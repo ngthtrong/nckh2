@@ -7,7 +7,7 @@
 
 ## TỔNG QUAN QUY TRÌNH
 
-```
+```nckh
 Phase 1: Chuẩn bị       → Phase 2: Huấn luyện     → Phase 3: Đánh giá
 (Dữ liệu + Môi trường)    (Train + Fine-tune)        (Benchmark toàn diện)
 
