@@ -19,7 +19,7 @@
 % ---------- Page layout ----------
 \usepackage[
   a4paper,
-  left=3cm, right=2.5cm,
+  left=2.5cm, right=2cm,
   top=2.5cm, bottom=2.5cm,
   headheight=15pt
 ]{geometry}
@@ -309,12 +309,12 @@ Hình~\ref{fig:adaptive-tx} minh họa quyết định lựa chọn chế độ 
       {Backend FastAPI\\POST /rescue-events};
 
     \draw[arr] (start) -- (check);
-    \draw[arr] (check) -- node[above left, font=\footnotesize]{Có} (full);
-    \draw[arr] (check) -- node[above right, font=\footnotesize]{Không} (compact);
+    \draw[arr] (check) -- node[font=\footnotesize, near end, left]{Có} (full);
+    \draw[arr] (check) -- node[font=\footnotesize, near end, right]{Không} (compact);
     \draw[arr] (full) -- (api);
-    \draw[arr] (compact) -- node[right, font=\footnotesize]{Gửi metadata} (api);
+    \draw[arr] (compact) -- node[above, sloped, font=\footnotesize, fill=white, inner sep=1.5pt]{Gửi metadata} (api);
     \draw[arr] (compact) -- (queue);
-    \draw[arr, dashed] (queue.south) -- ++(0,-0.7) -- node[below, font=\footnotesize]{Khi mạng phục hồi} ++(-3.5,0) -- (api.south);
+    \draw[arr, dashed] (queue.south) -- ++(0,-0.7) -- node[below, font=\footnotesize, fill=white, inner sep=1.5pt]{Khi mạng phục hồi} ++(-3.5,0) -- (api.south);
   \end{tikzpicture}%
   }
   \caption{Cơ chế truyền dữ liệu thích ứng theo chất lượng kết nối mạng}
