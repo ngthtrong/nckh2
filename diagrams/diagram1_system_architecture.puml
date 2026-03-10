@@ -1,0 +1,72 @@
+@startuml system_architecture
+!theme cerulean
+skinparam backgroundColor #FAFAFA
+skinparam componentStyle rectangle
+skinparam defaultFontName "Segoe UI"
+
+title Sơ đồ kiến trúc tổng quan hệ thống\nHệ thống cứu hộ bão lũ dựa trên Edge AI
+
+legend right
+  |= Màu |= Thành phần |
+  |<#1a237e> | Ứng dụng di động |
+  |<#4a148c> | Nhân AI tại biên |
+  |<#004d40> | Máy chủ Backend |
+  |<#e65100> | Cơ sở dữ liệu |
+  |<#01579b> | Bảng điều khiển Web |
+  | <color:green>──────</color> | Mạng bình thường |
+  | <color:red>- - - -</color> | Mạng yếu/mất kết nối |
+endlegend
+
+package "📱 Ứng dụng di động (Flutter/Dart)" as MOBILE #1a237e {
+    component "📷 Camera / Thư viện ảnh" as CAM
+    component "📝 Nhập văn bản cứu hộ" as TXT
+    component "📍 Dịch vụ GPS" as GPS
+
+    package "🧠 Nhân xử lý AI tại biên" as AI_ENGINE #4a148c {
+        component "Phân loại ảnh ngập lụt\n(MobileNetV3 - TFLite)" as IMG_AI
+        component "Phân loại văn bản khẩn cấp\n(DistilBERT - ONNX)" as TXT_AI
+        component "Tính điểm khẩn cấp\ntổng hợp" as SCORE
+    }
+
+    component "💾 Lưu trữ cục bộ\n(SQLite/Hive)" as LOCAL_DB
+    component "🔄 Quản lý đồng bộ\n& Hàng đợi offline" as SYNC
+    component "📶 Giám sát kết nối mạng" as NET_MON
+}
+
+package "🖥️ Máy chủ Backend (Python/FastAPI)" as SERVER #004d40 {
+    component "🔌 REST API Server" as API
+    component "🔗 WebSocket Server" as WS
+    component "📊 Phân cụm không gian\n(DBSCAN/HDBSCAN)" as CLUSTER
+}
+
+database "🗄️ PostgreSQL + PostGIS" as PG #e65100
+
+package "🌐 Bảng điều khiển Web (HTML/CSS/JS)" as DASHBOARD #01579b {
+    component "🗺️ Bản đồ thời gian thực\n(Leaflet.js / Mapbox)" as MAP
+    component "📋 Bảng quản lý\nsự kiện cứu hộ" as PANEL
+}
+
+CAM --> IMG_AI
+TXT --> TXT_AI
+IMG_AI --> SCORE
+TXT_AI --> SCORE
+GPS --> SCORE
+SCORE --> LOCAL_DB
+SCORE --> SYNC
+
+NET_MON --> SYNC : Kiểm tra kết nối
+
+SYNC -[#green,bold]-> API : <color:green>**Mạng tốt:** Gửi đầy đủ\n(ảnh + text + GPS + kết quả AI)</color>
+SYNC -[#red,dashed]-> API : <color:red>**Mạng yếu:** Gửi metadata JSON\n(vài KB: kết quả AI + GPS + điểm)</color>
+
+LOCAL_DB --> SYNC : Đồng bộ lại\nkhi có mạng
+
+API --> CLUSTER
+API --> PG
+CLUSTER --> PG
+PG --> WS
+WS --> MAP : Cập nhật thời gian thực
+PG --> MAP
+PG --> PANEL
+
+@enduml

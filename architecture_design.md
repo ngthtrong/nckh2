@@ -71,6 +71,8 @@ graph TB
     style SERVER fill:#004d40,stroke:#1de9b6,color:#fff,stroke-width:2px
     style DATABASE fill:#e65100,stroke:#ff9100,color:#fff,stroke-width:2px
     style DASHBOARD fill:#01579b,stroke:#40c4ff,color:#fff,stroke-width:2px
+    linkStyle 8 stroke:#2e7d32,stroke-width:3px
+    linkStyle 9 stroke:#c62828,stroke-width:3px,stroke-dasharray: 6 4
 ```
 
 **Chú thích (Legend):**
@@ -537,6 +539,7 @@ L2 --> L3
 L3 --> L4
 L1 --> L5
 L3 --> L5
+L5 --> L4
 
 @enduml
 ```
@@ -655,6 +658,7 @@ participant "🔄 Đồng bộ" as Sync
 participant "🖥️ Backend\nFastAPI" as API
 participant "📊 Phân cụm\n(DBSCAN)" as Cluster
 participant "🗄️ PostgreSQL\n+ PostGIS" as DB
+participant "🔗 WebSocket\nServer" as WS
 participant "🌐 Dashboard\nWeb" as Dashboard
 
 == Bước 1: Người dùng nhập dữ liệu ==
@@ -683,9 +687,9 @@ alt Mạng tốt (4G/WiFi)
 
 else Mạng yếu/mất (2G/3G/offline)
     == Bước 7: Gửi metadata gọn nhẹ ==
-    NetMon --> Sync : status = "degraded"
+    NetMon --> Sync : status = "degraded" hoặc "offline"
     Sync -> LocalDB : Lưu đầy đủ vào hàng đợi
-    Sync -> API : POST /api/rescue-events/compact\nCompact JSON (~2-5 KB)\nAI results + GPS + urgency_score
+    Sync -> API : POST /api/rescue-events/compact\nCompact JSON (~2-5 KB)\nAI results + GPS + urgency_score\n+ text_summary
     API --> Sync : 201 Created
     note over LocalDB, Sync : Khi mạng khôi phục
     LocalDB -> Sync : Dữ liệu chờ đồng bộ
@@ -700,7 +704,8 @@ Cluster -> Cluster : DBSCAN clustering
 Cluster -> DB : UPDATE cluster assignments
 
 == Bước 9: Cập nhật Dashboard ==
-DB -> Dashboard : WebSocket push:\ncluster_update event
+DB -> WS : Trigger: sự kiện mới / cụm cập nhật
+WS -> Dashboard : WebSocket push:\ncluster_update event
 Dashboard -> Dashboard : Cập nhật bản đồ\nĐỏ = khẩn cấp\nVàng = cần hỗ trợ\nXanh = an toàn
 
 @enduml

@@ -1,5 +1,5 @@
 graph TB
-    subgraph PRESENTATION["TẦNG TRÌNH BÀY (Presentation Layer)"]
+    subgraph PRESENTATION["🎨 TẦNG TRÌNH BÀY (Presentation Layer)"]
         direction LR
         S1["Màn hình chính<br/>(Home)"]
         S2["Camera /<br/>Chọn ảnh"]
@@ -9,7 +9,7 @@ graph TB
         S6["Cài đặt"]
     end
 
-    subgraph BLOC["TẦNG NGHIỆP VỤ (Business Logic - BLoC)"]
+    subgraph BLOC["⚙️ TẦNG NGHIỆP VỤ (Business Logic - BLoC)"]
         direction LR
         B1["ImageClassificationBloc"]
         B2["TextClassificationBloc"]
@@ -19,7 +19,7 @@ graph TB
         B6["HistoryBloc"]
     end
 
-    subgraph AI_LAYER["TẦNG SUY LUẬN AI (AI Inference Layer)"]
+    subgraph AI_LAYER["🧠 TẦNG SUY LUẬN AI (AI Inference Layer)"]
         direction TB
         subgraph IMG_PIPE["Pipeline phân loại ảnh"]
             IP1["Tiền xử lý ảnh<br/>(resize, normalize)"]
@@ -31,18 +31,18 @@ graph TB
             TP2["Mô hình ONNX<br/>(DistilBERT)"]
             TP3["Kết quả: loại tin<br/>(urgent/supplies/safe/irrelevant)"]
         end
-        URGENCY["Tính điểm khẩn cấp<br/>tổng hợp (image + text + context)"]
+        URGENCY["🔴 Tính điểm khẩn cấp<br/>tổng hợp (image + text + context)"]
     end
 
-    subgraph DATA_LAYER["TẦNG DỮ LIỆU (Data Layer)"]
+    subgraph DATA_LAYER["💾 TẦNG DỮ LIỆU (Data Layer)"]
         direction LR
         LOCAL["Lưu trữ cục bộ<br/>(SQLite / Hive)"]
         REST["REST API Client<br/>(Dio / http)"]
         WS_CLIENT["WebSocket Client"]
-        SYNC_MGR["Quản lý đồng bộ<br/>(Queue - Retry - Send)"]
+        SYNC_MGR["Quản lý đồng bộ<br/>(Queue → Retry → Send)"]
     end
 
-    subgraph PLATFORM["TẦNG NỀN TẢNG (Platform Layer)"]
+    subgraph PLATFORM["📱 TẦNG NỀN TẢNG (Platform Layer)"]
         direction LR
         P_CAM["Camera Plugin"]
         P_GPS["Geolocator Plugin"]
