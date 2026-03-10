@@ -248,8 +248,36 @@ Hệ thống được thiết kế theo mô hình \keyword{lai (Hybrid)} gồm 4
 
 \begin{figure}[H]
   \centering
-  \includegraphics[width=0.88\linewidth]{diagram1_system_architecture.png}
-  \caption{Sơ đồ kiến trúc tổng quan hệ thống cứu hộ bão lũ dựa trên Edge AI}
+  \begin{tikzpicture}[
+    node distance=1.2cm and 2.2cm,
+    blk/.style={
+      draw=#1, fill=#1!12, rounded corners=8pt,
+      text width=4.7cm, minimum height=1.6cm,
+      align=center, font=\small\bfseries
+    },
+    flow/.style={-Stealth, thick},
+  ]
+
+    \node[blk=mobileblue] (mobile)
+      {\textcolor{mobileblue}{Ứng dụng di động}\\Flutter + AI tại biên\\(MobileNetV3, DistilBERT)};
+    \node[blk=backendgreen, right=of mobile] (backend)
+      {\textcolor{backendgreen}{Máy chủ Backend}\\FastAPI + DBSCAN/HDBSCAN};
+    \node[blk=dashblue, below=of mobile] (dash)
+      {\textcolor{dashblue}{Dashboard Web}\\Leaflet/Mapbox\\nhận dữ liệu realtime};
+    \node[blk=dborange, below=of backend] (db)
+      {\textcolor{dborange}{Cơ sở dữ liệu}\\PostgreSQL + PostGIS};
+
+    \draw[flow, backendgreen]
+      (mobile) -- node[above, font=\scriptsize]{Mạng tốt: full payload 2--5MB} (backend);
+    \draw[flow, urgentred, dashed]
+      (mobile.south east) to[bend right=20]
+      node[below, font=\scriptsize, align=center]{Mạng yếu/offline:\\metadata 2--5KB\\hàng đợi cục bộ, đồng bộ sau} (backend.south west);
+    \draw[flow, backendgreen] (backend) -- node[right, font=\scriptsize]{lưu sự kiện} (db);
+    \draw[flow, dashblue] (db) -- node[below, font=\scriptsize]{cluster + priority} (dash);
+    \draw[flow, dashblue] (backend) to[bend left=20]
+      node[right, font=\scriptsize]{WebSocket push} (dash);
+  \end{tikzpicture}
+  \caption{Sơ đồ kiến trúc tổng quan hệ thống cứu hộ bão lũ dựa trên Edge AI (vẽ lại bằng TikZ)}
   \label{fig:arch-overview}
 \end{figure}
 
@@ -638,8 +666,35 @@ Hình~\ref{fig:sequence} thể hiện toàn bộ vòng đời của một yêu c
 
 \begin{figure}[H]
   \centering
-  \includegraphics[width=\linewidth]{diagram4_sequence.png}
-  \caption{Sơ đồ tuần tự luồng xử lý yêu cầu cứu hộ thiên tai}
+  \begin{tikzpicture}[
+    node distance=0.36cm,
+    step/.style={
+      draw=#1, fill=#1!10, rounded corners=4pt,
+      text width=11.9cm, minimum height=0.65cm,
+      align=left, font=\footnotesize
+    },
+    arr/.style={-Stealth, thick}
+  ]
+    \node[step=mobileblue] (s1) {\textbf{(1)} Người dùng gửi yêu cầu: ảnh + văn bản + GPS.};
+    \node[step=aiviolet, below=of s1] (s2) {\textbf{(2)} AI ảnh (MobileNetV3) phân loại mức ngập.};
+    \node[step=aiviolet, below=of s2] (s3) {\textbf{(3)} AI văn bản (DistilBERT) phân loại nội dung cứu hộ.};
+    \node[step=aiviolet, below=of s3] (s4) {\textbf{(4)} Tính điểm khẩn cấp tổng hợp theo công thức~\eqref{eq:urgency}.};
+    \node[step=dborange, below=of s4] (s5) {\textbf{(5)} Lưu cục bộ + kiểm tra chất lượng kết nối mạng.};
+    \node[step=safegreen, below=of s5] (s6) {\textbf{(6)} Nếu mạng tốt: gửi đầy đủ 2--5MB (ảnh + text + GPS + kết quả AI).};
+    \node[step=urgentred, below=of s6] (s7) {\textbf{(7)} Nếu mạng yếu/offline: gửi metadata 2--5KB, ảnh đồng bộ sau.};
+    \node[step=backendgreen, below=of s7] (s8) {\textbf{(8)} Backend phân cụm DBSCAN + PostGIS trong 500m/2h, cập nhật ưu tiên cụm.};
+    \node[step=dashblue, below=of s8] (s9) {\textbf{(9)} WebSocket cập nhật Dashboard thời gian thực (2--5 giây).};
+
+    \draw[arr] (s1) -- (s2);
+    \draw[arr] (s2) -- (s3);
+    \draw[arr] (s3) -- (s4);
+    \draw[arr] (s4) -- (s5);
+    \draw[arr] (s5) -- (s6);
+    \draw[arr] (s6) -- (s7);
+    \draw[arr] (s7) -- (s8);
+    \draw[arr] (s8) -- (s9);
+  \end{tikzpicture}
+  \caption{Sơ đồ luồng xử lý yêu cầu cứu hộ thiên tai theo 9 bước (vẽ lại bằng TikZ)}
   \label{fig:sequence}
 \end{figure}
 
@@ -662,8 +717,31 @@ Hình~\ref{fig:sequence} thể hiện toàn bộ vòng đời của một yêu c
 
 \begin{figure}[H]
   \centering
-  \includegraphics[width=0.56\linewidth]{diagram3_tech_stack.png}
-  \caption{Bộ công nghệ sử dụng theo tầng trong hệ thống}
+  \begin{tikzpicture}[
+    node distance=0.6cm,
+    layer/.style={draw=#1, fill=#1!12, rounded corners=7pt, minimum width=12.2cm, minimum height=1.0cm, align=left, font=\small\bfseries},
+    item/.style={font=\scriptsize}
+  ]
+    \node[layer=headerblue] (l1)
+      {Tầng trình bày (Frontend)\\Flutter/Dart | HTML/CSS/JavaScript | Leaflet.js/Mapbox};
+    \node[layer=urgentred, below=of l1] (l2)
+      {Tầng AI tại biên (Edge AI)\\TensorFlow Lite + MobileNetV3 | ONNX Runtime + DistilBERT/PhoBERT};
+    \node[layer=backendgreen, below=of l2] (l3)
+      {Tầng nghiệp vụ (Backend)\\Python 3.11 | FastAPI/Uvicorn | scikit-learn (DBSCAN/HDBSCAN)};
+    \node[layer=dborange, below=of l3] (l4)
+      {Tầng dữ liệu (Data)\\PostgreSQL + PostGIS | SQLite/Hive (mobile)};
+    \node[layer=aiviolet, below=of l4] (l5)
+      {Tầng giao tiếp (Communication)\\REST API (HTTP/HTTPS) | WebSocket | JSON};
+    \node[layer=black, below=of l5] (l6)
+      {Công cụ phát triển (DevOps)\\Git/GitHub | Docker | Google Colab};
+
+    \draw[-Stealth, thick] (l1) -- (l2);
+    \draw[-Stealth, thick] (l2) -- (l3);
+    \draw[-Stealth, thick] (l3) -- (l4);
+    \draw[-Stealth, thick] (l4) -- (l5);
+    \draw[-Stealth, thick] (l5) -- (l6);
+  \end{tikzpicture}
+  \caption{Bộ công nghệ sử dụng theo tầng trong hệ thống (vẽ lại bằng TikZ)}
   \label{fig:tech-stack}
 \end{figure}
 
