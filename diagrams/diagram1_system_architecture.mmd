@@ -1,0 +1,63 @@
+graph TB
+    subgraph MOBILE["ỨNG DỤNG DI ĐỘNG (Flutter/Dart)"]
+        direction TB
+        CAM["Camera / Thư viện ảnh"]
+        TXT["Nhập văn bản cứu hộ"]
+        GPS["Dịch vụ GPS"]
+        
+        subgraph AI_ENGINE["Nhân xử lý AI tại biên"]
+            IMG_AI["Phân loại ảnh ngập lụt<br/>(MobileNetV3 - TFLite)"]
+            TXT_AI["Phân loại văn bản khẩn cấp<br/>(DistilBERT - ONNX)"]
+            SCORE["Tính điểm khẩn cấp tổng hợp"]
+        end
+        
+        LOCAL_DB["Lưu trữ cục bộ<br/>(SQLite/Hive)"]
+        SYNC["Quản lý đồng bộ<br/>& Hàng đợi offline"]
+        NET_MON["Giám sát kết nối mạng"]
+    end
+
+    subgraph SERVER["MÁY CHỦ BACKEND (Python/FastAPI)"]
+        direction TB
+        API["REST API Server"]
+        WS["WebSocket Server"]
+        CLUSTER["Phân cụm không gian<br/>(DBSCAN/HDBSCAN)"]
+    end
+
+    subgraph DATABASE["CƠ SỞ DỮ LIỆU"]
+        PG["PostgreSQL + PostGIS"]
+    end
+
+    subgraph DASHBOARD["BẢNG ĐIỀU KHIỂN WEB"]
+        MAP["Bản đồ thời gian thực<br/>(Leaflet.js / Mapbox)"]
+        PANEL["Bảng quản lý sự kiện cứu hộ"]
+    end
+
+    CAM --> IMG_AI
+    TXT --> TXT_AI
+    IMG_AI --> SCORE
+    TXT_AI --> SCORE
+    GPS --> SCORE
+    SCORE --> SYNC
+    SCORE --> LOCAL_DB
+
+    NET_MON -->|"Kiểm tra<br/>kết nối"| SYNC
+
+    SYNC -->|"Mạng tốt:<br/>Gửi đầy đủ dữ liệu<br/>(ảnh + text + GPS + kết quả AI)"| API
+    SYNC -->|"Mạng yếu/mất:<br/>Gửi metadata JSON gọn nhẹ<br/>(vài KB: kết quả AI + GPS + điểm)"| API
+
+    LOCAL_DB -->|"Đồng bộ lại<br/>khi có mạng"| SYNC
+
+    API --> CLUSTER
+    API --> PG
+    CLUSTER --> PG
+    
+    WS -->|"Cập nhật<br/>thời gian thực"| MAP
+    PG --> WS
+    PG --> MAP
+    PG --> PANEL
+
+    style MOBILE fill:#1a237e,stroke:#7c4dff,color:#fff,stroke-width:2px
+    style AI_ENGINE fill:#4a148c,stroke:#e040fb,color:#fff,stroke-width:2px
+    style SERVER fill:#004d40,stroke:#1de9b6,color:#fff,stroke-width:2px
+    style DATABASE fill:#e65100,stroke:#ff9100,color:#fff,stroke-width:2px
+    style DASHBOARD fill:#01579b,stroke:#40c4ff,color:#fff,stroke-width:2px
