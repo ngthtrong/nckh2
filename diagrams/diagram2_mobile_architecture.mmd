@@ -20,7 +20,7 @@ graph TB
     end
 
     subgraph AI_LAYER["🧠 TẦNG SUY LUẬN AI (AI Inference Layer)"]
-        direction TB
+        direction LR
         subgraph IMG_PIPE["Pipeline phân loại ảnh"]
             IP1["Tiền xử lý ảnh<br/>(resize, normalize)"]
             IP2["Mô hình TFLite<br/>(MobileNetV3)"]
@@ -31,8 +31,9 @@ graph TB
             TP2["Mô hình ONNX<br/>(DistilBERT)"]
             TP3["Kết quả: loại tin<br/>(urgent/supplies/safe/irrelevant)"]
         end
-        URGENCY["🔴 Tính điểm khẩn cấp<br/>tổng hợp (image + text + context)"]
     end
+
+    URGENCY["🔴 Tính điểm khẩn cấp tổng hợp<br/>(image + text + context)"]
 
     subgraph DATA_LAYER["💾 TẦNG DỮ LIỆU (Data Layer)"]
         direction LR
@@ -66,7 +67,6 @@ graph TB
     TP3 --> URGENCY
     B3 --> URGENCY
 
-    URGENCY --> LOCAL
     URGENCY --> SYNC_MGR
     B4 --> SYNC_MGR
     B5 --> SYNC_MGR
@@ -86,5 +86,6 @@ graph TB
     style AI_LAYER fill:#b71c1c,stroke:#ef5350,color:#fff,stroke-width:2px
     style IMG_PIPE fill:#880e4f,stroke:#f06292,color:#fff,stroke-width:1px
     style TXT_PIPE fill:#880e4f,stroke:#f06292,color:#fff,stroke-width:1px
+    style URGENCY fill:#7b1fa2,stroke:#ce93d8,color:#fff,stroke-width:2px
     style DATA_LAYER fill:#e65100,stroke:#ff9800,color:#fff,stroke-width:2px
     style PLATFORM fill:#1b5e20,stroke:#66bb6a,color:#fff,stroke-width:2px

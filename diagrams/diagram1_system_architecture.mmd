@@ -3,11 +3,11 @@ graph TB
         direction TB
         CAM["📷 Camera / Thư viện ảnh"]
         TXT["📝 Nhập văn bản cứu hộ"]
-        GPS["📍 Dịch vụ GPS"]
         
         subgraph AI_ENGINE["🧠 Nhân xử lý AI tại biên"]
             IMG_AI["Phân loại ảnh ngập lụt<br/>(MobileNetV3 - TFLite)"]
             TXT_AI["Phân loại văn bản khẩn cấp<br/>(DistilBERT - ONNX)"]
+            GPS["📍 Dịch vụ GPS"]
             SCORE["Tính điểm khẩn cấp tổng hợp"]
         end
         
@@ -40,18 +40,18 @@ graph TB
     SCORE --> SYNC
     SCORE --> LOCAL_DB
 
-    NET_MON -->|"Kiểm tra<br/>kết nối"| SYNC
+    NET_MON --> SYNC
 
-    SYNC -->|"✅ Mạng tốt:<br/>Gửi đầy đủ dữ liệu<br/>(ảnh + text + GPS + kết quả AI)"| API
-    SYNC -->|"⚠️ Mạng yếu/mất:<br/>Gửi metadata JSON gọn nhẹ<br/>(vài KB: kết quả AI + GPS + điểm khẩn cấp)"| API
+    SYNC -->|"✅ Mạng tốt:<br/>Gửi đầy đủ dữ liệu"| API
+    SYNC -.->|"⚠️ Mạng yếu/mất:<br/>Gửi metadata JSON"| API
 
-    LOCAL_DB -->|"Đồng bộ lại<br/>khi có mạng"| SYNC
+    LOCAL_DB --> SYNC
 
     API --> CLUSTER
     API --> PG
     CLUSTER --> PG
     
-    WS -->|"Cập nhật<br/>thời gian thực"| MAP
+    WS -->|"Cập nhật thời gian thực"| MAP
     PG --> WS
     PG --> MAP
     PG --> PANEL
