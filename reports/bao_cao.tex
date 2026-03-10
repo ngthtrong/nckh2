@@ -19,7 +19,7 @@
 % ---------- Page layout ----------
 \usepackage[
   a4paper,
-  left=3cm, right=2.5cm,
+  left=2.5cm, right=2cm,
   top=2.5cm, bottom=2.5cm,
   headheight=15pt
 ]{geometry}
@@ -291,25 +291,25 @@ Hình~\ref{fig:adaptive-tx} minh họa quyết định lựa chọn chế độ 
     \node[decision, below=of start] (check)
       {Băng thông\\$>$ 1\,Mbps?};
 
-    \node[box=safegreen, below left=1.2cm and 1.5cm of check] (full)
+    \node[box=safegreen, below left=2.0cm and 4.5cm of check] (full)
       {\textbf{Chế độ đầy đủ}\\$\sim$2--5\,MB\\Ảnh + Text + GPS\\+ Kết quả AI};
 
-    \node[box=urgentred, below right=1.2cm and 1.5cm of check] (compact)
+    \node[box=urgentred, below right=2.0cm and 4.5cm of check] (compact)
       {\textbf{Chế độ gọn nhẹ}\\$\sim$2--5\,KB\\JSON: AI results\\+ GPS + urgency};
 
-    \node[box=dborange, below=2.8cm of check] (queue)
+    \node[box=dborange, below=1.5cm of compact] (queue)
       {Lưu hàng đợi cục bộ\\(SQLite / Hive)};
 
     \node[box=backendgreen, below=1.4cm of full] (api)
       {Backend FastAPI\\POST /rescue-events};
 
     \draw[arr] (start) -- (check);
-    \draw[arr] (check) -- node[above left, font=\footnotesize]{Có} (full);
-    \draw[arr] (check) -- node[above right, font=\footnotesize]{Không} (compact);
+    \draw[arr] (check) -- node[above left, pos=0.25, font=\footnotesize]{Có} (full);
+    \draw[arr] (check) -- node[above right, pos=0.25, font=\footnotesize]{Không} (compact);
     \draw[arr] (full) -- (api);
-    \draw[arr] (compact) -- node[right, font=\footnotesize]{Gửi metadata} (api);
+    \draw[arr] (compact) -- node[above, sloped, pos=0.25, font=\footnotesize]{Gửi metadata} (api);
     \draw[arr] (compact) -- (queue);
-    \draw[arr, dashed] (queue.south) -- ++(0,-0.7) -- node[below, font=\footnotesize]{Khi mạng phục hồi} ++(-3.5,0) -- (api.south);
+    \draw[arr, dashed] (queue.south) -- ++(0,-0.7) -- node[below, font=\footnotesize]{Khi mạng phục hồi} ++(-9.0,0) -- (api.south);
   \end{tikzpicture}
   \caption{Cơ chế truyền dữ liệu thích ứng theo chất lượng kết nối mạng}
   \label{fig:adaptive-tx}
