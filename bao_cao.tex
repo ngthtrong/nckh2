@@ -1,0 +1,1011 @@
+% !TEX program = xelatex
+% ============================================================
+%  BÁO CÁO NGHIÊN CỨU KHOA HỌC SINH VIÊN
+%  Hệ thống phân tích đa phương thức và phân cụm sự kiện
+%  cứu hộ bão lũ dựa trên Edge AI
+%  Đại học Cần Thơ – Khoa CNTT & TT
+% ============================================================
+\documentclass[12pt, a4paper]{report}
+
+% ---------- Unicode & Font ----------
+\usepackage{fontspec}
+\usepackage{polyglossia}
+\setmainlanguage{vietnamese}
+\setotherlanguage{english}
+\setmainfont{Times New Roman}
+\setsansfont{Arial}
+\setmonofont[Scale=0.9]{Courier New}
+
+% ---------- Page layout ----------
+\usepackage[
+  a4paper,
+  left=3cm, right=2.5cm,
+  top=2.5cm, bottom=2.5cm,
+  headheight=15pt
+]{geometry}
+
+% ---------- Headers / Footers ----------
+\usepackage{fancyhdr}
+\pagestyle{fancy}
+\fancyhf{}
+\fancyhead[L]{\small\textit{Nghiên cứu khoa học sinh viên -- Đại học Cần Thơ}}
+\fancyhead[R]{\small\textit{2026}}
+\fancyfoot[C]{\thepage}
+\renewcommand{\headrulewidth}{0.4pt}
+
+% ---------- Graphics ----------
+\usepackage{graphicx}
+\usepackage{float}
+\usepackage{caption}
+\usepackage{subcaption}
+\graphicspath{{diagrams/}}
+
+% ---------- Colors ----------
+\usepackage[dvipsnames, table]{xcolor}
+\definecolor{mobileblue}{HTML}{1a237e}
+\definecolor{aiviolet}{HTML}{4a148c}
+\definecolor{backendgreen}{HTML}{004d40}
+\definecolor{dborange}{HTML}{e65100}
+\definecolor{dashblue}{HTML}{01579b}
+\definecolor{urgentred}{HTML}{c62828}
+\definecolor{warnyellow}{HTML}{f57f17}
+\definecolor{safegreen}{HTML}{2e7d32}
+\definecolor{lightgray}{HTML}{f5f5f5}
+\definecolor{headerblue}{HTML}{1565c0}
+\definecolor{rowalt}{HTML}{e8f5e9}
+
+% ---------- Tables ----------
+\usepackage{booktabs}
+\usepackage{longtable}
+\usepackage{array}
+\usepackage{multirow}
+\usepackage{makecell}
+\renewcommand{\arraystretch}{1.35}
+
+% ---------- TikZ ----------
+\usepackage{tikz}
+\usetikzlibrary{
+  shapes.geometric,
+  shapes.arrows,
+  arrows.meta,
+  positioning,
+  fit,
+  calc,
+  decorations.pathreplacing,
+  backgrounds,
+  shadows,
+  matrix
+}
+\usepackage{pgfplots}
+\pgfplotsset{compat=1.18}
+
+% ---------- Rotation (sidewaysfigure) ----------
+\usepackage{rotating}
+
+% ---------- Misc ----------
+\usepackage{enumitem}
+\usepackage{amsmath}
+\usepackage{amssymb}
+\usepackage{hyperref}
+\hypersetup{
+  colorlinks=true,
+  linkcolor=headerblue,
+  citecolor=backendgreen,
+  urlcolor=dashblue,
+  pdftitle={Báo cáo NCKH: Hệ thống Edge AI cứu hộ bão lũ},
+  pdfauthor={Lê Thị Ngọc Ảnh et al.},
+}
+\usepackage{setspace}
+\onehalfspacing
+\usepackage{parskip}
+\setlength{\parskip}{6pt}
+
+% ---------- Chapter/Section style ----------
+\usepackage{titlesec}
+\titleformat{\chapter}[display]
+  {\normalfont\huge\bfseries\color{headerblue}}
+  {\chaptertitlename\ \thechapter}{16pt}{\Huge}
+\titleformat{\section}
+  {\normalfont\Large\bfseries\color{headerblue}}
+  {\thesection}{1em}{}
+\titleformat{\subsection}
+  {\normalfont\large\bfseries\color{backendgreen}}
+  {\thesubsection}{1em}{}
+
+% ============================================================
+%  HELPER COMMANDS
+% ============================================================
+\newcommand{\keyword}[1]{\textbf{#1}}
+\newcommand{\tech}[1]{\texttt{#1}}
+\newcommand{\prio}[1]{%
+  \ifnum\pdfstrcmp{#1}{critical}=0 \colorbox{urgentred}{\color{white}\textbf{Khẩn cấp}}\fi
+  \ifnum\pdfstrcmp{#1}{medium}=0   \colorbox{warnyellow}{\color{white}\textbf{Cần hỗ trợ}}\fi
+  \ifnum\pdfstrcmp{#1}{low}=0      \colorbox{safegreen}{\color{white}\textbf{An toàn}}\fi
+}
+
+% ============================================================
+\begin{document}
+
+% ============================================================
+%  TRANG BÌA
+% ============================================================
+\begin{titlepage}
+\begin{center}
+  {\large BỘ GIÁO DỤC VÀ ĐÀO TẠO}\\[4pt]
+  {\Large\bfseries ĐẠI HỌC CẦN THƠ}\\[4pt]
+  {\large Trường Công Nghệ Thông Tin \& Truyền Thông}\\[30pt]
+
+  % (Đặt logo CTU ở đây nếu có: \includegraphics[width=3cm]{logo_ctu.png})
+
+  \vspace{20pt}
+  \rule{\linewidth}{1.5pt}\\[6pt]
+  {\LARGE\bfseries\color{headerblue}
+    BÁO CÁO NGHIÊN CỨU KHOA HỌC SINH VIÊN}\\[6pt]
+  \rule{\linewidth}{1.5pt}
+
+  \vspace{18pt}
+  {\large\bfseries
+    HỆ THỐNG PHÂN TÍCH ĐA PHƯƠNG THỨC VÀ\\[4pt]
+    PHÂN CỤM SỰ KIỆN CỨU HỘ BÃO LŨ\\[4pt]
+    DỰA TRÊN EDGE AI}\\[6pt]
+  {\normalsize\itshape
+    (An Edge AI–Based System for Multimodal Analysis\\
+    and Clustering of Flood Rescue Events)}
+
+  \vspace{24pt}
+  \begin{tabular}{rl}
+    \textbf{Chủ nhiệm đề tài:}  & Lê Thị Ngọc Ảnh (B2303861) \\
+    \textbf{Cán bộ hướng dẫn:}  & TS. Nguyễn Thanh Khoa (MSCB: 2995) \\
+    \textbf{Đơn vị:}             & Khoa CNTT \& TT – Đại học Cần Thơ \\
+    \textbf{Thời gian:}          & 03/2026 – 08/2026 \\
+    \textbf{Lĩnh vực:}           & Khoa học Kỹ thuật \& Công nghệ \\
+    \textbf{Loại hình:}          & Nghiên cứu ứng dụng \\
+  \end{tabular}
+
+  \vfill
+  {\normalsize Cần Thơ, tháng 03 năm 2026}
+\end{center}
+\end{titlepage}
+
+% ============================================================
+%  TÓM TẮT
+% ============================================================
+\chapter*{Tóm tắt}
+\addcontentsline{toc}{chapter}{Tóm tắt}
+
+Đề tài nghiên cứu hệ thống \keyword{phân tích đa phương thức và phân cụm sự kiện cứu hộ bão lũ dựa trên Edge AI}, nhằm giải quyết bài toán cấp bách: thu thập và xử lý thông tin cứu hộ trong điều kiện hạ tầng viễn thông bị gián đoạn hoặc quá tải do thiên tai.
+
+\textbf{Vấn đề:} Các hệ thống cứu hộ hiện tại hoạt động theo mô hình tập trung, phụ thuộc hoàn toàn vào kết nối Internet ổn định để gửi dữ liệu về máy chủ xử lý — điểm yếu chí mạng khi bão lũ xảy ra.
+
+\textbf{Giải pháp đề xuất:} Hệ thống \keyword{lai (hybrid)} gồm ứng dụng di động Flutter tích hợp \keyword{nhân xử lý AI tại biên (Edge AI)}: mô hình \tech{MobileNetV3} (TensorFlow Lite) phân loại ảnh ngập lụt và mô hình \tech{DistilBERT} (ONNX Runtime) phân loại văn bản khẩn cấp, hoạt động hoàn toàn offline. Cơ chế \keyword{truyền dữ liệu thích ứng} tự động chuyển giữa chế độ đầy đủ (mạng tốt, ~2–5\,MB) và chế độ metadata gọn nhẹ (mạng yếu/offline, ~2–5\,KB). Backend Python/FastAPI áp dụng thuật toán \keyword{DBSCAN/HDBSCAN} kết hợp \tech{PostGIS} để phân cụm sự kiện theo không gian–thời gian, hiển thị thời gian thực trên bản đồ Web qua WebSocket.
+
+\textbf{Đóng góp chính:} (1) Bộ dữ liệu đặc thù cứu hộ bão lũ Việt Nam; (2) Mô hình AI nhẹ, tinh chỉnh cho bối cảnh địa phương; (3) Hệ thống hoạt động hiệu quả trong điều kiện mạng yếu.
+
+\textbf{Từ khóa:} Edge AI, đa phương thức, phân cụm không gian, cứu hộ thiên tai, MobileNetV3, DistilBERT, DBSCAN, Flutter.
+
+% ============================================================
+%  MỤC LỤC
+% ============================================================
+\tableofcontents
+\listoffigures
+\listoftables
+
+% ============================================================
+\chapter{Tổng quan nghiên cứu}
+% ============================================================
+
+\section{Tính cấp thiết của đề tài}
+
+Việt Nam là quốc gia thường xuyên chịu ảnh hưởng nặng nề của bão lũ. Trung bình mỗi năm nước ta hứng chịu khoảng 10--12 cơn bão và áp thấp nhiệt đới trên Biển Đông, trong đó 5--6 cơn ảnh hưởng trực tiếp đến đất liền, đặc biệt là các tỉnh ven biển miền Trung và miền Bắc, gây thiệt hại nghiêm trọng về người và tài sản.
+
+Thực tế cho thấy khi bão lũ xảy ra, hạ tầng viễn thông thường bị gián đoạn hoặc quá tải. Người dân gửi thông tin cầu cứu qua mạng xã hội dưới nhiều hình thức khác nhau, dẫn đến dữ liệu rời rạc, trùng lặp và khó kiểm chứng. Các hệ thống xử lý tập trung hiện nay gặp nhiều khó khăn trong việc tiếp nhận và phân tích lượng lớn thông tin này trong thời gian ngắn.
+
+Đề tài đề xuất \keyword{hệ thống ứng dụng AI nhẹ triển khai trực tiếp trên thiết bị di động} nhằm:
+\begin{enumerate}[leftmargin=1.5cm]
+  \item Phân loại sơ bộ mức độ khẩn cấp ngay tại thiết bị người dùng;
+  \item Chỉ truyền thông tin cần thiết dưới dạng dữ liệu gọn nhẹ;
+  \item Gom nhóm các sự kiện cứu hộ trùng lặp để hỗ trợ điều phối nguồn lực.
+\end{enumerate}
+
+\section{Tình hình nghiên cứu}
+
+\subsection{Trong nước}
+
+Hiện nay tại Việt Nam, các nghiên cứu ứng dụng AI trong phòng chống thiên tai đang rất được quan tâm. Điển hình:
+
+\begin{itemize}
+  \item \textbf{Ước lượng mực nước lũ từ ảnh mạng xã hội} \cite{quan2020flood}: phân tích tỷ lệ bị che khuất của các khớp xương cơ thể người để tính toán mực nước thực tế mà không cần trạm quan trắc vật lý.
+  \item \textbf{Bản đồ phân vùng nguy cơ lũ lụt bằng Deep Learning} \cite{nguyen2022flood}: tích hợp dữ liệu địa hình, thủy văn và lượng mưa lịch sử vào hệ thống thông tin địa lý cho khu vực miền Trung.
+\end{itemize}
+
+Hạn chế chung: hầu hết các hệ thống hoạt động theo \keyword{mô hình tập trung}, phụ thuộc lớn vào băng thông mạng.
+
+\subsection{Ngoài nước}
+
+Trên thế giới, xu hướng sử dụng dữ liệu đa phương thức từ mạng xã hội cho ứng phó thiên tai đã có nhiều bước tiến:
+
+\begin{itemize}
+  \item \textbf{CrisisMMD} \cite{alam2018crisismmd} và \textbf{FloodNet} \cite{rahnemoonfar2021floodnet}: bộ dữ liệu đa phương thức chuẩn cho huấn luyện AI nhận diện thiệt hại.
+  \item \textbf{Multimodal Deep Learning cho thiên tai} \cite{ofli2020multimodal}: kết hợp CNN (ảnh) và LSTM/BERT (văn bản), đạt độ chính xác cao hơn đáng kể so với đơn phương thức.
+  \item \textbf{EmergencyNet} \cite{kyrkou2020emergencynet}: mạng nơ-ron tích chập nhẹ cho Drone/IoT, giảm thiểu độ trễ xuống mức mili-giây.
+\end{itemize}
+
+Khoảng trống nghiên cứu: còn thiếu các hệ thống tích hợp trọn vẹn từ xử lý tại biên, gom nhóm sự kiện trùng lặp đến tính điểm ưu tiên cứu hộ cụ thể theo ngữ cảnh Việt Nam.
+
+\section{Mục tiêu đề tài}
+
+Đề tài tập trung nghiên cứu và xây dựng hệ thống ứng dụng trí tuệ nhân tạo có khả năng:
+\begin{itemize}
+  \item Thu thập, phân tích và gom nhóm các thông tin cứu hộ (văn bản, hình ảnh, vị trí);
+  \item Đánh giá mức độ khẩn cấp trong điều kiện mạng không ổn định;
+  \item Hỗ trợ điều phối nguồn lực, rút ngắn thời gian phản ứng, giảm thiểu thiệt hại.
+\end{itemize}
+
+% ============================================================
+\chapter{Kiến trúc hệ thống}
+% ============================================================
+
+\section{Kiến trúc tổng quan}
+
+Hệ thống được thiết kế theo mô hình \keyword{lai (Hybrid)} gồm 4 tầng chính như thể hiện trong Hình~\ref{fig:arch-overview}.
+
+\vspace{-0.8cm}
+\begin{figure}[H]
+  \centering
+  \includegraphics[width=\linewidth]{diagram1_system_architecture.png}
+  \caption{Sơ đồ kiến trúc tổng quan hệ thống cứu hộ bão lũ dựa trên Edge AI}
+  \label{fig:arch-overview}
+\end{figure}
+
+\begin{enumerate}
+  \item \textbf{Ứng dụng di động (Mobile App):} Xây dựng bằng Flutter/Dart, chạy đa nền tảng (Android/iOS). \keyword{Nhân xử lý AI tại biên} chạy trực tiếp trên điện thoại người dùng — phân loại ảnh ngập lụt (TensorFlow Lite) và phân loại văn bản khẩn cấp (ONNX Runtime) \textbf{không cần kết nối Internet}.
+
+  \item \textbf{Cơ chế truyền dữ liệu thích ứng (Adaptive Transmission):}
+  \begin{itemize}
+    \item \textbf{Mạng tốt (4G/WiFi):} Gửi toàn bộ dữ liệu $\sim$2--5\,MB (ảnh gốc + văn bản + GPS + kết quả AI).
+    \item \textbf{Mạng yếu/offline (2G/3G):} Chỉ gửi gói JSON $\sim$2--5\,KB (kết quả AI + GPS + điểm khẩn cấp). Dữ liệu đầy đủ được lưu vào hàng đợi cục bộ và tự động đồng bộ khi kết nối phục hồi.
+  \end{itemize}
+
+  \item \textbf{Máy chủ Backend:} Python/FastAPI tiếp nhận dữ liệu, thực hiện phân cụm không gian với DBSCAN/HDBSCAN kết hợp PostGIS.
+
+  \item \textbf{Bảng điều khiển Web (Dashboard):} Bản đồ thời gian thực với Leaflet.js/Mapbox, cập nhật liên tục qua WebSocket, mã màu ưu tiên cứu hộ.
+\end{enumerate}
+
+\subsection{Cơ chế truyền dữ liệu thích ứng}
+
+Hình~\ref{fig:adaptive-tx} minh họa quyết định lựa chọn chế độ truyền dữ liệu dựa trên chất lượng kết nối mạng.
+
+\begin{figure}[H]
+  \centering
+  \resizebox{\linewidth}{!}{%
+  \begin{tikzpicture}[
+    node distance=1.4cm and 2.2cm,
+    box/.style={
+      draw, rounded corners=6pt, minimum width=3.8cm, minimum height=1cm,
+      align=center, font=\small, fill=#1!15, draw=#1
+    },
+    decision/.style={
+      diamond, draw=headerblue, fill=headerblue!10, aspect=2.5,
+      align=center, font=\small\bfseries, minimum width=4.5cm
+    },
+    arr/.style={-Stealth, thick},
+  ]
+    \node[box=headerblue, minimum width=5cm] (start)
+      {Dữ liệu cứu hộ sẵn sàng\\(AI đã xử lý xong)};
+
+    \node[decision, below=of start] (check)
+      {Băng thông\\$>$ 1\,Mbps?};
+
+    \node[box=safegreen, below left=1.2cm and 1.5cm of check] (full)
+      {\textbf{Chế độ đầy đủ}\\$\sim$2--5\,MB\\Ảnh + Text + GPS\\+ Kết quả AI};
+
+    \node[box=urgentred, below right=1.2cm and 1.5cm of check] (compact)
+      {\textbf{Chế độ gọn nhẹ}\\$\sim$2--5\,KB\\JSON: AI results\\+ GPS + urgency};
+
+    \node[box=dborange, below=2.8cm of check] (queue)
+      {Lưu hàng đợi cục bộ\\(SQLite / Hive)};
+
+    \node[box=backendgreen, below=1.4cm of full] (api)
+      {Backend FastAPI\\POST /rescue-events};
+
+    \draw[arr] (start) -- (check);
+    \draw[arr] (check) -- node[above left, font=\footnotesize]{Có} (full);
+    \draw[arr] (check) -- node[above right, font=\footnotesize]{Không} (compact);
+    \draw[arr] (full) -- (api);
+    \draw[arr] (compact) -- node[right, font=\footnotesize]{Gửi metadata} (api);
+    \draw[arr] (compact) -- (queue);
+    \draw[arr, dashed] (queue.south) -- ++(0,-0.7) -- node[below, font=\footnotesize]{Khi mạng phục hồi} ++(-3.5,0) -- (api.south);
+  \end{tikzpicture}%
+  }
+  \caption{Cơ chế truyền dữ liệu thích ứng theo chất lượng kết nối mạng}
+  \label{fig:adaptive-tx}
+\end{figure}
+
+\section{Kiến trúc ứng dụng di động}
+
+Ứng dụng di động được thiết kế theo \keyword{kiến trúc phân tầng (Layered Architecture)} kết hợp \keyword{BLoC pattern} để quản lý trạng thái (Hình~\ref{fig:mobile-arch}).
+
+\begin{sidewaysfigure}[H]
+  \centering
+  \includegraphics[width=\linewidth]{diagram2_mobile_architecture.png}
+  \caption{Kiến trúc chi tiết ứng dụng di động Flutter (Layered + BLoC)}
+  \label{fig:mobile-arch}
+\end{sidewaysfigure}
+
+Ứng dụng gồm 5 tầng:
+
+\begin{description}[leftmargin=2.5cm, labelwidth=2cm]
+  \item[Tầng 1 -- Trình bày] 6 màn hình: Trang chủ, Camera/Ảnh, Văn bản, Biểu mẫu cứu hộ, Lịch sử, Cài đặt.
+  \item[Tầng 2 -- Nghiệp vụ] 6 BLoC quản lý luồng xử lý: phân loại ảnh, phân loại văn bản, yêu cầu cứu hộ, kết nối, đồng bộ, lịch sử.
+  \item[Tầng 3 -- AI Inference] Hai pipeline song song: ảnh (MobileNetV3 TFLite) và văn bản (DistilBERT ONNX), hội tụ tại bộ tính điểm khẩn cấp.
+  \item[Tầng 4 -- Dữ liệu] SQLite/Hive (hàng đợi offline), REST API Client (Dio), WebSocket Client, Sync Manager.
+  \item[Tầng 5 -- Nền tảng] Camera Plugin, Geolocator, Connectivity Plus, Battery Optimization.
+\end{description}
+
+\subsection{Pipeline AI tại biên}
+
+Hình~\ref{fig:ai-pipeline} mô tả hai pipeline AI chạy song song trên thiết bị.
+
+\begin{figure}[H]
+  \centering
+  \resizebox{\linewidth}{!}{%
+  \begin{tikzpicture}[
+    node distance=0.6cm and 0.5cm,
+    step/.style={
+      draw=#1, fill=#1!12, rounded corners=4pt,
+      minimum width=3.2cm, minimum height=0.85cm,
+      align=center, font=\small
+    },
+    arr/.style={-Stealth, thick, #1},
+    label/.style={font=\small\bfseries, #1},
+  ]
+    % Image pipeline
+    \node[step=aiviolet] (i1) {Ảnh (camera/\\thư viện)};
+    \node[step=aiviolet, right=0.5cm of i1] (i2) {Tiền xử lý\\resize 224×224\\normalize};
+    \node[step=aiviolet, right=0.5cm of i2] (i3) {MobileNetV3\\(TFLite)};
+    \node[step=aiviolet, right=0.5cm of i3] (i4) {Mức ngập\\none/low/high\\conf: 0.92};
+
+    % Text pipeline
+    \node[step=dashblue, below=1.8cm of i1] (t1) {Văn bản\\(tiếng Việt)};
+    \node[step=dashblue, right=0.5cm of t1] (t2) {Tokenization\\(Vietnamese)};
+    \node[step=dashblue, right=0.5cm of t2] (t3) {DistilBERT\\(ONNX)};
+    \node[step=dashblue, right=0.5cm of t3] (t4) {Phân loại tin\\urgent/supplies\\safe/irrelevant};
+
+    % Score node
+    \node[draw=urgentred, fill=urgentred!15, rounded corners=6pt,
+          minimum width=3.0cm, minimum height=1.5cm,
+          align=center, font=\small\bfseries,
+          right=0.7cm of i4, yshift=-1cm] (score)
+      {Điểm khẩn cấp\\$s = 0.4\,v_i + 0.4\,v_t$\\$\quad+ 0.2\,c$\\$s \in [0,1]$};
+
+    \draw[arr=aiviolet] (i1) -- (i2);
+    \draw[arr=aiviolet] (i2) -- (i3);
+    \draw[arr=aiviolet] (i3) -- (i4);
+    \draw[arr=aiviolet] (i4.east) -- ++(0.4,0) |- (score.north);
+
+    \draw[arr=dashblue] (t1) -- (t2);
+    \draw[arr=dashblue] (t2) -- (t3);
+    \draw[arr=dashblue] (t3) -- (t4);
+    \draw[arr=dashblue] (t4.east) -- ++(0.4,0) |- (score.south);
+
+    % GPS input
+    \node[step=backendgreen, below=0.5cm of t1] (gps) {GPS\\(lat, lng)};
+    \draw[arr=backendgreen] (gps.east) -- ++(9.8,0) |- (score.south east);
+
+    % Labels
+    \node[label=aiviolet, above=0.1cm of i1] {\footnotesize Pipeline ảnh};
+    \node[label=dashblue, above=0.1cm of t1] {\footnotesize Pipeline văn bản};
+  \end{tikzpicture}%
+  }
+  \caption{Hai pipeline AI tại biên chạy song song và công thức tính điểm khẩn cấp tổng hợp}
+  \label{fig:ai-pipeline}
+\end{figure}
+
+Công thức tính điểm khẩn cấp tổng hợp:
+\begin{equation}
+  s = 0.4 \cdot v_{\text{image}} + 0.4 \cdot v_{\text{text}} + 0.2 \cdot c
+  \label{eq:urgency}
+\end{equation}
+trong đó $v_{\text{image}} \in [0,1]$ là điểm mức ngập từ AI ảnh, $v_{\text{text}} \in [0,1]$ là điểm phân loại từ AI văn bản, $c \in [0,1]$ là điểm ngữ cảnh (thời gian, mật độ báo cáo lân cận). Ngưỡng phân loại mức ưu tiên:
+
+\begin{center}
+\begin{tabular}{clp{6cm}}
+\toprule
+\textbf{Màu} & \textbf{Ngưỡng} & \textbf{Ý nghĩa} \\
+\midrule
+\cellcolor{urgentred}\textcolor{white}{\textbf{Đỏ}}
+  & $s > 0.7$ & Khẩn cấp — cần cứu hộ ngay lập tức \\
+\cellcolor{warnyellow}\textcolor{white}{\textbf{Vàng}}
+  & $0.4 \leq s \leq 0.7$ & Cần hỗ trợ — theo dõi và chuẩn bị can thiệp \\
+\cellcolor{safegreen}\textcolor{white}{\textbf{Xanh}}
+  & $s < 0.4$ & An toàn — không cần ưu tiên ngay \\
+\bottomrule
+\end{tabular}
+\end{center}
+
+% ============================================================
+\chapter{Bộ dữ liệu và Mô hình AI}
+% ============================================================
+
+\section{Bộ dữ liệu}
+
+\subsection{Dữ liệu hình ảnh}
+
+\begin{table}[H]
+\centering
+\caption{Bộ dữ liệu hình ảnh ngập lụt sử dụng trong đề tài}
+\label{tab:image-datasets}
+\rowcolors{2}{lightgray}{white}
+\begin{tabular}{llp{4.5cm}p{3.5cm}}
+\toprule
+\textbf{Bộ dữ liệu} & \textbf{Kích thước} & \textbf{Nội dung} & \textbf{Xử lý bổ sung} \\
+\midrule
+FloodNet \cite{rahnemoonfar2021floodnet}
+  & $\sim$2.3K ảnh & Ảnh UAV post-flood, nhãn semantic & Fine-tune theo địa hình VN \\
+CrisisMMD \cite{alam2018crisismmd}
+  & $\sim$16K tweet & Ảnh + text từ mạng xã hội & Lọc nhãn flood; dịch text \\
+Dữ liệu thu thập
+  & $\sim$5K ảnh & Facebook/Zalo VN, bão lũ 2023-24 & Gán nhãn thủ công \\
+\midrule
+\textbf{Tổng cộng} & \textbf{$\sim$23K} & — & — \\
+\bottomrule
+\end{tabular}
+\end{table}
+
+\textbf{Nhãn phân loại ảnh:}
+\begin{itemize}
+  \item \tech{none} — Không có dấu hiệu ngập lụt
+  \item \tech{low} — Ngập nhẹ (dưới 50cm)
+  \item \tech{high} — Ngập nặng (trên 50cm hoặc ngập nhà)
+\end{itemize}
+
+\subsection{Dữ liệu văn bản}
+
+\begin{table}[H]
+\centering
+\caption{Bộ dữ liệu văn bản tiếng Việt sử dụng trong đề tài}
+\label{tab:text-datasets}
+\rowcolors{2}{lightgray}{white}
+\begin{tabular}{llp{4.5cm}p{3.5cm}}
+\toprule
+\textbf{Bộ dữ liệu} & \textbf{Kích thước} & \textbf{Nội dung} & \textbf{Xử lý bổ sung} \\
+\midrule
+UIT-VSMEC
+  & $\sim$6.9K câu & Phân tích cảm xúc tiếng Việt & Điều chỉnh nhãn cứu hộ \\
+Crawl mạng XH
+  & $\sim$10K câu & Facebook/Zalo bão lũ VN 2020-24 & Làm sạch, chuẩn hóa Unicode \\
+\midrule
+\textbf{Tổng cộng} & \textbf{$\sim$17K} & — & — \\
+\bottomrule
+\end{tabular}
+\end{table}
+
+\textbf{Nhãn phân loại văn bản:}
+\begin{itemize}
+  \item \tech{urgent\_rescue} — Cầu cứu khẩn cấp (\textit{"cứu với", "ngập nóc nhà"})
+  \item \tech{need\_supplies} — Cần nhu yếu phẩm (\textit{"thiếu lương thực, thuốc"})
+  \item \tech{safe\_update} — Cập nhật an toàn (\textit{"đã lên được gác, ổn"})
+  \item \tech{irrelevant} — Không liên quan đến cứu hộ
+\end{itemize}
+
+\section{Mô hình AI và kỹ thuật tối ưu hóa}
+
+\subsection{Mô hình phân loại ảnh}
+
+\begin{itemize}
+  \item \textbf{Kiến trúc gốc:} MobileNetV3-Large (ImageNet pretrained)
+  \item \textbf{Transfer Learning:} Fine-tune 2 lớp cuối trên bộ dữ liệu ngập lụt VN
+  \item \textbf{Tối ưu hóa:} Post-training quantization (INT8) $\rightarrow$ TFLite
+  \item \textbf{Kích thước mô hình:} $\sim$5\,MB (sau nén)
+  \item \textbf{Thời gian suy luận:} $<$100\,ms trên thiết bị tầm trung
+\end{itemize}
+
+\subsection{Mô hình phân loại văn bản}
+
+\begin{itemize}
+  \item \textbf{Kiến trúc gốc:} DistilBERT-base hoặc PhoBERT-distilled (tiếng Việt)
+  \item \textbf{Fine-tune:} Trên bộ dữ liệu UIT-VSMEC + dữ liệu crawl
+  \item \textbf{Tối ưu hóa:} Dynamic quantization $\rightarrow$ ONNX Runtime Mobile
+  \item \textbf{Kích thước mô hình:} $\sim$65\,MB (sau nén)
+  \item \textbf{Thời gian suy luận:} $<$200\,ms trên thiết bị tầm trung
+\end{itemize}
+
+\subsection{Pipeline tối ưu hóa mô hình}
+
+Hình~\ref{fig:model-pipeline} mô tả quy trình tối ưu hóa mô hình từ huấn luyện đến triển khai trên thiết bị di động.
+
+\begin{figure}[H]
+\centering
+\begin{tikzpicture}[
+  node distance=0.7cm,
+  phase/.style={
+    draw=#1, fill=#1!12, rounded corners=5pt,
+    minimum width=6cm, minimum height=1.2cm,
+    align=center, font=\small
+  },
+  arr/.style={-Stealth, thick, draw=#1},
+  metrics/.style={font=\footnotesize\itshape, color=gray}
+]
+  \node[phase=headerblue] (pretrain)
+    {Pretrained Model (ImageNet / PhoBERT)};
+  \node[phase=backendgreen, below=0.7cm of pretrain] (finetune)
+    {Fine-tuning (Transfer Learning)};
+  \node[phase=aiviolet, below=0.7cm of finetune] (eval)
+    {Đánh giá (Accuracy, F1-Score)};
+  \node[phase=dborange, below=0.7cm of eval] (quant)
+    {Quantization (INT8 / Dynamic)};
+  \node[phase=urgentred, below=0.7cm of quant] (convert)
+    {Chuyển đổi (TFLite / ONNX)};
+  \node[phase=dashblue, below=0.7cm of convert] (deploy)
+    {Triển khai trên thiết bị di động};
+
+  \draw[arr=headerblue]  (pretrain) -- (finetune);
+  \draw[arr=backendgreen](finetune) -- (eval);
+  \draw[arr=aiviolet]    (eval)     -- (quant);
+  \draw[arr=dborange]    (quant)    -- (convert);
+  \draw[arr=urgentred]   (convert)  -- (deploy);
+
+  % Feedback arrow on the right side
+  \draw[-Stealth, thick, dashed, draw=gray]
+    (eval.east) -- ++(1.6,0)
+    -- node[right, metrics, align=left]{Chưa đạt ngưỡng\\$\rightarrow$ tinh chỉnh}
+    ++(0,1.9) -- (finetune.east);
+
+  % Size annotations on the left
+  \node[metrics, left=0.3cm of pretrain] {$\sim$200\,MB};
+  \node[metrics, left=0.3cm of finetune] {$\sim$150\,MB};
+  \node[metrics, left=0.3cm of quant]    {$\sim$40\,MB};
+  \node[metrics, left=0.3cm of deploy]   {$\sim$5–65\,MB};
+\end{tikzpicture}
+\caption{Pipeline tối ưu hóa và triển khai mô hình AI trên thiết bị di động}
+\label{fig:model-pipeline}
+\end{figure}
+
+% ============================================================
+\chapter{Thuật toán phân cụm sự kiện cứu hộ}
+% ============================================================
+
+\section{Bài toán phân cụm}
+
+Khi nhiều người dùng báo cáo cùng một vùng ngập lụt, server sẽ nhận được nhiều sự kiện gần nhau về không gian và thời gian. Mục tiêu phân cụm:
+\begin{itemize}
+  \item Gom nhóm các sự kiện \textbf{trong bán kính 500m và khung thời gian 2 giờ};
+  \item Gán độ ưu tiên cho cụm bằng $\max(\text{urgency\_score})$;
+  \item Loại bỏ trùng lặp, giúp lực lượng cứu hộ không phân tán nguồn lực.
+\end{itemize}
+
+\section{Thuật toán DBSCAN kết hợp PostGIS}
+
+DBSCAN (Density-Based Spatial Clustering of Applications with Noise) được chọn vì:
+\begin{itemize}
+  \item Không cần xác định số cụm trước;
+  \item Phát hiện cụm hình dạng tùy ý;
+  \item Tự động nhận diện nhiễu (sự kiện cô lập không thuộc cụm nào).
+\end{itemize}
+
+\textbf{Tham số:}
+\begin{itemize}
+  \item $\varepsilon = 500$\,m (bán kính tối đa giữa 2 điểm trong cùng cụm)
+  \item $\text{min\_samples} = 2$ (tối thiểu 2 báo cáo để tạo cụm)
+  \item Khoảng cách địa lý: \tech{ST\_DWithin(point, 500m)} (PostGIS)
+\end{itemize}
+
+\begin{figure}[H]
+\centering
+\begin{tikzpicture}[scale=0.85]
+  % Background map area
+  \fill[blue!5, rounded corners=8pt] (-0.5,-0.5) rectangle (11,7.5);
+  \draw[blue!20, rounded corners=8pt] (-0.5,-0.5) rectangle (11,7.5);
+
+  % Cluster 1 - critical (red) - top left area
+  \fill[urgentred!20, opacity=0.5] (2.5,5) circle (1.4cm);
+  \draw[urgentred, thick, dashed] (2.5,5) circle (1.4cm);
+  \foreach \x/\y in {2.0/5.3, 2.8/5.6, 3.1/4.7, 2.3/4.5, 2.7/5.0} {
+    \fill[urgentred] (\x,\y) circle (4pt);
+  }
+  \node[font=\footnotesize\bfseries, color=urgentred] at (2.5,6.7) {Cụm A};
+  \node[font=\tiny, color=urgentred] at (2.5,6.35) {score=0.94, n=5};
+
+  % Cluster 2 - warning (yellow) - right area
+  \fill[warnyellow!30, opacity=0.5] (7.5,5) circle (1.1cm);
+  \draw[warnyellow!80!black, thick, dashed] (7.5,5) circle (1.1cm);
+  \foreach \x/\y in {7.0/5.2, 7.8/4.7, 8.1/5.3, 7.4/4.5} {
+    \fill[warnyellow!80!black] (\x,\y) circle (4pt);
+  }
+  \node[font=\footnotesize\bfseries, color=warnyellow!80!black] at (7.5,6.4) {Cụm B};
+  \node[font=\tiny, color=warnyellow!80!black] at (7.5,6.1) {score=0.61, n=4};
+
+  % Cluster 3 - safe (green) - bottom center
+  \fill[safegreen!20, opacity=0.5] (5,2) circle (1.0cm);
+  \draw[safegreen, thick, dashed] (5,2) circle (1.0cm);
+  \foreach \x/\y in {4.5/2.2, 5.3/1.7, 5.6/2.4, 4.8/1.5} {
+    \fill[safegreen] (\x,\y) circle (4pt);
+  }
+  \node[font=\footnotesize\bfseries, color=safegreen] at (5,3.2) {Cụm C};
+  \node[font=\tiny, color=safegreen] at (5,2.9) {score=0.32, n=4};
+
+  % Noise points
+  \fill[gray] (9.5,1.5) circle (4pt);
+  \fill[gray] (1.0,1.5) circle (4pt);
+  \fill[gray] (9.0,7.0) circle (3pt);
+  \node[font=\tiny, color=gray] at (9.5,1.0) {Nhiễu};
+  \node[font=\tiny, color=gray] at (1.0,1.0) {Nhiễu};
+
+  % Legend
+  \node[font=\small\bfseries] at (5.5,-0.2) {Bản đồ phân cụm sự kiện cứu hộ (minh họa)};
+
+  % eps arrow
+  \draw[<->, thick, dashblue] (2.5,5) -- ++(1.4,0)
+    node[midway, below, font=\tiny] {$\varepsilon{=}500$m};
+\end{tikzpicture}
+\caption{Minh họa phân cụm DBSCAN: cụm đỏ (khẩn cấp), vàng (cần hỗ trợ), xanh (an toàn), xám (nhiễu)}
+\label{fig:dbscan}
+\end{figure}
+
+\section{Luồng xử lý yêu cầu cứu hộ}
+
+Hình~\ref{fig:sequence} thể hiện toàn bộ vòng đời của một yêu cầu cứu hộ từ khi người dùng gửi đến khi hiển thị trên bản đồ dashboard.
+
+\begin{figure}[H]
+  \centering
+  \includegraphics[width=\linewidth]{diagram4_sequence.png}
+  \caption{Sơ đồ tuần tự luồng xử lý yêu cầu cứu hộ thiên tai}
+  \label{fig:sequence}
+\end{figure}
+
+\textbf{9 bước xử lý chính:}
+\begin{enumerate}
+  \item \textbf{Thu thập dữ liệu:} Người dùng chụp ảnh, nhập tin nhắn; hệ thống tự lấy GPS.
+  \item \textbf{AI pipeline ảnh:} MobileNetV3 phân loại mức ngập (none/low/high).
+  \item \textbf{AI pipeline văn bản:} DistilBERT phân loại tin nhắn (4 nhóm).
+  \item \textbf{Tính điểm khẩn cấp:} Theo công thức~\eqref{eq:urgency}.
+  \item \textbf{Lưu cục bộ + kiểm tra mạng:} Lưu bản sao, kiểm tra băng thông.
+  \item \textbf{Gửi đầy đủ} (mạng tốt): POST $\sim$2--5\,MB.
+  \item \textbf{Gửi metadata} (mạng yếu): POST JSON $\sim$2--5\,KB; upload ảnh khi phục hồi.
+  \item \textbf{Phân cụm server:} DBSCAN + PostGIS gom nhóm trong 500m/2h.
+  \item \textbf{Cập nhật Dashboard:} WebSocket push → bản đồ cập nhật trong $<$2--5\,s.
+\end{enumerate}
+
+% ============================================================
+\chapter{Bộ công nghệ sử dụng}
+% ============================================================
+
+\begin{figure}[H]
+  \centering
+  \includegraphics[width=0.95\linewidth]{diagram3_tech_stack.png}
+  \caption{Bộ công nghệ sử dụng theo tầng trong hệ thống}
+  \label{fig:tech-stack}
+\end{figure}
+
+\begin{table}[H]
+\centering
+\caption{Danh sách công nghệ theo tầng hệ thống}
+\label{tab:tech-stack}
+\rowcolors{2}{lightgray}{white}
+\begin{tabular}{llp{5.5cm}}
+\toprule
+\textbf{Tầng} & \textbf{Công nghệ} & \textbf{Vai trò} \\
+\midrule
+\multirow{3}{*}{Trình bày (Frontend)}
+  & Flutter/Dart & Ứng dụng di động đa nền tảng \\
+  & HTML/CSS/JS & Dashboard Web \\
+  & Leaflet.js / Mapbox & Bản đồ tương tác thời gian thực \\
+\midrule
+\multirow{4}{*}{Edge AI}
+  & TensorFlow Lite & Runtime chạy mô hình ảnh \\
+  & ONNX Runtime Mobile & Runtime chạy mô hình NLP \\
+  & MobileNetV3 & Phân loại mức ngập \\
+  & DistilBERT / PhoBERT & Phân loại tin nhắn cứu hộ \\
+\midrule
+\multirow{4}{*}{Backend}
+  & Python 3.11 & Ngôn ngữ chính server-side \\
+  & FastAPI & REST API + WebSocket \\
+  & scikit-learn & DBSCAN/HDBSCAN clustering \\
+  & Uvicorn & ASGI server \\
+\midrule
+\multirow{4}{*}{Dữ liệu}
+  & PostgreSQL & CSDL quan hệ chính \\
+  & PostGIS & Truy vấn không gian địa lý \\
+  & SQLite / Hive & Lưu trữ offline trên mobile \\
+  & — & — \\
+\midrule
+\multirow{3}{*}{DevOps}
+  & Git / GitHub & Quản lý mã nguồn \\
+  & Docker & Container hóa dịch vụ \\
+  & Google Colab & Huấn luyện mô hình AI \\
+\bottomrule
+\end{tabular}
+\end{table}
+
+% ============================================================
+\chapter{Các module hệ thống}
+% ============================================================
+
+\begin{longtable}{>{\bfseries}p{0.5cm} p{3.2cm} p{5.5cm} p{4.8cm}}
+\caption{Danh sách 14 module chính của hệ thống}
+\label{tab:modules}\\
+\toprule
+\textbf{\#} & \textbf{Tên module} & \textbf{Chức năng} & \textbf{Công nghệ} \\
+\midrule
+\endfirsthead
+\multicolumn{4}{c}{\tablename~\thetable\ -- tiếp theo}\\
+\toprule
+\textbf{\#} & \textbf{Tên module} & \textbf{Chức năng} & \textbf{Công nghệ} \\
+\midrule
+\endhead
+\bottomrule
+\endfoot
+\bottomrule
+\endlastfoot
+1 & Camera \& Ảnh & Thu thập ảnh từ camera hoặc thư viện; nén ảnh trước AI & Flutter (camera, image\_picker) \\
+2 & AI Phân loại ảnh & Phân loại mức ngập: none / low / high (on-device) & TFLite, MobileNetV3 \\
+3 & Nhập văn bản & Giao diện nhập tin nhắn; tiền xử lý Unicode, tokenize & Flutter TextInput, Dart \\
+4 & AI Phân loại văn bản & Phân loại tin nhắn 4 nhóm (on-device) & ONNX Mobile, DistilBERT \\
+5 & Tính điểm khẩn cấp & Kết hợp AI ảnh + AI văn bản + GPS → urgency score & Dart (tự xây dựng) \\
+6 & Hàng đợi offline \& Sync & Lưu dữ liệu khi mất mạng; tự retry khi khôi phục & SQLite / Hive, Dart Isolates \\
+7 & GPS & Lấy tọa độ; reverse geocoding; tối ưu pin & geolocator, geocoding plugin \\
+8 & Giám sát kết nối & Kiểm tra trạng thái WiFi/4G/3G/offline & connectivity\_plus \\
+9 & REST API Client & Gửi dữ liệu lên server; multipart upload; retry logic & Dio / http package \\
+10 & Backend API Server & REST + WebSocket; nhận/xử lý dữ liệu cứu hộ & Python, FastAPI, Uvicorn \\
+11 & Phân cụm không gian & DBSCAN + PostGIS; cập nhật cụm thời gian thực & scikit-learn, PostGIS \\
+12 & Cơ sở dữ liệu & Lưu trữ sự kiện, kết quả cụm, người dùng & PostgreSQL, PostGIS \\
+13 & Dashboard \& Bản đồ & Bản đồ WebSocket thời gian thực; bảng quản lý & Leaflet.js, HTML/CSS/JS \\
+14 & Xác thực người dùng & Đăng ký/đăng nhập; JWT; phân quyền & FastAPI (jose), secure\_storage \\
+\end{longtable}
+
+% ============================================================
+\chapter{Phương pháp nghiên cứu và Tiến độ}
+% ============================================================
+
+\section{Phương pháp nghiên cứu}
+
+\begin{enumerate}
+  \item \textbf{Thu thập và xử lý dữ liệu:} FloodNet, CrisisMMD, UIT-VSMEC kết hợp Web Crawling từ mạng xã hội Việt Nam. Gán nhãn, chuẩn hóa và tăng cường dữ liệu (data augmentation).
+
+  \item \textbf{Thiết kế hệ thống:} Tài liệu kiến trúc lai, sơ đồ luồng dữ liệu Mobile–Server, thiết kế CSDL không gian, kiến trúc mô hình AI.
+
+  \item \textbf{Machine Learning \& Tối ưu hóa:} Transfer Learning trên MobileNetV3 và DistilBERT; Model Quantization (INT8/Dynamic) để nén mô hình.
+
+  \item \textbf{Phát triển phần mềm:} Flutter (AI inference offline) + Python/FastAPI (clustering, WebSocket).
+
+  \item \textbf{Kiểm thử:} Đánh giá accuracy, F1-score trên tập validation.
+
+  \item \textbf{Thực nghiệm hệ thống:} Giả lập mạng 2G/3G trên thiết bị thực, đo độ trễ và khả năng đồng bộ.
+\end{enumerate}
+
+\section{Tiến độ thực hiện}
+
+\begin{figure}[H]
+\centering
+\begin{tikzpicture}[x=1.7cm, y=0.75cm]
+  % Grid
+  \foreach \m/\label in {0/T3, 1/T4, 2/T5, 3/T6, 4/T7, 5/T8} {
+    \draw[gray!30] (\m+0.5, 0) -- (\m+0.5, -10.5);
+    \node[font=\small\bfseries, color=gray] at (\m+0.5, 0.4) {\label/2026};
+  }
+
+  % Gantt bars
+  \def\ganttbar#1#2#3#4#5{%
+    \fill[#5!70, rounded corners=2pt] (#2, #1-0.35) rectangle (#3, #1+0.35);
+    \node[font=\tiny, align=left, anchor=west] at (6.1, #1) {#4};
+  }
+
+  \ganttbar{-1}{0}{2}{Nghiên cứu tổng quan (NTQ, LTNA)}{headerblue}
+  \ganttbar{-2}{0}{2}{Thu thập \& xây dựng bộ dữ liệu (LTNA, NHT)}{backendgreen}
+  \ganttbar{-3}{0}{0.25}{Thiết kế kiến trúc \& CSDL (NTT, CTH)}{aiviolet}
+  \ganttbar{-4}{1}{5}{Huấn luyện \& tinh chỉnh mô hình (LTNA, NNQ)}{dborange}
+  \ganttbar{-5}{1}{5}{Nén \& tối ưu hóa mô hình (NHT, CTH)}{urgentred}
+  \ganttbar{-6}{1}{5}{Thuật toán phân cụm (NTT, NHT)}{warnyellow!80!black}
+  \ganttbar{-7}{3}{5}{Ứng dụng di động (NTT, CTH)}{dashblue}
+  \ganttbar{-8}{3}{5}{Backend \& Dashboard (LTNA, NNQ)}{safegreen}
+  \ganttbar{-9}{5}{6}{Thực nghiệm đánh giá (NTT, NNQ)}{aiviolet}
+  \ganttbar{-10}{5}{6}{Viết báo cáo (LTNA, NNQ)}{headerblue}
+
+  % Task labels
+  \foreach \y/\task in {
+    -1/1. Nghiên cứu tổng quan,
+    -2/2. Xây dựng bộ dữ liệu,
+    -3/3. Thiết kế kiến trúc,
+    -4/4. Huấn luyện mô hình,
+    -5/5. Tối ưu hóa mô hình,
+    -6/6. Phân cụm không gian,
+    -7/7. Ứng dụng di động,
+    -8/8. Backend \& Dashboard,
+    -9/9. Thực nghiệm,
+    -10/10. Viết báo cáo%
+  } {
+    \node[font=\tiny, anchor=east, align=right, text width=3.5cm] at (-0.05, \y) {\task};
+  }
+
+  % Month axis
+  \draw[thick] (0,-10.8) -- (6,-10.8);
+  \foreach \m in {0,...,6} \draw (\m,-10.7) -- (\m,-10.9);
+\end{tikzpicture}
+\caption{Biểu đồ Gantt tiến độ thực hiện đề tài (03/2026 – 08/2026)}
+\label{fig:gantt}
+\end{figure}
+
+\begin{table}[H]
+\centering
+\caption{Tiến độ thực hiện chi tiết}
+\label{tab:schedule}
+\small
+\rowcolors{2}{lightgray}{white}
+\begin{tabular}{>{\centering}p{0.6cm} p{4.5cm} p{3.0cm} p{4.5cm}}
+\toprule
+\textbf{STT} & \textbf{Nội dung} & \textbf{Thời gian} & \textbf{Người thực hiện} \\
+\midrule
+1 & Nghiên cứu tổng quan & 3--4/2026 & LTNA, NNQ \\
+2 & Xây dựng bộ dữ liệu & 3--4/2026 & LTNA, NHT \\
+3 & Thiết kế kiến trúc \& CSDL & 3/2026 & NTT, CTH \\
+4 & Huấn luyện mô hình & 4--7/2026 & LTNA, NNQ \\
+5 & Tối ưu hóa mô hình & 4--7/2026 & NHT, CTH \\
+6 & Thuật toán phân cụm & 4--7/2026 & NTT, NHT \\
+7 & Ứng dụng di động & 6--7/2026 & NTT, CTH \\
+8 & Backend \& Dashboard & 6--7/2026 & LTNA, NNQ \\
+9 & Thực nghiệm đánh giá & 8/2026 & NTT, NNQ \\
+10 & Viết báo cáo \& công bố & 8/2026 & LTNA, NNQ \\
+\bottomrule
+\end{tabular}
+\end{table}
+
+\noindent\footnotesize
+\textit{LTNA: Lê Thị Ngọc Ảnh; NNQ: Nguyễn Như Quỳnh; NTT: Nguyễn Thanh Trọng; NHT: Ngô Hưng Thịnh; CTH: Cao Tường Hưng}
+
+% ============================================================
+\chapter{Kết quả dự kiến và Đánh giá}
+% ============================================================
+
+\section{Sản phẩm dự kiến}
+
+\begin{enumerate}
+  \item \textbf{Ứng dụng di động hỗ trợ cứu hộ:} Flutter app tích hợp Edge AI, hoạt động offline, gửi thông tin cầu cứu lên trung tâm.
+  \item \textbf{Website quản lý thông tin cứu hộ:} Dashboard bản đồ thời gian thực, phân cụm sự kiện, bộ lọc theo mức ưu tiên.
+  \item \textbf{Bộ mô hình AI đã huấn luyện:} MobileNetV3-TFLite và DistilBERT-ONNX đã tối ưu, tinh chỉnh cho bối cảnh Việt Nam.
+  \item \textbf{Bộ dữ liệu đặc thù:} Bộ dữ liệu ảnh + văn bản cứu hộ bão lũ Việt Nam.
+\end{enumerate}
+
+\section{Chỉ tiêu đánh giá}
+
+\begin{table}[H]
+\centering
+\caption{Chỉ tiêu đánh giá hiệu năng hệ thống}
+\label{tab:metrics}
+\rowcolors{2}{lightgray}{white}
+\begin{tabular}{lll}
+\toprule
+\textbf{Chỉ tiêu} & \textbf{Mục tiêu} & \textbf{Phương pháp đánh giá} \\
+\midrule
+Accuracy mô hình ảnh & $\geq 85\%$ & Validation set (20\% bộ dữ liệu) \\
+F1-Score phân loại văn bản & $\geq 80\%$ & Macro F1 trên 4 nhãn \\
+Thời gian suy luận AI (ảnh) & $<100$\,ms & Đo trên thiết bị thực tế \\
+Thời gian suy luận AI (text) & $<200$\,ms & Đo trên thiết bị thực tế \\
+Độ trễ end-to-end (mạng tốt) & $<5$\,s & Từ gửi đến hiển thị bản đồ \\
+Kích thước gói metadata & $<5$\,KB & JSON compact payload \\
+Tỷ lệ đồng bộ thành công & $\geq 95\%$ & Giả lập mạng 2G/3G/offline \\
+\bottomrule
+\end{tabular}
+\end{table}
+
+\section{Tác động và lợi ích}
+
+\begin{itemize}
+  \item \textbf{Giáo dục \& đào tạo:} Tài liệu tham khảo thực tiễn về Edge AI và Multimodal Deep Learning.
+  \item \textbf{Khoa học \& công nghệ:} Đề xuất hướng tiếp cận mới: xử lý tập trung → xử lý tại biên + phân cụm thông minh.
+  \item \textbf{Kinh tế xã hội:} Hỗ trợ cứu hộ nhanh, chính xác; giảm lãng phí nguồn lực cứu trợ.
+  \item \textbf{Tổ chức:} Tạo bộ dữ liệu thực tế thiên tai Việt Nam; nền tảng cho nghiên cứu tiếp nối.
+\end{itemize}
+
+% ============================================================
+\chapter*{Kết luận}
+\addcontentsline{toc}{chapter}{Kết luận}
+% ============================================================
+
+Đề tài đề xuất và xây dựng một hệ thống \keyword{hỗ trợ cứu hộ bão lũ dựa trên Edge AI} với kiến trúc lai sáng tạo, giải quyết trực tiếp điểm yếu của các hệ thống tập trung hiện tại: phụ thuộc vào kết nối mạng ổn định.
+
+\textbf{Điểm nổi bật:}
+\begin{enumerate}
+  \item \keyword{AI tại biên hoàn toàn offline}: Hai pipeline MobileNetV3 và DistilBERT chạy trực tiếp trên điện thoại, không cần Internet.
+  \item \keyword{Truyền dữ liệu thích ứng}: Tự động chuyển giữa chế độ đầy đủ (~5\,MB) và gọn nhẹ (~5\,KB) theo chất lượng mạng.
+  \item \keyword{Phân cụm thông minh}: DBSCAN + PostGIS gom nhóm sự kiện trùng lặp, hỗ trợ điều phối nguồn lực chính xác.
+  \item \keyword{Phù hợp bối cảnh Việt Nam}: Fine-tune mô hình với dữ liệu địa phương, hỗ trợ tiếng Việt tự nhiên.
+\end{enumerate}
+
+Kết quả nghiên cứu có tiềm năng ứng dụng thực tiễn cao trong công tác phòng chống thiên tai tại Đồng bằng sông Cửu Long và cả nước, đồng thời đóng góp cho hướng nghiên cứu Edge AI ứng dụng trong môi trường mạng yếu tại Việt Nam.
+
+% ============================================================
+%  TÀI LIỆU THAM KHẢO
+% ============================================================
+\begin{thebibliography}{99}
+
+\bibitem{dinhquang2023}
+Đinh Nhật Quang, Tạ Quang Chiểu, và Trịnh Trần Tiểu Long (2023).
+\textit{Tổng quan ứng dụng phương pháp học máy trong dự báo lũ}.
+Tạp chí Khoa học và Công nghệ Thủy lợi, số 79, tr. 89--101.
+
+\bibitem{quan2020flood}
+Khanh-An C. Quan, Vinh-Tiep Nguyen, Tan-Cong Nguyen, Tam V. Nguyen, Minh-Triet Tran (2020).
+\textit{Flood Level Prediction via Human Pose Estimation from Social Media Images}.
+Proc. ICMR '20, tr. 296--300.
+
+\bibitem{nguyen2022flood}
+H. D. Nguyen, Q. H. Nguyen, Q. V. V. Du, et al. (2022).
+\textit{A novel combination of deep neural network and Manta ray foraging optimization for flood susceptibility mapping in Quang Ngai province, Vietnam}.
+Geocarto Int., vol. 37, no. 25, tr. 7531--7555.
+
+\bibitem{alam2018crisismmd}
+Alam, F., Ofli, F., \& Imran, M. (2018).
+\textit{CrisisMMD: Multimodal Twitter Datasets from Natural Disasters}.
+Proc. ICWSM 2018.
+
+\bibitem{rahnemoonfar2021floodnet}
+Rahnemoonfar, M., et al. (2021).
+\textit{FloodNet: A High Resolution Aerial Imagery Dataset for Post Flood Scene Understanding}.
+IEEE Access.
+
+\bibitem{ofli2020multimodal}
+F. Ofli, F. Alam, và M. Imran (2020).
+\textit{Analysis of Social Media Data using Multimodal Deep Learning for Disaster Response}.
+Proc. ISCRAM, Blacksburg, VA, USA.
+
+\bibitem{duan2021lightweight}
+Y. Duan, W. Zhang, P. Huang, G. He, và H. Guo (2021).
+\textit{A New Lightweight Convolutional Neural Network for Multi-Scale Land Surface Water Extraction from GaoFen-1D Satellite Images}.
+Remote Sens., vol. 13, no. 22, tr. 4576.
+
+\bibitem{kyrkou2020emergencynet}
+C. Kyrkou, và T. Theocharides (2020).
+\textit{EmergencyNet: Efficient Aerial Image Classification for Drone-Based Emergency Monitoring Using Atrous Convolutional Feature Fusion}.
+IEEE J. Sel. Top. Appl. Earth Obs. Remote Sens., vol. 13, tr. 1687--1699.
+
+\end{thebibliography}
+
+% ============================================================
+%  PHỤ LỤC
+% ============================================================
+\appendix
+
+\chapter{Thông tin nhóm nghiên cứu}
+
+\begin{table}[H]
+\centering
+\caption{Thành viên nhóm nghiên cứu}
+\label{tab:members}
+\rowcolors{2}{lightgray}{white}
+\begin{tabular}{>{\centering}p{0.5cm} p{3cm} p{2.8cm} p{6cm}}
+\toprule
+\textbf{\#} & \textbf{Họ và tên} & \textbf{MSSV -- Lớp} & \textbf{Nhiệm vụ chính} \\
+\midrule
+1 & Lê Thị Ngọc Ảnh & B2303861 -- DI2396F1 & Tổng quan, bộ dữ liệu, huấn luyện mô hình, Backend/Dashboard, báo cáo \\
+2 & Nguyễn Như Quỳnh & B2303777 -- DI2396F1 & Tổng quan, huấn luyện mô hình, Backend/Dashboard, thực nghiệm, báo cáo \\
+3 & Nguyễn Thanh Trọng & B2305615 -- DI2396F1 & Kiến trúc hệ thống, CSDL, thuật toán phân cụm, ứng dụng di động, thực nghiệm \\
+4 & Ngô Hưng Thịnh & B2303904 -- DI2396F2 & Bộ dữ liệu, tối ưu hóa mô hình, thuật toán phân cụm \\
+5 & Cao Tường Hưng & B2303873 -- DI2396F1 & Kiến trúc hệ thống, tối ưu hóa mô hình, ứng dụng di động \\
+\midrule
+\multicolumn{2}{l}{\textbf{Cán bộ hướng dẫn:}} & \multicolumn{2}{l}{TS. Nguyễn Thanh Khoa (MSCB: 2995) -- Khoa CNTT\&TT, ĐH Cần Thơ} \\
+\bottomrule
+\end{tabular}
+\end{table}
+
+\chapter{Kinh phí thực hiện}
+
+\begin{table}[H]
+\centering
+\caption{Dự toán kinh phí đề tài}
+\label{tab:budget}
+\rowcolors{2}{lightgray}{white}
+\begin{tabular}{>{\centering}p{0.6cm} p{6.5cm} r r}
+\toprule
+\textbf{STT} & \textbf{Khoản chi} & \textbf{Kinh phí (đồng)} & \textbf{Nguồn} \\
+\midrule
+1 & Thù lao tham gia thực hiện đề tài & 12.100.000 & ĐHCT \\
+2 & Mua vật tư, nguyên liệu & 0 & -- \\
+3 & Văn phòng phẩm, in ấn & 175.000 & ĐHCT \\
+4 & Họp hội đồng đánh giá, nghiệm thu & 2.725.000 & ĐHCT \\
+\midrule
+  & \textbf{Tổng cộng} & \textbf{15.000.000} & \textbf{ĐHCT} \\
+\bottomrule
+\end{tabular}
+\end{table}
+
+\end{document}
