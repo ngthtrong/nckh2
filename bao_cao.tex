@@ -248,7 +248,7 @@ Hệ thống được thiết kế theo mô hình \keyword{lai (Hybrid)} gồm 4
 
 \begin{figure}[H]
   \centering
-  \includegraphics[width=\linewidth]{diagram1_system_architecture.png}
+  \includegraphics[width=0.88\linewidth]{diagram1_system_architecture.png}
   \caption{Sơ đồ kiến trúc tổng quan hệ thống cứu hộ bão lũ dựa trên Edge AI}
   \label{fig:arch-overview}
 \end{figure}
@@ -273,7 +273,7 @@ Hình~\ref{fig:adaptive-tx} minh họa quyết định lựa chọn chế độ 
 
 \begin{figure}[H]
   \centering
-  \begin{tikzpicture}[
+  \begin{tikzpicture}[scale=0.88, transform shape,
     node distance=1.4cm and 2.2cm,
     box/.style={
       draw, rounded corners=6pt, minimum width=3.8cm, minimum height=1cm,
@@ -291,10 +291,10 @@ Hình~\ref{fig:adaptive-tx} minh họa quyết định lựa chọn chế độ 
     \node[decision, below=of start] (check)
       {Băng thông\\$>$ 1\,Mbps?};
 
-    \node[box=safegreen, below left=2.0cm and 4.5cm of check] (full)
+    \node[box=safegreen, below left=2.0cm and 3.8cm of check] (full)
       {\textbf{Chế độ đầy đủ}\\$\sim$2--5\,MB\\Ảnh + Text + GPS\\+ Kết quả AI};
 
-    \node[box=urgentred, below right=2.0cm and 4.5cm of check] (compact)
+    \node[box=urgentred, below right=2.0cm and 3.8cm of check] (compact)
       {\textbf{Chế độ gọn nhẹ}\\$\sim$2--5\,KB\\JSON: AI results\\+ GPS + urgency};
 
     \node[box=dborange, below=1.5cm of compact] (queue)
@@ -309,7 +309,7 @@ Hình~\ref{fig:adaptive-tx} minh họa quyết định lựa chọn chế độ 
     \draw[arr] (full) -- (api);
     \draw[arr] (compact) -- node[above, sloped, pos=0.25, font=\footnotesize]{Gửi metadata} (api);
     \draw[arr] (compact) -- (queue);
-    \draw[arr, dashed] (queue.south) -- ++(0,-0.7) -- node[below, font=\footnotesize]{Khi mạng phục hồi} ++(-9.0,0) -- (api.south);
+    \draw[arr, dashed] (queue.south) -- ++(0,-0.7) -- node[below, font=\footnotesize]{Khi mạng phục hồi} ++(-7.6,0) -- (api.south);
   \end{tikzpicture}
   \caption{Cơ chế truyền dữ liệu thích ứng theo chất lượng kết nối mạng}
   \label{fig:adaptive-tx}
@@ -509,7 +509,7 @@ Hình~\ref{fig:model-pipeline} mô tả quy trình tối ưu hóa mô hình từ
 \begin{figure}[H]
 \centering
 \begin{tikzpicture}[
-  node distance=0.5cm and 0.4cm,
+  node distance=0.55cm and 0.4cm,
   phase/.style={
     draw=#1, fill=#1!12, rounded corners=5pt,
     minimum width=2.8cm, minimum height=1.2cm,
@@ -520,15 +520,15 @@ Hình~\ref{fig:model-pipeline} mô tả quy trình tối ưu hóa mô hình từ
 ]
   \node[phase=headerblue] (pretrain)
     {Pretrained\\Model\\(ImageNet/\\PhoBERT)};
-  \node[phase=backendgreen, right=0.6cm of pretrain] (finetune)
+  \node[phase=backendgreen, below=0.6cm of pretrain] (finetune)
     {Fine-tuning\\(Transfer\\Learning)};
-  \node[phase=aiviolet, right=0.6cm of finetune] (eval)
+  \node[phase=aiviolet, below=0.6cm of finetune] (eval)
     {Đánh giá\\(Accuracy,\\F1-Score)};
-  \node[phase=dborange, right=0.6cm of eval] (quant)
+  \node[phase=dborange, below=0.6cm of eval] (quant)
     {Quantization\\(INT8 /\\Dynamic)};
-  \node[phase=urgentred, right=0.6cm of quant] (convert)
+  \node[phase=urgentred, below=0.6cm of quant] (convert)
     {Chuyển đổi\\(TFLite /\\ONNX)};
-  \node[phase=dashblue, right=0.6cm of convert] (deploy)
+  \node[phase=dashblue, below=0.6cm of convert] (deploy)
     {Triển khai\\trên thiết bị\\di động};
 
   \draw[arr=headerblue] (pretrain) -- (finetune);
@@ -539,13 +539,13 @@ Hình~\ref{fig:model-pipeline} mô tả quy trình tối ưu hóa mô hình từ
 
   % Feedback arrow
   \draw[-Stealth, thick, dashed, draw=gray]
-    (eval.north) -- ++(0,0.7) -- node[above, metrics]{Chưa đạt ngưỡng → tinh chỉnh} ++(-3.2,0) -- (finetune.north);
+    (eval.east) -- ++(1.8,0) -- node[right, metrics]{Chưa đạt ngưỡng → tinh chỉnh} ++(0,-1.8) -- (finetune.east);
 
   % Size annotations
-  \node[metrics, below=0.3cm of pretrain] {$\sim$200\,MB};
-  \node[metrics, below=0.3cm of finetune] {$\sim$150\,MB};
-  \node[metrics, below=0.3cm of quant]    {$\sim$40\,MB};
-  \node[metrics, below=0.3cm of deploy]   {$\sim$5–65\,MB};
+  \node[metrics, right=0.35cm of pretrain] {$\sim$200\,MB};
+  \node[metrics, right=0.35cm of finetune] {$\sim$150\,MB};
+  \node[metrics, right=0.35cm of quant]    {$\sim$40\,MB};
+  \node[metrics, right=0.35cm of deploy]   {$\sim$5–65\,MB};
 \end{tikzpicture}
 \caption{Pipeline tối ưu hóa và triển khai mô hình AI trên thiết bị di động}
 \label{fig:model-pipeline}
@@ -602,8 +602,8 @@ DBSCAN (Density-Based Spatial Clustering of Applications with Noise) được ch
   \foreach \x/\y in {7.0/5.2, 7.8/4.7, 8.1/5.3, 7.4/4.5} {
     \fill[warnyellow!80!black] (\x,\y) circle (4pt);
   }
-  \node[font=\footnotesize\bfseries, color=warnyellow!80!black] at (7.5,6.4) {Cụm B};
-  \node[font=\tiny, color=warnyellow!80!black] at (7.5,6.1) {score=0.61, n=4};
+  \node[font=\footnotesize\bfseries, color=warnyellow!80!black] at (7.5,6.8) {Cụm B};
+  \node[font=\tiny, color=warnyellow!80!black] at (7.5,6.45) {score=0.61, n=4};
 
   % Cluster 3 - safe (green) - bottom center
   \fill[safegreen!20, opacity=0.5] (5,2) circle (1.0cm);
@@ -662,7 +662,7 @@ Hình~\ref{fig:sequence} thể hiện toàn bộ vòng đời của một yêu c
 
 \begin{figure}[H]
   \centering
-  \includegraphics[width=0.95\linewidth]{diagram3_tech_stack.png}
+  \includegraphics[width=0.56\linewidth]{diagram3_tech_stack.png}
   \caption{Bộ công nghệ sử dụng theo tầng trong hệ thống}
   \label{fig:tech-stack}
 \end{figure}
@@ -676,33 +676,28 @@ Hình~\ref{fig:sequence} thể hiện toàn bộ vòng đời của một yêu c
 \toprule
 \textbf{Tầng} & \textbf{Công nghệ} & \textbf{Vai trò} \\
 \midrule
-\multirow{3}{*}{Trình bày (Frontend)}
   & Flutter/Dart & Ứng dụng di động đa nền tảng \\
   & HTML/CSS/JS & Dashboard Web \\
-  & Leaflet.js / Mapbox & Bản đồ tương tác thời gian thực \\
+  \multirow{-3}{*}{Trình bày (Frontend)} & Leaflet.js / Mapbox & Bản đồ tương tác thời gian thực \\
 \midrule
-\multirow{4}{*}{Edge AI}
   & TensorFlow Lite & Runtime chạy mô hình ảnh \\
   & ONNX Runtime Mobile & Runtime chạy mô hình NLP \\
   & MobileNetV3 & Phân loại mức ngập \\
-  & DistilBERT / PhoBERT & Phân loại tin nhắn cứu hộ \\
+  \multirow{-4}{*}{Edge AI} & DistilBERT / PhoBERT & Phân loại tin nhắn cứu hộ \\
 \midrule
-\multirow{4}{*}{Backend}
   & Python 3.11 & Ngôn ngữ chính server-side \\
   & FastAPI & REST API + WebSocket \\
   & scikit-learn & DBSCAN/HDBSCAN clustering \\
-  & Uvicorn & ASGI server \\
+  \multirow{-4}{*}{Backend} & Uvicorn & ASGI server \\
 \midrule
-\multirow{4}{*}{Dữ liệu}
   & PostgreSQL & CSDL quan hệ chính \\
   & PostGIS & Truy vấn không gian địa lý \\
   & SQLite / Hive & Lưu trữ offline trên mobile \\
-  & — & — \\
+  \multirow{-4}{*}{Dữ liệu} & — & — \\
 \midrule
-\multirow{3}{*}{DevOps}
   & Git / GitHub & Quản lý mã nguồn \\
   & Docker & Container hóa dịch vụ \\
-  & Google Colab & Huấn luyện mô hình AI \\
+  \multirow{-3}{*}{DevOps} & Google Colab & Huấn luyện mô hình AI \\
 \bottomrule
 \end{tabular}
 \end{table}
@@ -767,7 +762,7 @@ Hình~\ref{fig:sequence} thể hiện toàn bộ vòng đời của một yêu c
 
 \begin{figure}[H]
 \centering
-\begin{tikzpicture}[x=1.7cm, y=0.75cm]
+\begin{tikzpicture}[x=1.55cm, y=0.75cm]
   % Grid
   \foreach \m/\label in {0/T3, 1/T4, 2/T5, 3/T6, 4/T7, 5/T8} {
     \draw[gray!30] (\m+0.5, 0) -- (\m+0.5, -10.5);
@@ -804,7 +799,7 @@ Hình~\ref{fig:sequence} thể hiện toàn bộ vòng đời của một yêu c
     -9/9. Thực nghiệm,
     -10/10. Viết báo cáo%
   } {
-    \node[font=\tiny, anchor=east, align=right, text width=3.5cm] at (-0.05, \y) {\task};
+    \node[font=\tiny, anchor=east, align=right, text width=2.9cm] at (0.25, \y) {\task};
   }
 
   % Month axis
