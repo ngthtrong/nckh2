@@ -155,79 +155,9 @@ flowchart LR
 
 
 
+![image](./puml.jpg)
 
-```puml
-@startuml
-left to right direction
-skinparam packageStyle rectangle
-skinparam usecase {
-    BackgroundColor #F3F6FB
-    BorderColor #1A237E
-    ArrowColor #7C4DFF
-}
-skinparam actor {
-    BackgroundColor #E8EAF6
-    BorderColor #1A237E
-}
 
-actor "Người bị nạn\n(Mobile App)" as Victim
-actor "Đội cứu hộ\n(Dashboard)" as Rescue
-actor "Quản trị viên\n(Dashboard)" as Admin
-
-' Admin kế thừa quyền của Đội cứu hộ
-Admin -|> Rescue 
-
-rectangle "HỆ THỐNG CỨU HỘ BÃO LŨ" {
-    
-    package "Tài khoản & Xác thực" {
-        usecase "UC01: Đăng ký / Đăng nhập" as UC01
-    }
-
-    package "Phân hệ Mobile (Người bị nạn)" {
-        usecase "UC02: Gửi báo cáo cứu hộ" as UC02
-        usecase "UC03: Chụp/Chọn ảnh ngập lụt" as UC03
-        usecase "UC04: Nhập văn bản cứu hộ" as UC04
-        usecase "UC05: Suy luận AI tại biên" as UC05
-        usecase "UC06: Tính điểm khẩn cấp" as UC06
-        usecase "UC07: Gửi dữ liệu theo chế độ mạng" as UC07
-        usecase "UC08: Đồng bộ khi có mạng" as UC08
-        usecase "UC09: Xem lịch sử báo cáo" as UC09
-    }
-
-    package "Phân hệ Dashboard (Cứu hộ & Admin)" {
-        usecase "UC10: Phân cụm sự kiện" as UC10
-        usecase "UC11: Theo dõi bản đồ Realtime" as UC11
-        usecase "UC12: Quản lý sự kiện cứu hộ" as UC12
-        usecase "UC13: Quản lý người dùng" as UC13
-        usecase "UC14: Cấu hình hệ thống" as UC14
-    }
-}
-
-' Các mối quan hệ Actor - Use Case
-Victim --> UC01
-Victim --> UC02
-Victim --> UC09
-
-Rescue --> UC01
-Rescue --> UC11
-Rescue --> UC12
-
-Admin --> UC13
-Admin --> UC14
-
-' Các mối quan hệ Include / Extend bên trong
-UC02 ..> UC03 : <<include>>
-UC02 ..> UC04 : <<include>>
-UC02 ..> UC05 : <<include>>
-UC02 ..> UC06 : <<include>>
-UC02 ..> UC07 : <<include>>
-
-UC07 <.. UC08 : <<extend>>
-
-UC11 <.. UC10 : <<extend>>
-
-@enduml
-```
 ---
 
 ## 3. Mối quan hệ giữa các Use Case
