@@ -17,7 +17,7 @@ def test_health():
 def test_dashboard_page():
     response = client.get("/")
     assert response.status_code == 200
-    assert "Dashboard phân cụm sự kiện cứu hộ" in response.text
+    assert "Dashboard Louvain" in response.text
 
 
 def test_reports_and_louvain():
