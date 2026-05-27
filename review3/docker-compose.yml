@@ -1,0 +1,22 @@
+services:
+  postgis:
+    image: postgis/postgis:16-3.4
+    container_name: review3-postgis
+    restart: unless-stopped
+    environment:
+      POSTGRES_DB: review3
+      POSTGRES_USER: review3
+      POSTGRES_PASSWORD: review3
+    ports:
+      - "5432:5432"
+    volumes:
+      - review3_pgdata:/var/lib/postgresql/data
+      - ./sql:/docker-entrypoint-initdb.d:ro
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U review3 -d review3"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+
+volumes:
+  review3_pgdata:
