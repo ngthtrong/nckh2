@@ -1,0 +1,326 @@
+% Draft LNCS-style manuscript for the flood rescue Edge AI project.
+% Compile from this directory with: pdflatex main.tex
+
+\documentclass[runningheads]{llncs}
+
+\usepackage[T1]{fontenc}
+\usepackage[utf8]{inputenc}
+\usepackage{amsmath}
+\usepackage{amssymb}
+\usepackage{array}
+\usepackage{graphicx}
+\usepackage{url}
+
+\graphicspath{{../diagrams/}}
+
+\begin{document}
+
+\title{Edge-Based Multimodal Analysis and Spatiotemporal-Semantic Community Detection for Flood Rescue Coordination}
+
+\titlerunning{Edge AI and Community Detection for Flood Rescue}
+
+\author{Le Thi Ngoc Anh \and Nguyen Nhu Quynh \and Nguyen Thanh Trong \and Ngo Hung Thinh \and Cao Tuong Hung \and Nguyen Thanh Khoa}
+
+\authorrunning{L. T. N. Anh et al.}
+
+\institute{School of Information and Communication Technology, Can Tho University, Can Tho, Vietnam\\
+\email{anhb2303861@student.ctu.edu.vn}}
+
+\maketitle
+
+\begin{abstract}
+Flood disasters frequently disrupt communication infrastructure, making centralized rescue information systems difficult to operate when large image or video payloads must be transmitted to cloud servers. This paper presents a draft design of an Edge AI-based system for multimodal flood rescue reporting and event clustering. The proposed system performs image and text inference directly on mobile devices, using lightweight visual and Vietnamese text classifiers to transform raw user reports into compact metadata. The backend then models incoming reports as a weighted spatiotemporal-semantic graph, where each node is a rescue report and each edge represents the probability that two reports belong to the same rescue event. We formulate a node urgency score from recency, local temporal density, local spatial density, flood-level labels, and rescue-intent labels. Edge weights combine geographical proximity, temporal proximity, label similarity, and node urgency. Louvain community detection is then applied to extract rescue communities and rank them for dashboard visualization. The draft evaluation protocol compares the proposed approach against GPS-only DBSCAN and spatial-only Louvain under simulated weak-network conditions. The current manuscript reports the system design, mathematical formulation, and planned experiments; final model-training and clustering results will be inserted after the experimental pipeline is executed.
+
+\keywords{Edge AI \and Flood rescue \and Multimodal analysis \and Louvain algorithm \and Community detection \and Spatiotemporal graph}
+\end{abstract}
+
+\section{Introduction}
+
+Vietnam is highly exposed to typhoons, floods, and other climate-related hazards. During severe flood events, affected citizens often send rescue requests through social networks, messaging applications, or emergency channels. These reports may include images, short Vietnamese text messages, phone numbers, locations, and repeated updates from nearby households. Although such community-generated information is valuable, it is difficult for rescue teams to process in real time because reports are noisy, duplicated, and unevenly distributed in space and time.
+
+Most existing digital rescue workflows assume that stable Internet connectivity is available. This assumption is fragile in flood scenarios: mobile networks may be overloaded, base stations may lose power, and users may only have intermittent 2G/3G connectivity. A cloud-centric system that requires full image or video upload can therefore fail at the exact moment when fast situational awareness is most important. The research problem addressed in this work is how to preserve useful rescue intelligence when bandwidth is scarce and reports arrive as fragmented multimodal signals.
+
+We propose a hybrid architecture in which mobile devices perform initial multimodal analysis at the edge and transmit only compact metadata when the network is weak. The backend receives report metadata, builds a weighted graph, and applies the Louvain community detection algorithm to group reports that likely describe the same rescue event. Instead of clustering by location alone, the proposed graph integrates space, time, image labels, text labels, report density, and urgency into a single representation.
+
+The main contributions of this draft are as follows:
+\begin{itemize}
+    \item An edge-first architecture for flood rescue reporting that reduces dependence on cloud-side raw-media processing.
+    \item A multimodal node urgency score that combines recency, temporal density, spatial density, flood-level labels, and rescue-intent labels.
+    \item A spatiotemporal-semantic weighted graph formulation designed for Louvain-based rescue event community detection.
+    \item An evaluation protocol for comparing the proposed graph method with GPS-only DBSCAN and spatial-only Louvain under weak-network simulation.
+\end{itemize}
+
+\section{Related Work}
+
+\subsection{Multimodal Disaster Analysis}
+
+Social media and crowd-sourced disaster data have been widely studied for crisis informatics. CrisisMMD provides multimodal Twitter data from natural disasters and demonstrates the value of combining images and text for disaster response tasks~\cite{alam2018crisismmd}. FloodNet provides high-resolution post-flood imagery for scene understanding and flood assessment~\cite{rahnemoonfar2021floodnet}. Ofli et al.~\cite{ofli2020multimodal} further show that multimodal deep learning can improve disaster-response analysis compared with single-modality classification.
+
+These works establish the usefulness of visual and textual signals, but they commonly focus on classification of individual posts or images. In operational rescue coordination, however, the system must also merge many individual reports into coherent events and rank areas for response.
+
+\subsection{Edge AI for Emergency Monitoring}
+
+Edge computing is attractive for disaster response because it reduces latency and network load. Lightweight convolutional models such as EmergencyNet have been studied for drone-based emergency monitoring~\cite{kyrkou2020emergencynet}. Mobile-friendly architectures such as MobileNetV3 are suitable for on-device image inference~\cite{howard2019mobilenetv3}. For text, compressed transformer models such as DistilBERT~\cite{sanh2019distilbert} and Vietnamese pretrained models such as PhoBERT~\cite{nguyen2020phobert} provide practical baselines for mobile or server-side natural language processing.
+
+The proposed project follows this direction by using MobileNetV3-style image inference and distilled BERT/PhoBERT-style text inference on mobile devices. The system differs from pure classification pipelines by transmitting inference results as compact metadata and using them for downstream graph construction.
+
+\subsection{Spatial Clustering and Community Detection}
+
+DBSCAN clusters points according to density and is a common baseline for spatial event grouping~\cite{ester1996dbscan}. ST-DBSCAN extends this idea to spatial-temporal data~\cite{birant2007stdbscan}. These methods are useful when event similarity is determined primarily by distance and time. Flood rescue reports, however, also contain semantic urgency: two nearby reports may differ sharply if one is an urgent rescue request and another is only a safe-status update.
+
+Louvain community detection optimizes modularity on weighted graphs and scales well to large networks~\cite{blondel2008louvain}. By designing edge weights to encode rescue semantics, Louvain can be used not only to detect dense spatial neighborhoods but also to group reports that share urgent multimodal context. Leiden improves some stability limitations of Louvain~\cite{traag2019leiden}, and is considered a future alternative in this project.
+
+\subsection{Research Gap}
+
+Prior work provides strong foundations for disaster classification, edge inference, and spatial clustering, but an integrated pipeline from edge-side multimodal tagging to graph-based rescue community detection is still underexplored. The key gap addressed here is a practical formulation that converts lightweight edge metadata into a graph suitable for rescue event grouping and priority ranking.
+
+\section{System Overview}
+
+Figure~\ref{fig:architecture} summarizes the proposed architecture. A mobile user submits an image, a Vietnamese text message, and GPS coordinates. Image and text classifiers run on the device to infer a flood-level label and a rescue-intent label. The mobile application stores a local copy of the report and checks network quality. When the connection is good, the application can send full payloads including media. When the connection is weak, it sends compact metadata including GPS, timestamps, model labels, confidence scores, and a pending-media flag.
+
+\begin{figure}
+\centering
+\includegraphics[width=\textwidth]{diagram1_system_architecture.png}
+\caption{Proposed hybrid architecture with mobile Edge AI, backend graph clustering, and realtime dashboard visualization.}
+\label{fig:architecture}
+\end{figure}
+
+The backend exposes REST APIs for report ingestion and WebSocket channels for realtime dashboard updates. Reports are stored in a spatial database layer, planned as PostgreSQL/PostGIS for deployment and SQLite for local prototyping. A clustering engine builds the rescue graph, applies Louvain community detection, writes community assignments, and updates cluster-level priority scores. The dashboard displays clustered rescue hotspots on a map and lets rescue teams filter by priority level, time window, and report type.
+
+\section{Proposed Methodology}
+
+\subsection{Event Representation}
+
+Each incoming rescue report is represented as a node $i$ with:
+\[
+x_i = (t_i, lat_i, lng_i, I_i, T_i, p_i),
+\]
+where $t_i$ is the creation time, $(lat_i,lng_i)$ is the GPS coordinate, $I_i$ is the image-derived flood label, $T_i$ is the text-derived rescue-intent label, and $p_i$ is optional sender metadata such as name or phone number. Sender metadata is useful for verification but is not directly used in the clustering formula to reduce privacy exposure.
+
+The planned image labels are:
+\[
+I_i \in \{\texttt{none}, \texttt{low}, \texttt{medium}, \texttt{high}\},
+\]
+and the planned text labels are:
+\[
+T_i \in \{\texttt{irrelevant}, \texttt{safe\_update}, \texttt{need\_supplies}, \texttt{urgent\_rescue}\}.
+\]
+
+\subsection{Multimodal Tag Quantification}
+
+Labels are mapped to normalized values in $[0,1]$ before graph construction. Table~\ref{tab:label_mapping} shows the initial mapping used in the prototype.
+
+\begin{table}
+\caption{Initial label-to-score mappings for edge metadata.}
+\label{tab:label_mapping}
+\centering
+\begin{tabular}{|l|c|l|c|}
+\hline
+Image label & $v_i^I$ & Text label & $v_i^T$\\
+\hline
+\texttt{none} & 0.00 & \texttt{irrelevant} & 0.00\\
+\texttt{low} & 0.33 & \texttt{safe\_update} & 0.25\\
+\texttt{medium} & 0.67 & \texttt{need\_supplies} & 0.65\\
+\texttt{high} & 1.00 & \texttt{urgent\_rescue} & 1.00\\
+\hline
+\end{tabular}
+\end{table}
+
+For a lightweight multimodal severity estimate, the visual and textual labels may be combined as:
+\begin{equation}
+C_i = \eta_I v_i^I + \eta_T v_i^T,
+\label{eq:severity}
+\end{equation}
+where $\eta_I + \eta_T = 1$. In the early design, $\eta_I=0.4$ and $\eta_T=0.6$ emphasize that text often expresses rescue intent more directly than images.
+
+For graph construction and cluster ranking, this paper uses a richer node urgency score:
+\begin{equation}
+u_i = \alpha r_i + \beta d_i^t + \gamma d_i^s + \delta v_i^I + \varepsilon v_i^T,
+\label{eq:node_score}
+\end{equation}
+where $\alpha+\beta+\gamma+\delta+\varepsilon=1$. The initial values are $\alpha=0.25$, $\beta=0.20$, $\gamma=0.20$, $\delta=0.20$, and $\varepsilon=0.15$.
+
+The recency component is defined by exponential decay:
+\begin{equation}
+r_i = e^{-\Delta t_i / \tau},
+\label{eq:recency}
+\end{equation}
+where $\Delta t_i$ is the report age in hours relative to the current processing time and $\tau$ controls how quickly old reports lose priority.
+
+Temporal and spatial density are normalized logarithmically:
+\begin{equation}
+d_i^t = \frac{\log(1+n_i^t)}{\log(1+n_{\max}^t)},
+\qquad
+d_i^s = \frac{\log(1+n_i^s)}{\log(1+n_{\max}^s)}.
+\label{eq:density}
+\end{equation}
+Here $n_i^t$ is the number of reports within a time window around $t_i$, and $n_i^s$ is the number of reports within a spatial radius around $(lat_i,lng_i)$. The logarithmic form prevents very dense areas from dominating all other signals.
+
+\subsection{Spatiotemporal-Semantic Graph Construction}
+
+Let $G=(V,E)$ be an undirected weighted graph, where each node in $V$ is a rescue report. An edge $(i,j)$ is created only if two prefiltering conditions are satisfied:
+\begin{equation}
+d_{ij} \leq D_{\max}, \qquad \Delta t_{ij} \leq T_{\max}.
+\label{eq:edge_filter}
+\end{equation}
+The prototype uses $D_{\max}=1$ km and $T_{\max}=2$ hours. The geographical distance $d_{ij}$ is computed with the Haversine formula, and $\Delta t_{ij}$ is the absolute time difference in hours. In a production database, these candidate edges can be generated efficiently by spatial indexes and PostGIS radius queries.
+
+The proposed edge weight is:
+\begin{equation}
+w_{ij} =
+\lambda_1 e^{-d_{ij}/\sigma_d}
++ \lambda_2 e^{-\Delta t_{ij}/\sigma_t}
++ \lambda_3 s_{ij}^{label}
++ \lambda_4 \min(u_i,u_j),
+\label{eq:edge_weight}
+\end{equation}
+where $\lambda_1+\lambda_2+\lambda_3+\lambda_4=1$. The initial configuration is $\lambda_1=0.35$, $\lambda_2=0.25$, $\lambda_3=0.20$, $\lambda_4=0.20$, $\sigma_d=1$ km, and $\sigma_t=2$ hours.
+
+The label similarity $s_{ij}^{label}$ is a rule-based approximation in the current draft:
+\begin{equation}
+s_{ij}^{label} =
+\begin{cases}
+0, & \text{if either report is \texttt{irrelevant}},\\
+1, & \text{if both image and text labels match},\\
+0.75, & \text{if both text labels are urgent/support requests},\\
+0.40, & \text{if reports mix support need and safe update},\\
+0.80, & \text{if at least one image label is \texttt{high}},\\
+0.25, & \text{otherwise}.
+\end{cases}
+\label{eq:label_similarity}
+\end{equation}
+
+The intuition is that two reports should be strongly connected if they are near in space, close in time, semantically compatible, and both urgent. Reports that are near but semantically weak, such as safe updates or irrelevant messages, receive lower weights and are less likely to dominate urgent communities.
+
+\subsection{Louvain-Based Rescue Community Detection}
+
+After constructing $G$, the backend applies Louvain community detection. For a weighted graph, modularity is:
+\begin{equation}
+Q = \frac{1}{2m}\sum_{i,j}
+\left[
+w_{ij} - \frac{k_i k_j}{2m}
+\right]
+\delta(c_i,c_j),
+\label{eq:modularity}
+\end{equation}
+where $k_i=\sum_j w_{ij}$ is the weighted degree of node $i$, $2m=\sum_i k_i$, $c_i$ is the community assignment of node $i$, and $\delta(c_i,c_j)$ equals 1 when two nodes are in the same community and 0 otherwise.
+
+In social networks, Louvain usually groups nodes with dense topological connectivity. In the proposed rescue graph, dense connectivity is induced by space, time, and semantic urgency. Therefore, maximizing modularity favors communities that correspond to geographically concentrated and semantically coherent rescue hotspots.
+
+\subsection{Cluster Priority Score}
+
+For each community $C_k$, the backend computes a cluster priority score:
+\begin{equation}
+P(C_k) = \rho \max_{i \in C_k} u_i + (1-\rho)\frac{1}{|C_k|}\sum_{i \in C_k}u_i,
+\label{eq:cluster_priority}
+\end{equation}
+where $\rho$ controls the importance of the most urgent report in the community. The dashboard can map $P(C_k)>0.7$ to red, $0.4 \leq P(C_k)\leq 0.7$ to yellow, and $P(C_k)<0.4$ to green. These thresholds follow the current system specification and will be calibrated after experiments with real and simulated data.
+
+\section{Experimental Design and Evaluation}
+
+\subsection{Datasets}
+
+The planned image dataset combines FloodNet, CrisisMMD, and Vietnamese flood images collected from local online sources. The current target is approximately 23,000 images mapped to flood-level labels. The planned text dataset combines UIT-VSMEC-style Vietnamese social text and crawled disaster messages, targeting approximately 17,000 sentences mapped to four rescue-intent labels.
+
+For graph and clustering experiments, the prototype contains a simulated metadata dataset of 240 reports over nine flood-prone central Vietnamese provinces. Each simulated report contains time, GPS coordinates, sender information, text content, image label, text label, urgency score, network mode, and synchronization status. This synthetic dataset is intended for early validation of the graph formula before real deployment data is available.
+
+\subsection{Edge AI Evaluation}
+
+The image classifier will be evaluated using accuracy, macro-F1, model size, and inference latency on a mid-range Android device. The text classifier will be evaluated using macro-F1, model size, and inference latency. Table~\ref{tab:model_targets} records the current target metrics.
+
+\begin{table}
+\caption{Target metrics for edge inference. Final measured values are to be inserted after training and device tests.}
+\label{tab:model_targets}
+\centering
+\begin{tabular}{|l|l|l|l|}
+\hline
+Modality & Candidate model & Target size & Target latency\\
+\hline
+Image & MobileNetV3-Large, TFLite INT8 & $\leq$ 5 MB & $<$ 100 ms\\
+Text & DistilBERT/PhoBERT distilled, ONNX & $\leq$ 65 MB & $<$ 200 ms\\
+\hline
+\end{tabular}
+\end{table}
+
+\subsection{Clustering Evaluation}
+
+The proposed clustering method will be compared with three baselines:
+\begin{itemize}
+    \item GPS-only DBSCAN using spatial distance and a fixed time window.
+    \item ST-DBSCAN using both spatial and temporal thresholds.
+    \item Spatial-only Louvain, where edge weights use distance and time but exclude labels and urgency.
+\end{itemize}
+
+The main evaluation metrics are weighted modularity, silhouette score on geographical coordinates, cluster purity with respect to simulated ground-truth event centers, number of singleton/noise reports, and ranking quality for urgent rescue communities. The expected qualitative behavior is that the proposed method should avoid letting safe updates dilute high-urgency rescue clusters, while still merging duplicated urgent reports from the same area.
+
+\subsection{Network Simulation}
+
+The system will be evaluated under three network modes: good connectivity, degraded 3G/2G, and offline-then-sync. Full payload transmission is expected to require approximately 2--5 MB per report when images are included. Compact metadata transmission is expected to remain below 5 KB per report. The main metrics are upload latency, synchronization success rate, backend processing latency, and time-to-dashboard update.
+
+\subsection{Prototype Status}
+
+At the current draft stage, the repository includes scripts for sample GPS generation, CSV import, weighted graph construction, and Louvain execution. The prototype uses SQLite for a quick local run and can be adapted to PostgreSQL/PostGIS for spatial querying. A preliminary run on the simulated dataset produced 240 nodes, 1425 weighted edges, 16 communities, and a weighted modularity score of 0.9205. These values are useful as an initial sanity check only; final claims will require repeated experiments, ablation studies, and comparison with DBSCAN/ST-DBSCAN baselines.
+
+\section{Discussion}
+
+The proposed formulation intentionally separates edge inference from backend community detection. This separation has three advantages. First, the mobile device can still produce useful rescue metadata even when the raw image cannot be uploaded. Second, the backend clustering layer can be improved independently as more data becomes available. Third, the graph representation allows interpretable ablation: distance, time, labels, and urgency can each be removed or reweighted to test their contributions.
+
+There are also limitations. The current label similarity function is rule-based and may need to be replaced by learned semantic similarity once enough labeled Vietnamese rescue messages are available. Synthetic GPS reports are useful for early testing but cannot fully represent the noise, misinformation, and behavioral patterns of real disaster communication. The proposed thresholds for distance, time, and priority are initial values and should be calibrated with domain experts and historical flood events.
+
+\section{Conclusion and Future Work}
+
+This paper presents a draft LNCS-style formulation for an Edge AI-based flood rescue coordination system. The central idea is to convert raw multimodal user reports into compact edge metadata, construct a spatiotemporal-semantic weighted graph, and apply Louvain community detection to identify rescue hotspots. The proposed node and edge formulas combine recency, density, flood level, rescue intent, spatial proximity, temporal proximity, and urgency.
+
+Future work will complete model training, run on-device latency tests, execute the Louvain prototype on simulated and real datasets, and compare the proposed method with DBSCAN, ST-DBSCAN, and spatial-only Louvain. The system will also be extended with PostGIS indexing, dashboard visualization, and a privacy-aware synchronization workflow for media uploaded after connectivity is restored.
+
+\begin{credits}
+\subsubsection{\ackname} This work is developed as part of a student scientific research project at Can Tho University under the supervision of Nguyen Thanh Khoa.
+
+\subsubsection{\discintname}
+The authors have no competing interests to declare that are relevant to the content of this article.
+\end{credits}
+
+\begin{thebibliography}{13}
+
+\bibitem{blondel2008louvain}
+Blondel, V.D., Guillaume, J.L., Lambiotte, R., Lefebvre, E.: Fast unfolding of communities in large networks. Journal of Statistical Mechanics: Theory and Experiment \textbf{2008}(10), P10008 (2008)
+
+\bibitem{birant2007stdbscan}
+Birant, D., Kut, A.: ST-DBSCAN: An algorithm for clustering spatial-temporal data. Data \& Knowledge Engineering \textbf{60}(1), 208--221 (2007)
+
+\bibitem{ester1996dbscan}
+Ester, M., Kriegel, H.P., Sander, J., Xu, X.: A density-based algorithm for discovering clusters in large spatial databases with noise. In: Proceedings of the Second International Conference on Knowledge Discovery and Data Mining, pp. 226--231. AAAI Press (1996)
+
+\bibitem{alam2018crisismmd}
+Alam, F., Ofli, F., Imran, M.: CrisisMMD: Multimodal Twitter datasets from natural disasters. In: Proceedings of the International AAAI Conference on Web and Social Media (ICWSM) (2018)
+
+\bibitem{rahnemoonfar2021floodnet}
+Rahnemoonfar, M., et al.: FloodNet: A high resolution aerial imagery dataset for post flood scene understanding. IEEE Access \textbf{9}, 89644--89654 (2021)
+
+\bibitem{ofli2020multimodal}
+Ofli, F., Alam, F., Imran, M.: Analysis of social media data using multimodal deep learning for disaster response. In: Proceedings of ISCRAM (2020)
+
+\bibitem{kyrkou2020emergencynet}
+Kyrkou, C., Theocharides, T.: EmergencyNet: Efficient aerial image classification for drone-based emergency monitoring using atrous convolutional feature fusion. IEEE Journal of Selected Topics in Applied Earth Observations and Remote Sensing \textbf{13}, 1687--1699 (2020)
+
+\bibitem{howard2019mobilenetv3}
+Howard, A., Sandler, M., Chu, G., Chen, L.C., Chen, B., Tan, M., Wang, W., Zhu, Y., Pang, R., Vasudevan, V., Le, Q.V., Adam, H.: Searching for MobileNetV3. In: Proceedings of the IEEE/CVF International Conference on Computer Vision, pp. 1314--1324 (2019)
+
+\bibitem{sanh2019distilbert}
+Sanh, V., Debut, L., Chaumond, J., Wolf, T.: DistilBERT, a distilled version of BERT: smaller, faster, cheaper and lighter. arXiv preprint arXiv:1910.01108 (2019)
+
+\bibitem{nguyen2020phobert}
+Nguyen, D.Q., Nguyen, A.T.: PhoBERT: Pre-trained language models for Vietnamese. In: Findings of the Association for Computational Linguistics: EMNLP 2020, pp. 1037--1042 (2020)
+
+\bibitem{traag2019leiden}
+Traag, V.A., Waltman, L., van Eck, N.J.: From Louvain to Leiden: guaranteeing well-connected communities. Scientific Reports \textbf{9}, 5233 (2019)
+
+\bibitem{quan2020floodlevel}
+Quan, K.A.C., Nguyen, V.T., Nguyen, T.C., Nguyen, T.V., Tran, M.T.: Flood level prediction via human pose estimation from social media images. In: Proceedings of the International Conference on Multimedia Retrieval, pp. 296--300 (2020)
+
+\bibitem{nguyen2022floodsusceptibility}
+Nguyen, H.D., Nguyen, Q.H., Du, Q.V.V., Nguyen, T.H.T., Nguyen, T.G., Bui, Q.T.: A novel combination of deep neural network and Manta ray foraging optimization for flood susceptibility mapping in Quang Ngai province, Vietnam. Geocarto International \textbf{37}(25), 7531--7555 (2022)
+
+\end{thebibliography}
+
+\end{document}
