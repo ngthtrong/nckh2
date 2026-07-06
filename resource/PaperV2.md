@@ -131,6 +131,7 @@ $$
 $$
 
   Nếu hai báo cáo cùng mô tả "nước ngập lút mái nhà" ($F \approx 1.0$) thì $\Delta F \approx 0$ và $\mathcal{S}_{context} \to 1$, khuếch đại liên kết để tạo thành một quần thể khẩn cấp đồng nhất. Trái lại, một người báo ngập nhẹ (an toàn ở tầng 3) và một người báo ngập nặng (đang bám trên mái nhà) sẽ có $\Delta F$ lớn, làm $\mathcal{S}_{context}$ co lại — phản ánh đúng rằng nhu cầu cứu hộ của hai đối tượng là khác biệt. Hai hằng số $\tau_F, \tau_E$ kiểm soát độ nhạy của hàm.
+
 * $\beta, \gamma$ là các tham số cân bằng giữa yếu tố thời gian và ngữ cảnh, có thể do chuyên gia thiết lập hoặc học tự động thông qua tối ưu hóa (Graph Neural Networks).[^9] Lưu ý rằng $\alpha$ trong dạng cộng cũ không còn cần thiết vì $\mathcal{S}_{geo}$ đã trở thành thừa số điều biến toàn cục.
 
 **Làm thưa đồ thị (Graph Sparsification).** Nếu xây dựng đồ thị đầy đủ (nối mọi cặp đỉnh), ma trận kề sẽ dày đặc và gần-hoàn-chỉnh, làm thuật toán tối ưu Modularity hoạt động kém và tốn kém. Vì $\mathcal{S}_{geo}$ suy giảm rất nhanh theo khoảng cách, phần lớn các cạnh xa mang trọng số không đáng kể. Do đó, báo cáo áp dụng một trong hai cơ chế làm thưa: (i) **ngưỡng $\epsilon$** — chỉ giữ cạnh khi $w_{ij} > \theta$; hoặc (ii) **đồ thị k lân cận gần nhất (k-NN graph)** — mỗi đỉnh chỉ nối với $k$ đỉnh có trọng số cao nhất. Cơ chế này vừa giảm độ phức tạp tính toán, vừa loại bỏ các liên kết giả tạo giữa các vùng địa lý cách biệt, tạo ra một đồ thị thưa và có cấu trúc rõ ràng cho bước phân rã cộng đồng.
