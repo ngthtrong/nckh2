@@ -31,7 +31,7 @@ Khi đó khoảng cách lớn ⇒ $S_{geo}\to 0$ ⇒ $w_{ij}\to 0$ bất kể ng
 
 Ngoài ra $S_{context}$ **chưa có công thức tường minh** (chỉ mô tả bằng lời là đo $\Delta F = |F_i - F_j|$ và tương đồng $E$). Cần định nghĩa rõ, ví dụ $S_{context} = \exp(-|F_i-F_j|/\tau)$ hoặc tương tự.
 
-Một điểm thực tiễn bị bỏ sót:  **làm thưa đồ thị (sparsification)** . Nếu xây đồ thị đầy đủ (mọi cặp), Louvain hoạt động kém trên đồ thị dày đặc gần-hoàn-chỉnh. Cần k-NN graph hoặc ngưỡng $\epsilon$ (chỉ nối khi $w_{ij} > \theta$) — báo cáo không đề cập.
+Một điểm thực tiễn bị bỏ s3ót:  **làm thưa đồ thị (sparsification)** . Nếu xây đồ thị đầy đủ (mọi cặp), Louvain hoạt động kém trên đồ thị dày đặc gần-hoàn-chỉnh. Cần k-NN graph hoặc ngưỡng $\epsilon$ (chỉ nối khi $w_{ij} > \theta$) — báo cáo không đề cập.
 
 ### 4.3 — Louvain + Modularity
 
@@ -67,9 +67,5 @@ $$
 Mục 4 mạch lạc, bám sát 3 khe hở đã nêu, và phần Louvain/modularity là nền tảng vững, khả thi. Nhưng có  **hai lỗi cần sửa trước khi đưa vào bài báo** : (1) hàm trọng số $w_{ij}$ nên chuyển sang dạng nhân/gating để địa lý thực sự chi phối cụm; (2) hàm $\mathcal{P}(C_k)$ cần chuẩn hóa thang đo các hạng tử và tách $\mathcal{V}_{agg}$ ra làm thừa số nhân đúng với ý "khuếch đại". Về scope, $C_i$ và một phần $V_i$ vượt quá hạ tầng thực tế của đề tài 6 tháng — nên hoặc đơn giản hóa, hoặc ghi rõ là hướng mở rộng tương lai.
 
 Bạn muốn tôi đề xuất công thức viết lại chi tiết (kèm chuẩn hóa cụ thể) cho 4.2 và 4.4, hay chỉnh trực tiếp vào file báo cáo?
-
-
-
-
 
 sk-13272b9f0f4b0e0d-w65adk-5b272c57
