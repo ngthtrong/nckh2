@@ -67,5 +67,3 @@ $$
 Mục 4 mạch lạc, bám sát 3 khe hở đã nêu, và phần Louvain/modularity là nền tảng vững, khả thi. Nhưng có  **hai lỗi cần sửa trước khi đưa vào bài báo** : (1) hàm trọng số $w_{ij}$ nên chuyển sang dạng nhân/gating để địa lý thực sự chi phối cụm; (2) hàm $\mathcal{P}(C_k)$ cần chuẩn hóa thang đo các hạng tử và tách $\mathcal{V}_{agg}$ ra làm thừa số nhân đúng với ý "khuếch đại". Về scope, $C_i$ và một phần $V_i$ vượt quá hạ tầng thực tế của đề tài 6 tháng — nên hoặc đơn giản hóa, hoặc ghi rõ là hướng mở rộng tương lai.
 
 Bạn muốn tôi đề xuất công thức viết lại chi tiết (kèm chuẩn hóa cụ thể) cho 4.2 và 4.4, hay chỉnh trực tiếp vào file báo cáo?
-
-sk-13272b9f0f4b0e0d-w65adk-5b272c57
