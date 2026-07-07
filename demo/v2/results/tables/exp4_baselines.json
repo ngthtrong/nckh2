@@ -6,7 +6,8 @@
     "nmi": 0.927,
     "mean_diam_km": 0.2967,
     "max_diam_km": 1.4237,
-    "needs_preset_k": false
+    "needs_preset_k": false,
+    "same_graph_as_ours": true
   },
   {
     "method": "Leiden (gating graph)",
@@ -15,42 +16,77 @@
     "nmi": 0.927,
     "mean_diam_km": 0.2967,
     "max_diam_km": 1.4237,
-    "needs_preset_k": false
+    "needs_preset_k": false,
+    "same_graph_as_ours": true
   },
   {
-    "method": "K-Means (K=12, đúng K)",
+    "method": "Spectral (affinity gating, K=27)",
+    "n_clusters": 27,
+    "ari": 0.3392,
+    "nmi": 0.7274,
+    "mean_diam_km": 14.1121,
+    "max_diam_km": 186.1363,
+    "needs_preset_k": true,
+    "same_graph_as_ours": true
+  },
+  {
+    "method": "HDBSCAN (dist=1-w gating)",
+    "n_clusters": 11,
+    "ari": 0.8903,
+    "nmi": 0.9219,
+    "mean_diam_km": 25.0846,
+    "max_diam_km": 196.1757,
+    "needs_preset_k": false,
+    "same_graph_as_ours": true
+  },
+  {
+    "method": "Agglomerative (dist=1-w, K=27)",
+    "n_clusters": 27,
+    "ari": 0.892,
+    "nmi": 0.927,
+    "mean_diam_km": 0.2967,
+    "max_diam_km": 1.4237,
+    "needs_preset_k": true,
+    "same_graph_as_ours": true
+  },
+  {
+    "method": "K-Means (K=12, đúng K, tọa độ)",
     "n_clusters": 12,
     "ari": 0.6875,
     "nmi": 0.8336,
     "mean_diam_km": 49.2053,
     "max_diam_km": 114.7597,
-    "needs_preset_k": true
+    "needs_preset_k": true,
+    "same_graph_as_ours": false
   },
   {
-    "method": "K-Means (K=3, sai K)",
+    "method": "K-Means (K=3, sai K, tọa độ)",
     "n_clusters": 3,
     "ari": 0.4329,
     "nmi": 0.6296,
     "mean_diam_km": 102.035,
     "max_diam_km": 132.5658,
-    "needs_preset_k": true
+    "needs_preset_k": true,
+    "same_graph_as_ours": false
   },
   {
-    "method": "DBSCAN (eps=0.3)",
+    "method": "DBSCAN (eps=0.3, tọa độ)",
     "n_clusters": 15,
     "ari": 0.6439,
     "nmi": 0.7826,
     "mean_diam_km": 15.1243,
     "max_diam_km": 213.5256,
-    "needs_preset_k": false
+    "needs_preset_k": false,
+    "same_graph_as_ours": false
   },
   {
-    "method": "DBSCAN (eps=0.6)",
+    "method": "DBSCAN (eps=0.6, tọa độ)",
     "n_clusters": 7,
     "ari": 0.73,
     "nmi": 0.8732,
     "mean_diam_km": 32.2683,
     "max_diam_km": 196.1757,
-    "needs_preset_k": false
+    "needs_preset_k": false,
+    "same_graph_as_ours": false
   }
 ]
