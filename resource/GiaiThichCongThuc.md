@@ -135,7 +135,7 @@ $$
 
 ## 4. Hàm ưu tiên cấp cụm $\mathcal{P}(C_k)$ (Mục 4.4)
 
-Đây là công thức thứ hai được **sửa lỗi toán học nghiêm trọng**. Ba lỗi của bản gốc: (a) sai lệch thang đo, (b) $\mathcal{V}$ cộng thay vì nhân, (c) $\tanh$ bão hòa quá nhanh.
+Đây là công thức thứ hai được **sửa lỗi toán học nghiêm trọng**. Bốn điểm sửa của bản gốc: (a) sai lệch thang đo, (b) $\mathcal{V}$ cộng thay vì nhân, (c) $\tanh$ bão hòa quá nhanh, và (d) $\mathcal{F}_{max}$ chưa gate $C_i$ (thiếu nhất quán chống tin giả — xem Mục 4.3).
 
 $$
 \mathcal{P}(C_k) = \mathcal{V}_{agg}(C_k) \cdot \Big( \omega_1 \widetilde{\mathcal{E}}_{agg}(C_k) + \omega_2 \widetilde{\mathcal{F}}_{max}(C_k) + \omega_3 \widetilde{\mathcal{N}}(C_k) \Big)
@@ -167,10 +167,11 @@ $$
 ### 4.3. Thành phần Ngập tối đa $\mathcal{F}_{max}$
 
 $$
-\mathcal{F}_{max}(C_k) = \max_{v_i \in C_k}(F_i)
+\mathcal{F}_{max}(C_k) = \max_{v_i \in C_k}\big(F_i \cdot C_i\big)
 $$
 
 - Dùng $\max$ **không phải** trung bình — quyết định chuyên môn theo **nguyên lý bình thông nhau**: trong một cụm địa lý gắn kết, điểm ngập sâu nhất quyết định rủi ro sinh tồn cao nhất của cả quần thể. Lấy trung bình sẽ làm loãng cảnh báo khi chỉ vài điểm ngập nặng.
+- **Gate $C_i$ bên trong $\max$** (bổ sung so với bản gốc): nhân $C_i$ *bên trong* hàm $\max$ để một báo cáo giả khai $F=1{,}0$ với $C_i$ thấp không tự chiếm trọn $\mathcal{F}_{max}$ của cả cụm. Nếu chỉ dùng $\max F_i$ thuần thì $\mathcal{E}_{agg}$ và $\mathcal{N}_{total}$ đã gate $C_i$ nhưng $\mathcal{F}_{max}$ thì không — thiếu nhất quán, tạo lỗ hổng để một báo cáo đơn lẻ không đáng tin thao túng thứ hạng. Với $\max(F_i \cdot C_i)$, cả ba thành phần lõi rủi ro ($\mathcal{E}, \mathcal{F}, \mathcal{N}$) đều nhất quán chống tin giả.
 
 ### 4.4. Thành phần Quy mô sinh mạng $\mathcal{N}_{total}$
 
@@ -216,4 +217,5 @@ $$
 | 4.3 | Nhắc Leiden thoáng qua | Nhấn mạnh Leiden chống đứt gãy cụm | Trọng tâm cụm sai làm điều ca nô sai |
 | 4.4 | Cộng 4 hạng tử chưa chuẩn hóa | Chuẩn hóa $[0,1]$ + tách $\mathcal{V}_{agg}$ làm thừa số | Sửa sai lệch thang đo và ý nghĩa "khuếch đại" |
 | 4.4 $\mathcal{N}$ | $\sum N_i$ | $\sum N_i \cdot C_i$ rồi nén log | Chống báo giả thổi phồng số người |
+| 4.4 $\mathcal{F}_{max}$ | $\max F_i$ | $\max(F_i \cdot C_i)$ | Gate $C_i$ cho nhất quán chống tin giả với $\mathcal{E}, \mathcal{N}$ |
 | 4.4 $\mathcal{V}_{agg}$ | $\tanh(\sum V_i)$ | $\tanh(\frac{1}{s}\sum V_i)$ | Chống bão hòa sớm, giữ khả năng phân biệt |
