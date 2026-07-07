@@ -145,6 +145,35 @@ def fig_baselines():
     plt.close(fig)
 
 
+def fig_ranking_stability():
+    rows = load("exp5_ranking_stability.json")
+    levels = [r["omega_perturbation"] for r in rows]
+    tau_mean = [r["mean_kendall_tau"] for r in rows]
+    tau_min = [r["min_kendall_tau"] for r in rows]
+    top3 = [r["top3_set_preserved_pct"] for r in rows]
+    fig, ax1 = plt.subplots(figsize=(7, 4.5))
+    x = range(len(levels))
+    ax1.bar([i - 0.15 for i in x], tau_mean, 0.3, color="#27ae60", alpha=0.85, label="τ trung bình")
+    ax1.bar([i + 0.15 for i in x], tau_min, 0.3, color="#e67e22", alpha=0.85, label="τ tối thiểu")
+    ax1.set_ylabel("Kendall's τ")
+    ax1.set_xticks(list(x))
+    ax1.set_xticklabels(levels)
+    ax1.set_xlabel("Mức dao động ω")
+    ax1.set_ylim(0.75, 1.02)
+    ax1.axhline(y=0.9, color="#c0392b", linestyle="--", alpha=0.5, label="ngưỡng τ = 0.9")
+    ax1.legend(loc="lower left", fontsize=8)
+    ax2 = ax1.twinx()
+    ax2.plot(list(x), top3, "s-", color="#8e44ad", label="Top-3 giữ nguyên (%)")
+    ax2.set_ylabel("Top-3 giữ nguyên (%)", color="#8e44ad")
+    ax2.tick_params(axis="y", labelcolor="#8e44ad")
+    ax2.set_ylim(60, 105)
+    ax2.grid(False)
+    ax2.legend(loc="lower right", fontsize=8)
+    ax1.set_title("Độ ổn định xếp hạng P(C_k) khi trọng số ω dao động\n(200 thử nghiệm Monte-Carlo mỗi mức)")
+    fig.savefig(FIGURES / "fig7_ranking_stability.png")
+    plt.close(fig)
+
+
 def main():
     fig_gating_vs_additive()
     fig_tanh_saturation()
@@ -152,6 +181,7 @@ def main():
     fig_sigma_sweep()
     fig_resolution_sweep()
     fig_baselines()
+    fig_ranking_stability()
     figs = sorted(p.name for p in FIGURES.glob("*.png"))
     print("Đã sinh", len(figs), "hình -> results/figures/")
     for f in figs:

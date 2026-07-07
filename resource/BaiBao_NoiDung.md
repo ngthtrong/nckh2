@@ -6,7 +6,7 @@
 
 ## Tóm tắt (Abstract)
 
-Trong các thảm họa bão lũ, hạ tầng viễn thông thường bị gián đoạn khiến mô hình xử lý tập trung trên đám mây bị vô hiệu hóa đúng vào "giờ vàng" cứu hộ. Bài báo đề xuất một khung giải pháp kết hợp Điện toán Biên (Edge AI) và Lý thuyết Đồ thị Trọng số để thu thập, phân cụm và tự động xếp hạng ưu tiên các sự kiện cứu hộ. Thiết bị biên trích xuất một vector thuộc tính đa chiều $(L, T, F, E, N, V, C)$ từ ảnh và văn bản rồi chỉ truyền đi một gói siêu dữ liệu (metadata) vài Kilobyte thay vì ảnh/video thô. Ở phía máy chủ, các sự kiện được biểu diễn thành đồ thị trọng số trong đó khoảng cách địa lý đóng vai trò **cổng chặn nhân tính (multiplicative gate)** thay vì một số hạng cộng, bảo đảm mọi cụm đều gắn kết về mặt không gian. Thuật toán Louvain (khuyến nghị Leiden) phân rã đồ thị thành các "khu vực tác chiến", và một hàm ưu tiên cấp cụm $\mathcal{P}(C_k)$ — với lõi rủi ro đã chuẩn hóa và hệ số tổn thương nhân khẩu học đóng vai trò **thừa số khuếch đại** — xếp hạng các cụm để hỗ trợ điều phối. Thực nghiệm trên bộ dữ liệu mô phỏng 285 sự kiện tại Miền Trung Việt Nam cho thấy: dạng nhân/gating giảm đường kính cụm trung bình từ **100 km xuống 0,30 km** trong khi vẫn giữ nguyên độ chính xác phân cụm (ARI = 0,89); cổng tin cậy $C_i$ chặn được báo cáo giả thổi phồng số nạn nhân (giảm **55%** quy mô dân số ảo); và khung đề xuất đạt **ARI 0,89** so với K-Means (0,69) và DBSCAN (0,73).
+Trong các thảm họa bão lũ, hạ tầng viễn thông thường bị gián đoạn khiến mô hình xử lý tập trung trên đám mây bị vô hiệu hóa đúng vào "giờ vàng" cứu hộ. Bài báo đề xuất một khung giải pháp kết hợp Điện toán Biên (Edge AI) và Lý thuyết Đồ thị Trọng số để thu thập, phân cụm và tự động xếp hạng ưu tiên các sự kiện cứu hộ. Thiết bị biên trích xuất một vector thuộc tính đa chiều $(L, T, F, E, N, V, C)$ từ ảnh và văn bản rồi chỉ truyền đi một gói siêu dữ liệu (metadata) vài Kilobyte thay vì ảnh/video thô. Ở phía máy chủ, các sự kiện được biểu diễn thành đồ thị trọng số trong đó khoảng cách địa lý đóng vai trò **cổng chặn nhân tính (multiplicative gate)** thay vì một số hạng cộng, bảo đảm mọi cụm đều gắn kết về mặt không gian. Thuật toán Louvain (khuyến nghị Leiden) phân rã đồ thị thành các "khu vực tác chiến", và một hàm ưu tiên cấp cụm $\mathcal{P}(C_k)$ — với lõi rủi ro đã chuẩn hóa và hệ số tổn thương nhân khẩu học đóng vai trò **thừa số khuếch đại** — xếp hạng các cụm để hỗ trợ điều phối. Thực nghiệm trên bộ dữ liệu mô phỏng 285 sự kiện tại Miền Trung Việt Nam cho thấy: dạng nhân/gating giảm đường kính cụm trung bình từ **100 km xuống 0,30 km** trong khi vẫn giữ nguyên độ chính xác phân cụm (ARI = 0,89); cổng tin cậy $C_i$ chặn được báo cáo giả thổi phồng số nạn nhân (giảm **55%** quy mô dân số ảo); khung đề xuất đạt **ARI 0,89** so với K-Means (0,69), DBSCAN (0,73), và kể cả Spectral Clustering (0,34) và HDBSCAN (0,89 nhưng đường kính 25 km) chạy trên cùng đồ thị gating; xếp hạng ưu tiên ổn định với Kendall's τ ≥ 0,94 khi trọng số dao động ±0,10.
 
 **Từ khóa:** Edge AI, phân cụm sự kiện, đồ thị trọng số, phát hiện cộng đồng, Louvain, ưu tiên cứu hộ, đa phương thức, thảm họa bão lũ.
 
@@ -313,20 +313,37 @@ Trên **10 seed khác nhau**, cả Louvain và Leiden đều cho **0 cộng đ�
 
 ### 5.5. Thí nghiệm 4 — So sánh với baseline
 
-| Phương pháp | Số cụm | ARI | NMI | Đường kính TB (km) | Cần biết trước $K$? |
-| :--- | :---: | :---: | :---: | :---: | :---: |
-| **Louvain (đồ thị gating)** | 27 | **0,892** | **0,927** | **0,30** | Không |
-| **Leiden (đồ thị gating)** | 27 | **0,892** | **0,927** | **0,30** | Không |
-| K-Means ($K=12$, đúng $K$) | 12 | 0,688 | 0,834 | 49,21 | Có |
-| K-Means ($K=3$, sai $K$) | 3 | 0,433 | 0,630 | 102,04 | Có |
-| DBSCAN (eps=0,3) | 15 | 0,644 | 0,783 | 15,12 | Không |
-| DBSCAN (eps=0,6) | 7 | 0,730 | 0,873 | 32,27 | Không |
+Bảng dưới mở rộng so sánh với **ba baseline công bằng** chạy trên **cùng đồ thị gating** (Spectral, HDBSCAN, Agglomerative) bên cạnh các baseline hình học thuần túy (K-Means, DBSCAN trên tọa độ thô).
 
-Khung đề xuất vượt trội trên cả hai tiêu chí: **độ chính xác** (ARI 0,89 so với K-Means 0,69 và DBSCAN cao nhất 0,73) và **gắn kết không gian** (đường kính 0,30 km so với hàng chục km của baseline). Đáng chú ý, ngay cả khi K-Means được cho đúng số cụm, đường kính cụm vẫn tới ~49 km — cho thấy phân cụm hình học thuần túy không nắm bắt được cấu trúc "ốc đảo" mà cơ chế đồ thị gating tạo ra.
+| Phương pháp | Số cụm | ARI | NMI | Đường kính TB (km) | Cùng đồ thị? | Cần biết trước $K$? |
+| :--- | :---: | :---: | :---: | :---: | :---: | :---: |
+| **Louvain (đồ thị gating)** | 27 | **0,892** | **0,927** | **0,30** | ✓ | Không |
+| **Leiden (đồ thị gating)** | 27 | **0,892** | **0,927** | **0,30** | ✓ | Không |
+| Spectral (affinity gating, $K=27$) | 27 | 0,339 | 0,727 | 14,11 | ✓ | Có |
+| HDBSCAN (dist=$1-w$ gating) | 11 | 0,890 | 0,922 | 25,08 | ✓ | Không |
+| Agglomerative (dist=$1-w$, $K=27$) | 27 | 0,892 | 0,927 | 0,30 | ✓ | Có |
+| K-Means ($K=12$, đúng $K$, tọa độ) | 12 | 0,688 | 0,834 | 49,21 | ✗ | Có |
+| K-Means ($K=3$, sai $K$, tọa độ) | 3 | 0,433 | 0,630 | 102,04 | ✗ | Có |
+| DBSCAN (eps=0,3, tọa độ) | 15 | 0,644 | 0,783 | 15,12 | ✗ | Không |
+| DBSCAN (eps=0,6, tọa độ) | 7 | 0,730 | 0,873 | 32,27 | ✗ | Không |
 
-### 5.6. Trực quan hóa
+**Phân tích baseline công bằng.** Khi chạy trên cùng ma trận affinity/khoảng cách, Louvain/Leiden vẫn vượt trội: (i) **Spectral Clustering** cho ARI chỉ 0,339 — đồ thị gating thưa và không liên thông đầy đủ gây khó cho phân tách phổ; (ii) **HDBSCAN** đạt ARI 0,890 (gần bằng Louvain) nhưng tìm được ít cụm hơn (11 vs 27) và đường kính trung bình 25 km — gộp nhiều ốc đảo khác nhau vào cùng cụm; (iii) **Agglomerative** (average linkage) khớp hoàn hảo với Louvain về ARI và NMI, nhưng yêu cầu biết trước $K$ — điều bất khả thi trong thảm họa. Kết quả xác nhận rằng ưu thế không chỉ đến từ đồ thị gating (vì HDBSCAN cũng dùng cùng đồ thị) mà từ sự kết hợp giữa đồ thị gating và cơ chế tối ưu Modularity (tự tìm K, gắn kết không gian).
 
-Pipeline sinh một **dashboard bản đồ Leaflet tự chứa** (`demo/v2/dashboard/dashboard.html`) hiển thị các cụm sự kiện trên bản đồ Miền Trung kèm bảng xếp hạng $\mathcal{P}(C_k)$, minh họa trực tiếp đầu ra cho ban điều phối. Sáu hình PNG (`results/figures/`) minh họa từng thí nghiệm: (1) gating vs cộng, (2) bão hòa $\tanh$, (3) cổng $C_i$, (4) quét $\sigma_{geo}$, (5) quét $\lambda$, (6) so sánh baseline.
+### 5.6. Thí nghiệm 5 — Độ ổn định xếp hạng (Kendall's τ)
+
+Phản biện tiềm năng: ban chỉ huy đặt $\omega$ thủ công — nếu thứ hạng $\mathcal{P}(C_k)$ quá nhạy với $\omega$, danh sách ưu tiên trở nên tùy tiện. Chúng tôi nhiễu loạn $\omega$ quanh giá trị mặc định $(0{,}34;\,0{,}33;\,0{,}33)$, chuẩn hóa lại về $\sum\omega=1$, rồi đo Kendall's τ giữa thứ hạng mới và thứ hạng gốc (200 thử nghiệm Monte-Carlo mỗi mức).
+
+| Mức dao động $\omega$ | τ trung bình | τ tối thiểu | Top-3 giữ nguyên (%) |
+| :---: | :---: | :---: | :---: |
+| ±0,05 | **0,994** | 0,977 | **100,0** |
+| ±0,10 | 0,986 | 0,937 | 99,0 |
+| ±0,20 | 0,957 | 0,841 | 76,5 |
+
+Kết quả: ở mức dao động thực tế (±0,05 — ±0,10), Kendall's τ luôn trên **0,93** và tập 3 cụm ưu tiên cao nhất gần như không đổi (99–100%). Ngay cả ở mức cực đoan ±0,20 (thay đổi gần 60% giá trị $\omega$), τ trung bình vẫn đạt 0,957. Điều này chứng minh hàm $\mathcal{P}(C_k)$ cho **xếp hạng ổn định**, giảm thiểu rủi ro "danh sách ưu tiên tùy tiện" khi ban chỉ huy hiệu chỉnh trọng số.
+
+### 5.7. Trực quan hóa
+
+Pipeline sinh một **dashboard bản đồ Leaflet tự chứa** (`demo/v2/dashboard/dashboard.html`) hiển thị các cụm sự kiện trên bản đồ Miền Trung kèm bảng xếp hạng $\mathcal{P}(C_k)$, minh họa trực tiếp đầu ra cho ban điều phối. Bảy hình PNG (`results/figures/`) minh họa từng thí nghiệm: (1) gating vs cộng, (2) bão hòa $\tanh$, (3) cổng $C_i$, (4) quét $\sigma_{geo}$, (5) quét $\lambda$, (6) so sánh baseline, (7) độ ổn định xếp hạng.
 
 ---
 
@@ -360,7 +377,7 @@ Pipeline sinh một **dashboard bản đồ Leaflet tự chứa** (`demo/v2/dash
 
 ## 8. Kết luận
 
-Bài báo đề xuất một khung end-to-end kết hợp Edge AI và Lý thuyết Đồ thị Trọng số cho phân cụm và ưu tiên sự kiện cứu hộ bão lũ, lấp đầy ba khe hở khoa học: thiếu thuộc tính vật lý trong trọng số cạnh, điểm mù về tổn thương nhân khẩu học, và thiếu ưu tiên cấp cụm. Hai đóng góp phương pháp then chốt — **hàm trọng số nhân/gating** để địa lý chi phối cấu trúc cụm, và **hàm ưu tiên với hệ số công bằng làm thừa số khuếch đại** — được kiểm chứng định lượng: gating giảm đường kính cụm từ 100 km xuống 0,30 km mà giữ nguyên ARI 0,89; cổng tin cậy chặn 55% dân số ảo từ tin giả; và khung đề xuất vượt K-Means (0,69) và DBSCAN (0,73) với ARI 0,89. Kết quả định hình một chuẩn mực kiến trúc mới cho nền tảng ứng phó thảm họa thông minh, hoạt động bền vững ngay cả khi hạ tầng viễn thông suy kiệt.
+Bài báo đề xuất một khung end-to-end kết hợp Edge AI và Lý thuyết Đồ thị Trọng số cho phân cụm và ưu tiên sự kiện cứu hộ bão lũ, lấp đầy ba khe hở khoa học: thiếu thuộc tính vật lý trong trọng số cạnh, điểm mù về tổn thương nhân khẩu học, và thiếu ưu tiên cấp cụm. Hai đóng góp phương pháp then chốt — **hàm trọng số nhân/gating** để địa lý chi phối cấu trúc cụm, và **hàm ưu tiên với hệ số công bằng làm thừa số khuếch đại** — được kiểm chứng định lượng: gating giảm đường kính cụm từ 100 km xuống 0,30 km mà giữ nguyên ARI 0,89; cổng tin cậy chặn 55% dân số ảo từ tin giả. So sánh công bằng trên cùng đồ thị gating cho thấy Louvain vượt Spectral Clustering (ARI 0,34) và HDBSCAN (ARI 0,89 nhưng đường kính 25 km), đồng thời không cần biết trước $K$ như Agglomerative. Kiểm nghiệm Monte-Carlo (200 lần, 3 mức nhiễu) xác nhận xếp hạng $\mathcal{P}(C_k)$ ổn định (Kendall's τ ≥ 0,94 ở ±0,10; top-3 cụm giữ nguyên 99%). Kết quả định hình một chuẩn mực kiến trúc mới cho nền tảng ứng phó thảm họa thông minh, hoạt động bền vững ngay cả khi hạ tầng viễn thông suy kiệt.
 
 ---
 
