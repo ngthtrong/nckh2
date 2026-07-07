@@ -3,7 +3,7 @@
 P(C_k) = V_agg * ( w1*Ẽ_agg + w2*F̃_max + w3*Ñ )   [lõi rủi ro chuẩn hóa, V nhân ngoài]
 
 Ẽ_agg  = (1/|C|) sum E_i*C_i                  [khẩn cấp TB có trọng số tin cậy]
-F̃_max  = max F_i                              [nguyên lý bình thông nhau]
+F̃_max  = max (F_i*C_i)                         [nguyên lý bình thông nhau, gate tin cậy]
 Ñ      = log(1+sum N_i*C_i) / log(1+N_max)    [dân số, gate C_i, nén log, chuẩn hóa]
 V_agg  = 1 + tanh( (1/s) sum V_i )            [hệ số khuếch đại công bằng, chống bão hòa]
 """
@@ -45,11 +45,13 @@ def score_clusters(
     params: PriorityParams,
     gate_confidence: bool = True,
     normalize_v: bool = True,
+    gate_fmax: bool = True,
 ) -> list[ClusterScore]:
     """Tính P(C_k) cho mọi cụm.
 
     gate_confidence=False  -> N_total = sum N_i (không gate C_i, cho ablation)
     normalize_v=False      -> V_agg cộng vào lõi thay vì nhân (cho ablation)
+    gate_fmax=False        -> F_max = max F_i (không gate C_i, cho ablation)
     """
     groups = _cluster_members(events, labels)
 
@@ -67,7 +69,10 @@ def score_clusters(
     for cid, members in groups.items():
         size = len(members)
         e_agg = sum(ev.urgency * ev.confidence for ev in members) / size
-        f_max = max(ev.flood for ev in members)
+        if gate_fmax:
+            f_max = max(ev.flood * ev.confidence for ev in members)
+        else:
+            f_max = max(ev.flood for ev in members)
         n_raw = n_totals[cid]
         n_norm = (math.log1p(n_raw) / log_nmax) if log_nmax > 0 else 0.0
 

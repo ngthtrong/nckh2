@@ -152,6 +152,31 @@ def exp_e_confidence_gate(events):
     }
 
 
+def exp_f_fmax_gate(events):
+    """S3: báo cáo giả khai ngập cao (F lớn) nhưng C_i thấp.
+    Gate C_i bên trong max có chặn được nó chiếm trọn F_max không?
+    So sánh F_max của cụm chứa S3 khi gate và không gate."""
+    idx = {e.event_id: i for i, e in enumerate(events)}
+    w = build_weight_matrix(events, C.weight, mode="gating")
+    ws = sparsify(w, C.weight)
+    lab = run_louvain(ws, C.cluster.resolution, C.cluster.random_state)
+    s3_cluster = lab[idx["S3_FAKE"]] if "S3_FAKE" in idx else None
+
+    sc_gated = {s.cluster_id: s for s in score_clusters(events, lab, C.priority, gate_fmax=True)}
+    sc_ungated = {s.cluster_id: s for s in score_clusters(events, lab, C.priority, gate_fmax=False)}
+
+    mem = [e for e, l in zip(events, lab) if l == s3_cluster]
+    fake = next((e for e in mem if e.is_fake), None)
+    return {
+        "s3_cluster": s3_cluster,
+        "fake_report_id": fake.event_id if fake else None,
+        "fake_flood_F": round(fake.flood, 4) if fake else None,
+        "fake_confidence_Ci": round(fake.confidence, 4) if fake else None,
+        "cluster_Fmax_ungated": sc_ungated[s3_cluster].f_max if s3_cluster in sc_ungated else None,
+        "cluster_Fmax_gated": sc_gated[s3_cluster].f_max if s3_cluster in sc_gated else None,
+    }
+
+
 def main():
     events = prepared_events()
 
@@ -173,11 +198,15 @@ def main():
     res_e = exp_e_confidence_gate(events)
     print_table("E. Gate C_i hạ nhiệt tin giả (S3)", [res_e])
 
+    res_f = exp_f_fmax_gate(events)
+    print_table("F. Gate C_i cho F_max chặn tin giả khai ngập cao (S3)", [res_f])
+
     save_table("exp1_A_gating_vs_additive.json", rows_a)
     save_table("exp1_B_normalization.json", [res_b])
     save_table("exp1_C_v_multiplier.json", rows_c)
     save_table("exp1_D_tanh_saturation.json", rows_d)
     save_table("exp1_E_confidence_gate.json", [res_e])
+    save_table("exp1_F_fmax_gate.json", [res_f])
     print("\n[saved] exp1_*.json -> results/tables/")
 
 
