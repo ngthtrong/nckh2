@@ -55,16 +55,16 @@ Các thuật toán không giám sát truyền thống gặp hạn chế: **K-Mea
 
 Bảng dưới định vị công trình này so với các nghiên cứu tiêu biểu cùng lĩnh vực trên năm trục năng lực. Dấu ✓ = có, ✗ = không, ~ = một phần. Ô trống mà các cột khác không lấp chính là đóng góp của bài báo.
 
-| Nghiên cứu | Đa phương thức | Edge/on-device | Đồ thị trọng số | Tổn thương (equity) | Ưu tiên cấp cụm |
-| :--- | :---: | :---: | :---: | :---: | :---: |
-| CrisisSpot (arXiv 2410.08814) | ✓ | ✗ | ✓ (GNN) | ✗ | ✗ |
-| SCBD (SSE-Cross-BERT-DenseNet) | ✓ | ✗ | ✗ | ✗ | ✗ |
-| TwitterNews+ / Dong et al. (event detection) | ✗ (text) | ✗ | ✓ (TF-IDF) | ✗ | ✗ |
-| EmergencyNet (Kyrkou & Theocharides) | ✗ (ảnh) | ✓ | ✗ | ✗ | ✗ |
-| ResQConnect | ✓ | ~ | ✗ | ✗ | ✗ |
-| Disaster Knowledge Graph (spatiotemporal KG) | ✓ | ✗ | ✓ | ✗ | ✗ |
-| Vulnerability-based prioritization (INFOR 2025) | ✗ | ✗ | ✗ | ✓ | ~ (điểm cấp vùng) |
-| **Khung đề xuất (bài này)** | **✓** | **✓** | **✓ (gating)** | **✓ (thừa số)** | **✓** |
+| Nghiên cứu                                    | Đa phương thức | Edge/on-device | Đồ thị trọng số |  Tổn thương (equity)  |  Ưu tiên cấp cụm  |
+| :---------------------------------------------- | :----------------: | :------------: | :-------------------: | :----------------------: | :-------------------: |
+| CrisisSpot (arXiv 2410.08814)                   |         ✓         |       ✗       |       ✓ (GNN)       |            ✗            |          ✗          |
+| SCBD (SSE-Cross-BERT-DenseNet)                  |         ✓         |       ✗       |          ✗          |            ✗            |          ✗          |
+| TwitterNews+ / Dong et al. (event detection)    |     ✗ (text)     |       ✗       |      ✓ (TF-IDF)      |            ✗            |          ✗          |
+| EmergencyNet (Kyrkou & Theocharides)            |     ✗ (ảnh)     |       ✓       |          ✗          |            ✗            |          ✗          |
+| ResQConnect                                     |         ✓         |       ~       |          ✗          |            ✗            |          ✗          |
+| Disaster Knowledge Graph (spatiotemporal KG)    |         ✓         |       ✗       |          ✓          |            ✗            |          ✗          |
+| Vulnerability-based prioritization (INFOR 2025) |         ✗         |       ✗       |          ✗          |            ✓            | ~ (điểm cấp vùng) |
+| **Khung đề xuất (bài này)**          |    **✓**    |  **✓**  | **✓ (gating)** | **✓ (thừa số)** |     **✓**     |
 
 Không nghiên cứu nào trong bảng đồng thời (i) chạy trích xuất đa phương thức tại biên, (ii) mã hóa vào đồ thị trọng số gating không gian – ngữ nghĩa – vật lý, (iii) tích hợp tổn thương nhân khẩu học như hệ số khuếch đại, và (iv) sinh xếp hạng ưu tiên cấp cụm. Đây là khoảng trống mà bài báo lấp.
 
@@ -74,11 +74,11 @@ Không nghiên cứu nào trong bảng đồng thời (i) chạy trích xuất �
 
 Rà soát tài liệu cho thấy ba khe hở căn bản, làm tiền đề lý luận cho khung giải pháp đề xuất.
 
-| Khía cạnh | Hạn chế hiện hành | Khe hở khoa học |
-| :--- | :--- | :--- |
+| Khía cạnh                               | Hạn chế hiện hành                                                                              | Khe hở khoa học                                                                                                                |
+| :---------------------------------------- | :------------------------------------------------------------------------------------------------- | :------------------------------------------------------------------------------------------------------------------------------- |
 | **Xây dựng đồ thị trọng số** | Đa số chỉ dùng khoảng cách địa lý hoặc tương đồng TF-IDF để đặt trọng số cạnh | Bỏ qua đặc trưng vật lý sinh tồn; cần hàm trọng số đa chiều tích hợp độ sâu ngập và mức đe dọa sinh mạng |
-| **Kiến trúc hệ thống** | Phụ thuộc mô hình học sâu trên đám mây; sụp đổ khi mạng tê liệt | Thiếu khung lai kết hợp trích xuất tại biên + gửi metadata nhẹ để lập đồ thị |
-| **Ra quyết định** | Xem nhu cầu là đồng nhất; không định lượng ưu tiên giữa các cụm | Thiếu "Hàm điểm ưu tiên cấp cụm" tích hợp chỉ số tổn thương nhân khẩu học |
+| **Kiến trúc hệ thống**          | Phụ thuộc mô hình học sâu trên đám mây; sụp đổ khi mạng tê liệt                    | Thiếu khung lai kết hợp trích xuất tại biên + gửi metadata nhẹ để lập đồ thị                                      |
+| **Ra quyết định**                | Xem nhu cầu là đồng nhất; không định lượng ưu tiên giữa các cụm                     | Thiếu "Hàm điểm ưu tiên cấp cụm" tích hợp chỉ số tổn thương nhân khẩu học                                      |
 
 **Khe hở 1 — Thiếu thuộc tính đặc thù trong định lượng trọng số.** Hai sự kiện gần nhau về địa lý không đồng nghĩa cùng mức rủi ro, vì rủi ro còn bị chi phối bởi địa hình vi mô, kết cấu nhà và tình trạng nạn nhân. Việc không tích hợp "độ sâu ngập" (từ ảnh) và "mức hoảng loạn/khẩn cấp" (từ văn bản) vào trọng số cạnh khiến đồ thị không phân biệt được nhóm kẹt trên mái nhà với nhóm an toàn ở chung cư tầng cao dù cùng tọa độ.
 
@@ -100,15 +100,15 @@ $$
 v_i = (L_i,\; T_i,\; F_i,\; E_i,\; N_i,\; V_i,\; C_i)
 $$
 
-| Ký hiệu | Tên | Miền giá trị | Nguồn trích xuất |
-| :--- | :--- | :--- | :--- |
-| $L_i$ | Vị trí GPS | $(\text{lat}, \text{lon})$ | Thiết bị di động / geo-tagging |
-| $T_i$ | Tem thời gian | dấu thời gian | Metadata báo cáo |
-| $F_i$ | Mức độ ngập vật lý | $[0,1]$ | Semantic segmentation / pose estimation (MobileNetV3) |
-| $E_i$ | Mức độ khẩn cấp | $[0,1]$ | Phân tích cảm xúc văn bản (DistilBERT / UIT-VSMEC) |
-| $N_i$ | Số người mắc kẹt | $\mathbb{Z}^{+}$ | Nhập tay / crowd counting |
-| $V_i$ | Chỉ số tổn thương nhân khẩu học | $\ge 0$ | Nhánh multi-label ghép chung bộ phân loại văn bản |
-| $C_i$ | Độ tin cậy thông tin | $(0,1]$ | Heuristic tổng hợp nhẹ |
+| Ký hiệu | Tên                                    | Miền giá trị              | Nguồn trích xuất                                      |
+| :-------- | :-------------------------------------- | :--------------------------- | :------------------------------------------------------- |
+| $L_i$   | Vị trí GPS                            | $(\text{lat}, \text{lon})$ | Thiết bị di động / geo-tagging                       |
+| $T_i$   | Tem thời gian                          | dấu thời gian              | Metadata báo cáo                                       |
+| $F_i$   | Mức độ ngập vật lý                | $[0,1]$                    | Semantic segmentation / pose estimation (MobileNetV3)    |
+| $E_i$   | Mức độ khẩn cấp                    | $[0,1]$                    | Phân tích cảm xúc văn bản (DistilBERT / UIT-VSMEC) |
+| $N_i$   | Số người mắc kẹt                   | $\mathbb{Z}^{+}$           | Nhập tay / crowd counting                               |
+| $V_i$   | Chỉ số tổn thương nhân khẩu học | $\ge 0$                    | Nhánh multi-label ghép chung bộ phân loại văn bản |
+| $C_i$   | Độ tin cậy thông tin                | $(0,1]$                    | Heuristic tổng hợp nhẹ                                |
 
 Nhờ Edge AI, thiết bị chỉ gửi một chuỗi JSON chứa $(L_i, T_i, F_i, E_i, N_i, V_i, C_i)$ với kích thước vài KB thay vì ảnh/video hàng MB.
 
@@ -218,7 +218,8 @@ $$
 \mathcal{F}_{max}(C_k) = \max_{v_i\in C_k} \big(F_i \cdot C_i\big)
 $$
 
-  Dùng $\max$ (không phải trung bình) theo **nguyên lý bình thông nhau** — điểm ngập sâu nhất quyết định rủi ro sinh tồn cao nhất của cả quần thể; trung bình sẽ làm loãng cảnh báo. Quan trọng: nhân $C_i$ **bên trong** $\max$ để một báo cáo giả khai $F=1{,}0$ với $C_i$ thấp không tự chiếm trọn $\mathcal{F}_{max}$ — đây là lỗ hổng của bản chỉ dùng $\max F_i$ thuần (khi đó $\mathcal{E}$ và $\mathcal{N}$ đã gate $C_i$ nhưng $\mathcal{F}$ thì không, thiếu nhất quán).
+  Dùng $\max$ (không phải trung bình) theo **nguyên lý bình thông nhau** — điểm ngập sâu nhất quyết định rủi ro sinh tồn cao nhất của cả quần thể; trung bình sẽ làm loãng cảhnh báo. Quan trọng: nhân $C_i$ **bên trong** $\max$ để một báo cáo giả khai $F=1{,}0$ với $C_i$ thấp không tự chiếm trọn $\mathcal{F}_{max}$ — đây là lỗ hổng của bản chỉ dùng $\max F_i$ thuần (khi đó $\mathcal{E}$ và $\mathcal{N}$ đã gate $C_i$ nhưng $\mathcal{F}$ thì không, thiếu nhất quán).
+
 - **Quy mô sinh mạng có trọng số tin cậy:** $\mathcal{N}_{total}(C_k) = \sum_{v_i\in C_k} N_i\cdot C_i$, sau đó nén log và chuẩn hóa. Nhân $C_i$ để báo cáo giả thổi phồng "500 người" với $C_i$ thấp không tự đẩy cụm lên đầu.
 
 **Lỗi (b) và (c) — hệ số khuếch đại tổn thương:**
@@ -238,17 +239,17 @@ Xếp hạng $\mathcal{P}(C_k)$ giảm dần cho ngay danh sách ưu tiên hành
 
 #### 4.4.1. Bảng tổng kết các thay đổi so với bản gốc (V1 → V2)
 
-| Vị trí | Công thức gốc (V1) | Công thức sửa (V2) | Lý do |
-| :--- | :--- | :--- | :--- |
-| 4.1 $V_i$ | "NLP sâu" riêng biệt | Nhánh multi-label ghép chung DistilBERT | Khả thi tại biên, không thêm mô hình nặng |
-| 4.1 $C_i$ | Lịch sử người dùng / cảm biến vật lý | Heuristic sigmoid nhẹ | Hạ tầng gốc không tồn tại trong đề tài 6 tháng |
-| 4.2 $w_{ij}$ | Cộng: $\alpha S_g + \beta S_t + \gamma S_c$ | Nhân/gating: $S_g\cdot(\beta S_t+\gamma S_c)$ | Địa lý phải là cổng chặn để cụm gắn kết không gian |
-| 4.2 $S_{temp},S_{context}$ | Chỉ mô tả bằng lời | Công thức mũ tường minh | Cần định nghĩa rõ để cài đặt được |
-| 4.2 sparsification | (không có) | Thêm ngưỡng $\epsilon$ / k-NN | Louvain hoạt động kém trên đồ thị dày đặc |
-| 4.3 Leiden | Nhắc thoáng qua | Nhấn mạnh chống đứt gãy cụm | Trọng tâm cụm sai làm điều ca nô sai |
-| 4.4 $\mathcal{P}$ | Cộng 4 hạng tử chưa chuẩn hóa | Chuẩn hóa $[0,1]$ + tách $\mathcal{V}_{agg}$ làm thừa số | Sửa sai lệch thang đo và ý nghĩa "khuếch đại" |
-| 4.4 $\mathcal{N}$ | $\sum N_i$ | $\sum N_i\cdot C_i$ rồi nén log | Chống báo giả thổi phồng số người |
-| 4.4 $\mathcal{V}_{agg}$ | $\tanh(\sum V_i)$ | $\tanh(\tfrac1s\sum V_i)$ | Chống bão hòa sớm, giữ khả năng phân biệt |
+| Vị trí                    | Công thức gốc (V1)                         | Công thức sửa (V2)                                             | Lý do                                                          |
+| :-------------------------- | :-------------------------------------------- | :---------------------------------------------------------------- | :-------------------------------------------------------------- |
+| 4.1$V_i$                  | "NLP sâu" riêng biệt                       | Nhánh multi-label ghép chung DistilBERT                         | Khả thi tại biên, không thêm mô hình nặng               |
+| 4.1$C_i$                  | Lịch sử người dùng / cảm biến vật lý | Heuristic sigmoid nhẹ                                            | Hạ tầng gốc không tồn tại trong đề tài 6 tháng        |
+| 4.2$w_{ij}$               | Cộng:$\alpha S_g + \beta S_t + \gamma S_c$ | Nhân/gating:$S_g\cdot(\beta S_t+\gamma S_c)$                   | Địa lý phải là cổng chặn để cụm gắn kết không gian |
+| 4.2$S_{temp},S_{context}$ | Chỉ mô tả bằng lời                       | Công thức mũ tường minh                                      | Cần định nghĩa rõ để cài đặt được                  |
+| 4.2 sparsification          | (không có)                                  | Thêm ngưỡng$\epsilon$ / k-NN                                 | Louvain hoạt động kém trên đồ thị dày đặc            |
+| 4.3 Leiden                  | Nhắc thoáng qua                             | Nhấn mạnh chống đứt gãy cụm                                | Trọng tâm cụm sai làm điều ca nô sai                     |
+| 4.4$\mathcal{P}$          | Cộng 4 hạng tử chưa chuẩn hóa           | Chuẩn hóa$[0,1]$ + tách $\mathcal{V}_{agg}$ làm thừa số | Sửa sai lệch thang đo và ý nghĩa "khuếch đại"          |
+| 4.4$\mathcal{N}$          | $\sum N_i$                                  | $\sum N_i\cdot C_i$ rồi nén log                               | Chống báo giả thổi phồng số người                       |
+| 4.4$\mathcal{V}_{agg}$    | $\tanh(\sum V_i)$                           | $\tanh(\tfrac1s\sum V_i)$                                       | Chống bão hòa sớm, giữ khả năng phân biệt              |
 
 ---
 
@@ -276,10 +277,10 @@ Toàn bộ pipeline hiện thực bằng Python (`numpy`, `networkx`, `python-lo
 
 **(1A) Gating vs Cộng.** Cả hai dạng cho **cùng ARI = 0,892 và NMI = 0,927**, nhưng khác biệt căn bản về gắn kết không gian:
 
-| Dạng | ARI | Đường kính TB (km) | Đường kính max (km) | Số cụm |
-| :--- | :---: | :---: | :---: | :---: |
-| Cộng (additive) | 0,892 | **100,07** | 213,95 | 6 |
-| Nhân/Gating | 0,892 | **0,30** | 1,42 | 27 |
+| Dạng            |  ARI  | Đường kính TB (km) | Đường kính max (km) | Số cụm |
+| :--------------- | :---: | :--------------------: | :---------------------: | :------: |
+| Cộng (additive) | 0,892 |    **100,07**    |         213,95         |    6    |
+| Nhân/Gating     | 0,892 |     **0,30**     |          1,42          |    27    |
 
 Dạng cộng tạo ra các cụm có đường kính trung bình **100 km** — vô nghĩa cho điều phối ca nô. Dạng gating kéo đường kính xuống **0,30 km**, đúng tầm hoạt động thực tế. Điểm mấu chốt: gating **không** hy sinh độ chính xác phân cụm mà chỉ sửa hình học không gian của cụm.
 
@@ -290,12 +291,12 @@ Dạng cộng tạo ra các cụm có đường kính trung bình **100 km** —
 **(1D) Chống bão hòa $\tanh$.** Bảng dưới cho thấy $\tanh(\sum V_i)$ không chia tỉ lệ đã bão hòa ($\approx 2{,}0$) ngay từ $\sum V_i = 3$, mất hoàn toàn khả năng phân biệt; trong khi $\tanh(\sum V_i/10)$ vẫn tăng đơn điệu tới $\sum V_i = 50$:
 
 | $\sum V_i$ | $\tanh(\sum V_i)$ (không chia) | $\tanh(\sum V_i/10)$ |
-| :---: | :---: | :---: |
-| 1 | 1,76 | 1,10 |
-| 3 | 2,00 | 1,29 |
-| 10 | 2,00 | 1,76 |
-| 30 | 2,00 | 2,00 |
-| 50 | 2,00 | 2,00 |
+| :----------: | :-------------------------------: | :--------------------: |
+|      1      |               1,76               |          1,10          |
+|      3      |               2,00               |          1,29          |
+|      10      |               2,00               |          1,76          |
+|      30      |               2,00               |          2,00          |
+|      50      |               2,00               |          2,00          |
 
 **(1E) Cổng tin cậy $C_i$ cho quy mô dân số.** Với kịch bản S3 (tin giả thổi phồng 200 người, $C_i=0,45$): quy mô dân số cụm không gate là 200 người, sau khi nhân $C_i$ giảm còn **90 người — giảm 55%**. Cổng tin cậy ngăn được một báo cáo giả tự đẩy cụm lên đầu danh sách ưu tiên.
 
@@ -315,17 +316,17 @@ Trên **10 seed khác nhau**, cả Louvain và Leiden đều cho **0 cộng đ�
 
 Bảng dưới mở rộng so sánh với **ba baseline công bằng** chạy trên **cùng đồ thị gating** (Spectral, HDBSCAN, Agglomerative) bên cạnh các baseline hình học thuần túy (K-Means, DBSCAN trên tọa độ thô).
 
-| Phương pháp | Số cụm | ARI | NMI | Đường kính TB (km) | Cùng đồ thị? | Cần biết trước $K$? |
-| :--- | :---: | :---: | :---: | :---: | :---: | :---: |
-| **Louvain (đồ thị gating)** | 27 | **0,892** | **0,927** | **0,30** | ✓ | Không |
-| **Leiden (đồ thị gating)** | 27 | **0,892** | **0,927** | **0,30** | ✓ | Không |
-| Spectral (affinity gating, $K=27$) | 27 | 0,339 | 0,727 | 14,11 | ✓ | Có |
-| HDBSCAN (dist=$1-w$ gating) | 11 | 0,890 | 0,922 | 25,08 | ✓ | Không |
-| Agglomerative (dist=$1-w$, $K=27$) | 27 | 0,892 | 0,927 | 0,30 | ✓ | Có |
-| K-Means ($K=12$, đúng $K$, tọa độ) | 12 | 0,688 | 0,834 | 49,21 | ✗ | Có |
-| K-Means ($K=3$, sai $K$, tọa độ) | 3 | 0,433 | 0,630 | 102,04 | ✗ | Có |
-| DBSCAN (eps=0,3, tọa độ) | 15 | 0,644 | 0,783 | 15,12 | ✗ | Không |
-| DBSCAN (eps=0,6, tọa độ) | 7 | 0,730 | 0,873 | 32,27 | ✗ | Không |
+| Phương pháp                              | Số cụm |       ARI       |       NMI       | Đường kính TB (km) | Cùng đồ thị? | Cần biết trước$K$? |
+| :------------------------------------------ | :------: | :-------------: | :-------------: | :--------------------: | :--------------: | :----------------------: |
+| **Louvain (đồ thị gating)**        |    27    | **0,892** | **0,927** |     **0,30**     |        ✓        |          Không          |
+| **Leiden (đồ thị gating)**         |    27    | **0,892** | **0,927** |     **0,30**     |        ✓        |          Không          |
+| Spectral (affinity gating,$K=27$)         |    27    |      0,339      |      0,727      |         14,11         |        ✓        |           Có           |
+| HDBSCAN (dist=$1-w$ gating)               |    11    |      0,890      |      0,922      |         25,08         |        ✓        |          Không          |
+| Agglomerative (dist=$1-w$, $K=27$)      |    27    |      0,892      |      0,927      |          0,30          |        ✓        |           Có           |
+| K-Means ($K=12$, đúng $K$, tọa độ) |    12    |      0,688      |      0,834      |         49,21         |        ✗        |           Có           |
+| K-Means ($K=3$, sai $K$, tọa độ)     |    3    |      0,433      |      0,630      |         102,04         |        ✗        |           Có           |
+| DBSCAN (eps=0,3, tọa độ)                 |    15    |      0,644      |      0,783      |         15,12         |        ✗        |          Không          |
+| DBSCAN (eps=0,6, tọa độ)                 |    7    |      0,730      |      0,873      |         32,27         |        ✗        |          Không          |
 
 **Phân tích baseline công bằng.** Khi chạy trên cùng ma trận affinity/khoảng cách, Louvain/Leiden vẫn vượt trội: (i) **Spectral Clustering** cho ARI chỉ 0,339 — đồ thị gating thưa và không liên thông đầy đủ gây khó cho phân tách phổ; (ii) **HDBSCAN** đạt ARI 0,890 (gần bằng Louvain) nhưng tìm được ít cụm hơn (11 vs 27) và đường kính trung bình 25 km — gộp nhiều ốc đảo khác nhau vào cùng cụm; (iii) **Agglomerative** (average linkage) khớp hoàn hảo với Louvain về ARI và NMI, nhưng yêu cầu biết trước $K$ — điều bất khả thi trong thảm họa. Kết quả xác nhận rằng ưu thế không chỉ đến từ đồ thị gating (vì HDBSCAN cũng dùng cùng đồ thị) mà từ sự kết hợp giữa đồ thị gating và cơ chế tối ưu Modularity (tự tìm K, gắn kết không gian).
 
@@ -333,11 +334,11 @@ Bảng dưới mở rộng so sánh với **ba baseline công bằng** chạy tr
 
 Phản biện tiềm năng: ban chỉ huy đặt $\omega$ thủ công — nếu thứ hạng $\mathcal{P}(C_k)$ quá nhạy với $\omega$, danh sách ưu tiên trở nên tùy tiện. Chúng tôi nhiễu loạn $\omega$ quanh giá trị mặc định $(0{,}34;\,0{,}33;\,0{,}33)$, chuẩn hóa lại về $\sum\omega=1$, rồi đo Kendall's τ giữa thứ hạng mới và thứ hạng gốc (200 thử nghiệm Monte-Carlo mỗi mức).
 
-| Mức dao động $\omega$ | τ trung bình | τ tối thiểu | Top-3 giữ nguyên (%) |
-| :---: | :---: | :---: | :---: |
-| ±0,05 | **0,994** | 0,977 | **100,0** |
-| ±0,10 | 0,986 | 0,937 | 99,0 |
-| ±0,20 | 0,957 | 0,841 | 76,5 |
+| Mức dao động$\omega$ | τ trung bình | τ tối thiểu | Top-3 giữ nguyên (%) |
+| :-----------------------: | :-------------: | :------------: | :--------------------: |
+|          ±0,05          | **0,994** |     0,977     |    **100,0**    |
+|          ±0,10          |      0,986      |     0,937     |          99,0          |
+|          ±0,20          |      0,957      |     0,841     |          76,5          |
 
 Kết quả: ở mức dao động thực tế (±0,05 — ±0,10), Kendall's τ luôn trên **0,93** và tập 3 cụm ưu tiên cao nhất gần như không đổi (99–100%). Ngay cả ở mức cực đoan ±0,20 (thay đổi gần 60% giá trị $\omega$), τ trung bình vẫn đạt 0,957. Điều này chứng minh hàm $\mathcal{P}(C_k)$ cho **xếp hạng ổn định**, giảm thiểu rủi ro "danh sách ưu tiên tùy tiện" khi ban chỉ huy hiệu chỉnh trọng số.
 
@@ -351,11 +352,11 @@ Pipeline sinh một **dashboard bản đồ Leaflet tự chứa** (`demo/v2/dash
 
 **Ý nghĩa liên ngành.** Khung giải pháp mang lại tác động cộng hưởng trên ba lĩnh vực:
 
-| Lĩnh vực | Giá trị mang lại |
-| :--- | :--- |
-| **Hạ tầng viễn thông & Edge** | Duy trì sự sống còn (resilience) khi mạng sụp đổ; giảm dữ liệu truyền từ MB xuống KB nhờ chuyển hóa đa phương thức thành metadata tại biên |
-| **Khoa học dữ liệu & AI** | Chuyển bài toán phân loại tĩnh thành khai phá cấu trúc mạng (network topology mining), định lượng rủi ro lan truyền bằng toán học |
-| **Đạo đức cứu hộ & xã hội** | Tích hợp chỉ số tổn thương vào hàm ưu tiên, tái định hình sự công bằng (equity), cứu đúng người đúng thời điểm |
+| Lĩnh vực                                | Giá trị mang lại                                                                                                                                                |
+| :---------------------------------------- | :----------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| **Hạ tầng viễn thông & Edge**   | Duy trì sự sống còn (resilience) khi mạng sụp đổ; giảm dữ liệu truyền từ MB xuống KB nhờ chuyển hóa đa phương thức thành metadata tại biên |
+| **Khoa học dữ liệu & AI**        | Chuyển bài toán phân loại tĩnh thành khai phá cấu trúc mạng (network topology mining), định lượng rủi ro lan truyền bằng toán học              |
+| **Đạo đức cứu hộ & xã hội** | Tích hợp chỉ số tổn thương vào hàm ưu tiên, tái định hình sự công bằng (equity), cứu đúng người đúng thời điểm                         |
 
 **Khả năng chuyển giao.** Các nguyên lý đồ thị trọng số + Louvain có thể chuyển sang lập bản đồ rủi ro hỏa hoạn đô thị, xác định khu vực bùng phát dịch bệnh, hay phân tích đứt gãy chuỗi cung ứng — hướng tới mạng lưới Internet of Emergency Services (IoES).
 
@@ -411,22 +412,23 @@ Bài báo đề xuất một khung end-to-end kết hợp Edge AI và Lý thuy�
 **Không có trích dẫn bịa hoàn toàn** — mọi URL đều tồn tại. Nhưng ba nhóm vấn đề:
 
 **(a) Claim bị thổi phồng — phải sửa:**
+
 - **[^16] ResQConnect:** paper thật, nhưng claim "mô hình nén trên di động, độ trễ **< 500 ms**" KHÔNG có trong nguồn (nguồn chỉ nói "on-device offline triage"). → Bỏ con số 500 ms hoặc lấy từ EmergencyNet.
 
 **(b) Đã xác minh chắc chắn ✓:** [^9]/[^11] CrisisSpot (F1 +5,01% và +9,45% — khớp), [^2] GNN-SAGE, [^47] CaST, [^35] Louvain (lưu ý O(N log N) là ước lượng thực nghiệm), [^51] Leiden (Louvain tới 25% cụm đứt gãy), [^42] vulnerability prioritization, [^25] TF-IDF weighted graph, [^26] Dong et al., [^13] ConvGraph.
 
 **(c) Nguồn KHÔNG đạt chuẩn học thuật (12 refs — nên thay bằng peer-reviewed):**
 
-| Ref hiện tại | Loại | Thay bằng |
-| :--- | :--- | :--- |
-| [^36] Wikipedia, [^37] Xilinx, [^52] Medium | định nghĩa Modularity/Louvain | **Blondel et al. 2008** (J. Stat. Mech. P1008); **Newman & Girvan 2004** (Phys. Rev. E 69, 026113) |
-| [^31] Stack Overflow | K-Means vs community detection | **Fortunato 2010** (Physics Reports); **Fortunato & Hric 2016** |
-| [^30] (claim không thấy ở abstract) | giới hạn K-Means/DBSCAN | **MacQueen 1967**; **Ester et al. 1996** (DBSCAN); **Schubert et al. 2017** |
-| [^54] Meegle (SEO) | ma trận quyết định MCDM | **Saaty 1980** (AHP); **Triantaphyllou 2000** |
-| [^5],[^6],[^17],[^21] blog/vendor | Edge AI cho thảm họa | **Kyrkou & Theocharides 2020** (EmergencyNet); **Merenda et al. 2020** (Sensors) |
-| [^57] Scribd (mini-project SV) | flood management AI | **Munawar et al. 2022**; hoặc survey peer-reviewed |
-| [^19] IDGA (trade press) | embedded AI/drone | thay bằng paper IEEE về UAV edge inference |
-| [^18] UN-SPIDER | (URL có ký tự thừa `%C2%A0` → 404) | sửa URL; giữ như nguồn institutional cho motivation |
+| Ref hiện tại                              | Loại                                    | Thay bằng                                                                                                     |
+| :------------------------------------------ | :--------------------------------------- | :------------------------------------------------------------------------------------------------------------- |
+| [^36] Wikipedia, [^37] Xilinx, [^52] Medium | định nghĩa Modularity/Louvain         | **Blondel et al. 2008** (J. Stat. Mech. P1008); **Newman & Girvan 2004** (Phys. Rev. E 69, 026113) |
+| [^31] Stack Overflow                        | K-Means vs community detection           | **Fortunato 2010** (Physics Reports); **Fortunato & Hric 2016**                                    |
+| [^30] (claim không thấy ở abstract)      | giới hạn K-Means/DBSCAN                | **MacQueen 1967**; **Ester et al. 1996** (DBSCAN); **Schubert et al. 2017**                  |
+| [^54] Meegle (SEO)                          | ma trận quyết định MCDM              | **Saaty 1980** (AHP); **Triantaphyllou 2000**                                                      |
+| [^5],[^6],[^17],[^21] blog/vendor           | Edge AI cho thảm họa                   | **Kyrkou & Theocharides 2020** (EmergencyNet); **Merenda et al. 2020** (Sensors)                   |
+| [^57] Scribd (mini-project SV)              | flood management AI                      | **Munawar et al. 2022**; hoặc survey peer-reviewed                                                      |
+| [^19] IDGA (trade press)                    | embedded AI/drone                        | thay bằng paper IEEE về UAV edge inference                                                                   |
+| [^18] UN-SPIDER                             | (URL có ký tự thừa`%C2%A0` → 404) | sửa URL; giữ như nguồn institutional cho motivation                                                        |
 
 **Nguyên tắc:** blog/vendor chấp nhận được cho phần *motivation*, nhưng mọi claim **định lượng** (500 ms, MB→KB, F1, O(N log N)) và mọi **định nghĩa toán học** phải trỏ về nguồn peer-reviewed.
 
@@ -443,4 +445,3 @@ Bài báo đề xuất một khung end-to-end kết hợp Edge AI và Lý thuy�
 - **Cần bổ sung khi có:** tên nhóm tác giả + đơn vị (ĐH Cần Thơ, Trường CNTT&TT), phần Acknowledgements, và mã số đề tài.
 
 > ⚠️ **Cảnh báo bảo mật:** file nguồn `resource/giải trình thay đổi V1 sang V2.md` (dòng cuối) chứa một chuỗi trông giống **khóa bí mật/API key bị lộ** (tiền tố `sk-...`). Chuỗi này KHÔNG được đưa vào bài báo. Nên xóa khỏi file nguồn và thu hồi (rotate) khóa nếu nó là khóa thật đang dùng.
-
