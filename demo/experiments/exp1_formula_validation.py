@@ -177,6 +177,57 @@ def exp_f_fmax_gate(events):
     }
 
 
+def exp_g_ari_decomposition(events):
+    """Phân rã trần ARI: core-only vs narrative-only vs toàn tập có nhãn.
+
+    Các nhóm kịch bản (gt 100–105) được đặt TRÙNG tọa độ với 6 ốc đảo (gt 0–5)
+    nhưng mang nhãn khác, nên mọi phương pháp dựa trên không gian đều buộc phải
+    gộp mỗi điểm kịch bản vào ốc đảo chủ -> chặn trần ARI toàn tập dưới 1,0.
+    Đo riêng từng nhóm để chứng minh: chính sự trùng tọa độ (không phải dạng
+    trọng số) mới ghim ARI ở 0,892.
+    """
+    from sklearn.metrics import adjusted_rand_score
+
+    w = build_weight_matrix(events, C.weight, mode="gating")
+    ws = sparsify(w, C.weight)
+    lab = run_louvain(ws, C.cluster.resolution, C.cluster.random_state)
+
+    gt = [e.gt_cluster for e in events]
+    core_idx = [i for i, g in enumerate(gt) if 0 <= g <= 5]
+    narr_idx = [i for i, g in enumerate(gt) if g >= 100]
+    all_idx = [i for i, g in enumerate(gt) if g >= 0]
+
+    def _ari(idxs):
+        return round(float(adjusted_rand_score(
+            [gt[i] for i in idxs], [lab[i] for i in idxs])), 4)
+
+    # đếm nhóm kịch bản trùng tọa độ với TÂM ốc đảo thật (CLUSTER_CENTERS,
+    # không phải điểm lõi đã bị jitter) — các điểm kịch bản được đặt đúng
+    # tọa độ tâm nên lệch 0 m.
+    from pipeline.attributes import haversine_m
+    from data.generate import CLUSTER_CENTERS
+    centers = [(clat, clng) for clat, clng, _ in CLUSTER_CENTERS]
+    colocated = 0
+    seen = set()
+    for e, g in zip(events, gt):
+        if g >= 100 and g not in seen:
+            seen.add(g)
+            dmin = min(haversine_m(e.lat, e.lng, cl[0], cl[1]) for cl in centers)
+            if dmin < 1.0:
+                colocated += 1
+
+    return {
+        "n_gt_labels": len({g for g in gt if g >= 0}),
+        "ari_core_only": _ari(core_idx),
+        "ari_narrative_only": _ari(narr_idx),
+        "ari_all_labeled": _ari(all_idx),
+        "n_core": len(core_idx),
+        "n_narrative": len(narr_idx),
+        "n_all_labeled": len(all_idx),
+        "n_colocated_narrative_groups": colocated,
+    }
+
+
 def main():
     events = prepared_events()
 
@@ -185,6 +236,9 @@ def main():
     print(f"   S1 (Huế & Hội An cách 90km) gom chung cụm? "
           f"additive={_s1_same_cluster(events,'additive')}  "
           f"gating={_s1_same_cluster(events,'gating')}")
+
+    res_g = exp_g_ari_decomposition(events)
+    print_table("G. Phân rã trần ARI (core-only vs narrative-only vs toàn tập)", [res_g])
 
     res_b = exp_b_normalization(events)
     print_table("B. P(C_k): Tác động chuẩn hóa thang đo", [res_b])
@@ -202,6 +256,7 @@ def main():
     print_table("F. Gate C_i cho F_max chặn tin giả khai ngập cao (S3)", [res_f])
 
     save_table("exp1_A_gating_vs_additive.json", rows_a)
+    save_table("exp1_G_ari_decomposition.json", [res_g])
     save_table("exp1_B_normalization.json", [res_b])
     save_table("exp1_C_v_multiplier.json", rows_c)
     save_table("exp1_D_tanh_saturation.json", rows_d)
