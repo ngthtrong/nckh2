@@ -39,13 +39,14 @@ def main():
         "Leiden (gating graph)": run_leiden(ws, 1.0, 42),
         # --- baseline CÔNG BẰNG: chạy trên CÙNG đồ thị/khoảng cách gating ---
         f"Spectral (affinity gating, K={k_lou})": run_spectral(ws, k_lou),
+        f"Spectral (affinity gating, K={n_gt} true GT labels)": run_spectral(ws, n_gt),
         "HDBSCAN (dist=1-w gating)": run_hdbscan_on_graph(ws, min_cluster_size=3),
         f"Agglomerative (dist=1-w, K={k_lou})": run_agglomerative_on_graph(ws, k_lou),
         # --- baseline hình học thuần túy trên tọa độ thô (đối chiếu) ---
-        f"K-Means (K={n_gt}, đúng K, tọa độ)": run_kmeans(events, n_gt),
-        "K-Means (K=3, sai K, tọa độ)": run_kmeans(events, 3),
-        "DBSCAN (eps=0.3, tọa độ)": run_dbscan(events, eps=0.3, min_samples=3),
-        "DBSCAN (eps=0.6, tọa độ)": run_dbscan(events, eps=0.6, min_samples=3),
+        f"K-Means (K={n_gt}, correct K, coords)": run_kmeans(events, n_gt),
+        "K-Means (K=3, wrong K, coords)": run_kmeans(events, 3),
+        "DBSCAN (eps=0.3, coords)": run_dbscan(events, eps=0.3, min_samples=3),
+        "DBSCAN (eps=0.6, coords)": run_dbscan(events, eps=0.6, min_samples=3),
     }
 
     rows = []

@@ -3,8 +3,13 @@
 % giai trinh V1->V2) and demo/v2/ experimental results (seed = 42, deterministic).
 \documentclass[runningheads]{llncs}
 
-\usepackage[T1]{fontenc}
-\usepackage[utf8]{inputenc}
+\usepackage{iftex}
+\ifPDFTeX
+  \usepackage[T1]{fontenc}
+  \usepackage[utf8]{inputenc}
+\else
+  \usepackage{fontspec}
+\fi
 \usepackage{graphicx}
 \usepackage{amsmath}
 \usepackage{amssymb}
@@ -21,10 +26,16 @@
 \title{Weighted Graph-Based Event Clustering and Priority Scoring for Flood-Rescue Coordination Using Edge AI}
 \titlerunning{Weighted Graph Clustering for Flood Rescue}
 
-\author{Anonymous Author(s)}
-\authorrunning{Anonymous et al.}
-\institute{Affiliation, City, Country \\
-\email{anonymous@example.edu}}
+\author{Lê Thị Ngọc Ảnh \and
+Nguyễn Thanh Trọng \and
+Cao Tường Hưng \and
+Nguyễn Như Quỳnh \and
+Ngô Hưng Thịnh \and
+Nguyễn Thanh Khoa}
+\authorrunning{L. T. N. Ảnh et al.}
+\institute{College of Information and Communication Technology,\\
+Can Tho University, Can Tho, Vietnam\\
+\email{ngthtrong204@gmail.com}}
 
 \maketitle
 
@@ -110,11 +121,30 @@ where $L_i$ is GPS location, $T_i$ a timestamp, $F_i\in[0,1]$ physical flood lev
 \paragraph{Edge feasibility.}
 The base attributes $L,T,E,N,F$ follow the project's commitments (images via MobileNetV3, quantized DistilBERT for text). The two auxiliary attributes are designed to add \emph{no} heavy deep model: $V_i$ is extracted by a multi-label head sharing the same text classifier used for $E_i$ (detecting phrases such as ``infant present,'' ``exhausted elderly,'' ``pregnant woman''), and $C_i$ uses a lightweight sigmoid heuristic. Full versions (dedicated crowd counting/pose estimation for $N_i$; a confidence model learned from user history for $C_i$) are explicitly positioned as future work beyond the six-month prototype.
 
+\paragraph{Operational definition of $V_i$.}
+$V_i$ is the sum of humanitarian-priority weights over the vulnerable labels detected in a report. Table~\ref{tab:vweights} gives the \emph{proposed} weight scheme and its mapping to the four discrete levels $\{0,1,1.5,2\}$ used in the dataset. We stress a scope boundary: the experiments assume $V_i$ is \emph{given} (ground-truth vulnerability), so they test the amplification \emph{mechanism} of $\mathcal{V}_{agg}$, \emph{not} the capability to extract $V_i$ from raw text---the latter is future work. The weight table is a normative proposal (who sets it is a policy decision for command staff), not an empirically optimized artifact.
+
+\begin{table}[t]
+\caption{Proposed vulnerability label weights and their mapping to the dataset's four discrete $V_i$ levels.}\label{tab:vweights}
+\centering
+\setlength{\tabcolsep}{5pt}
+\begin{tabular}{lcl}
+\toprule
+Detected label(s) & $V_i$ level & Rationale \\
+\midrule
+None & 0.0 & No vulnerable individual reported \\
+Elderly \emph{or} disabled (one) & 1.0 & Single standard vulnerable individual \\
+Pregnant woman, or two labels & 1.5 & Elevated medical urgency / compounding \\
+Infant, or three+ labels & 2.0 & Highest deterioration rate \\
+\bottomrule
+\end{tabular}
+\end{table}
+
 \paragraph{Confidence heuristic.}
 \begin{equation}\label{eq:confidence}
 C_i = \sigma\!\big(b_0 + b_1 \cdot \mathbb{1}[\text{has image}] + b_2 \cdot \log(1 + n_i^{\text{corrob}})\big)
 \end{equation}
-Here $\sigma$ is the sigmoid, $\mathbb{1}[\text{has image}]$ indicates vision-verified multimodal evidence, and $n_i^{\text{corrob}}$ counts independent corroborating reports in the same spatiotemporal window. Log compression makes the 2nd--3rd corroborating report boost confidence strongly while the 50th adds almost nothing, resisting single-location spam. In experiments we use $(b_0,b_1,b_2)=(-0.2,\,1.4,\,0.9)$.
+Here $\sigma$ is the sigmoid, $\mathbb{1}[\text{has image}]$ indicates vision-verified multimodal evidence, and $n_i^{\text{corrob}}$ counts independent corroborating reports within a corroboration radius $r_{\text{corrob}}=400$\,m and time window $\Delta t_{\text{corrob}}=60$\,min (kept deliberately separate from the clustering constants $\sigma_{geo},\tau_{temp}$ to avoid cross-coupling). Log compression makes the 2nd--3rd corroborating report boost confidence strongly while the 50th adds almost nothing, resisting single-location spam. In experiments we use $(b_0,b_1,b_2)=(-0.2,\,1.4,\,0.9)$. Absent a persistent-account infrastructure, ``independence'' is approximated purely by spatiotemporal proximity; we return to the resulting vulnerability to coordinated fake corroboration in the adversarial analysis of Sect.~\ref{sec:exp8}.
 
 \subsection{Spatial--Semantic--Physical Weighted Graph}
 This is the most important design fix relative to a naive draft. A \emph{naive additive} weighting
@@ -133,7 +163,7 @@ When distance is large, $\mathcal{S}_{geo}\to0$ forces $w_{ij}\to0$ regardless o
 \mathcal{S}_{temp} &= \exp\!\left( - \frac{|T_i - T_j|}{\tau_{temp}} \right) \label{eq:stemp}\\
 \mathcal{S}_{context} &= \exp\!\left( - \frac{|F_i - F_j|}{\tau_F} - \frac{|E_i - E_j|}{\tau_E} \right) \label{eq:scontext}
 \end{align}
-$\mathrm{dist}(\cdot)$ is Haversine distance (meters); $\sigma_{geo}$ is a characteristic radius approximating a boat's operating range (a few hundred meters to 1--2\,km). The squared distance makes the Gaussian gate decay sharply, strongly penalizing distant links. The temporal kernel uses a first-order (non-squared) exponent because flood evolution has inertia. For context, similar reports ($\Delta F\approx0,\Delta E\approx0$) give $\mathcal{S}_{context}\to1$, whereas dissimilar ones (one safe on a 3rd floor, one clinging to a rooftop) shrink it---correctly reflecting distinct rescue needs. Since $\exp(-a-b)=\exp(-a)\exp(-b)$, both conditions (similar flood \emph{and} similar urgency) must hold jointly for a high $\mathcal{S}_{context}$. The additive form's $\alpha$ is eliminated because $\mathcal{S}_{geo}$ is now a global factor.
+$\mathrm{dist}(\cdot)$ is Haversine distance (meters); $\sigma_{geo}$ is a characteristic radius approximating a boat's operating range (a few hundred meters to 1--2\,km). The squared distance makes the Gaussian gate decay sharply, strongly penalizing distant links. The temporal kernel uses a first-order (non-squared) exponent because flood evolution has inertia. For context, similar reports ($\Delta F\approx0,\Delta E\approx0$) give $\mathcal{S}_{context}\to1$, whereas dissimilar ones (one safe on a 3rd floor, one clinging to a rooftop) shrink it---correctly reflecting distinct rescue needs. Since $\exp(-a-b)=\exp(-a)\exp(-b)$, both conditions (similar flood \emph{and} similar urgency) must hold jointly for a high $\mathcal{S}_{context}$. The slightly tighter $\tau_F=0.25$ versus $\tau_E=0.35$ makes the kernel penalize a given flood-depth gap more sharply than the same urgency gap, reflecting that the vision-derived $F$ is a more physically grounded (hence more trustworthy) discriminator than the sentiment-derived $E$; a sensitivity sweep (Sect.~\ref{sec:exp2}) confirms clustering is insensitive to both within a wide band, so this asymmetry is a mild modeling preference rather than a tuned parameter. The additive form's $\alpha$ is eliminated because $\mathcal{S}_{geo}$ is now a global factor.
 
 \paragraph{Graph sparsification.}
 Because $\mathcal{S}_{geo}$ decays quickly, most long-range edges carry negligible weight. We sparsify via either (i) a threshold $\theta$ (retain edges with $w_{ij}>\theta$) or (ii) a $k$-NN graph (each vertex keeps its $k$ highest-weight neighbors). This reduces computation and removes spurious cross-zone links, since Modularity optimization degrades on dense, near-complete graphs.
@@ -174,11 +204,18 @@ We use $\max$ (not mean) for flood depth by the ``communicating-vessels'' princi
 \end{equation}
 Placing $\mathcal{V}_{agg}$ \emph{outside} as a factor makes it a true amplifier: a cluster with no vulnerable individuals gets $\approx1$ (risk core unchanged), while one with many gets up to $2\times$. An additive term bounded in $[1,2]$ would only add a near-constant offset---amplifying nothing. The scale factor $s$ (e.g., $s=10$) prevents early saturation: with raw $\tanh(\sum V_i)$, only 2--3 vulnerable individuals push $\tanh$ near 1, making a cluster with 1 indistinguishable from one with 50; dividing by $s$ stretches the linear region while $\tanh$ still caps the value. An equivalent alternative is $1+\log(1+\sum V_i)$ with normalization.
 
+\paragraph{Adjustable amplification cap.}
+The fixed $2\times$ ceiling is a policy choice, not a mathematical necessity. To let command staff bound how far vulnerability may reorder the list---a genuine ``many-healthy vs.\ few-vulnerable'' trade-off---we generalize to
+\begin{equation}\label{eq:vagg-mu}
+\mathcal{V}_{agg}(C_k) = 1 + (\mu-1)\tanh\!\left(\frac{1}{s}\sum_{v_i\in C_k}V_i\right), \qquad \mu\in[1,2],
+\end{equation}
+so $\mu=1$ disables amplification (pure risk core) and $\mu=2$ recovers the default. All reported numbers use $\mu=2$. A larger $\mu$ can push a small vulnerable-rich cluster above a large healthy one; exposing $\mu$ makes that ethical dial explicit rather than hard-coded.
+
 \paragraph{Weights and range.}
 $\omega_1,\omega_2,\omega_3$ (with $\sum\omega=1$) are set by command staff via a decision matrix~\cite{saaty1980ahp} to switch tactical modes (population-first vs.\ depth-first). Since the core is normalized to $[0,1]$ and $\sum\omega=1$, the core lies in $[0,1]$; multiplying by $\mathcal{V}_{agg}\in(1,2)$ bounds $\mathcal{P}(C_k)\in(0,2]$---convenient for ranking. Descending $\mathcal{P}(C_k)$ yields an actionable priority list; combined with cluster centroids it is an ideal input for downstream route optimization (A$^*$ cost-aware, multi-commodity routing).
 
 \paragraph{On reusing $F,E$ in two stages.}
-$F$ and $E$ appear both in clustering (via $\mathcal{S}_{context}$) and prioritization (via $\mathcal{F}_{max},\mathcal{E}_{agg}$). This is not erroneous double-counting: $\mathcal{S}_{context}$ measures pairwise \emph{similarity} (whether two events share a situation), whereas $\mathcal{F}_{max}/\mathcal{E}_{agg}$ measure a cluster's \emph{absolute severity} (for ranking). We acknowledge, however, that a cluster grouped by similar $F$ will almost certainly have high $\mathcal{F}_{max}$, so $\mathcal{F}_{max}$ should be read as ``the characteristic flood level of an already-homogeneous population,'' not a fully independent signal.
+$F$ and $E$ appear both in clustering (via $\mathcal{S}_{context}$) and prioritization (via $\mathcal{F}_{max},\mathcal{E}_{agg}$). This is not erroneous double-counting: $\mathcal{S}_{context}$ measures pairwise \emph{similarity} (whether two events share a situation), whereas $\mathcal{F}_{max}/\mathcal{E}_{agg}$ measure a cluster's \emph{absolute severity} (for ranking). We acknowledge, however, that a cluster grouped by similar $F$ will almost certainly have high $\mathcal{F}_{max}$, so $\mathcal{F}_{max}$ should be read as ``the characteristic flood level of an already-homogeneous population,'' not a fully independent signal. We quantify this circularity in Sect.~\ref{sec:exp6}: removing $\mathcal{S}_{context}$ from the graph changes clustering (ARI drops) but barely moves the priority ranking, showing that $\mathcal{S}_{context}$ mainly aids \emph{grouping} rather than covertly dictating the \emph{ranking}.
 
 \section{Experiments}
 
@@ -187,7 +224,7 @@ $F$ and $E$ appear both in clustering (via $\mathcal{S}_{context}$) and prioriti
 Absent a real labeled ground-truth dataset for rescue clusters, we generate a \emph{deterministic synthetic} dataset (seed $=42$) modeled on Central Vietnam (Hu\'e--Qu\'ang Tr\d{i}--Qu\'ang Nam--Đà N\~{a}ng; $15.7$--$17.1^\circ$N, $107.0$--$108.6^\circ$E) with \textbf{285 events}: 240 core events around \textbf{6 flood ``islands''} ($\sim$40 each, with a \texttt{gt\_cluster} label), 20 scattered noise events ($\sim$40\% fake), and 25 narrative scenario events (S1--S4), each stress-testing one design decision---S1: two rooftop-flood points $\sim$90\,km apart (gating separation); S2: a cluster rich in vulnerable individuals ($\mathcal{V}_{agg}$ amplification); S3: an isolated fake report inflating 200 victims ($C_i$ gate); S4: a large shallow-flood cluster vs.\ a small rooftop-flood cluster ($\mathcal{F}_{max}$).
 
 \paragraph{Parameters.}
-$\sigma_{geo}=700$\,m; $\tau_{temp}=45$\,min; $\tau_F=0.25$; $\tau_E=0.35$; $\beta=\gamma=0.5$; edge threshold $\theta=0.05$; $k$-NN $k=12$; $\lambda=1.0$; $s=10$; $\omega=(0.34,0.33,0.33)$; confidence heuristic $(b_0,b_1,b_2)=(-0.2,1.4,0.9)$.
+$\sigma_{geo}=700$\,m; $\tau_{temp}=45$\,min; $\tau_F=0.25$; $\tau_E=0.35$; $\beta=\gamma=0.5$; edge threshold $\theta=0.05$; $k$-NN $k=12$; $\lambda=1.0$; $s=10$; $\omega=(0.34,0.33,0.33)$; confidence heuristic $(b_0,b_1,b_2)=(-0.2,1.4,0.9)$; corroboration window $(r_{\text{corrob}},\Delta t_{\text{corrob}})=(400\,\text{m},60\,\text{min})$. We distinguish \emph{domain-set} parameters, fixed by operational meaning rather than tuned---$\sigma_{geo}$ (boat range), $\tau_{temp}$ and $\Delta t_{\text{corrob}}$ (flood-evolution timescale), $\lambda=1$ (standard Modularity)---from \emph{tunable} ones ($\tau_F,\tau_E,\beta,\gamma,\theta,k,s,\omega,b_*$), whose robustness we probe in Experiments 2 and 5. Since a single synthetic dataset cannot support a train/validation/test split with statistical meaning, we report sensitivity sweeps instead of claiming optimality; learning these parameters on real data is future work.
 
 \paragraph{Metrics.}
 Adjusted Rand Index (ARI)~\cite{hubert1985comparing} and Normalized Mutual Information (NMI) against ground truth; \emph{geographic cluster diameter} (km, the largest intra-cluster point distance) for spatial coherence; and Modularity $Q$. The full pipeline is implemented in Python (\texttt{numpy}, \texttt{networkx}, \texttt{python-louvain}, \texttt{igraph}, \texttt{leidenalg}, \texttt{scikit-learn}).
@@ -255,8 +292,10 @@ The same S3 report claims $F=0.99$ with $C_i=0.45$. Under a plain $\max F_i$ it 
 \caption{Confidence gating: a fake report ($C_i=0.45$) inflating 200 victims is reduced to an effective 90, and its claimed $F=0.99$ to $0.45$.}\label{fig:cgate}
 \end{figure}
 
-\subsection{Experiment 2 --- Sensitivity Analysis}
+\subsection{Experiment 2 --- Sensitivity Analysis}\label{sec:exp2}
 Resolution $\lambda$: ARI is stable at $0.892$ for $\lambda\le1.5$; it degrades at $\lambda=2.0$ (ARI $0.83$) and $\lambda=3.0$ (ARI $0.67$) as clusters fragment. Recommended safe range: $\lambda\in[0.5,1.5]$ (Fig.~\ref{fig:sweeps}, right). Radius $\sigma_{geo}$ directly trades diameter for cluster count: ARI holds at $0.892$ across a wide range while mean diameter grows from $0.28$\,km ($\sigma_{geo}=200$\,m) to $1.59$\,km ($\sigma_{geo}=4000$\,m) (Fig.~\ref{fig:sweeps}, left); $\sigma_{geo}$ should match the real operating range of the rescue unit. Scale $s$: the spread of $\mathcal{V}_{agg}$ narrows as $s$ grows ($s=1$ spans $1.0\to2.0$; $s=20$ only $1.0\to1.78$); $s=10$ gives good discrimination up to $\sum V_i\approx50$.
+
+To answer the ``too many free parameters'' concern, we extend the sweep to the context and balance parameters. The context sensitivities $\tau_F,\tau_E$ are \emph{inert} for clustering accuracy: ARI stays at $0.892$ across the full grid $\tau_F,\tau_E\in[0.15,0.5]$, because the geographic gate dominates cluster structure regardless of how sharply context similarity decays. The balance $\beta/\gamma$ matters only near the extremes: ARI holds at $0.892$ for $\beta\le0.5$ (context-inclusive) but drops to $0.7855$ once $\beta\ge0.9$ starves the context term---consistent with the ablation of Sect.~\ref{sec:exp6}. This shows most parameters are either domain-set (Table's ``domain'' group) or provably inert on this dataset, leaving only $\lambda,\sigma_{geo},\beta/\gamma$ as accuracy-relevant tuning knobs, all with safe operating ranges reported above.
 
 \begin{figure}[t]
 \centering
@@ -324,17 +363,29 @@ $\pm0.20$ & 0.957 & 0.841 & 76.5 \\
 \caption{Ranking stability: Kendall's $\tau$ stays above $0.93$ at realistic perturbation ($\pm0.05$--$\pm0.10$), with the top-3 clusters essentially unchanged.}\label{fig:stability}
 \end{figure}
 
-At realistic perturbation ($\pm0.05$--$\pm0.10$), $\tau$ stays above $0.93$ and the top-3 clusters are nearly unchanged (99--100\%). Even at an extreme $\pm0.20$ (altering nearly 60\% of $\omega$), mean $\tau$ is $0.957$, showing that $\mathcal{P}(C_k)$ produces a stable ranking.
+At realistic perturbation ($\pm0.05$--$\pm0.10$), $\tau$ stays above $0.93$ and the top-3 clusters are nearly unchanged (99--100\%). Even at an extreme $\pm0.20$ (altering nearly 60\% of $\omega$), mean $\tau$ is $0.957$, showing that $\mathcal{P}(C_k)$ produces a stable ranking. Stability also holds against the \emph{clustering} step, not just the weights: sweeping $\sigma_{geo}$ over $[400,1200]$\,m leaves the priority ranking essentially fixed (Kendall's $\tau=1.0$ up to $900$\,m, $0.9815$ at $1200$\,m where two clusters merge), so the ranking does not hinge on a single graph-construction choice.
+
+\subsection{Experiment 6 --- Context Circularity Ablation}\label{sec:exp6}
+A reviewer may worry that reusing $F,E$ in both $\mathcal{S}_{context}$ (clustering) and $\mathcal{F}_{max},\mathcal{E}_{agg}$ (ranking) lets the context term covertly dictate the final priority list. We test this by removing $\mathcal{S}_{context}$ from the edge weight (setting $\gamma{=}0$, geographic--temporal gating only) and comparing both the clustering and the induced ranking against the full model. Removing context \emph{does} change clustering---ARI drops from $0.892$ to $0.7855$, NMI from $0.927$ to $0.8741$, and the partition fragments from 27 to 30 clusters---confirming $\mathcal{S}_{context}$ genuinely aids grouping. Yet the priority ranking is barely affected: over the 27 clusters matched by centroid, Kendall's $\tau$ between the full-model and context-ablated rankings is $0.9829$, and all top-5 clusters are preserved. This dissociation shows $\mathcal{S}_{context}$ mainly improves \emph{who is grouped with whom}, not \emph{which cluster is ranked first}; the ranking is driven by the absolute-severity terms $\mathcal{F}_{max},\mathcal{E}_{agg}$ as intended, so the reuse is not vicious double-counting.
+
+\subsection{Experiment 7 --- Does Vulnerability Weighting Actually Help the Vulnerable?}\label{sec:exp7}
+Item~1.2's deeper question is not whether the vulnerability index $V_i$ changes the ranking (it does, by construction) but whether it produces a \emph{better rescue outcome} for vulnerable populations. We simulate a discrete-event dispatch: $3$ boats at $30$\,km/h with a $15$\,min service time per cluster, serving clusters in priority order, and measure the time until vulnerable victims (those with high $V_i$) are reached. We compare three priority policies: the full multiplicative $\mathcal{P}=\mathcal{V}_{agg}\cdot(\dots)$, an additive variant $\mathcal{P}=\mathcal{V}_{agg}+(\dots)$, and a vulnerability-blind policy ($V_i$ removed). Removing $V_i$ delays the mean time-to-vulnerable from $146.5$ to $163.6$\,min---a \textbf{10.4\% improvement} attributable to vulnerability weighting---and lowers harm-weighted response time by $8.7\%$. The multiplicative form buys this equity gain at a modest cost in mean all-victim arrival ($942.9$ vs.\ $719.6$\,min for the blind policy), an explicit and defensible fairness--efficiency trade-off rather than a mere reordering. The additive variant reaches the vulnerable slightly faster ($133.3$\,min) but weakens the coupling between vulnerability and severity that the multiplicative gate is designed to preserve; we report both so the trade-off is transparent.
+
+\subsection{Experiment 8 --- Confidence Detector and Adversarial Robustness}\label{sec:exp8}
+We evaluate the confidence heuristic $C_i$ as a fake-report detector and probe its worst case. Treating low $C_i$ as a fake-flag over all $285$ events, $C_i$ separates the injected fakes from real reports with \textbf{ROC-AUC $0.9651$} (mean $C_i$ $0.50$ for fakes vs.\ $0.92$ for real). This is a screening signal, not a guarantee, and we deliberately stress its failure mode. A naive fake (isolated, no image) scores $C_i=0.45$ and is easily down-weighted; but an adversary who \emph{adds a forged image} raises it to $0.77$, who \emph{stages coordinated corroboration} raises it to $0.74$, and who does \emph{both} reaches $C_i=0.92$---indistinguishable from the real-report mean. Because ``independence'' of corroboration is approximated purely by spatiotemporal proximity (no persistent-account infrastructure), the heuristic is robust to lone spammers but \emph{not} to a resourced coordinated adversary. We therefore present $C_i$ as a first-line filter that must be paired with account-level trust or cross-channel verification before it can be relied on adversarially, and we state this limitation explicitly rather than overclaiming detection.
+
+\subsection{Experiment 9 --- A Discriminative Metric Beyond ARI}\label{sec:exp9}
+ARI saturates near the top of our leaderboard (Louvain, Leiden, Agglomerative, and even HDBSCAN all cluster around $0.89$--$0.892$), which risks hiding real quality differences. We add the homogeneity/completeness/V-measure triad, which decomposes cluster quality into two interpretable axes. The decomposition is far more discriminative on the failure that matters here---\emph{completeness}, i.e.\ whether a ground-truth event is split across clusters. Spectral clustering, despite the near-tie candidates having ARI within $0.003$, is exposed as fragmenting events: its completeness is only $0.595$ (V-measure $0.727$) against Louvain's completeness $1.0$ (V-measure $0.927$). The completeness spread across methods is $0.405$ versus an ARI spread of only $0.55$ concentrated at the low end, so the triad ranks the top methods that ARI cannot separate: Louvain/Leiden achieve perfect completeness while HDBSCAN, tied on ARI, drops to $0.929$ because it merges islands. We therefore report V-measure alongside ARI throughout.
 
 \section{Discussion}
 \paragraph{Cross-disciplinary impact.}
-The framework delivers synergistic value across telecommunications/edge (resilience under network collapse; MB$\to$KB data reduction), data science/AI (recasting static classification as network-topology mining with quantified propagation risk), and rescue ethics (integrating a vulnerability index into the priority function, reshaping equity). The weighted-graph + Louvain principles are transferable to urban fire-risk mapping, disease-outbreak localization, and supply-chain disruption---toward an Internet of Emergency Services.
+The framework delivers synergistic value across telecommunications/edge (resilience under network collapse; a structured event descriptor measures only \emph{112--137 bytes}---id, coordinates, and the $L,T,F,E,N,V,C$ fields---versus the raw multimedia post it summarizes, a MB$\to$sub-KB reduction that keeps the mesh/LoRa uplink viable), data science/AI (recasting static classification as network-topology mining with quantified propagation risk), and rescue ethics (integrating a vulnerability index into the priority function, reshaping equity). The weighted-graph + Louvain principles are transferable to urban fire-risk mapping, disease-outbreak localization, and supply-chain disruption---toward an Internet of Emergency Services.
 
 \paragraph{Scope relative to the project proposal.}
 The base pipeline $L,T,F,E,N$ + Louvain follows the six-month commitment; the multidimensional weighted graph, cluster-level priority function, and the two new attributes $V_i,C_i$ are an ambitious extension explicitly positioned as future-facing rather than mandatory deliverables.
 
 \subsection{Threats to Validity}
-\textbf{Internal:} results use self-generated synthetic data with designed, well-separated flood islands, so the high ARI ($0.892$) partly reflects data separability, not purely method strength. \textbf{External:} only one region (Central Vietnam) and one hazard (flood) are tested; $\sigma_{geo},\tau$ need recalibration elsewhere. \textbf{Construct:} ARI/NMI measure structural agreement, \emph{not} rescue-decision quality; an outcome-oriented metric (e.g., mean time-to-vulnerable-victim) is needed. \textbf{Conclusion:} Experiment 3 uses 10 seeds, but other experiments mostly use seed $=42$; reporting mean $\pm$ std across seeds would strengthen every headline number.
+\textbf{Internal:} results use self-generated synthetic data with designed, well-separated flood islands, so the high ARI ($0.892$) partly reflects data separability, not purely method strength. \textbf{External:} only one region (Central Vietnam) and one hazard (flood) are tested; $\sigma_{geo},\tau$ need recalibration elsewhere. \textbf{Construct:} ARI/NMI measure structural agreement, \emph{not} rescue-decision quality; we partly address this with the outcome-oriented queue simulation of Sect.~\ref{sec:exp7} (mean time-to-vulnerable-victim), though it too runs on synthetic demand. Because ARI saturates near the top methods (Sect.~\ref{sec:exp9}), we also report homogeneity/completeness to keep the comparison discriminative. \textbf{Conclusion:} Experiment 3 uses 10 seeds, but other experiments mostly use seed $=42$; reporting mean $\pm$ std across seeds would strengthen every headline number.
 
 \section{Limitations and Future Work}
 Results rest on deterministic synthetic data (enabling ground truth but not yet reflecting real social-media noise); validation on real data (CrisisMMD/FloodNet, storm-period Zalo/Facebook) is the next step. $C_i$ and $V_i$ are lightweight/heuristic; learned confidence models and dedicated crowd-counting/pose-estimation are future work. Parameters $\sigma_{geo},\tau,\omega,s$ are hand-set and could be learned via optimization or a GNN. Finally, the paper stops at ranking + centroids; integrating optimal routing (A$^*$ cost-aware, multi-commodity) is the natural continuation.
