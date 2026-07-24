@@ -6,7 +6,7 @@
 
 ## Tóm tắt (Abstract)
 
-Trong các thảm họa bão lũ, hạ tầng viễn thông thường bị gián đoạn khiến mô hình xử lý tập trung trên đám mây bị vô hiệu hóa đúng vào "giờ vàng" cứu hộ. Bài báo đề xuất một khung giải pháp kết hợp Điện toán Biên (Edge AI) và Lý thuyết Đồ thị Trọng số để thu thập, phân cụm và tự động xếp hạng ưu tiên các sự kiện cứu hộ. Thiết bị biên trích xuất một vector thuộc tính đa chiều $(L, T, F, E, N, V, C)$ từ ảnh và văn bản rồi chỉ truyền đi một gói siêu dữ liệu (metadata) vài Kilobyte thay vì ảnh/video thô. Ở phía máy chủ, các sự kiện được biểu diễn thành đồ thị trọng số trong đó khoảng cách địa lý đóng vai trò **cổng chặn nhân tính (multiplicative gate)** thay vì một số hạng cộng, bảo đảm mọi cụm đều gắn kết về mặt không gian. Thuật toán Louvain (khuyến nghị Leiden) phân rã đồ thị thành các "khu vực tác chiến", và một hàm ưu tiên cấp cụm $\mathcal{P}(C_k)$ — với lõi rủi ro đã chuẩn hóa và hệ số tổn thương nhân khẩu học đóng vai trò **thừa số khuếch đại** — xếp hạng các cụm để hỗ trợ điều phối. Thực nghiệm trên bộ dữ liệu mô phỏng 285 sự kiện tại Miền Trung Việt Nam cho thấy: dạng nhân/gating giảm đường kính cụm trung bình từ **100 km xuống 0,30 km** trong khi vẫn giữ nguyên độ chính xác phân cụm (ARI = 0,89); cổng tin cậy $C_i$ chặn được báo cáo giả thổi phồng số nạn nhân (giảm **55%** quy mô dân số ảo); khung đề xuất đạt **ARI 0,89** so với K-Means (0,69), DBSCAN (0,73), và kể cả Spectral Clustering (0,34) và HDBSCAN (0,89 nhưng đường kính 25 km) chạy trên cùng đồ thị gating; xếp hạng ưu tiên ổn định với Kendall's τ ≥ 0,94 khi trọng số dao động ±0,10.
+Trong các thảm họa bão lũ, hạ tầng viễn thông thường bị gián đoạn khiến mô hình xử lý tập trung trên đám mây bị vô hiệu hóa đúng vào "giờ vàng" cứu hộ. Bài báo đề xuất một khung giải pháp kết hợp Điện toán Biên (Edge AI) và Lý thuyết Đồ thị Trọng số để thu thập, phân cụm và tự động xếp hạng ưu tiên các sự kiện cứu hộ. Thiết bị biên trích xuất một vector thuộc tính đa chiều $(L, T, F, E, N, V, C)$ từ ảnh và văn bản rồi chỉ truyền đi một gói siêu dữ liệu (metadata) dưới 1 Kilobyte thay vì ảnh/video thô. Ở phía máy chủ, các sự kiện được biểu diễn thành đồ thị trọng số trong đó khoảng cách địa lý đóng vai trò **cổng chặn nhân tính (multiplicative gate)** thay vì một số hạng cộng, bảo đảm mọi cụm đều gắn kết về mặt không gian. Thuật toán Louvain (khuyến nghị Leiden) phân rã đồ thị thành các "khu vực tác chiến", và một hàm ưu tiên cấp cụm $\mathcal{P}(C_k)$ — với lõi rủi ro đã chuẩn hóa và hệ số tổn thương nhân khẩu học đóng vai trò **thừa số khuếch đại** — xếp hạng các cụm để hỗ trợ điều phối. Thực nghiệm trên bộ dữ liệu mô phỏng 285 sự kiện tại Miền Trung Việt Nam cho thấy: dạng nhân/gating giảm đường kính cụm trung bình từ **100 km xuống 0,30 km** trong khi vẫn giữ nguyên độ chính xác phân cụm (ARI = 0,892); cổng tin cậy $C_i$ chặn được báo cáo giả thổi phồng số nạn nhân (giảm **55%** quy mô dân số ảo); khung đề xuất đạt **ARI 0,892** so với K-Means (0,688), DBSCAN (0,730), và kể cả Spectral Clustering (0,339) và HDBSCAN (0,890 nhưng đường kính 25 km) chạy trên cùng đồ thị gating; xếp hạng ưu tiên ổn định với Kendall's τ ≥ 0,94 khi trọng số dao động ±0,10.
 
 **Từ khóa:** Edge AI, phân cụm sự kiện, đồ thị trọng số, phát hiện cộng đồng, Louvain, ưu tiên cứu hộ, đa phương thức, thảm họa bão lũ.
 
@@ -20,7 +20,7 @@ Một nguyên nhân cốt lõi làm đứt gãy công tác phản ứng khẩn c
 
 Bài báo này đề xuất một khung giải pháp end-to-end giải quyết đồng thời ba thách thức trên:
 
-1. **Sống sót qua mạng yếu:** đưa AI xuống thiết bị biên; thay vì tải ảnh/video hàng Megabyte, ứng dụng xử lý tại chỗ và chỉ gửi gói siêu dữ liệu vài Kilobyte.
+1. **Sống sót qua mạng yếu:** đưa AI xuống thiết bị biên; thay vì tải ảnh/video hàng Megabyte, ứng dụng xử lý tại chỗ và chỉ gửi gói siêu dữ liệu dưới 1 Kilobyte.
 2. **Gom nhóm sự kiện trùng lặp có ý nghĩa vật lý:** xây đồ thị trọng số tích hợp không gian – thời gian – ngữ cảnh, rồi phân rã cộng đồng.
 3. **Tự động xếp hạng ưu tiên:** định lượng mức khẩn cấp *cấp cụm* để trả lời câu hỏi điều phối "cứu cụm nào trước".
 
@@ -41,7 +41,7 @@ Sự dịch chuyển từ học máy đơn phương thức sang đa phương th�
 
 ### 2.2. Dịch chuyển sang Điện toán Biên (Edge Computing)
 
-Thách thức chí mạng của mô hình đa phương thức là nhu cầu băng thông và tính toán. Trong bão lũ, việc tải video/ảnh độ phân giải cao lên đám mây là bất khả thi. Cộng đồng nghiên cứu do đó thúc đẩy **Edge AI**: dùng nén mô hình (Quantization, Knowledge Distillation) và kiến trúc nhẹ để suy luận ngay trên thiết bị. Thiết bị biên chỉ truyền một gói metadata gọn nhẹ (vài KB) chứa các thuộc tính đã số hóa, bảo đảm tín hiệu cầu cứu vẫn thâm nhập qua hạ tầng tắc nghẽn. Nền tảng ResQConnect là minh chứng cho việc triển khai mô hình ngôn ngữ thu gọn phân loại/phân luồng (triage) trực tiếp trên thiết bị ở chế độ ngoại tuyến; các con số về độ trễ suy luận nhẹ trên biên (mức mili-giây) được dẫn từ EmergencyNet — kiến trúc CNN nhẹ chạy trên drone/thiết bị nhúng.
+Thách thức chí mạng của mô hình đa phương thức là nhu cầu băng thông và tính toán. Trong bão lũ, việc tải video/ảnh độ phân giải cao lên đám mây là bất khả thi. Cộng đồng nghiên cứu do đó thúc đẩy **Edge AI**: dùng nén mô hình (Quantization, Knowledge Distillation) và kiến trúc nhẹ để suy luận ngay trên thiết bị. Thiết bị biên chỉ truyền một gói metadata gọn nhẹ (dưới 1 KB, định lượng ở Mục Thảo luận) chứa các thuộc tính đã số hóa, bảo đảm tín hiệu cầu cứu vẫn thâm nhập qua hạ tầng tắc nghẽn. Nền tảng ResQConnect là minh chứng cho việc triển khai mô hình ngôn ngữ thu gọn phân loại/phân luồng (triage) trực tiếp trên thiết bị ở chế độ ngoại tuyến; các con số về độ trễ suy luận nhẹ trên biên (mức mili-giây) được dẫn từ EmergencyNet — kiến trúc CNN nhẹ chạy trên drone/thiết bị nhúng.
 
 ### 2.3. Phân tích không gian – thời gian dựa trên đồ thị
 
@@ -110,7 +110,7 @@ $$
 | $V_i$   | Chỉ số tổn thương nhân khẩu học | $\ge 0$                    | Nhánh multi-label ghép chung bộ phân loại văn bản |
 | $C_i$   | Độ tin cậy thông tin                | $(0,1]$                    | Heuristic tổng hợp nhẹ                                |
 
-Nhờ Edge AI, thiết bị chỉ gửi một chuỗi JSON chứa $(L_i, T_i, F_i, E_i, N_i, V_i, C_i)$ với kích thước vài KB thay vì ảnh/video hàng MB.
+Nhờ Edge AI, thiết bị chỉ gửi một chuỗi JSON chứa $(L_i, T_i, F_i, E_i, N_i, V_i, C_i)$ với kích thước dưới 1 KB (đo được 100–111 byte, xem exp10) thay vì ảnh/video hàng MB.
 
 **Thiết kế khả thi tại biên.** Bốn thuộc tính $L, T, E, N$ và $F$ bám sát cam kết của đề tài (ảnh qua MobileNetV3, văn bản qua DistilBERT đã lượng tử hóa). Hai thuộc tính bổ sung được thiết kế để **không phát sinh mô hình học sâu nặng**:
 
@@ -255,7 +255,7 @@ trong đó $\mu$ là **trần khuếch đại** do ban chỉ huy đặt: $\mu=1$
 
 Xếp hạng $\mathcal{P}(C_k)$ giảm dần cho ngay danh sách ưu tiên hành động; kết hợp tọa độ trọng tâm cụm, đây là đầu vào lý tưởng cho các thuật toán tối ưu định tuyến (A\* cost-aware, multi-commodity routing).
 
-**Ghi chú về việc dùng lại $F, E$ ở hai khâu.** Hai thuộc tính $F$ (mức ngập) và $E$ (mức khẩn cấp) xuất hiện cả ở khâu gom cụm (qua $\mathcal{S}_{context}$) lẫn khâu ưu tiên (qua $\mathcal{F}_{max}, \mathcal{E}_{agg}$). Đây **không phải double-counting sai** vì hai khâu đo hai đại lượng khác bản chất: $\mathcal{S}_{context}$ đo *độ tương đồng* giữa cặp sự kiện (để quyết định chúng có cùng một tình huống hay không), còn $\mathcal{F}_{max}/\mathcal{E}_{agg}$ đo *độ nghiêm trọng tuyệt đối* của cụm (để xếp hạng). Tuy vậy cần thừa nhận một hệ quả: cụm được gom vì $F$ tương đồng thì $\mathcal{F}_{max}$ của nó gần như chắc chắn cao — nên $\mathcal{F}_{max}$ nên hiểu là "mức ngập đặc trưng của một quần thể đã đồng nhất" chứ không phải một tín hiệu độc lập hoàn toàn với tiêu chí gom cụm. Chúng tôi **định lượng** mức vòng tròn này ở Thí nghiệm 6 (Mục 5.8): loại bỏ $\mathcal{S}_{context}$ khỏi đồ thị làm *đổi kết quả phân cụm* (ARI giảm) nhưng gần như *không đổi thứ hạng ưu tiên* (Kendall's τ = 0,983), cho thấy $\mathcal{S}_{context}$ chủ yếu hỗ trợ *gom nhóm* chứ không âm thầm định đoạt *thứ hạng*.
+**Ghi chú về việc dùng lại $F, E$ ở hai khâu.** Hai thuộc tính $F$ (mức ngập) và $E$ (mức khẩn cấp) xuất hiện cả ở khâu gom cụm (qua $\mathcal{S}_{context}$) lẫn khâu ưu tiên (qua $\mathcal{F}_{max}, \mathcal{E}_{agg}$). Đây **không phải double-counting sai** vì hai khâu đo hai đại lượng khác bản chất: $\mathcal{S}_{context}$ đo *độ tương đồng* giữa cặp sự kiện (để quyết định chúng có cùng một tình huống hay không), còn $\mathcal{F}_{max}/\mathcal{E}_{agg}$ đo *độ nghiêm trọng tuyệt đối* của cụm (để xếp hạng). Tuy vậy cần thừa nhận một hệ quả: cụm được gom vì $F$ tương đồng thì $\mathcal{F}_{max}$ của nó gần như chắc chắn cao — nên $\mathcal{F}_{max}$ nên hiểu là "mức ngập đặc trưng của một quần thể đã đồng nhất" chứ không phải một tín hiệu độc lập hoàn toàn với tiêu chí gom cụm. Chúng tôi **định lượng** mức vòng tròn này ở Thí nghiệm 6 (Mục 5.8): loại bỏ $\mathcal{S}_{context}$ khỏi đồ thị làm *đổi kết quả phân cụm* (ARI giảm) nhưng gần như *không đổi thứ hạng ưu tiên* (Kendall's τ = 0,9829), cho thấy $\mathcal{S}_{context}$ chủ yếu hỗ trợ *gom nhóm* chứ không âm thầm định đoạt *thứ hạng*.
 
 #### 4.4.1. Bảng tổng kết các thay đổi so với bản gốc (V1 → V2)
 
@@ -282,7 +282,7 @@ Xếp hạng $\mathcal{P}(C_k)$ giảm dần cho ngay danh sách ưu tiên hành
 - **240 sự kiện lõi** phân bố quanh **6 "ốc đảo" ngập** (mỗi cụm ~40 điểm, có nhãn `gt_cluster` để đo ARI/NMI).
 - **20 sự kiện nhiễu** rải rác, khoảng 40% là tin giả.
 - **25 sự kiện kịch bản minh họa** (S1–S4), mỗi kịch bản stress-test một quyết định thiết kế:
-  - **S1:** hai điểm ngập nóc cách nhau ~90 km (kiểm tra gating tách cụm).
+  - **S1:** hai điểm ngập nóc cách nhau ~103 km (kiểm tra gating tách cụm).
   - **S2:** cụm nhiều đối tượng yếu thế (kiểm tra $\mathcal{V}_{agg}$ khuếch đại).
   - **S3:** tin giả cô lập thổi phồng 200 người (kiểm tra cổng $C_i$).
   - **S4:** cụm đông-ngập nhẹ vs ít-ngập nóc (kiểm tra $\mathcal{F}_{max}$).
@@ -302,7 +302,7 @@ Toàn bộ pipeline hiện thực bằng Python (`numpy`, `networkx`, `python-lo
 | Cộng (additive) | 0,892 |    **100,07**    |         213,95         |    6    |
 | Nhân/Gating     | 0,892 |     **0,30**     |          1,42          |    27    |
 
-Dạng cộng tạo ra các cụm có đường kính trung bình **100 km** — vô nghĩa cho điều phối ca nô. Dạng gating kéo đường kính xuống **0,30 km**, đúng tầm hoạt động thực tế. Điểm mấu chốt: gating **không** hy sinh độ chính xác phân cụm mà chỉ sửa hình học không gian của cụm.
+Dạng cộng tạo ra các cụm có đường kính trung bình **100 km** — vô nghĩa cho điều phối ca nô. Dạng gating kéo đường kính xuống **0,30 km**, đúng tầm hoạt động thực tế. Điểm mấu chốt: gating **không** hy sinh độ chính xác phân cụm mà chỉ sửa hình học không gian của cụm. Sự trùng khớp ARI được giải thích minh bạch: hai dạng cho **cùng một phân hoạch trên 264 điểm có nhãn ground-truth** (thành 6 nhóm địa lý); khác biệt 6 vs 27 cụm hoàn toàn nằm ở 21 điểm nhiễu (`gt_cluster = -1`) mà cổng gating tách thành các cụm đơn lẻ còn dạng cộng gộp vào các cụm lớn — và các điểm nhiễu này bị mặt nạ loại bỏ *trước khi* tính ARI/NMI. Vậy tương phản "6 vs 27 cụm" chứng minh lợi ích của gating về **độ gắn kết địa lý và cô lập nhiễu**, không phải về ARI (vốn giống hệt theo cấu trúc bài toán).
 
 **(1B) Chuẩn hóa thang đo.** Không chuẩn hóa, cụm đứng đầu bảng xếp hạng là cụm có tổng dân số lớn nhất (216 người, lõi thô 71,65) — dân số áp đảo mọi yếu tố khác. Sau chuẩn hóa $[0,1]$, cụm đứng đầu là cụm có lõi rủi ro cân bằng (0,82) với $\mathcal{P}=1,52$ — phản ánh đúng tổ hợp khẩn cấp + ngập + dân số.
 
@@ -380,7 +380,7 @@ Ta đánh giá heuristic tin cậy $C_i$ như một bộ phát hiện tin giả 
 
 ### 5.10. Thí nghiệm 9 — Một độ đo phân biệt vượt trên ARI
 
-ARI bão hòa ở đỉnh bảng xếp hạng (Louvain, Leiden, Agglomerative, và cả HDBSCAN đều quanh $0{,}89$–$0{,}892$), có nguy cơ che các khác biệt chất lượng thật. Ta bổ sung bộ ba homogeneity/completeness/V-measure, phân rã chất lượng cụm thành hai trục diễn giải được. Phân rã này phân biệt tốt hơn hẳn ở đúng loại lỗi quan trọng ở đây — **completeness**, tức một sự kiện ground-truth có bị xé lẻ ra nhiều cụm không. Spectral Clustering, dù ARI chỉ cách nhóm gần-hòa $0{,}003$, bị phơi bày là làm vỡ vụn sự kiện: completeness chỉ $0{,}595$ (V-measure $0{,}727$) so với completeness $1{,}0$ của Louvain (V-measure $0{,}927$). Độ trải completeness giữa các phương pháp là $0{,}405$ so với độ trải ARI chỉ $0{,}55$ dồn ở đầu thấp, nên bộ ba xếp hạng được các phương pháp đỉnh mà ARI không tách nổi: Louvain/Leiden đạt completeness hoàn hảo trong khi HDBSCAN, hòa về ARI, tụt xuống $0{,}929$ vì gộp các ốc đảo. Do đó ta báo cáo V-measure kèm ARI xuyên suốt.
+ARI bão hòa ở đỉnh bảng xếp hạng (Louvain, Leiden, Agglomerative, và cả HDBSCAN đều quanh $0{,}89$–$0{,}892$), có nguy cơ che các khác biệt chất lượng thật. Ta bổ sung bộ ba homogeneity/completeness/V-measure, phân rã chất lượng cụm thành hai trục diễn giải được. Phân rã này phân biệt tốt hơn hẳn ở đúng loại lỗi quan trọng ở đây — **completeness**, tức một sự kiện ground-truth có bị xé lẻ ra nhiều cụm không. Nó phơi bày hai loại lỗi mà ARI làm mờ. Thứ nhất, ở đầu thấp, Spectral Clustering làm vỡ vụn sự kiện: completeness chỉ $0{,}595$ (V-measure $0{,}727$) so với $1{,}0$ của Louvain (V-measure $0{,}927$). Thứ hai, và đáng nói hơn, trong bốn phương pháp dẫn đầu mà ARI gộp thành gần-hòa (Louvain, Leiden, Agglomerative, HDBSCAN — chênh nhau trong $0{,}002$ ARI), completeness vẫn tách được: Louvain/Leiden/Agglomerative đạt hoàn hảo $1{,}0$ trong khi HDBSCAN tụt xuống $0{,}929$ vì gộp các ốc đảo — một khoảng cách completeness $0{,}07$ ở nơi ARI chỉ hiện $0{,}002$. (Độ trải ARI toàn dải $0{,}55$ là thật nhưng dồn hết ở đầu thấp — Spectral $0{,}339$, K-Means $0{,}688$ — nên không xếp hạng nổi nhóm dẫn đầu.) Do đó ta báo cáo V-measure kèm ARI xuyên suốt.
 
 ### 5.11. Trực quan hóa
 
@@ -394,7 +394,7 @@ Pipeline sinh một **dashboard bản đồ Leaflet tự chứa** hiển thị c
 
 | Lĩnh vực                                | Giá trị mang lại                                                                                                                                                |
 | :---------------------------------------- | :----------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| **Hạ tầng viễn thông & Edge**   | Duy trì sự sống còn (resilience) khi mạng sụp đổ; thay vì tải ảnh/video hàng MB, thiết bị chỉ gửi gói metadata JSON đo được **112 byte** (137 byte kèm định danh và cờ ảnh) — nhỏ hơn ba–bốn bậc độ lớn, đủ luồn qua hạ tầng tắc nghẽn |
+| **Hạ tầng viễn thông & Edge**   | Duy trì sự sống còn (resilience) khi mạng sụp đổ; thay vì tải ảnh/video hàng MB, thiết bị chỉ gửi gói metadata JSON nén đo được **100–111 byte** (min/median/max trên toàn bộ 285 sự kiện, gồm định danh, toạ độ, tem thời gian epoch và các trường $L,T,F,E,N,V,C$ + cờ ảnh; xem exp10) — nhỏ hơn ba–bốn bậc độ lớn, đủ luồn qua hạ tầng tắc nghẽn |
 | **Khoa học dữ liệu & AI**        | Chuyển bài toán phân loại tĩnh thành khai phá cấu trúc mạng (network topology mining), định lượng rủi ro lan truyền bằng toán học              |
 | **Đạo đức cứu hộ & xã hội** | Tích hợp chỉ số tổn thương vào hàm ưu tiên, tái định hình sự công bằng (equity), cứu đúng người đúng thời điểm                         |
 
@@ -411,14 +411,14 @@ Pipeline sinh một **dashboard bản đồ Leaflet tự chứa** hiển thị c
 
 ### 7.1. Các mối đe dọa đến tính hợp lệ (Threats to Validity)
 
-- **Hợp lệ nội tại (internal).** Kết quả dựa trên dữ liệu synthetic có ground-truth do chính nhóm sinh; các "ốc đảo" ngập được thiết kế tách biệt nên độ chính xác cao (ARI 0,89) một phần phản ánh độ tách của dữ liệu, không thuần túy là sức mạnh phương pháp. Giảm thiểu: bổ sung kiểm chứng trên dữ liệu thật (Mục 7).
+- **Hợp lệ nội tại (internal).** Kết quả dựa trên dữ liệu synthetic có ground-truth do chính nhóm sinh; các "ốc đảo" ngập được thiết kế tách biệt nên độ chính xác cao (ARI 0,892) một phần phản ánh độ tách của dữ liệu, không thuần túy là sức mạnh phương pháp. Giảm thiểu: bổ sung kiểm chứng trên dữ liệu thật (Mục 7).
 - **Hợp lệ ngoại tại (external).** Chỉ thử trên một vùng địa lý (Miền Trung VN) và một chế độ thảm họa (bão lũ). Chưa rõ khung tổng quát hóa cho đô thị mật độ cao khác, hay chế độ thảm họa khác (động đất, cháy rừng). Các tham số $\sigma_{geo}, \tau$ cần hiệu chỉnh lại cho từng bối cảnh.
 - **Hợp lệ khái niệm (construct).** ARI/NMI đo *độ khớp cấu trúc cụm* với ground-truth, KHÔNG trực tiếp đo *chất lượng quyết định cứu hộ*. Thí nghiệm 7 (Mục 5.8) bước đầu khắc phục điều này bằng một độ đo hướng-kết-quả (thời gian đến nạn nhân yếu thế qua mô phỏng điều phối), cho thấy trọng số tổn thương cải thiện 10,4%; và Thí nghiệm 9 (Mục 5.10) bổ sung V-measure để phân biệt chất lượng cụm mà ARI làm bão hòa. Dù vậy các độ đo này vẫn chạy trên dữ liệu synthetic và mô hình điều phối đơn giản hóa; kiểm chứng kết quả cứu hộ trên dữ liệu/địa hình thực vẫn là việc cần làm.
 - **Hợp lệ thống kê (conclusion).** exp3 chạy 10 seed cho kết quả ổn định, nhưng các thí nghiệm khác chủ yếu ở seed = 42. Nên báo cáo trung bình ± độ lệch chuẩn qua nhiều seed cho mọi con số chính.
 
 ## 8. Kết luận
 
-Bài báo đề xuất một khung end-to-end kết hợp Edge AI và Lý thuyết Đồ thị Trọng số cho phân cụm và ưu tiên sự kiện cứu hộ bão lũ, lấp đầy ba khe hở khoa học: thiếu thuộc tính vật lý trong trọng số cạnh, điểm mù về tổn thương nhân khẩu học, và thiếu ưu tiên cấp cụm. Hai đóng góp phương pháp then chốt — **hàm trọng số nhân/gating** để địa lý chi phối cấu trúc cụm, và **hàm ưu tiên với hệ số công bằng làm thừa số khuếch đại** — được kiểm chứng định lượng: gating giảm đường kính cụm từ 100 km xuống 0,30 km mà giữ nguyên ARI 0,89; cổng tin cậy chặn 55% dân số ảo từ tin giả. So sánh công bằng trên cùng đồ thị gating cho thấy Louvain vượt Spectral Clustering (ARI 0,34) và HDBSCAN (ARI 0,89 nhưng đường kính 25 km), đồng thời không cần biết trước $K$ như Agglomerative. Kiểm nghiệm Monte-Carlo (200 lần, 3 mức nhiễu) xác nhận xếp hạng $\mathcal{P}(C_k)$ ổn định (Kendall's τ ≥ 0,94 ở ±0,10; top-3 cụm giữ nguyên 99%). Kết quả định hình một chuẩn mực kiến trúc mới cho nền tảng ứng phó thảm họa thông minh, hoạt động bền vững ngay cả khi hạ tầng viễn thông suy kiệt.
+Bài báo đề xuất một khung end-to-end kết hợp Edge AI và Lý thuyết Đồ thị Trọng số cho phân cụm và ưu tiên sự kiện cứu hộ bão lũ, lấp đầy ba khe hở khoa học: thiếu thuộc tính vật lý trong trọng số cạnh, điểm mù về tổn thương nhân khẩu học, và thiếu ưu tiên cấp cụm. Hai đóng góp phương pháp then chốt — **hàm trọng số nhân/gating** để địa lý chi phối cấu trúc cụm, và **hàm ưu tiên với hệ số công bằng làm thừa số khuếch đại** — được kiểm chứng định lượng: gating giảm đường kính cụm từ 100 km xuống 0,30 km mà giữ nguyên ARI 0,892; cổng tin cậy chặn 55% dân số ảo từ tin giả. So sánh công bằng trên cùng đồ thị gating cho thấy Louvain vượt Spectral Clustering (ARI 0,339) và HDBSCAN (ARI 0,890 nhưng đường kính 25 km), đồng thời không cần biết trước $K$ như Agglomerative. Kiểm nghiệm Monte-Carlo (200 lần, 3 mức nhiễu) xác nhận xếp hạng $\mathcal{P}(C_k)$ ổn định (Kendall's τ ≥ 0,94 ở ±0,10; top-3 cụm giữ nguyên 99%). Kết quả định hình một chuẩn mực kiến trúc mới cho nền tảng ứng phó thảm họa thông minh, hoạt động bền vững ngay cả khi hạ tầng viễn thông suy kiệt.
 
 ---
 
@@ -479,7 +479,7 @@ Bài báo đề xuất một khung end-to-end kết hợp Edge AI và Lý thuy�
 ## Phụ lục A — Ghi chú soạn thảo và việc cần làm khi chuyển LaTeX
 
 - **Trích dẫn:** `PaperV2.md` đã có sẵn danh mục ~62 nguồn (`[^1]`–`[^62]`). Khi chuyển LaTeX, ánh xạ các trích dẫn trong bài này về BibTeX (repo đã có `splncs04.bst` — style Springer LNCS, gợi ý bài định dạng theo LNCS/hội nghị).
-- **Hình và bảng:** nhúng 6 hình từ `demo/v2/results/figures/` và các bảng số liệu từ `results/tables/*.json`. Mọi con số trong Mục 5 đã đối chiếu trực tiếp với các file JSON đó (seed = 42).
+- **Hình và bảng:** nhúng 7 hình từ `demo/results/figures/` và các bảng số liệu từ `results/tables/*.json`. Mọi con số trong Mục 5 đã đối chiếu trực tiếp với các file JSON đó (seed = 42).
 - **Công thức:** tất cả công thức đã ở dạng LaTeX inline/display, chuyển thẳng sang môi trường `equation`.
 - **Ngôn ngữ:** bản này bằng tiếng Việt; nếu cần bản song ngữ hoặc tiếng Anh cho hội nghị quốc tế, dịch sau khi chốt nội dung.
 - **Cần bổ sung khi có:** tên nhóm tác giả + đơn vị (ĐH Cần Thơ, Trường CNTT&TT), phần Acknowledgements, và mã số đề tài.
