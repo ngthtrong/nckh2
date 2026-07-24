@@ -116,7 +116,7 @@ def generate_noise(rng, n_noise=20) -> list[Event]:
 def narrative_scenarios() -> list[Event]:
     """Kịch bản minh họa thủ công — mỗi cụm chứng minh một fix của Mục 4.
 
-    S1: hai điểm CÙNG ngữ cảnh ngập nặng nhưng CÁCH XA 40km -> gating phải tách.
+    S1: hai điểm CÙNG ngữ cảnh ngập nặng nhưng CÁCH XA ~103km -> gating phải tách.
     S2: một cụm nhỏ có nhiều đối tượng yếu thế -> V_agg (nhân) phải đẩy ưu tiên.
     S3: một báo cáo giả thổi phồng 200 người, C_i thấp -> gate C_i phải hạ nhiệt.
     S4: cụm đông người nhưng ngập nhẹ vs cụm ít người ngập nóc -> F_max & cân bằng.
@@ -124,11 +124,11 @@ def narrative_scenarios() -> list[Event]:
     ev: list[Event] = []
     t0 = BASE_TIME
 
-    # S1 — hai điểm ngập nóc (F≈0.95) nhưng cách xa: Huế vs Hội An (~90km)
+    # S1 — hai điểm ngập nóc (F≈0.95) nhưng cách xa: Huế vs Hội An (~103km)
     ev.append(Event("S1_A", 16.4637, 107.5909, t0, 0.95, 0.9, 3, 0.0, True,
                     "Thừa Thiên Huế", "S1: ngập nóc tại Huế", gt_cluster=100))
     ev.append(Event("S1_B", 15.8801, 108.3380, t0 + timedelta(minutes=5), 0.96, 0.92, 4, 0.0, True,
-                    "Quảng Nam", "S1: ngập nóc tại Hội An (xa 90km)", gt_cluster=101))
+                    "Quảng Nam", "S1: ngập nóc tại Hội An (xa 103km)", gt_cluster=101))
 
     # S2 — cụm nhỏ 5 điểm sát nhau, nhiều đối tượng yếu thế
     for k in range(5):
