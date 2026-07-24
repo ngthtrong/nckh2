@@ -39,14 +39,14 @@ def fig_gating_vs_additive():
     fig, ax1 = plt.subplots(figsize=(6, 4))
     x = range(len(modes))
     bars = ax1.bar(x, diam, color=["#c0392b", "#27ae60"], alpha=0.85)
-    ax1.set_ylabel("Đường kính cụm trung bình (km)")
+    ax1.set_ylabel("Mean cluster diameter (km)")
     ax1.set_xticks(list(x))
-    ax1.set_xticklabels(["Cộng (additive)", "Nhân/Gating"])
+    ax1.set_xticklabels(["Additive", "Multiplicative/Gating"])
     ax1.set_yscale("log")
     for b, d in zip(bars, diam):
         ax1.text(b.get_x() + b.get_width() / 2, d, f"{d:.2f} km",
                  ha="center", va="bottom", fontsize=9)
-    ax1.set_title("Tác động của gating không gian tới độ gắn kết địa lý cụm\n(ARI giữ nguyên ≈ %.2f)" % ari[0])
+    ax1.set_title("Effect of spatial gating on cluster geographic cohesion\n(ARI unchanged ≈ %.2f)" % ari[0])
     fig.savefig(FIGURES / "fig1_gating_vs_additive.png")
     plt.close(fig)
 
@@ -58,11 +58,11 @@ def fig_tanh_saturation():
     key_scaled = [k for k in rows[0] if k.startswith("V_agg_with_s")][0]
     scaled = [r[key_scaled] for r in rows]
     fig, ax = plt.subplots(figsize=(6, 4))
-    ax.plot(v, no_scale, "o-", color="#c0392b", label="tanh(ΣV)  — bão hòa sớm")
-    ax.plot(v, scaled, "s-", color="#27ae60", label="tanh(ΣV/s), s=10 — phân biệt tốt")
-    ax.set_xlabel("Tổng tổn thương trong cụm  ΣV")
-    ax.set_ylabel("Hệ số V_agg")
-    ax.set_title("Chống bão hòa tanh: giữ khả năng phân biệt\ncụm ít vs nhiều đối tượng yếu thế")
+    ax.plot(v, no_scale, "o-", color="#c0392b", label="tanh(ΣV) — early saturation")
+    ax.plot(v, scaled, "s-", color="#27ae60", label="tanh(ΣV/s), s=10 — good discrimination")
+    ax.set_xlabel("Total vulnerability in cluster  ΣV")
+    ax.set_ylabel("Amplification factor V_agg")
+    ax.set_title("Anti-saturation of tanh: preserving discrimination\nbetween clusters with few vs. many vulnerable subjects")
     ax.legend()
     fig.savefig(FIGURES / "fig2_tanh_saturation.png")
     plt.close(fig)
@@ -70,14 +70,14 @@ def fig_tanh_saturation():
 
 def fig_confidence_gate():
     row = load("exp1_E_confidence_gate.json")[0]
-    labels = ["Không gate C_i\n(N thô)", "Có gate C_i\n(N·C_i)"]
+    labels = ["No C_i gate\n(raw N)", "With C_i gate\n(N·C_i)"]
     vals = [row["cluster_N_ungated"], row["cluster_N_gated"]]
     fig, ax = plt.subplots(figsize=(5.5, 4))
     bars = ax.bar(labels, vals, color=["#c0392b", "#27ae60"], alpha=0.85)
     for b, v in zip(bars, vals):
         ax.text(b.get_x() + b.get_width() / 2, v, f"{v:.0f}", ha="center", va="bottom")
-    ax.set_ylabel("Tổng số người quy đổi của cụm chứa tin giả")
-    ax.set_title("Gate C_i hạ nhiệt tin giả (S3)\nC_i tin giả = %.2f, giảm %.0f%%"
+    ax.set_ylabel("Effective population of cluster with fake report")
+    ax.set_title("C_i gate dampens a fake report (S3)\nfake C_i = %.2f, reduced by %.0f%%"
                  % (row["fake_confidence_Ci"], row["reduction_pct"]))
     fig.savefig(FIGURES / "fig3_confidence_gate.png")
     plt.close(fig)
@@ -89,16 +89,16 @@ def fig_sigma_sweep():
     diam = [r["mean_diam_km"] for r in rows]
     nclu = [r["n_clusters"] for r in rows]
     fig, ax1 = plt.subplots(figsize=(6.5, 4))
-    ax1.plot(sig, diam, "o-", color="#2980b9", label="Đường kính cụm TB (km)")
-    ax1.set_xlabel("σ_geo (mét)")
-    ax1.set_ylabel("Đường kính cụm TB (km)", color="#2980b9")
+    ax1.plot(sig, diam, "o-", color="#2980b9", label="Mean cluster diameter (km)")
+    ax1.set_xlabel("σ_geo (meters)")
+    ax1.set_ylabel("Mean cluster diameter (km)", color="#2980b9")
     ax1.tick_params(axis="y", labelcolor="#2980b9")
     ax2 = ax1.twinx()
-    ax2.plot(sig, nclu, "s--", color="#e67e22", label="Số cụm")
-    ax2.set_ylabel("Số cụm", color="#e67e22")
+    ax2.plot(sig, nclu, "s--", color="#e67e22", label="Number of clusters")
+    ax2.set_ylabel("Number of clusters", color="#e67e22")
     ax2.tick_params(axis="y", labelcolor="#e67e22")
     ax2.grid(False)
-    ax1.set_title("Độ nhạy σ_geo: đánh đổi bán kính gating vs số cụm")
+    ax1.set_title("σ_geo sensitivity: gating radius vs cluster count trade-off")
     fig.savefig(FIGURES / "fig4_sigma_sweep.png")
     plt.close(fig)
 
@@ -114,11 +114,11 @@ def fig_resolution_sweep():
     ax1.set_ylabel("ARI", color="#27ae60")
     ax1.tick_params(axis="y", labelcolor="#27ae60")
     ax2 = ax1.twinx()
-    ax2.plot(lam, nclu, "s--", color="#8e44ad", label="Số cụm")
-    ax2.set_ylabel("Số cụm", color="#8e44ad")
+    ax2.plot(lam, nclu, "s--", color="#8e44ad", label="Number of clusters")
+    ax2.set_ylabel("Number of clusters", color="#8e44ad")
     ax2.tick_params(axis="y", labelcolor="#8e44ad")
     ax2.grid(False)
-    ax1.set_title("Độ nhạy λ: tăng λ ⇒ chia cụm sâu hơn (ARI ổn định tới λ≈1.5)")
+    ax1.set_title("λ sensitivity: higher λ ⇒ finer clusters (ARI stable up to λ≈1.5)")
     fig.savefig(FIGURES / "fig5_resolution_sweep.png")
     plt.close(fig)
 
@@ -132,15 +132,15 @@ def fig_baselines():
     colors = ["#27ae60" if ("Louvain" in r["method"] or "Leiden" in r["method"])
               else "#c0392b" for r in rows]
     a1.barh(names, ari, color=colors, alpha=0.85)
-    a1.set_xlabel("ARI (cao hơn = tốt hơn)")
-    a1.set_title("Chất lượng cụm vs ground-truth")
+    a1.set_xlabel("ARI (higher = better)")
+    a1.set_title("Clustering quality vs ground-truth")
     a1.invert_yaxis()
     a2.barh(names, diam, color=colors, alpha=0.85)
-    a2.set_xlabel("Đường kính cụm TB (km, thấp hơn = gắn kết hơn)")
-    a2.set_title("Độ gắn kết địa lý")
+    a2.set_xlabel("Mean cluster diameter (km, lower = more cohesive)")
+    a2.set_title("Geographic cohesion")
     a2.set_xscale("log")
     a2.invert_yaxis()
-    fig.suptitle("Louvain/Leiden (đồ thị gating) vs K-Means / DBSCAN")
+    fig.suptitle("Louvain/Leiden (gating graph) vs K-Means / DBSCAN")
     fig.savefig(FIGURES / "fig6_baselines.png")
     plt.close(fig)
 
@@ -153,23 +153,23 @@ def fig_ranking_stability():
     top3 = [r["top3_set_preserved_pct"] for r in rows]
     fig, ax1 = plt.subplots(figsize=(7, 4.5))
     x = range(len(levels))
-    ax1.bar([i - 0.15 for i in x], tau_mean, 0.3, color="#27ae60", alpha=0.85, label="τ trung bình")
-    ax1.bar([i + 0.15 for i in x], tau_min, 0.3, color="#e67e22", alpha=0.85, label="τ tối thiểu")
+    ax1.bar([i - 0.15 for i in x], tau_mean, 0.3, color="#27ae60", alpha=0.85, label="Mean τ")
+    ax1.bar([i + 0.15 for i in x], tau_min, 0.3, color="#e67e22", alpha=0.85, label="Min τ")
     ax1.set_ylabel("Kendall's τ")
     ax1.set_xticks(list(x))
     ax1.set_xticklabels(levels)
-    ax1.set_xlabel("Mức dao động ω")
+    ax1.set_xlabel("ω perturbation level")
     ax1.set_ylim(0.75, 1.02)
-    ax1.axhline(y=0.9, color="#c0392b", linestyle="--", alpha=0.5, label="ngưỡng τ = 0.9")
+    ax1.axhline(y=0.9, color="#c0392b", linestyle="--", alpha=0.5, label="τ = 0.9 threshold")
     ax1.legend(loc="lower left", fontsize=8)
     ax2 = ax1.twinx()
-    ax2.plot(list(x), top3, "s-", color="#8e44ad", label="Top-3 giữ nguyên (%)")
-    ax2.set_ylabel("Top-3 giữ nguyên (%)", color="#8e44ad")
+    ax2.plot(list(x), top3, "s-", color="#8e44ad", label="Top-3 preserved (%)")
+    ax2.set_ylabel("Top-3 preserved (%)", color="#8e44ad")
     ax2.tick_params(axis="y", labelcolor="#8e44ad")
     ax2.set_ylim(60, 105)
     ax2.grid(False)
     ax2.legend(loc="lower right", fontsize=8)
-    ax1.set_title("Độ ổn định xếp hạng P(C_k) khi trọng số ω dao động\n(200 thử nghiệm Monte-Carlo mỗi mức)")
+    ax1.set_title("Ranking stability of P(C_k) under ω perturbation\n(200 Monte-Carlo trials per level)")
     fig.savefig(FIGURES / "fig7_ranking_stability.png")
     plt.close(fig)
 

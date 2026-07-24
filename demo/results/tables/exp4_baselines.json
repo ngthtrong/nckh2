@@ -30,6 +30,16 @@
     "same_graph_as_ours": true
   },
   {
+    "method": "Spectral (affinity gating, K=12 true GT labels)",
+    "n_clusters": 12,
+    "ari": 0.6484,
+    "nmi": 0.8248,
+    "mean_diam_km": 38.9952,
+    "max_diam_km": 186.1363,
+    "needs_preset_k": true,
+    "same_graph_as_ours": true
+  },
+  {
     "method": "HDBSCAN (dist=1-w gating)",
     "n_clusters": 11,
     "ari": 0.8903,
@@ -50,7 +60,7 @@
     "same_graph_as_ours": true
   },
   {
-    "method": "K-Means (K=12, đúng K, tọa độ)",
+    "method": "K-Means (K=12, correct K, coords)",
     "n_clusters": 12,
     "ari": 0.6875,
     "nmi": 0.8336,
@@ -60,7 +70,7 @@
     "same_graph_as_ours": false
   },
   {
-    "method": "K-Means (K=3, sai K, tọa độ)",
+    "method": "K-Means (K=3, wrong K, coords)",
     "n_clusters": 3,
     "ari": 0.4329,
     "nmi": 0.6296,
@@ -70,7 +80,7 @@
     "same_graph_as_ours": false
   },
   {
-    "method": "DBSCAN (eps=0.3, tọa độ)",
+    "method": "DBSCAN (eps=0.3, coords)",
     "n_clusters": 15,
     "ari": 0.6439,
     "nmi": 0.7826,
@@ -80,7 +90,7 @@
     "same_graph_as_ours": false
   },
   {
-    "method": "DBSCAN (eps=0.6, tọa độ)",
+    "method": "DBSCAN (eps=0.6, coords)",
     "n_clusters": 7,
     "ari": 0.73,
     "nmi": 0.8732,

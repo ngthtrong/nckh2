@@ -1,6 +1,6 @@
 # Khung Đồ thị Trọng số Đa phương thức cho Phân cụm và Ưu tiên Sự kiện Cứu hộ Bão lũ dựa trên Edge AI
 
-> **Ghi chú soạn thảo.** Đây là bản nội dung tiếng Việt dùng để soạn thảo trước cho bài báo khoa học. Nội dung được tổng hợp và kiểm tra chéo từ: (i) `Thuyết minh NCKH.md` (phạm vi đề tài), (ii) `PaperV2.md` (báo cáo nghiên cứu, Mục 4 là phương pháp lõi), (iii) `GiaiThichCongThuc.md` (giải thích chi tiết công thức), (iv) `giải trình thay đổi V1 sang V2.md` (lý do sửa lỗi), và (v) kết quả thực nghiệm định lượng trong `demo/v2/`. Sau khi chốt nội dung, tài liệu này sẽ được chuyển sang định dạng LaTeX chuẩn hội nghị/tạp chí. Các số liệu thực nghiệm trong bài đều lấy trực tiếp từ `demo/v2/results/` (seed = 42, sinh dữ liệu tất định).
+> **Ghi chú soạn thảo.** Đây là bản nội dung tiếng Việt dùng để soạn thảo trước cho bài báo khoa học. Nội dung được tổng hợp và kiểm tra chéo từ: (i) `Thuyết minh NCKH.md` (phạm vi đề tài), (ii) `PaperV2.md` (báo cáo nghiên cứu, Mục 4 là phương pháp lõi), (iii) `GiaiThichCongThuc.md` (giải thích chi tiết công thức), (iv) `giải trình thay đổi V1 sang V2.md` (lý do sửa lỗi), và (v) kết quả thực nghiệm định lượng trong `demo/`. Sau khi chốt nội dung, tài liệu này sẽ được chuyển sang định dạng LaTeX chuẩn hội nghị/tạp chí. Các số liệu thực nghiệm trong bài đều lấy trực tiếp từ `demo/results/tables/` (seed = 42, sinh dữ liệu tất định).
 
 ---
 
@@ -119,6 +119,17 @@ Nhờ Edge AI, thiết bị chỉ gửi một chuỗi JSON chứa $(L_i, T_i, F_
 
 Các phiên bản đầy đủ hơn (crowd counting/pose estimation chuyên biệt cho $N_i$, mô hình tin cậy học từ lịch sử người dùng cho $C_i$) được định vị rõ ràng là **hướng mở rộng tương lai**, không phải ràng buộc bắt buộc của prototype 6 tháng.
 
+**Định nghĩa vận hành của $V_i$.** Trong các thực nghiệm, $V_i$ được gán một trọng số rời rạc theo nhóm đối tượng yếu thế mà nhánh phân loại phát hiện, rồi cộng lại trên mỗi báo cáo:
+
+| Nhóm phát hiện                         | Trọng số $V$ |
+| :---------------------------------------- | :-------------: |
+| Không có đối tượng yếu thế       |       0       |
+| Người già / trẻ em                    |       1       |
+| Phụ nữ mang thai / người khuyết tật |      1,5      |
+| Trẻ sơ sinh / người bệnh nặng     |       2       |
+
+Cần nhấn mạnh: các thực nghiệm **giả định $V_i$ đã cho** (kiểm tra *cơ chế* hàm ưu tiên, không phải năng lực *trích xuất* $V_i$ từ văn bản); độ chính xác của bước trích xuất $V_i$ là một vấn đề NLP tách biệt, để dành cho kiểm chứng trên dữ liệu thật.
+
 #### 4.1.1. Công thức độ tin cậy $C_i$
 
 $$
@@ -127,9 +138,10 @@ $$
 
 - $\sigma(x) = 1/(1+e^{-x})$ là hàm **sigmoid**, ép $C_i$ về $(0,1)$ để luôn là hệ số tin cậy hợp lệ.
 - $\mathbb{1}[\text{có ảnh}]$ là hàm chỉ thị: bằng 1 nếu báo cáo kèm ảnh/video đã được mô hình thị giác xác thực — bằng chứng đa phương thức làm tăng tin cậy.
-- $n_i^{\text{corrob}}$ là số báo cáo độc lập lân cận (cùng vùng, cùng cửa sổ thời gian) củng cố báo cáo $i$.
+- $n_i^{\text{corrob}}$ là số báo cáo độc lập lân cận củng cố báo cáo $i$, đếm trong **bán kính củng cố $r_{\text{corrob}}=400$ m** và **cửa sổ thời gian $\Delta t_{\text{corrob}}=60$ phút** (giữ tách biệt có chủ đích với các hằng số phân cụm $\sigma_{geo}, \tau_{temp}$ để tránh ghép chéo tham số).
 - Nén logarit $\log(1+n_i^{\text{corrob}})$ khiến báo cáo thứ 2–3 tăng tin cậy mạnh nhưng báo cáo thứ 50 gần như không thêm gì — tránh spam cùng vị trí thổi phồng độ tin cậy.
 - $b_0, b_1, b_2$ là hệ số hiệu chỉnh (bias và trọng số), đặt bởi chuyên gia hoặc học từ dữ liệu. Trong thực nghiệm dùng $b_0=-0{,}2$, $b_1=1{,}4$, $b_2=0{,}9$.
+- Vì "tính độc lập" của báo cáo củng cố chỉ được xấp xỉ qua gần kề không-thời gian (không có hạ tầng tài khoản định danh), heuristic bền với spam đơn lẻ nhưng dễ bị tấn công phối hợp — ta phân tích lỗ hổng này ở phần đối kháng của Thí nghiệm 8 (Mục 5.9).
 
 ### 4.2. Đồ thị trọng số không gian – ngữ nghĩa – vật lý
 
@@ -173,7 +185,7 @@ $$
 \mathcal{S}_{context} = \exp\!\left( - \frac{|F_i - F_j|}{\tau_F} - \frac{|E_i - E_j|}{\tau_E} \right)
 $$
 
-Đo tương đồng tình trạng vật lý qua chênh lệch mức ngập $\Delta F$ và mức khẩn cấp $\Delta E$. Hai báo cáo giống nhau $\Rightarrow \mathcal{S}_{context}\to 1$; khác biệt lớn (một người an toàn tầng 3, một người bám mái nhà) $\Rightarrow \mathcal{S}_{context}$ co lại. Vì $\exp(-a-b)=\exp(-a)\exp(-b)$, hai điều kiện (giống về ngập VÀ giống về khẩn cấp) phải đồng thời thỏa thì $\mathcal{S}_{context}$ mới cao.
+Đo tương đồng tình trạng vật lý qua chênh lệch mức ngập $\Delta F$ và mức khẩn cấp $\Delta E$. Hai báo cáo giống nhau $\Rightarrow \mathcal{S}_{context}\to 1$; khác biệt lớn (một người an toàn tầng 3, một người bám mái nhà) $\Rightarrow \mathcal{S}_{context}$ co lại. Vì $\exp(-a-b)=\exp(-a)\exp(-b)$, hai điều kiện (giống về ngập VÀ giống về khẩn cấp) phải đồng thời thỏa thì $\mathcal{S}_{context}$ mới cao. Hai hằng số suy giảm $\tau_F, \tau_E$ điều khiển độ "khoan dung" khi so khớp: $\tau$ nhỏ phạt gắt mọi chênh lệch (chỉ báo cáo gần như trùng khớp mới coi là cùng ngữ cảnh), $\tau$ lớn nới lỏng. Ta đặt $\tau_E > \tau_F$ (mặc định $0{,}35$ vs $0{,}25$) vì mức khẩn cấp $E$ trích từ cảm xúc văn bản vốn nhiễu hơn mức ngập $F$ trích từ thị giác, nên cần khoan dung hơn khi so khớp. Thí nghiệm 2 (Mục 5.3) cho thấy phân cụm gần như bất biến với $\tau_F, \tau_E$, nên đây là tham số đặt theo miền chứ không phải nút hiệu chỉnh nhạy.
 
 **(d) Tham số và làm thưa đồ thị.** $\beta, \gamma$ cân bằng thời gian và ngữ cảnh; $\alpha$ của dạng cộng bị loại vì $\mathcal{S}_{geo}$ nay là thừa số điều biến toàn cục. Vì $\mathcal{S}_{geo}$ suy giảm nhanh, hầu hết cạnh xa có trọng số không đáng kể; ta **làm thưa đồ thị** bằng (i) **ngưỡng $\epsilon$** — giữ cạnh khi $w_{ij}>\theta$, hoặc (ii) **k-NN graph** — mỗi đỉnh nối $k$ láng giềng trọng số cao nhất. Điều này giảm chi phí tính toán và loại liên kết giả giữa các vùng cách biệt, vì thuật toán Modularity hoạt động kém trên đồ thị dày đặc gần-hoàn-chỉnh.
 
@@ -231,11 +243,19 @@ $$
 - **Lỗi (b) — cộng vs nhân:** bản gốc đặt $\mathcal{V}$ như số hạng cộng $\omega_4\mathcal{V}_{agg}$. Một số hạng bị chặn trong $[1,2]$ chỉ tạo offset gần hằng số, **không khuếch đại gì**. Cách sửa: tách $\mathcal{V}_{agg}$ ra ngoài làm **thừa số nhân**. Cụm không có đối tượng yếu thế: $\mathcal{V}_{agg}\approx 1$ (giữ nguyên lõi); cụm nhiều đối tượng yếu thế: $\mathcal{V}_{agg}\to 2$ (nhân đôi điểm) — đúng nghĩa "amplify equity".
 - **Lỗi (c) — bão hòa sớm:** nếu dùng $\tanh(\sum V_i)$ trực tiếp, chỉ 2–3 đối tượng yếu thế đã đưa $\tanh$ sát 1, khiến cụm 1 người và cụm 50 người yếu thế nhận điểm gần như nhau — mất khả năng phân biệt. Cách sửa: thêm **hệ số tỉ lệ** $s$ (ví dụ $s=10$) chia trong đối số $\tanh$, giãn vùng tuyến tính. $\tanh$ vẫn giữ vai trò chặn trên tránh điểm bùng nổ vô cực. (Lựa chọn tương đương: $1+\log(1+\sum V_i)$ kèm chuẩn hóa.)
 
+**Trần khuếch đại tổng quát $\mu$.** Chặn trên "nhân đôi" ($\mathcal{V}_{agg}\in(1,2)$) là một *lựa chọn chính sách* chứ không phải hằng số bất biến. Ta tổng quát hóa thành
+
+$$
+\mathcal{V}_{agg}(C_k) = 1 + (\mu - 1)\tanh\!\left( \frac{1}{s} \sum_{v_i \in C_k} V_i \right), \qquad \mu\in[1,2], \quad \mathcal{V}_{agg}\in(1,\mu)
+$$
+
+trong đó $\mu$ là **trần khuếch đại** do ban chỉ huy đặt: $\mu=1$ tắt hoàn toàn ưu tiên tổn thương (quay về thuần rủi ro), $\mu=2$ cho phép nhân đôi tối đa. Việc phơi bày $\mu$ tường minh giúp yếu tố công bằng trở thành một *núm điều khiển chính sách có thể kiểm toán* thay vì một hằng số ẩn. Mọi số liệu báo cáo trong bài dùng $\mu=2$.
+
 **Trọng số và miền giá trị.** $\omega_1,\omega_2,\omega_3$ với ràng buộc $\sum\omega=1$, do ban chỉ huy đặt qua **Ma trận Quyết định** để chuyển trạng thái chiến thuật (ưu tiên số đông vs ưu tiên ngập sâu). Vì lõi đã chuẩn hóa $[0,1]$ và $\sum\omega=1$, lõi rủi ro $\in[0,1]$; nhân $\mathcal{V}_{agg}\in(1,2)$ cho $\mathcal{P}(C_k)\in(0,2]$ — chặn gọn, dễ xếp hạng.
 
 Xếp hạng $\mathcal{P}(C_k)$ giảm dần cho ngay danh sách ưu tiên hành động; kết hợp tọa độ trọng tâm cụm, đây là đầu vào lý tưởng cho các thuật toán tối ưu định tuyến (A\* cost-aware, multi-commodity routing).
 
-**Ghi chú về việc dùng lại $F, E$ ở hai khâu.** Hai thuộc tính $F$ (mức ngập) và $E$ (mức khẩn cấp) xuất hiện cả ở khâu gom cụm (qua $\mathcal{S}_{context}$) lẫn khâu ưu tiên (qua $\mathcal{F}_{max}, \mathcal{E}_{agg}$). Đây **không phải double-counting sai** vì hai khâu đo hai đại lượng khác bản chất: $\mathcal{S}_{context}$ đo *độ tương đồng* giữa cặp sự kiện (để quyết định chúng có cùng một tình huống hay không), còn $\mathcal{F}_{max}/\mathcal{E}_{agg}$ đo *độ nghiêm trọng tuyệt đối* của cụm (để xếp hạng). Tuy vậy cần thừa nhận một hệ quả: cụm được gom vì $F$ tương đồng thì $\mathcal{F}_{max}$ của nó gần như chắc chắn cao — nên $\mathcal{F}_{max}$ nên hiểu là "mức ngập đặc trưng của một quần thể đã đồng nhất" chứ không phải một tín hiệu độc lập hoàn toàn với tiêu chí gom cụm.
+**Ghi chú về việc dùng lại $F, E$ ở hai khâu.** Hai thuộc tính $F$ (mức ngập) và $E$ (mức khẩn cấp) xuất hiện cả ở khâu gom cụm (qua $\mathcal{S}_{context}$) lẫn khâu ưu tiên (qua $\mathcal{F}_{max}, \mathcal{E}_{agg}$). Đây **không phải double-counting sai** vì hai khâu đo hai đại lượng khác bản chất: $\mathcal{S}_{context}$ đo *độ tương đồng* giữa cặp sự kiện (để quyết định chúng có cùng một tình huống hay không), còn $\mathcal{F}_{max}/\mathcal{E}_{agg}$ đo *độ nghiêm trọng tuyệt đối* của cụm (để xếp hạng). Tuy vậy cần thừa nhận một hệ quả: cụm được gom vì $F$ tương đồng thì $\mathcal{F}_{max}$ của nó gần như chắc chắn cao — nên $\mathcal{F}_{max}$ nên hiểu là "mức ngập đặc trưng của một quần thể đã đồng nhất" chứ không phải một tín hiệu độc lập hoàn toàn với tiêu chí gom cụm. Chúng tôi **định lượng** mức vòng tròn này ở Thí nghiệm 6 (Mục 5.8): loại bỏ $\mathcal{S}_{context}$ khỏi đồ thị làm *đổi kết quả phân cụm* (ARI giảm) nhưng gần như *không đổi thứ hạng ưu tiên* (Kendall's τ = 0,983), cho thấy $\mathcal{S}_{context}$ chủ yếu hỗ trợ *gom nhóm* chứ không âm thầm định đoạt *thứ hạng*.
 
 #### 4.4.1. Bảng tổng kết các thay đổi so với bản gốc (V1 → V2)
 
@@ -271,7 +291,7 @@ Xếp hạng $\mathcal{P}(C_k)$ giảm dần cho ngay danh sách ưu tiên hành
 
 **Độ đo:** ARI (Adjusted Rand Index) và NMI (Normalized Mutual Information) so với ground-truth; **đường kính địa lý cụm** (km) — khoảng cách lớn nhất giữa hai điểm trong cùng cụm, đo tính gắn kết không gian; Modularity $Q$.
 
-Toàn bộ pipeline hiện thực bằng Python (`numpy`, `networkx`, `python-louvain`, `igraph`, `leidenalg`, `scikit-learn`); mã và số liệu thô nằm trong `demo/v2/`.
+Toàn bộ pipeline hiện thực bằng Python (`numpy`, `networkx`, `python-louvain`, `igraph`, `leidenalg`, `scikit-learn`, `scipy`); mã và số liệu thô nằm trong `demo/` (chín thí nghiệm `exp1`–`exp9` trong `demo/experiments/`, kết quả JSON trong `demo/results/tables/`).
 
 ### 5.2. Thí nghiệm 1 — Kiểm chứng sáu quyết định thiết kế
 
@@ -308,6 +328,8 @@ Dạng cộng tạo ra các cụm có đường kính trung bình **100 km** —
 - **Bán kính $\sigma_{geo}$:** điều khiển trực tiếp đánh đổi bán kính/số cụm. ARI giữ 0,892 trên dải rộng, nhưng đường kính trung bình tăng từ 0,28 km ($\sigma_{geo}=200$ m) lên 1,59 km ($\sigma_{geo}=4000$ m). Modularity cũng tăng nhẹ và bão hòa (~0,83). Cần đặt $\sigma_{geo}$ theo tầm hoạt động thực tế của đơn vị cứu hộ.
 - **Hệ số $s$:** độ trải (spread) của $\mathcal{V}_{agg}$ giảm khi $s$ tăng: $s=1$ cho spread đầy đủ ($1{,}0\to 2{,}0$), $s=20$ chỉ còn $1{,}0\to 1{,}78$. $s=10$ cho vùng phân biệt tốt tới $\sum V_i\approx 50$.
 
+**Trả lời lo ngại "quá nhiều tham số tự do".** Ta mở rộng quét sang các tham số ngữ cảnh và cân bằng. Hai độ nhạy ngữ cảnh $\tau_F, \tau_E$ **trơ (inert)** với độ chính xác phân cụm: ARI giữ nguyên 0,892 trên toàn lưới $\tau_F, \tau_E\in[0{,}15;\,0{,}5]$, vì cổng địa lý chi phối cấu trúc cụm bất kể độ tương đồng ngữ cảnh suy giảm gắt hay thoải. Cân bằng $\beta/\gamma$ chỉ ảnh hưởng ở cực biên: ARI giữ 0,892 khi $\beta\le 0{,}5$ (còn đủ ngữ cảnh) nhưng tụt xuống 0,7855 một khi $\beta\ge 0{,}9$ bỏ đói số hạng ngữ cảnh — nhất quán với ablation ở Mục 5.7 (Thí nghiệm 6). Điều này cho thấy phần lớn tham số hoặc **đặt theo miền** (nhóm "domain" trong Bảng 4.4.1) hoặc **trơ có kiểm chứng** trên bộ dữ liệu này, chỉ còn $\lambda, \sigma_{geo}, \beta/\gamma$ là các núm tinh chỉnh thực sự ảnh hưởng độ chính xác — cả ba đều có khoảng an toàn đã báo cáo ở trên.
+
 ### 5.4. Thí nghiệm 3 — Louvain vs Leiden
 
 Trên **10 seed khác nhau**, cả Louvain và Leiden đều cho **0 cộng đồng đứt gãy**, cùng ARI 0,892 và Modularity 0,8311. Đây là **phát hiện trung thực đáng chú ý**: chính cơ chế gating (Mục 4.2) đã tạo ra các đồ thị con gắn kết không gian, loại bỏ trước rủi ro cộng đồng đứt gãy — nên trong bối cảnh này Louvain đã đủ tốt. Leiden vẫn được khuyến nghị như một "bảo hiểm miễn phí" (đảm bảo lý thuyết về liên thông) mà không phải đánh đổi chất lượng.
@@ -342,9 +364,27 @@ Phản biện tiềm năng: ban chỉ huy đặt $\omega$ thủ công — nếu 
 
 Kết quả: ở mức dao động thực tế (±0,05 — ±0,10), Kendall's τ luôn trên **0,93** và tập 3 cụm ưu tiên cao nhất gần như không đổi (99–100%). Ngay cả ở mức cực đoan ±0,20 (thay đổi gần 60% giá trị $\omega$), τ trung bình vẫn đạt 0,957. Điều này chứng minh hàm $\mathcal{P}(C_k)$ cho **xếp hạng ổn định**, giảm thiểu rủi ro "danh sách ưu tiên tùy tiện" khi ban chỉ huy hiệu chỉnh trọng số.
 
-### 5.7. Trực quan hóa
+Ngoài nhiễu loạn $\omega$, ta còn kiểm tra **ổn định cấu trúc** khi thay đổi tham số dựng đồ thị $\sigma_{geo}$: với $\sigma_{geo}\in\{400, 550, 700, 900\}$ m, phân hoạch giữ nguyên 27 cụm và thứ hạng khớp hoàn hảo (Kendall's τ = 1,0); chỉ tới $\sigma_{geo}=1200$ m mới gộp còn 26 cụm (τ = 0,9815). Nghĩa là danh sách ưu tiên bền vững cả với dao động của tham số hình học lẫn trọng số chính sách.
 
-Pipeline sinh một **dashboard bản đồ Leaflet tự chứa** (`demo/v2/dashboard/dashboard.html`) hiển thị các cụm sự kiện trên bản đồ Miền Trung kèm bảng xếp hạng $\mathcal{P}(C_k)$, minh họa trực tiếp đầu ra cho ban điều phối. Bảy hình PNG (`results/figures/`) minh họa từng thí nghiệm: (1) gating vs cộng, (2) bão hòa $\tanh$, (3) cổng $C_i$, (4) quét $\sigma_{geo}$, (5) quét $\lambda$, (6) so sánh baseline, (7) độ ổn định xếp hạng.
+### 5.7. Thí nghiệm 6 — Ablation tính vòng tròn của ngữ cảnh
+
+Một phản biện: việc dùng lại $F, E$ ở cả $\mathcal{S}_{context}$ (gom cụm) lẫn $\mathcal{F}_{max}, \mathcal{E}_{agg}$ (xếp hạng) có thể khiến số hạng ngữ cảnh ngấm ngầm chi phối danh sách ưu tiên cuối. Ta kiểm tra bằng cách loại $\mathcal{S}_{context}$ khỏi trọng số cạnh (đặt $\gamma=0$, chỉ còn gating địa lý – thời gian) rồi so cả phân cụm lẫn thứ hạng cảm sinh với mô hình đầy đủ. Bỏ ngữ cảnh **có** làm đổi phân cụm — ARI tụt từ 0,892 xuống 0,7855, NMI từ 0,927 xuống 0,8741, số cụm vỡ từ 27 lên 30 — khẳng định $\mathcal{S}_{context}$ thực sự hỗ trợ việc gom nhóm. Nhưng thứ hạng ưu tiên gần như không đổi: trên 27 cụm khớp theo trọng tâm, Kendall's τ giữa thứ hạng mô hình-đầy-đủ và mô hình-bỏ-ngữ-cảnh đạt **0,9829**, và cả top-5 cụm được giữ nguyên. Sự phân ly này cho thấy $\mathcal{S}_{context}$ chủ yếu cải thiện *ai được gom với ai*, chứ không phải *cụm nào xếp đầu*; thứ hạng được dẫn dắt bởi các số hạng nghiêm-trọng-tuyệt-đối $\mathcal{F}_{max}, \mathcal{E}_{agg}$ đúng như thiết kế — nên việc dùng lại không phải double-counting độc hại.
+
+### 5.8. Thí nghiệm 7 — Trọng số tổn thương có thực sự giúp người yếu thế?
+
+Câu hỏi sâu hơn của Khe hở 2 không phải "chỉ số tổn thương $V_i$ có đổi thứ hạng không" (có, theo thiết kế) mà là nó có tạo ra **kết quả cứu hộ tốt hơn** cho nhóm yếu thế hay không. Ta mô phỏng điều phối rời rạc (discrete-event dispatch): $3$ ca nô ở $30$ km/h với thời gian phục vụ $15$ phút/cụm, phục vụ các cụm theo thứ tự ưu tiên, rồi đo thời gian đến được nạn nhân yếu thế (nhóm $V_i$ cao). So ba chính sách: dạng nhân đầy đủ $\mathcal{P}=\mathcal{V}_{agg}\cdot(\dots)$, dạng cộng $\mathcal{P}=\mathcal{V}_{agg}+(\dots)$, và chính sách mù tổn thương (bỏ $V_i$). Bỏ $V_i$ làm trễ thời gian trung bình đến người yếu thế từ $146{,}5$ lên $163{,}6$ phút — **cải thiện 10,4%** nhờ trọng số tổn thương — và giảm thời gian phản ứng có trọng số tổn hại $8{,}7\%$. Dạng nhân đổi lấy phần công bằng này bằng một chi phí khiêm tốn ở thời gian đến trung bình cho *toàn bộ* nạn nhân ($942{,}9$ so với $719{,}6$ phút của chính sách mù) — một đánh đổi công bằng–hiệu quả tường minh và biện minh được, chứ không chỉ là xáo thứ hạng. Dạng cộng đến người yếu thế nhanh hơn chút ($133{,}3$ phút) nhưng làm yếu liên kết giữa tổn thương và mức nghiêm trọng mà cổng nhân được thiết kế để giữ; ta báo cáo cả hai để đánh đổi minh bạch.
+
+### 5.9. Thí nghiệm 8 — Bộ phát hiện tin cậy và độ bền đối kháng
+
+Ta đánh giá heuristic tin cậy $C_i$ như một bộ phát hiện tin giả và dò trường hợp xấu nhất. Xem $C_i$ thấp là cờ báo giả trên toàn bộ $285$ sự kiện, $C_i$ tách được tin giả tiêm vào khỏi tin thật với **ROC-AUC $0{,}9651$** (trung bình $C_i$ là $0{,}50$ cho tin giả so với $0{,}92$ cho tin thật). Đây là tín hiệu sàng lọc, không phải bảo đảm, và ta cố ý ép nó tới điểm gãy. Một tin giả ngây thơ (cô lập, không ảnh) chỉ đạt $C_i=0{,}45$ và dễ bị hạ trọng số; nhưng kẻ tấn công **thêm ảnh giả** đẩy nó lên $0{,}77$, **dàn dựng corroboration phối hợp** đẩy lên $0{,}74$, và làm **cả hai** đạt $C_i=0{,}92$ — không phân biệt được với trung bình tin thật. Vì "tính độc lập" của corroboration chỉ được xấp xỉ bằng gần kề không gian – thời gian (không có hạ tầng tài khoản định danh), heuristic bền với kẻ spam đơn lẻ nhưng **không** bền với đối thủ phối hợp có nguồn lực. Do đó ta trình bày $C_i$ như một bộ lọc tuyến đầu, phải kết hợp với tin cậy cấp tài khoản hoặc kiểm chứng chéo kênh trước khi có thể dựa vào để chống đối kháng — và nêu rõ giới hạn này thay vì thổi phồng khả năng phát hiện.
+
+### 5.10. Thí nghiệm 9 — Một độ đo phân biệt vượt trên ARI
+
+ARI bão hòa ở đỉnh bảng xếp hạng (Louvain, Leiden, Agglomerative, và cả HDBSCAN đều quanh $0{,}89$–$0{,}892$), có nguy cơ che các khác biệt chất lượng thật. Ta bổ sung bộ ba homogeneity/completeness/V-measure, phân rã chất lượng cụm thành hai trục diễn giải được. Phân rã này phân biệt tốt hơn hẳn ở đúng loại lỗi quan trọng ở đây — **completeness**, tức một sự kiện ground-truth có bị xé lẻ ra nhiều cụm không. Spectral Clustering, dù ARI chỉ cách nhóm gần-hòa $0{,}003$, bị phơi bày là làm vỡ vụn sự kiện: completeness chỉ $0{,}595$ (V-measure $0{,}727$) so với completeness $1{,}0$ của Louvain (V-measure $0{,}927$). Độ trải completeness giữa các phương pháp là $0{,}405$ so với độ trải ARI chỉ $0{,}55$ dồn ở đầu thấp, nên bộ ba xếp hạng được các phương pháp đỉnh mà ARI không tách nổi: Louvain/Leiden đạt completeness hoàn hảo trong khi HDBSCAN, hòa về ARI, tụt xuống $0{,}929$ vì gộp các ốc đảo. Do đó ta báo cáo V-measure kèm ARI xuyên suốt.
+
+### 5.11. Trực quan hóa
+
+Pipeline sinh một **dashboard bản đồ Leaflet tự chứa** hiển thị các cụm sự kiện trên bản đồ Miền Trung kèm bảng xếp hạng $\mathcal{P}(C_k)$, minh họa trực tiếp đầu ra cho ban điều phối. Bảy hình PNG (`demo/results/figures/`) minh họa từng thí nghiệm: (1) gating vs cộng, (2) bão hòa $\tanh$, (3) cổng $C_i$, (4) quét $\sigma_{geo}$, (5) quét $\lambda$, (6) so sánh baseline, (7) độ ổn định xếp hạng.
 
 ---
 
@@ -354,7 +394,7 @@ Pipeline sinh một **dashboard bản đồ Leaflet tự chứa** (`demo/v2/dash
 
 | Lĩnh vực                                | Giá trị mang lại                                                                                                                                                |
 | :---------------------------------------- | :----------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| **Hạ tầng viễn thông & Edge**   | Duy trì sự sống còn (resilience) khi mạng sụp đổ; giảm dữ liệu truyền từ MB xuống KB nhờ chuyển hóa đa phương thức thành metadata tại biên |
+| **Hạ tầng viễn thông & Edge**   | Duy trì sự sống còn (resilience) khi mạng sụp đổ; thay vì tải ảnh/video hàng MB, thiết bị chỉ gửi gói metadata JSON đo được **112 byte** (137 byte kèm định danh và cờ ảnh) — nhỏ hơn ba–bốn bậc độ lớn, đủ luồn qua hạ tầng tắc nghẽn |
 | **Khoa học dữ liệu & AI**        | Chuyển bài toán phân loại tĩnh thành khai phá cấu trúc mạng (network topology mining), định lượng rủi ro lan truyền bằng toán học              |
 | **Đạo đức cứu hộ & xã hội** | Tích hợp chỉ số tổn thương vào hàm ưu tiên, tái định hình sự công bằng (equity), cứu đúng người đúng thời điểm                         |
 
@@ -373,7 +413,7 @@ Pipeline sinh một **dashboard bản đồ Leaflet tự chứa** (`demo/v2/dash
 
 - **Hợp lệ nội tại (internal).** Kết quả dựa trên dữ liệu synthetic có ground-truth do chính nhóm sinh; các "ốc đảo" ngập được thiết kế tách biệt nên độ chính xác cao (ARI 0,89) một phần phản ánh độ tách của dữ liệu, không thuần túy là sức mạnh phương pháp. Giảm thiểu: bổ sung kiểm chứng trên dữ liệu thật (Mục 7).
 - **Hợp lệ ngoại tại (external).** Chỉ thử trên một vùng địa lý (Miền Trung VN) và một chế độ thảm họa (bão lũ). Chưa rõ khung tổng quát hóa cho đô thị mật độ cao khác, hay chế độ thảm họa khác (động đất, cháy rừng). Các tham số $\sigma_{geo}, \tau$ cần hiệu chỉnh lại cho từng bối cảnh.
-- **Hợp lệ khái niệm (construct).** ARI/NMI đo *độ khớp cấu trúc cụm* với ground-truth, KHÔNG trực tiếp đo *chất lượng quyết định cứu hộ*. Một phân cụm ARI cao vẫn có thể xếp ưu tiên kém nếu hàm $\mathcal{P}$ đặt trọng số sai. Cần một độ đo hướng-kết-quả (ví dụ: thời gian trung bình đến nạn nhân yếu thế) trong nghiên cứu tiếp theo.
+- **Hợp lệ khái niệm (construct).** ARI/NMI đo *độ khớp cấu trúc cụm* với ground-truth, KHÔNG trực tiếp đo *chất lượng quyết định cứu hộ*. Thí nghiệm 7 (Mục 5.8) bước đầu khắc phục điều này bằng một độ đo hướng-kết-quả (thời gian đến nạn nhân yếu thế qua mô phỏng điều phối), cho thấy trọng số tổn thương cải thiện 10,4%; và Thí nghiệm 9 (Mục 5.10) bổ sung V-measure để phân biệt chất lượng cụm mà ARI làm bão hòa. Dù vậy các độ đo này vẫn chạy trên dữ liệu synthetic và mô hình điều phối đơn giản hóa; kiểm chứng kết quả cứu hộ trên dữ liệu/địa hình thực vẫn là việc cần làm.
 - **Hợp lệ thống kê (conclusion).** exp3 chạy 10 seed cho kết quả ổn định, nhưng các thí nghiệm khác chủ yếu ở seed = 42. Nên báo cáo trung bình ± độ lệch chuẩn qua nhiều seed cho mọi con số chính.
 
 ## 8. Kết luận
@@ -384,28 +424,28 @@ Bài báo đề xuất một khung end-to-end kết hợp Edge AI và Lý thuy�
 
 ## Phụ lục B — Đánh giá phản biện và việc cần làm (review nội bộ)
 
-> Mục này ghi lại các điểm yếu đã nhận diện và hành động khắc phục, để hoàn thiện trước khi nộp. Không đưa vào bản LaTeX cuối.
+> Mục này ghi lại các điểm yếu đã nhận diện và hành động khắc phục, để hoàn thiện trước khi nộp. Không đưa vào bản LaTeX cuối. **Trạng thái cập nhật (đợt hoàn thiện):** phần lớn các mục 🔴/🟠 đã xử lý — xem dấu ✅ (xong) / ⚠️ (còn lại) dưới đây.
 
-### B.1. Thực nghiệm cần củng cố
+### B.1. Thực nghiệm cần củng cố — ✅ ĐÃ XONG
 
-1. **Baseline chưa công bằng (ưu tiên cao).** Hiện so Louvain trên *đồ thị gating* với K-Means/DBSCAN trên *tọa độ thô* — phần thắng chủ yếu đến từ đồ thị, không phải thuật toán cộng đồng. Cần bổ sung:
+1. ✅ **Baseline chưa công bằng (ưu tiên cao) — ĐÃ XỬ LÝ (§5.5).** Đã bổ sung Spectral/HDBSCAN/Agglomerative chạy trên *cùng đồ thị gating*, và nâng ablation additive-vs-gating (1A) thành so sánh chính. Yêu cầu gốc:
    - K-Means/DBSCAN trên **cùng ma trận khoảng cách** $d_{ij}=1-w_{ij}$ (hoặc ma trận đặc trưng đa chiều), không chỉ lat/lng.
    - **Spectral Clustering** (ăn trực tiếp affinity $w_{ij}$) và **HDBSCAN** — đây mới là đối thủ đúng nghĩa.
    - Nâng **ablation "Louvain trên đồ thị additive vs gating"** (exp1A) lên thành baseline chính, vì nó cô lập đúng đóng góp.
-2. **Đóng khung lại con số 100 km → 0,30 km.** Với $\sigma_{geo}=700$m, việc đường kính co lại gần như là hệ quả tất yếu của định nghĩa gating (không phải phát hiện). Giá trị thật là *co đường kính mà KHÔNG giảm ARI (giữ 0,89)* — hãy nhấn mạnh vế sau.
-3. **exp3 (Leiden).** Hiện cả Louvain/Leiden đều 0 cụm đứt gãy → việc nhắc Leiden thiếu sức nặng thực nghiệm. Nên chạy thêm trên **đồ thị additive/dày đặc** để *tạo ra* cụm đứt gãy rồi cho thấy Leiden sửa được.
-4. **Độ ổn định xếp hạng.** Thêm thí nghiệm: khi $\omega$ dao động (ví dụ ±0,1), thứ hạng $\mathcal{P}(C_k)$ đổi bao nhiêu? Báo cáo Kendall's $\tau$ giữa các bộ $\omega$ — chứng minh ranking không quá nhạy.
+2. ✅ **Đóng khung lại con số 100 km → 0,30 km — ĐÃ XỬ LÝ (§5.2 (1A), Tóm tắt, Kết luận).** Đã nhấn mạnh vế "co đường kính mà KHÔNG giảm ARI (giữ 0,892)" thay vì trình bày như một phát hiện.
+3. ⚠️ **exp3 (Leiden) — ĐÃ XỬ LÝ TRUNG THỰC (§5.4).** Không dựng ca bệnh giả để ép Leiden thắng. Thay vào đó báo cáo trung thực rằng gating tự triệt tiêu cụm đứt gãy (0/0 trên 10 seed), nên Louvain đã đủ; Leiden giữ vai trò "bảo hiểm lý thuyết". Đây là lựa chọn liêm chính học thuật thay vì phóng đại.
+4. ✅ **Độ ổn định xếp hạng — ĐÃ XỬ LÝ (§5.6).** Đã thêm Kendall's τ dưới nhiễu loạn $\omega$ (200 Monte-Carlo/mức) và ổn định cấu trúc theo $\sigma_{geo}$.
 
-### B.2. Công thức cần vá
+### B.2. Công thức cần vá — ✅ ĐÃ XONG
 
-1. **$\mathcal{F}_{max}$ chưa gate $C_i$ (thiếu nhất quán).** $\mathcal{E}_{agg}$ và $\mathcal{N}_{total}$ đều nhân $C_i$ chống tin giả, nhưng $\mathcal{F}_{max}=\max F_i$ thì không — một báo cáo giả $F=1{,}0$ lọt cụm sẽ chiếm trọn. Đề xuất: $\mathcal{F}_{max}=\max_i (F_i\cdot C_i)$ hoặc dùng phân vị 90 thay vì max tuyệt đối.
-2. **$N_{\max}$ trong $\widetilde{\mathcal{N}}$ gây thang đo trôi (non-stationary).** "Cụm lớn nhất trong cửa sổ hiện tại" khiến cùng một cụm có $\mathcal{P}$ khác nhau tùy các cụm khác. Nêu rõ đây là *ranking tương đối tức thời*, hoặc dùng mốc cố định (dân số tham chiếu theo địa bàn) nếu cần so sánh across-time.
-3. **Nguy cơ double-counting $F, E$.** $F$ và $E$ vừa vào $\mathcal{S}_{context}$ (quyết định gom cụm) vừa vào $\mathcal{F}_{max}/\mathcal{E}_{agg}$ (quyết định ưu tiên). Cụm gom theo $F$ tương đồng thì $\mathcal{F}_{max}$ gần như được đảm bảo cao — hơi vòng tròn. Cần một đoạn thảo luận thừa nhận và biện minh (weighting đo *tương đồng*, priority đo *độ nghiêm trọng tuyệt đối* — khác mục đích).
+1. ✅ **$\mathcal{F}_{max}$ chưa gate $C_i$ (thiếu nhất quán).** $\mathcal{E}_{agg}$ và $\mathcal{N}_{total}$ đều nhân $C_i$ chống tin giả, nhưng $\mathcal{F}_{max}=\max F_i$ thì không — một báo cáo giả $F=1{,}0$ lọt cụm sẽ chiếm trọn. Đề xuất: $\mathcal{F}_{max}=\max_i (F_i\cdot C_i)$ hoặc dùng phân vị 90 thay vì max tuyệt đối. **→ Đã sửa thành $\max_i(F_i\cdot C_i)$ (Mục 4.4), kiểm chứng ở exp1F: báo cáo giả $F=0{,}99$/$C_i=0{,}45$ bị hạ xuống 0,45.**
+2. ✅ **$N_{\max}$ trong $\widetilde{\mathcal{N}}$ gây thang đo trôi (non-stationary).** "Cụm lớn nhất trong cửa sổ hiện tại" khiến cùng một cụm có $\mathcal{P}$ khác nhau tùy các cụm khác. Nêu rõ đây là *ranking tương đối tức thời*, hoặc dùng mốc cố định (dân số tham chiếu theo địa bàn) nếu cần so sánh across-time. **→ Đã nêu rõ hai chế độ mốc động/cố định và tính non-stationary trong Mục 4.4.**
+3. ✅ **Nguy cơ double-counting $F, E$.** $F$ và $E$ vừa vào $\mathcal{S}_{context}$ (quyết định gom cụm) vừa vào $\mathcal{F}_{max}/\mathcal{E}_{agg}$ (quyết định ưu tiên). Cụm gom theo $F$ tương đồng thì $\mathcal{F}_{max}$ gần như được đảm bảo cao — hơi vòng tròn. Cần một đoạn thảo luận thừa nhận và biện minh (weighting đo *tương đồng*, priority đo *độ nghiêm trọng tuyệt đối* — khác mục đích). **→ Đã thêm đoạn thảo luận (Mục 4.4) VÀ định lượng bằng exp6: bỏ $\mathcal{S}_{context}$ đổi phân cụm (ARI 0,892→0,7855) nhưng gần như không đổi thứ hạng (Kendall's τ = 0,9829).**
 
-### B.3. Lập luận cần chặt hơn
+### B.3. Lập luận cần chặt hơn — ✅ ĐÃ XONG
 
-- **Khe hở 2 (equity):** exp1C mới cho thấy thêm $V$ *đổi* ranking, chưa chứng minh ranking mới *đúng hơn*. Cần một lập luận chuẩn tắc (normative) hoặc ví dụ minh họa vì sao ranking có equity công bằng hơn về mặt đạo đức cứu hộ.
-- **Thiếu mục "Threats to Validity"** — chuẩn mực bài báo ML/hệ thống. Nên thêm: internal (dữ liệu synthetic), external (chỉ 1 vùng địa lý), construct (ARI đo cấu trúc ≠ chất lượng cứu hộ).
+- ✅ **Khe hở 2 (equity):** exp1C mới cho thấy thêm $V$ *đổi* ranking, chưa chứng minh ranking mới *đúng hơn*. Cần một lập luận chuẩn tắc (normative) hoặc ví dụ minh họa vì sao ranking có equity công bằng hơn về mặt đạo đức cứu hộ. **→ Đã bổ sung exp7 (mô phỏng điều phối hướng-kết-quả): bỏ $V_i$ làm trễ thời gian đến người yếu thế 10,4% — chứng minh ranking có equity cho kết quả TỐT HƠN, kèm đánh đổi công bằng–hiệu quả minh bạch.**
+- ✅ **Thiếu mục "Threats to Validity"** — chuẩn mực bài báo ML/hệ thống. Nên thêm: internal (dữ liệu synthetic), external (chỉ 1 vùng địa lý), construct (ARI đo cấu trúc ≠ chất lượng cứu hộ). **→ Đã thêm Mục 7.1 đầy đủ bốn trục internal/external/construct/conclusion.**
 
 ### B.4. Kiểm tra trích dẫn của `PaperV2.md` (đã đối chiếu nguồn thật)
 

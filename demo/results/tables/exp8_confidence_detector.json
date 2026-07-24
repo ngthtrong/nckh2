@@ -1,0 +1,46 @@
+[
+  {
+    "detector": {
+      "auc": 0.9651,
+      "ap": 0.244,
+      "n_fake": 6,
+      "n_total": 285,
+      "mean_Ci_fake": 0.5032,
+      "mean_Ci_real": 0.9202
+    },
+    "adversarial": {
+      "Ci_S3_naive_fake": 0.4502,
+      "Ci_ADV_IMG": 0.7685,
+      "Ci_ADV_CORR": 0.7403,
+      "Ci_ADV_BOTH": 0.9204,
+      "Ci_real_mean": 0.9202
+    },
+    "adversarial_detail": [
+      {
+        "report": "S3_FAKE (giả ngây thơ: cô lập, ko ảnh)",
+        "Ci": 0.4502,
+        "note": "tham chiếu baseline"
+      },
+      {
+        "report": "ADV_IMG (giả + có ảnh)",
+        "Ci": 0.7685,
+        "note": "ảnh đẩy C_i lên"
+      },
+      {
+        "report": "ADV_CORR_0 (giả + corroboration giả)",
+        "Ci": 0.7403,
+        "note": "phối hợp đẩy C_i lên"
+      },
+      {
+        "report": "ADV_BOTH_0 (giả + ảnh + corroboration)",
+        "Ci": 0.9204,
+        "note": "xấu nhất"
+      },
+      {
+        "report": "TB báo cáo THẬT",
+        "Ci": 0.9202,
+        "note": "mốc để so"
+      }
+    ]
+  }
+]
