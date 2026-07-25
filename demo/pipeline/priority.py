@@ -46,23 +46,36 @@ def score_clusters(
     gate_confidence: bool = True,
     normalize_v: bool = True,
     gate_fmax: bool = True,
+    n_ref: float | None = None,
 ) -> list[ClusterScore]:
     """Tính P(C_k) cho mọi cụm.
 
     gate_confidence=False  -> N_total = sum N_i (không gate C_i, cho ablation)
     normalize_v=False      -> V_agg cộng vào lõi thay vì nhân (cho ablation)
     gate_fmax=False        -> F_max = max F_i (không gate C_i, cho ablation)
+
+    n_ref: mốc chuẩn hoá dân số N_max.
+        None (mặc định) -> mốc ĐỘNG: N_max = dân số của cụm lớn nhất trong lần
+        chạy hiện tại, nên cụm lớn nhất luôn có Ñ = 1,0. Tiện khi xếp hạng trong
+        MỘT lần chạy, nhưng điểm P không so sánh được giữa các lần chạy/thời điểm
+        khác nhau.
+        Số dương -> mốc TĨNH do chỉ huy đặt (ví dụ dân số khu vực tác chiến), khi
+        đó Ñ và P so sánh được xuyên thời gian. Mọi kết quả báo cáo phải nêu rõ
+        đang dùng mốc nào.
     """
     groups = _cluster_members(events, labels)
 
-    # N_max để chuẩn hóa dân số: tổng dân số (đã gate) của cụm lớn nhất
+    # N_max để chuẩn hóa dân số: động (cụm lớn nhất) hoặc tĩnh (n_ref)
     n_totals = {}
     for cid, members in groups.items():
         if gate_confidence:
             n_totals[cid] = sum(ev.n_trapped * ev.confidence for ev in members)
         else:
             n_totals[cid] = sum(ev.n_trapped for ev in members)
-    n_max = max(n_totals.values()) if n_totals else 1.0
+    if n_ref is not None and n_ref > 0:
+        n_max = float(n_ref)
+    else:
+        n_max = max(n_totals.values()) if n_totals else 1.0
     log_nmax = math.log1p(n_max) if n_max > 0 else 1.0
 
     scores: list[ClusterScore] = []

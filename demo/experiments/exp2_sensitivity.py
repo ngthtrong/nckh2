@@ -28,7 +28,9 @@ def sweep_sigma_geo(events):
             "n_clusters": sp["n_clusters"],
             "ari": q["ari"],
             "nmi": q["nmi"],
-            "mean_diam_km": sp["mean_diameter_km"],
+            "mean_diam_km_multi": sp["mean_diameter_km_multi"],
+            "max_diam_km": sp["max_diameter_km"],
+            "n_singletons": sp["n_singletons"],
             "modularity": round(modularity(ws, lab), 4),
         })
     return rows
@@ -49,7 +51,9 @@ def sweep_resolution(events):
             "n_clusters": sp["n_clusters"],
             "ari": q["ari"],
             "nmi": q["nmi"],
-            "mean_diam_km": sp["mean_diameter_km"],
+            "mean_diam_km_multi": sp["mean_diameter_km_multi"],
+            "max_diam_km": sp["max_diameter_km"],
+            "n_singletons": sp["n_singletons"],
         })
     return rows
 
@@ -98,7 +102,9 @@ def sweep_tau_context(events):
             "n_clusters": sp["n_clusters"],
             "ari": q["ari"],
             "nmi": q["nmi"],
-            "mean_diam_km": sp["mean_diameter_km"],
+            "mean_diam_km_multi": sp["mean_diameter_km_multi"],
+            "max_diam_km": sp["max_diameter_km"],
+            "n_singletons": sp["n_singletons"],
         })
     return rows
 
@@ -124,7 +130,9 @@ def sweep_beta_gamma(events):
             "n_clusters": sp["n_clusters"],
             "ari": q["ari"],
             "nmi": q["nmi"],
-            "mean_diam_km": sp["mean_diameter_km"],
+            "mean_diam_km_multi": sp["mean_diameter_km_multi"],
+            "max_diam_km": sp["max_diameter_km"],
+            "n_singletons": sp["n_singletons"],
         })
     return rows
 
@@ -146,6 +154,38 @@ def main():
 
     rows_bg = sweep_beta_gamma(events)
     print_table("Quét beta/gamma (thời gian vs ngữ cảnh)", rows_bg)
+
+    # Diễn giải trung thực (phản biện 2.2): ARI phẳng KHÔNG tự động là "bền vững".
+    # Phải phân biệt (i) bền vững thật — cấu trúc cụm đúng trên một dải tham số, với
+    # (ii) trơ về độ đo — ARI không phản ứng vì đã bão hòa. Ta kiểm bằng cách xem
+    # đường kính cụm và số cụm có đổi hay không khi ARI giữ nguyên.
+    def _flat(rows, key="ari"):
+        vals = {r[key] for r in rows}
+        return len(vals) == 1
+
+    diag = []
+    for name, rows, knob in (("sigma_geo", rows_sigma, "sigma_geo_m"),
+                             ("resolution", rows_res, "resolution_lambda"),
+                             ("tau_context", rows_tau, "tau_f"),
+                             ("beta_gamma", rows_bg, "beta")):
+        aris = [r["ari"] for r in rows]
+        ks = [r["n_clusters"] for r in rows]
+        dias = [r["max_diam_km"] for r in rows]
+        diag.append({
+            "sweep": name,
+            "ari_min": min(aris), "ari_max": max(aris),
+            "ari_range": round(max(aris) - min(aris), 4),
+            "ari_flat": _flat(rows),
+            "n_clusters_min": min(ks), "n_clusters_max": max(ks),
+            "max_diam_km_min": min(dias), "max_diam_km_max": max(dias),
+            "verdict": ("ARI phẳng NHƯNG cấu trúc cụm đổi -> ARI trơ, không kết luận bền vững"
+                        if _flat(rows) and len(set(ks)) > 1 else
+                        "ARI phẳng và cấu trúc cụm cũng ổn định -> bền vững thật"
+                        if _flat(rows) else
+                        "ARI có phản ứng -> phép quét CÓ tín hiệu phân biệt"),
+        })
+    print_table("Chẩn đoán: bền vững thật vs trơ về độ đo", diag)
+    save_table("exp2_sensitivity_diagnosis.json", diag)
 
     save_table("exp2_sigma_geo.json", rows_sigma)
     save_table("exp2_resolution.json", rows_res)

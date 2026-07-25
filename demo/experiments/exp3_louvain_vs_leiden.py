@@ -9,7 +9,7 @@ from __future__ import annotations
 from common import prepared_events, print_table, save_table
 from pipeline.config import WeightParams
 from pipeline.clustering import (
-    count_disconnected_communities,
+    disconnected_report,
     modularity,
     run_leiden,
     run_louvain,
@@ -33,8 +33,10 @@ def main():
     for seed in SEEDS:
         lab_lou = run_louvain(ws, 1.0, seed)
         lab_lei = run_leiden(ws, 1.0, seed)
-        b_lou, n_lou = count_disconnected_communities(ws, lab_lou)
-        b_lei, n_lei = count_disconnected_communities(ws, lab_lei)
+        r_lou = disconnected_report(ws, lab_lou)
+        r_lei = disconnected_report(ws, lab_lei)
+        b_lou, n_lou = r_lou["n_broken"], r_lou["n_clusters_total"]
+        b_lei, n_lei = r_lei["n_broken"], r_lei["n_clusters_total"]
         q_lou = cluster_quality(lab_lou, gt)
         q_lei = cluster_quality(lab_lei, gt)
         m_lou = modularity(ws, lab_lou)
@@ -43,6 +45,13 @@ def main():
             "seed": seed,
             "lou_broken": b_lou, "lou_clusters": n_lou, "lou_ari": q_lou["ari"], "lou_mod": round(m_lou, 4),
             "lei_broken": b_lei, "lei_clusters": n_lei, "lei_ari": q_lei["ari"], "lei_mod": round(m_lei, 4),
+            # MẪU SỐ THẬT của phép kiểm: chỉ cụm >= 2 phần tử kiểm được tính liên thông;
+            # singleton liên thông một cách tầm thường nên phải loại khỏi mẫu số, nếu
+            # không con số "0 cụm đứt gãy" sẽ đọc mạnh hơn bằng chứng thực có.
+            "lou_clusters_evaluated": r_lou["n_clusters_evaluated"],
+            "lou_singletons_excluded": r_lou["n_singletons_excluded"],
+            "lei_clusters_evaluated": r_lei["n_clusters_evaluated"],
+            "lei_singletons_excluded": r_lei["n_singletons_excluded"],
         })
         agg["louvain"]["broken"] += b_lou
         agg["louvain"]["ari"] += q_lou["ari"]
@@ -52,13 +61,17 @@ def main():
         agg["leiden"]["mod"] += m_lei
 
     n = len(SEEDS)
+    eval_lou = sum(r["lou_clusters_evaluated"] for r in rows)
+    eval_lei = sum(r["lei_clusters_evaluated"] for r in rows)
     summary = [
         {"algo": "Louvain",
          "total_broken_communities": agg["louvain"]["broken"],
+         "total_clusters_evaluated": eval_lou,
          "avg_ari": round(agg["louvain"]["ari"] / n, 4),
          "avg_modularity": round(agg["louvain"]["mod"] / n, 4)},
         {"algo": "Leiden",
          "total_broken_communities": agg["leiden"]["broken"],
+         "total_clusters_evaluated": eval_lei,
          "avg_ari": round(agg["leiden"]["ari"] / n, 4),
          "avg_modularity": round(agg["leiden"]["mod"] / n, 4)},
     ]
@@ -69,6 +82,9 @@ def main():
     total_broken = agg["louvain"]["broken"] + agg["leiden"]["broken"]
     print("\n--- Diễn giải ---")
     if total_broken == 0:
+        print(f"MẪU SỐ: chỉ {eval_lou} (Louvain) / {eval_lei} (Leiden) cụm-lần có >= 2 phần tử")
+        print("nên kiểm được tính liên thông; các cụm 1 phần tử liên thông tầm thường và")
+        print("đã bị loại khỏi mẫu số. Kết luận dưới đây chỉ có hiệu lực trên mẫu số đó.")
         print("Trên đồ thị đã gating không gian (Mục 4.2), KHÔNG cụm nào bị đứt gãy nội bộ")
         print("ở cả Louvain lẫn Leiden, qua toàn bộ", n, "seed. Hai thuật toán cho kết quả")
         print("gần như trùng khớp (ARI/modularity bằng nhau). Kết luận: chính cơ chế gating")

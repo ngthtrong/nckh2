@@ -96,6 +96,8 @@ def count_disconnected_communities(w: np.ndarray, labels: list[int]) -> tuple[in
     """Đếm số cộng đồng bị đứt gãy nội bộ (không liên thông trong subgraph của cụm).
 
     Trả về (số cụm đứt gãy, tổng số cụm) — dùng cho thí nghiệm Louvain vs Leiden.
+    Xem `disconnected_report` nếu cần mẫu số đúng: cụm 1 phần tử luôn liên thông
+    một cách tầm thường nên không được tính vào phép kiểm.
     """
     g = matrix_to_graph(w)
     clusters: dict[int, list[int]] = {}
@@ -109,3 +111,33 @@ def count_disconnected_communities(w: np.ndarray, labels: list[int]) -> tuple[in
         if sub.number_of_nodes() > 0 and not nx.is_connected(sub):
             broken += 1
     return broken, len(clusters)
+
+
+def disconnected_report(w: np.ndarray, labels: list[int]) -> dict[str, int]:
+    """Như `count_disconnected_communities` nhưng nêu rõ MẪU SỐ của phép kiểm.
+
+    Kết luận "không có cộng đồng liên kết kém" chỉ có nghĩa trên các cụm thực sự
+    kiểm được (>= 2 phần tử); singleton bị loại khỏi mẫu số phải được báo cáo
+    tường minh, nếu không con số 0 sẽ đọc mạnh hơn bằng chứng thật.
+    """
+    g = matrix_to_graph(w)
+    clusters: dict[int, list[int]] = {}
+    for node, lab in enumerate(labels):
+        clusters.setdefault(lab, []).append(node)
+    broken = 0
+    n_eval = 0
+    n_singletons = 0
+    for members in clusters.values():
+        if len(members) <= 1:
+            n_singletons += 1
+            continue
+        n_eval += 1
+        sub = g.subgraph(members)
+        if sub.number_of_nodes() > 0 and not nx.is_connected(sub):
+            broken += 1
+    return {
+        "n_broken": broken,
+        "n_clusters_total": len(clusters),
+        "n_clusters_evaluated": n_eval,
+        "n_singletons_excluded": n_singletons,
+    }
