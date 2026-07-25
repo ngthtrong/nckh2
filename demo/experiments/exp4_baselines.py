@@ -34,27 +34,45 @@ def main():
     lou = run_louvain(ws, 1.0, 42)
     k_lou = len(set(lou))
 
+    # Khai TƯỜNG MINH ba thuộc tính của từng baseline thay vì suy từ tên hiển thị:
+    #   needs_k    : có phải cấp trước số cụm K?
+    #   same_graph : có chạy trên CÙNG ma trận trọng số gating như phương pháp đề xuất?
+    #   noise_label: nhãn "không thuộc cụm nào" (-1 với DBSCAN/HDBSCAN, None nếu
+    #                thuật toán gán mọi điểm vào một cụm thật). Tham số này quyết định
+    #                metrics có coi thùng nhiễu là một cụm hay không — xem metrics.py.
     methods = {
-        "Louvain (gating graph)": lou,
-        "Leiden (gating graph)": run_leiden(ws, 1.0, 42),
+        "Louvain (gating graph)": (lou, False, True, None),
+        "Leiden (gating graph)": (run_leiden(ws, 1.0, 42), False, True, None),
         # --- baseline CÔNG BẰNG: chạy trên CÙNG đồ thị/khoảng cách gating ---
-        f"Spectral (affinity gating, K={k_lou})": run_spectral(ws, k_lou),
-        f"Spectral (affinity gating, K={n_gt} true GT labels)": run_spectral(ws, n_gt),
-        "HDBSCAN (dist=1-w gating)": run_hdbscan_on_graph(ws, min_cluster_size=3),
-        f"Agglomerative (dist=1-w, K={k_lou})": run_agglomerative_on_graph(ws, k_lou),
-        # --- baseline hình học thuần túy trên tọa độ thô (đối chiếu) ---
-        f"K-Means (K={n_gt}, correct K, coords)": run_kmeans(events, n_gt),
-        "K-Means (K=3, wrong K, coords)": run_kmeans(events, 3),
-        "DBSCAN (eps=0.3, coords)": run_dbscan(events, eps=0.3, min_samples=3),
-        "DBSCAN (eps=0.6, coords)": run_dbscan(events, eps=0.6, min_samples=3),
+        f"Spectral (affinity gating, K={k_lou} = Louvain's discovered K)":
+            (run_spectral(ws, k_lou), True, True, None),
+        f"Spectral (affinity gating, K={n_gt} true GT labels)":
+            (run_spectral(ws, n_gt), True, True, None),
+        "HDBSCAN (dist=1-w gating)":
+            (run_hdbscan_on_graph(ws, min_cluster_size=3), False, True, -1),
+        f"Agglomerative (dist=1-w, K={k_lou} = Louvain's discovered K)":
+            (run_agglomerative_on_graph(ws, k_lou), True, True, None),
+        # --- baseline hình học THUẦN TOẠ ĐỘ: chỉ [lat, lng] ---
+        f"K-Means (K={n_gt}, coords only)":
+            (run_kmeans(events, n_gt, features="geo"), True, False, None),
+        "DBSCAN (eps=0.3, coords only)":
+            (run_dbscan(events, eps=0.3, min_samples=3, features="geo"), False, False, -1),
+        # --- baseline Euclid có nối thêm chiều ngữ cảnh: [lat, lng, F, E] ---
+        f"K-Means (K={n_gt}, coords+F,E)":
+            (run_kmeans(events, n_gt, features="geo_context"), True, False, None),
+        "K-Means (K=3, wrong K, coords+F,E)":
+            (run_kmeans(events, 3, features="geo_context"), True, False, None),
+        "DBSCAN (eps=0.3, coords+F,E)":
+            (run_dbscan(events, eps=0.3, min_samples=3, features="geo_context"), False, False, -1),
+        "DBSCAN (eps=0.6, coords+F,E)":
+            (run_dbscan(events, eps=0.6, min_samples=3, features="geo_context"), False, False, -1),
     }
 
     rows = []
-    for name, lab in methods.items():
+    for name, (lab, needs_k, same_graph, noise_label) in methods.items():
         q = cluster_quality(lab, gt)
-        sp = geographic_spread(events, lab)
-        nz = noise_handling(lab, gt)
-        fair = any(t in name for t in ("gating", "dist=1-w", "affinity"))
+        sp = geographic_spread(events, lab, noise_label=noise_label)
+        nz = noise_handling(lab, gt, noise_label=noise_label)
         rows.append({
             "method": name,
             "n_clusters": sp["n_clusters"],
@@ -64,10 +82,12 @@ def main():
             "max_diam_km": sp["max_diameter_km"],
             "noise_absorbed_pct": nz["noise_absorbed_pct"],
             "contaminated_clusters": nz["contaminated_clusters"],
+            "n_unclustered": nz["n_unclustered"],
+            "labeled_dropped_to_noise": nz["labeled_dropped_to_noise"],
             "n_singletons": sp["n_singletons"],
             "mean_diam_km_all": sp["mean_diameter_km"],
-            "needs_preset_k": ("K-Means" in name or "K=" in name),
-            "same_graph_as_ours": fair,
+            "needs_preset_k": needs_k,
+            "same_graph_as_ours": same_graph,
         })
 
     print_table(f"Baseline comparison (ground-truth clusters = {n_gt}, Louvain K = {k_lou})", rows)

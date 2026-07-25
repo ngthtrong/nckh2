@@ -18,23 +18,46 @@ from sklearn.preprocessing import StandardScaler
 from .attributes import Event
 
 
-def _feature_matrix(events: list[Event]) -> np.ndarray:
-    """Đặc trưng cho baseline: tọa độ + mức ngập + khẩn cấp (đã chuẩn hóa)."""
-    raw = np.array(
-        [[ev.lat, ev.lng, ev.flood, ev.urgency] for ev in events], dtype=float
-    )
-    return StandardScaler().fit_transform(raw)
+def _feature_matrix(events: list[Event], features: str = "geo_context") -> np.ndarray:
+    """Đặc trưng (đã chuẩn hóa) cho các baseline hình học.
+
+    `features` phải được khai TƯỜNG MINH ở nơi gọi, vì hai lựa chọn trả lời hai
+    câu hỏi khác nhau và trước đây bị lẫn:
+      - `"geo"`         : CHỈ [lat, lng]. Đây mới là baseline "toạ độ thô" thật,
+        dùng để trả lời "địa lý một mình có đủ chưa?".
+      - `"geo_context"` : [lat, lng, flood, urgency] — nối ngữ cảnh vào không gian
+        Euclid theo kiểu CỘNG CHIỀU. Đây KHÔNG phải baseline toạ độ thô; nó là
+        đối chứng cho thấy nhồi ngữ cảnh vào metric Euclid khác hẳn việc dùng
+        ngữ cảnh theo dạng nhân (gating) như phương pháp đề xuất.
+    """
+    if features == "geo":
+        cols = [[ev.lat, ev.lng] for ev in events]
+    elif features == "geo_context":
+        cols = [[ev.lat, ev.lng, ev.flood, ev.urgency] for ev in events]
+    else:
+        raise ValueError(f"features phải là 'geo' hoặc 'geo_context', nhận: {features!r}")
+    return StandardScaler().fit_transform(np.array(cols, dtype=float))
 
 
-def run_kmeans(events: list[Event], n_clusters: int, random_state: int = 42) -> list[int]:
-    x = _feature_matrix(events)
+def run_kmeans(
+    events: list[Event],
+    n_clusters: int,
+    random_state: int = 42,
+    features: str = "geo_context",
+) -> list[int]:
+    x = _feature_matrix(events, features)
     n_clusters = max(1, min(n_clusters, len(events)))
     km = KMeans(n_clusters=n_clusters, random_state=random_state, n_init=10)
     return km.fit_predict(x).tolist()
 
 
-def run_dbscan(events: list[Event], eps: float = 0.5, min_samples: int = 3) -> list[int]:
-    x = _feature_matrix(events)
+def run_dbscan(
+    events: list[Event],
+    eps: float = 0.5,
+    min_samples: int = 3,
+    features: str = "geo_context",
+) -> list[int]:
+    x = _feature_matrix(events, features)
     db = DBSCAN(eps=eps, min_samples=min_samples)
     return db.fit_predict(x).tolist()
 

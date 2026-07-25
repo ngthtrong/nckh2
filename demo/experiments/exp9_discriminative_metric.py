@@ -6,9 +6,14 @@ Agglomerative, nhiều mức sigma/lambda) => ARI đã bão hòa, không còn ph
 (ARI), một cái tất yếu (đường kính = tautology của gating).
 
 Cách khắc phục (giữ nguyên dataset): bổ sung độ đo phân biệt hơn — bộ ba
-homogeneity / completeness / V-measure (sklearn) + số cụm tìm được so với 6
-"ốc đảo" ground-truth. Các độ đo này TÁCH được các phương pháp mà ARI gộp
-chung ~0.892 (đặc biệt Louvain 27 cụm vs HDBSCAN 11 cụm vs Spectral).
+homogeneity / completeness / V-measure (sklearn) + số cụm tìm được so với 14
+nhãn ground-truth. Các độ đo này TÁCH được các phương pháp mà ARI gộp chung ở
+đỉnh bảng (Louvain/Leiden/Agglomerative đều 0,9957) và giải thích *cách* các
+phương pháp ở đầu thấp thất bại (Spectral over-segment vs DBSCAN under-segment).
+
+LƯU Ý VỀ K: K-Means ở đây dùng K = số nhãn ground-truth (14), khớp với exp4 —
+trước đây exp9 dùng K=12 trong khi exp4 dùng K=14, nên cùng một thuật toán lại
+xuất hiện với hai con số ARI khác nhau ở hai bảng của cùng bài báo.
 
 Trung thực: nếu các phương pháp vẫn cùng điểm ở mọi độ đo, ta thừa nhận
 dataset quá dễ tách. Nếu tách ra => ARI-bão-hòa không phải bằng chứng duy nhất.
@@ -34,25 +39,37 @@ from pipeline.baselines import (
 )
 
 
-def _scores(labels, gt):
-    """ARI + homogeneity/completeness/V-measure trên tập lõi (gt >= 0)."""
+def _scores(labels, gt, noise_label: int | None = -1):
+    """ARI + homogeneity/completeness/V-measure trên tập lõi (gt >= 0).
+
+    `n_clusters` KHÔNG đếm thùng nhiễu (nhãn -1 của DBSCAN/HDBSCAN nghĩa là
+    "không thuộc cụm nào"), để khớp với `metrics.geographic_spread` và với
+    Bảng baseline của exp4 — trước đây exp9 đếm cả thùng nhiễu nên báo 21 cụm
+    cho HDBSCAN trong khi exp4 báo 20.
+    """
     pred = np.array(labels)
     truth = np.array(gt)
     mask = truth >= 0
     ari = float(adjusted_rand_score(truth[mask], pred[mask]))
     h, c, v = homogeneity_completeness_v_measure(truth[mask], pred[mask])
+    uniq = set(labels)
+    if noise_label is not None:
+        uniq.discard(noise_label)
     return {
         "ari": round(ari, 4),
         "homogeneity": round(float(h), 4),
         "completeness": round(float(c), 4),
         "v_measure": round(float(v), 4),
-        "n_clusters": len(set(labels)),
+        "n_clusters": len(uniq),
     }
 
 
 def main():
     events = prepared_events()
     gt = [e.gt_cluster for e in events]
+    # Số nhãn ground-truth thật — dùng làm K cho K-Means, KHỚP với exp4 (14),
+    # thay vì một giá trị 12 khác không có lý do (nhất quán liên thí nghiệm).
+    n_gt = len({g for g in gt if g >= 0})
 
     w = build_weight_matrix(events, C.weight, mode="gating")
     ws = sparsify(w, C.weight)
@@ -66,8 +83,13 @@ def main():
         "Spectral (gating)": run_spectral(ws, k_lou),
         "HDBSCAN (gating)": run_hdbscan_on_graph(ws),
         "Agglomerative (gating)": run_agglomerative_on_graph(ws, k_lou),
-        "K-Means (raw, K=12)": run_kmeans(events, 12),
-        "DBSCAN (raw, eps=0.6)": run_dbscan(events, eps=0.6),
+        # K = 14 (số nhãn ground-truth thật) để KHỚP exp4 — cùng thuật toán thì
+        # phải cùng tham số, nếu không bảng 9 và bảng 6 sẽ báo hai ARI khác nhau
+        # cho "cùng" một baseline (loop 14, chất vấn 14.5).
+        # Nhãn nêu ĐÚNG không gian đặc trưng: các baseline này chạy trên
+        # [lat, lng, F, E] đã chuẩn hóa, KHÔNG phải toạ độ thuần (xem exp4).
+        f"K-Means (coords+F,E, K={n_gt})": run_kmeans(events, n_gt),
+        "DBSCAN (coords+F,E, eps=0.6)": run_dbscan(events, eps=0.6),
     }
 
     rows = []
