@@ -14,7 +14,7 @@ Trong các thảm họa bão lũ, hạ tầng viễn thông thường bị gián
 
 ## 1. Giới thiệu
 
-Biến đổi khí hậu đang làm gia tăng tần suất và cường độ của các hiện tượng thời tiết cực đoan. Việt Nam — với đường bờ biển dài và địa hình chịu ảnh hưởng trực tiếp của hoàn lưu bão — mỗi năm hứng chịu khoảng 10–12 cơn bão và áp thấp nhiệt đới, trong đó 5–6 cơn ảnh hưởng trực tiếp đến đất liền, gây thiệt hại nặng nề về người và tài sản, đặc biệt tại miền Trung và miền Bắc.
+Biến đổi khí hậu đang làm gia tăng tần suất và cường độ của các hiện tượng thời tiết cực đoan. Việt Nam — với đường bờ biển dài và địa hình chịu ảnh hưởng trực tiếp của hoàn lưu bão — mỗi năm hứng chịu khoảng 6–8 cơn bão và áp thấp nhiệt đới ảnh hưởng trực tiếp (trong số khoảng 11 cơn hình thành trên Biển Đông), gây thiệt hại nặng nề về người và tài sản, đặc biệt tại miền Trung và miền Bắc.
 
 Một nguyên nhân cốt lõi làm đứt gãy công tác phản ứng khẩn cấp là sự gián đoạn của hạ tầng viễn thông. Khi lưới điện suy kiệt và trạm thu phát sóng (BTS) bị cô lập, các mô hình thu thập – xử lý dữ liệu tập trung (cloud-centric) hoàn toàn thất bại, khiến trung tâm chỉ huy mất kết nối với vùng tâm bão đúng vào "giờ vàng". Trong bối cảnh đó, mạng xã hội và ứng dụng nhắn tin trở thành kênh **cảm biến xã hội (social sensing)** mang tính sinh tồn, sinh ra dòng dữ liệu **đa phương thức** (văn bản, hình ảnh, video, siêu dữ liệu không gian – thời gian) nhưng rời rạc, trùng lặp, nhiều nhiễu, dễ gây **quá tải thông tin**.
 
@@ -108,7 +108,7 @@ $$
 | $E_i$   | Mức độ khẩn cấp                    | $[0,1]$                    | Phân tích cảm xúc văn bản (DistilBERT / UIT-VSMEC) |
 | $N_i$   | Số người mắc kẹt                   | $\mathbb{Z}^{+}$           | Nhập tay / crowd counting                               |
 | $V_i$   | Chỉ số tổn thương nhân khẩu học | $\ge 0$                    | Nhánh multi-label ghép chung bộ phân loại văn bản |
-| $C_i$   | Độ tin cậy thông tin                | $(0,1]$                    | Heuristic tổng hợp nhẹ                                |
+| $C_i$   | Độ tin cậy thông tin                | $(0,1)$                    | Heuristic tổng hợp nhẹ                                |
 
 Nhờ Edge AI, thiết bị chỉ gửi một chuỗi JSON chứa $(L_i, T_i, F_i, E_i, N_i, V_i, C_i)$ với kích thước dưới 1 KB (đo được 100–111 byte, xem exp10) thay vì ảnh/video hàng MB.
 
@@ -237,13 +237,13 @@ $$
 **Lỗi (b) và (c) — hệ số khuếch đại tổn thương:**
 
 $$
-\mathcal{V}_{agg}(C_k) = 1 + \tanh\!\left( \frac{1}{s} \sum_{v_i \in C_k} V_i \right), \qquad \mathcal{V}_{agg}\in(1,2)
+\mathcal{V}_{agg}(C_k) = 1 + \tanh\!\left( \frac{1}{s} \sum_{v_i \in C_k} V_i \right), \qquad \mathcal{V}_{agg}\in[1,2)
 $$
 
 - **Lỗi (b) — cộng vs nhân:** bản gốc đặt $\mathcal{V}$ như số hạng cộng $\omega_4\mathcal{V}_{agg}$. Một số hạng bị chặn trong $[1,2]$ chỉ tạo offset gần hằng số, **không khuếch đại gì**. Cách sửa: tách $\mathcal{V}_{agg}$ ra ngoài làm **thừa số nhân**. Cụm không có đối tượng yếu thế: $\mathcal{V}_{agg}\approx 1$ (giữ nguyên lõi); cụm nhiều đối tượng yếu thế: $\mathcal{V}_{agg}\to 2$ (nhân đôi điểm) — đúng nghĩa "amplify equity".
 - **Lỗi (c) — bão hòa sớm:** nếu dùng $\tanh(\sum V_i)$ trực tiếp, chỉ 2–3 đối tượng yếu thế đã đưa $\tanh$ sát 1, khiến cụm 1 người và cụm 50 người yếu thế nhận điểm gần như nhau — mất khả năng phân biệt. Cách sửa: thêm **hệ số tỉ lệ** $s$ (ví dụ $s=10$) chia trong đối số $\tanh$, giãn vùng tuyến tính. $\tanh$ vẫn giữ vai trò chặn trên tránh điểm bùng nổ vô cực. (Lựa chọn tương đương: $1+\log(1+\sum V_i)$ kèm chuẩn hóa.)
 
-**Trần khuếch đại tổng quát $\mu$.** Chặn trên "nhân đôi" ($\mathcal{V}_{agg}\in(1,2)$) là một *lựa chọn chính sách* chứ không phải hằng số bất biến. Ta tổng quát hóa thành
+**Trần khuếch đại tổng quát $\mu$.** Chặn trên "nhân đôi" ($\mathcal{V}_{agg}\in[1,2)$) là một *lựa chọn chính sách* chứ không phải hằng số bất biến. Ta tổng quát hóa thành
 
 $$
 \mathcal{V}_{agg}(C_k) = 1 + (\mu - 1)\tanh\!\left( \frac{1}{s} \sum_{v_i \in C_k} V_i \right), \qquad \mu\in[1,2], \quad \mathcal{V}_{agg}\in(1,\mu)
@@ -251,7 +251,7 @@ $$
 
 trong đó $\mu$ là **trần khuếch đại** do ban chỉ huy đặt: $\mu=1$ tắt hoàn toàn ưu tiên tổn thương (quay về thuần rủi ro), $\mu=2$ cho phép nhân đôi tối đa. Việc phơi bày $\mu$ tường minh giúp yếu tố công bằng trở thành một *núm điều khiển chính sách có thể kiểm toán* thay vì một hằng số ẩn. Mọi số liệu báo cáo trong bài dùng $\mu=2$.
 
-**Trọng số và miền giá trị.** $\omega_1,\omega_2,\omega_3$ với ràng buộc $\sum\omega=1$, do ban chỉ huy đặt qua **Ma trận Quyết định** để chuyển trạng thái chiến thuật (ưu tiên số đông vs ưu tiên ngập sâu). Vì lõi đã chuẩn hóa $[0,1]$ và $\sum\omega=1$, lõi rủi ro $\in[0,1]$; nhân $\mathcal{V}_{agg}\in(1,2)$ cho $\mathcal{P}(C_k)\in(0,2]$ — chặn gọn, dễ xếp hạng.
+**Trọng số và miền giá trị.** $\omega_1,\omega_2,\omega_3$ với ràng buộc $\sum\omega=1$, do ban chỉ huy đặt qua **Ma trận Quyết định** để chuyển trạng thái chiến thuật (ưu tiên số đông vs ưu tiên ngập sâu). Vì lõi đã chuẩn hóa $[0,1]$ và $\sum\omega=1$, lõi rủi ro $\in[0,1]$; nhân $\mathcal{V}_{agg}\in[1,2)$ cho $\mathcal{P}(C_k)\in[0,2)$ — chặn gọn, dễ xếp hạng.
 
 Xếp hạng $\mathcal{P}(C_k)$ giảm dần cho ngay danh sách ưu tiên hành động; kết hợp tọa độ trọng tâm cụm, đây là đầu vào lý tưởng cho các thuật toán tối ưu định tuyến (A\* cost-aware, multi-commodity routing).
 
@@ -287,13 +287,13 @@ Xếp hạng $\mathcal{P}(C_k)$ giảm dần cho ngay danh sách ưu tiên hành
   - **S3:** tin giả cô lập thổi phồng 200 người (kiểm tra cổng $C_i$).
   - **S4:** cụm đông-ngập nhẹ vs ít-ngập nóc (kiểm tra $\mathcal{F}_{max}$).
 
-Lưu ý quan trọng: các nhóm kịch bản (nhãn 100–105) được đặt **trùng tọa độ** với 6 tâm ốc đảo (lệch 0 m) nhưng mang nhãn khác — thiết kế này **chặn trần ARI dưới 1,0 theo cấu trúc**, vì bất kỳ phương pháp phân cụm dựa trên không gian nào cũng buộc phải gộp mỗi nhóm kịch bản vào ốc đảo chủ của nó (xem §5.2 (1A)).
+Lưu ý quan trọng: mỗi nhóm kịch bản (nhãn 100–105) được **neo tại đúng tâm một ốc đảo** (điểm gốc lệch 0 m; các điểm còn lại trong nhóm nhiều-điểm rải trong bán kính $\lesssim$ 850 m, cùng cỡ với độ tản $\sim$250 m của điểm lõi) nhưng mang nhãn khác — thiết kế này **chặn trần ARI dưới 1,0 theo cấu trúc**, vì bất kỳ phương pháp phân cụm dựa trên không gian nào cũng buộc phải gộp mỗi nhóm kịch bản vào ốc đảo chủ của nó (xem §5.2 (1A)).
 
 **Tham số mặc định:** $\sigma_{geo}=700$ m; $\tau_{temp}=45$ phút; $\tau_F=0{,}25$; $\tau_E=0{,}35$; $\beta=\gamma=0{,}5$; ngưỡng cạnh $\theta=0{,}05$; k-NN $k=12$; $\lambda=1{,}0$; $s=10$; $\omega=(0{,}34;\,0{,}33;\,0{,}33)$; heuristic $C_i$ với $(b_0,b_1,b_2)=(-0{,}2;\,1{,}4;\,0{,}9)$.
 
 **Độ đo:** ARI (Adjusted Rand Index) và NMI (Normalized Mutual Information) so với ground-truth; **đường kính địa lý cụm** (km) — khoảng cách lớn nhất giữa hai điểm trong cùng cụm, đo tính gắn kết không gian; Modularity $Q$.
 
-Toàn bộ pipeline hiện thực bằng Python (`numpy`, `networkx`, `python-louvain`, `igraph`, `leidenalg`, `scikit-learn`, `scipy`); mã và số liệu thô nằm trong `demo/` (chín thí nghiệm `exp1`–`exp9` trong `demo/experiments/`, kết quả JSON trong `demo/results/tables/`).
+Toàn bộ pipeline hiện thực bằng Python (`numpy`, `networkx`, `python-louvain`, `igraph`, `leidenalg`, `scikit-learn`, `scipy`); mã và số liệu thô nằm trong `demo/` (mười thí nghiệm `exp1`–`exp10` trong `demo/experiments/`, kết quả JSON trong `demo/results/tables/`).
 
 ### 5.2. Thí nghiệm 1 — Kiểm chứng sáu quyết định thiết kế
 
@@ -306,7 +306,7 @@ Toàn bộ pipeline hiện thực bằng Python (`numpy`, `networkx`, `python-lo
 
 Dạng cộng tạo ra các cụm có đường kính trung bình **100 km** — vô nghĩa cho điều phối ca nô. Dạng gating kéo đường kính xuống **0,30 km**, đúng tầm hoạt động thực tế. Hai sự thật giải thích vì sao ARI vừa *trùng khớp* giữa hai dạng vừa *dưới 1,0*:
 
-- **Trần ARI dưới 1,0 do ground-truth áp đặt, không phải do dạng trọng số.** 24 điểm kịch bản stress-test (nhãn 100–105) nằm **cùng tọa độ** với 6 ốc đảo nhưng mang nhãn khác, nên mọi phương pháp dựa trên không gian đều buộc phải gộp mỗi điểm vào ốc đảo chủ. Đo riêng: 240 điểm lõi được phục hồi hoàn hảo (ARI = 1,0), 24 điểm kịch bản cũng nhất quán nội bộ (ARI = 1,0); chính sự trùng tọa độ giữa hai nhóm mới ghim ARI trên toàn tập 264 điểm có nhãn xuống **0,892**.
+- **Trần ARI dưới 1,0 do ground-truth áp đặt, không phải do dạng trọng số.** 24 điểm kịch bản stress-test (nhãn 100–105) tạo 6 nhóm, mỗi nhóm **neo tại tâm một ốc đảo** (trùng tọa độ tâm ở điểm gốc; các điểm còn lại rải trong bán kính $\lesssim$ 850 m) nhưng mang nhãn khác, nên mọi phương pháp dựa trên không gian đều buộc phải gộp mỗi nhóm vào ốc đảo chủ. Đo riêng: 240 điểm lõi được phục hồi hoàn hảo (ARI = 1,0), 24 điểm kịch bản cũng nhất quán nội bộ (ARI = 1,0); chính sự chồng lấn không gian giữa hai nhóm mới ghim ARI trên toàn tập 264 điểm có nhãn xuống **0,892**.
 - **ARI trùng khớp giữa hai dạng** vì chúng cho **cùng một phân hoạch trên 264 điểm có nhãn**; khác biệt 6 vs 27 cụm hoàn toàn nằm ở 21 điểm nhiễu (`gt_cluster = -1`) mà cổng gating tách thành cụm đơn lẻ còn dạng cộng gộp vào cụm lớn — các điểm nhiễu này bị mặt nạ loại bỏ (`gt < 0`) *trước khi* tính ARI/NMI nên vô hình với chúng.
 
 Vậy tương phản "6 vs 27 cụm" chứng minh lợi ích của gating về **độ gắn kết địa lý và cô lập nhiễu**, không phải về ARI (vốn giống hệt theo cấu trúc bài toán).
@@ -357,7 +357,7 @@ Bảng dưới mở rộng so sánh với **ba baseline công bằng** chạy tr
 | DBSCAN (eps=0,3, tọa độ)                 |    15    |      0,644      |      0,783      |         15,12         |        ✗        |          Không          |
 | DBSCAN (eps=0,6, tọa độ)                 |    7    |      0,730      |      0,873      |         32,27         |        ✗        |          Không          |
 
-**Phân tích baseline công bằng.** Khi chạy trên cùng ma trận affinity/khoảng cách, Louvain/Leiden vẫn vượt trội: (i) **Spectral Clustering** cho ARI chỉ 0,339 — đồ thị gating thưa và không liên thông đầy đủ gây khó cho phân tách phổ; (ii) **HDBSCAN** đạt ARI 0,890 (gần bằng Louvain) nhưng tìm được ít cụm hơn (11 vs 27) và đường kính trung bình 25 km — gộp nhiều ốc đảo khác nhau vào cùng cụm; (iii) **Agglomerative** (average linkage) khớp hoàn hảo với Louvain về ARI và NMI, nhưng yêu cầu biết trước $K$ — điều bất khả thi trong thảm họa. Kết quả xác nhận rằng ưu thế không chỉ đến từ đồ thị gating (vì HDBSCAN cũng dùng cùng đồ thị) mà từ sự kết hợp giữa đồ thị gating và cơ chế tối ưu Modularity (tự tìm K, gắn kết không gian).
+**Phân tích baseline công bằng.** Khi chạy trên cùng ma trận affinity/khoảng cách, Louvain/Leiden vẫn vượt trội: (i) **Spectral Clustering** cho ARI chỉ 0,339 — đồ thị gating thưa và không liên thông đầy đủ gây khó cho phân tách phổ; (ii) **HDBSCAN** đạt ARI 0,890 (gần bằng Louvain) nhưng tìm được ít cụm hơn (11 vs 27) và đường kính trung bình 25 km — con số này bị thổi lên bởi một "thùng nhiễu" gom $\sim$36 điểm có nhãn cộng một cụm dư rải rác, do HDBSCAN **xé lẻ** ốc đảo (loại các điểm biên ra nhiễu) chứ không gộp các ốc đảo lại; (iii) **Agglomerative** (average linkage) khớp hoàn hảo với Louvain về ARI và NMI, nhưng yêu cầu biết trước $K$ — điều bất khả thi trong thảm họa. Kết quả xác nhận rằng ưu thế không chỉ đến từ đồ thị gating (vì HDBSCAN cũng dùng cùng đồ thị) mà từ sự kết hợp giữa đồ thị gating và cơ chế tối ưu Modularity (tự tìm K, gắn kết không gian).
 
 ### 5.6. Thí nghiệm 5 — Độ ổn định xếp hạng (Kendall's τ)
 
@@ -385,9 +385,9 @@ Câu hỏi sâu hơn của Khe hở 2 không phải "chỉ số tổn thương $
 
 Ta đánh giá heuristic tin cậy $C_i$ như một bộ phát hiện tin giả và dò trường hợp xấu nhất. Xem $C_i$ thấp là cờ báo giả trên toàn bộ $285$ sự kiện, $C_i$ tách được tin giả tiêm vào khỏi tin thật với **ROC-AUC $0{,}9651$** (trung bình $C_i$ là $0{,}50$ cho tin giả so với $0{,}92$ cho tin thật). Đây là tín hiệu sàng lọc, không phải bảo đảm, và ta cố ý ép nó tới điểm gãy. Một tin giả ngây thơ (cô lập, không ảnh) chỉ đạt $C_i=0{,}45$ và dễ bị hạ trọng số; nhưng kẻ tấn công **thêm ảnh giả** đẩy nó lên $0{,}77$, **dàn dựng corroboration phối hợp** đẩy lên $0{,}74$, và làm **cả hai** đạt $C_i=0{,}92$ — không phân biệt được với trung bình tin thật. Vì "tính độc lập" của corroboration chỉ được xấp xỉ bằng gần kề không gian – thời gian (không có hạ tầng tài khoản định danh), heuristic bền với kẻ spam đơn lẻ nhưng **không** bền với đối thủ phối hợp có nguồn lực. Do đó ta trình bày $C_i$ như một bộ lọc tuyến đầu, phải kết hợp với tin cậy cấp tài khoản hoặc kiểm chứng chéo kênh trước khi có thể dựa vào để chống đối kháng — và nêu rõ giới hạn này thay vì thổi phồng khả năng phát hiện.
 
-### 5.10. Thí nghiệm 9 — Một độ đo phân biệt vượt trên ARI
+### 5.10. Thí nghiệm 9 — Phân rã chất lượng cụm: completeness vượt trên ARI
 
-ARI bão hòa ở đỉnh bảng xếp hạng (Louvain, Leiden, Agglomerative, và cả HDBSCAN đều quanh $0{,}89$–$0{,}892$), có nguy cơ che các khác biệt chất lượng thật. Ta bổ sung bộ ba homogeneity/completeness/V-measure, phân rã chất lượng cụm thành hai trục diễn giải được. Phân rã này phân biệt tốt hơn hẳn ở đúng loại lỗi quan trọng ở đây — **completeness**, tức một sự kiện ground-truth có bị xé lẻ ra nhiều cụm không. Nó phơi bày hai loại lỗi mà ARI làm mờ. Thứ nhất, ở đầu thấp, Spectral Clustering làm vỡ vụn sự kiện: completeness chỉ $0{,}595$ (V-measure $0{,}727$) so với $1{,}0$ của Louvain (V-measure $0{,}927$). Thứ hai, và đáng nói hơn, trong bốn phương pháp dẫn đầu mà ARI gộp thành gần-hòa (Louvain, Leiden, Agglomerative, HDBSCAN — chênh nhau trong $0{,}002$ ARI), completeness vẫn tách được: Louvain/Leiden/Agglomerative đạt hoàn hảo $1{,}0$ trong khi HDBSCAN tụt xuống $0{,}929$ vì gộp các ốc đảo — một khoảng cách completeness $0{,}07$ ở nơi ARI chỉ hiện $0{,}002$. (Độ trải ARI toàn dải $0{,}55$ là thật nhưng dồn hết ở đầu thấp — Spectral $0{,}339$, K-Means $0{,}688$ — nên không xếp hạng nổi nhóm dẫn đầu.) Do đó ta báo cáo V-measure kèm ARI xuyên suốt.
+ARI bão hòa ở đỉnh bảng xếp hạng (Louvain, Leiden, Agglomerative, và cả HDBSCAN đều quanh $0{,}89$–$0{,}892$), có nguy cơ che các khác biệt chất lượng thật. Ta **phân rã** độ khớp thành cặp homogeneity/completeness (mà trung bình điều hòa của chúng — V-measure — **chính bằng** NMI trung-bình-cộng đã in ở các Bảng gating và baseline; do đó giá trị phân biệt tăng thêm đến từ hai **thành phần**, không phải từ một độ đo tổng hợp mới). Phân rã này phân biệt tốt hơn hẳn ở đúng loại lỗi quan trọng ở đây — **completeness**, tức một sự kiện ground-truth có bị xé lẻ ra nhiều cụm không. Nó phơi bày hai loại lỗi mà ARI làm mờ. Thứ nhất, ở đầu thấp, Spectral Clustering làm vỡ vụn sự kiện: completeness chỉ $0{,}595$ (V-measure $0{,}727$) so với $1{,}0$ của Louvain (V-measure $0{,}927$). Thứ hai, và đáng nói hơn, trong bốn phương pháp dẫn đầu mà ARI gộp thành gần-hòa (Louvain, Leiden, Agglomerative, HDBSCAN — chênh nhau trong $0{,}002$ ARI), completeness vẫn tách được: Louvain/Leiden/Agglomerative đạt hoàn hảo $1{,}0$ trong khi HDBSCAN tụt xuống $0{,}929$ vì **xé lẻ** sự kiện ground-truth — đẩy $\sim$36 điểm có nhãn vào thùng nhiễu và tách một ốc đảo ra nhiều cụm dư — một khoảng cách completeness $0{,}07$ ở nơi ARI chỉ hiện $0{,}002$. (Ngược lại, homogeneity của HDBSCAN là $0{,}915$, thậm chí **cao hơn** Louvain $0{,}864$: cụm của nó vẫn "sạch" chính vì nó loại bớt điểm biên chứ không trộn lẫn các lớp, nên lỗi lộ ra ở completeness chứ không phải homogeneity.) (Độ trải ARI toàn dải $0{,}55$ là thật nhưng dồn hết ở đầu thấp — Spectral $0{,}339$, K-Means $0{,}688$ — nên không xếp hạng nổi nhóm dẫn đầu.) Do đó ta báo cáo phân rã homogeneity/completeness kèm ARI xuyên suốt.
 
 ### 5.11. Trực quan hóa
 
@@ -418,9 +418,9 @@ Pipeline sinh một **dashboard bản đồ Leaflet tự chứa** hiển thị c
 
 ### 7.1. Các mối đe dọa đến tính hợp lệ (Threats to Validity)
 
-- **Hợp lệ nội tại (internal).** Kết quả dựa trên dữ liệu synthetic có ground-truth do chính nhóm sinh; các "ốc đảo" ngập được thiết kế tách biệt về mặt không gian nên độ chính xác trên phần lõi cao (ARI lõi = 1,0) một phần phản ánh độ tách của dữ liệu, không thuần túy là sức mạnh phương pháp. Con số ARI toàn tập 0,892 lại bị chặn trần bởi thiết kế ground-truth (các nhóm kịch bản trùng tọa độ ốc đảo nhưng mang nhãn khác, xem §5.2), nên bản thân nó không phải thước đo trực tiếp của độ khó. Giảm thiểu: bổ sung kiểm chứng trên dữ liệu thật (Mục 7).
+- **Hợp lệ nội tại (internal).** Kết quả dựa trên dữ liệu synthetic có ground-truth do chính nhóm sinh; các "ốc đảo" ngập được thiết kế tách biệt về mặt không gian nên độ chính xác trên phần lõi cao (ARI lõi = 1,0) một phần phản ánh độ tách của dữ liệu, không thuần túy là sức mạnh phương pháp. Con số ARI toàn tập 0,892 lại bị chặn trần bởi thiết kế ground-truth (các nhóm kịch bản neo tại tâm ốc đảo, chồng lấn không gian nhưng mang nhãn khác, xem §5.2), nên bản thân nó không phải thước đo trực tiếp của độ khó. Giảm thiểu: bổ sung kiểm chứng trên dữ liệu thật (Mục 7).
 - **Hợp lệ ngoại tại (external).** Chỉ thử trên một vùng địa lý (Miền Trung VN) và một chế độ thảm họa (bão lũ). Chưa rõ khung tổng quát hóa cho đô thị mật độ cao khác, hay chế độ thảm họa khác (động đất, cháy rừng). Các tham số $\sigma_{geo}, \tau$ cần hiệu chỉnh lại cho từng bối cảnh.
-- **Hợp lệ khái niệm (construct).** ARI/NMI đo *độ khớp cấu trúc cụm* với ground-truth, KHÔNG trực tiếp đo *chất lượng quyết định cứu hộ*. Thí nghiệm 7 (Mục 5.8) bước đầu khắc phục điều này bằng một độ đo hướng-kết-quả (thời gian đến nạn nhân yếu thế qua mô phỏng điều phối), cho thấy trọng số tổn thương cải thiện 10,4%; và Thí nghiệm 9 (Mục 5.10) bổ sung V-measure để phân biệt chất lượng cụm mà ARI làm bão hòa. Dù vậy các độ đo này vẫn chạy trên dữ liệu synthetic và mô hình điều phối đơn giản hóa; kiểm chứng kết quả cứu hộ trên dữ liệu/địa hình thực vẫn là việc cần làm.
+- **Hợp lệ khái niệm (construct).** ARI/NMI đo *độ khớp cấu trúc cụm* với ground-truth, KHÔNG trực tiếp đo *chất lượng quyết định cứu hộ*. Thí nghiệm 7 (Mục 5.8) bước đầu khắc phục điều này bằng một độ đo hướng-kết-quả (thời gian đến nạn nhân yếu thế qua mô phỏng điều phối), cho thấy trọng số tổn thương cải thiện 10,4%; và Thí nghiệm 9 (Mục 5.10) phân rã độ khớp thành homogeneity/completeness để phân biệt chất lượng cụm mà ARI làm bão hòa (lưu ý V-measure chính bằng NMI đã báo cáo; giá trị phân biệt đến từ hai thành phần chứ không phải một độ đo mới). Dù vậy các độ đo này vẫn chạy trên dữ liệu synthetic và mô hình điều phối đơn giản hóa; kiểm chứng kết quả cứu hộ trên dữ liệu/địa hình thực vẫn là việc cần làm.
 - **Hợp lệ thống kê (conclusion).** exp3 chạy 10 seed cho kết quả ổn định, nhưng các thí nghiệm khác chủ yếu ở seed = 42. Nên báo cáo trung bình ± độ lệch chuẩn qua nhiều seed cho mọi con số chính.
 
 ## 8. Kết luận
