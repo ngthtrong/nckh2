@@ -44,6 +44,11 @@ class PriorityParams:
     omega_f: float = 0.33           # omega_2: trọng số ngập tối đa
     omega_n: float = 0.33           # omega_3: trọng số quy mô dân số
     v_scale: float = 10.0           # s: hệ số chống bão hòa tanh
+    # mu: trần khuếch đại tổn thương, V_agg = 1 + (mu-1)*tanh(sum V_i / s).
+    # mu = 1 tắt khuếch đại (chỉ còn lõi rủi ro), mu = 2 là mặc định chính sách.
+    # Đây là núm ĐẠO ĐỨC do ban chỉ huy đặt: nó chặn mức mà tổn thương được phép
+    # đảo thứ tự danh sách ưu tiên. Mọi kết quả báo cáo dùng mu = 2.
+    v_cap_mu: float = 2.0
 
 
 @dataclass(frozen=True)

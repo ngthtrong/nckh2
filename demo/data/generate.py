@@ -165,9 +165,19 @@ _SATELLITES = {
     107: (0, 0.0, +2 * SAT_OFFSET_M),              # S5B  — sát S5A, xem dưới
 }
 
-# Khoảng cách giữa hai nhóm S5 (mét). Chọn 900 m: nhỏ so với sigma_geo = 700 m nên
-# S_geo giữa hai nhóm vẫn đáng kể (~0.44) => CHỈ có S_context mới tách được chúng.
+# Khoảng cách giữa hai TÂM nhóm S5 (mét). Chọn 900 m: CÙNG CỠ với sigma_geo = 700 m
+# (900 m ~ 1.29 sigma) nên S_geo = exp(-d^2/2sigma^2) giữa hai tâm vẫn đáng kể
+# (~0.44) => CHỈ có S_context mới tách được chúng.
+# Lưu ý đo lường (phản biện vòng 17): vì mỗi nhóm rải 6 điểm theo đường chéo
+# step_m = 90 m và có jitter, khoảng cách THỰC HIỆN không đúng bằng hằng số này:
+# trọng tâm cách nhau ~901 m, cặp điểm gần nhất ~697 m, cặp xa nhất ~1266 m.
+# Mọi phát biểu trong bài báo phải dùng 900 m (khoảng cách thiết kế) và nêu rõ
+# 901 m / 697 m khi cần độ chính xác, KHÔNG dùng con số nào khác.
 S5_GAP_M = 900.0
+
+# Các cặp nhãn ground-truth được PHÉP nằm gần nhau hơn MIN_GT_SEPARATION_M vì đó
+# chính là điều kiện thí nghiệm (S5: chỉ S_context tách được chúng).
+GT_PROXIMITY_EXEMPT: set[tuple[int, int]] = {(106, 107)}
 
 
 def _sat_center(gt: int) -> tuple[float, float, str]:
@@ -267,31 +277,103 @@ def narrative_scenarios(rng=None, jitter_m: float = 40.0) -> list[Event]:
 
 
 def assert_gt_separable(events: list[Event], min_sep_m: float = MIN_GT_SEPARATION_M) -> dict:
-    """Chặn lỗi trần-ARI: nhóm kịch bản KHÔNG được trùng vị trí ốc đảo lõi.
+    """Chặn lỗi trần-ARI: hai nhãn ground-truth KHÔNG được đồng vị trí.
 
-    Nếu một điểm mang nhãn gt >= 100 nằm sát tâm một ốc đảo (nhãn 0..5), mọi
-    phương pháp dựa trên không gian buộc phải gộp nó vào ốc đảo đó, ghim trần ARI
-    xuống dưới 1,0 vì lý do THIẾT KẾ chứ không phải chất lượng thuật toán. Hàm này
-    raise ngay khi sinh dữ liệu để lỗi không âm thầm quay lại.
+    Nếu hai điểm mang nhãn gt khác nhau nằm quá gần nhau, mọi phương pháp dựa trên
+    không gian buộc phải gộp chúng, ghim trần ARI xuống dưới 1,0 vì lý do THIẾT KẾ
+    chứ không phải chất lượng thuật toán. Hàm này raise ngay khi sinh dữ liệu để lỗi
+    không âm thầm quay lại.
+
+    Ba lớp kiểm tra (mở rộng ở vòng phản biện 17 — trước đây chỉ có lớp 1, nên
+    hai lỗ hổng sau đây không được canh):
+      1. điểm kịch bản (gt >= 100) vs TÂM ốc đảo lõi;
+      2. điểm kịch bản vs ĐIỂM lõi thực tế — điểm lõi rải quanh tâm nên khoảng
+         cách tới điểm luôn NHỎ HƠN tới tâm, đây mới là ràng buộc thật;
+      3. điểm kịch bản vs điểm kịch bản KHÁC NHÃN — cặp trong GT_PROXIMITY_EXEMPT
+         được miễn vì sự gần nhau của chúng chính là điều kiện thí nghiệm.
     """
     centers = [(clat, clng) for clat, clng, _ in CLUSTER_CENTERS]
-    worst = None
-    for e in events:
-        if e.gt_cluster is None or e.gt_cluster < 100:
-            continue
+    narrative = [e for e in events if e.gt_cluster is not None and e.gt_cluster >= 100]
+    core = [e for e in events if e.gt_cluster is not None and 0 <= e.gt_cluster < 100]
+
+    # --- lớp 1: kịch bản vs tâm ốc đảo ------------------------------------
+    worst_center = None
+    for e in narrative:
         dmin = min(haversine_m(e.lat, e.lng, cl[0], cl[1]) for cl in centers)
-        if worst is None or dmin < worst[1]:
-            worst = (e.event_id, dmin, e.gt_cluster)
+        if worst_center is None or dmin < worst_center[1]:
+            worst_center = (e.event_id, dmin, e.gt_cluster)
         if dmin < min_sep_m:
             raise AssertionError(
                 f"Nhóm kịch bản {e.event_id} (gt={e.gt_cluster}) chỉ cách tâm ốc đảo "
                 f"{dmin:.0f} m (< {min_sep_m:.0f} m). Nhãn ground-truth sẽ không khả "
                 f"tách bằng không gian và trần ARI bị ghim dưới 1,0 do thiết kế dữ liệu."
             )
+
+    # --- lớp 2: kịch bản vs ĐIỂM lõi --------------------------------------
+    worst_point = None
+    for e in narrative:
+        for c in core:
+            d = haversine_m(e.lat, e.lng, c.lat, c.lng)
+            if worst_point is None or d < worst_point[2]:
+                worst_point = (e.event_id, c.event_id, d, e.gt_cluster, c.gt_cluster)
+    if worst_point is not None and worst_point[2] < min_sep_m:
+        raise AssertionError(
+            f"Điểm kịch bản {worst_point[0]} (gt={worst_point[3]}) chỉ cách ĐIỂM lõi "
+            f"{worst_point[1]} (gt={worst_point[4]}) {worst_point[2]:.0f} m "
+            f"(< {min_sep_m:.0f} m): hai nhãn ground-truth đồng vị trí."
+        )
+
+    # --- lớp 3: kịch bản vs kịch bản khác nhãn ----------------------------
+    worst_pair = None
+    for i, a in enumerate(narrative):
+        for b in narrative[i + 1:]:
+            if a.gt_cluster == b.gt_cluster:
+                continue
+            key = (min(a.gt_cluster, b.gt_cluster), max(a.gt_cluster, b.gt_cluster))
+            d = haversine_m(a.lat, a.lng, b.lat, b.lng)
+            if key in GT_PROXIMITY_EXEMPT:
+                continue
+            if worst_pair is None or d < worst_pair[2]:
+                worst_pair = (a.event_id, b.event_id, d, key)
+    if worst_pair is not None and worst_pair[2] < min_sep_m:
+        raise AssertionError(
+            f"Hai nhóm kịch bản khác nhãn {worst_pair[3]} có cặp điểm "
+            f"{worst_pair[0]}–{worst_pair[1]} chỉ cách {worst_pair[2]:.0f} m "
+            f"(< {min_sep_m:.0f} m) và KHÔNG nằm trong GT_PROXIMITY_EXEMPT."
+        )
+
+    # cặp được miễn: báo cáo khoảng cách thực tế để bài báo trích đúng số
+    exempt_stats: dict[str, float | None] = {}
+    for key in sorted(GT_PROXIMITY_EXEMPT):
+        ga = [e for e in narrative if e.gt_cluster == key[0]]
+        gb = [e for e in narrative if e.gt_cluster == key[1]]
+        if not ga or not gb:
+            continue
+        pair_d = [haversine_m(a.lat, a.lng, b.lat, b.lng) for a in ga for b in gb]
+        ca = (sum(e.lat for e in ga) / len(ga), sum(e.lng for e in ga) / len(ga))
+        cb = (sum(e.lat for e in gb) / len(gb), sum(e.lng for e in gb) / len(gb))
+        tag = f"gt{key[0]}_{key[1]}"
+        exempt_stats[f"exempt_{tag}_centroid_m"] = round(
+            haversine_m(ca[0], ca[1], cb[0], cb[1]), 1)
+        exempt_stats[f"exempt_{tag}_min_pair_m"] = round(min(pair_d), 1)
+        exempt_stats[f"exempt_{tag}_max_pair_m"] = round(max(pair_d), 1)
+
     return {
-        "min_narrative_to_core_center_m": round(worst[1], 1) if worst else None,
-        "closest_narrative_event": worst[0] if worst else None,
+        "min_narrative_to_core_center_m": round(worst_center[1], 1) if worst_center else None,
+        "closest_narrative_event": worst_center[0] if worst_center else None,
+        "min_narrative_to_core_point_m": round(worst_point[2], 1) if worst_point else None,
+        "min_narrative_pair_m": round(worst_pair[2], 1) if worst_pair else None,
+        **exempt_stats,
     }
+
+
+def _centroid_dist_km(events: list[Event], gt_a: int, gt_b: int) -> float:
+    """Khoảng cách giữa TRỌNG TÂM hai nhóm nhãn (km)."""
+    def cen(gt: int) -> tuple[float, float]:
+        g = [e for e in events if e.gt_cluster == gt]
+        return sum(e.lat for e in g) / len(g), sum(e.lng for e in g) / len(g)
+    a, b = cen(gt_a), cen(gt_b)
+    return haversine_m(a[0], a[1], b[0], b[1]) / 1000.0
 
 
 def event_to_dict(ev: Event) -> dict:
@@ -346,8 +428,12 @@ def build_dataset(seed: int = 42, n_per_cluster: int = 40, n_noise: int = 60) ->
             "n_fake_with_image": sum(1 for e in all_events if e.is_fake and e.has_image),
             "satellite_offset_m": SAT_OFFSET_M,
             "s5_gap_m": S5_GAP_M,
+            # hai cách đo khoảng cách cặp S1, ghi cả hai để bài báo trích được
+            # nguồn chính xác (phản biện vòng 17): điểm đầu tiên của mỗi nhóm, và
+            # trọng tâm hai nhóm. Cả hai đều làm tròn 1 chữ số thành 106,8 km.
             "s1_pair_distance_km": round(
                 haversine_m(s1a.lat, s1a.lng, s1b.lat, s1b.lng) / 1000.0, 2),
+            "s1_centroid_distance_km": round(_centroid_dist_km(narrative, 100, 101), 2),
             **sep,
         },
         "events": [event_to_dict(e) for e in all_events],

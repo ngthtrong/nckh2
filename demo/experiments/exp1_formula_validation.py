@@ -16,6 +16,8 @@ from __future__ import annotations
 
 import math
 
+from scipy.stats import kendalltau as _kendalltau
+
 from common import prepared_events, print_table, save_table
 from pipeline.config import DEFAULT_CONFIG as C
 from pipeline.clustering import run_louvain
@@ -167,6 +169,61 @@ def exp_c_v_multiplier(events):
         })
     rows.sort(key=lambda r: r["P_multiply"], reverse=True)
     return rows, s2_cluster
+
+
+def exp_h_mu_policy(events):
+    """H. Núm chính sách mu: nó thực sự đổi được thứ hạng bao nhiêu?
+
+    Bài báo trình bày mu như một "núm đạo đức" cho ban chỉ huy, nói rằng mu lớn
+    có thể đẩy một cụm nhỏ nhiều người yếu thế lên trên một cụm lớn khoẻ mạnh.
+    Đó là một tuyên bố THỰC NGHIỆM, và trước đây chưa có thí nghiệm nào chạy với
+    mu != 2 — nghĩa là tuyên bố chưa được kiểm chứng trên chính bộ dữ liệu này.
+
+    Ở đây ta quét mu qua toàn miền đã công bố [1, 2] và đo:
+      - top3: tập ba cụm đầu (mu có đảo được nhóm dẫn đầu không?)
+      - kendall_tau_vs_mu2: thứ hạng lệch bao nhiêu so với mặc định mu = 2
+      - top1_v_agg / top1_size: cụm đầu bảng có phải cụm giàu-yếu-thế hay không
+
+    Nếu top-3 không đổi trên toàn miền, phải báo cáo đúng như vậy: núm này có
+    hiệu lực toán học nhưng KHÔNG đủ để đảo nhóm dẫn đầu trên dữ liệu này.
+    """
+    from dataclasses import replace
+
+    w = build_weight_matrix(events, C.weight, mode="gating")
+    ws = sparsify(w, C.weight)
+    lab = run_louvain(ws, C.cluster.resolution, C.cluster.random_state)
+
+    sizes = {}
+    for ev, l in zip(events, lab):
+        sizes[l] = sizes.get(l, 0) + 1
+
+    def _order(mu):
+        p = replace(C.priority, v_cap_mu=mu)
+        return score_clusters(events, lab, p)
+
+    base = [s.cluster_id for s in _order(2.0)]
+    pos_base = {cid: i for i, cid in enumerate(base)}
+
+    rows = []
+    for mu in (1.0, 1.25, 1.5, 1.75, 2.0):
+        sc = _order(mu)
+        order = [s.cluster_id for s in sc]
+        x = [pos_base[c] for c in order]
+        y = list(range(len(order)))
+        tau, _ = _kendalltau(x, y)
+        rows.append({
+            "mu": mu,
+            "top3_clusters": order[:3],
+            "top3_same_as_mu2": order[:3] == base[:3],
+            "kendall_tau_vs_mu2": round(float(tau), 4),
+            "top1_cluster": order[0],
+            "top1_v_agg": sc[0].v_agg,
+            "top1_core": sc[0].core,
+            "top1_priority": sc[0].priority,
+            "top1_size": sizes[order[0]],
+            "max_priority": max(s.priority for s in sc),
+        })
+    return rows
 
 
 def exp_d_tanh_saturation():
@@ -325,6 +382,15 @@ def main():
     res_f = exp_f_fmax_gate(events)
     print_table("F. Gate C_i cho F_max chặn tin giả khai ngập cao (S3)", [res_f])
 
+    rows_h = exp_h_mu_policy(events)
+    print_table("H. Núm chính sách mu: quét toàn miền [1, 2] đã công bố", rows_h)
+    if all(r["top3_same_as_mu2"] for r in rows_h):
+        print("   LƯU Ý TRUNG THỰC: top-3 KHÔNG đổi trên toàn miền mu. Núm này có")
+        print("   hiệu lực toán học (tau < 1, thứ hạng dưới có đổi) nhưng KHÔNG đủ")
+        print("   để đảo nhóm dẫn đầu trên bộ dữ liệu này. Phải báo cáo đúng vậy.")
+    else:
+        print("   mu ĐỔI ĐƯỢC nhóm dẫn đầu — xem cột top3_clusters.")
+
     save_table("exp1_A_gating_vs_additive.json", rows_a)
     save_table("exp1_G_ari_decomposition.json", [res_g])
     save_table("exp1_B_normalization.json", [res_b])
@@ -332,6 +398,7 @@ def main():
     save_table("exp1_D_tanh_saturation.json", rows_d)
     save_table("exp1_E_confidence_gate.json", [res_e])
     save_table("exp1_F_fmax_gate.json", [res_f])
+    save_table("exp1_H_mu_policy.json", rows_h)
     print("\n[saved] exp1_*.json -> results/tables/")
 
 
