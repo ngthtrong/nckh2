@@ -1,10 +1,16 @@
 """Thí nghiệm 1 — Kiểm chứng 4 fix của Mục 4.
 
-A. w_ij: cộng vs nhân/gating  -> đo đường kính địa lý cụm (S1: hai điểm xa cùng ngữ cảnh).
+A. w_ij: cộng (quét alpha) vs nhân/gating -> đường kính địa lý cụm (S1: hai NHÓM xa
+   nhau nhưng cùng ngữ cảnh). Quét alpha để dạng cộng không bị dựng thành người rơm.
 B. P(C_k): chuẩn hóa vs không  -> chứng minh N_total áp đảo khi không chuẩn hóa.
-C. V_agg: nhân vs cộng          -> chứng minh 'khuếch đại' chỉ đúng khi nhân (S2).
+C. V_agg: nhân vs cộng          -> chứng minh 'khuếch đại' chỉ đúng khi nhân (S2);
+   so trên thang đã chuẩn hoá để hai dạng cùng miền giá trị.
 D. tanh bão hòa: có/không s     -> khả năng phân biệt cụm ít vs nhiều đối tượng yếu thế.
 E. gate C_i cho N_total         -> tin giả S3 bị hạ nhiệt.
+F. gate C_i cho F_max           -> tin giả khai ngập cao không chiếm trọn F_max.
+G. Phân rã ARI                  -> BẤT BIẾN dữ liệu: nhãn kịch bản phải khả tách
+   bằng không gian (không nhóm nào trùng tâm ốc đảo), tức trần ARI không bị ghim
+   bởi thiết kế dữ liệu.
 """
 from __future__ import annotations
 
@@ -19,32 +25,54 @@ from pipeline.weighting import build_weight_matrix, sparsify
 
 
 def exp_a_gating_vs_additive(events):
+    """Dạng CỘNG vs NHÂN, quét alpha để loại bỏ nghi vấn 'người rơm'.
+
+    Phản biện 2.1: bản trước cố định alpha = 0,34 trong khi beta = gamma = 0,5,
+    tức dạng cộng bị cho ít trọng số không gian hơn hai thành phần kia — thua là
+    tất yếu. Ở đây ta quét alpha ∈ {0,34; 0,5; 1,0} và thêm biến thể chuẩn hoá
+    1/3 (alpha = beta = gamma = 1/3, tổng = 1) để dạng cộng được đặt ở điều kiện
+    THUẬN LỢI NHẤT của nó. Nếu gating vẫn thắng ở mọi alpha thì kết luận mới
+    vững; nếu không, phải báo cáo đúng như vậy.
+
+    Cột so sánh chính là `max_diam_km` và `mean_diam_km_multi`: `mean_diam_km`
+    tính cả singleton (đường kính 0) nên thưởng giả tạo cho phân hoạch vụn.
+    """
     gt = [e.gt_cluster for e in events]
+    variants = [
+        ("additive (alpha=0.34)", "additive", 0.34),
+        ("additive (alpha=0.5 = beta = gamma)", "additive", 0.5),
+        ("additive (alpha=1.0)", "additive", 1.0),
+        ("additive (chuẩn hoá 1/3)", "additive_norm", None),
+        ("gating (nhân, đề xuất)", "gating", None),
+    ]
     rows = []
-    for mode in ("additive", "gating"):
-        w = build_weight_matrix(events, C.weight, mode=mode)
+    for label, mode, alpha in variants:
+        w = build_weight_matrix(events, C.weight, mode=mode, alpha=alpha)
         ws = sparsify(w, C.weight)
         lab = run_louvain(ws, C.cluster.resolution, C.cluster.random_state)
         q = cluster_quality(lab, gt)
         spread = geographic_spread(events, lab)
         rows.append({
-            "mode": mode,
+            "variant": label,
             "ari": q["ari"],
             "nmi": q["nmi"],
-            "mean_diam_km": spread["mean_diameter_km"],
+            "mean_diam_km_multi": spread["mean_diameter_km_multi"],
             "max_diam_km": spread["max_diameter_km"],
+            "mean_diam_km_all": spread["mean_diameter_km"],
             "n_clusters": spread["n_clusters"],
+            "n_singletons": spread["n_singletons"],
+            "s1_merged": _s1_same_cluster(events, mode, alpha),
         })
     return rows
 
 
-def _s1_same_cluster(events, mode):
-    """S1_A (Huế) và S1_B (Hội An, xa ~90km) có bị gom chung cụm không?"""
-    w = build_weight_matrix(events, C.weight, mode=mode)
+def _s1_same_cluster(events, mode, alpha=None):
+    """Nhóm S1_A (Huế) và S1_B (Hội An, xa ~107km) có bị gom chung cụm không?"""
+    w = build_weight_matrix(events, C.weight, mode=mode, alpha=alpha)
     ws = sparsify(w, C.weight)
     lab = run_louvain(ws, C.cluster.resolution, C.cluster.random_state)
     idx = {e.event_id: i for i, e in enumerate(events)}
-    a, b = idx.get("S1_A"), idx.get("S1_B")
+    a, b = idx.get("S1_A_0"), idx.get("S1_B_0")
     if a is None or b is None:
         return None
     return lab[a] == lab[b]
@@ -88,7 +116,14 @@ def exp_b_normalization(events):
 
 
 def exp_c_v_multiplier(events):
-    """S2 (cụm nhiều đối tượng yếu thế): V nhân đẩy ưu tiên bao nhiêu so với cộng?"""
+    """S2 (cụm nhiều đối tượng yếu thế): V nhân đẩy ưu tiên bao nhiêu so với cộng?
+
+    Phản biện 2.5: P_multiply và P_add có MIỀN GIÁ TRỊ khác nhau (nhân với V_agg
+    ∈ [1, 2) vs cộng thêm một offset), nên so trực tiếp hai con số là so hai
+    thang đo. Điều duy nhất so được — và cũng là điều bài báo tuyên bố — là THỨ
+    HẠNG. Vì vậy ta thêm cột hạng của mỗi cụm theo từng dạng, cùng thang chuẩn
+    hoá min-max để đọc được khoảng cách tương đối trong cùng một dạng.
+    """
     w = build_weight_matrix(events, C.weight, mode="gating")
     ws = sparsify(w, C.weight)
     lab = run_louvain(ws, C.cluster.resolution, C.cluster.random_state)
@@ -100,6 +135,20 @@ def exp_c_v_multiplier(events):
     idx = {e.event_id: i for i, e in enumerate(events)}
     s2_cluster = lab[idx["S2_0"]] if "S2_0" in idx else None
 
+    # hạng (0 = ưu tiên cao nhất) theo từng dạng
+    rank_mult = {cid: i for i, cid in enumerate(
+        sorted(sc_mult, key=lambda c: sc_mult[c].priority, reverse=True))}
+    rank_add = {cid: i for i, cid in enumerate(
+        sorted(sc_add, key=lambda c: sc_add[c].priority, reverse=True))}
+
+    def _minmax(vals):
+        lo, hi = min(vals), max(vals)
+        span = hi - lo
+        return (lambda x: round((x - lo) / span, 4)) if span > 0 else (lambda x: 0.0)
+
+    norm_mult = _minmax([s.priority for s in sc_mult.values()])
+    norm_add = _minmax([s.priority for s in sc_add.values()])
+
     rows = []
     for cid in sc_mult:
         m, a = sc_mult[cid], sc_add[cid]
@@ -110,6 +159,11 @@ def exp_c_v_multiplier(events):
             "core": m.core,
             "P_multiply": m.priority,
             "P_add": a.priority,
+            "P_multiply_norm": norm_mult(m.priority),
+            "P_add_norm": norm_add(a.priority),
+            "rank_multiply": rank_mult[cid],
+            "rank_add": rank_add[cid],
+            "rank_shift": rank_add[cid] - rank_mult[cid],
         })
     rows.sort(key=lambda r: r["P_multiply"], reverse=True)
     return rows, s2_cluster
@@ -178,13 +232,19 @@ def exp_f_fmax_gate(events):
 
 
 def exp_g_ari_decomposition(events):
-    """Phân rã trần ARI: core-only vs narrative-only vs toàn tập có nhãn.
+    """BẤT BIẾN dữ liệu — trần ARI không bị ghim bởi thiết kế dữ liệu.
 
-    Các nhóm kịch bản (gt 100–105) được đặt TRÙNG tọa độ với 6 ốc đảo (gt 0–5)
-    nhưng mang nhãn khác, nên mọi phương pháp dựa trên không gian đều buộc phải
-    gộp mỗi điểm kịch bản vào ốc đảo chủ -> chặn trần ARI toàn tập dưới 1,0.
-    Đo riêng từng nhóm để chứng minh: chính sự trùng tọa độ (không phải dạng
-    trọng số) mới ghim ARI ở 0,892.
+    Lịch sử: ở bản dữ liệu trước, các nhóm kịch bản (gt 100–105) được đặt TRÙNG
+    tọa độ với 6 ốc đảo (gt 0–5) nhưng mang nhãn khác. Mọi phương pháp dựa trên
+    không gian đều buộc phải gộp điểm kịch bản vào ốc đảo chủ, nên ARI toàn tập
+    bị ghim ở 0,892 vì THIẾT KẾ DỮ LIỆU chứ không vì chất lượng thuật toán — và
+    do đó ARI không còn phân biệt được phương pháp (phản biện 2.2).
+
+    Sau khi sinh lại dữ liệu, mỗi nhóm kịch bản cách tâm ốc đảo chủ ≥ 3 km
+    (≫ sigma_geo = 700 m). Hàm này giữ lại phân rã ARI như một PHÉP KIỂM
+    HỒI QUY: `n_colocated_narrative_groups` phải bằng 0 và ARI core-only,
+    narrative-only, toàn tập phải xấp xỉ nhau. Nếu con số trùng-tọa-độ > 0 quay
+    lại, phép kiểm này phát hiện ngay.
     """
     from sklearn.metrics import adjusted_rand_score
 
@@ -232,13 +292,23 @@ def main():
     events = prepared_events()
 
     rows_a = exp_a_gating_vs_additive(events)
-    print_table("A. w_ij: Cộng vs Nhân/Gating (chất lượng + gắn kết địa lý)", rows_a)
-    print(f"   S1 (Huế & Hội An cách 90km) gom chung cụm? "
-          f"additive={_s1_same_cluster(events,'additive')}  "
-          f"gating={_s1_same_cluster(events,'gating')}")
+    print_table("A. w_ij: Cộng (quét alpha) vs Nhân/Gating — so trên đường kính "
+                "cụm nhiều thành viên và trường hợp xấu nhất", rows_a)
+    print("   Cột so sánh hợp lệ: max_diam_km và mean_diam_km_multi. "
+          "mean_diam_km_all tính cả singleton (0 km) nên thưởng giả tạo cho "
+          "phân hoạch vụn — chỉ để tham khảo.")
+    print("   s1_merged = True nghĩa là hai nhóm S1 cách 107 km bị gộp làm một cụm "
+          "(sai về mặt vận hành).")
 
     res_g = exp_g_ari_decomposition(events)
-    print_table("G. Phân rã trần ARI (core-only vs narrative-only vs toàn tập)", [res_g])
+    print_table("G. BẤT BIẾN dữ liệu: nhãn kịch bản khả tách bằng không gian "
+                "(n_colocated phải = 0)", [res_g])
+    if res_g["n_colocated_narrative_groups"] != 0:
+        print("   !! CẢNH BÁO: có nhóm kịch bản trùng tâm ốc đảo -> trần ARI bị "
+              "ghim bởi thiết kế dữ liệu. Chạy lại data/generate.py.")
+    else:
+        print("   OK: không nhóm kịch bản nào trùng tâm ốc đảo; ARI phản ánh chất "
+              "lượng thuật toán chứ không phải trần do dữ liệu.")
 
     res_b = exp_b_normalization(events)
     print_table("B. P(C_k): Tác động chuẩn hóa thang đo", [res_b])

@@ -21,9 +21,22 @@ Metric equity: thời gian-đến trung bình CÓ TRỌNG SỐ theo tổng tổn
 cụm (nạn nhân yếu thế càng nhiều thì việc tới trễ càng bị phạt nặng). Chính sách
 tốt hơn về equity => metric này NHỎ hơn.
 
-Trung thực: nếu (a) KHÔNG nhỏ hơn (b)/(c), ta báo cáo đúng như vậy và đóng khung
-V_agg là *lựa chọn giá trị chuẩn tắc* (triage ưu tiên người dễ tổn thương) thay
-vì tuyên bố tối ưu khách quan.
+VỀ TÍNH TUẦN HOÀN CỦA THƯỚC ĐO (phản biện 1.2b): không tồn tại thước đo trung
+lập tuyệt đối ở đây, nên ta báo cáo CẢ BA và nói rõ thiên vị của từng cái thay vì
+chọn cái có lợi rồi biện minh sau:
+  1. `time_to_vulnerable_min`  — trọng số ΣV thuần. THIÊN VỊ dạng CỘNG: dạng cộng
+     tối ưu đúng hàm mục tiêu này (offset phẳng theo ΣV).
+  2. `harm_weighted_time_min`  — trọng số ΣV × core. THIÊN VỊ dạng NHÂN: định
+     nghĩa 'thiệt hại' là tương tác yếu-thế × nghiêm-trọng, tức chính giả thuyết
+     mà dạng nhân mã hoá. Đây là thước đo bản trước chọn, nên không thể dùng nó
+     làm bằng chứng độc lập.
+  3. `severe_reach_time_min`   — trọng số 1[F_max > 0,7], KHÔNG chứa V và KHÔNG
+     chứa core. Định nghĩa trước bằng ngưỡng vận hành (ngập > 0,7 là nguy hiểm
+     tới tính mạng) nên không thiên vị dạng nào. Đây là thước đo trọng tài.
+
+Trung thực: nếu (a) KHÔNG nhỏ hơn (b)/(c) trên thước đo trọng tài, ta báo cáo
+đúng như vậy và đóng khung V_agg là *lựa chọn giá trị chuẩn tắc* (triage ưu tiên
+người dễ tổn thương) thay vì tuyên bố tối ưu khách quan.
 """
 from __future__ import annotations
 
@@ -40,6 +53,11 @@ from pipeline.weighting import build_weight_matrix, sparsify
 N_BOATS = 3          # số đội ca nô
 V_BOAT_KMH = 30.0    # tốc độ ca nô (km/h) — cỡ ca nô cứu hộ
 T_SERVE_MIN = 15.0   # thời gian phục vụ mỗi cụm (phút)
+
+# Ngưỡng "ngập nặng" cho metric trung lập thứ ba. Đặt trước khi xem kết quả;
+# đây là tiêu chí vận hành (ngập tới mái, phải cứu hộ bằng ca nô), KHÔNG lấy từ
+# bất kỳ thành phần nào của công thức P.
+SEVERE_FLOOD_THRESHOLD = 0.7
 
 
 def _depot(scores):
@@ -87,6 +105,30 @@ def _harm_weight(score, events_by_cluster):
     return v * score.core
 
 
+def _severe_vulnerable_weight(score, events_by_cluster):
+    """Trọng số TRUNG LẬP, đăng ký trước: ΣV của các cụm ngập nặng (F_max > 0,7).
+
+    Vì sao cần metric thứ ba: metric ΣV-thuần (`_vulnerable_weight`) tối ưu đúng
+    cho dạng CỘNG, còn metric thiệt-hại (`_harm_weight`) dùng chính `score.core`
+    — đại lượng nằm trong công thức P đang được đánh giá — nên có lợi cho dạng
+    NHÂN. Chấm điểm bằng bất kỳ metric nào trong hai cái đó rồi tuyên bố người
+    thắng là lập luận vòng tròn (phản biện 1.2).
+
+    Metric này dùng một tiêu chí NGOÀI công thức P: ngưỡng ngập nặng F > 0,7 là
+    tiêu chí phân loại vận hành (nhà cửa ngập tới mái, cần cứu hộ đường thuỷ),
+    xác định trước khi xem kết quả và không phụ thuộc omega, V_agg hay core.
+    Trọng số = ΣV nếu cụm ngập nặng, 0 nếu không: "tới muộn ở nơi có người yếu
+    thế TRONG vùng ngập nặng" là thiệt hại ta thực sự muốn giảm.
+    """
+    mem = events_by_cluster.get(score.cluster_id, [])
+    if not mem:
+        return 0.0
+    f_max = max(e.flood for e in mem)
+    if f_max <= SEVERE_FLOOD_THRESHOLD:
+        return 0.0
+    return sum(e.vulnerability for e in mem)
+
+
 def _weighted_time(scores, arrival, weight_fn, events_by_cluster):
     """Thời gian-đến trung bình có trọng số. Nhỏ = tốt.
 
@@ -131,22 +173,27 @@ def main():
     rows = []
     twv_by_policy = {}
     harm_by_policy = {}
+    severe_by_policy = {}
     for name, ordered in policies.items():
         arrival = _simulate_arrival_times(ordered, depot)
-        # metric 1: thời gian đến yếu thế, trọng số ΣV thuần
+        # metric 1: thời gian đến yếu thế, trọng số ΣV thuần (thiên vị dạng CỘNG)
         twv = _weighted_time(sc_full, arrival, _vulnerable_weight, events_by_cluster)
-        # metric 2: thời gian đến yếu thế, trọng số THIỆT HẠI = ΣV * nghiêm trọng
+        # metric 2: trọng số THIỆT HẠI = ΣV * core (thiên vị dạng NHÂN vì dùng core)
         harm = _weighted_time(sc_full, arrival, _harm_weight, events_by_cluster)
+        # metric 3: TRUNG LẬP — ΣV trong cụm ngập nặng F>0,7 (ngoài công thức P)
+        severe = _weighted_time(sc_full, arrival, _severe_vulnerable_weight, events_by_cluster)
         # thời gian-đến TB không trọng số (để đối chiếu công bằng tổng thể)
         mean_arr = sum(arrival.values()) / len(arrival)
         rows.append({
             "policy": name,
             "time_to_vulnerable_min": round(twv, 2),
             "harm_weighted_time_min": round(harm, 2),
+            "severe_flood_vulnerable_time_min": round(severe, 2),
             "mean_arrival_all_min": round(mean_arr, 2),
         })
         twv_by_policy[name] = twv
         harm_by_policy[name] = harm
+        severe_by_policy[name] = severe
 
     def _impr(metric, base_key="P_no_vulnerability", full_key="P_full_multiplicative"):
         base, full = metric[base_key], metric[full_key]
@@ -154,14 +201,28 @@ def main():
 
     impr_twv = _impr(twv_by_policy)
     impr_harm = _impr(harm_by_policy)
+    impr_severe = _impr(severe_by_policy)
+    # so với chính sách dạng CỘNG (đối thủ thật, không phải 'bỏ V')
+    impr_severe_vs_add = _impr(severe_by_policy, base_key="P_additive_V")
 
     print_table("Exp7 — Outcome metric cho equity (thời gian đến nạn nhân yếu thế)", rows)
     print(f"\nCấu hình: {N_BOATS} ca nô, {V_BOAT_KMH} km/h, phục vụ {T_SERVE_MIN} phút/cụm.")
-    print(f"[ΣV thuần]  V nhân giảm {impr_twv}% thời-gian-đến-yếu-thế so với bỏ V.")
-    print(f"[thiệt hại] V nhân giảm {impr_harm}% thời-gian-đến-yếu-thế-nghiêm-trọng so với bỏ V.")
-    print("Ghi chú: metric ΣV-thuần thưởng đúng cái dạng CỘNG tối ưu (offset phẳng); "
-          "metric THIỆT HẠI (ΣV*nghiêm trọng) mới phản ánh mục tiêu thật của dạng NHÂN "
-          "(ưu tiên giao của yếu thế VÀ nghiêm trọng).")
+    print("\n--- Ba metric, và THIÊN VỊ đã biết của từng cái (khai báo trước) ---")
+    print(f"[1. ΣV thuần   ] V nhân giảm {impr_twv}% so với bỏ V. "
+          "THIÊN VỊ dạng CỘNG: trọng số phẳng theo ΣV chính là cái dạng cộng tối ưu hoá.")
+    print(f"[2. ΣV × core  ] V nhân giảm {impr_harm}% so với bỏ V. "
+          "THIÊN VỊ dạng NHÂN: dùng lại `core` của chính công thức P (lập luận vòng).")
+    print(f"[3. ΣV | F>0,7 ] V nhân giảm {impr_severe}% so với bỏ V; "
+          f"{impr_severe_vs_add}% so với dạng CỘNG.")
+    print("     TRUNG LẬP: ngưỡng ngập F > 0,7 là tiêu chí ngoài công thức P, không dùng")
+    print("     core, không dùng omega. Đây là metric duy nhất trong ba cái nên dùng để")
+    print("     KẾT LUẬN; hai metric đầu chỉ để cho thấy kết quả phụ thuộc cách chọn metric.")
+    if impr_severe_vs_add <= 0:
+        print("\nKẾT LUẬN TRUNG THỰC: trên metric trung lập, dạng NHÂN KHÔNG tốt hơn dạng CỘNG.")
+        print("Vậy V_agg dạng nhân phải được đóng khung là LỰA CHỌN GIÁ TRỊ CHUẨN TẮC")
+        print("(triage ưu tiên người dễ tổn thương), không phải tối ưu khách quan đã chứng minh.")
+    else:
+        print(f"\nTrên metric trung lập, dạng NHÂN tốt hơn dạng CỘNG {impr_severe_vs_add}%.")
 
     out = {
         "config": {
@@ -172,6 +233,14 @@ def main():
         "policies": rows,
         "improvement_pct_vulnerable_full_vs_noV": impr_twv,
         "improvement_pct_harm_full_vs_noV": impr_harm,
+        "improvement_pct_severe_full_vs_noV": impr_severe,
+        "improvement_pct_severe_full_vs_additive": impr_severe_vs_add,
+        "metric_bias_note": {
+            "time_to_vulnerable_min": "thiên vị dạng CỘNG (trọng số phẳng theo ΣV)",
+            "harm_weighted_time_min": "thiên vị dạng NHÂN (dùng lại core của P)",
+            "severe_flood_vulnerable_time_min": "TRUNG LẬP (ngưỡng F>0,7 ngoài công thức P)",
+        },
+        "primary_metric": "severe_flood_vulnerable_time_min",
     }
     save_table("exp7_equity_outcome.json", [out])
     print("\n[saved] exp7_equity_outcome.json -> results/tables/")

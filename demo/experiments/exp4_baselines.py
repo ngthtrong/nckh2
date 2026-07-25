@@ -16,7 +16,7 @@ from pipeline.baselines import (
 )
 from pipeline.config import WeightParams
 from pipeline.clustering import run_leiden, run_louvain
-from pipeline.metrics import cluster_quality, geographic_spread
+from pipeline.metrics import cluster_quality, geographic_spread, noise_handling, noise_handling
 from pipeline.weighting import build_weight_matrix, sparsify
 
 
@@ -53,19 +53,33 @@ def main():
     for name, lab in methods.items():
         q = cluster_quality(lab, gt)
         sp = geographic_spread(events, lab)
+        nz = noise_handling(lab, gt)
         fair = any(t in name for t in ("gating", "dist=1-w", "affinity"))
         rows.append({
             "method": name,
             "n_clusters": sp["n_clusters"],
             "ari": q["ari"],
             "nmi": q["nmi"],
-            "mean_diam_km": sp["mean_diameter_km"],
+            "mean_diam_km_multi": sp["mean_diameter_km_multi"],
             "max_diam_km": sp["max_diameter_km"],
+            "noise_absorbed_pct": nz["noise_absorbed_pct"],
+            "contaminated_clusters": nz["contaminated_clusters"],
+            "n_singletons": sp["n_singletons"],
+            "mean_diam_km_all": sp["mean_diameter_km"],
             "needs_preset_k": ("K-Means" in name or "K=" in name),
             "same_graph_as_ours": fair,
         })
 
     print_table(f"Baseline comparison (ground-truth clusters = {n_gt}, Louvain K = {k_lou})", rows)
+    print("\nSo sánh đường kính phải dùng mean_diam_km_multi (cụm >= 2 thành viên) hoặc")
+    print("max_diam_km; mean_diam_km_all tính cả singleton = 0 km nên thưởng giả tạo cho")
+    print("phân hoạch vụn (phản biện 1.3). Cột same_graph_as_ours = True là baseline công")
+    print("bằng: cùng ma trận trọng số gating, chỉ khác thuật toán phân hoạch.")
+    print("\nĐỌC ARI CÙNG VỚI noise_absorbed_pct: ARI/NMI chỉ chấm trên điểm có nhãn")
+    print("(gt >= 0) nên một phương pháp hút hết điểm nhiễu vào cụm thật vẫn có thể đạt")
+    print("ARI = 1,0 trong khi kéo giãn cụm tới hàng chục km — ưu thế đó là giả về mặt")
+    print("vận hành. Phương pháp tốt phải đồng thời: ARI cao, đường kính nhỏ, và")
+    print("noise_absorbed_pct thấp.")
     save_table("exp4_baselines.json", rows)
     print("\n[saved] exp4_baselines.json -> results/tables/")
 

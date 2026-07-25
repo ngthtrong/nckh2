@@ -32,22 +32,74 @@ from pipeline.attributes import Event, compute_confidence
 from data.generate import BASE_TIME
 
 
-def _detector_scores(events):
-    """(A) C_i như bộ phát hiện tin giả yếu: AUC & AP của (1 - C_i) vs is_fake."""
-    y_true = [1 if e.is_fake else 0 for e in events]
-    y_score = [1.0 - e.confidence for e in events]  # càng ít tin cậy -> càng nghi giả
-    n_fake = sum(y_true)
-    if n_fake == 0 or n_fake == len(y_true):
-        return {"auc": None, "ap": None, "n_fake": n_fake, "n_total": len(y_true)}
+def _detector_scores(events, n_boot: int = 1000, seed: int = 42):
+    """(A) C_i như bộ phát hiện tin giả yếu: AUC & AP của (1 - C_i) vs is_fake.
+
+    Phản biện 3.2: bản trước chỉ nêu AUC = 0,9651 mà bỏ qua Average Precision
+    (0,244 với n_fake = 6/285). Trên tập RẤT MẤT CÂN BẰNG, AUC lạc quan một cách
+    hệ thống vì nó thưởng việc xếp hạng đúng trên phần lớn mẫu âm, trong khi AP
+    (diện tích dưới precision–recall) mới phản ánh chi phí vận hành thật: trong
+    số các báo cáo bị hệ thống nghi là giả, bao nhiêu phần trăm đúng là giả.
+
+    Ở đây ta báo cáo CẢ HAI kèm khoảng tin cậy 95% bootstrap (n_boot lần lấy mẫu
+    có hoàn lại, phân tầng theo nhãn để mỗi mẫu bootstrap vẫn có cả hai lớp), và
+    kèm `baseline_ap` = tỉ lệ dương (AP của bộ phát hiện ngẫu nhiên) để người đọc
+    thấy AP nên được so với mốc nào.
+    """
+    import numpy as np
+
+    y_true = np.array([1 if e.is_fake else 0 for e in events])
+    # càng ít tin cậy -> càng nghi giả
+    y_score = np.array([1.0 - e.confidence for e in events])
+    n_fake = int(y_true.sum())
+    n_total = len(y_true)
+    if n_fake == 0 or n_fake == n_total:
+        return {"auc": None, "ap": None, "n_fake": n_fake, "n_total": n_total}
+
+    auc = float(roc_auc_score(y_true, y_score))
+    ap = float(average_precision_score(y_true, y_score))
+
+    # bootstrap phân tầng: giữ nguyên số mẫu mỗi lớp để AP không bị nhiễu do
+    # một mẫu bootstrap tình cờ không còn tin giả nào.
+    rng = np.random.default_rng(seed)
+    pos_idx = np.flatnonzero(y_true == 1)
+    neg_idx = np.flatnonzero(y_true == 0)
+    aucs, aps = [], []
+    for _ in range(n_boot):
+        take = np.concatenate([
+            rng.choice(pos_idx, size=len(pos_idx), replace=True),
+            rng.choice(neg_idx, size=len(neg_idx), replace=True),
+        ])
+        yt, ys = y_true[take], y_score[take]
+        if yt.min() == yt.max():
+            continue
+        aucs.append(float(roc_auc_score(yt, ys)))
+        aps.append(float(average_precision_score(yt, ys)))
+
+    def _ci(vals):
+        if not vals:
+            return (None, None)
+        lo, hi = np.percentile(vals, [2.5, 97.5])
+        return round(float(lo), 4), round(float(hi), 4)
+
+    auc_lo, auc_hi = _ci(aucs)
+    ap_lo, ap_hi = _ci(aps)
+
     return {
-        "auc": round(float(roc_auc_score(y_true, y_score)), 4),
-        "ap": round(float(average_precision_score(y_true, y_score)), 4),
+        "auc": round(auc, 4),
+        "auc_ci95_low": auc_lo,
+        "auc_ci95_high": auc_hi,
+        "ap": round(ap, 4),
+        "ap_ci95_low": ap_lo,
+        "ap_ci95_high": ap_hi,
+        "baseline_ap_random": round(n_fake / n_total, 4),
         "n_fake": n_fake,
-        "n_total": len(y_true),
+        "n_total": n_total,
+        "n_bootstrap": len(aps),
         "mean_Ci_fake": round(sum(e.confidence for e in events if e.is_fake) / n_fake, 4),
         "mean_Ci_real": round(
             sum(e.confidence for e in events if not e.is_fake)
-            / (len(events) - n_fake), 4),
+            / (n_total - n_fake), 4),
     }
 
 
@@ -128,6 +180,15 @@ def main():
 
     det = _detector_scores(events)
     print_table("A. C_i như bộ phát hiện tin giả yếu (trên dataset chính)", [det])
+    if det.get("ap") is not None:
+        print(f"\nĐỌC AUC CÙNG AP: AUC = {det['auc']} "
+              f"[{det['auc_ci95_low']}; {det['auc_ci95_high']}] nghe rất cao, nhưng "
+              f"AP = {det['ap']} [{det['ap_ci95_low']}; {det['ap_ci95_high']}] "
+              f"trên mốc ngẫu nhiên {det['baseline_ap_random']} "
+              f"(n_fake = {det['n_fake']}/{det['n_total']}).")
+        print("Trên tập mất cân bằng, AUC lạc quan hệ thống; AP mới là con số vận hành")
+        print("(trong các báo cáo bị nghi giả, bao nhiêu % đúng là giả). Vì vậy C_i chỉ")
+        print("nên dùng như BỘ LỌC THÔ hạ trọng số, KHÔNG phải bộ phát hiện tin giả.")
 
     adv_rows, adv_summary = _adversarial_confidence(prepared_events())
     print_table("B. C_i dưới tin giả ĐỐI KHÁNG (có ảnh / corroboration giả)", adv_rows)
