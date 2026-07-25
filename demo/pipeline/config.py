@@ -19,6 +19,10 @@ class WeightParams:
     gamma: float = 0.5              # gamma: trọng số ngữ cảnh
     edge_threshold: float = 0.05    # theta: ngưỡng epsilon để làm thưa đồ thị
     knn: int = 12                   # k: số láng giềng giữ lại (0 = tắt k-NN)
+    # alpha: trọng số địa lý CHỈ dùng cho dạng cộng (baseline ablation).
+    # Đặt = beta = gamma để baseline không bị hạ trọng số địa lý một cách bất
+    # công; mọi so sánh cộng-vs-nhân đều phải công bố giá trị alpha đã dùng.
+    alpha: float = 0.5
 
 
 @dataclass(frozen=True)
