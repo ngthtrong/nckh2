@@ -70,11 +70,26 @@ def run_leiden(w: np.ndarray, resolution: float = 1.0, random_state: int = 42) -
 
 
 def modularity(w: np.ndarray, labels: list[int], resolution: float = 1.0) -> float:
-    g = matrix_to_graph(w)
-    if g.number_of_edges() == 0:
+    """Modularity Q dạng Reichardt–Bornholdt với tham số độ phân giải lambda (Mục 4.3):
+
+        Q = (1/2m) * sum_ij [ A_ij - lambda * k_i*k_j/(2m) ] * delta(c_i, c_j)
+
+    Tính trực tiếp trên ma trận trọng số để tôn trọng `resolution`; hàm
+    `community_louvain.modularity` của thư viện không nhận tham số này nên khi
+    resolution=1.0 kết quả trùng khớp Modularity chuẩn.
+    """
+    n = w.shape[0]
+    a = np.array(w, dtype=float)
+    np.fill_diagonal(a, 0.0)
+    two_m = a.sum()
+    if two_m == 0:
         return 0.0
-    part = {i: labels[i] for i in range(len(labels))}
-    return community_louvain.modularity(part, g, weight="weight")
+    k = a.sum(axis=1)
+    lab = np.asarray(labels)
+    same = lab[:, None] == lab[None, :]
+    expected = resolution * np.outer(k, k) / two_m
+    q = (a - expected)[same].sum() / two_m
+    return float(q)
 
 
 def count_disconnected_communities(w: np.ndarray, labels: list[int]) -> tuple[int, int]:
