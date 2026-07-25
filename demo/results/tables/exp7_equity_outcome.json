@@ -1,0 +1,42 @@
+[
+  {
+    "config": {
+      "n_boats": 3,
+      "v_boat_kmh": 30.0,
+      "t_serve_min": 15.0
+    },
+    "policies": [
+      {
+        "policy": "P_full_multiplicative",
+        "time_to_vulnerable_min": 165.01,
+        "harm_weighted_time_min": 154.82,
+        "severe_flood_vulnerable_time_min": 110.2,
+        "mean_arrival_all_min": 2528.24
+      },
+      {
+        "policy": "P_no_vulnerability",
+        "time_to_vulnerable_min": 246.58,
+        "harm_weighted_time_min": 227.51,
+        "severe_flood_vulnerable_time_min": 113.53,
+        "mean_arrival_all_min": 2410.06
+      },
+      {
+        "policy": "P_additive_V",
+        "time_to_vulnerable_min": 140.69,
+        "harm_weighted_time_min": 136.79,
+        "severe_flood_vulnerable_time_min": 122.89,
+        "mean_arrival_all_min": 2248.23
+      }
+    ],
+    "improvement_pct_vulnerable_full_vs_noV": 33.08,
+    "improvement_pct_harm_full_vs_noV": 31.95,
+    "improvement_pct_severe_full_vs_noV": 2.93,
+    "improvement_pct_severe_full_vs_additive": 10.33,
+    "metric_bias_note": {
+      "time_to_vulnerable_min": "thiên vị dạng CỘNG (trọng số phẳng theo ΣV)",
+      "harm_weighted_time_min": "thiên vị dạng NHÂN (dùng lại core của P)",
+      "severe_flood_vulnerable_time_min": "TRUNG LẬP (ngưỡng F>0,7 ngoài công thức P)"
+    },
+    "primary_metric": "severe_flood_vulnerable_time_min"
+  }
+]
