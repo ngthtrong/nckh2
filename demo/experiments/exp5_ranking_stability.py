@@ -34,11 +34,28 @@ def _ranking(events, labels, params) -> list[int]:
     return [s.cluster_id for s in scores]
 
 
-def _tau_vs_baseline(base_order: list[int], new_order: list[int]) -> float:
-    """Kendall's tau giữa hai thứ hạng trên cùng tập cụm."""
+def _tau_vs_baseline(
+    base_order: list[int], new_order: list[int], restrict: set[int] | None = None
+) -> float:
+    """Kendall's tau giữa hai thứ hạng trên cùng tập cụm.
+
+    `restrict`: nếu cho, chỉ tính tau trên các cluster_id trong tập này.
+
+    VÌ SAO CẦN `restrict`: phân hoạch gating sinh 61 singleton trong 74 cụm, tức
+    82% "cụm" chỉ có một sự kiện. Singleton có V = 0 thường xuyên nên V_agg = 1
+    và điểm P của chúng gần như chỉ phụ thuộc một điểm dữ liệu — thứ hạng của
+    chúng rất ít bị đảo khi omega dao động. Tau tính trên toàn 74 cụm vì thế bị
+    đám singleton "kéo lên" và có thể phóng đại độ ổn định của phần danh sách mà
+    ban điều phối thực sự dùng. Tau hạn chế trên các cụm >= 2 thành viên là con
+    số khắt khe hơn và phải được báo cáo song song.
+    """
     pos_base = {cid: i for i, cid in enumerate(base_order)}
     pos_new = {cid: i for i, cid in enumerate(new_order)}
     common = [cid for cid in base_order if cid in pos_new]
+    if restrict is not None:
+        common = [cid for cid in common if cid in restrict]
+    if len(common) < 2:
+        return float("nan")
     x = [pos_base[cid] for cid in common]
     y = [pos_new[cid] for cid in common]
     tau, _ = kendalltau(x, y)
@@ -51,12 +68,26 @@ def _normalize(w_e, w_f, w_n):
 
 
 def _stability_omega(events, lab, base_order):
-    """Nhiễu loạn omega (trọng số lõi) trên CÙNG tập cụm."""
+    """Nhiễu loạn omega (trọng số lõi) trên CÙNG tập cụm.
+
+    Báo cáo tau theo HAI phạm vi (xem `_tau_vs_baseline`): toàn bộ cụm, và chỉ
+    các cụm >= 2 thành viên. Phạm vi thứ hai loại 61 singleton — nhóm có thứ
+    hạng gần như bất động nên làm tau toàn cục trông ổn định hơn thực tế đối với
+    phần danh sách mà điều phối thực sự dùng.
+    """
     base_params = C.priority
     rng = random.Random(42)
+
+    # cụm có >= 2 thành viên (loại singleton)
+    sizes: dict[int, int] = {}
+    for l in lab:
+        sizes[l] = sizes.get(l, 0) + 1
+    multi = {cid for cid, n in sizes.items() if n >= 2}
+
     rows = []
     for level in (0.05, 0.10, 0.20):
         taus = []
+        taus_multi = []
         top3_kept = []
         for _ in range(200):
             we = base_params.omega_e + rng.uniform(-level, level)
@@ -68,11 +99,15 @@ def _stability_omega(events, lab, base_order):
             )
             new_order = _ranking(events, lab, p)
             taus.append(_tau_vs_baseline(base_order, new_order))
+            taus_multi.append(_tau_vs_baseline(base_order, new_order, restrict=multi))
             top3_kept.append(set(base_order[:3]) == set(new_order[:3]))
         rows.append({
             "omega_perturbation": f"+/-{level:.2f}",
             "mean_kendall_tau": round(sum(taus) / len(taus), 4),
             "min_kendall_tau": round(min(taus), 4),
+            "mean_kendall_tau_multi": round(sum(taus_multi) / len(taus_multi), 4),
+            "min_kendall_tau_multi": round(min(taus_multi), 4),
+            "n_clusters_multi": len(multi),
             "top3_set_preserved_pct": round(100 * sum(top3_kept) / len(top3_kept), 1),
             "n_trials": len(taus),
         })

@@ -5,7 +5,10 @@ P(C_k) = V_agg * ( w1*Ẽ_agg + w2*F̃_max + w3*Ñ )   [lõi rủi ro chuẩn h�
 Ẽ_agg  = (1/|C|) sum E_i*C_i                  [khẩn cấp TB có trọng số tin cậy]
 F̃_max  = max (F_i*C_i)                         [nguyên lý bình thông nhau, gate tin cậy]
 Ñ      = log(1+sum N_i*C_i) / log(1+N_max)    [dân số, gate C_i, nén log, chuẩn hóa]
-V_agg  = 1 + tanh( (1/s) sum V_i )            [hệ số khuếch đại công bằng, chống bão hòa]
+V_agg  = 1 + (mu-1)*tanh( (1/s) sum V_i )     [hệ số khuếch đại công bằng, chống bão hòa]
+
+mu in [1,2] là trần khuếch đại do ban chỉ huy đặt (PriorityParams.v_cap_mu):
+mu = 1 tắt khuếch đại, mu = 2 (mặc định) cho V_agg in [1,2) như bản gốc.
 """
 from __future__ import annotations
 
@@ -90,14 +93,25 @@ def score_clusters(
         n_norm = (math.log1p(n_raw) / log_nmax) if log_nmax > 0 else 0.0
 
         v_sum = sum(ev.vulnerability for ev in members)
-        v_agg = 1.0 + math.tanh(v_sum / params.v_scale)
+        v_agg = 1.0 + (params.v_cap_mu - 1.0) * math.tanh(v_sum / params.v_scale)
 
         core = params.omega_e * e_agg + params.omega_f * f_max + params.omega_n * n_norm
 
         if normalize_v:
             priority = v_agg * core
         else:
-            # dạng cộng ngây thơ (ablation): V góp một số hạng cộng
+            # Dạng CỘNG ngây thơ (ablation). Công thức chính xác đang chạy là
+            #     P_add = core + (V_agg - 1)
+            # tức số hạng cộng là (V_agg - 1) in [0, mu-1], KHÔNG phải V_agg.
+            # Vì sao trừ 1: để hai dạng TRÙNG KHÍT ở cụm không có người yếu thế
+            # (V_agg = 1 -> P_add = P_mult = core). Nếu cộng thẳng V_agg, mọi cụm
+            # bị dịch thêm một hằng số +1, làm miền giá trị lệch ([1,2+] thay vì
+            # [0,2)) mà KHÔNG đổi thứ hạng — cộng một hằng số cho mọi cụm là phép
+            # biến đổi bảo toàn thứ tự. Dạng đang dùng vì thế là biến thể cộng
+            # công bằng nhất: cùng miền giá trị, cùng điểm gốc, chỉ khác cách V
+            # tương tác với lõi rủi ro (cộng vs nhân) — đúng điều cần so.
+            # LƯU Ý TÁI LẬP: bài báo phải in đúng công thức này, không in
+            # "P = V_agg + core".
             priority = core + (v_agg - 1.0)
 
         center_lat = sum(ev.lat for ev in members) / size

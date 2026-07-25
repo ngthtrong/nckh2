@@ -24,7 +24,9 @@ def cluster_quality(labels: list[int], gt: list[int]) -> dict[str, float]:
     }
 
 
-def noise_handling(labels: list[int], gt: list[int]) -> dict[str, float]:
+def noise_handling(
+    labels: list[int], gt: list[int], noise_label: int | None = -1
+) -> dict[str, float]:
     """Cách phương pháp XỬ LÝ nhiễu — thông tin mà ARI/NMI che mất.
 
     `cluster_quality` chỉ chấm trên các điểm có nhãn (gt >= 0), nên một phương
@@ -32,15 +34,29 @@ def noise_handling(labels: list[int], gt: list[int]) -> dict[str, float]:
     Đó là ưu thế giả: về vận hành, nhiễu bị hút vào cụm sẽ kéo giãn cụm và làm
     sai lệch toạ độ điều phối.
 
+    THÙNG NHIỄU (`noise_label`, mặc định -1): DBSCAN/HDBSCAN gán nhãn -1 cho
+    "KHÔNG thuộc cụm nào". Nhóm đó KHÔNG phải một cụm, nên không được tính là
+    nơi nhiễu "bị hấp thụ" — nếu tính, một phương pháp ném cả nhiễu lẫn vài
+    điểm thật vào thùng -1 sẽ bị báo cáo sai thành "hấp thụ 100% nhiễu" trong
+    khi thực tế nó không hấp thụ điểm nào. Đặt `noise_label=None` cho các thuật
+    toán không sinh nhãn nhiễu (Louvain, Leiden, K-Means, Spectral,
+    Agglomerative) — với chúng mọi nhãn đều là cụm thật.
+
     Trả về:
-      - `noise_absorbed_pct`: % điểm nhiễu bị đặt vào một cụm có ít nhất một
-        điểm thật (càng thấp càng tốt).
-      - `contaminated_clusters`: số cụm chứa lẫn cả điểm thật và điểm nhiễu.
+      - `noise_absorbed_pct`: % điểm nhiễu bị đặt vào một CỤM THẬT có ít nhất
+        một điểm có nhãn (càng thấp càng tốt).
+      - `contaminated_clusters`: số cụm thật chứa lẫn cả điểm thật và điểm nhiễu.
       - `purity_labeled`: tỉ lệ điểm trong các cụm "thật" thực sự có nhãn.
+      - `n_unclustered`: số điểm nằm trong thùng nhiễu (chưa được gán cụm nào).
+      - `labeled_dropped_to_noise`: số điểm CÓ NHÃN bị đẩy vào thùng nhiễu — lỗi
+        đối ngẫu của hấp thụ. Một phương pháp có thể đạt hấp-thụ-nhiễu 0% bằng
+        cách từ chối phân cụm phần lớn dữ liệu; cột này phơi bày cái giá đó.
     """
     groups: dict[int, list[int]] = {}
     for lab, g in zip(labels, gt):
         groups.setdefault(lab, []).append(g)
+
+    noise_bin = groups.pop(noise_label, []) if noise_label is not None else []
 
     n_noise = sum(1 for g in gt if g < 0)
     absorbed = 0
@@ -62,10 +78,14 @@ def noise_handling(labels: list[int], gt: list[int]) -> dict[str, float]:
         "noise_absorbed_pct": round(100.0 * absorbed / n_noise, 2) if n_noise else 0.0,
         "contaminated_clusters": contaminated,
         "purity_labeled": round(n_labeled_in_real / n_in_real, 4) if n_in_real else 0.0,
+        "n_unclustered": len(noise_bin),
+        "labeled_dropped_to_noise": sum(1 for g in noise_bin if g >= 0),
     }
 
 
-def geographic_spread(events: list[Event], labels: list[int]) -> dict[str, float]:
+def geographic_spread(
+    events: list[Event], labels: list[int], noise_label: int | None = -1
+) -> dict[str, float]:
     """Đường kính địa lý của cụm (km) — cụm gắn kết thì nhỏ.
 
     CẢNH BÁO SO SÁNH: `mean_diameter_km` tính cả cụm singleton với đường kính 0,
@@ -75,10 +95,19 @@ def geographic_spread(events: list[Event], labels: list[int]) -> dict[str, float
       - `mean_diameter_km_multi`  : chỉ tính cụm có >= 2 thành viên
       - `mean_diameter_km_weighted`: trung bình có trọng số theo số điểm
     `mean_diameter_km` được giữ để tương thích ngược, chỉ nên đọc như tham khảo.
+
+    THÙNG NHIỄU (`noise_label`, mặc định -1): nhãn -1 của DBSCAN/HDBSCAN nghĩa là
+    "không thuộc cụm nào", nên KHÔNG được tính như một cụm. Nếu tính, thùng nhiễu
+    gom các điểm rải khắp vùng sẽ tạo ra một "cụm" đường kính hàng trăm km và
+    chi phối cả `max_diameter_km` lẫn `mean_diameter_km_multi` — một artifact đo
+    lường, không phải nhược điểm thật của thuật toán. Số điểm trong thùng được
+    báo cáo riêng qua `n_unclustered`.
     """
     groups: dict[int, list[Event]] = {}
     for ev, lab in zip(events, labels):
         groups.setdefault(lab, []).append(ev)
+
+    noise_bin = groups.pop(noise_label, []) if noise_label is not None else []
 
     diameters = []        # mọi cụm (singleton = 0.0)
     diam_multi = []       # chỉ cụm >= 2 thành viên
@@ -116,4 +145,5 @@ def geographic_spread(events: list[Event], labels: list[int]) -> dict[str, float
         "n_clusters": len(groups),
         "n_singletons": n_singletons,
         "n_clusters_multi": len(diam_multi),
+        "n_unclustered": len(noise_bin),
     }
