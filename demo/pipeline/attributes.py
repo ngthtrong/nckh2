@@ -24,6 +24,12 @@ class Event:
     gt_cluster: int = -1        # nhãn cụm ground-truth (-1 nếu nhiễu)
     is_fake: bool = False       # đánh dấu báo cáo giả (để đánh giá tác động C_i)
     confidence: float = field(default=1.0)  # C_i (điền sau khi tính heuristic)
+    # n_corrob: số báo cáo lân cận củng cố, đầu vào thô của C_i. Trước đây chỉ là
+    # biến cục bộ trong `compute_confidence`, nên không thể báo cáo AUC của TỪNG
+    # đặc trưng cạnh C_i. Phản biện §4 cho thấy chính đặc trưng này gánh gần như
+    # toàn bộ khả năng phân biệt của C_i; bài báo phải để người đọc thấy điều đó,
+    # nên nó được lưu như một trường (điền bởi `compute_confidence`).
+    n_corrob: int = 0
 
 
 def haversine_m(lat1: float, lng1: float, lat2: float, lng2: float) -> float:
@@ -51,5 +57,8 @@ def compute_confidence(events: list[Event], params: ConfidenceParams) -> None:
             dt_min = abs((ev.created_at - other.created_at).total_seconds()) / 60.0
             if dist <= params.corrob_radius_m and dt_min <= params.corrob_window_min:
                 n_corrob += 1
+        # lưu n_corrob như một trường của Event để Thí nghiệm 8 báo cáo được AUC
+        # của TỪNG đặc trưng cạnh C_i (phản biện §4 / P2.4).
+        ev.n_corrob = n_corrob
         z = params.b0 + params.b1 * (1.0 if ev.has_image else 0.0) + params.b2 * math.log1p(n_corrob)
         ev.confidence = 1.0 / (1.0 + math.exp(-z))

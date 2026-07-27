@@ -137,6 +137,125 @@ def build_weight_matrix_vec(events: list[Event], p: WeightParams,
     return w
 
 
+def implied_distance_cutoff(p: WeightParams, theta: float) -> float:
+    """Cận trên khoảng cách của mọi cạnh còn lại sau khi làm thưa ở ngưỡng theta.
+
+    Đây là hệ quả trực tiếp của Bổ đề 1 (Mục 4.2). Với dạng NHÂN
+    `w_ij = S_geo(d_ij) * (beta*S_temp + gamma*S_ctx)` và `beta + gamma <= 1`, ta có
+    `w_ij <= S_geo(d_ij)`, nên
+
+        w_ij > theta  =>  exp(-d^2 / 2 sigma^2) > theta  =>  d < sigma*sqrt(2 ln(1/theta))
+
+    Trả về `sigma_geo_m * sqrt(2 * ln(1/theta))` (mét). Với sigma = 700 m,
+    theta = 0,05 -> 1713 m.
+
+    theta >= 1 trả 0.0 (không cạnh nào sống sót); theta <= 0 trả `inf` (không có
+    cận — đúng về mặt toán học vì ngưỡng 0 không loại cạnh nào).
+    """
+    if theta <= 0.0:
+        return float("inf")
+    if theta >= 1.0:
+        return 0.0
+    return float(p.sigma_geo_m * math.sqrt(2.0 * math.log(1.0 / theta)))
+
+
+def additive_floor(events: list[Event], p: WeightParams,
+                   alpha: float | None = None) -> float:
+    """Sàn dương, ĐỘC LẬP KHOẢNG CÁCH, của dạng cộng — Hệ quả của Bổ đề 1.
+
+    Với `w_ij = alpha*S_geo + beta*S_temp + gamma*S_ctx`, mọi cặp thoả
+    `w_ij >= beta*S_temp + gamma*S_ctx`. Số hạng bên phải KHÔNG phụ thuộc `d_ij`,
+    nên với mọi theta nhỏ hơn giá trị nhỏ nhất của nó trên toàn bộ cặp, tập cạnh
+    còn lại sau khi làm thưa không bị chặn về khoảng cách: tồn tại cặp cách nhau
+    tuỳ ý xa vẫn được giữ.
+
+    Hàm trả về đúng cái sàn đó: `min_{i<j} (beta*S_temp_ij + gamma*S_ctx_ij)`.
+    `alpha` không ảnh hưởng giá trị trả về (sàn không chứa số hạng địa lý) nhưng
+    được nhận vào cho đối xứng API và để gọi tường minh trong các sweep.
+    """
+    del alpha  # sàn không phụ thuộc alpha; tham số giữ cho đối xứng API
+    ts = np.array([e.created_at.timestamp() for e in events]) / 60.0
+    flood = np.array([e.flood for e in events])
+    urg = np.array([e.urgency for e in events])
+    temp = np.exp(-np.abs(ts[:, None] - ts[None, :]) / p.tau_temp_min)
+    ctx = np.exp(-np.abs(flood[:, None] - flood[None, :]) / p.tau_f
+                 - np.abs(urg[:, None] - urg[None, :]) / p.tau_e)
+    floor = p.beta * temp + p.gamma * ctx
+    iu = np.triu_indices(len(events), k=1)
+    return float(floor[iu].min()) if len(iu[0]) else 0.0
+
+
+def max_weight(events: list[Event], p: WeightParams, mode: str = "gating",
+               alpha: float | None = None) -> float:
+    """`w_max` = trọng số cạnh lớn nhất thực tế trên dataset, theo từng dạng.
+
+    Dùng để chuẩn hoá theta (`theta / w_max`) khi so sánh các dạng trọng số có
+    thang giá trị khác nhau — thước đo BẤT BIẾN theo phép tái tham số hoá, khác
+    với độ rộng tuyệt đối của cửa sổ theta (không bất biến, xem exp13).
+    """
+    w = build_weight_matrix_vec(events, p, mode=mode, alpha=alpha)
+    iu = np.triu_indices(len(events), k=1)
+    return float(w[iu].max()) if len(iu[0]) else 0.0
+
+
+def max_edge_distance_above(events: list[Event], p: WeightParams, theta: float,
+                            mode: str = "gating",
+                            alpha: float | None = None) -> tuple[float, int]:
+    """`max{d_ij : w_ij > theta}` (mét) và số cạnh vượt ngưỡng.
+
+    Đại lượng thực nghiệm để kiểm Bổ đề 1: với dạng nhân giá trị này phải LUÔN
+    nhỏ hơn `implied_distance_cutoff(p, theta)`; với dạng cộng nó phải VI PHẠM
+    cận đó ở theta nhỏ hơn `additive_floor`.
+
+    Trả về `(0.0, 0)` khi không cạnh nào vượt ngưỡng.
+    """
+    w = build_weight_matrix_vec(events, p, mode=mode, alpha=alpha)
+    lat = np.radians(np.array([e.lat for e in events]))
+    lng = np.radians(np.array([e.lng for e in events]))
+    r = 6.371e6
+    dlat = lat[:, None] - lat[None, :]
+    dlng = lng[:, None] - lng[None, :]
+    h = (np.sin(dlat / 2) ** 2
+         + np.cos(lat)[:, None] * np.cos(lat)[None, :] * np.sin(dlng / 2) ** 2)
+    dist = 2 * r * np.arcsin(np.sqrt(np.clip(h, 0.0, 1.0)))
+    iu = np.triu_indices(len(events), k=1)
+    mask = w[iu] > theta
+    if not mask.any():
+        return 0.0, 0
+    return float(dist[iu][mask].max()), int(mask.sum())
+
+
+def retained_fraction(events: list[Event], p: WeightParams, theta: float,
+                      mode: str = "gating", alpha: float | None = None) -> float:
+    """Tỉ lệ cạnh (trên tổng số cặp) còn lại sau khi cắt ở ngưỡng theta.
+
+    Thước đo BẤT BIẾN thứ hai để so sánh các dạng trọng số: không phụ thuộc thang
+    giá trị của `w`, chỉ phụ thuộc cấu trúc đồ thị mà ngưỡng sinh ra.
+    """
+    w = build_weight_matrix_vec(events, p, mode=mode, alpha=alpha)
+    iu = np.triu_indices(len(events), k=1)
+    vals = w[iu]
+    return float((vals > theta).mean()) if len(vals) else 0.0
+
+
+def max_retained_distance(events: list[Event], w: np.ndarray, theta: float) -> float:
+    """Khoảng cách LỚN NHẤT giữa hai đầu của một cạnh có w_ij > theta (mét).
+
+    Dùng để kiểm Bổ đề 1 bằng thực nghiệm: với dạng nhân giá trị này phải luôn
+    nhỏ hơn `implied_distance_cutoff`; với dạng cộng nó vượt cận khi theta nhỏ
+    hơn sàn (`additive_floor`). Trả 0.0 nếu không còn cạnh nào.
+    """
+    n = len(events)
+    max_d = 0.0
+    for i in range(n):
+        for j in range(i + 1, n):
+            if w[i, j] > theta:
+                d = haversine_m(events[i].lat, events[i].lng,
+                                events[j].lat, events[j].lng)
+                max_d = max(max_d, d)
+    return max_d
+
+
 def sparsify(w: np.ndarray, p: WeightParams) -> np.ndarray:
     """Làm thưa đồ thị: ngưỡng epsilon + k-NN (Mục 4.2)."""
     n = w.shape[0]

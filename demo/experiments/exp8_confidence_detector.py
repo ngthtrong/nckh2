@@ -15,7 +15,7 @@ Hai phần:
         - ADV_CORR  : một CỤM 4 tin giả phối hợp cùng vùng/cửa sổ -> tự củng cố
                       lẫn nhau (corroboration giả), không ảnh.
         - ADV_BOTH  : cụm 4 tin giả CÓ ảnh + tự củng cố (kịch bản xấu nhất).
-      So C_i của chúng với tin giả ngây thơ (S3_FAKE) và với báo cáo thật.
+      So C_i của chúng với tin giả ngây thơ (ADV_NAIVE) và với báo cáo thật.
 
 Trung thực: kỳ vọng heuristic MẠNH với tin giả ngây thơ, YẾU với adversary phối
 hợp — ta báo cáo đúng giới hạn này, không tô hồng.
@@ -114,6 +114,14 @@ def _make_adversarial():
     lat0, lng0 = 16.20, 108.00
     adv: list[Event] = []
 
+    # ADV_NAIVE: tin giả NGÂY THƠ — cô lập, không ảnh, không phối hợp. Đây là mốc
+    # baseline tự chứa (thay cho S3_FAKE của generator cũ): heuristic C_i phải hạ
+    # mạnh trường hợp này.
+    adv.append(Event("ADV_NAIVE", lat0 - 0.10, lng0 - 0.10, t0, 0.50, 0.50, 90, 0.0,
+                     has_image=False, province="ADV",
+                     note="đối kháng: tin giả ngây thơ (cô lập, ko ảnh)",
+                     gt_cluster=-1, is_fake=True))
+
     # ADV_IMG: tin giả đơn lẻ nhưng CÓ ảnh (giả mạo bằng chứng thị giác)
     adv.append(Event("ADV_IMG", lat0, lng0, t0, 0.98, 0.98, 180, 0.0,
                      has_image=True, province="ADV",
@@ -149,14 +157,14 @@ def _adversarial_confidence(base_events):
     compute_confidence(combined, C.confidence)   # tính lại C_i trên tập gộp
     ci = {e.event_id: e.confidence for e in combined}
 
-    # tham chiếu: tin giả ngây thơ S3_FAKE và trung bình báo cáo thật
-    s3 = ci.get("S3_FAKE")
+    # tham chiếu: tin giả ngây thơ (tự dựng, cô lập) và trung bình báo cáo thật
+    naive = ci["ADV_NAIVE"]
     real_mean = (sum(e.confidence for e in combined if not e.is_fake)
                  / sum(1 for e in combined if not e.is_fake))
 
     rows = [
-        {"report": "S3_FAKE (giả ngây thơ: cô lập, ko ảnh)", "Ci": round(s3, 4)
-         if s3 else None, "note": "tham chiếu baseline"},
+        {"report": "ADV_NAIVE (giả ngây thơ: cô lập, ko ảnh)",
+         "Ci": round(naive, 4), "note": "tham chiếu baseline"},
         {"report": "ADV_IMG (giả + có ảnh)", "Ci": round(ci["ADV_IMG"], 4),
          "note": "ảnh đẩy C_i lên"},
         {"report": "ADV_CORR_0 (giả + corroboration giả)",
@@ -167,7 +175,7 @@ def _adversarial_confidence(base_events):
          "note": "mốc để so"},
     ]
     return rows, {
-        "Ci_S3_naive_fake": round(s3, 4) if s3 else None,
+        "Ci_naive_fake": round(naive, 4),
         "Ci_ADV_IMG": round(ci["ADV_IMG"], 4),
         "Ci_ADV_CORR": round(ci["ADV_CORR_0"], 4),
         "Ci_ADV_BOTH": round(ci["ADV_BOTH_0"], 4),
@@ -192,7 +200,7 @@ def main():
 
     adv_rows, adv_summary = _adversarial_confidence(prepared_events())
     print_table("B. C_i dưới tin giả ĐỐI KHÁNG (có ảnh / corroboration giả)", adv_rows)
-    print("\nDiễn giải: heuristic C_i MẠNH với tin giả ngây thơ (S3 thấp), nhưng "
+    print("\nDiễn giải: heuristic C_i MẠNH với tin giả ngây thơ (ADV_NAIVE thấp), nhưng "
           "adversary tạo ảnh giả hoặc phối hợp nhiều tin sẽ NÂNG được C_i — "
           "đây là giới hạn thật của heuristic nhẹ, cần mô hình tin cậy học từ "
           "lịch sử/định danh người dùng để chống (hướng mở rộng).")
