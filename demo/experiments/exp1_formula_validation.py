@@ -1,16 +1,22 @@
 """Thí nghiệm 1 — Kiểm chứng 4 fix của Mục 4.
 
-A. w_ij: cộng (quét alpha) vs nhân/gating -> đường kính địa lý cụm (S1: hai NHÓM xa
-   nhau nhưng cùng ngữ cảnh). Quét alpha để dạng cộng không bị dựng thành người rơm.
+A. w_ij: cộng (quét alpha) vs nhân/gating -> đường kính địa lý cụm; kèm phép kiểm
+   hai nhóm cách hơn 100 km có bị gộp không. Quét alpha để dạng cộng không bị dựng
+   thành người rơm.
 B. P(C_k): chuẩn hóa vs không  -> chứng minh N_total áp đảo khi không chuẩn hóa.
-C. V_agg: nhân vs cộng          -> chứng minh 'khuếch đại' chỉ đúng khi nhân (S2);
-   so trên thang đã chuẩn hoá để hai dạng cùng miền giá trị.
+C. V_agg: nhân vs cộng          -> 'khuếch đại' chỉ đúng khi nhân; neo vào cụm
+   giàu-yếu-thế nhất, so trên thang đã chuẩn hoá để hai dạng cùng miền giá trị.
 D. tanh bão hòa: có/không s     -> khả năng phân biệt cụm ít vs nhiều đối tượng yếu thế.
-E. gate C_i cho N_total         -> tin giả S3 bị hạ nhiệt.
+E. gate C_i cho N_total         -> tin giả khai N lớn nhất bị hạ nhiệt.
 F. gate C_i cho F_max           -> tin giả khai ngập cao không chiếm trọn F_max.
-G. Phân rã ARI                  -> BẤT BIẾN dữ liệu: nhãn kịch bản phải khả tách
-   bằng không gian (không nhóm nào trùng tâm ốc đảo), tức trần ARI không bị ghim
-   bởi thiết kế dữ liệu.
+G. Phân rã ARI theo LOẠI CẤU TRÚC KHÓ -> ARI toàn tập đến từ đâu: cặp chồng lấn
+   không gian, cặp trùng tâm khác thời gian, nhãn multimodal, nhóm đơn. Cột nào
+   thấp là chỗ phương pháp còn yếu.
+
+Mọi phép kiểm ở đây neo ĐỘNG vào dữ liệu (chọn cụm/tin giả xấu nhất từ chính
+dataset) thay vì tra ID kịch bản cứng như bản trước — generator P1 không còn dựng
+kịch bản đặt tay, và neo động thì chặt hơn: generator đổi, phép kiểm vẫn nhắm đúng
+trường hợp nguy hiểm nhất.
 """
 from __future__ import annotations
 
@@ -19,6 +25,7 @@ import math
 from scipy.stats import kendalltau as _kendalltau
 
 from common import prepared_events, print_table, save_table
+from pipeline.attributes import haversine_m
 from pipeline.config import DEFAULT_CONFIG as C
 from pipeline.clustering import run_louvain
 from pipeline.metrics import cluster_quality, geographic_spread
@@ -63,21 +70,52 @@ def exp_a_gating_vs_additive(events):
             "mean_diam_km_all": spread["mean_diameter_km"],
             "n_clusters": spread["n_clusters"],
             "n_singletons": spread["n_singletons"],
-            "s1_merged": _s1_same_cluster(events, mode, alpha),
+            "far_groups_merged": _far_groups_merged(events, mode, alpha),
         })
     return rows
 
 
-def _s1_same_cluster(events, mode, alpha=None):
-    """Nhóm S1_A (Huế) và S1_B (Hội An, xa ~107km) có bị gom chung cụm không?"""
+def _far_groups_merged(events, mode, alpha=None):
+    """Hai nhóm GT XA NHAU nhất có bị gom chung một cụm không?
+
+    Trước đây hàm này tra hai ID kịch bản cứng (`S1_A_0`, `S1_B_0`) do generator
+    cũ sinh ra. Bộ dữ liệu mới (P1) không còn kịch bản đặt tay nào, nên phép kiểm
+    được viết lại theo CẤU TRÚC: tự tìm cặp nhãn GT có tâm cách nhau xa nhất rồi
+    hỏi xem chúng có bị gộp không. Ý nghĩa vận hành giữ nguyên — dạng trọng số
+    nào gộp hai vùng cách hàng trăm km là sai — nhưng phép kiểm không còn phụ
+    thuộc vào ID nào cả, nên không âm thầm vô hiệu khi dữ liệu đổi.
+    """
     w = build_weight_matrix(events, C.weight, mode=mode, alpha=alpha)
     ws = sparsify(w, C.weight)
     lab = run_louvain(ws, C.cluster.resolution, C.cluster.random_state)
-    idx = {e.event_id: i for i, e in enumerate(events)}
-    a, b = idx.get("S1_A_0"), idx.get("S1_B_0")
-    if a is None or b is None:
+
+    # tâm từng nhãn GT
+    cents: dict[int, list] = {}
+    for e in events:
+        if e.gt_cluster >= 0:
+            cents.setdefault(e.gt_cluster, []).append((e.lat, e.lng))
+    if len(cents) < 2:
         return None
-    return lab[a] == lab[b]
+    means = {g: (sum(p[0] for p in v) / len(v), sum(p[1] for p in v) / len(v))
+             for g, v in cents.items()}
+
+    # cặp nhãn xa nhau nhất
+    keys = sorted(means)
+    best = None
+    for i, ga in enumerate(keys):
+        for gb in keys[i + 1:]:
+            d = haversine_m(*means[ga], *means[gb])
+            if best is None or d > best[0]:
+                best = (d, ga, gb)
+    _, ga, gb = best
+
+    # đại diện: điểm gần tâm nhãn nhất
+    def _rep(g):
+        cand = [(haversine_m(e.lat, e.lng, *means[g]), i)
+                for i, e in enumerate(events) if e.gt_cluster == g]
+        return min(cand)[1]
+
+    return lab[_rep(ga)] == lab[_rep(gb)]
 
 
 def exp_b_normalization(events):
@@ -133,9 +171,18 @@ def exp_c_v_multiplier(events):
     sc_mult = {s.cluster_id: s for s in score_clusters(events, lab, C.priority, normalize_v=True)}
     sc_add = {s.cluster_id: s for s in score_clusters(events, lab, C.priority, normalize_v=False)}
 
-    # tìm cụm chứa S2
-    idx = {e.event_id: i for i, e in enumerate(events)}
-    s2_cluster = lab[idx["S2_0"]] if "S2_0" in idx else None
+    # Cụm "giàu đối tượng yếu thế" — tức trường hợp mà V_agg nhân được kỳ vọng
+    # khuếch đại. Bản trước neo vào ID kịch bản `S2_0` do generator cũ đặt tay;
+    # dataset mới (P1) không còn kịch bản nào như vậy, nên ta chọn TỪ DỮ LIỆU:
+    # cụm nhiều thành viên có tổng V lớn nhất. Đây cũng là phép kiểm chặt hơn vì
+    # nó luôn nhắm đúng trường hợp mà tuyên bố của bài phải đúng.
+    v_sum_by_cluster: dict[int, float] = {}
+    size_by_cluster: dict[int, int] = {}
+    for ev, l in zip(events, lab):
+        v_sum_by_cluster[l] = v_sum_by_cluster.get(l, 0.0) + ev.vulnerability
+        size_by_cluster[l] = size_by_cluster.get(l, 0) + 1
+    multi = [c for c in v_sum_by_cluster if size_by_cluster[c] >= 2]
+    s2_cluster = max(multi, key=lambda c: v_sum_by_cluster[c]) if multi else None
 
     # hạng (0 = ưu tiên cao nhất) theo từng dạng
     rank_mult = {cid: i for i, cid in enumerate(
@@ -156,7 +203,7 @@ def exp_c_v_multiplier(events):
         m, a = sc_mult[cid], sc_add[cid]
         rows.append({
             "cluster": cid,
-            "is_S2": cid == s2_cluster,
+            "is_top_vuln": cid == s2_cluster,
             "v_agg": m.v_agg,
             "core": m.core,
             "P_multiply": m.priority,
@@ -240,23 +287,42 @@ def exp_d_tanh_saturation():
     return rows
 
 
+def _worst_fake_cluster(events, lab, key):
+    """Tin giả TỆ NHẤT theo `key` và cụm chứa nó — chọn TỪ DỮ LIỆU, không hardcode ID.
+
+    Bản trước neo vào `S3_FAKE`, một ID mà generator cũ dựng thủ công. Dataset mới
+    (P1) không còn kịch bản đặt tay: tin giả được rải vào TRONG các cụm thật, nên
+    phép kiểm phải tự tìm trường hợp xấu nhất. Làm vậy còn chặt hơn: nếu generator
+    đổi, phép kiểm vẫn nhắm đúng tin giả nguy hiểm nhất.
+
+    `key` chọn trục "nguy hiểm": mục E dùng N khai báo (bơm N_total), mục F dùng F
+    khai báo (chiếm trọn F_max).
+    """
+    fakes = [(e, l) for e, l in zip(events, lab) if e.is_fake]
+    if not fakes:
+        return None, None
+    fake, cid = max(fakes, key=lambda p: key(p[0]))
+    return fake, cid
+
+
 def exp_e_confidence_gate(events):
-    """S3: báo cáo giả 200 người. Gate C_i làm N_total của cụm giảm bao nhiêu?"""
-    idx = {e.event_id: i for i, e in enumerate(events)}
+    """Gate C_i làm N_total của cụm chứa tin giả khai N lớn nhất giảm bao nhiêu?"""
     w = build_weight_matrix(events, C.weight, mode="gating")
     ws = sparsify(w, C.weight)
     lab = run_louvain(ws, C.cluster.resolution, C.cluster.random_state)
-    s3_cluster = lab[idx["S3_FAKE"]] if "S3_FAKE" in idx else None
+    fake, fake_cluster = _worst_fake_cluster(events, lab, key=lambda e: e.n_trapped)
+    if fake is None:
+        return {"note": "dataset không có tin giả"}
 
-    mem = [e for e, l in zip(events, lab) if l == s3_cluster]
+    mem = [e for e, l in zip(events, lab) if l == fake_cluster]
     n_ungated = sum(e.n_trapped for e in mem)
     n_gated = sum(e.n_trapped * e.confidence for e in mem)
-    fake = next((e for e in mem if e.is_fake), None)
     return {
-        "s3_cluster": s3_cluster,
+        "fake_cluster": fake_cluster,
         "fake_report_id": fake.event_id if fake else None,
         "fake_confidence_Ci": round(fake.confidence, 4) if fake else None,
         "fake_claimed_N": fake.n_trapped if fake else None,
+        "cluster_size": len(mem),
         "cluster_N_ungated": round(n_ungated, 1),
         "cluster_N_gated": round(n_gated, 1),
         "reduction_pct": round(100 * (1 - n_gated / n_ungated), 1) if n_ungated else 0,
@@ -264,44 +330,55 @@ def exp_e_confidence_gate(events):
 
 
 def exp_f_fmax_gate(events):
-    """S3: báo cáo giả khai ngập cao (F lớn) nhưng C_i thấp.
-    Gate C_i bên trong max có chặn được nó chiếm trọn F_max không?
-    So sánh F_max của cụm chứa S3 khi gate và không gate."""
-    idx = {e.event_id: i for i, e in enumerate(events)}
+    """Tin giả khai NGẬP CAO (F lớn) nhưng C_i thấp: gate C_i bên trong max có
+    chặn được nó chiếm trọn F_max của cụm không?
+
+    Neo động giống mục E, nhưng chọn tin giả theo F cao nhất (đây là tin giả gây
+    hại nhất cho F_max) thay vì theo N.
+    """
     w = build_weight_matrix(events, C.weight, mode="gating")
     ws = sparsify(w, C.weight)
     lab = run_louvain(ws, C.cluster.resolution, C.cluster.random_state)
-    s3_cluster = lab[idx["S3_FAKE"]] if "S3_FAKE" in idx else None
+
+    fake, target = _worst_fake_cluster(events, lab, key=lambda e: e.flood)
+    if fake is None:
+        return {"note": "dataset không có tin giả"}
 
     sc_gated = {s.cluster_id: s for s in score_clusters(events, lab, C.priority, gate_fmax=True)}
     sc_ungated = {s.cluster_id: s for s in score_clusters(events, lab, C.priority, gate_fmax=False)}
 
-    mem = [e for e, l in zip(events, lab) if l == s3_cluster]
-    fake = next((e for e in mem if e.is_fake), None)
+    mem = [e for e, l in zip(events, lab) if l == target]
     return {
-        "s3_cluster": s3_cluster,
-        "fake_report_id": fake.event_id if fake else None,
-        "fake_flood_F": round(fake.flood, 4) if fake else None,
-        "fake_confidence_Ci": round(fake.confidence, 4) if fake else None,
-        "cluster_Fmax_ungated": sc_ungated[s3_cluster].f_max if s3_cluster in sc_ungated else None,
-        "cluster_Fmax_gated": sc_gated[s3_cluster].f_max if s3_cluster in sc_gated else None,
+        "target_cluster": int(target),
+        "cluster_size": len(mem),
+        "fake_report_id": fake.event_id,
+        "fake_flood_F": round(fake.flood, 4),
+        "fake_confidence_Ci": round(fake.confidence, 4),
+        "cluster_Fmax_ungated": sc_ungated[target].f_max if target in sc_ungated else None,
+        "cluster_Fmax_gated": sc_gated[target].f_max if target in sc_gated else None,
     }
 
 
 def exp_g_ari_decomposition(events):
-    """BẤT BIẾN dữ liệu — trần ARI không bị ghim bởi thiết kế dữ liệu.
+    """Phân rã ARI theo BA CẤU TRÚC KHÓ mà dataset P1 cố tình dựng.
 
-    Lịch sử: ở bản dữ liệu trước, các nhóm kịch bản (gt 100–105) được đặt TRÙNG
-    tọa độ với 6 ốc đảo (gt 0–5) nhưng mang nhãn khác. Mọi phương pháp dựa trên
-    không gian đều buộc phải gộp điểm kịch bản vào ốc đảo chủ, nên ARI toàn tập
-    bị ghim ở 0,892 vì THIẾT KẾ DỮ LIỆU chứ không vì chất lượng thuật toán — và
-    do đó ARI không còn phân biệt được phương pháp (phản biện 2.2).
+    Lịch sử: bản trước phân rã theo "core" (gt 0–5) vs "kịch bản" (gt >= 100) và
+    kiểm hồi quy `n_colocated_narrative_groups == 0`. Dataset P1 đã bỏ hoàn toàn
+    các nhóm kịch bản đặt tay, nên hai con số đó nay luôn rỗng/0 — tức phép kiểm
+    cũ không còn kiểm gì cả. Thay vào đó ta phân rã theo đúng ba cấu trúc khiến
+    dataset khó, mỗi cấu trúc cô lập MỘT thành phần của w_ij:
 
-    Sau khi sinh lại dữ liệu, mỗi nhóm kịch bản cách tâm ốc đảo chủ ≥ 3 km
-    (≫ sigma_geo = 700 m). Hàm này giữ lại phân rã ARI như một PHÉP KIỂM
-    HỒI QUY: `n_colocated_narrative_groups` phải bằng 0 và ARI core-only,
-    narrative-only, toàn tập phải xấp xỉ nhau. Nếu con số trùng-tọa-độ > 0 quay
-    lại, phép kiểm này phát hiện ngay.
+      - chồng lấn không gian (gt 0–5): ba cặp tâm cách < 800 m nhưng NGƯỢC ngữ
+        cảnh (F ~0,85 vs ~0,25) -> chỉ S_ctx tách được. ARI thấp ở đây nghĩa là
+        thành phần ngữ cảnh không làm việc.
+      - cùng vị trí khác thời gian (gt 6–7): chồng tâm, lệch 3,5 h -> chỉ S_temp
+        tách được.
+      - multimodal (gt 8): một nhãn, hai ổ điểm cách ~1,4 km -> không ngưỡng
+        khoảng cách đơn nào gộp đúng; đây là trần khó có thật, không phải lỗi.
+
+    Đọc bảng theo hướng: nếu một dòng tụt hẳn so với các dòng khác thì thành phần
+    tương ứng của w_ij là chỗ yếu, và đó là thông tin hữu ích chứ không phải điều
+    cần che.
     """
     from sklearn.metrics import adjusted_rand_score
 
@@ -310,38 +387,34 @@ def exp_g_ari_decomposition(events):
     lab = run_louvain(ws, C.cluster.resolution, C.cluster.random_state)
 
     gt = [e.gt_cluster for e in events]
-    core_idx = [i for i, g in enumerate(gt) if 0 <= g <= 5]
-    narr_idx = [i for i, g in enumerate(gt) if g >= 100]
-    all_idx = [i for i, g in enumerate(gt) if g >= 0]
+
+    def _idx(pred):
+        return [i for i, g in enumerate(gt) if pred(g)]
+
+    overlap_idx = _idx(lambda g: 0 <= g <= 5)     # 3 cặp chồng lấn không gian
+    sametime_idx = _idx(lambda g: g in (6, 7))    # cặp cùng vị trí khác thời gian
+    multimodal_idx = _idx(lambda g: g == 8)       # nhãn hai ổ điểm
+    single_idx = _idx(lambda g: 9 <= g <= 12)     # nhóm đơn, mật độ biến thiên
+    all_idx = _idx(lambda g: g >= 0)
 
     def _ari(idxs):
+        if len(idxs) < 2:
+            return None
         return round(float(adjusted_rand_score(
             [gt[i] for i in idxs], [lab[i] for i in idxs])), 4)
 
-    # đếm nhóm kịch bản trùng tọa độ với TÂM ốc đảo thật (CLUSTER_CENTERS,
-    # không phải điểm lõi đã bị jitter) — các điểm kịch bản được đặt đúng
-    # tọa độ tâm nên lệch 0 m.
-    from pipeline.attributes import haversine_m
-    from data.generate import CLUSTER_CENTERS
-    centers = [(clat, clng) for clat, clng, _ in CLUSTER_CENTERS]
-    colocated = 0
-    seen = set()
-    for e, g in zip(events, gt):
-        if g >= 100 and g not in seen:
-            seen.add(g)
-            dmin = min(haversine_m(e.lat, e.lng, cl[0], cl[1]) for cl in centers)
-            if dmin < 1.0:
-                colocated += 1
-
     return {
         "n_gt_labels": len({g for g in gt if g >= 0}),
-        "ari_core_only": _ari(core_idx),
-        "ari_narrative_only": _ari(narr_idx),
+        "ari_spatial_overlap_gt0_5": _ari(overlap_idx),
+        "ari_same_loc_diff_time_gt6_7": _ari(sametime_idx),
+        "ari_multimodal_gt8": _ari(multimodal_idx),
+        "ari_single_groups_gt9_12": _ari(single_idx),
         "ari_all_labeled": _ari(all_idx),
-        "n_core": len(core_idx),
-        "n_narrative": len(narr_idx),
+        "n_spatial_overlap": len(overlap_idx),
+        "n_same_loc_diff_time": len(sametime_idx),
+        "n_multimodal": len(multimodal_idx),
+        "n_single_groups": len(single_idx),
         "n_all_labeled": len(all_idx),
-        "n_colocated_narrative_groups": colocated,
     }
 
 
@@ -354,33 +427,33 @@ def main():
     print("   Cột so sánh hợp lệ: max_diam_km và mean_diam_km_multi. "
           "mean_diam_km_all tính cả singleton (0 km) nên thưởng giả tạo cho "
           "phân hoạch vụn — chỉ để tham khảo.")
-    print("   s1_merged = True nghĩa là hai nhóm S1 cách 107 km bị gộp làm một cụm "
-          "(sai về mặt vận hành).")
+    print("   far_groups_merged = True nghĩa là hai nhóm cách hơn 100 km bị gộp làm "
+          "một cụm (sai về mặt vận hành).")
 
     res_g = exp_g_ari_decomposition(events)
-    print_table("G. BẤT BIẾN dữ liệu: nhãn kịch bản khả tách bằng không gian "
-                "(n_colocated phải = 0)", [res_g])
-    if res_g["n_colocated_narrative_groups"] != 0:
-        print("   !! CẢNH BÁO: có nhóm kịch bản trùng tâm ốc đảo -> trần ARI bị "
-              "ghim bởi thiết kế dữ liệu. Chạy lại data/generate.py.")
-    else:
-        print("   OK: không nhóm kịch bản nào trùng tâm ốc đảo; ARI phản ánh chất "
-              "lượng thuật toán chứ không phải trần do dữ liệu.")
+    print_table("G. Phân rã ARI theo LOẠI CẤU TRÚC KHÓ — ARI toàn tập đến từ đâu",
+                [res_g])
+    print("   ari_overlap_pairs: 3 cặp chồng lấn không gian, chỉ tách được bằng "
+          "ngữ cảnh.")
+    print("   ari_same_place_diff_time: cặp trùng tâm, chỉ tách được bằng thời gian.")
+    print("   ari_multimodal: nhãn có hai ổ điểm cách ~1,4 km (không ngưỡng khoảng "
+          "cách nào gộp đúng).")
+    print("   Cột nào THẤP là chỗ phương pháp còn yếu — đọc thẳng, không tô hồng.")
 
     res_b = exp_b_normalization(events)
     print_table("B. P(C_k): Tác động chuẩn hóa thang đo", [res_b])
 
-    rows_c, s2c = exp_c_v_multiplier(events)
-    print_table(f"C. V_agg nhân vs cộng (cụm S2 = {s2c})", rows_c[:6])
+    rows_c, vc = exp_c_v_multiplier(events)
+    print_table(f"C. V_agg nhân vs cộng (cụm giàu-yếu-thế nhất = {vc})", rows_c[:6])
 
     rows_d = exp_d_tanh_saturation()
     print_table("D. Chống bão hòa tanh (khả năng phân biệt)", rows_d)
 
     res_e = exp_e_confidence_gate(events)
-    print_table("E. Gate C_i hạ nhiệt tin giả (S3)", [res_e])
+    print_table("E. Gate C_i hạ nhiệt tin giả khai N lớn nhất", [res_e])
 
     res_f = exp_f_fmax_gate(events)
-    print_table("F. Gate C_i cho F_max chặn tin giả khai ngập cao (S3)", [res_f])
+    print_table("F. Gate C_i cho F_max chặn tin giả khai ngập cao nhất", [res_f])
 
     rows_h = exp_h_mu_policy(events)
     print_table("H. Núm chính sách mu: quét toàn miền [1, 2] đã công bố", rows_h)
