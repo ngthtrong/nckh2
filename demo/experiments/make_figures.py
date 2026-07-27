@@ -12,6 +12,8 @@ Bộ hình (7 hình, đánh số theo thứ tự xuất hiện trong bài báo):
   fig5_resolution_sweep— độ nhạy lambda
   fig6_baselines       — đối chiếu baseline (ARI, đường kính, hấp thụ nhiễu)
   fig7_ranking_stability— độ ổn định xếp hạng P(C_k)
+  fig8_lemma1          — Bổ đề 1: cận đường kính của dạng nhân luôn đúng, dạng cộng
+                         không có cận (đóng góp lý thuyết trung tâm, P0)
 
 Lưu ý về độ đo: mọi hình dùng `mean_diam_km_multi` / `max_diam_km` (chỉ cụm có
 >= 2 thành viên) thay cho `mean_diam_km` cũ — độ đo cũ tính cả singleton (đường
@@ -77,7 +79,7 @@ def fig_ablation():
     names = [_short_variant(r["variant"]) for r in rows]
     maxd = [r["max_diam_km"] for r in rows]
     ari = [r["ari"] for r in rows]
-    merged = [r["s1_merged"] for r in rows]
+    merged = [r["far_groups_merged"] for r in rows]
     colors = [GREEN if not m else RED for m in merged]
 
     fig, (a1, a2) = plt.subplots(1, 2, figsize=(11, 4.2),
@@ -93,13 +95,13 @@ def fig_ablation():
         a1.text(b.get_x() + b.get_width() / 2, d * 1.12,
                 f"{d:.1f} km\nARI {r:.3f}", ha="center", va="bottom", fontsize=7.5)
         a1.text(b.get_x() + b.get_width() / 2, min(maxd) * 0.35,
-                "S1 merged" if m else "S1 kept apart",
+                "far groups merged" if m else "far groups kept apart",
                 ha="center", va="bottom", fontsize=7,
                 color="white", rotation=90,
                 bbox=dict(boxstyle="round,pad=0.15", fc=RED if m else GREEN, ec="none"))
     a1.set_ylim(min(maxd) * 0.25, max(maxd) * 4)
     a1.set_title("(a) Additive weight (α sweep) vs multiplicative gating\n"
-                 "every additive setting merges two contexts 107 km apart",
+                 "additive diameters blow up to ~100 km regardless of α",
                  fontsize=9.5)
 
     labels = ["No $C_i$ gate\n(raw $N$)", "With $C_i$ gate\n($N \\cdot C_i$)"]
@@ -120,7 +122,39 @@ def fig_ablation():
 # --------------------------------------------------------------------------
 # fig2 — bản đồ cụm: dạng cộng vs dạng nhân trên cùng dữ liệu
 # --------------------------------------------------------------------------
-def _cluster_map(ax, events, labels, title, note: str | None = None):
+def _worst_merge(events, labels):
+    """Cặp điểm CÓ NHÃN GT xa nhau nhất mà bị phân hoạch `labels` gộp vào một cụm.
+
+    Trả về (i, j, dist_km, gt_i, gt_j) hoặc None nếu không có cụm nào gộp hai
+    nhóm GT khác nhau. Dùng để chú thích hình 2 bằng SỐ ĐO trên dữ liệu hiện
+    hành, thay vì neo vào ID kịch bản cố định (các ID S1-A/S1-B của bộ dữ liệu
+    cũ không còn tồn tại — phản biện P3.2).
+    """
+    from pipeline.metrics import haversine_m
+
+    buckets: dict[int, list[int]] = {}
+    for i, (ev, lab) in enumerate(zip(events, labels)):
+        if ev.gt_cluster is not None and ev.gt_cluster >= 0:
+            buckets.setdefault(lab, []).append(i)
+
+    best = None
+    for idx in buckets.values():
+        if len({events[i].gt_cluster for i in idx}) < 2:
+            continue
+        for a in range(len(idx)):
+            for b in range(a + 1, len(idx)):
+                i, j = idx[a], idx[b]
+                if events[i].gt_cluster == events[j].gt_cluster:
+                    continue
+                d = haversine_m(events[i].lat, events[i].lng,
+                                events[j].lat, events[j].lng) / 1000.0
+                if best is None or d > best[2]:
+                    best = (i, j, d, events[i].gt_cluster, events[j].gt_cluster)
+    return best
+
+
+def _cluster_map(ax, events, labels, title, note: str | None = None,
+                 marks: list[tuple[int, str]] | None = None):
     """Vẽ scatter sự kiện + nan hoa từ tâm cụm tới thành viên.
 
     Nan hoa dài = cụm bị kéo giãn địa lý; đây là điều mà ARI không thấy được.
@@ -145,15 +179,15 @@ def _cluster_map(ax, events, labels, title, note: str | None = None):
         ax.scatter(lng[idx], lat[idx], s=14, color=col,
                    edgecolors="none", zorder=2)
 
-    # đánh dấu hai nhóm S1 — phép thử gating
-    for gid, txt in ((100, "S1-A"), (101, "S1-B")):
-        sel = [i for i, e in enumerate(events) if e.gt_cluster == gid]
-        if sel:
-            ax.annotate(txt, (lng[sel[0]], lat[sel[0]]),
-                        textcoords="offset points", xytext=(6, 6),
-                        fontsize=8, fontweight="bold")
-            ax.scatter(lng[sel], lat[sel], s=70, facecolors="none",
-                       edgecolors="black", lw=1.0, zorder=3)
+    # đánh dấu các điểm được truyền vào (do người gọi tính từ dữ liệu).
+    # Lệch nhãn theo thứ tự: hai điểm bị gộp có thể cách nhau vài km nên ở tỷ lệ
+    # vùng chúng gần trùng nhau, nhãn sẽ chồng nếu dùng chung một offset.
+    for n, (i, txt) in enumerate(marks or []):
+        ax.annotate(txt, (lng[i], lat[i]),
+                    textcoords="offset points", xytext=(7, 7 - 12 * n),
+                    fontsize=8, fontweight="bold")
+        ax.scatter([lng[i]], [lat[i]], s=70, facecolors="none",
+                   edgecolors="black", lw=1.0, zorder=3)
 
     ax.set_xlabel("Longitude (°E)")
     ax.set_ylabel("Latitude (°N)")
@@ -177,21 +211,44 @@ def fig_map():
     s_add = geographic_spread(events, lab_add)
     s_gate = geographic_spread(events, lab_gate)
 
+    # neo chú thích vào cặp GT xa nhất BỊ GỘP, đo trên dữ liệu hiện hành
+    wm_add = _worst_merge(events, lab_add)
+    wm_gate = _worst_merge(events, lab_gate)
+
+    if wm_add is None:
+        marks_add, note_add = [], "No two ground-truth groups are merged."
+    else:
+        i, j, dkm, gi, gj = wm_add
+        marks_add = [(i, "g%d" % gi), (j, "g%d" % gj)]
+        note_add = ("Long spokes = one cluster stretched across the region;\n"
+                    "groups %d and %d are merged although the two marked\n"
+                    "events are %.1f km apart." % (gi, gj, dkm))
+
+    if wm_gate is None:
+        marks_gate = marks_add
+        note_gate = ("No visible spokes: every cluster is under %.2f km wide,\n"
+                     "so at this scale each one collapses to a point.\n"
+                     "No two ground-truth groups are merged." %
+                     s_gate["max_diameter_km"])
+    else:
+        i, j, dkm, gi, gj = wm_gate
+        marks_gate = [(i, "g%d" % gi), (j, "g%d" % gj)]
+        note_gate = ("No visible spokes: every cluster is under %.2f km wide,\n"
+                     "so at this scale each one collapses to a point.\n"
+                     "Widest merge of two groups spans only %.2f km (g%d/g%d)."
+                     % (s_gate["max_diameter_km"], dkm, gi, gj))
+
     fig, (a1, a2) = plt.subplots(1, 2, figsize=(12, 5))
     _cluster_map(a1, events, lab_add,
                  "(a) Additive weight, α = 1.0 (best additive setting)\n"
                  "%d clusters · max diameter %.1f km"
                  % (s_add["n_clusters"], s_add["max_diameter_km"]),
-                 note="Long spokes = one cluster stretched across the region;\n"
-                      "S1-A and S1-B are merged although they are 107 km apart.")
+                 note=note_add, marks=marks_add)
     _cluster_map(a2, events, lab_gate,
                  "(b) Multiplicative gating (proposed)\n"
                  "%d clusters · max diameter %.2f km"
                  % (s_gate["n_clusters"], s_gate["max_diameter_km"]),
-                 note="No visible spokes: every cluster is under %.1f km wide,\n"
-                      "so at this scale each one collapses to a point.\n"
-                      "S1-A and S1-B stay apart."
-                      % s_gate["max_diameter_km"])
+                 note=note_gate, marks=marks_gate)
     # dùng cùng khung toạ độ để so sánh trực quan là công bằng
     xlim = (min(a1.get_xlim()[0], a2.get_xlim()[0]), max(a1.get_xlim()[1], a2.get_xlim()[1]))
     ylim = (min(a1.get_ylim()[0], a2.get_ylim()[0]), max(a1.get_ylim()[1], a2.get_ylim()[1]))
@@ -356,6 +413,71 @@ def fig_ranking_stability():
     plt.close(fig)
 
 
+# --------------------------------------------------------------------------
+# fig8 — kiểm Bổ đề 1: cận đường kính của dạng nhân vs dạng cộng
+# --------------------------------------------------------------------------
+def fig_lemma1():
+    """Bổ đề 1 bằng hình: khoảng cách cạnh dài nhất so với cận sigma*sqrt(2 ln 1/theta).
+
+    Đây là hình cho đóng góp lý thuyết trung tâm (P0). Trục y log vì dạng cộng vượt
+    cận tới hai bậc độ lớn: sàn cộng alpha*S_geo + ... không bao giờ tụt dưới
+    beta*S_temp + gamma*S_ctx, nên một cặp cách 188 km vẫn có w > theta.
+
+    Đọc hình: đường nét liền = cận lý thuyết; điểm = khoảng cách cạnh dài nhất ĐO
+    ĐƯỢC. Điểm nằm DƯỚI đường là bổ đề đúng; nằm TRÊN là vi phạm.
+    """
+    gat = load("exp13_lemma1_detail_gating.json")
+    add = load("exp13_lemma1_detail_additive_alpha05.json")
+    summary = load("exp13_lemma1_check.json")
+
+    fig, (a1, a2) = plt.subplots(1, 2, figsize=(11, 4.2))
+
+    # (a) gating — điểm luôn nằm dưới cận
+    th = [r["theta"] for r in gat]
+    bound = [r["implied_cutoff_m"] / 1000 for r in gat]
+    meas = [r["max_edge_dist_m"] / 1000 for r in gat]
+    a1.plot(th, bound, "-", color=BLUE, lw=2,
+            label=r"bound $\sigma\sqrt{2\ln(1/\theta)}$")
+    a1.plot(th, meas, "o", color=GREEN, ms=4,
+            label=r"measured $\max\{d_{ij}: w_{ij}>\theta\}$")
+    a1.fill_between(th, meas, bound, color=GREEN, alpha=0.12)
+    a1.set_xlabel(r"$\theta$")
+    a1.set_ylabel("Distance (km)")
+    a1.set_title("(a) Multiplicative gating: bound always holds\n"
+                 "%d/%d $\\theta$ values, 0 violations"
+                 % (summary[0]["n_theta_checked"], summary[0]["n_theta_checked"]),
+                 fontsize=9.5)
+    a1.legend(fontsize=8, loc="upper right")
+
+    # (b) dạng cộng — vượt cận nhiều bậc độ lớn
+    s_add = next(s for s in summary if s["form"] == "additive (alpha=0.5)")
+    th2 = [r["theta"] for r in add]
+    bound2 = [r["implied_cutoff_m"] / 1000 for r in add]
+    meas2 = [r["max_edge_dist_m"] / 1000 for r in add]
+    viol = [r["violates_lemma1"] for r in add]
+    a2.plot(th2, bound2, "-", color=BLUE, lw=2, label="same bound")
+    a2.plot([t for t, v in zip(th2, viol) if v],
+            [m for m, v in zip(meas2, viol) if v],
+            "x", color=RED, ms=5, label="measured (violates)")
+    a2.plot([t for t, v in zip(th2, viol) if not v],
+            [m for m, v in zip(meas2, viol) if not v],
+            "o", color=GREEN, ms=4, label="measured (holds)")
+    a2.axhline(188.8, color=ORANGE, ls=":", lw=1.2)
+    a2.text(th2[len(th2) // 2], 205, "dataset extent 188.8 km",
+            fontsize=7.5, color=ORANGE)
+    a2.set_yscale("log")
+    a2.set_xlabel(r"$\theta$")
+    a2.set_ylabel("Distance (km, log scale)")
+    a2.set_title("(b) Additive weight ($\\alpha=0.5$): no bound exists\n"
+                 "%d/%d $\\theta$ values violate (floor = %.4f)"
+                 % (s_add["n_lemma1_violations"], s_add["n_theta_checked"],
+                    s_add["additive_floor"]), fontsize=9.5)
+    a2.legend(fontsize=8, loc="center right")
+
+    fig.savefig(FIGURES / "fig8_lemma1.png")
+    plt.close(fig)
+
+
 def main():
     # hình cũ đã bỏ (fig2_tanh_saturation: đồ thị hàm thuần, không có dữ liệu;
     # fig3_confidence_gate: đã gộp vào fig1) — xoá để results/figures không lẫn
@@ -370,6 +492,7 @@ def main():
     fig_resolution_sweep()
     fig_baselines()
     fig_ranking_stability()
+    fig_lemma1()
     figs = sorted(p.name for p in FIGURES.glob("*.png"))
     print("Đã sinh", len(figs), "hình -> results/figures/")
     for f in figs:

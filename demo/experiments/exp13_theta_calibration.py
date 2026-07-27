@@ -1,31 +1,37 @@
-"""Thí nghiệm 13 — Hiệu chuẩn ngưỡng theta: gating có thắng nhờ công thức, hay
-nhờ một ngưỡng thuận lợi?
+"""Thí nghiệm 13 — Xác nhận thực nghiệm của Bổ đề 1 (bảo đảm định vị của dạng nhân).
 
-VÌ SAO CẦN THÍ NGHIỆM NÀY (một confound thật, phát hiện ở vòng phản biện 16).
+VÒNG 17 — CHUYỂN VAI (phản biện §1).
 
-Mọi so sánh cộng-vs-nhân trong Thí nghiệm 1A đều dùng CÙNG một ngưỡng làm thưa
-theta = 0,05. Nhưng hai dạng trọng số có MIỀN GIÁ TRỊ khác nhau hẳn:
+Bản trước dùng thí nghiệm này để tuyên bố "cửa sổ theta dùng được rộng 51×". Đo
+lại cho thấy con số 51× là ARTIFACT của một thước đo KHÔNG BẤT BIẾN: nó là tỉ số
+theta_hi/theta_lo của độ rộng TUYỆT ĐỐI, mà độ rộng tuyệt đối phụ thuộc thang giá
+trị của w (gating dùng theta→0 được, dạng cộng thì không vì có sàn dương). Theo
+hai thước đo BẤT BIẾN (theta chuẩn hoá theo w_max, và tỉ lệ cạnh giữ lại), lợi thế
+chỉ còn 2× và 1× — KHÔNG phải 51×.
 
-    gating       : w in [0; 0,988]   trung vị = 0,000
-    cộng alpha=1 : w in [0,041; 1,988] trung vị = 0,391
+Đóng góp thật KHÔNG nằm ở "cửa sổ rộng hơn" mà ở BỔ ĐỀ 1 (Mục 4.2):
 
-Nguyên nhân: dạng cộng có S_temp và S_context là các số hạng ĐỘC LẬP, không bị
-S_geo nhân vào, nên ngay cả một cặp cách nhau 200 km vẫn giữ w >= beta*S_temp +
-gamma*S_context > 0. Hệ quả: cùng theta = 0,05 lọc 91,7% cặp của gating nhưng chỉ
-lọc 0,01% cặp của dạng cộng. Nói cách khác, dạng cộng bị đưa vào Louvain dưới
-dạng một đồ thị GẦN HOÀN CHỈNH — đúng chế độ mà chính bài báo nói Modularity hoạt
-động kém.
+    Với w_ij = S_geo(d_ij)·(beta·S_temp + gamma·S_ctx) và beta+gamma <= 1, mọi cạnh
+    sống sót sau khi cắt ở theta > 0 đều thoả d_ij < sigma·sqrt(2·ln(1/theta)).
+    => đường kính cụm bị chặn bởi h·sigma·sqrt(2·ln(1/theta)), KHÔNG phụ thuộc dữ liệu.
 
-Vậy phần nào của khoảng cách 214 km → 1,41 km là do công thức nhân, và phần nào
-chỉ là do một ngưỡng vô tình bất lợi cho dạng cộng? Thí nghiệm này trả lời bằng
-cách quét theta cho TỪNG dạng trọng số và báo cáo kết quả TỐT NHẤT mà mỗi dạng
-đạt được — tức đặt dạng cộng vào điều kiện thuận lợi nhất của nó, thay vì giữ
-một ngưỡng duy nhất rồi tuyên bố thắng.
+    Hệ quả: dạng CỘNG w_ij = alpha·S_geo + beta·S_temp + gamma·S_ctx có sàn dương
+    độc lập khoảng cách (= min beta·S_temp+gamma·S_ctx). Với mọi theta dưới sàn đó,
+    tập cạnh còn lại KHÔNG bị chặn về khoảng cách — tồn tại cặp cách nhau tuỳ ý xa
+    vẫn được giữ.
 
-Nếu dạng cộng với theta hiệu chuẩn đuổi kịp gating, phải báo cáo đúng như vậy và
-phát biểu lại đóng góp cho chính xác. Đó chính là điều xảy ra.
+Thí nghiệm này giờ làm ba việc:
+  (1) Đo miền giá trị của từng dạng để thấy vì sao cùng một theta không công bằng.
+  (2) Quét theta cho từng dạng, báo cáo các cột BẤT BIẾN (theta/w_max, tỉ lệ cạnh
+      giữ lại) thay cho tỉ số độ rộng tuyệt đối. Tiêu chí "dùng được" là THUẦN VẬN
+      HÀNH (không dùng nhãn GT — điều phối viên thật không có nhãn).
+  (3) `verify_lemma1`: với mỗi theta trong sweep, kiểm max{d_ij : w_ij > theta} so
+      với cận sigma·sqrt(2·ln(1/theta)). Gating phải LUÔN thoả; dạng cộng phải VI
+      PHẠM ở theta nhỏ hơn sàn. Đây là bảng thay thế cho bảng 51× cũ.
 """
 from __future__ import annotations
+
+from dataclasses import replace
 
 import numpy as np
 
@@ -33,20 +39,36 @@ from common import prepared_events, print_table, save_table
 from pipeline.config import DEFAULT_CONFIG as C
 from pipeline.clustering import run_louvain
 from pipeline.metrics import cluster_quality, geographic_spread, noise_handling
-from pipeline.weighting import build_weight_matrix, sparsify
-from dataclasses import replace
+from pipeline.weighting import (
+    build_weight_matrix,
+    sparsify,
+    max_weight,
+    implied_distance_cutoff,
+    additive_floor,
+    max_edge_distance_above,
+    retained_fraction,
+)
 
-# Ngưỡng "dùng được cho điều phối": cụm xấu nhất phải nằm trong tầm hoạt động
-# thực tế của một ca nô. Đặt trước khi xem kết quả.
+# --- Tiêu chí "dùng được cho điều phối" — THUẦN VẬN HÀNH (P1.4) --------------
+# Bản trước lọc theo `ari >= 0.95`, nhưng ARI cần nhãn ground-truth, mà điều phối
+# viên trong thảm hoạ thật KHÔNG có nhãn. Tiêu chí usable phải là thứ đo được KHI
+# KHÔNG có nhãn: đường kính cụm xấu nhất trong tầm ca nô, không quá vụn, số cụm
+# hợp lý. ARI vẫn được BÁO CÁO (cột tham khảo) nhưng KHÔNG dùng để lọc.
+#
+# Ba điều kiện dưới đây đều đo được KHÔNG cần nhãn:
+#   - `max_diameter_km` lấy trên MỌI cụm (kể cả cụm toàn tin nhiễu), vì điều phối
+#     viên không biết cụm nào là nhiễu — cụm rộng vẫn là cụm rộng với họ.
+#   - phân vụn đo theo TỈ LỆ SỰ KIỆN nằm trong cụm đơn lẻ, không phải tỉ lệ CỤM:
+#     tin giả cô lập đúng ra tạo nhiều cụm đơn (dấu hiệu TỐT), nên đếm theo cụm
+#     sẽ phạt oan chính hành vi ta muốn.
+#   - đếm cụm dùng `n_clusters_multi` (cụm >= 2 thành viên) — số cụm THỰC SỰ cần
+#     điều một ca nô tới.
 USABLE_MAX_DIAM_KM = 5.0
-# Sàn độ khớp nhãn để một cấu hình được coi là hợp lệ (không chấp nhận đường
-# kính nhỏ đạt được bằng cách băm vụn dữ liệu).
-USABLE_MIN_ARI = 0.95
+USABLE_MAX_FRAC_EVENTS_SINGLETON = 0.5
+USABLE_MIN_CLUSTERS = 5
+USABLE_MAX_CLUSTERS = 40
 
 # Các dạng trọng số đưa vào so sánh, cùng miền quét theta của riêng nó.
-# `slug` là tên file ASCII đặt TƯỜNG MINH: sinh slug tự động từ nhãn tiếng Việt
-# tạo ra tên file có dấu (ví dụ `exp13_sweep_additive_chuẩn_hoá_13.json`), gây
-# lỗi trên các hệ thống tệp không dùng UTF-8 và làm hỏng tính tái lập.
 # Mỗi phần tử: (nhãn hiển thị, slug ASCII cho tên file, mode, alpha, dải theta).
 FORMS = [
     ("gating", "gating", "gating", None, np.arange(0.01, 0.76, 0.02)),
@@ -61,24 +83,96 @@ FORMS = [
 ]
 
 
-def _evaluate(events, gt, mode, alpha, theta):
+def _evaluate(events, gt, mode, alpha, theta, wmax):
     wp = replace(C.weight, edge_threshold=float(theta))
     w = build_weight_matrix(events, wp, mode=mode, alpha=alpha)
     ws = sparsify(w, wp)
     lab = run_louvain(ws, C.cluster.resolution, C.cluster.random_state)
     q = cluster_quality(lab, gt)
-    sp = geographic_spread(events, lab)
+    sp = geographic_spread(events, lab, gt_labels=gt)
     nz = noise_handling(lab, gt, noise_label=None)
+    n_sing = sp["n_singletons"]
+    # Phân vụn theo TỈ LỆ SỰ KIỆN (mỗi cụm đơn lẻ = 1 sự kiện), không theo tỉ lệ cụm.
+    frac_ev_sing = round(n_sing / len(events), 4) if len(events) else 0.0
     return {
         "theta": round(float(theta), 3),
+        # --- cột BẤT BIẾN (thay cho độ rộng tuyệt đối 51×) ---
+        "theta_norm": round(float(theta) / wmax, 4) if wmax > 0 else None,
+        "retained_frac": round(retained_fraction(events, wp, float(theta),
+                                                  mode=mode, alpha=alpha), 4),
+        # --- cột vận hành (tiêu chí usable) — KHÔNG dùng nhãn GT ---
+        "max_diam_km": sp["max_diameter_km"],
+        "frac_events_singleton": frac_ev_sing,
+        "n_clusters_multi": sp["n_clusters_multi"],
+        # --- cột tham khảo (KHÔNG dùng để lọc usable) ---
+        "max_diam_km_labeled": sp["max_diameter_km_labeled"],
+        "n_clusters": sp["n_clusters"],
         "ari": q["ari"],
         "nmi": q["nmi"],
-        "n_clusters": sp["n_clusters"],
-        "mean_diam_km_multi": sp["mean_diameter_km_multi"],
-        "max_diam_km": sp["max_diameter_km"],
-        "noise_absorbed_pct": nz["noise_absorbed_pct"],
         "n_edges": int(np.count_nonzero(ws) // 2),
     }
+
+
+def _is_usable(r) -> bool:
+    """Tiêu chí thuần vận hành — không đụng nhãn GT.
+
+    Ba điều kiện đều là thứ điều phối viên đọc được ngay trên bản đồ: cụm xấu nhất
+    còn trong tầm triển khai một ca nô, phần lớn sự kiện không bị bỏ rơi lẻ loi, và
+    số cụm NHIỀU THÀNH VIÊN nằm trong tầm điều phối được của một ca trực.
+    """
+    return (
+        r["max_diam_km"] is not None
+        and r["max_diam_km"] < USABLE_MAX_DIAM_KM
+        and r["frac_events_singleton"] < USABLE_MAX_FRAC_EVENTS_SINGLETON
+        and USABLE_MIN_CLUSTERS <= r["n_clusters_multi"] <= USABLE_MAX_CLUSTERS
+    )
+
+
+def verify_lemma1(events, gt):
+    """Kiểm Bổ đề 1 bằng thực nghiệm cho từng dạng, trên toàn dải theta.
+
+    Với mỗi theta: so `max{d_ij : w_ij > theta}` (đo) với cận `sigma·sqrt(2 ln 1/theta)`.
+    - gating: cận phải LUÔN đúng (0 vi phạm) — đó là nội dung Bổ đề 1.
+    - dạng cộng: cận bị VI PHẠM ở theta nhỏ hơn sàn (`additive_floor`), vì sàn dương
+      độc lập khoảng cách giữ lại các cạnh xa tuỳ ý.
+
+    Trả về (bảng tóm tắt mỗi dạng, chi tiết vi phạm theo theta).
+    """
+    summary = []
+    detail = {}
+    for label, slug, mode, alpha, thetas in FORMS:
+        floor = (additive_floor(events, C.weight, alpha=alpha)
+                 if mode in ("additive", "additive_norm") else None)
+        rows = []
+        n_violations = 0
+        first_violation_theta = None
+        for t in thetas:
+            wp = replace(C.weight, edge_threshold=float(t))
+            cutoff = implied_distance_cutoff(wp, float(t))
+            max_d, n_edges = max_edge_distance_above(events, wp, float(t),
+                                                     mode=mode, alpha=alpha)
+            violates = bool(max_d > cutoff + 1e-6)   # dung sai số học nhỏ
+            if violates:
+                n_violations += 1
+                if first_violation_theta is None:
+                    first_violation_theta = round(float(t), 3)
+            rows.append({
+                "theta": round(float(t), 3),
+                "implied_cutoff_m": round(cutoff, 1),
+                "max_edge_dist_m": round(max_d, 1),
+                "n_edges": n_edges,
+                "violates_lemma1": violates,
+            })
+        detail[slug] = rows
+        summary.append({
+            "form": label,
+            "additive_floor": round(floor, 4) if floor is not None else None,
+            "n_theta_checked": len(rows),
+            "n_lemma1_violations": n_violations,
+            "first_violation_theta": first_violation_theta,
+            "lemma1_holds": n_violations == 0,
+        })
+    return summary, detail
 
 
 def main():
@@ -87,37 +181,44 @@ def main():
 
     # --- Phần 1: miền giá trị của từng dạng, để thấy confound bằng con số ---
     range_rows = []
-    for label, _slug, mode, alpha, _ in FORMS:
+    wmax_by_slug = {}
+    for label, slug, mode, alpha, _ in FORMS:
         w = build_weight_matrix(events, C.weight, mode=mode, alpha=alpha)
         off = w[~np.eye(len(events), dtype=bool)]
+        wmax = float(off.max())
+        wmax_by_slug[slug] = wmax
         range_rows.append({
             "form": label,
             "w_min": round(float(off.min()), 4),
             "w_median": round(float(np.median(off)), 4),
-            "w_max": round(float(off.max()), 4),
+            "w_max": round(wmax, 4),
             "frac_pairs_above_0.05": round(float((off > 0.05).mean()), 4),
         })
     print_table("Miền giá trị w_ij theo từng dạng — VÌ SAO cùng một theta không "
                 "phải một so sánh công bằng", range_rows)
-    print("   Cùng theta = 0,05 giữ lại 100% cặp của dạng cộng nhưng chỉ ~8% cặp")
+    print("   Cùng theta = 0,05 giữ lại ~100% cặp của dạng cộng nhưng chỉ ~8% cặp")
     print("   của gating: dạng cộng bị đưa vào Louvain như đồ thị gần hoàn chỉnh.")
 
-    # --- Phần 2: quét theta riêng cho từng dạng, lấy cấu hình TỐT NHẤT ---
+    # --- Phần 2: quét theta, báo cáo cột BẤT BIẾN + usable thuần vận hành ---
     best_rows = []
     all_sweeps = {}
     for label, slug, mode, alpha, thetas in FORMS:
-        sweep = [_evaluate(events, gt, mode, alpha, t) for t in thetas]
+        wmax = wmax_by_slug[slug]
+        sweep = [_evaluate(events, gt, mode, alpha, t, wmax) for t in thetas]
         all_sweeps[slug] = sweep
 
-        usable = [r for r in sweep
-                  if r["max_diam_km"] < USABLE_MAX_DIAM_KM and r["ari"] >= USABLE_MIN_ARI]
+        usable = [r for r in sweep if _is_usable(r)]
         best_ari = max(sweep, key=lambda r: r["ari"])
         if usable:
             lo = min(r["theta"] for r in usable)
             hi = max(r["theta"] for r in usable)
-            width_ratio = round(hi / lo, 2) if lo > 0 else None
+            # cột BẤT BIẾN thay cho width_ratio: theta chuẩn hoá tại hai đầu cửa sổ
+            norm_lo = min(r["theta_norm"] for r in usable)
+            norm_hi = max(r["theta_norm"] for r in usable)
+            ret_lo = min(r["retained_frac"] for r in usable)
+            ret_hi = max(r["retained_frac"] for r in usable)
         else:
-            lo = hi = width_ratio = None
+            lo = hi = norm_lo = norm_hi = ret_lo = ret_hi = None
 
         best_rows.append({
             "form": label,
@@ -127,28 +228,41 @@ def main():
             "n_usable_theta": len(usable),
             "usable_theta_lo": lo,
             "usable_theta_hi": hi,
-            "usable_width_ratio": width_ratio,
+            # BẤT BIẾN: thay cột usable_width_ratio (không bất biến) bị bỏ
+            "usable_theta_norm_lo": norm_lo,
+            "usable_theta_norm_hi": norm_hi,
+            "usable_retained_lo": ret_lo,
+            "usable_retained_hi": ret_hi,
             "ari_at_published_theta_0.05": next(
                 (r["ari"] for r in sweep if abs(r["theta"] - 0.05) < 1e-9), None),
         })
 
-    print_table("Kết quả TỐT NHẤT của từng dạng khi theta được hiệu chuẩn riêng "
-                f"(dùng được = max_diam < {USABLE_MAX_DIAM_KM} km VÀ ARI >= {USABLE_MIN_ARI})",
-                best_rows)
-    print("   Đọc bảng này theo CHIỀU RỘNG cửa sổ dùng được, không theo đỉnh ARI:")
-    print("   với theta hiệu chuẩn, dạng cộng ĐUỔI KỊP gating ở đỉnh. Khác biệt")
-    print("   thật nằm ở chỗ gating giữ được chất lượng đó trên một dải theta rộng")
-    print("   hàng chục lần, còn dạng cộng chỉ đạt trong một khe rất hẹp mà không")
-    print("   thể tìm ra nếu không có nhãn ground-truth — thứ mà thảm họa thật")
-    print("   không có. Đó mới là phát biểu đóng góp đúng.")
+    print_table("Kết quả TỐT NHẤT của từng dạng khi theta hiệu chuẩn riêng — "
+                "TIÊU CHÍ USABLE THUẦN VẬN HÀNH (không dùng nhãn GT): "
+                f"max_diam(mọi cụm) < {USABLE_MAX_DIAM_KM} km VÀ "
+                f"frac_events_singleton < {USABLE_MAX_FRAC_EVENTS_SINGLETON} VÀ "
+                f"{USABLE_MIN_CLUSTERS} <= n_clusters_multi <= "
+                f"{USABLE_MAX_CLUSTERS}", best_rows)
+    print("   Đọc theo hai cột BẤT BIẾN (theta_norm, retained_frac), KHÔNG theo tỉ")
+    print("   số độ rộng tuyệt đối: con số 51× cũ là artifact của thước đo không")
+    print("   bất biến. Lợi thế thật của gating là Bổ đề 1 (bảng dưới), không phải")
+    print("   một cửa sổ rộng hơn.")
+
+    # --- Phần 3: KIỂM BỔ ĐỀ 1 (bảng thay thế bảng 51×) ---
+    lemma_summary, lemma_detail = verify_lemma1(events, gt)
+    print_table("KIỂM BỔ ĐỀ 1: max{d_ij : w_ij>theta} so với cận sigma·sqrt(2 ln 1/theta) "
+                "— gating: 0 vi phạm; dạng cộng: vi phạm ở theta < sàn", lemma_summary)
+    print("   Đây là bằng chứng đóng góp trung tâm: bảo đảm định vị của dạng nhân")
+    print("   là BẤT BIẾN theo tái tham số hoá và không cần nhãn/seed nào.")
 
     save_table("exp13_theta_calibration_best.json", best_rows)
     save_table("exp13_theta_ranges.json", range_rows)
+    save_table("exp13_lemma1_check.json", lemma_summary)
     for slug, sweep in all_sweeps.items():
-        # slug là ASCII khai tường minh trong FORMS: tên file phải chuyển được
-        # giữa các hệ thống, không phụ thuộc dấu tiếng Việt trong nhãn hiển thị.
         save_table(f"exp13_sweep_{slug}.json", sweep)
-    print("\n[saved] exp13_*.json -> results/tables/")
+    for slug, rows in lemma_detail.items():
+        save_table(f"exp13_lemma1_detail_{slug}.json", rows)
+    print("\n[saved] exp13_*.json + exp13_lemma1_*.json -> results/tables/")
 
 
 if __name__ == "__main__":

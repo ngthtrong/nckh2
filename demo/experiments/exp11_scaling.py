@@ -33,17 +33,21 @@ from pipeline.weighting import (
     sparsify,
 )
 
-# n mục tiêu: điều khiển qua số điểm mỗi ốc đảo + số điểm nhiễu.
-# 6 ốc đảo * n_per_cluster + n_noise + 41 điểm kịch bản.
+# n mục tiêu: điều khiển qua số điểm mỗi NHÓM + số điểm nhiễu.
+# Dataset P1 có 14 đặc tả nhóm (`_GROUP_SPECS`, gồm 3 cặp chồng lấn, 1 cặp cùng
+# vị trí khác thời gian, 2 ổ của nhãn multimodal, 4 nhóm đơn), nên tổng
+# n = 14 * n_per_cluster + n_noise + 4 (chiến dịch tin giả).
+# CẢNH BÁO tính lại khi sửa `_GROUP_SPECS`: bảng cũ giả định 6 ốc đảo nên mức cuối
+# vọt lên ~15.000 sự kiện — với build O(n^2) thì đó là gấp ~4 lần thời gian dự kiến.
 SIZES = [
-    (40, 60),      # ~341  — đúng dataset chính
-    (160, 200),    # ~1201
-    (490, 600),    # ~3581
-    (990, 1200),   # ~7181
+    (31, 70),      # ~508   — cùng cỡ dataset chính (485)
+    (74, 168),     # ~1208
+    (221, 504),    # ~3602
+    (442, 1008),   # ~7200
 ]
 
 # Với n lớn, vòng lặp Python thuần quá chậm để đo lặp lại; chỉ đo tới ngưỡng này.
-PURE_LOOP_MAX_N = 3600
+PURE_LOOP_MAX_N = 3700
 
 
 def _timed(fn):

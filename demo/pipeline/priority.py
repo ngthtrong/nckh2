@@ -49,7 +49,7 @@ def score_clusters(
     gate_confidence: bool = True,
     normalize_v: bool = True,
     gate_fmax: bool = True,
-    n_ref: float | None = None,
+    n_ref: float | str | None = None,
 ) -> list[ClusterScore]:
     """Tính P(C_k) cho mọi cụm.
 
@@ -58,24 +58,33 @@ def score_clusters(
     gate_fmax=False        -> F_max = max F_i (không gate C_i, cho ablation)
 
     n_ref: mốc chuẩn hoá dân số N_max.
-        None (mặc định) -> mốc ĐỘNG: N_max = dân số của cụm lớn nhất trong lần
-        chạy hiện tại, nên cụm lớn nhất luôn có Ñ = 1,0. Tiện khi xếp hạng trong
-        MỘT lần chạy, nhưng điểm P không so sánh được giữa các lần chạy/thời điểm
-        khác nhau.
-        Số dương -> mốc TĨNH do chỉ huy đặt (ví dụ dân số khu vực tác chiến), khi
-        đó Ñ và P so sánh được xuyên thời gian. Mọi kết quả báo cáo phải nêu rõ
-        đang dùng mốc nào.
+        None (mặc định của hàm) -> lấy `params.n_ref` (mặc định cấu hình = 500,0,
+        tức mốc TĨNH). Đây là hành vi báo cáo chuẩn của bài: Ñ và P so sánh được
+        xuyên thời gian.
+        Số dương -> ghi đè mốc tĩnh bằng giá trị truyền vào.
+        `"dynamic"` -> mốc ĐỘNG: N_max = dân số của cụm lớn nhất trong lần chạy
+        hiện tại, nên cụm lớn nhất luôn có Ñ = 1,0. Tiện khi xếp hạng trong MỘT
+        lần chạy, nhưng P KHÔNG so sánh được giữa các thời điểm khác nhau — một
+        cụm tụt hạng chỉ vì nơi khác xuất hiện cụm lớn hơn. Chỉ dùng cho thí
+        nghiệm định lượng chính mức bất ổn đó (Thí nghiệm 5).
     """
     groups = _cluster_members(events, labels)
 
-    # N_max để chuẩn hóa dân số: động (cụm lớn nhất) hoặc tĩnh (n_ref)
+    # N_max để chuẩn hóa dân số: tĩnh (mặc định, từ params.n_ref) hoặc động
     n_totals = {}
     for cid, members in groups.items():
         if gate_confidence:
             n_totals[cid] = sum(ev.n_trapped * ev.confidence for ev in members)
         else:
             n_totals[cid] = sum(ev.n_trapped for ev in members)
-    if n_ref is not None and n_ref > 0:
+
+    if n_ref is None:
+        n_ref = getattr(params, "n_ref", None)
+    if isinstance(n_ref, str):
+        if n_ref != "dynamic":
+            raise ValueError(f"n_ref không hợp lệ: {n_ref!r} (chỉ nhận 'dynamic')")
+        n_max = max(n_totals.values()) if n_totals else 1.0
+    elif n_ref is not None and n_ref > 0:
         n_max = float(n_ref)
     else:
         n_max = max(n_totals.values()) if n_totals else 1.0

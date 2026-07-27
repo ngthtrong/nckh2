@@ -49,6 +49,14 @@ class PriorityParams:
     # Đây là núm ĐẠO ĐỨC do ban chỉ huy đặt: nó chặn mức mà tổn thương được phép
     # đảo thứ tự danh sách ưu tiên. Mọi kết quả báo cáo dùng mu = 2.
     v_cap_mu: float = 2.0
+    # n_ref: mốc chuẩn hoá dân số N_max trong Ñ = log(1+sum N_i C_i)/log(1+N_max).
+    # MẶC ĐỊNH LÀ TĨNH (500 người, cỡ dân số một khu tác chiến): với mốc động
+    # (N_max = cụm lớn nhất của lần chạy hiện tại), P KHÔNG so sánh được xuyên
+    # thời gian — một cụm tụt hạng chỉ vì nơi khác vừa xuất hiện cụm lớn hơn, dù
+    # tình hình của nó không đổi. Với hệ điều phối trực tuyến đó là lỗi thiết kế.
+    # Mọi số báo cáo trong bài dùng mốc TĨNH này; mức bất ổn của mốc động được
+    # định lượng riêng trong Thí nghiệm 5 (n_ref động vs tĩnh).
+    n_ref: float = 500.0
 
 
 @dataclass(frozen=True)

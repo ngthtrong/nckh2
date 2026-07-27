@@ -80,6 +80,20 @@ def main() -> int:
     if extra:
         print(f"\nHình của demo không dùng trong bài (bình thường): {', '.join(extra)}")
 
+    # Chiều NGƯỢC LẠI: hình MỒ CÔI trong paper/figures/ — có trong thư mục của bài
+    # nhưng không \includegraphics ở đâu. Đây là cảnh báo, không phải lỗi: hình có
+    # thể đang chờ được đưa vào bài (fig2_map/fig3_heatmap/fig8_lemma1 ở vòng 17).
+    # Vẫn phải in ra, vì một hình mồ côi cũng có thể là dấu hiệu bài BỎ SÓT bằng
+    # chứng đã sinh ra được, hoặc còn sót artifact của phiên bản cũ.
+    orphans = sorted(p.name for p in PAPER_DIR.glob("*.png") if p.name not in set(used))
+    if orphans:
+        print(f"\nCẢNH BÁO — hình mồ côi trong paper/figures/ (không được tham chiếu):")
+        for name in orphans:
+            gen = GENERATED_DIR / name
+            tag = ("suite sinh ra được — cân nhắc đưa vào bài" if gen.exists()
+                   else "KHÔNG do suite sinh ra — có thể là artifact cũ, nên xoá")
+            print(f"  {name}  ({tag})")
+
     if bad:
         print(f"\nTHẤT BẠI: {bad} hình lệch/thiếu. Chạy make_figures.py rồi copy sang paper/figures/.")
         return 1

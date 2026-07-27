@@ -16,12 +16,23 @@ trung bình ± lệch chuẩn cho:
 
 Ngoài ra đếm tỉ lệ hạt giống mà gating THẮNG additive trên từng độ đo — đây là
 phát biểu vững hơn trung bình đơn thuần (không phụ thuộc phân phối).
+
+VÒNG 17 (phản biện §8, điểm 3): trước đây mỗi hạt giống chỉ jitter TOẠ ĐỘ ĐIỂM,
+nên cả 20 hạt giống dùng lại đúng một bố cục liên nhóm (cùng mức chồng lấn, cùng
+spread, cùng mật độ). Khi đó sd chỉ đo nhiễu trong nhóm, không đo độ bền trước
+các cấu hình khó dễ khác nhau. Nay `GEOM_JITTER` buộc mỗi hạt giống sinh lại CẢ
+hình học liên nhóm (khoảng cách tâm–tâm -> mức chồng lấn hiệu dụng, spread, số
+điểm mỗi nhóm).
+
+Ngoài ra mọi độ đo được kèm CI bootstrap 95% và kiểm định Wilcoxon GHÉP CẶP
+(cùng hạt giống) — `wins_pct` một mình không nói được hiệu là thật hay là nhiễu.
+Nếu CI của hiệu CHỨA 0 thì kết luận đúng là "không có bằng chứng khác biệt".
 """
 from __future__ import annotations
 
 import statistics as stats
 
-from common import print_table, save_table
+from common import bootstrap_ci, paired_test, print_table, save_table
 from data.generate import make_events
 from pipeline.attributes import compute_confidence
 from pipeline.clustering import modularity, run_louvain
@@ -32,9 +43,14 @@ from pipeline.weighting import build_weight_matrix_vec, sparsify
 N_SEEDS = 20
 BASE_SEED = 1000
 
+# Biến thiên hình học liên nhóm theo hạt giống (±25%): đổi khoảng cách tâm–tâm của
+# các cặp chồng lấn, spread nội nhóm và số điểm mỗi nhóm. Đặt > 0 là điểm khác biệt
+# chính so với bản trước (chỉ jitter điểm).
+GEOM_JITTER = 0.25
+
 
 def _one_seed(seed: int) -> dict:
-    events = make_events(seed=seed)
+    events = make_events(seed=seed, geom_jitter=GEOM_JITTER)
     compute_confidence(events, C.confidence)
     gt = [e.gt_cluster for e in events]
 
@@ -49,6 +65,11 @@ def _one_seed(seed: int) -> dict:
         out[f"{tag}_ari"] = q["ari"]
         out[f"{tag}_nmi"] = q["nmi"]
         out[f"{tag}_mean_diam_multi"] = sp["mean_diameter_km_multi"]
+        # quy ước hình học chính của bài (P2.2): chỉ các cụm chứa >= 1 điểm có nhãn
+        spl = geographic_spread(events, lab, gt_labels=gt)
+        out[f"{tag}_mean_diam_labeled"] = spl["mean_diameter_km_labeled"]
+        out[f"{tag}_max_diam_labeled"] = spl["max_diameter_km_labeled"]
+        out[f"{tag}_n_clusters_noise_only"] = spl["n_clusters_noise_only"]
         out[f"{tag}_max_diam"] = sp["max_diameter_km"]
         out[f"{tag}_n_clusters"] = sp["n_clusters"]
         out[f"{tag}_n_singletons"] = sp["n_singletons"]
@@ -60,13 +81,14 @@ def _one_seed(seed: int) -> dict:
 
 
 def _error_structure(labels: list[int], gt: list[int]) -> dict:
-    """Nhóm GT nào bị GỘP hoặc TÁCH — giải thích tại sao sd của ARI bằng 0.
+    """Nhóm GT nào bị GỘP hoặc TÁCH — cấu trúc sai sót, không chỉ độ lớn sai sót.
 
-    ARI = 0,9957 lặp lại y hệt trên mọi hạt giống KHÔNG phải vì dữ liệu không
-    đổi (toạ độ có jitter theo seed), mà vì cấu trúc SAI SÓT luôn giống nhau:
-    đúng một cặp nhóm bị gộp — cặp S5 (gt 106/107) cách nhau 900 m, vốn được
-    thiết kế làm ca đối chứng khó. Hàm này ghi lại cấu trúc đó để bài báo nêu
-    nguyên nhân thay vì để một sd = 0 không giải thích.
+    Trên dataset vòng 17, ARI KHÔNG còn bất biến theo hạt giống (sd > 0) vì mỗi
+    hạt giống sinh lại cả hình học liên nhóm. Hàm này ghi lại sai sót nào lặp lại:
+    nếu cùng một cặp nhãn bị gộp ở phần lớn hạt giống thì đó là giới hạn có hệ
+    thống của cấu hình mặc định (một cặp chồng lấn mà ngữ cảnh không đủ tách),
+    chứ không phải nhiễu ngẫu nhiên. Bài báo phải nêu đúng cặp đó thay vì chỉ báo
+    cáo một con số ARI trung bình.
     """
     by_gt: dict[int, set[int]] = {}
     for lab, g in zip(labels, gt):
@@ -105,6 +127,10 @@ def main() -> None:
     metrics = [
         ("ari", "cao hơn tốt"),
         ("nmi", "cao hơn tốt"),
+        # quy ước hình học chính của bài (P2.2) — đặt TRƯỚC các cột gộp
+        ("mean_diam_labeled", "thấp hơn tốt"),
+        ("max_diam_labeled", "thấp hơn tốt"),
+        ("n_clusters_noise_only", "—"),
         ("mean_diam_multi", "thấp hơn tốt"),
         ("max_diam", "thấp hơn tốt"),
         ("n_clusters", "—"),
@@ -126,43 +152,81 @@ def main() -> None:
             wins = sum(1 for x, y in zip(g, a) if x < y)
         else:
             wins = None
+        # CI bootstrap của TRUNG BÌNH mỗi phương pháp + kiểm định ghép cặp trên hiệu.
+        # `paired_test` luôn tính hiệu theo chiều (gating - additive); với độ đo
+        # "thấp hơn tốt" thì hiệu ÂM mới là gating tốt hơn, nên ghi rõ chiều tốt.
+        g_lo, g_hi = bootstrap_ci(g)
+        a_lo, a_hi = bootstrap_ci(a)
+        pt = paired_test(g, a)
         summary.append({
             "metric": key,
             "direction": direction,
             "gating_mean": gm,
             "gating_sd": gsd,
+            "gating_ci95_lo": g_lo,
+            "gating_ci95_hi": g_hi,
             "additive_a1_mean": am,
             "additive_a1_sd": asd,
+            "additive_ci95_lo": a_lo,
+            "additive_ci95_hi": a_hi,
+            "mean_diff_gate_minus_add": pt["mean_diff"],
+            "diff_ci95_lo": pt["diff_ci_lo"],
+            "diff_ci95_hi": pt["diff_ci_hi"],
+            "diff_ci_contains_zero": pt["contains_zero"],
+            "wilcoxon_p": pt["wilcoxon_p"],
             "gating_wins_pct": (round(100.0 * wins / len(seeds), 1)
                                 if wins is not None else None),
         })
 
-    print_table(f"Exp12 — Trung bình ± lệch chuẩn trên {N_SEEDS} hạt giống", summary)
+    print_table(f"Exp12 — mean ± sd + CI 95% trên {N_SEEDS} hạt giống "
+                f"(geom_jitter = {GEOM_JITTER})", summary)
     print("\n--- Diễn giải ---")
-    print("Mọi con số tiêu đề trong bài phải được trích từ bảng này (dạng mean ± sd),")
-    print("KHÔNG phải từ một lần chạy seed = 42. Cột gating_wins_pct cho phát biểu")
-    print("không phụ thuộc phân phối: tỉ lệ hạt giống mà gating thắng additive")
-    print("(alpha = 1,0 — cấu hình mạnh nhất của dạng cộng) trên từng độ đo.")
-    print("Lưu ý: dạng cộng ở đây KHÔNG phải người rơm; alpha = 1,0 được chọn vì")
-    print("exp1A cho thấy đó là cấu hình dạng cộng đạt ARI cao nhất.")
+    print("Mọi con số tiêu đề trong bài phải được trích từ bảng này (dạng mean ± sd")
+    print("kèm CI), KHÔNG phải từ một lần chạy seed = 42. Mỗi hạt giống sinh lại CẢ")
+    print(f"hình học liên nhóm (±{GEOM_JITTER:.0%} trên khoảng cách tâm–tâm, spread và")
+    print("số điểm mỗi nhóm), nên sd ở đây đo độ bền trước các cấu hình khó dễ khác")
+    print("nhau — không chỉ nhiễu toạ độ trong nhóm như bản trước.")
+    print("Cột diff_ci_contains_zero là điều kiện phát biểu: nếu True thì kết luận")
+    print("đúng là KHÔNG có bằng chứng khác biệt, bất kể gating_wins_pct bằng bao")
+    print("nhiêu. Lưu ý dạng cộng KHÔNG phải người rơm: alpha = 1,0 là cấu hình dạng")
+    print("cộng đạt ARI cao nhất theo exp1A.")
 
-    # Vì sao sd(ARI) của gating = 0? Phải giải thích, không để con số 0 tự nói.
-    merge_sigs = {}
+    # Kết luận nào được phép phát biểu? Chỉ những độ đo có CI của hiệu KHÔNG chứa 0.
+    sig_rows = [r for r in summary
+                if r["direction"] != "—" and not r["diff_ci_contains_zero"]]
+    ns_rows = [r for r in summary
+               if r["direction"] != "—" and r["diff_ci_contains_zero"]]
+    print("\n--- Độ đo có khác biệt được chứng minh (CI của hiệu không chứa 0) ---")
+    for r in sig_rows:
+        print(f"  {r['metric']}: hiệu = {r['mean_diff_gate_minus_add']} "
+              f"[{r['diff_ci95_lo']}; {r['diff_ci95_hi']}], "
+              f"Wilcoxon p = {r['wilcoxon_p']}")
+    print("--- Độ đo KHÔNG có bằng chứng khác biệt (phải phát biểu là không kết luận) ---")
+    for r in ns_rows or []:
+        print(f"  {r['metric']}: hiệu = {r['mean_diff_gate_minus_add']} "
+              f"[{r['diff_ci95_lo']}; {r['diff_ci95_hi']}] chứa 0")
+    if not ns_rows:
+        print("  (không có)")
+
+    # CẤU TRÚC SAI SỐ: nhãn GT nào bị gộp/xé, và có ổn định qua hạt giống hay không.
+    # Bản trước khẳng định sd(ARI) = 0 vì luôn cùng một cặp bị gộp; với dataset khó
+    # + geom_jitter thì sd > 0, nên ở đây ta BÁO CÁO phân bố thay vì giả định.
+    merge_sigs: dict[str, int] = {}
     for r in per_seed:
         sig = "; ".join("+".join(str(g) for g in grp)
                         for grp in r["gate_errors"]["merged_gt_groups"])
         merge_sigs[sig] = merge_sigs.get(sig, 0) + 1
     n_split = sum(r["gate_errors"]["n_gt_groups_split"] for r in per_seed)
-    print("\n--- Vì sao lệch chuẩn ARI của gating bằng 0? ---")
-    print(f"Cấu trúc SAI SỐ giống nhau ở mọi hạt giống: tổng số nhãn GT bị xé nhỏ")
-    print(f"trên cả {N_SEEDS} hạt giống = {n_split}; các nhóm GT bị gộp:")
+    ari_sd = next(r["gating_sd"] for r in summary if r["metric"] == "ari")
+    print(f"\n--- Cấu trúc sai số của gating (sd của ARI = {ari_sd}) ---")
+    print(f"Tổng số nhãn GT bị xé nhỏ trên cả {N_SEEDS} hạt giống = {n_split}.")
+    print("Phân bố các cấu hình GỘP nhãn (chữ ký = các nhóm GT bị gộp vào một cụm):")
     for sig, cnt in sorted(merge_sigs.items(), key=lambda kv: -kv[1]):
         print(f"  {sig or '(không gộp)'}: {cnt}/{N_SEEDS} hạt giống")
-    print("Nghĩa là ARI không đổi KHÔNG phải vì dữ liệu không đổi (toạ độ, thời gian,")
-    print("nhiễu đều sinh lại theo hạt giống) mà vì sai số duy nhất luôn là cùng một")
-    print("cặp: hai nhóm S5 cách nhau 900 m được cố ý dựng để CHỈ S_context tách được.")
-    print("Đây là giới hạn đã biết của cấu hình mặc định, không phải bằng chứng về")
-    print("độ bền vững tuyệt đối — phải nêu đúng như vậy trong bài.")
+    print("Đọc bảng này cùng sd: sai số KHÔNG còn là một cặp cố định như dataset cũ.")
+    print("Cặp bị gộp thường xuyên nhất là cặp chồng lấn không gian mà ngữ cảnh chưa")
+    print("tách đủ — đây là giới hạn thật của cấu hình mặc định và phải nêu trong bài,")
+    print("không phải bằng chứng về độ bền vững tuyệt đối.")
 
     save_table("exp12_multiseed_per_seed.json", per_seed)
     save_table("exp12_multiseed_summary.json", summary)

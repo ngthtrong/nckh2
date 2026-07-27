@@ -5,8 +5,10 @@
 
 \usepackage{iftex}
 \ifPDFTeX
-  \usepackage[T1]{fontenc}
+  % T5 (vntex) must come last so it is the default encoding: the Vietnamese author
+  % names and place names in the body use combining accents that T1 cannot express.
   \usepackage[utf8]{inputenc}
+  \usepackage[T1,T5]{fontenc}
 \else
   \usepackage{fontspec}
 \fi
@@ -82,11 +84,18 @@ The critical bottleneck of multimodal models is their bandwidth and compute dema
 \subsection{Graph-Based Spatiotemporal Analytics}
 Treating each distress call as an isolated point discards global context. Graph theory offers a mathematical framework to model interactions and risk propagation: a rescue event is a vertex $v$ in a graph $G=(V,E,W)$, with edges $E$ encoding relationships and weights $W$ their strength. Event-detection studies typically build weighted graphs from spatiotemporal proximity and keyword co-occurrence (e.g., TF-IDF similarity)~\cite{sakaki2010earthquake,atefeh2015survey}. A natural extension is to let Euclidean/Haversine distance \emph{penalize} links between distant events, forming a geo-semantic graph; that additive penalty is precisely the design we compare against in Sect.~\ref{sec:exp1}, and it still omits flood depth and demographic vulnerability.
 
+\subsection{Product Kernels and Spatially Constrained Clustering}\label{sec:rw_product}
+The multiplicative form we adopt is not new in itself, and it would be misleading to present it as such. Multiplying a spatial kernel by a range kernel is the defining move of \emph{bilateral filtering}~\cite{tomasi1998bilateral}, where $S_{\text{spatial}}(\lVert p-q \rVert) \cdot S_{\text{range}}(\lvert I_p - I_q \rvert)$ smooths an image without bleeding across intensity edges. The mechanism that makes it work there is exactly the one we rely on here: because the factors multiply, either one alone can veto the interaction, so a spatially close pair with mismatched attributes is suppressed rather than averaged. Our $S_{\text{geo}} \cdot (\beta S_{\text{temp}} + \gamma S_{\text{ctx}})$ is a direct transposition of that structure from pixel space to event space, with flood depth and urgency playing the role of the range dimension.
+
+A parallel line of work constrains clustering by geography instead of by kernel algebra. ClustGeo~\cite{chavent2018clustgeo} interpolates between a feature dissimilarity matrix and a geographic one through a mixing parameter, and SKATER~\cite{assuncao2006efficient} enforces contiguity by pruning a minimum spanning tree over a spatial adjacency graph; Yuan and Nara~\cite{yuan2021spatial} survey the broader family. These methods share our goal of clusters that are simultaneously coherent in attribute space and compact on the ground. They differ in what they guarantee. A convex combination of two dissimilarity matrices, like the additive weight we compare against, retains a distance-independent floor: two events arbitrarily far apart can still exceed the linkage threshold if their non-spatial terms agree strongly enough. The product form admits no such floor, which is what lets us state a closed-form bound on cluster diameter as a function of the pruning threshold (Sect.~\ref{sec:exp13}) rather than measuring one after the fact. Establishing that bound, and testing it against the additive alternative at every threshold, is the contribution we claim; the product kernel itself we inherit.
+
+Finally, the vulnerability amplifier $\mu$ places this work in the equity-versus-efficiency tradition of humanitarian logistics. Huang et al.~\cite{huang2012models} formalize how relief-routing objectives encode equity, efficiency, and efficacy differently, and show these goals genuinely conflict rather than merely trading off smoothly. Our $\mu$ is a deliberately blunt instrument by comparison, and Sect.~\ref{sec:exp7} reports its measured effect on outcomes for vulnerable groups instead of assuming the intended one.
+
 \subsection{Community Detection}
 Traditional unsupervised methods are limited: \textbf{K-Means}~\cite{macqueen1967some} requires a predefined cluster count $K$ (infeasible in a volatile disaster) and assumes spherical clusters; \textbf{DBSCAN}~\cite{ester1996dbscan} avoids a preset $K$ but is sensitive to its density parameters and, as Sect.~\ref{sec:exp4} shows on our data, buys cluster tightness by refusing to cluster a large fraction of the events at all. Network-topology methods, notably \textbf{Louvain}~\cite{blondel2008louvain}, are widely adopted for weighted-graph clustering via optimization of the \textbf{Modularity} function~\cite{newman2004finding}, with observed near-$\mathcal{O}(N\log N)$ runtime. The \textbf{Leiden}~\cite{traag2019leiden} variant fixes the badly-connected-community pathology that Louvain occasionally exhibits. A broader survey of the field is given by Fortunato~\cite{fortunato2010community}.
 
 \subsection{Positioning}
-Table~\ref{tab:positioning} positions this work against representative studies on five capability axes. To our knowledge, no prior work simultaneously (i) runs multimodal extraction at the edge, (ii) encodes it into a spatial--semantic--physical gating weighted graph, (iii) integrates demographic vulnerability as an amplification factor, and (iv) produces a cluster-level priority ranking. That empty cell is the gap this paper fills.
+Table~\ref{tab:positioning} positions this work against representative studies on five capability axes. The individual ingredients are all established: edge-side multimodal extraction, product kernels (Sect.~\ref{sec:rw_product}), spatially constrained clustering, and equity-weighted resource allocation each have their own literature. What we have not found is a system that composes them end to end, from an on-device metadata packet through a gated spatial--semantic--physical graph to a vulnerability-amplified cluster ranking, and that states a diameter guarantee for the resulting clusters rather than reporting a measured average. That composition, and the analytic bound that comes with it, is what this paper contributes.
 
 \begin{table}[t]
 \caption{Positioning against representative work ($\checkmark$ yes, $\sim$ partial, blank no).}\label{tab:positioning}
