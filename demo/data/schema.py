@@ -72,6 +72,36 @@ ALLOWED_SOURCE_TYPES = {
 ALLOWED_HARM_CURVES = {"piecewise_linear_lateness"}
 MISSINGNESS_FIELDS = {"flood", "urgency", "n_trapped", "vulnerability"}
 OPAQUE_EVENT_ID = re.compile(r"^EV-[0-9a-f]{20}$")
+FORBIDDEN_OBSERVABLE_VALUE_TOKENS = {
+    "independent_stress",
+    "low_conf",
+    "coordinated_high",
+    "duplicate_kind",
+    "spatial_overlap",
+    "same_location_temporal",
+    "distant_context",
+}
+REQUIRED_EVALUATION_FIELDS = {
+    "incident_id",
+    "gt_cluster",
+    "scenario_family",
+    "duplicate_kind",
+    "duplicate_family_id",
+    "coverage_n",
+    "coverage_v",
+    "population_member_indices",
+    "vulnerable_member_indices",
+    "is_fake",
+    "adversary",
+}
+ALLOWED_ADVERSARIES = {
+    "background_fake",
+    "low_conf_inflate_N",
+    "low_conf_inflate_V",
+    "low_conf_inflate_F",
+    "low_conf_inflate_E",
+    "coordinated_high_conf_campaign",
+}
 
 
 def canonical_json_bytes(value: Any) -> bytes:
@@ -90,6 +120,10 @@ def canonical_json_bytes(value: Any) -> bytes:
 
 def sha256_bytes(value: bytes) -> str:
     return hashlib.sha256(value).hexdigest()
+
+
+def _is_json_number(value: object) -> bool:
+    return not isinstance(value, bool) and isinstance(value, (int, float))
 
 
 def registered_seed_splits(
@@ -166,7 +200,15 @@ def _near_duplicate_ok(a: dict[str, Any], b: dict[str, Any]) -> bool:
     ta = datetime.fromisoformat(str(a["created_at"]))
     tb = datetime.fromisoformat(str(b["created_at"]))
     dt_min = abs((ta - tb).total_seconds()) / 60.0
-    n_tol = max(5.0, 0.25 * max(float(a["n_trapped"]), 1.0))
+    n_tol = max(
+        5.0,
+        0.25
+        * max(
+            float(a["n_trapped"]),
+            float(b["n_trapped"]),
+            1.0,
+        ),
+    )
     return (
         dist <= 100.0
         and dt_min <= 10.0
@@ -352,6 +394,16 @@ def validate_candidate_dataset(
                 or not isinstance(incident["v_true"], int)
             ):
                 raise ValueError("gt_cluster/n_true/v_true must be integers")
+            for field in (
+                "center_lat",
+                "center_lng",
+                "deadline_min",
+                "service_demand_min",
+            ):
+                if not _is_json_number(incident[field]):
+                    raise ValueError(f"{field} must be numeric")
+            if not isinstance(incident["start_at"], str):
+                raise ValueError("start_at must be an ISO-8601 string")
             gt = int(incident["gt_cluster"])
             n_true = int(incident["n_true"])
             v_true = int(incident["v_true"])
@@ -364,6 +416,8 @@ def validate_candidate_dataset(
                 errors.append(f"{incident.get('incident_id')}: gt_cluster must be non-negative")
             if incident.get("scenario_family") not in REQUIRED_SCENARIO_FAMILIES:
                 errors.append(f"{incident.get('incident_id')}: invalid scenario_family")
+            if not isinstance(incident.get("province"), str) or not incident["province"]:
+                errors.append(f"{incident.get('incident_id')}: province must be non-empty")
             if n_true <= 0 or not 0.0 <= v_true <= n_true:
                 errors.append(f"{incident.get('incident_id')}: latent population invalid")
             if deadline <= 0 or service <= 0:
@@ -381,6 +435,11 @@ def validate_candidate_dataset(
                 errors.append(f"{incident.get('incident_id')}: invalid harm_curve type")
             else:
                 try:
+                    if any(
+                        not _is_json_number(harm_curve[field])
+                        for field in ("grace_min", "slope", "capacity_penalty")
+                    ):
+                        raise ValueError("harm parameters must be numeric")
                     harm_values = [
                         float(harm_curve["grace_min"]),
                         float(harm_curve["slope"]),
@@ -409,6 +468,51 @@ def validate_candidate_dataset(
                 errors.append(
                     f"{incident.get('incident_id')}: vulnerable membership invalid"
                 )
+            profile = incident.get("generator_profile")
+            required_profile_fields = {
+                "n_reports",
+                "spread_m",
+                "flood_latent",
+                "urgency_latent",
+                "multimodal",
+            }
+            if (
+                not isinstance(profile, dict)
+                or set(profile) != required_profile_fields
+            ):
+                errors.append(
+                    f"{incident.get('incident_id')}: generator_profile fields invalid"
+                )
+            else:
+                if (
+                    isinstance(profile["n_reports"], bool)
+                    or not isinstance(profile["n_reports"], int)
+                    or profile["n_reports"] <= 0
+                ):
+                    errors.append(
+                        f"{incident.get('incident_id')}: profile n_reports invalid"
+                    )
+                if (
+                    not _is_json_number(profile["spread_m"])
+                    or not math.isfinite(float(profile["spread_m"]))
+                    or float(profile["spread_m"]) <= 0
+                ):
+                    errors.append(
+                        f"{incident.get('incident_id')}: profile spread invalid"
+                    )
+                for field in ("flood_latent", "urgency_latent"):
+                    if (
+                        not _is_json_number(profile[field])
+                        or not math.isfinite(float(profile[field]))
+                        or not 0 <= float(profile[field]) <= 1
+                    ):
+                        errors.append(
+                            f"{incident.get('incident_id')}: profile {field} invalid"
+                        )
+                if not isinstance(profile["multimodal"], bool):
+                    errors.append(
+                        f"{incident.get('incident_id')}: profile multimodal invalid"
+                    )
             gt_labels.append(gt)
             families.add(str(incident["scenario_family"]))
         except (KeyError, TypeError, ValueError) as exc:
@@ -431,6 +535,14 @@ def validate_candidate_dataset(
     unique_memberships: set[tuple[str, int]] = set()
     adversaries: set[str] = set()
     for report in reports:
+        unexpected_top_level = sorted(
+            set(report) - set(OBSERVABLE_FIELDS) - {"evaluation_only"}
+        )
+        if unexpected_top_level:
+            errors.append(
+                f"{report.get('event_id')}: unexpected top-level fields "
+                f"{unexpected_top_level}"
+            )
         missing = [field for field in OBSERVABLE_FIELDS if field not in report]
         if missing:
             errors.append(f"{report.get('event_id')}: missing observable fields {missing}")
@@ -441,6 +553,11 @@ def validate_candidate_dataset(
                 or not isinstance(report["n_trapped"], int)
             ):
                 raise ValueError("n_trapped must be an integer")
+            for field in ("lat", "lng", "flood", "urgency", "vulnerability"):
+                if not _is_json_number(report[field]):
+                    raise ValueError(f"{field} must be numeric")
+            if not isinstance(report["created_at"], str):
+                raise ValueError("created_at must be an ISO-8601 string")
             lat = float(report["lat"])
             lng = float(report["lng"])
             flood = float(report["flood"])
@@ -487,10 +604,20 @@ def validate_candidate_dataset(
         if not isinstance(evaluation, dict):
             errors.append(f"{report.get('event_id')}: evaluation_only missing")
             continue
-        if "is_fake" in report:
-            errors.append(f"{report.get('event_id')}: is_fake must be evaluation_only")
+        missing_evaluation = sorted(REQUIRED_EVALUATION_FIELDS - set(evaluation))
+        if missing_evaluation:
+            errors.append(
+                f"{report.get('event_id')}: missing evaluation fields "
+                f"{missing_evaluation}"
+            )
         if not isinstance(evaluation.get("is_fake"), bool):
             errors.append(f"{report.get('event_id')}: evaluation is_fake missing")
+        adversary_value = evaluation.get("adversary")
+        if (
+            adversary_value is not None
+            and adversary_value not in ALLOWED_ADVERSARIES
+        ):
+            errors.append(f"{report.get('event_id')}: invalid adversary label")
         incident_id = evaluation.get("incident_id")
         if incident_id is not None:
             n_linked += 1
@@ -498,7 +625,21 @@ def validate_candidate_dataset(
                 errors.append(f"{report['event_id']}: orphan incident_id")
             else:
                 incident = incident_by_id[str(incident_id)]
-                if evaluation.get("gt_cluster") != incident.get("gt_cluster"):
+                if (
+                    isinstance(report.get("n_trapped"), int)
+                    and not isinstance(report.get("n_trapped"), bool)
+                    and _is_json_number(report.get("vulnerability"))
+                    and "n_trapped" not in report.get("missing_fields", [])
+                    and float(report["vulnerability"]) > int(report["n_trapped"])
+                ):
+                    errors.append(
+                        f"{report['event_id']}: linked vulnerability exceeds N"
+                    )
+                if (
+                    isinstance(evaluation.get("gt_cluster"), bool)
+                    or not isinstance(evaluation.get("gt_cluster"), int)
+                    or evaluation.get("gt_cluster") != incident.get("gt_cluster")
+                ):
                     errors.append(f"{report['event_id']}: incident/gt mismatch")
                 if evaluation.get("scenario_family") != incident.get("scenario_family"):
                     errors.append(f"{report['event_id']}: incident/family mismatch")
@@ -506,6 +647,7 @@ def validate_candidate_dataset(
                 vulnerable = evaluation.get("vulnerable_member_indices")
                 if (
                     not isinstance(members, list)
+                    or not members
                     or any(
                         isinstance(value, bool)
                         or not isinstance(value, int)
@@ -519,6 +661,10 @@ def validate_candidate_dataset(
                 allowed_vulnerable = set(incident["vulnerable_member_indices"])
                 if (
                     not isinstance(vulnerable, list)
+                    or any(
+                        isinstance(value, bool) or not isinstance(value, int)
+                        for value in vulnerable
+                    )
                     or any(value not in set(members) for value in vulnerable)
                     or any(value not in allowed_vulnerable for value in vulnerable)
                     or len(set(vulnerable)) != len(vulnerable)
@@ -532,6 +678,11 @@ def validate_candidate_dataset(
                     else 0.0
                 )
                 try:
+                    if (
+                        not _is_json_number(evaluation["coverage_n"])
+                        or not _is_json_number(evaluation["coverage_v"])
+                    ):
+                        raise ValueError("coverage must be numeric")
                     if not math.isclose(
                         float(evaluation["coverage_n"]),
                         expected_coverage_n,
@@ -561,7 +712,7 @@ def validate_candidate_dataset(
                 errors.append(f"{report['event_id']}: unlinked report has coverage_n")
             if evaluation.get("coverage_v") is not None:
                 errors.append(f"{report['event_id']}: unlinked report has coverage_v")
-        kind = evaluation.get("duplicate_kind", "none")
+        kind = evaluation.get("duplicate_kind")
         family_id = evaluation.get("duplicate_family_id")
         if kind not in {"none", "exact", "near"}:
             errors.append(f"{report['event_id']}: invalid duplicate_kind")
@@ -583,6 +734,20 @@ def validate_candidate_dataset(
         leaked = FORBIDDEN_INFERENCE_FIELDS.intersection(observable_report(report))
         if leaked:
             errors.append(f"{report['event_id']}: inference leak {sorted(leaked)}")
+        rendered_observable = json.dumps(
+            observable_report(report),
+            ensure_ascii=False,
+            sort_keys=True,
+        ).casefold()
+        leaked_tokens = sorted(
+            token
+            for token in FORBIDDEN_OBSERVABLE_VALUE_TOKENS
+            if token in rendered_observable
+        )
+        if leaked_tokens:
+            errors.append(
+                f"{report['event_id']}: inference value leak {leaked_tokens}"
+            )
         fingerprint_groups.setdefault(report_fingerprint(report), []).append(report)
 
     for family_id, rows in exact_groups.items():

@@ -222,5 +222,13 @@ the finite product region and raises outside that region.
   \(h r_\theta\), actual geographic diameter, and their tightness ratio;
 - never reinterpret an empty retained set as a zero-radius violation.
 
+The implementation rejects non-positive/non-finite spatial, temporal, or
+context decay scales because the proofs require similarities in `[0,1]`.
+The dense adjacency representation also rejects negative operational
+thresholds: numeric zero is its “no edge” sentinel and cannot encode a
+retained zero-weight edge. Bound classifiers still describe the negative
+threshold region as mathematically unbounded. Near-equality log ratios use a
+`log1p` branch, while extreme/subnormal ratios use a difference of logarithms.
+
 The experiment is diagnostic evidence. It measures the realized \(h\); it
 does not promote \(h\) to a pipeline-controlled constant.

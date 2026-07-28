@@ -145,6 +145,7 @@ def main(arguments: Sequence[str] | None = None) -> int:
     stderr_path = run.path / "logs" / "stderr.log"
     exit_code = 125
     launch_error: str | None = None
+    interrupted = False
     try:
         wrapped = _bubblewrap_command(run, args.command)
         with stdout_path.open("xb") as stdout, stderr_path.open("xb") as stderr:
@@ -163,9 +164,19 @@ def main(arguments: Sequence[str] | None = None) -> int:
         if not stderr_path.exists():
             with stderr_path.open("x", encoding="utf-8") as stream:
                 stream.write(launch_error + "\n")
+    except KeyboardInterrupt:
+        interrupted = True
+        exit_code = 130
+        launch_error = "KeyboardInterrupt: candidate run interrupted by user"
+        with stderr_path.open("a", encoding="utf-8") as stream:
+            stream.write(launch_error + "\n")
 
     try:
-        manifest_path = run.finalize(exit_code=exit_code, error=launch_error)
+        manifest_path = run.finalize(
+            exit_code=exit_code,
+            status="aborted" if interrupted else None,
+            error=launch_error,
+        )
     except ArtifactError as exc:
         print(f"candidate manifest failed: {exc}", file=sys.stderr)
         return 125
@@ -177,4 +188,3 @@ def main(arguments: Sequence[str] | None = None) -> int:
 
 if __name__ == "__main__":
     raise SystemExit(main())
-

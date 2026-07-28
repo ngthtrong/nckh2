@@ -16,6 +16,7 @@ from data.generate import (
 )
 from data.schema import (
     FORBIDDEN_INFERENCE_FIELDS,
+    _near_duplicate_ok,
     canonical_json_bytes,
     observable_report,
     registered_seed_splits,
@@ -115,6 +116,40 @@ def test_generator_and_priority_duplicate_contracts_match() -> None:
         assert are_near_duplicate_reports(events[indices[0]], events[indices[1]])
 
 
+def test_schema_and_priority_share_relative_n_near_boundary() -> None:
+    created_at = datetime(2026, 1, 1, tzinfo=timezone.utc)
+    first = Event(
+        event_id="a",
+        lat=16.0,
+        lng=108.0,
+        created_at=created_at,
+        flood=0.5,
+        urgency=0.5,
+        n_trapped=300,
+        vulnerability=2.0,
+        has_image=True,
+        confidence=0.8,
+    )
+    second = deepcopy(first)
+    second.event_id = "b"
+    second.n_trapped = 400
+    first_payload = {
+        "lat": first.lat,
+        "lng": first.lng,
+        "created_at": first.created_at.isoformat(),
+        "flood": first.flood,
+        "urgency": first.urgency,
+        "n_trapped": first.n_trapped,
+        "vulnerability": first.vulnerability,
+    }
+    second_payload = {
+        **first_payload,
+        "n_trapped": second.n_trapped,
+    }
+    assert _near_duplicate_ok(first_payload, second_payload)
+    assert are_near_duplicate_reports(first, second)
+
+
 def test_exact_duplicate_does_not_inflate_confidence_corroboration() -> None:
     first = Event(
         event_id="a",
@@ -192,6 +227,16 @@ def _assert_mutation_rejected(data: dict) -> None:
         "exact_declared_near",
         "null_event_id",
         "naive_timestamp",
+        "semantic_value_leak",
+        "top_level_latent_key",
+        "empty_linked_membership",
+        "boolean_vulnerable_member",
+        "missing_duplicate_kind",
+        "missing_duplicate_family_id",
+        "missing_generator_profile",
+        "invalid_generator_profile",
+        "missing_incident_province",
+        "linked_vulnerability_exceeds_n",
     ],
 )
 def test_quality_gate_rejects_structural_mutations(mutation: str) -> None:
@@ -232,6 +277,42 @@ def test_quality_gate_rejects_structural_mutations(mutation: str) -> None:
         data["reports"][0]["event_id"] = None
     elif mutation == "naive_timestamp":
         data["reports"][0]["created_at"] = "2026-10-15T08:00:00"
+    elif mutation == "semantic_value_leak":
+        data["reports"][0]["province"] = "independent_stress_region"
+    elif mutation == "top_level_latent_key":
+        data["reports"][0]["incident_id"] = "leaked-incident"
+    elif mutation == "empty_linked_membership":
+        linked = next(
+            row for row in data["reports"] if row["evaluation_only"]["incident_id"]
+        )
+        linked["evaluation_only"]["population_member_indices"] = []
+        linked["evaluation_only"]["vulnerable_member_indices"] = []
+        linked["evaluation_only"]["coverage_n"] = 0.0
+        linked["evaluation_only"]["coverage_v"] = 0.0
+    elif mutation == "boolean_vulnerable_member":
+        linked = next(
+            row
+            for row in data["reports"]
+            if row["evaluation_only"]["vulnerable_member_indices"]
+        )
+        linked["evaluation_only"]["vulnerable_member_indices"][0] = True
+    elif mutation == "missing_duplicate_kind":
+        data["reports"][0]["evaluation_only"].pop("duplicate_kind")
+    elif mutation == "missing_duplicate_family_id":
+        data["reports"][0]["evaluation_only"].pop("duplicate_family_id")
+    elif mutation == "missing_generator_profile":
+        data["incidents"][0].pop("generator_profile")
+    elif mutation == "invalid_generator_profile":
+        data["incidents"][0]["generator_profile"]["spread_m"] = -1.0
+    elif mutation == "missing_incident_province":
+        data["incidents"][0].pop("province")
+    elif mutation == "linked_vulnerability_exceeds_n":
+        linked = next(
+            row for row in data["reports"] if row["evaluation_only"]["incident_id"]
+        )
+        linked["n_trapped"] = 1
+        linked["vulnerability"] = 2.0
+        linked["missing_fields"] = []
     _assert_mutation_rejected(data)
 
 

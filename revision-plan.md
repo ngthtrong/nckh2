@@ -1,9 +1,9 @@
 # Kế hoạch chỉnh sửa toàn diện để tái nộp
 
-**Bài báo:** “A Product-Kernel Weighted Graph for Flood-Rescue Event Clustering and Cluster-Level Priority Scoring”  
-**Trạng thái đầu vào:** Reject and Resubmit, 4/10, reviewer confidence High  
-**Phạm vi tài liệu:** chỉ lập kế hoạch; chưa sửa mã phương pháp, chưa chạy lại suite, chưa chỉnh `paper/main.tex`  
-**Nguồn yêu cầu chính:** `phan-bien.md`  
+**Bài báo:** “A Product-Kernel Weighted Graph for Flood-Rescue Event Clustering and Cluster-Level Priority Scoring”
+**Trạng thái đầu vào:** Reject and Resubmit, 4/10, reviewer confidence High
+**Phạm vi tài liệu:** chỉ lập kế hoạch; chưa sửa mã phương pháp, chưa chạy lại suite, chưa chỉnh `paper/main.tex`
+**Nguồn yêu cầu chính:** `phan-bien.md`
 **Snapshot repo được audit:** 28/07/2026
 
 ## 1. Kết luận điều hành
@@ -49,31 +49,31 @@ Các hạng mục này là đầu vào để mở rộng, không phải lý do b
 
 ## 3. Kiểm chứng và phân loại MC1–MC8
 
-| MC | Phân loại | Kết luận sau kiểm chứng | Phạm vi sửa |
-|---|---|---|---|
-| MC1 | **Chấp nhận** | Edge bound đúng; cluster bound phụ thuộc `h`; additive có bound trong miền `theta > beta+gamma`; violation count hiện chứa `theta >= 1`. | P0, WS-A |
-| MC2 | **Chấp nhận một phần** | Bài đã tự gọi shared default là diagnostic và có per-form calibration. Tuy nhiên chưa có train/calibration/test, nested tuning hay matched-density test đa-seed. | P0, WS-B |
-| MC3 | **Chấp nhận; một phần bị chặn** | Generator cố ý tạo các trường hợp mà context/time phải có tác dụng. Multi-seed vẫn cùng họ generator. Real-data validity chưa có và bị chặn bởi dữ liệu ngoài. | P0/P1, WS-D |
-| MC4 | **Chấp nhận một phần** | Confidence bypass `V` và double-counting `N,V` là thật. Nhận xét “priority tăng không giới hạn” là sai vì `tanh` và `mu` đã cap `A_k`; tiêu chí đúng phải là marginal influence được gate/có giới hạn. | P0, WS-C |
-| MC5 | **Chấp nhận** | Primary dispatch metric dùng lại `F,V`; trade-off mean arrival chưa được đặt ngang hàng; outcome chưa độc lập. | P0/P1, WS-C |
-| MC6 | **Chấp nhận** | Baseline single-seed/tuning yếu; same-graph baselines chỉ kiểm partitioner; thiếu factorial ablation và baseline spatio-temporal trực tiếp. | P1, WS-E |
-| MC7 | **Chấp nhận** | ARI loại `gt=-1`; 52 clusters/39 singleton/38 noise-only ở seed 42; split/merge và operator burden chưa là headline metric. | P0/P1, WS-E |
-| MC8 | **Chấp nhận** | README lỗi thời, không lock dependencies, paper thiếu immutable artifact reference, timing thiếu provenance, clean-room chưa có. | P1, WS-F |
+| MC  | Phân loại                                 | Kết luận sau kiểm chứng                                                                                                                                                                                                                 | Phạm vi sửa |
+| --- | ------------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | ------------- |
+| MC1 | **Chấp nhận**                       | Edge bound đúng; cluster bound phụ thuộc`h`; additive có bound trong miền `theta > beta+gamma`; violation count hiện chứa `theta >= 1`.                                                                                       | P0, WS-A      |
+| MC2 | **Chấp nhận một phần**            | Bài đã tự gọi shared default là diagnostic và có per-form calibration. Tuy nhiên chưa có train/calibration/test, nested tuning hay matched-density test đa-seed.                                                                | P0, WS-B      |
+| MC3 | **Chấp nhận; một phần bị chặn** | Generator cố ý tạo các trường hợp mà context/time phải có tác dụng. Multi-seed vẫn cùng họ generator. Real-data validity chưa có và bị chặn bởi dữ liệu ngoài.                                                      | P0/P1, WS-D   |
+| MC4 | **Chấp nhận một phần**            | Confidence bypass`V` và double-counting `N,V` là thật. Nhận xét “priority tăng không giới hạn” là sai vì `tanh` và `mu` đã cap `A_k`; tiêu chí đúng phải là marginal influence được gate/có giới hạn. | P0, WS-C      |
+| MC5 | **Chấp nhận**                       | Primary dispatch metric dùng lại`F,V`; trade-off mean arrival chưa được đặt ngang hàng; outcome chưa độc lập.                                                                                                                | P0/P1, WS-C   |
+| MC6 | **Chấp nhận**                       | Baseline single-seed/tuning yếu; same-graph baselines chỉ kiểm partitioner; thiếu factorial ablation và baseline spatio-temporal trực tiếp.                                                                                          | P1, WS-E      |
+| MC7 | **Chấp nhận**                       | ARI loại`gt=-1`; 52 clusters/39 singleton/38 noise-only ở seed 42; split/merge và operator burden chưa là headline metric.                                                                                                           | P0/P1, WS-E   |
+| MC8 | **Chấp nhận**                       | README lỗi thời, không lock dependencies, paper thiếu immutable artifact reference, timing thiếu provenance, clean-room chưa có.                                                                                                     | P1, WS-F      |
 
 ### Minor concerns được route
 
-| Minor concern | Nhiệm vụ |
-|---|---|
-| `< theta` trong mã nhưng `> theta` trong proof | A2 |
-| “Kernel” chưa rõ nghĩa PSD/similarity | A1, G1 |
-| Bound chặt hơn khi `beta+gamma < 1` | A1 |
-| `N_ref` saturation | C1, C2, C4 |
-| Centroid trung bình lat/lng | C4, E3 |
-| Multiple comparisons/SD/CI | B2, G1 |
-| Bảng positioning dùng `~` | G1 |
-| Related work chưa đủ sâu | E1, G1 |
-| Packet size dùng placeholder/thiếu overhead | F4, G1 |
-| Comment và artifact cũ | F3 |
+| Minor concern                                        | Nhiệm vụ |
+| ---------------------------------------------------- | ---------- |
+| `< theta` trong mã nhưng `> theta` trong proof | A2         |
+| “Kernel” chưa rõ nghĩa PSD/similarity           | A1, G1     |
+| Bound chặt hơn khi`beta+gamma < 1`               | A1         |
+| `N_ref` saturation                                 | C1, C2, C4 |
+| Centroid trung bình lat/lng                         | C4, E3     |
+| Multiple comparisons/SD/CI                           | B2, G1     |
+| Bảng positioning dùng`~`                         | G1         |
+| Related work chưa đủ sâu                         | E1, G1     |
+| Packet size dùng placeholder/thiếu overhead        | F4, G1     |
+| Comment và artifact cũ                             | F3         |
 
 ## 4. Các quyết định khoa học phải chốt trước khi sửa
 
@@ -679,23 +679,23 @@ flowchart TD
 
 ## 8. Ma trận file ownership và chống xung đột
 
-| Path/file | Owner | Consumers | Freeze rule |
-|---|---|---|---|
-| `demo/pipeline/weighting.py` | WS-A | B, E, F | A2 merge trước Gate 1 |
-| `demo/pipeline/priority.py` | WS-C | D, E, dashboard | C2 merge trước D2/Gate 1 |
-| `demo/pipeline/config.py` | WS-C integration owner | A, B, D, E | Không sửa song song; ưu tiên config module riêng |
-| `demo/data/generate.py` | WS-D | B, C, E | Chỉ D sửa; schema contract từ C |
-| `demo/pipeline/baselines.py` | WS-E | B | E1 registry khóa trước E2 |
-| `demo/pipeline/metrics.py` | WS-E | B, C | Metric API freeze tại Gate 2 |
-| `demo/experiments/common.py` | Integration owner B/F | mọi exp | Không sửa trực tiếp nếu có thể; thêm module `protocol.py`/`artifacts.py` |
-| `demo/run_all.py` | WS-F | mọi WS | Chỉ chỉnh sau experiment registry freeze |
-| `demo/data/dataset.json` | Không WS nào ghi trong development | current suite | Candidate data ở run directory; promote sau Gate 3 |
-| `demo/results/**` | Generated only | G | Không chỉnh tay; candidate run không ghi vào đây |
-| `paper/main.tex` | WS-G | final | Locked read-only tới Gate 3 |
-| `paper/figures/**` | WS-G/generated | final | Chỉ copy/promote từ locked run |
-| `loop/loop17/traceability.md` | Read-only historical | G | Tạo traceability revision mới, không sửa lịch sử |
-| `README.md`, `demo/README.md` | WS-F | reviewer | Chốt sau runner/result layout ổn định |
-| `revision/**` | Theo task ID | toàn nhóm | Mỗi task có file riêng; G2 tổng hợp |
+| Path/file                         | Owner                                | Consumers       | Freeze rule                                                                         |
+| --------------------------------- | ------------------------------------ | --------------- | ----------------------------------------------------------------------------------- |
+| `demo/pipeline/weighting.py`    | WS-A                                 | B, E, F         | A2 merge trước Gate 1                                                             |
+| `demo/pipeline/priority.py`     | WS-C                                 | D, E, dashboard | C2 merge trước D2/Gate 1                                                          |
+| `demo/pipeline/config.py`       | WS-C integration owner               | A, B, D, E      | Không sửa song song; ưu tiên config module riêng                               |
+| `demo/data/generate.py`         | WS-D                                 | B, C, E         | Chỉ D sửa; schema contract từ C                                                  |
+| `demo/pipeline/baselines.py`    | WS-E                                 | B               | E1 registry khóa trước E2                                                        |
+| `demo/pipeline/metrics.py`      | WS-E                                 | B, C            | Metric API freeze tại Gate 2                                                       |
+| `demo/experiments/common.py`    | Integration owner B/F                | mọi exp        | Không sửa trực tiếp nếu có thể; thêm module`protocol.py`/`artifacts.py` |
+| `demo/run_all.py`               | WS-F                                 | mọi WS         | Chỉ chỉnh sau experiment registry freeze                                          |
+| `demo/data/dataset.json`        | Không WS nào ghi trong development | current suite   | Candidate data ở run directory; promote sau Gate 3                                 |
+| `demo/results/**`               | Generated only                       | G               | Không chỉnh tay; candidate run không ghi vào đây                              |
+| `paper/main.tex`                | WS-G                                 | final           | Locked read-only tới Gate 3                                                        |
+| `paper/figures/**`              | WS-G/generated                       | final           | Chỉ copy/promote từ locked run                                                    |
+| `loop/loop17/traceability.md`   | Read-only historical                 | G               | Tạo traceability revision mới, không sửa lịch sử                              |
+| `README.md`, `demo/README.md` | WS-F                                 | reviewer        | Chốt sau runner/result layout ổn định                                           |
+| `revision/**`                   | Theo task ID                         | toàn nhóm     | Mỗi task có file riêng; G2 tổng hợp                                            |
 
 ### Nguyên tắc merge
 
@@ -707,16 +707,16 @@ flowchart TD
 
 ## 9. Ma trận phản biện → nhiệm vụ → artifact → nghiệm thu
 
-| Concern | Tasks | Artifact chính | Acceptance |
-|---|---|---|---|
-| MC1 | A1, A2, G1 | math spec, exp14, theorem tests | Domain/proof/code thống nhất; không threshold ngoài domain |
-| MC2 | B1, B2, G1 | seed manifest, exp15 | No test leakage; equal budget; matched density/degree; paired CI |
-| MC3 | D1–D4, G1 | data spec, candidate datasets, optional real report | Method-agnostic gates; real data hoặc scope fallback |
-| MC4 | C1–C3, D1–D2 | priority contract, invariant tests, exp16 | Exact duplicate invariant; C=0 no contribution; latent truth error reported |
-| MC5 | C4–C5, G1 | exp17 Pareto/outcome | Independent endpoint; all trade-offs reported |
-| MC6 | E1–E2, B2 | baseline registry, exp18/19 | Strong tuned baselines; factorial effects + CI |
-| MC7 | E3, G1 | exp20 | Metrics cover all points; split/merge/noise/workload CI |
-| MC8 | F1–F4, G0, F3 | lock, manifests, clean-room report | Fresh environment reproduces JSON/figures/PDF |
+| Concern | Tasks          | Artifact chính                                     | Acceptance                                                                  |
+| ------- | -------------- | --------------------------------------------------- | --------------------------------------------------------------------------- |
+| MC1     | A1, A2, G1     | math spec, exp14, theorem tests                     | Domain/proof/code thống nhất; không threshold ngoài domain              |
+| MC2     | B1, B2, G1     | seed manifest, exp15                                | No test leakage; equal budget; matched density/degree; paired CI            |
+| MC3     | D1–D4, G1     | data spec, candidate datasets, optional real report | Method-agnostic gates; real data hoặc scope fallback                       |
+| MC4     | C1–C3, D1–D2 | priority contract, invariant tests, exp16           | Exact duplicate invariant; C=0 no contribution; latent truth error reported |
+| MC5     | C4–C5, G1     | exp17 Pareto/outcome                                | Independent endpoint; all trade-offs reported                               |
+| MC6     | E1–E2, B2     | baseline registry, exp18/19                         | Strong tuned baselines; factorial effects + CI                              |
+| MC7     | E3, G1         | exp20                                               | Metrics cover all points; split/merge/noise/workload CI                     |
+| MC8     | F1–F4, G0, F3 | lock, manifests, clean-room report                  | Fresh environment reproduces JSON/figures/PDF                               |
 
 ## 10. Kế hoạch thực nghiệm và quản lý seed/tuning/test
 
@@ -757,14 +757,14 @@ flowchart TD
 
 ### Downstream invalidation
 
-| Loại thay đổi | Bắt buộc chạy lại |
-|---|---|
-| `weighting.py` edge semantics | Exp0–4, 6, 9, 11–15, 18–20, figures graph-related, dashboard |
-| `priority.py`/priority config | Exp1 priority parts, Exp5–8, Exp16–17, ranking figures, dashboard |
-| `generate.py`/dataset values/schema | Toàn bộ suite và mọi hình/dashboard |
-| Metrics convention | Mọi experiment dùng metric đó; paper tables tương ứng |
-| Baseline-only | Exp4/9/18, baseline figures |
-| Artifact/README-only | Clean-room validation; không chạy scientific suite nếu checksum source không đổi |
+| Loại thay đổi                      | Bắt buộc chạy lại                                                                  |
+| ------------------------------------- | -------------------------------------------------------------------------------------- |
+| `weighting.py` edge semantics       | Exp0–4, 6, 9, 11–15, 18–20, figures graph-related, dashboard                        |
+| `priority.py`/priority config       | Exp1 priority parts, Exp5–8, Exp16–17, ranking figures, dashboard                    |
+| `generate.py`/dataset values/schema | Toàn bộ suite và mọi hình/dashboard                                               |
+| Metrics convention                    | Mọi experiment dùng metric đó; paper tables tương ứng                           |
+| Baseline-only                         | Exp4/9/18, baseline figures                                                            |
+| Artifact/README-only                  | Clean-room validation; không chạy scientific suite nếu checksum source không đổi |
 
 ### Naming
 
@@ -848,13 +848,13 @@ Không viết “fixed” nếu chỉ thay câu chữ mà không có test/eviden
 
 ## 14. Rủi ro, blocker và đầu vào cần tác giả cung cấp
 
-| Blocker/input | Không thể tự suy đoán | Workstream vẫn chạy được | Fallback |
-|---|---|---|---|
-| Real flood reports + quyền sử dụng | Source, consent, privacy, incident labels | A, B, C synthetic, D1–D2, E, F | Synthetic-method scope |
-| Chuyên gia cứu hộ/logistics | Identity, authority, policy preferences | C1–C4, D/E/F | Gọi weights là illustrative knobs |
-| Venue/page limit | Template, page/supplement rules | Mọi scientific task | G1 chờ venue decision |
-| Public repository/DOI | Destination, release authority | F1–F3 local | Commit hash + private artifact package tạm thời |
-| ORCID/authorship approval | ORCID thật, author order/consent | Toàn bộ technical work | Để trống đến submission system |
+| Blocker/input                         | Không thể tự suy đoán                | Workstream vẫn chạy được   | Fallback                                          |
+| ------------------------------------- | ----------------------------------------- | ------------------------------- | ------------------------------------------------- |
+| Real flood reports + quyền sử dụng | Source, consent, privacy, incident labels | A, B, C synthetic, D1–D2, E, F | Synthetic-method scope                            |
+| Chuyên gia cứu hộ/logistics        | Identity, authority, policy preferences   | C1–C4, D/E/F                   | Gọi weights là illustrative knobs               |
+| Venue/page limit                      | Template, page/supplement rules           | Mọi scientific task            | G1 chờ venue decision                            |
+| Public repository/DOI                 | Destination, release authority            | F1–F3 local                    | Commit hash + private artifact package tạm thời |
+| ORCID/authorship approval             | ORCID thật, author order/consent         | Toàn bộ technical work        | Để trống đến submission system               |
 
 ### Rủi ro khoa học lớn
 
@@ -935,33 +935,33 @@ Sau R0/Gate 0:
 
 ## 17. Bảng tổng hợp nhiệm vụ
 
-| Task | Priority | Workstream | Dependencies | Parallel group | Files | Output | Acceptance test | Effort |
-|---|---|---|---|---|---|---|---|---|
-| R0 | P0 | Cross | — | 0 | `revision/*` | snapshot + decisions | 8/8 MC, Q1–Q8 resolved/blocked | M |
-| A1 | P0 | A | R0 | 1 | `revision/math-spec.md` | theorem spec | full domain, no overclaim | M |
-| A2 | P0 | A | A1 | 2 | weighting/tests/exp14 | bound diagnostics | 0 invalid-domain rows | M |
-| B1 | P0 | B | R0 | 1 | protocol/seed manifests | protocol hash | disjoint 20/20/40 seeds, ≤128 configs | M |
-| B2 | P0 | B | Gate 1, B1, E1 | 3 | calibration/exp15 | test comparison | no leakage, matched density/degree, CI | L |
-| C1 | P0 | C | R0 | 1 | priority contract | semantics/threat model | provenance + rules for all fields | M |
-| C2 | P0 | C | C1 | 2 | priority/tests | robust aggregation | duplicate invariant; C=0 no effect | L |
-| C3 | P0 | C | Gate 1 | 3 | exp16 | robustness tables | all threat cases + CI | L |
-| C4 | P0 | C | Gate 1, C1 | 3 | simulator/exp17 | Pareto/outcome | independent endpoint; full trade-off | L |
-| C5 | P1 | C | C1, external | external | expert protocol | validation summary | independent expert evidence or fallback | L |
-| D1 | P0 | D | R0, C1/B1 input | 1 | data spec | incident schema | method-agnostic labels/gates | L |
-| D2 | P0 | D | C2, B1, F2 | 2 | generator/schema | frozen datasets | deterministic hashes, latent totals reconcile | XL |
-| D3 | P1 | D | D1, external | 1/external | real-data protocol | access/annotation plan | rights + annotation process | M |
-| D4 | P1 | D | D3, Gate 1 | external | adapter/exp21 | real sanity check | held-out metrics + error analysis | XL |
-| E1 | P1 | E | R0 | 1 | baseline protocol | registry/search spaces | direct spatio-temporal + spatial + additive | M |
-| E2 | P1 | E | Gate 1, E1/B1 | 3 | baselines/exp18/19 | tuned baselines/ablation | same budget; factorial CI | L |
-| E3 | P0 | E | Gate 1 | 3 | metrics/exp20 | burden metrics | covers 100% points/denominators | M |
-| F1 | P1 | F | R0, E1 input | 1 | lock/environment | reproducible env | fresh install/import pass | M |
-| F2 | P0 | F | F1, B1 | 2 | artifacts/runner | isolated run manifest | no overwrite; full provenance | L |
-| F3 | P1 | F | G2, result lock | 4 | README/build/report | clean-room report | full JSON/figures/PDF reproduce | L |
-| F4 | P1 | F | Gate 1, F2 | 3 | exp22/runtime/packet | runtime/memory tables | 5 repeats, pinned threads, actual C | L |
-| G0 | P0 | G | Gate 3 | 4 | locked run/traceability | result lock | 100% claim selectors | M |
-| G1 | P0 | G | G0 | 4 | paper/figures | revised manuscript | no unsupported claim/untraced number | L |
-| G2 | P1 | G | G1 | 4 | response/ledger | response package | all MC/minor dispositions | M |
-| G3 | P0 | G | F3/G2 | 5 | submission package | final audit/PDF | Gate 4 pass | M |
+| Task | Priority | Workstream | Dependencies    | Parallel group | Files                     | Output                   | Acceptance test                               | Effort |
+| ---- | -------- | ---------- | --------------- | -------------- | ------------------------- | ------------------------ | --------------------------------------------- | ------ |
+| R0   | P0       | Cross      | —              | 0              | `revision/*`            | snapshot + decisions     | 8/8 MC, Q1–Q8 resolved/blocked               | M      |
+| A1   | P0       | A          | R0              | 1              | `revision/math-spec.md` | theorem spec             | full domain, no overclaim                     | M      |
+| A2   | P0       | A          | A1              | 2              | weighting/tests/exp14     | bound diagnostics        | 0 invalid-domain rows                         | M      |
+| B1   | P0       | B          | R0              | 1              | protocol/seed manifests   | protocol hash            | disjoint 20/20/40 seeds, ≤128 configs        | M      |
+| B2   | P0       | B          | Gate 1, B1, E1  | 3              | calibration/exp15         | test comparison          | no leakage, matched density/degree, CI        | L      |
+| C1   | P0       | C          | R0              | 1              | priority contract         | semantics/threat model   | provenance + rules for all fields             | M      |
+| C2   | P0       | C          | C1              | 2              | priority/tests            | robust aggregation       | duplicate invariant; C=0 no effect            | L      |
+| C3   | P0       | C          | Gate 1          | 3              | exp16                     | robustness tables        | all threat cases + CI                         | L      |
+| C4   | P0       | C          | Gate 1, C1      | 3              | simulator/exp17           | Pareto/outcome           | independent endpoint; full trade-off          | L      |
+| C5   | P1       | C          | C1, external    | external       | expert protocol           | validation summary       | independent expert evidence or fallback       | L      |
+| D1   | P0       | D          | R0, C1/B1 input | 1              | data spec                 | incident schema          | method-agnostic labels/gates                  | L      |
+| D2   | P0       | D          | C2, B1, F2      | 2              | generator/schema          | frozen datasets          | deterministic hashes, latent totals reconcile | XL     |
+| D3   | P1       | D          | D1, external    | 1/external     | real-data protocol        | access/annotation plan   | rights + annotation process                   | M      |
+| D4   | P1       | D          | D3, Gate 1      | external       | adapter/exp21             | real sanity check        | held-out metrics + error analysis             | XL     |
+| E1   | P1       | E          | R0              | 1              | baseline protocol         | registry/search spaces   | direct spatio-temporal + spatial + additive   | M      |
+| E2   | P1       | E          | Gate 1, E1/B1   | 3              | baselines/exp18/19        | tuned baselines/ablation | same budget; factorial CI                     | L      |
+| E3   | P0       | E          | Gate 1          | 3              | metrics/exp20             | burden metrics           | covers 100% points/denominators               | M      |
+| F1   | P1       | F          | R0, E1 input    | 1              | lock/environment          | reproducible env         | fresh install/import pass                     | M      |
+| F2   | P0       | F          | F1, B1          | 2              | artifacts/runner          | isolated run manifest    | no overwrite; full provenance                 | L      |
+| F3   | P1       | F          | G2, result lock | 4              | README/build/report       | clean-room report        | full JSON/figures/PDF reproduce               | L      |
+| F4   | P1       | F          | Gate 1, F2      | 3              | exp22/runtime/packet      | runtime/memory tables    | 5 repeats, pinned threads, actual C           | L      |
+| G0   | P0       | G          | Gate 3          | 4              | locked run/traceability   | result lock              | 100% claim selectors                          | M      |
+| G1   | P0       | G          | G0              | 4              | paper/figures             | revised manuscript       | no unsupported claim/untraced number          | L      |
+| G2   | P1       | G          | G1              | 4              | response/ledger           | response package         | all MC/minor dispositions                     | M      |
+| G3   | P0       | G          | F3/G2           | 5              | submission package        | final audit/PDF          | Gate 4 pass                                   | M      |
 
 ## 18. Hai mức hoàn thành
 

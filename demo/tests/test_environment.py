@@ -104,6 +104,8 @@ class EnvironmentLockTests(unittest.TestCase):
             "demo",
             "environment",
             "evaluation_protocol",
+            "experiments",
+            "inference",
             "pipeline",
             "protocol",
         }

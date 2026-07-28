@@ -2,7 +2,8 @@
 
 The Python boundary is CPython `>=3.12,<3.13`.  `requirements.lock` at the
 repository root pins every distribution in the audited environment; direct
-runtime dependencies are also pinned in `pyproject.toml`.
+runtime dependencies are also pinned in `pyproject.toml`. It is the sole
+canonical dependency lock; no second lock format is maintained.
 
 Create a clean environment from the repository root:
 
@@ -25,4 +26,3 @@ Bubblewrap, XeLaTeX, and BibTeX state without replacing a previous record:
 
 Every candidate run invokes the same capture function and embeds the result
 in its immutable provenance files and final manifest.
-
