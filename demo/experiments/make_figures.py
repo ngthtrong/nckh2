@@ -5,9 +5,8 @@ matplotlib thuần để tái lập ổn định.
 
 Bộ hình (7 hình, đánh số theo thứ tự xuất hiện trong bài báo):
   fig1_ablation        — 2 panel: quét alpha (cộng) vs gating; và tác dụng gate C_i
-  fig2_map             — bản đồ cụm: dạng cộng (alpha=1,0, cấu hình tốt nhất của nó)
-                         so với dạng nhân/gating trên CÙNG một bộ dữ liệu
-  fig3_heatmap         — w_ij theo (Δd, Δt) cho hai dạng, kèm đường mức ngưỡng θ
+  fig2_map             — phân bố dữ liệu + ba cặp nhãn chồng lấn không gian
+  fig3_heatmap         — bề mặt ARI theo (tau_F, tau_E)
   fig4_sigma_sweep     — độ nhạy sigma_geo
   fig5_resolution_sweep— độ nhạy lambda
   fig6_baselines       — đối chiếu baseline (ARI, đường kính, hấp thụ nhiễu)
@@ -23,6 +22,7 @@ from __future__ import annotations
 
 import json
 from pathlib import Path
+from statistics import mean
 
 import matplotlib
 import numpy as np
@@ -31,6 +31,7 @@ matplotlib.use("Agg")
 import matplotlib.pyplot as plt
 
 from common import prepared_events
+from pipeline.attributes import haversine_m
 from pipeline.clustering import run_louvain
 from pipeline.config import DEFAULT_CONFIG as C
 from pipeline.metrics import geographic_spread
@@ -199,99 +200,133 @@ def _cluster_map(ax, events, labels, title, note: str | None = None,
 
 
 def fig_map():
+    """Phân bố GT và ba cặp nhóm chồng lấn — bằng chứng trực quan độ khó P1."""
     events = prepared_events()
+    cmap = plt.get_cmap("tab20")
+    fig = plt.figure(figsize=(11.8, 6.0))
+    grid = fig.add_gridspec(3, 2, width_ratios=(1.45, 1.0), hspace=0.48)
+    regional = fig.add_subplot(grid[:, 0])
 
-    def cluster(mode, alpha=None):
-        w = build_weight_matrix(events, C.weight, mode=mode, alpha=alpha)
-        return run_louvain(sparsify(w, C.weight), C.cluster.resolution,
-                           C.cluster.random_state)
+    for gt in range(13):
+        members = [event for event in events if event.gt_cluster == gt]
+        regional.scatter(
+            [event.lng for event in members],
+            [event.lat for event in members],
+            s=13,
+            color=cmap(gt),
+            label=f"g{gt}",
+            alpha=0.8,
+        )
+    noise = [event for event in events if event.gt_cluster < 0]
+    regional.scatter(
+        [event.lng for event in noise],
+        [event.lat for event in noise],
+        s=11,
+        marker="x",
+        color="0.55",
+        alpha=0.75,
+        label="noise/fake",
+    )
+    regional.set_xlabel("Longitude (°E)")
+    regional.set_ylabel("Latitude (°N)")
+    regional.set_title("(a) Full synthetic region: 13 physical-event labels + noise",
+                       fontsize=9.5)
+    regional.legend(ncol=3, fontsize=6.5, loc="best", framealpha=0.9)
 
-    lab_add = cluster("additive", 1.0)
-    lab_gate = cluster("gating")
-    s_add = geographic_spread(events, lab_add)
-    s_gate = geographic_spread(events, lab_gate)
+    pair_names = [
+        ((0, 1), "Hue"),
+        ((2, 3), "Hoi An"),
+        ((4, 5), "Da Nang"),
+    ]
+    for row, ((ga, gb), place) in enumerate(pair_names):
+        ax = fig.add_subplot(grid[row, 1])
+        for gt, marker in ((ga, "o"), (gb, "s")):
+            members = [event for event in events if event.gt_cluster == gt]
+            ax.scatter(
+                [event.lng for event in members],
+                [event.lat for event in members],
+                s=19,
+                marker=marker,
+                color=cmap(gt),
+                alpha=0.72,
+                label=f"g{gt}",
+            )
+        centroids = {}
+        for gt in (ga, gb):
+            members = [event for event in events if event.gt_cluster == gt]
+            centroids[gt] = (
+                mean(event.lat for event in members),
+                mean(event.lng for event in members),
+            )
+        distance = haversine_m(*centroids[ga], *centroids[gb])
+        ax.plot(
+            [centroids[ga][1], centroids[gb][1]],
+            [centroids[ga][0], centroids[gb][0]],
+            "k--",
+            lw=1.0,
+        )
+        ax.scatter(
+            [centroids[ga][1], centroids[gb][1]],
+            [centroids[ga][0], centroids[gb][0]],
+            s=45,
+            facecolors="none",
+            edgecolors="black",
+            linewidths=1.0,
+        )
+        ax.set_title(
+            f"({chr(ord('b') + row)}) {place}: g{ga}/g{gb}, "
+            f"centroids {distance:.0f} m apart",
+            fontsize=8.8,
+        )
+        ax.legend(fontsize=7, loc="best")
+        ax.tick_params(labelsize=7)
+        if row == 2:
+            ax.set_xlabel("Longitude (°E)", fontsize=8)
+        ax.set_ylabel("Latitude (°N)", fontsize=8)
 
-    # neo chú thích vào cặp GT xa nhất BỊ GỘP, đo trên dữ liệu hiện hành
-    wm_add = _worst_merge(events, lab_add)
-    wm_gate = _worst_merge(events, lab_gate)
-
-    if wm_add is None:
-        marks_add, note_add = [], "No two ground-truth groups are merged."
-    else:
-        i, j, dkm, gi, gj = wm_add
-        marks_add = [(i, "g%d" % gi), (j, "g%d" % gj)]
-        note_add = ("Long spokes = one cluster stretched across the region;\n"
-                    "groups %d and %d are merged although the two marked\n"
-                    "events are %.1f km apart." % (gi, gj, dkm))
-
-    if wm_gate is None:
-        marks_gate = marks_add
-        note_gate = ("No visible spokes: every cluster is under %.2f km wide,\n"
-                     "so at this scale each one collapses to a point.\n"
-                     "No two ground-truth groups are merged." %
-                     s_gate["max_diameter_km"])
-    else:
-        i, j, dkm, gi, gj = wm_gate
-        marks_gate = [(i, "g%d" % gi), (j, "g%d" % gj)]
-        note_gate = ("No visible spokes: every cluster is under %.2f km wide,\n"
-                     "so at this scale each one collapses to a point.\n"
-                     "Widest merge of two groups spans only %.2f km (g%d/g%d)."
-                     % (s_gate["max_diameter_km"], dkm, gi, gj))
-
-    fig, (a1, a2) = plt.subplots(1, 2, figsize=(12, 5))
-    _cluster_map(a1, events, lab_add,
-                 "(a) Additive weight, α = 1.0 (best additive setting)\n"
-                 "%d clusters · max diameter %.1f km"
-                 % (s_add["n_clusters"], s_add["max_diameter_km"]),
-                 note=note_add, marks=marks_add)
-    _cluster_map(a2, events, lab_gate,
-                 "(b) Multiplicative gating (proposed)\n"
-                 "%d clusters · max diameter %.2f km"
-                 % (s_gate["n_clusters"], s_gate["max_diameter_km"]),
-                 note=note_gate, marks=marks_gate)
-    # dùng cùng khung toạ độ để so sánh trực quan là công bằng
-    xlim = (min(a1.get_xlim()[0], a2.get_xlim()[0]), max(a1.get_xlim()[1], a2.get_xlim()[1]))
-    ylim = (min(a1.get_ylim()[0], a2.get_ylim()[0]), max(a1.get_ylim()[1], a2.get_ylim()[1]))
-    for ax in (a1, a2):
-        ax.set_xlim(*xlim)
-        ax.set_ylim(*ylim)
-    fig.suptitle("Same events, same Louvain, same λ — only the edge-weight form differs",
-                 fontsize=10)
+    fig.suptitle(
+        "Dataset geometry: spatial envelopes overlap, while flood/urgency "
+        "profiles define distinct events",
+        fontsize=10,
+    )
     fig.savefig(FIGURES / "fig2_map.png")
     plt.close(fig)
 
 
 # --------------------------------------------------------------------------
-# fig3 — heatmap w_ij theo (Δd, Δt)
+# fig3 — heatmap độ nhạy ARI theo (tau_F, tau_E)
 # --------------------------------------------------------------------------
 def fig_heatmap():
-    p = C.weight
-    d = np.linspace(0.0, 4000.0, 220)          # mét
-    t = np.linspace(0.0, 180.0, 220)           # phút
-    D, T = np.meshgrid(d, t)
-    sg = np.exp(-(D ** 2) / (2.0 * p.sigma_geo_m ** 2))
-    st = np.exp(-T / p.tau_temp_min)
-    sc = 1.0                                    # ngữ cảnh trùng khớp (trường hợp xấu nhất)
+    rows = load("exp2_tau_context.json")
+    tau_f = sorted({r["tau_f"] for r in rows})
+    tau_e = sorted({r["tau_e"] for r in rows})
+    lookup = {(r["tau_f"], r["tau_e"]): r for r in rows}
+    ari = np.array([[lookup[(tf, te)]["ari"] for te in tau_e] for tf in tau_f])
 
-    w_gate = sg * (p.beta * st + p.gamma * sc)
-    w_add = 1.0 * sg + p.beta * st + p.gamma * sc   # alpha = 1.0
-
-    fig, axes = plt.subplots(1, 2, figsize=(11.5, 4.4))
-    for ax, w, name in ((axes[0], w_add, "(a) Additive: $\\alpha S_{geo} + \\beta S_{temp} + \\gamma S_{ctx}$"),
-                        (axes[1], w_gate, "(b) Gating: $S_{geo}(\\beta S_{temp} + \\gamma S_{ctx})$")):
-        im = ax.pcolormesh(D / 1000.0, T, w, shading="auto", cmap="viridis")
-        cs = ax.contour(D / 1000.0, T, w, levels=[p.edge_threshold],
-                        colors="white", linewidths=1.6, linestyles="--")
-        ax.clabel(cs, fmt={p.edge_threshold: "θ = %.2f" % p.edge_threshold}, fontsize=8)
-        ax.set_xlabel("Spatial distance Δd (km)")
-        ax.set_ylabel("Time gap Δt (minutes)")
-        ax.set_title(name, fontsize=9.5)
-        ax.grid(False)
-        fig.colorbar(im, ax=ax, label="$w_{ij}$")
-
-    fig.suptitle("Edge weight for two reports with identical context ($S_{ctx}=1$): "
-                 "the additive form never falls below θ, so distance cannot separate them",
-                 fontsize=9.5)
+    fig, ax = plt.subplots(figsize=(6.7, 5.2))
+    im = ax.imshow(
+        ari,
+        origin="lower",
+        aspect="auto",
+        cmap="viridis",
+        vmin=float(ari.min()),
+        vmax=float(ari.max()),
+    )
+    ax.set_xticks(range(len(tau_e)), [f"{v:g}" for v in tau_e])
+    ax.set_yticks(range(len(tau_f)), [f"{v:g}" for v in tau_f])
+    ax.set_xlabel(r"$\tau_E$")
+    ax.set_ylabel(r"$\tau_F$")
+    for i in range(len(tau_f)):
+        for j in range(len(tau_e)):
+            color = "white" if ari[i, j] < np.median(ari) else "black"
+            ax.text(j, i, f"{ari[i, j]:.3f}", ha="center", va="center",
+                    fontsize=7.2, color=color)
+    fig.colorbar(im, ax=ax, label="ARI")
+    ax.set_title(
+        r"Context sensitivity over $(\tau_F,\tau_E)$: "
+        f"ARI range = {ari.max() - ari.min():.3f}",
+        fontsize=9.5,
+    )
     fig.savefig(FIGURES / "fig3_heatmap.png")
     plt.close(fig)
 
@@ -350,7 +385,7 @@ def fig_baselines():
     rows = load("exp4_baselines.json")
     names = [r["method"].replace(" (", "\n(") for r in rows]
     ari = [r["ari"] for r in rows]
-    diam = [r["mean_diam_km_multi"] for r in rows]
+    diam = [r["mean_diam_km_labeled"] for r in rows]
     noise = [r["noise_absorbed_pct"] for r in rows]
     ours = [("Louvain" in r["method"] or "Leiden" in r["method"]) for r in rows]
     colors = [GREEN if o else RED for o in ours]
@@ -362,8 +397,8 @@ def fig_baselines():
     a1.invert_yaxis()
 
     a2.barh(names, [max(d, 1e-3) for d in diam], color=colors, alpha=0.85)
-    a2.set_xlabel("Mean diameter, multi-member clusters (km, lower = better)")
-    a2.set_title("Geographic cohesion", fontsize=9.5)
+    a2.set_xlabel("Mean diameter of labeled clusters (km, lower = better)")
+    a2.set_title("Geographic cohesion (same convention)", fontsize=9.5)
     a2.set_xscale("log")
     a2.invert_yaxis()
     a2.set_yticklabels([])

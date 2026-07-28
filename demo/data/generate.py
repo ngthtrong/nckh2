@@ -352,18 +352,36 @@ def inter_group_separation(events: list[Event]) -> dict:
     cens = {g: centroid(g) for g in labels}
     min_pair = None
     n_below_sigma = 0
+    n_below_800 = 0
     for i, ga in enumerate(labels):
         for gb in labels[i + 1:]:
             d = haversine_m(*cens[ga], *cens[gb])
             if d < 700.0:
                 n_below_sigma += 1
+            if d < 800.0:
+                n_below_800 += 1
             if min_pair is None or d < min_pair[2]:
                 min_pair = (ga, gb, d)
+    overlap_pairs = {}
+    for ga, gb in ((0, 1), (2, 3), (4, 5)):
+        overlap_pairs[f"{ga}-{gb}"] = round(
+            haversine_m(*cens[ga], *cens[gb]), 1
+        )
+    label_sizes = {
+        gt: sum(1 for e in events if e.gt_cluster == gt) for gt in labels
+    }
     return {
         "n_gt_labels": len(labels),
         "min_inter_centroid_m": round(min_pair[2], 1) if min_pair else None,
         "closest_label_pair": [min_pair[0], min_pair[1]] if min_pair else None,
         "n_label_pairs_below_sigma_geo": n_below_sigma,
+        "n_label_pairs_below_800m": n_below_800,
+        "spatial_overlap_pair_centroid_m": overlap_pairs,
+        "gt_event_size_min": min(label_sizes.values()) if label_sizes else None,
+        "gt_event_size_max": max(label_sizes.values()) if label_sizes else None,
+        "source_blob_spread_m_min": min(s["spread_m"] for s in _GROUP_SPECS),
+        "source_blob_spread_m_max": max(s["spread_m"] for s in _GROUP_SPECS),
+        "same_location_time_gap_h": 3.5,
     }
 
 
@@ -446,12 +464,17 @@ if __name__ == "__main__":
     dataset = build_dataset()
     out_path = out_dir / "dataset.json"
     out_path.write_text(json.dumps(dataset, ensure_ascii=False, indent=2), encoding="utf-8")
+    sealed_path = out_dir / "dataset-v3.json"
+    sealed_path.write_text(
+        json.dumps(dataset, ensure_ascii=False, indent=2), encoding="utf-8"
+    )
     m = dataset["meta"]
-    print(f"Wrote {m['n_total']} events -> {out_path}")
+    print(f"Wrote {m['n_total']} events -> {out_path} + {sealed_path}")
     print(f"  core={m['n_core']} noise={m['n_noise']} campaign={m['n_campaign']}")
     print(f"  nhãn GT={m['n_gt_clusters']} {m['gt_labels']}")
     print(f"  tin giả={m['n_fake']} (có ảnh: {m['n_fake_with_image']}, "
           f"trong cụm: {m['n_fake_in_cluster']} = {m['frac_fake_in_cluster']:.0%})")
     print(f"  cặp nhãn có tâm < sigma_geo(700m): {m['n_label_pairs_below_sigma_geo']}")
+    print(f"  cặp nhãn có tâm < 800m: {m['n_label_pairs_below_800m']}")
     print(f"  khoảng cách tâm–tâm nhỏ nhất giữa hai nhãn: {m['min_inter_centroid_m']} m "
           f"(cặp {m['closest_label_pair']})")

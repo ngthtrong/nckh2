@@ -37,6 +37,7 @@ from pipeline.weighting import build_weight_matrix, sparsify
 # Ngưỡng nghiệm thu (KHÔNG được nới sau khi xem kết quả).
 GEO_ARI_MAX = 0.75          # baseline toạ độ thô phải kém hơn mức này
 CTX_ARI_DROP_MIN = 0.08     # bỏ S_context phải làm ARI tụt ít nhất ngần này
+TAU_CONTEXT_ARI_RANGE_MIN = 0.01  # quét tau_F/tau_E phải làm ARI phản ứng
 SINGLE_FEATURE_AUC_MAX = 0.75  # không đặc trưng đơn nào vượt mức này
 FAKE_IN_CLUSTER_MIN = 0.55  # tỉ lệ tin giả nằm trong cụm tối thiểu
 
@@ -116,6 +117,44 @@ def _context_ablation(events):
     }
 
 
+def _tau_context_response(events):
+    """Quét tau_F/tau_E phải làm phân hoạch phản ứng, không trơ hoàn toàn.
+
+    Dải 0.15--0.50 của bản cũ nằm trọn trên một plateau. Các cấu hình dưới đây
+    là tập con đăng ký trước của lưới Exp2, đủ rộng để kiểm tra độ nhạy thật.
+    """
+    settings = (
+        (0.03, 0.03),
+        (0.10, 0.03),
+        (0.25, 0.35),
+        (0.50, 0.50),
+        (1.00, 1.00),
+    )
+    rows = []
+    for tau_f, tau_e in settings:
+        wp = WeightParams(tau_f=tau_f, tau_e=tau_e)
+        labels = run_louvain(
+            sparsify(build_weight_matrix(events, wp, mode="gating"), wp),
+            C.cluster.resolution,
+            C.cluster.random_state,
+        )
+        rows.append({
+            "tau_f": tau_f,
+            "tau_e": tau_e,
+            "ari": round(_ari_on_labeled(events, labels), 4),
+            "n_clusters": len(set(labels)),
+        })
+    aris = [r["ari"] for r in rows]
+    ari_range = round(max(aris) - min(aris), 4)
+    return {
+        "settings": rows,
+        "ari_range": ari_range,
+        "pass_tau_context_varies": bool(
+            ari_range >= TAU_CONTEXT_ARI_RANGE_MIN
+        ),
+    }
+
+
 def _single_feature_auc(events):
     """(4) AUC biên của từng đặc trưng đơn dự đoán is_fake. Không cái nào > 0.75."""
     y = np.array([1 if e.is_fake else 0 for e in events])
@@ -165,17 +204,20 @@ def main():
 
     geo = _geo_baselines(events)
     ctx = _context_ablation(events)
+    tau_ctx = _tau_context_response(events)
     feat = _single_feature_auc(events)
     fake = _fake_in_cluster(events)
 
     print_table("P1.1 — baseline CHỈ toạ độ phải KÉM (ARI < 0.75)", [geo])
     print_table("P1.1 — S_context phải CÓ TÁC DỤNG (ARI drop >= 0.08, phân hoạch đổi)", [ctx])
+    print_table("P1.1 — quét tau_F/tau_E phải làm ARI biến thiên", [tau_ctx])
     print_table("P1.2 — không đặc trưng đơn nào tách tin giả (AUC <= 0.75)", [feat])
     print_table("P1.2 — tin giả trộn vào tin thật (>= 0.55 trong cụm)", [fake])
 
     checks = {
         "geo_weak": geo["pass_geo_weak"],
         "context_matters": ctx["pass_context_matters"],
+        "tau_context_varies": tau_ctx["pass_tau_context_varies"],
         "features_overlap": feat.get("pass_features_overlap", False),
         "fake_mixed": fake.get("pass_fake_mixed", False),
     }
@@ -189,12 +231,14 @@ def main():
     out = {
         "geo_baselines": geo,
         "context_ablation": ctx,
+        "tau_context_response": tau_ctx,
         "single_feature_auc": feat,
         "fake_in_cluster": fake,
         "all_criteria_pass": bool(all_pass),
         "thresholds": {
             "geo_ari_max": GEO_ARI_MAX,
             "ctx_ari_drop_min": CTX_ARI_DROP_MIN,
+            "tau_context_ari_range_min": TAU_CONTEXT_ARI_RANGE_MIN,
             "single_feature_auc_max": SINGLE_FEATURE_AUC_MAX,
             "fake_in_cluster_min": FAKE_IN_CLUSTER_MIN,
         },

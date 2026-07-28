@@ -6,6 +6,24 @@ Trạng thái đối chiếu: `paper/main.tex` (641 dòng), `demo/` (13 thí ngh
 vệ tinh + `n_noise=60`, Thí nghiệm 11/12/13, Bảng tham số) — **không lặp lại**.
 Kế hoạch này chỉ giải quyết các vấn đề vòng mới.
 
+## Trạng thái thực thi — cập nhật 28/07/2026
+
+| Pha | Trạng thái | Kết quả kiểm chứng |
+|---|---|---|
+| P0 — bổ đề và thu hồi tuyên bố cũ | **Hoàn tất** | Bổ đề định vị và chứng minh đã có trong bài; bỏ tuyên bố cửa sổ `51×`. |
+| P1 — thiết kế lại dữ liệu | **Hoàn tất phần chính** | Dataset v3 có 485 báo cáo, 13 sự kiện thật, ba cặp chồng lấn không gian, một cặp chồng vị trí khác thời gian, mật độ/spread không đều và tin giả trộn vào vùng sự kiện. Cả 5 cửa chặn độ khó đều đạt. |
+| P1.5 — sanity check dữ liệu thật | **Chưa thực hiện, hạng mục phụ** | Workspace không có tập báo cáo lũ thật có đồng thời tọa độ và thời gian; giới hạn này đã được nêu trong bài. |
+| P2 — sửa pipeline và quy ước đo | **Hoàn tất** | Thống nhất hình học trên cụm có nhãn, `N_ref=500` tĩnh và bị chặn, CI/bootstrap + Wilcoxon, kiểm tra `C_i` có điều kiện. |
+| P3 — chạy lại thí nghiệm | **Hoàn tất** | `demo/run_all.py` chạy sạch 17/17 bước; các bảng JSON và 8 hình đã tái sinh. |
+| P4 — văn liệu và định vị đóng góp | **Hoàn tất** | Bổ sung product/bilateral kernel, spatially constrained clustering và equity; dạng cộng được mô tả đúng là baseline tự dựng. |
+| P5 — viết lại bài | **Hoàn tất phần có dữ liệu** | Tiêu đề/abstract/contributions đã viết lại; Edge AI hạ thành kiến trúc chưa đánh giá; PDF LNCS dài 12 trang. Email liên hệ đã thay bằng địa chỉ thật tìm thấy trong tài nguyên dự án. |
+| P6 — xác minh | **Hoàn tất với một thay thế công cụ** | 8/8 hình khớp checksum, không hình mồ côi; số liệu có bảng truy vết; XeLaTeX + BibTeX biên dịch sạch, 0 lỗi/0 float-too-large/0 overfull trên 5 pt/0 tham chiếu thiếu. Dùng XeLaTeX vì TeX cục bộ thiếu `t5enc.def` cho tiếng Việt khi chạy pdfLaTeX. |
+
+Hai đầu vào không thể tự suy đoán vẫn để mở trước khi nộp: ORCID thật của sáu
+tác giả và, nếu có, tập dữ liệu lũ thực cho P1.5. Nhật ký thực thi và bảng truy
+vết nằm tại `loop/loop17/execution_report.md` và
+`loop/loop17/traceability.md`.
+
 ## 0. Quyết định phạm vi (đã chốt với tác giả)
 
 | Hạng mục | Quyết định | Ảnh hưởng tới kế hoạch |
@@ -608,4 +626,3 @@ P4 văn liệu (song song) ─────────────────�
 Việc **phải làm đầu tiên** và cũng rẻ nhất: P0.1 (Bổ đề 1) và P4.1 (thêm trích
 dẫn). Hai việc này không cần chạy lại gì, và chúng quyết định bài có một tuyên bố
 dương tính hay không. P1 là hạng mục dài nhất và mọi con số phụ thuộc vào nó.
-

@@ -16,7 +16,7 @@ from pipeline.baselines import (
 )
 from pipeline.config import WeightParams
 from pipeline.clustering import run_leiden, run_louvain
-from pipeline.metrics import cluster_quality, geographic_spread, noise_handling, noise_handling
+from pipeline.metrics import cluster_quality, geographic_spread, noise_handling
 from pipeline.weighting import build_weight_matrix, sparsify
 
 
@@ -71,13 +71,22 @@ def main():
     rows = []
     for name, (lab, needs_k, same_graph, noise_label) in methods.items():
         q = cluster_quality(lab, gt)
-        sp = geographic_spread(events, lab, noise_label=noise_label)
+        sp = geographic_spread(
+            events, lab, noise_label=noise_label, gt_labels=gt
+        )
         nz = noise_handling(lab, gt, noise_label=noise_label)
         rows.append({
             "method": name,
             "n_clusters": sp["n_clusters"],
             "ari": q["ari"],
             "nmi": q["nmi"],
+            "mean_diam_km_labeled": sp["mean_diameter_km_labeled"],
+            "max_diam_km_labeled": sp["max_diameter_km_labeled"],
+            "n_clusters_labeled": sp["n_clusters_labeled"],
+            "n_clusters_noise_only": sp["n_clusters_noise_only"],
+            "frac_labeled_clusters_under_1p5km":
+                sp["frac_labeled_clusters_under_1p5km"],
+            # Chỉ số gộp giữ lại để minh bạch cách xử lý singleton/nhiễu.
             "mean_diam_km_multi": sp["mean_diameter_km_multi"],
             "max_diam_km": sp["max_diameter_km"],
             "noise_absorbed_pct": nz["noise_absorbed_pct"],
@@ -91,10 +100,9 @@ def main():
         })
 
     print_table(f"Baseline comparison (ground-truth clusters = {n_gt}, Louvain K = {k_lou})", rows)
-    print("\nSo sánh đường kính phải dùng mean_diam_km_multi (cụm >= 2 thành viên) hoặc")
-    print("max_diam_km; mean_diam_km_all tính cả singleton = 0 km nên thưởng giả tạo cho")
-    print("phân hoạch vụn (phản biện 1.3). Cột same_graph_as_ours = True là baseline công")
-    print("bằng: cùng ma trận trọng số gating, chỉ khác thuật toán phân hoạch.")
+    print("\nSo sánh hình học chính dùng mean/max_diam_km_labeled cho MỌI phương pháp.")
+    print("Cụm toàn nhiễu được tách riêng ở n_clusters_noise_only; cột *_multi và")
+    print("*_all chỉ là đối chiếu, không dùng làm kết luận chính.")
     print("\nĐỌC ARI CÙNG VỚI noise_absorbed_pct: ARI/NMI chỉ chấm trên điểm có nhãn")
     print("(gt >= 0) nên một phương pháp hút hết điểm nhiễu vào cụm thật vẫn có thể đạt")
     print("ARI = 1,0 trong khi kéo giãn cụm tới hàng chục km — ưu thế đó là giả về mặt")

@@ -13,6 +13,42 @@
       "partition_identical": false,
       "pass_context_matters": true
     },
+    "tau_context_response": {
+      "settings": [
+        {
+          "tau_f": 0.03,
+          "tau_e": 0.03,
+          "ari": 0.9321,
+          "n_clusters": 52
+        },
+        {
+          "tau_f": 0.1,
+          "tau_e": 0.03,
+          "ari": 0.8809,
+          "n_clusters": 51
+        },
+        {
+          "tau_f": 0.25,
+          "tau_e": 0.35,
+          "ari": 0.9515,
+          "n_clusters": 52
+        },
+        {
+          "tau_f": 0.5,
+          "tau_e": 0.5,
+          "ari": 0.9515,
+          "n_clusters": 52
+        },
+        {
+          "tau_f": 1.0,
+          "tau_e": 1.0,
+          "ari": 0.9515,
+          "n_clusters": 52
+        }
+      ],
+      "ari_range": 0.0706,
+      "pass_tau_context_varies": true
+    },
     "single_feature_auc": {
       "auc_n_corrob": 0.6903,
       "auc_has_image": 0.5459,
@@ -29,6 +65,7 @@
     "thresholds": {
       "geo_ari_max": 0.75,
       "ctx_ari_drop_min": 0.08,
+      "tau_context_ari_range_min": 0.01,
       "single_feature_auc_max": 0.75,
       "fake_in_cluster_min": 0.55
     }
