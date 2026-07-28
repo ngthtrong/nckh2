@@ -88,24 +88,27 @@ def sweep_tau_context(events):
     """
     gt = [e.gt_cluster for e in events]
     rows = []
-    for tau_f, tau_e in ((0.15, 0.15), (0.25, 0.25), (0.35, 0.35),
-                         (0.25, 0.35), (0.35, 0.25), (0.50, 0.50)):
-        wp = WeightParams(tau_f=tau_f, tau_e=tau_e)
-        w = build_weight_matrix(events, wp, mode="gating")
-        ws = sparsify(w, wp)
-        lab = run_louvain(ws, 1.0, 42)
-        q = cluster_quality(lab, gt)
-        sp = geographic_spread(events, lab)
-        rows.append({
-            "tau_f": tau_f,
-            "tau_e": tau_e,
-            "n_clusters": sp["n_clusters"],
-            "ari": q["ari"],
-            "nmi": q["nmi"],
-            "mean_diam_km_multi": sp["mean_diameter_km_multi"],
-            "max_diam_km": sp["max_diameter_km"],
-            "n_singletons": sp["n_singletons"],
-        })
+    # Dải cũ 0.15--0.50 nằm trọn trên một plateau. Lưới rộng hơn vừa kiểm vùng
+    # nhạy ở tau < 0.10, vừa kiểm giới hạn phạt ngữ cảnh rất nhẹ ở tau = 1.
+    tau_values = (0.03, 0.05, 0.10, 0.25, 0.50, 1.00)
+    for tau_f in tau_values:
+        for tau_e in tau_values:
+            wp = WeightParams(tau_f=tau_f, tau_e=tau_e)
+            w = build_weight_matrix(events, wp, mode="gating")
+            ws = sparsify(w, wp)
+            lab = run_louvain(ws, 1.0, 42)
+            q = cluster_quality(lab, gt)
+            sp = geographic_spread(events, lab)
+            rows.append({
+                "tau_f": tau_f,
+                "tau_e": tau_e,
+                "n_clusters": sp["n_clusters"],
+                "ari": q["ari"],
+                "nmi": q["nmi"],
+                "mean_diam_km_multi": sp["mean_diameter_km_multi"],
+                "max_diam_km": sp["max_diameter_km"],
+                "n_singletons": sp["n_singletons"],
+            })
     return rows
 
 

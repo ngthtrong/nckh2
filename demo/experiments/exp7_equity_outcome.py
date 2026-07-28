@@ -1,249 +1,277 @@
-"""Thí nghiệm 7 — Thước đo KẾT QUẢ (outcome) cho equity (phản biện 1.2).
+"""Thí nghiệm 7 — outcome của chính sách ưu tiên, đa seed và đa depot.
 
-Phản biện: exp1C mới chứng minh V_agg (nhân) *đổi* thứ hạng, CHƯA chứng minh
-thứ hạng mới *tốt hơn* về mặt cứu hộ. Đây là lập luận mô tả, chưa chuẩn tắc.
-
-Cách khắc phục (hướng (a) của phản biện): định nghĩa một metric vận hành —
-"thời gian mô phỏng đến nạn nhân yếu thế" dưới chính sách điều phối THAM LAM
-theo thứ hạng P — rồi so 3 chính sách ranking:
-    (a) P đầy đủ  : V_agg dạng NHÂN (đề xuất)
-    (b) P không V : bỏ hoàn toàn yếu tố tổn thương (omega thuần lõi)
-    (c) P cộng V  : V_agg dạng CỘNG (offset)
-
-Mô hình điều phối (đơn giản, minh bạch):
-  - Có R đội ca nô, mỗi đội tốc độ VBOAT km/h, xuất phát từ một depot chung.
-  - Phục vụ các cụm LẦN LƯỢT theo thứ hạng P giảm dần; mỗi đội bốc cụm kế tiếp
-    trong hàng đợi khi rảnh, di chuyển từ vị trí hiện tại tới trọng tâm cụm
-    (Haversine), cộng thời gian phục vụ cố định TSERVE mỗi cụm.
-  - "Thời gian đến" của một cụm = thời điểm đội tới trọng tâm cụm đó.
-
-Metric equity: thời gian-đến trung bình CÓ TRỌNG SỐ theo tổng tổn thương ΣV của
-cụm (nạn nhân yếu thế càng nhiều thì việc tới trễ càng bị phạt nặng). Chính sách
-tốt hơn về equity => metric này NHỎ hơn.
-
-VỀ TÍNH TUẦN HOÀN CỦA THƯỚC ĐO (phản biện 1.2b): không tồn tại thước đo trung
-lập tuyệt đối ở đây, nên ta báo cáo CẢ BA và nói rõ thiên vị của từng cái thay vì
-chọn cái có lợi rồi biện minh sau:
-  1. `time_to_vulnerable_min`  — trọng số ΣV thuần. THIÊN VỊ dạng CỘNG: dạng cộng
-     tối ưu đúng hàm mục tiêu này (offset phẳng theo ΣV).
-  2. `harm_weighted_time_min`  — trọng số ΣV × core. THIÊN VỊ dạng NHÂN: định
-     nghĩa 'thiệt hại' là tương tác yếu-thế × nghiêm-trọng, tức chính giả thuyết
-     mà dạng nhân mã hoá. Đây là thước đo bản trước chọn, nên không thể dùng nó
-     làm bằng chứng độc lập.
-  3. `severe_reach_time_min`   — trọng số 1[F_max > 0,7], KHÔNG chứa V và KHÔNG
-     chứa core. Định nghĩa trước bằng ngưỡng vận hành (ngập > 0,7 là nguy hiểm
-     tới tính mạng) nên không thiên vị dạng nào. Đây là thước đo trọng tài.
-
-Trung thực: nếu (a) KHÔNG nhỏ hơn (b)/(c) trên thước đo trọng tài, ta báo cáo
-đúng như vậy và đóng khung V_agg là *lựa chọn giá trị chuẩn tắc* (triage ưu tiên
-người dễ tổn thương) thay vì tuyên bố tối ưu khách quan.
+Chỉ phục vụ các cụm có ít nhất hai báo cáo và có ít nhất một báo cáo C_i >= 0.5.
+Quy tắc này loại các singleton/nhiễu mà điều phối viên thực tế không đưa thẳng
+vào hàng đợi ca nô. Ba chính sách được so trên cùng phân hoạch và cùng hàng đợi:
+V khuếch đại dạng nhân, bỏ V, và V dạng cộng. Mỗi seed sinh lại hình học liên
+nhóm; mỗi chính sách chạy từ ba depot.
 """
 from __future__ import annotations
 
 import heapq
+from statistics import mean
 
-from common import prepared_events, print_table, save_table
-from pipeline.config import DEFAULT_CONFIG as C
+from common import bootstrap_ci, multi_seed, paired_test, print_table, save_table
+from data.generate import CLUSTER_CENTERS, make_events
+from pipeline.attributes import compute_confidence, haversine_m
 from pipeline.clustering import run_louvain
+from pipeline.config import DEFAULT_CONFIG as C
 from pipeline.priority import score_clusters
-from pipeline.attributes import haversine_m
 from pipeline.weighting import build_weight_matrix, sparsify
 
-# Tham số mô phỏng điều phối (đặt theo miền, minh bạch)
-N_BOATS = 3          # số đội ca nô
-V_BOAT_KMH = 30.0    # tốc độ ca nô (km/h) — cỡ ca nô cứu hộ
-T_SERVE_MIN = 15.0   # thời gian phục vụ mỗi cụm (phút)
-
-# Ngưỡng "ngập nặng" cho metric trung lập thứ ba. Đặt trước khi xem kết quả;
-# đây là tiêu chí vận hành (ngập tới mái, phải cứu hộ bằng ca nô), KHÔNG lấy từ
-# bất kỳ thành phần nào của công thức P.
+N_BOATS = 3
+V_BOAT_KMH = 30.0
+T_SERVE_MIN = 15.0
+MIN_CLUSTER_SERVE = 2
+MIN_CONFIDENCE_SERVE = 0.5
 SEVERE_FLOOD_THRESHOLD = 0.7
-
-
-def _depot(scores):
-    """Depot = trọng tâm hình học của tất cả các cụm (trung tâm chiến dịch)."""
-    lat = sum(s.center_lat for s in scores) / len(scores)
-    lng = sum(s.center_lng for s in scores) / len(scores)
-    return lat, lng
+N_SEEDS = 20
 
 
 def _simulate_arrival_times(ordered, depot):
-    """Mô phỏng R đội phục vụ các cụm theo thứ tự `ordered`.
-
-    Trả về dict {cluster_id: arrival_time_min}.
-    Heap các đội: (thời điểm rảnh, lat hiện tại, lng hiện tại).
-    """
     dlat, dlng = depot
     boats = [(0.0, dlat, dlng) for _ in range(N_BOATS)]
     heapq.heapify(boats)
     arrival = {}
-    for s in ordered:
+    for score in ordered:
         free_t, blat, blng = heapq.heappop(boats)
-        dist_km = haversine_m(blat, blng, s.center_lat, s.center_lng) / 1000.0
-        travel_min = (dist_km / V_BOAT_KMH) * 60.0
-        arr = free_t + travel_min
-        arrival[s.cluster_id] = arr
-        # đội bận tới arr + phục vụ, và đứng tại trọng tâm cụm vừa phục vụ
-        heapq.heappush(boats, (arr + T_SERVE_MIN, s.center_lat, s.center_lng))
+        dist_km = haversine_m(
+            blat, blng, score.center_lat, score.center_lng
+        ) / 1000.0
+        arr = free_t + 60.0 * dist_km / V_BOAT_KMH
+        arrival[score.cluster_id] = arr
+        heapq.heappush(
+            boats,
+            (arr + T_SERVE_MIN, score.center_lat, score.center_lng),
+        )
     return arrival
 
 
 def _vulnerable_weight(score, events_by_cluster):
-    """Tổng tổn thương ΣV của cụm (trọng số cho metric equity thuần)."""
-    return sum(e.vulnerability for e in events_by_cluster.get(score.cluster_id, []))
+    return sum(
+        event.vulnerability
+        for event in events_by_cluster.get(score.cluster_id, [])
+    )
 
 
 def _harm_weight(score, events_by_cluster):
-    """Trọng số THIỆT HẠI = ΣV * mức nghiêm trọng lõi (đã chuẩn hóa).
-
-    Đây là điểm mấu chốt để phân biệt dạng nhân với dạng cộng: một nạn nhân
-    yếu thế trong cụm ngập nặng/khẩn cấp cao chịu rủi ro sinh tồn lớn hơn cùng
-    nạn nhân đó trong cụm nhẹ. Dạng NHÂN được thiết kế đúng để ưu tiên giao của
-    'yếu thế' VÀ 'nghiêm trọng'; dạng cộng chỉ thưởng một offset phẳng theo ΣV
-    nên không nắm được tương tác này. Trọng số = ΣV * core (core in [0,1])."""
-    v = sum(e.vulnerability for e in events_by_cluster.get(score.cluster_id, []))
-    return v * score.core
+    return _vulnerable_weight(score, events_by_cluster) * score.core
 
 
 def _severe_vulnerable_weight(score, events_by_cluster):
-    """Trọng số TRUNG LẬP, đăng ký trước: ΣV của các cụm ngập nặng (F_max > 0,7).
-
-    Vì sao cần metric thứ ba: metric ΣV-thuần (`_vulnerable_weight`) tối ưu đúng
-    cho dạng CỘNG, còn metric thiệt-hại (`_harm_weight`) dùng chính `score.core`
-    — đại lượng nằm trong công thức P đang được đánh giá — nên có lợi cho dạng
-    NHÂN. Chấm điểm bằng bất kỳ metric nào trong hai cái đó rồi tuyên bố người
-    thắng là lập luận vòng tròn (phản biện 1.2).
-
-    Metric này dùng một tiêu chí NGOÀI công thức P: ngưỡng ngập nặng F > 0,7 là
-    tiêu chí phân loại vận hành (nhà cửa ngập tới mái, cần cứu hộ đường thuỷ),
-    xác định trước khi xem kết quả và không phụ thuộc omega, V_agg hay core.
-    Trọng số = ΣV nếu cụm ngập nặng, 0 nếu không: "tới muộn ở nơi có người yếu
-    thế TRONG vùng ngập nặng" là thiệt hại ta thực sự muốn giảm.
-    """
-    mem = events_by_cluster.get(score.cluster_id, [])
-    if not mem:
+    members = events_by_cluster.get(score.cluster_id, [])
+    if not members or max(event.flood for event in members) <= SEVERE_FLOOD_THRESHOLD:
         return 0.0
-    f_max = max(e.flood for e in mem)
-    if f_max <= SEVERE_FLOOD_THRESHOLD:
-        return 0.0
-    return sum(e.vulnerability for e in mem)
+    return sum(event.vulnerability for event in members)
 
 
 def _weighted_time(scores, arrival, weight_fn, events_by_cluster):
-    """Thời gian-đến trung bình có trọng số. Nhỏ = tốt.
-
-    scores dùng để lấy TRỌNG SỐ (cố định theo cụm), arrival lấy từ chính sách
-    đang đánh giá. Tách bạch để mọi chính sách được chấm bằng cùng bộ trọng số."""
-    num = 0.0
-    den = 0.0
-    for s in scores:
-        w = weight_fn(s, events_by_cluster)
-        if w <= 0:
-            continue
-        num += w * arrival[s.cluster_id]
-        den += w
-    return (num / den) if den > 0 else 0.0
+    weighted = [
+        (weight_fn(score, events_by_cluster), arrival[score.cluster_id])
+        for score in scores
+    ]
+    denominator = sum(weight for weight, _ in weighted)
+    if denominator <= 0:
+        return 0.0
+    return sum(weight * time for weight, time in weighted) / denominator
 
 
-def main():
-    events = prepared_events()
-    w = build_weight_matrix(events, C.weight, mode="gating")
-    ws = sparsify(w, C.weight)
-    lab = run_louvain(ws, C.cluster.resolution, C.cluster.random_state)
+def _eligible_cluster_ids(events_by_cluster):
+    return {
+        cid
+        for cid, members in events_by_cluster.items()
+        if len(members) >= MIN_CLUSTER_SERVE
+        and any(event.confidence >= MIN_CONFIDENCE_SERVE for event in members)
+    }
 
+
+def _run_seed(seed: int):
+    events = make_events(seed=seed, geom_jitter=0.20)
+    compute_confidence(events, C.confidence)
+    weights = build_weight_matrix(events, C.weight, mode="gating")
+    labels = run_louvain(
+        sparsify(weights, C.weight),
+        C.cluster.resolution,
+        seed,
+    )
     events_by_cluster = {}
-    for e, l in zip(events, lab):
-        events_by_cluster.setdefault(l, []).append(e)
+    for event, label in zip(events, labels):
+        events_by_cluster.setdefault(label, []).append(event)
 
-    # Ba chính sách ranking (cùng tập cụm & trọng tâm, chỉ khác cách tính P)
-    sc_full = score_clusters(events, lab, C.priority, normalize_v=True)   # (a) V nhân
-    sc_add = score_clusters(events, lab, C.priority, normalize_v=False)   # (c) V cộng
-
-    # (b) P không V: đặt V_agg=1 bằng cách chấm điểm rồi sắp theo `core` (bỏ V)
-    sc_noV = sorted(sc_full, key=lambda s: s.core, reverse=True)
-
-    depot = _depot(sc_full)
-
+    eligible = _eligible_cluster_ids(events_by_cluster)
+    scores_full_all = score_clusters(
+        events, labels, C.priority, normalize_v=True
+    )
+    scores_add_all = score_clusters(
+        events, labels, C.priority, normalize_v=False
+    )
+    scores_full = [s for s in scores_full_all if s.cluster_id in eligible]
+    scores_add = [s for s in scores_add_all if s.cluster_id in eligible]
+    scores_no_v = sorted(scores_full, key=lambda s: s.core, reverse=True)
+    scores_add = sorted(scores_add, key=lambda s: s.priority, reverse=True)
     policies = {
-        "P_full_multiplicative": sc_full,
-        "P_no_vulnerability": sc_noV,
-        "P_additive_V": sorted(sc_add, key=lambda s: s.priority, reverse=True),
+        "P_full_multiplicative": scores_full,
+        "P_no_vulnerability": scores_no_v,
+        "P_additive_V": scores_add,
+    }
+
+    centroid = (
+        mean(s.center_lat for s in scores_full),
+        mean(s.center_lng for s in scores_full),
+    )
+    depots = {
+        "regional_centroid": centroid,
+        "Hue": CLUSTER_CENTERS[0][:2],
+        "Da_Nang": CLUSTER_CENTERS[3][:2],
     }
 
     rows = []
-    twv_by_policy = {}
-    harm_by_policy = {}
-    severe_by_policy = {}
-    for name, ordered in policies.items():
-        arrival = _simulate_arrival_times(ordered, depot)
-        # metric 1: thời gian đến yếu thế, trọng số ΣV thuần (thiên vị dạng CỘNG)
-        twv = _weighted_time(sc_full, arrival, _vulnerable_weight, events_by_cluster)
-        # metric 2: trọng số THIỆT HẠI = ΣV * core (thiên vị dạng NHÂN vì dùng core)
-        harm = _weighted_time(sc_full, arrival, _harm_weight, events_by_cluster)
-        # metric 3: TRUNG LẬP — ΣV trong cụm ngập nặng F>0,7 (ngoài công thức P)
-        severe = _weighted_time(sc_full, arrival, _severe_vulnerable_weight, events_by_cluster)
-        # thời gian-đến TB không trọng số (để đối chiếu công bằng tổng thể)
-        mean_arr = sum(arrival.values()) / len(arrival)
-        rows.append({
-            "policy": name,
-            "time_to_vulnerable_min": round(twv, 2),
-            "harm_weighted_time_min": round(harm, 2),
-            "severe_flood_vulnerable_time_min": round(severe, 2),
-            "mean_arrival_all_min": round(mean_arr, 2),
+    for depot_name, depot in depots.items():
+        for policy_name, ordered in policies.items():
+            arrival = _simulate_arrival_times(ordered, depot)
+            rows.append({
+                "seed": seed,
+                "depot": depot_name,
+                "policy": policy_name,
+                "n_clusters_served": len(ordered),
+                "time_to_vulnerable_min": round(
+                    _weighted_time(
+                        scores_full, arrival, _vulnerable_weight,
+                        events_by_cluster,
+                    ),
+                    4,
+                ),
+                "harm_weighted_time_min": round(
+                    _weighted_time(
+                        scores_full, arrival, _harm_weight,
+                        events_by_cluster,
+                    ),
+                    4,
+                ),
+                "severe_flood_vulnerable_time_min": round(
+                    _weighted_time(
+                        scores_full, arrival, _severe_vulnerable_weight,
+                        events_by_cluster,
+                    ),
+                    4,
+                ),
+                "mean_arrival_all_min": round(mean(arrival.values()), 4),
+            })
+    return {
+        "seed": seed,
+        "n_clusters_total": len(events_by_cluster),
+        "n_clusters_served": len(eligible),
+        "rows": rows,
+    }
+
+
+def _per_seed_means(runs):
+    metrics = (
+        "time_to_vulnerable_min",
+        "harm_weighted_time_min",
+        "severe_flood_vulnerable_time_min",
+        "mean_arrival_all_min",
+    )
+    out = []
+    for run in runs:
+        policies = sorted({row["policy"] for row in run["rows"]})
+        for policy in policies:
+            selected = [row for row in run["rows"] if row["policy"] == policy]
+            out.append({
+                "seed": run["seed"],
+                "policy": policy,
+                "n_clusters_served": run["n_clusters_served"],
+                **{
+                    metric: round(mean(row[metric] for row in selected), 4)
+                    for metric in metrics
+                },
+            })
+    return out
+
+
+def _summarize(per_seed):
+    metrics = (
+        "time_to_vulnerable_min",
+        "harm_weighted_time_min",
+        "severe_flood_vulnerable_time_min",
+        "mean_arrival_all_min",
+    )
+    policies = sorted({row["policy"] for row in per_seed})
+    rows = []
+    for policy in policies:
+        selected = [row for row in per_seed if row["policy"] == policy]
+        summary = {"policy": policy, "n_seeds": len(selected)}
+        for metric in metrics:
+            values = [row[metric] for row in selected]
+            lo, hi = bootstrap_ci(values)
+            summary[f"{metric}_mean"] = round(mean(values), 2)
+            summary[f"{metric}_ci95_lo"] = round(lo, 2)
+            summary[f"{metric}_ci95_hi"] = round(hi, 2)
+        rows.append(summary)
+    return rows
+
+
+def _comparisons(per_seed):
+    primary = "severe_flood_vulnerable_time_min"
+    by_policy = {}
+    for row in per_seed:
+        by_policy.setdefault(row["policy"], []).append(row)
+    for values in by_policy.values():
+        values.sort(key=lambda row: row["seed"])
+    full = [row[primary] for row in by_policy["P_full_multiplicative"]]
+    out = []
+    for baseline in ("P_no_vulnerability", "P_additive_V"):
+        other = [row[primary] for row in by_policy[baseline]]
+        test = paired_test(full, other)
+        out.append({
+            "metric": primary,
+            "comparison": f"P_full_multiplicative minus {baseline}",
+            **test,
+            "interpretation": (
+                "negative favors multiplicative; evidence only if CI excludes 0"
+            ),
         })
-        twv_by_policy[name] = twv
-        harm_by_policy[name] = harm
-        severe_by_policy[name] = severe
+    return out
 
-    def _impr(metric, base_key="P_no_vulnerability", full_key="P_full_multiplicative"):
-        base, full = metric[base_key], metric[full_key]
-        return round(100 * (base - full) / base, 2) if base else 0.0
 
-    impr_twv = _impr(twv_by_policy)
-    impr_harm = _impr(harm_by_policy)
-    impr_severe = _impr(severe_by_policy)
-    # so với chính sách dạng CỘNG (đối thủ thật, không phải 'bỏ V')
-    impr_severe_vs_add = _impr(severe_by_policy, base_key="P_additive_V")
+def main():
+    runs = multi_seed(_run_seed, seeds=range(N_SEEDS))
+    detail = [row for run in runs for row in run["rows"]]
+    per_seed = _per_seed_means(runs)
+    summary = _summarize(per_seed)
+    comparisons = _comparisons(per_seed)
 
-    print_table("Exp7 — Outcome metric cho equity (thời gian đến nạn nhân yếu thế)", rows)
-    print(f"\nCấu hình: {N_BOATS} ca nô, {V_BOAT_KMH} km/h, phục vụ {T_SERVE_MIN} phút/cụm.")
-    print("\n--- Ba metric, và THIÊN VỊ đã biết của từng cái (khai báo trước) ---")
-    print(f"[1. ΣV thuần   ] V nhân giảm {impr_twv}% so với bỏ V. "
-          "THIÊN VỊ dạng CỘNG: trọng số phẳng theo ΣV chính là cái dạng cộng tối ưu hoá.")
-    print(f"[2. ΣV × core  ] V nhân giảm {impr_harm}% so với bỏ V. "
-          "THIÊN VỊ dạng NHÂN: dùng lại `core` của chính công thức P (lập luận vòng).")
-    print(f"[3. ΣV | F>0,7 ] V nhân giảm {impr_severe}% so với bỏ V; "
-          f"{impr_severe_vs_add}% so với dạng CỘNG.")
-    print("     TRUNG LẬP: ngưỡng ngập F > 0,7 là tiêu chí ngoài công thức P, không dùng")
-    print("     core, không dùng omega. Đây là metric duy nhất trong ba cái nên dùng để")
-    print("     KẾT LUẬN; hai metric đầu chỉ để cho thấy kết quả phụ thuộc cách chọn metric.")
-    if impr_severe_vs_add <= 0:
-        print("\nKẾT LUẬN TRUNG THỰC: trên metric trung lập, dạng NHÂN KHÔNG tốt hơn dạng CỘNG.")
-        print("Vậy V_agg dạng nhân phải được đóng khung là LỰA CHỌN GIÁ TRỊ CHUẨN TẮC")
-        print("(triage ưu tiên người dễ tổn thương), không phải tối ưu khách quan đã chứng minh.")
-    else:
-        print(f"\nTrên metric trung lập, dạng NHÂN tốt hơn dạng CỘNG {impr_severe_vs_add}%.")
+    print_table("Exp7 — trung bình theo seed (đã lấy trung bình 3 depot)", per_seed)
+    print_table("Exp7 — outcome đa seed, bootstrap CI 95%", summary)
+    print_table("Exp7 — Wilcoxon ghép cặp trên metric trung lập", comparisons)
 
-    out = {
+    output = [{
         "config": {
             "n_boats": N_BOATS,
             "v_boat_kmh": V_BOAT_KMH,
             "t_serve_min": T_SERVE_MIN,
+            "min_cluster_serve": MIN_CLUSTER_SERVE,
+            "min_confidence_serve": MIN_CONFIDENCE_SERVE,
+            "n_seeds": N_SEEDS,
+            "depots": ["regional_centroid", "Hue", "Da_Nang"],
+            "geom_jitter": 0.20,
         },
-        "policies": rows,
-        "improvement_pct_vulnerable_full_vs_noV": impr_twv,
-        "improvement_pct_harm_full_vs_noV": impr_harm,
-        "improvement_pct_severe_full_vs_noV": impr_severe,
-        "improvement_pct_severe_full_vs_additive": impr_severe_vs_add,
-        "metric_bias_note": {
-            "time_to_vulnerable_min": "thiên vị dạng CỘNG (trọng số phẳng theo ΣV)",
-            "harm_weighted_time_min": "thiên vị dạng NHÂN (dùng lại core của P)",
-            "severe_flood_vulnerable_time_min": "TRUNG LẬP (ngưỡng F>0,7 ngoài công thức P)",
-        },
+        "summary": summary,
+        "paired_comparisons": comparisons,
         "primary_metric": "severe_flood_vulnerable_time_min",
-    }
-    save_table("exp7_equity_outcome.json", [out])
-    print("\n[saved] exp7_equity_outcome.json -> results/tables/")
+        "metric_bias_note": {
+            "time_to_vulnerable_min":
+                "thiên vị dạng cộng (trọng số phẳng theo sum V)",
+            "harm_weighted_time_min":
+                "thiên vị dạng nhân (dùng lại core của P)",
+            "severe_flood_vulnerable_time_min":
+                "trung lập hơn: ngưỡng F>0.7 nằm ngoài công thức P",
+        },
+    }]
+    save_table("exp7_equity_outcome.json", output)
+    save_table("exp7_equity_per_seed.json", per_seed)
+    save_table("exp7_equity_per_seed_depot.json", detail)
+    print("\n[saved] exp7_equity_*.json -> results/tables/")
 
 
 if __name__ == "__main__":

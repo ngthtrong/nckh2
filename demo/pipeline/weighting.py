@@ -160,7 +160,8 @@ def implied_distance_cutoff(p: WeightParams, theta: float) -> float:
 
 
 def additive_floor(events: list[Event], p: WeightParams,
-                   alpha: float | None = None) -> float:
+                   alpha: float | None = None,
+                   mode: str = "additive") -> float:
     """Sàn dương, ĐỘC LẬP KHOẢNG CÁCH, của dạng cộng — Hệ quả của Bổ đề 1.
 
     Với `w_ij = alpha*S_geo + beta*S_temp + gamma*S_ctx`, mọi cặp thoả
@@ -180,7 +181,12 @@ def additive_floor(events: list[Event], p: WeightParams,
     temp = np.exp(-np.abs(ts[:, None] - ts[None, :]) / p.tau_temp_min)
     ctx = np.exp(-np.abs(flood[:, None] - flood[None, :]) / p.tau_f
                  - np.abs(urg[:, None] - urg[None, :]) / p.tau_e)
-    floor = p.beta * temp + p.gamma * ctx
+    if mode == "additive_norm":
+        floor = (temp + ctx) / 3.0
+    elif mode == "additive":
+        floor = p.beta * temp + p.gamma * ctx
+    else:
+        raise ValueError(f"mode không hỗ trợ sàn dạng cộng: {mode!r}")
     iu = np.triu_indices(len(events), k=1)
     return float(floor[iu].min()) if len(iu[0]) else 0.0
 

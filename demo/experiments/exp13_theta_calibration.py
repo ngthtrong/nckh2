@@ -141,7 +141,8 @@ def verify_lemma1(events, gt):
     summary = []
     detail = {}
     for label, slug, mode, alpha, thetas in FORMS:
-        floor = (additive_floor(events, C.weight, alpha=alpha)
+        floor = (additive_floor(
+                    events, C.weight, alpha=alpha, mode=mode)
                  if mode in ("additive", "additive_norm") else None)
         rows = []
         n_violations = 0

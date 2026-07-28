@@ -183,6 +183,65 @@ def _stability_structure(events):
     return rows
 
 
+def _n_ref_online_stability(events, labels):
+    """Stress test mốc dân số tĩnh so với mốc động khi cụm mới xuất hiện.
+
+    Ta giữ 10 cụm ban đầu nhỏ nhất, rồi thêm các cụm còn lại theo kích thước tăng
+    dần để cụm lớn nhất xuất hiện cuối. Đây là kịch bản bất lợi nhưng hợp lệ cho
+    chuẩn hoá động: trạng thái của 10 cụm neo không đổi, nên điểm của chúng không
+    được phép trôi chỉ vì một khu vực khác vừa gửi thêm báo cáo.
+    """
+    groups: dict[int, list[int]] = {}
+    for i, lab in enumerate(labels):
+        groups.setdefault(lab, []).append(i)
+    ordered = sorted(groups, key=lambda cid: (len(groups[cid]), cid))
+    n_anchor = min(10, max(3, len(ordered) // 4))
+    anchor = ordered[:n_anchor]
+    additions = ordered[n_anchor:]
+
+    def _score(selected, n_ref):
+        idx = [i for cid in selected for i in groups[cid]]
+        sub_events = [events[i] for i in idx]
+        sub_labels = [labels[i] for i in idx]
+        return score_clusters(
+            sub_events, sub_labels, C.priority, n_ref=n_ref
+        )
+
+    base_static = {s.cluster_id: s for s in _score(anchor, C.priority.n_ref)}
+    base_dynamic = {s.cluster_id: s for s in _score(anchor, "dynamic")}
+    base_order_static = sorted(anchor, key=lambda c: base_static[c].priority, reverse=True)
+    base_order_dynamic = sorted(anchor, key=lambda c: base_dynamic[c].priority, reverse=True)
+
+    rows = []
+    selected = list(anchor)
+    for step, cid in enumerate(additions, start=1):
+        selected.append(cid)
+        cur_static = {s.cluster_id: s for s in _score(selected, C.priority.n_ref)}
+        cur_dynamic = {s.cluster_id: s for s in _score(selected, "dynamic")}
+        static_order = sorted(anchor, key=lambda c: cur_static[c].priority, reverse=True)
+        dynamic_order = sorted(anchor, key=lambda c: cur_dynamic[c].priority, reverse=True)
+        static_drift = [
+            abs(cur_static[c].priority - base_static[c].priority) for c in anchor
+        ]
+        dynamic_drift = [
+            abs(cur_dynamic[c].priority - base_dynamic[c].priority) for c in anchor
+        ]
+        rows.append({
+            "step": step,
+            "added_cluster_size": len(groups[cid]),
+            "n_clusters_visible": len(selected),
+            "static_tau_anchor": round(
+                _tau_vs_baseline(base_order_static, static_order), 4
+            ),
+            "dynamic_tau_anchor": round(
+                _tau_vs_baseline(base_order_dynamic, dynamic_order), 4
+            ),
+            "static_max_abs_priority_drift": round(max(static_drift), 6),
+            "dynamic_max_abs_priority_drift": round(max(dynamic_drift), 6),
+        })
+    return rows
+
+
 def main():
     events = prepared_events()
     w = build_weight_matrix(events, C.weight, mode="gating")
@@ -202,8 +261,13 @@ def main():
     print_table("Ổn định xếp hạng khi CẤU TRÚC cụm đổi (sigma_geo, khớp trọng tâm)", rows_struct)
     save_table("exp5_structural_stability.json", rows_struct)
 
+    rows_nref = _n_ref_online_stability(events, lab)
+    print_table("Ổn định xuyên thời gian: N_ref tĩnh vs N_max động", rows_nref)
+    save_table("exp5_nref_stability.json", rows_nref)
+
     print("\n[saved] exp5_ranking_stability.json, exp5_scale_stability.json, "
-          "exp5_structural_stability.json -> results/tables/")
+          "exp5_structural_stability.json, exp5_nref_stability.json "
+          "-> results/tables/")
 
 
 if __name__ == "__main__":

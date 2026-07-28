@@ -99,7 +99,12 @@ def score_clusters(
         else:
             f_max = max(ev.flood for ev in members)
         n_raw = n_totals[cid]
-        n_norm = (math.log1p(n_raw) / log_nmax) if log_nmax > 0 else 0.0
+        # Chặn tại 1 để `n_ref` là một mốc bão hoà thật sự. Nếu dân số cụm vượt
+        # 500 người, không chặn sẽ làm Ñ>1 và phá miền P in [0,2) đã công bố.
+        n_norm = (
+            min(1.0, math.log1p(n_raw) / log_nmax)
+            if log_nmax > 0 else 0.0
+        )
 
         v_sum = sum(ev.vulnerability for ev in members)
         v_agg = 1.0 + (params.v_cap_mu - 1.0) * math.tanh(v_sum / params.v_scale)

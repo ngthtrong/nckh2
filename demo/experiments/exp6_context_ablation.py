@@ -13,6 +13,7 @@ Bỏ S_context mà giữ gating: đặt gamma=0 -> w_ij = S_geo * (beta*S_temp).
 from __future__ import annotations
 
 from scipy.stats import kendalltau
+from sklearn.metrics import adjusted_rand_score
 
 from common import prepared_events, print_table, save_table
 from pipeline.config import DEFAULT_CONFIG as C
@@ -91,8 +92,17 @@ def main():
 
     q_full = cluster_quality(lab_full, gt)
     q_abl = cluster_quality(lab_abl, gt)
-    sp_full = geographic_spread(events, lab_full)
-    sp_abl = geographic_spread(events, lab_abl)
+    sp_full = geographic_spread(events, lab_full, gt_labels=gt)
+    sp_abl = geographic_spread(events, lab_abl, gt_labels=gt)
+
+    # Ba cặp nhãn 0/1, 2/3, 4/5 chồng lấn không gian. Đây là tập con quyết
+    # định: nếu S_context có tác dụng, hiệu ứng phải hiện ra tại đây.
+    overlap_idx = [i for i, g in enumerate(gt) if g in {0, 1, 2, 3, 4, 5}]
+    overlap_gt = [gt[i] for i in overlap_idx]
+    overlap_full = [lab_full[i] for i in overlap_idx]
+    overlap_abl = [lab_abl[i] for i in overlap_idx]
+    overlap_full_ari = float(adjusted_rand_score(overlap_gt, overlap_full))
+    overlap_abl_ari = float(adjusted_rand_score(overlap_gt, overlap_abl))
 
     # Xếp hạng P trên mỗi đồ thị
     rank_full = _priority_by_centroid(events, lab_full, C.priority)
@@ -120,11 +130,15 @@ def main():
         "graph_full_ari": q_full["ari"],
         "graph_full_nmi": q_full["nmi"],
         "graph_full_n_clusters": sp_full["n_clusters"],
-        "graph_full_mean_diam_km": sp_full["mean_diameter_km"],
+        "graph_full_mean_diam_km_labeled": sp_full["mean_diameter_km_labeled"],
         "graph_ablate_ari": q_abl["ari"],
         "graph_ablate_nmi": q_abl["nmi"],
         "graph_ablate_n_clusters": sp_abl["n_clusters"],
-        "graph_ablate_mean_diam_km": sp_abl["mean_diameter_km"],
+        "graph_ablate_mean_diam_km_labeled": sp_abl["mean_diameter_km_labeled"],
+        "overlap_subset_n": len(overlap_idx),
+        "overlap_subset_full_ari": round(overlap_full_ari, 4),
+        "overlap_subset_ablate_ari": round(overlap_abl_ari, 4),
+        "overlap_subset_ari_drop": round(overlap_full_ari - overlap_abl_ari, 4),
         "n_matched_clusters": len(xf),
         "kendall_tau_ranking": tau,
         "top5_matched_by_centroid": top5_overlap,
