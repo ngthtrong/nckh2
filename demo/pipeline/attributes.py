@@ -19,8 +19,13 @@ class Event:
     n_trapped: int              # N_i
     vulnerability: float        # V_i >= 0 (tổng trọng số đối tượng yếu thế)
     has_image: bool             # tín hiệu cho C_i
+    source_type: str = "unknown"  # provenance quan sát được; không phải nhãn GT
     province: str = ""
     note: str = ""
+    # Tên các trường F/E/N/V không có trong báo cáo nguồn. Candidate v4.1 dùng
+    # zero-imputation khóa trước kết quả và giữ mask này để không nhầm giá trị
+    # quan sát bằng 0 với giá trị bị thiếu.
+    missing_fields: tuple[str, ...] = ()
     gt_cluster: int = -1        # nhãn cụm ground-truth (-1 nếu nhiễu)
     is_fake: bool = False       # đánh dấu báo cáo giả (để đánh giá tác động C_i)
     confidence: float = field(default=1.0)  # C_i (điền sau khi tính heuristic)
@@ -48,15 +53,38 @@ def compute_confidence(events: list[Event], params: ConfidenceParams) -> None:
     C_i = sigmoid(b0 + b1*1[có ảnh] + b2*log(1 + n_corrob))
     n_corrob = số báo cáo lân cận (cùng vùng không gian + cửa sổ thời gian).
     """
+    # Count unique observable payloads rather than transport-level report IDs.
+    # Otherwise one exact duplicate would increase C for itself and every
+    # nearby report before the duplicate-aware priority estimator can act.
+    fingerprints = [
+        (
+            ev.lat,
+            ev.lng,
+            ev.created_at.isoformat(),
+            ev.flood,
+            ev.urgency,
+            ev.n_trapped,
+            ev.vulnerability,
+            ev.has_image,
+            ev.source_type,
+            ev.province,
+            tuple(ev.missing_fields),
+        )
+        for ev in events
+    ]
     for i, ev in enumerate(events):
-        n_corrob = 0
+        corroborating_payloads = set()
         for j, other in enumerate(events):
             if i == j:
+                continue
+            if fingerprints[i] == fingerprints[j]:
+                # Same evidence unit; exact multiplicity is not corroboration.
                 continue
             dist = haversine_m(ev.lat, ev.lng, other.lat, other.lng)
             dt_min = abs((ev.created_at - other.created_at).total_seconds()) / 60.0
             if dist <= params.corrob_radius_m and dt_min <= params.corrob_window_min:
-                n_corrob += 1
+                corroborating_payloads.add(fingerprints[j])
+        n_corrob = len(corroborating_payloads)
         # lưu n_corrob như một trường của Event để Thí nghiệm 8 báo cáo được AUC
         # của TỪNG đặc trưng cạnh C_i (phản biện §4 / P2.4).
         ev.n_corrob = n_corrob

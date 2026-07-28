@@ -9,11 +9,38 @@ S_context= exp(-|dF|/tau_F - |dE|/tau_E)            [tương đồng vật lý]
 from __future__ import annotations
 
 import math
+from dataclasses import dataclass
+from typing import Literal
 
 import numpy as np
 
 from .attributes import Event, haversine_m
 from .config import WeightParams
+
+
+BoundStatus = Literal["finite", "unbounded", "empty"]
+
+
+@dataclass(frozen=True)
+class GeographicBound:
+    """Kết quả phân loại cận địa lý theo đúng miền tham số.
+
+    `radius_m` chỉ có giá trị khi `status == "finite"`. Hai trạng thái còn lại
+    được tách rõ để caller không biến tập cạnh rỗng thành cận bán kính 0, hoặc
+    biến miền không có cận thành một con số dùng để đếm "vi phạm".
+    """
+
+    form: Literal["product", "additive"]
+    status: BoundStatus
+    theta: float
+    beta_gamma_sum: float
+    radius_m: float | None
+    alpha: float | None = None
+
+    @property
+    def domain_eligible(self) -> bool:
+        """Chỉ miền `finite` mới đủ điều kiện kiểm bất đẳng thức khoảng cách."""
+        return self.status == "finite"
 
 
 def s_geo(a: Event, b: Event, sigma_geo_m: float) -> float:
@@ -137,26 +164,124 @@ def build_weight_matrix_vec(events: list[Event], p: WeightParams,
     return w
 
 
-def implied_distance_cutoff(p: WeightParams, theta: float) -> float:
-    """Cận trên khoảng cách của mọi cạnh còn lại sau khi làm thưa ở ngưỡng theta.
+def _validate_bound_parameters(
+    p: WeightParams, theta: float, alpha: float | None = None
+) -> float:
+    """Kiểm các giả thiết chung của đặc tả toán học trước khi phân loại miền."""
+    values = {
+        "theta": theta,
+        "sigma_geo_m": p.sigma_geo_m,
+        "beta": p.beta,
+        "gamma": p.gamma,
+    }
+    if alpha is not None:
+        values["alpha"] = alpha
+    for name, value in values.items():
+        if not math.isfinite(value):
+            raise ValueError(f"{name} phải là số hữu hạn, nhận {value!r}")
+    if p.sigma_geo_m <= 0.0:
+        raise ValueError(f"sigma_geo_m phải > 0, nhận {p.sigma_geo_m!r}")
+    if p.beta < 0.0 or p.gamma < 0.0:
+        raise ValueError(
+            "cận địa lý yêu cầu beta, gamma không âm; "
+            f"nhận beta={p.beta!r}, gamma={p.gamma!r}"
+        )
+    if alpha is not None and alpha < 0.0:
+        raise ValueError(f"cận dạng cộng yêu cầu alpha không âm, nhận {alpha!r}")
+    b_sum = p.beta + p.gamma
+    if not math.isfinite(b_sum):
+        raise ValueError("beta + gamma phải biểu diễn được bằng số hữu hạn")
+    return b_sum
 
-    Đây là hệ quả trực tiếp của Bổ đề 1 (Mục 4.2). Với dạng NHÂN
-    `w_ij = S_geo(d_ij) * (beta*S_temp + gamma*S_ctx)` và `beta + gamma <= 1`, ta có
-    `w_ij <= S_geo(d_ij)`, nên
 
-        w_ij > theta  =>  exp(-d^2 / 2 sigma^2) > theta  =>  d < sigma*sqrt(2 ln(1/theta))
+def product_distance_bound(p: WeightParams, theta: float) -> GeographicBound:
+    """Phân loại cận khoảng cách cho dạng nhân trên TOÀN miền ngưỡng.
 
-    Trả về `sigma_geo_m * sqrt(2 * ln(1/theta))` (mét). Với sigma = 700 m,
-    theta = 0,05 -> 1713 m.
+    Đặt `B = beta + gamma`. Miền hữu hạn duy nhất là `B > 0` và
+    `0 < theta < B`, khi đó mọi cạnh với `weight > theta` thoả
 
-    theta >= 1 trả 0.0 (không cạnh nào sống sót); theta <= 0 trả `inf` (không có
-    cận — đúng về mặt toán học vì ngưỡng 0 không loại cạnh nào).
+        d < sigma_geo_m * sqrt(2 * log(B / theta)).
+
+    `status="empty"` nghĩa là không cạnh nào có thể vượt ngưỡng; đó không phải
+    cận bán kính 0. `status="unbounded"` nghĩa là không có cận hữu hạn suy ra từ
+    các tham số này. Xem `revision/math-spec.md`.
     """
-    if theta <= 0.0:
-        return float("inf")
-    if theta >= 1.0:
-        return 0.0
-    return float(p.sigma_geo_m * math.sqrt(2.0 * math.log(1.0 / theta)))
+    b_sum = _validate_bound_parameters(p, theta)
+    if theta < 0.0:
+        return GeographicBound("product", "unbounded", theta, b_sum, None)
+    if b_sum == 0.0:
+        return GeographicBound("product", "empty", theta, b_sum, None)
+    if theta == 0.0:
+        return GeographicBound("product", "unbounded", theta, b_sum, None)
+    if theta >= b_sum:
+        return GeographicBound("product", "empty", theta, b_sum, None)
+    log_ratio = math.log(b_sum) - math.log(theta)
+    radius = p.sigma_geo_m * math.sqrt(2.0 * log_ratio)
+    if not math.isfinite(radius):
+        raise OverflowError("cận product hữu hạn về toán học nhưng tràn kiểu float")
+    return GeographicBound("product", "finite", theta, b_sum, float(radius))
+
+
+def additive_distance_bound(
+    p: WeightParams, theta: float, alpha: float | None = None
+) -> GeographicBound:
+    """Phân loại cận khoảng cách cho dạng cộng trên TOÀN miền ngưỡng.
+
+    Với `B = beta + gamma` và `a = p.alpha` (hoặc `alpha` tường minh):
+
+    - `B < theta < B + a`: cận hữu hạn
+      `sigma * sqrt(2 * log(a / (theta - B)))`;
+    - `theta >= B + a`: tập cạnh rỗng dưới ngưỡng strict;
+    - miền thấp còn lại: không có cận hữu hạn, ngoại trừ trường hợp suy biến
+      `a == 0 and theta == B` cũng là tập rỗng.
+    """
+    a_w = p.alpha if alpha is None else alpha
+    b_sum = _validate_bound_parameters(p, theta, a_w)
+    total = b_sum + a_w
+    if not math.isfinite(total):
+        raise ValueError("alpha + beta + gamma phải biểu diễn được bằng số hữu hạn")
+    if theta < 0.0:
+        return GeographicBound(
+            "additive", "unbounded", theta, b_sum, None, alpha=a_w
+        )
+    if theta >= total:
+        return GeographicBound(
+            "additive", "empty", theta, b_sum, None, alpha=a_w
+        )
+    if theta <= b_sum:
+        return GeographicBound(
+            "additive", "unbounded", theta, b_sum, None, alpha=a_w
+        )
+    # `theta < total` và `theta > B` kéo theo `a_w > 0`.
+    log_ratio = math.log(a_w) - math.log(theta - b_sum)
+    radius = p.sigma_geo_m * math.sqrt(2.0 * log_ratio)
+    if not math.isfinite(radius):
+        raise OverflowError("cận additive hữu hạn về toán học nhưng tràn kiểu float")
+    return GeographicBound(
+        "additive", "finite", theta, b_sum, float(radius), alpha=a_w
+    )
+
+
+def implied_distance_cutoff(p: WeightParams, theta: float) -> float:
+    """Cận product hữu hạn, giữ tên cũ cho caller trong miền hợp lệ.
+
+    Khác implementation cũ, hàm không trả `0.0` cho tập cạnh rỗng và không trả
+    `inf` cho miền không có cận. Hai giá trị đó khiến code downstream có thể
+    đếm "vi phạm" ngoài miền định lý. Dùng `product_distance_bound` nếu caller
+    cần xử lý cả ba trạng thái.
+
+    Với cấu hình cũ `beta + gamma == 1`, kết quả trong `0 < theta < 1` không
+    đổi. Với tổng hệ số khác 1, hàm dùng cận chặt tổng quát chứa `B`.
+    """
+    bound = product_distance_bound(p, theta)
+    if not bound.domain_eligible:
+        raise ValueError(
+            "implied_distance_cutoff chỉ xác định trong miền product hữu hạn "
+            f"(0 < theta < beta + gamma); trạng thái nhận được: {bound.status!r}. "
+            "Dùng product_distance_bound để xử lý miền đầy đủ."
+        )
+    assert bound.radius_m is not None
+    return bound.radius_m
 
 
 def additive_floor(events: list[Event], p: WeightParams,
@@ -209,9 +334,10 @@ def max_edge_distance_above(events: list[Event], p: WeightParams, theta: float,
                             alpha: float | None = None) -> tuple[float, int]:
     """`max{d_ij : w_ij > theta}` (mét) và số cạnh vượt ngưỡng.
 
-    Đại lượng thực nghiệm để kiểm Bổ đề 1: với dạng nhân giá trị này phải LUÔN
-    nhỏ hơn `implied_distance_cutoff(p, theta)`; với dạng cộng nó phải VI PHẠM
-    cận đó ở theta nhỏ hơn `additive_floor`.
+    Đại lượng thực nghiệm để kiểm định lý trong MIỀN HỮU HẠN đã khai báo.
+    Caller phải dùng `product_distance_bound` hoặc `additive_distance_bound`
+    để xác nhận miền trước khi so khoảng cách; không đếm hàng `empty` hay
+    `unbounded` như một phép kiểm cận.
 
     Trả về `(0.0, 0)` khi không cạnh nào vượt ngưỡng.
     """
@@ -247,9 +373,9 @@ def retained_fraction(events: list[Event], p: WeightParams, theta: float,
 def max_retained_distance(events: list[Event], w: np.ndarray, theta: float) -> float:
     """Khoảng cách LỚN NHẤT giữa hai đầu của một cạnh có w_ij > theta (mét).
 
-    Dùng để kiểm Bổ đề 1 bằng thực nghiệm: với dạng nhân giá trị này phải luôn
-    nhỏ hơn `implied_distance_cutoff`; với dạng cộng nó vượt cận khi theta nhỏ
-    hơn sàn (`additive_floor`). Trả 0.0 nếu không còn cạnh nào.
+    Đây chỉ là phép đo dữ liệu. Caller phải phân loại miền bằng
+    `product_distance_bound`/`additive_distance_bound` trước khi diễn giải nó
+    như một phép kiểm định lý. Trả 0.0 nếu không còn cạnh nào.
     """
     n = len(events)
     max_d = 0.0
@@ -263,11 +389,11 @@ def max_retained_distance(events: list[Event], w: np.ndarray, theta: float) -> f
 
 
 def sparsify(w: np.ndarray, p: WeightParams) -> np.ndarray:
-    """Làm thưa đồ thị: ngưỡng epsilon + k-NN (Mục 4.2)."""
+    """Làm thưa đồ thị: strict threshold `weight > theta` + k-NN."""
     n = w.shape[0]
     out = w.copy()
-    # (i) ngưỡng epsilon
-    out[out < p.edge_threshold] = 0.0
+    # (i) strict threshold: proof, diagnostics và code cùng dùng `w > theta`.
+    out[out <= p.edge_threshold] = 0.0
     # (ii) k-NN: mỗi đỉnh chỉ giữ k cạnh trọng số cao nhất (đối xứng hóa bằng OR)
     if p.knn and p.knn > 0 and p.knn < n:
         mask = np.zeros_like(out, dtype=bool)

@@ -1,0 +1,155 @@
+{
+  "schema_version": "baseline-registry-v1",
+  "max_configurations_per_method_per_track": 128,
+  "noise_convention": {
+    "unassigned_label": -1,
+    "unassigned_is_cluster": false,
+    "all_points_methods": [
+      "product_louvain",
+      "additive_louvain",
+      "multiple_similarity_louvain",
+      "spatial_constrained_agglomerative",
+      "product_leiden",
+      "product_spectral"
+    ]
+  },
+  "methods": [
+    {
+      "id": "product_louvain",
+      "role": "proposed",
+      "inputs": ["geo", "time", "context"],
+      "preset_k": false,
+      "search_space": {
+        "sigma_geo_m": [500, 700, 900, 1200],
+        "threshold_quantile": [0.85, 0.9, 0.95, 0.98],
+        "tau_temp_min": [30, 60],
+        "knn": [8, 16],
+        "resolution": [0.8, 1.2]
+      },
+      "configuration_count": 128
+    },
+    {
+      "id": "additive_louvain",
+      "role": "composition_family",
+      "inputs": ["geo", "time", "context"],
+      "preset_k": false,
+      "search_space": {
+        "alpha": [0.3333333333333333, 0.5, 1.0],
+        "sigma_geo_m": [500, 900],
+        "threshold_quantile": [0.85, 0.9, 0.95, 0.98],
+        "knn": [8, 16],
+        "resolution": [0.8, 1.2]
+      },
+      "configuration_count": 96
+    },
+    {
+      "id": "multiple_similarity_louvain",
+      "role": "feasible_convex_mixture",
+      "inputs": ["geo", "time", "context"],
+      "preset_k": false,
+      "search_space": {
+        "simplex_weights": [
+          [0.6, 0.2, 0.2],
+          [0.2, 0.6, 0.2],
+          [0.2, 0.2, 0.6],
+          [0.5, 0.5, 0.0],
+          [0.5, 0.0, 0.5],
+          [0.0, 0.5, 0.5],
+          [0.3333333333333333, 0.3333333333333333, 0.3333333333333333],
+          [0.4, 0.3, 0.3],
+          [0.3, 0.4, 0.3],
+          [0.3, 0.3, 0.4]
+        ],
+        "threshold_quantile": [0.85, 0.9, 0.95, 0.98],
+        "resolution": [0.8, 1.2]
+      },
+      "configuration_count": 80
+    },
+    {
+      "id": "st_dbscan",
+      "role": "direct_spatiotemporal",
+      "inputs": ["geo", "time"],
+      "preset_k": false,
+      "search_space": {
+        "spatial_eps_m": [500, 800, 1200, 1800],
+        "temporal_eps_min": [30, 60, 120, 240],
+        "min_samples": [3, 5, 8]
+      },
+      "configuration_count": 48
+    },
+    {
+      "id": "dbscan_geo_time_context",
+      "role": "density",
+      "inputs": ["geo", "time", "context"],
+      "preset_k": false,
+      "search_space": {
+        "eps": [0.35, 0.5, 0.7, 1.0],
+        "min_samples": [3, 5, 8],
+        "scaler": ["robust", "standard"]
+      },
+      "configuration_count": 24
+    },
+    {
+      "id": "hdbscan_geo_time_context",
+      "role": "density",
+      "inputs": ["geo", "time", "context"],
+      "preset_k": false,
+      "search_space": {
+        "min_cluster_size": [3, 5, 8, 12, 20],
+        "min_samples": [null, 3, 5],
+        "scaler": ["robust", "standard"]
+      },
+      "configuration_count": 30
+    },
+    {
+      "id": "spatial_constrained_agglomerative",
+      "role": "spatial_constraint",
+      "inputs": ["geo_connectivity", "time", "context"],
+      "preset_k": "calibration",
+      "search_space": {
+        "connectivity_radius_m": [800, 1200, 1800, 2500],
+        "n_clusters": [10, 13, 16, 20],
+        "time_context_mix": [0.25, 0.5, 0.75, 1.0]
+      },
+      "configuration_count": 64
+    },
+    {
+      "id": "product_leiden",
+      "role": "same_representation_partitioner",
+      "inputs": ["selected_product_affinity"],
+      "preset_k": false,
+      "search_space": {
+        "resolution": [0.5, 0.7, 0.8, 1.0, 1.2, 1.4, 1.7, 2.0]
+      },
+      "configuration_count": 8
+    },
+    {
+      "id": "product_spectral",
+      "role": "same_representation_partitioner",
+      "inputs": ["selected_product_affinity"],
+      "preset_k": "calibration",
+      "oracle_k_is_primary": false,
+      "search_space": {
+        "n_clusters": [10, 13, 16, 20]
+      },
+      "configuration_count": 4
+    },
+    {
+      "id": "coordinate_kmeans",
+      "role": "weak_diagnostic_only",
+      "inputs": ["geo"],
+      "preset_k": "calibration",
+      "equivalent_competitor": false,
+      "search_space": {
+        "n_clusters": [10, 13, 16, 20]
+      },
+      "configuration_count": 4
+    }
+  ],
+  "factorial_ablations": {
+    "clustering_factors": ["geography", "time", "context", "knn"],
+    "clustering_variant_count": 16,
+    "priority_factors": ["confidence", "vulnerability", "aggregator"],
+    "report_interactions": true
+  }
+}
