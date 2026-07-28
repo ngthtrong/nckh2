@@ -30,6 +30,7 @@ from common import prepared_events, print_table, save_table
 from pipeline.config import DEFAULT_CONFIG as C
 from pipeline.clustering import run_louvain, run_leiden
 from pipeline.weighting import build_weight_matrix, sparsify
+from pipeline.metrics import geographic_spread
 from pipeline.baselines import (
     run_spectral,
     run_hdbscan_on_graph,
@@ -78,24 +79,34 @@ def main():
     k_lou = len(set(lou))
 
     methods = {
-        "Louvain (gating)": lou,
-        "Leiden (gating)": run_leiden(ws, C.cluster.resolution, C.cluster.random_state),
-        "Spectral (gating)": run_spectral(ws, k_lou),
-        "HDBSCAN (gating)": run_hdbscan_on_graph(ws),
-        "Agglomerative (gating)": run_agglomerative_on_graph(ws, k_lou),
+        "Louvain (gating)": (lou, None),
+        "Leiden (gating)": (
+            run_leiden(ws, C.cluster.resolution, C.cluster.random_state), None),
+        "Spectral (gating)": (run_spectral(ws, k_lou), None),
+        "HDBSCAN (gating)": (run_hdbscan_on_graph(ws), -1),
+        "Agglomerative (gating)": (
+            run_agglomerative_on_graph(ws, k_lou), None),
         # K = 14 (số nhãn ground-truth thật) để KHỚP exp4 — cùng thuật toán thì
         # phải cùng tham số, nếu không bảng 9 và bảng 6 sẽ báo hai ARI khác nhau
         # cho "cùng" một baseline (loop 14, chất vấn 14.5).
         # Nhãn nêu ĐÚNG không gian đặc trưng: các baseline này chạy trên
         # [lat, lng, F, E] đã chuẩn hóa, KHÔNG phải toạ độ thuần (xem exp4).
-        f"K-Means (coords+F,E, K={n_gt})": run_kmeans(events, n_gt),
-        "DBSCAN (coords+F,E, eps=0.6)": run_dbscan(events, eps=0.6),
+        f"K-Means (coords+F,E, K={n_gt})": (run_kmeans(events, n_gt), None),
+        "DBSCAN (coords+F,E, eps=0.6)": (run_dbscan(events, eps=0.6), -1),
     }
 
     rows = []
-    for name, lab in methods.items():
-        s = _scores(lab, gt)
+    for name, (lab, noise_label) in methods.items():
+        s = _scores(lab, gt, noise_label=noise_label)
+        sp = geographic_spread(
+            events, lab, noise_label=noise_label, gt_labels=gt
+        )
         s = {"method": name, **s}
+        s.update({
+            "mean_diam_km_labeled": sp["mean_diameter_km_labeled"],
+            "max_diam_km_labeled": sp["max_diameter_km_labeled"],
+            "n_clusters_noise_only": sp["n_clusters_noise_only"],
+        })
         rows.append(s)
 
     # thước đo mức phân biệt: độ trải (max-min) của từng cột

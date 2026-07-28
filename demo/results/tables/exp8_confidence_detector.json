@@ -1,52 +1,182 @@
 [
   {
-    "detector": {
+    "marginal_detector": {
+      "feature": "1-C_i (combined heuristic)",
       "auc": 0.6919,
-      "auc_ci95_low": 0.6095,
-      "auc_ci95_high": 0.7693,
+      "auc_ci95_lo": 0.6095,
+      "auc_ci95_hi": 0.7693,
       "ap": 0.1546,
-      "ap_ci95_low": 0.1135,
-      "ap_ci95_high": 0.2267,
-      "baseline_ap_random": 0.0804,
-      "n_fake": 39,
-      "n_total": 485,
-      "n_bootstrap": 1000,
-      "mean_Ci_fake": 0.8173,
-      "mean_Ci_real": 0.9035
+      "ap_ci95_lo": 0.1135,
+      "ap_ci95_hi": 0.2267,
+      "baseline_ap": 0.0804,
+      "n": 485,
+      "n_fake": 39
     },
-    "adversarial": {
-      "Ci_naive_fake": 0.4502,
-      "Ci_ADV_IMG": 0.7685,
-      "Ci_ADV_CORR": 0.7403,
-      "Ci_ADV_BOTH": 0.9204,
-      "Ci_real_mean": 0.9035
-    },
-    "adversarial_detail": [
+    "single_features": [
       {
-        "report": "ADV_NAIVE (giả ngây thơ: cô lập, ko ảnh)",
-        "Ci": 0.4502,
-        "note": "tham chiếu baseline"
+        "feature": "1-C_i (combined heuristic)",
+        "auc": 0.6919,
+        "auc_ci95_lo": 0.6095,
+        "auc_ci95_hi": 0.7693,
+        "ap": 0.1546,
+        "ap_ci95_lo": 0.1135,
+        "ap_ci95_hi": 0.2267,
+        "baseline_ap": 0.0804,
+        "n": 485,
+        "n_fake": 39
       },
       {
-        "report": "ADV_IMG (giả + có ảnh)",
-        "Ci": 0.7685,
-        "note": "ảnh đẩy C_i lên"
+        "feature": "-n_corrob",
+        "auc": 0.6903,
+        "auc_ci95_lo": 0.5997,
+        "auc_ci95_hi": 0.7743,
+        "ap": 0.168,
+        "ap_ci95_lo": 0.1213,
+        "ap_ci95_hi": 0.2411,
+        "baseline_ap": 0.0804,
+        "n": 485,
+        "n_fake": 39
       },
       {
-        "report": "ADV_CORR_0 (giả + corroboration giả)",
-        "Ci": 0.7403,
-        "note": "phối hợp đẩy C_i lên"
-      },
-      {
-        "report": "ADV_BOTH_0 (giả + ảnh + corroboration)",
-        "Ci": 0.9204,
-        "note": "xấu nhất"
-      },
-      {
-        "report": "TB báo cáo THẬT",
-        "Ci": 0.9035,
-        "note": "mốc để so"
+        "feature": "1-has_image",
+        "auc": 0.5459,
+        "auc_ci95_lo": 0.4656,
+        "auc_ci95_hi": 0.6213,
+        "ap": 0.089,
+        "ap_ci95_lo": 0.0764,
+        "ap_ci95_hi": 0.1105,
+        "baseline_ap": 0.0804,
+        "n": 485,
+        "n_fake": 39
       }
-    ]
+    ],
+    "conditional_by_density": [
+      {
+        "density_tier": "n_corrob=0",
+        "auc": 0.4212,
+        "auc_ci95_lo": 0.2646,
+        "auc_ci95_hi": 0.5723,
+        "ap": 0.2138,
+        "ap_ci95_lo": 0.1989,
+        "ap_ci95_hi": 0.2674,
+        "baseline_ap": 0.2364,
+        "n": 55,
+        "n_fake": 13
+      },
+      {
+        "density_tier": "n_corrob=1-5",
+        "auc": 0.468,
+        "auc_ci95_lo": 0.2625,
+        "auc_ci95_hi": 0.6857,
+        "ap": 0.1246,
+        "ap_ci95_lo": 0.0849,
+        "ap_ci95_hi": 0.3118,
+        "baseline_ap": 0.1098,
+        "n": 82,
+        "n_fake": 9
+      },
+      {
+        "density_tier": "n_corrob>5",
+        "auc": 0.6234,
+        "auc_ci95_lo": 0.4908,
+        "auc_ci95_hi": 0.7401,
+        "ap": 0.0694,
+        "ap_ci95_lo": 0.053,
+        "ap_ci95_hi": 0.1261,
+        "baseline_ap": 0.0489,
+        "n": 348,
+        "n_fake": 17
+      }
+    ],
+    "fake_campaign": [
+      {
+        "scenario": "fake_campaign",
+        "n": 4,
+        "mean_n_corrob": 10.75,
+        "mean_Ci": 0.9273,
+        "mean_fake_score_1_minus_Ci": 0.0727
+      },
+      {
+        "scenario": "other_fake",
+        "n": 35,
+        "mean_n_corrob": 8.26,
+        "mean_Ci": 0.8047,
+        "mean_fake_score_1_minus_Ci": 0.1953
+      },
+      {
+        "scenario": "real_reports",
+        "n": 446,
+        "mean_n_corrob": 15.17,
+        "mean_Ci": 0.9035,
+        "mean_fake_score_1_minus_Ci": 0.0965
+      }
+    ],
+    "parameter_sweep": [
+      {
+        "b1_image": 0.7,
+        "b2_corrob": 0.45,
+        "mean_Ci_fake": 0.6939,
+        "fake_population_retained_pct": 70.44,
+        "fake_population_reduced_pct": 29.56
+      },
+      {
+        "b1_image": 0.7,
+        "b2_corrob": 0.9,
+        "mean_Ci_fake": 0.7729,
+        "fake_population_retained_pct": 79.09,
+        "fake_population_reduced_pct": 20.91
+      },
+      {
+        "b1_image": 0.7,
+        "b2_corrob": 1.35,
+        "mean_Ci_fake": 0.8092,
+        "fake_population_retained_pct": 82.81,
+        "fake_population_reduced_pct": 17.19
+      },
+      {
+        "b1_image": 1.4,
+        "b2_corrob": 0.45,
+        "mean_Ci_fake": 0.7554,
+        "fake_population_retained_pct": 76.04,
+        "fake_population_reduced_pct": 23.96
+      },
+      {
+        "b1_image": 1.4,
+        "b2_corrob": 0.9,
+        "mean_Ci_fake": 0.8173,
+        "fake_population_retained_pct": 83.04,
+        "fake_population_reduced_pct": 16.96
+      },
+      {
+        "b1_image": 1.4,
+        "b2_corrob": 1.35,
+        "mean_Ci_fake": 0.8448,
+        "fake_population_retained_pct": 85.96,
+        "fake_population_reduced_pct": 14.04
+      },
+      {
+        "b1_image": 2.1,
+        "b2_corrob": 0.45,
+        "mean_Ci_fake": 0.7944,
+        "fake_population_retained_pct": 79.57,
+        "fake_population_reduced_pct": 20.43
+      },
+      {
+        "b1_image": 2.1,
+        "b2_corrob": 0.9,
+        "mean_Ci_fake": 0.8455,
+        "fake_population_retained_pct": 85.55,
+        "fake_population_reduced_pct": 14.45
+      },
+      {
+        "b1_image": 2.1,
+        "b2_corrob": 1.35,
+        "mean_Ci_fake": 0.868,
+        "fake_population_retained_pct": 88.02,
+        "fake_population_reduced_pct": 11.98
+      }
+    ],
+    "strongest_feature_by_auc": "1-C_i (combined heuristic)",
+    "interpretation": "C_i is an interpretable weighting convention, not a validated stand-alone misinformation detector."
   }
 ]
