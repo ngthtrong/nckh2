@@ -1,0 +1,53 @@
+flowchart TD
+  R0["R0: Audit repo và lập decision log"] --> Q0{"Gate 0: Chốt phạm vi tái nộp"}
+
+  Q0 --> A1["A1: Định lý và miền ngưỡng"]
+  Q0 --> B1["B1: Seed split và tuning budget"]
+  Q0 --> C1["C1: Semantics N, V, C và threat model"]
+  Q0 --> D1["D1: Audit generator và schema incident-level"]
+  Q0 --> E1["E1: Baseline registry và metric contract"]
+  Q0 --> F1["F1: Dependency lock và environment capture"]
+
+  A1 --> A2["A2: Test định lý và bound diagnostics"]
+  C1 --> C2["C2: Robust incident aggregation"]
+  C1 --> C4["C4: Outcome độc lập và Pareto protocol"]
+  D1 --> D2["D2: Candidate generator và dataset freeze"]
+  F1 --> F2["F2: Isolated run directory và manifest"]
+  B1 --> B2["B2: Nested calibration và matched density"]
+  E1 --> E2["E2: Tuned baselines và factorial ablation"]
+  E1 --> E3["E3: Split, merge, noise và workload metrics"]
+
+  C2 --> D2
+  B1 --> D2
+  F2 --> D2
+
+  A2 --> M0{"Gate 1: Method và data freeze"}
+  C2 --> M0
+  D2 --> M0
+
+  M0 --> B2
+  M0 --> E2
+  M0 --> E3
+  M0 --> C3["C3: Duplicate và adversarial robustness"]
+  M0 --> C4
+
+  D1 --> D3["D3: Real-data access và annotation protocol"]
+  D3 --> D4["D4: Real-data sanity check"]
+
+  B2 --> L0{"Gate 2: Protocol freeze trước test"}
+  E2 --> L0
+  E3 --> L0
+  C3 --> L0
+  C4 --> L0
+
+  L0 --> X0["X0: Chạy candidate suite trên test seeds một lần"]
+  F2 --> X0
+  X0 --> V0{"Gate 3: Result lock và audit"}
+
+  D4 -. "Nhánh đầy đủ nếu có dữ liệu thật" .-> V0
+
+  V0 --> G0["G0: Traceability và source-of-truth lock"]
+  G0 --> G1["G1: Viết lại main.tex, bảng và hình"]
+  G1 --> G2["G2: Response-to-reviewer"]
+  G2 --> F3["F3: Clean-room reproduction"]
+  F3 --> G3["G3: Final scientific audit và PDF tái nộp"]
