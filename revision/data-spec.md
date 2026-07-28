@@ -67,6 +67,7 @@ examined. Changing one changes the generator hash and reopens Gate 1.
 | Reported V noise | Normal `(0, 0.5)`, clipped to `[0,n_reported]` |
 | Source missingness | independent probabilities: F `0.04`, E `0.03`, N `0.06`, V `0.08` |
 | Missing-value handling | deterministic zero imputation plus observable sorted `missing_fields` mask |
+| Report serialization order | deterministic seed-based permutation after all report processes |
 | Supportive-overlap gate | center distance `<=900 m`, start delta `<=30 min`, latent F/E L1 delta `>=0.90` |
 | Adversarial-overlap gate | center distance `<=800 m`, start delta `<=30 min`, latent F/E L1 delta `<=0.25` |
 | Same-location temporal gate | center distance `<=300 m`, start delta `>=180 min`, latent F/E L1 delta `<=0.30` |
@@ -137,6 +138,14 @@ Evaluation-only fields are serialized in a separate nested object
 The loader exposes two explicit functions: an evaluation loader returning the
 full record and an inference loader returning only observable `Event` objects.
 There is no optional flag that silently leaks evaluation fields into inference.
+
+For incident-linked synthetic reports where `N` is observed, vulnerability is
+a person-count mass on the reported subset and therefore satisfies
+`0 <= vulnerability <= n_trapped`. When `N` is source-missing, its operational
+zero imputation is not treated as a population bound on an observed `V`.
+Deliberate unlinked adversarial claims may
+violate that relation (for example the V-inflation threat case); those are
+evaluation stress inputs, not plausible linked observations.
 
 ## Report generation
 

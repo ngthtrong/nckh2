@@ -9,6 +9,7 @@ import unittest
 from pathlib import Path
 
 from demo.experiments import protocol
+from demo.experiments.calibration import load_calibration_contract
 from demo.experiments.evaluation_protocol import load_locked_test_seeds
 
 
@@ -102,6 +103,89 @@ class ProtocolContractTests(unittest.TestCase):
             "within each declared co-primary family",
         )
 
+    def test_baseline_registry_has_hypotheses_and_audited_dependencies(self) -> None:
+        registry = json.loads(
+            (PROTOCOL_DIR / "baselines.json").read_text(encoding="utf-8")
+        )
+        self.assertEqual(registry["schema_version"], "baseline-registry-v2")
+        self.assertEqual(registry["dependency_audit"]["status"], "pass")
+        packages = registry["dependency_audit"]["packages"]
+        literature = registry["literature_audit"]
+        methods = registry["methods"]
+        self.assertEqual(len(methods), 10)
+
+        seen_ids: set[str] = set()
+        for method in methods:
+            with self.subTest(method=method["id"]):
+                self.assertNotIn(method["id"], seen_ids)
+                seen_ids.add(method["id"])
+                self.assertTrue(method["hypothesis"].strip())
+                self.assertIn("inputs", method)
+                self.assertIn("preset_k", method)
+                self.assertLessEqual(
+                    method["configuration_count"],
+                    registry["max_configurations_per_method_per_track"],
+                )
+                expanded_count = 1
+                for values in method["search_space"].values():
+                    expanded_count *= len(values)
+                self.assertEqual(
+                    expanded_count,
+                    method["configuration_count"],
+                )
+                implementation = method["implementation"]
+                self.assertTrue(implementation["entry_points"])
+                self.assertIn(
+                    implementation["status"],
+                    {"available", "adapter_required_before_gate_2"},
+                )
+                for dependency in implementation["dependencies"]:
+                    self.assertIn(dependency, packages)
+                    self.assertTrue(packages[dependency]["version"])
+                    self.assertTrue(packages[dependency]["license"])
+                    self.assertTrue(packages[dependency]["review_outcome"])
+                for literature_id in method["literature_ids"]:
+                    self.assertIn(literature_id, literature)
+
+        by_id = {method["id"]: method for method in methods}
+        self.assertEqual(
+            {method["implementation"]["status"] for method in methods},
+            {"available"},
+        )
+        self.assertIn(
+            "demo.pipeline.baselines.build_convex_similarity_matrix",
+            by_id["multiple_similarity_louvain"]["implementation"]["entry_points"],
+        )
+        self.assertFalse(by_id["coordinate_kmeans"]["equivalent_competitor"])
+        self.assertEqual(by_id["st_dbscan"]["role"], "direct_spatiotemporal")
+        self.assertIn(
+            "spatial_constraint",
+            by_id["spatial_constrained_agglomerative"]["role"],
+        )
+        self.assertIn(
+            "coordinate_kmeans",
+            registry["noise_convention"]["all_points_methods"],
+        )
+        self.assertEqual(
+            registry["factorial_ablations"]["clustering_effect_orders"],
+            [1, 2, 3, 4],
+        )
+
+    def test_operational_calibration_contract_has_numeric_guardrails(self) -> None:
+        contract = load_calibration_contract()
+        self.assertEqual(contract.review_policy.id, "standard")
+        self.assertEqual(
+            contract.objectives["benchmark_label_aware"],
+            ("ari_labeled_reports", "higher"),
+        )
+        self.assertEqual(
+            contract.objectives["operational_label_free"],
+            ("partition_stability", "higher"),
+        )
+        self.assertGreaterEqual(contract.minimum_partition_stability, 0.0)
+        self.assertLessEqual(contract.maximum_review_rate, 1.0)
+        self.assertGreater(contract.maximum_geographic_diameter_m, 0.0)
+
     def test_tuning_sources_have_no_static_test_seed_access(self) -> None:
         candidate_sources = sorted(
             path
@@ -169,4 +253,3 @@ class ProtocolContractTests(unittest.TestCase):
 
 if __name__ == "__main__":
     unittest.main()
-
