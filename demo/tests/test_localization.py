@@ -146,6 +146,10 @@ def test_additive_finite_radius_uses_theta_minus_non_geographic_max() -> None:
     "params",
     [
         WeightParams(sigma_geo_m=0.0),
+        WeightParams(tau_temp_min=0.0),
+        WeightParams(tau_temp_min=-10.0),
+        WeightParams(tau_f=0.0),
+        WeightParams(tau_e=float("inf")),
         WeightParams(beta=-0.1),
         WeightParams(gamma=-0.1),
     ],
@@ -188,6 +192,49 @@ def test_sparsify_removes_weight_equal_to_threshold() -> None:
     assert sparse[1, 0] == 0.0
     assert sparse[0, 2] == pytest.approx(0.5000001)
     assert sparse[1, 2] == pytest.approx(0.9)
+
+
+def test_sparsify_refuses_negative_threshold_zero_edge_ambiguity() -> None:
+    with pytest.raises(ValueError, match="edge_threshold"):
+        sparsify(np.zeros((2, 2)), WeightParams(edge_threshold=-0.1, knn=0))
+
+
+def test_product_bound_is_stable_near_upper_and_extreme_ratio() -> None:
+    b_sum = 1e10
+    near = math.nextafter(b_sum, 0.0)
+    near_bound = product_distance_bound(
+        WeightParams(sigma_geo_m=1000.0, beta=b_sum, gamma=0.0),
+        near,
+    )
+    assert near_bound.status == "finite"
+    assert near_bound.radius_m is not None
+    assert near_bound.radius_m > 0.0
+
+    extreme_bound = product_distance_bound(
+        WeightParams(sigma_geo_m=700.0, beta=1e308, gamma=0.0),
+        math.ulp(0.0),
+    )
+    assert extreme_bound.status == "finite"
+    assert extreme_bound.radius_m is not None
+    assert math.isfinite(extreme_bound.radius_m)
+
+
+def test_additive_bound_is_stable_next_to_upper_boundary() -> None:
+    scale = 1e100
+    total = scale + scale
+    theta = math.nextafter(total, scale)
+    bound = additive_distance_bound(
+        WeightParams(
+            sigma_geo_m=1000.0,
+            beta=scale,
+            gamma=0.0,
+            alpha=scale,
+        ),
+        theta,
+    )
+    assert bound.status == "finite"
+    assert bound.radius_m is not None
+    assert bound.radius_m > 0.0
 
 
 def test_random_bounded_attributes_obey_product_edge_bound() -> None:

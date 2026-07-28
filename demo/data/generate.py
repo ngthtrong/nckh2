@@ -533,11 +533,9 @@ def _iso(value: datetime) -> str:
 
 def _candidate_center(rng: np.random.Generator, spec: dict) -> tuple[float, float, str]:
     if spec.get("independent"):
-        return (
-            float(rng.uniform(15.7, 17.1)),
-            float(rng.uniform(107.0, 108.6)),
-            "independent_stress_region",
-        )
+        lat = float(rng.uniform(15.7, 17.1))
+        lng = float(rng.uniform(107.0, 108.6))
+        return lat, lng, _province_for_coordinate(lat, lng)
     lat, lng, province = CLUSTER_CENTERS[spec["anchor"]]
     # Seed-dependent geometry does not depend on a method or performance gate.
     scale = float(rng.uniform(0.85, 1.15))
@@ -545,6 +543,15 @@ def _candidate_center(rng: np.random.Generator, spec: dict) -> tuple[float, floa
     east = float(spec["east"]) * scale + float(rng.normal(0, 60))
     center_lat, center_lng = _offset(lat, lng, north, east)
     return center_lat, center_lng, province
+
+
+def _province_for_coordinate(lat: float, lng: float) -> str:
+    """Assign the nearest declared geographic province without truth sentinels."""
+    _, _, province = min(
+        CLUSTER_CENTERS,
+        key=lambda center: haversine_m(lat, lng, center[0], center[1]),
+    )
+    return province
 
 
 def _candidate_incidents(rng: np.random.Generator, seed: int) -> list[dict]:
@@ -839,6 +846,11 @@ def _inject_candidate_duplicates(
             duplicate["vulnerability"] = round(
                 max(0.0, duplicate["vulnerability"] + float(rng.normal(0, 0.35))), 4
             )
+            if "n_trapped" not in duplicate["missing_fields"]:
+                duplicate["n_trapped"] = max(
+                    duplicate["n_trapped"],
+                    math.ceil(duplicate["vulnerability"]),
+                )
             for field, original_value in (
                 ("flood", 0.0),
                 ("urgency", 0.0),
@@ -974,6 +986,15 @@ def _replace_with_opaque_event_ids(reports: list[dict], seed: int) -> None:
         report["event_id"] = event_id
 
 
+def _replace_with_coordinate_provinces(reports: list[dict]) -> None:
+    """Use one observable coordinate rule for every linked/unlinked report."""
+    for report in reports:
+        report["province"] = _province_for_coordinate(
+            float(report["lat"]),
+            float(report["lng"]),
+        )
+
+
 def build_candidate_dataset(seed: int, split: str | None = None) -> dict:
     """Build one deterministic candidate dataset without writing current data."""
     registered_split = registered_split_for_seed(int(seed))
@@ -988,6 +1009,10 @@ def build_candidate_dataset(seed: int, split: str | None = None) -> dict:
     reports = _base_candidate_reports(rng, incidents, int(seed))
     reports = _inject_candidate_duplicates(rng, reports, int(seed))
     reports.extend(_candidate_unlinked_reports(rng, incidents, int(seed)))
+    # Serialization order is randomized deterministically so row position
+    # cannot serve as a linked/unlinked, duplicate, or adversary proxy.
+    rng.shuffle(reports)
+    _replace_with_coordinate_provinces(reports)
     _replace_with_opaque_event_ids(reports, int(seed))
     dataset = {
         "schema_version": SCHEMA_VERSION,

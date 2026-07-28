@@ -7,6 +7,7 @@ import subprocess
 import sys
 import tempfile
 import unittest
+from unittest import mock
 from pathlib import Path
 
 from demo.experiments.artifacts import (
@@ -14,6 +15,7 @@ from demo.experiments.artifacts import (
     ArtifactRun,
     validate_manifest,
 )
+from demo.experiments import run_candidate
 
 
 SOURCE_ROOT = Path(__file__).resolve().parents[2]
@@ -104,6 +106,22 @@ class ArtifactRunTests(unittest.TestCase):
         with self.assertRaises(ArtifactError):
             validate_manifest(manifest_path)
 
+    def test_checksum_validation_detects_file_added_after_finalize(self) -> None:
+        run = self._create()
+        manifest_path = run.finalize(exit_code=0)
+        (run.path / "tables" / "unrecorded.json").write_text(
+            "{}\n",
+            encoding="utf-8",
+        )
+        with self.assertRaisesRegex(ArtifactError, "file set changed"):
+            validate_manifest(manifest_path)
+
+    def test_nested_output_named_manifest_is_checksummed(self) -> None:
+        run = self._create()
+        run.write_json("tables/manifest.json", {"nested": True})
+        manifest = validate_manifest(run.finalize(exit_code=0))
+        self.assertIn("tables/manifest.json", manifest["checksums"])
+
     def test_dirty_patch_and_untracked_identity_are_recorded(self) -> None:
         (self.repository / "protected.txt").write_text("changed\n", encoding="utf-8")
         (self.repository / "untracked.txt").write_text("new\n", encoding="utf-8")
@@ -156,6 +174,40 @@ class ArtifactRunTests(unittest.TestCase):
         self.assertEqual(len(runs), 1)
         manifest = validate_manifest(runs[0] / "manifest.json")
         self.assertEqual(manifest["status"], "failed")
+
+    @unittest.skipUnless(shutil.which("bwrap"), "Bubblewrap is required")
+    def test_candidate_wrapper_seals_keyboard_interrupt_as_aborted(self) -> None:
+        arguments = [
+            "--label",
+            "interrupted",
+            "--runs-root",
+            str(self.runs_root),
+            "--repository-root",
+            str(self.repository),
+            "--protocol-dir",
+            str(self.protocol_dir),
+            "--config",
+            str(self.config_path),
+            "--dataset",
+            str(self.dataset_path),
+            "--",
+            sys.executable,
+            "-c",
+            "pass",
+        ]
+        with mock.patch.object(
+            run_candidate,
+            "_bubblewrap_command",
+            side_effect=KeyboardInterrupt,
+        ):
+            self.assertEqual(run_candidate.main(arguments), 130)
+
+        runs = list(self.runs_root.iterdir())
+        self.assertEqual(len(runs), 1)
+        manifest = validate_manifest(runs[0] / "manifest.json")
+        self.assertEqual(manifest["status"], "aborted")
+        self.assertEqual(manifest["exit_code"], 130)
+        self.assertIn("KeyboardInterrupt", manifest["error"])
 
     def _run_candidate(
         self, label: str, code: str

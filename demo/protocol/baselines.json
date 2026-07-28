@@ -1,6 +1,78 @@
 {
-  "schema_version": "baseline-registry-v1",
+  "schema_version": "baseline-registry-v2",
   "max_configurations_per_method_per_track": 128,
+  "dependency_audit": {
+    "audited_on": "2026-07-29",
+    "source": "installed distribution metadata in the requirements.lock environment",
+    "status": "pass",
+    "packages": {
+      "igraph": {
+        "version": "1.0.0",
+        "license": "GNU General Public License (GPL)",
+        "review_outcome": "available; redistribution obligations require release review"
+      },
+      "leidenalg": {
+        "version": "0.12.0",
+        "license": "GPL-3.0-or-later",
+        "review_outcome": "available; redistribution obligations require release review"
+      },
+      "networkx": {
+        "version": "3.6.1",
+        "license": "BSD-3-Clause",
+        "review_outcome": "available"
+      },
+      "numpy": {
+        "version": "2.5.1",
+        "license": "BSD-3-Clause AND 0BSD AND MIT AND Zlib AND CC0-1.0",
+        "review_outcome": "available"
+      },
+      "python-louvain": {
+        "version": "0.16",
+        "license": "BSD License",
+        "review_outcome": "available"
+      },
+      "scikit-learn": {
+        "version": "1.9.0",
+        "license": "BSD-3-Clause",
+        "review_outcome": "available"
+      },
+      "scipy": {
+        "version": "1.18.0",
+        "license": "BSD License",
+        "review_outcome": "available"
+      }
+    }
+  },
+  "literature_audit": {
+    "blondel2008": {
+      "title": "Fast unfolding of communities in large networks",
+      "locator": "doi:10.1088/1742-5468/2008/10/P10008"
+    },
+    "birant2007": {
+      "title": "ST-DBSCAN: An algorithm for clustering spatial-temporal data",
+      "locator": "doi:10.1016/j.datak.2006.01.013"
+    },
+    "campello2013": {
+      "title": "Density-Based Clustering Based on Hierarchical Density Estimates",
+      "locator": "doi:10.1007/978-3-642-37456-2_14"
+    },
+    "ester1996": {
+      "title": "A Density-Based Algorithm for Discovering Clusters in Large Spatial Databases with Noise",
+      "locator": "KDD-96:226-231"
+    },
+    "ng2001": {
+      "title": "On Spectral Clustering: Analysis and an Algorithm",
+      "locator": "https://papers.nips.cc/paper/2092-on-spectral-clustering-analysis-and-an-algorithm"
+    },
+    "sklearn_agglomerative": {
+      "title": "Agglomerative clustering with connectivity constraints",
+      "locator": "https://scikit-learn.org/stable/modules/clustering.html#adding-connectivity-constraints"
+    },
+    "traag2019": {
+      "title": "From Louvain to Leiden: guaranteeing well-connected communities",
+      "locator": "doi:10.1038/s41598-019-41695-z"
+    }
+  },
   "noise_convention": {
     "unassigned_label": -1,
     "unassigned_is_cluster": false,
@@ -10,13 +82,24 @@
       "multiple_similarity_louvain",
       "spatial_constrained_agglomerative",
       "product_leiden",
-      "product_spectral"
+      "product_spectral",
+      "coordinate_kmeans"
     ]
   },
   "methods": [
     {
       "id": "product_louvain",
       "role": "proposed",
+      "hypothesis": "Product gating preserves incident integrity while suppressing geographically distant edges that match only time or context.",
+      "literature_ids": ["blondel2008"],
+      "implementation": {
+        "entry_points": [
+          "demo.pipeline.weighting.build_weight_matrix_vec",
+          "demo.pipeline.clustering.run_louvain"
+        ],
+        "dependencies": ["networkx", "numpy", "python-louvain"],
+        "status": "available"
+      },
       "inputs": ["geo", "time", "context"],
       "preset_k": false,
       "search_space": {
@@ -31,6 +114,16 @@
     {
       "id": "additive_louvain",
       "role": "composition_family",
+      "hypothesis": "An additive composition tests whether any product-gating advantage remains under an equally tuned non-gating similarity family.",
+      "literature_ids": ["blondel2008"],
+      "implementation": {
+        "entry_points": [
+          "demo.pipeline.weighting.build_weight_matrix_vec",
+          "demo.pipeline.clustering.run_louvain"
+        ],
+        "dependencies": ["networkx", "numpy", "python-louvain"],
+        "status": "available"
+      },
       "inputs": ["geo", "time", "context"],
       "preset_k": false,
       "search_space": {
@@ -45,6 +138,16 @@
     {
       "id": "multiple_similarity_louvain",
       "role": "feasible_convex_mixture",
+      "hypothesis": "A calibrated convex mixture tests whether flexible weighting of the same three similarities explains performance without multiplicative gating.",
+      "literature_ids": ["blondel2008"],
+      "implementation": {
+        "entry_points": [
+          "demo.pipeline.baselines.build_convex_similarity_matrix",
+          "demo.pipeline.clustering.run_louvain"
+        ],
+        "dependencies": ["networkx", "numpy", "python-louvain"],
+        "status": "available"
+      },
       "inputs": ["geo", "time", "context"],
       "preset_k": false,
       "search_space": {
@@ -55,19 +158,24 @@
           [0.5, 0.5, 0.0],
           [0.5, 0.0, 0.5],
           [0.0, 0.5, 0.5],
-          [0.3333333333333333, 0.3333333333333333, 0.3333333333333333],
-          [0.4, 0.3, 0.3],
-          [0.3, 0.4, 0.3],
-          [0.3, 0.3, 0.4]
+          [0.3333333333333333, 0.3333333333333333, 0.3333333333333333]
         ],
         "threshold_quantile": [0.85, 0.9, 0.95, 0.98],
+        "knn": [8, 16],
         "resolution": [0.8, 1.2]
       },
-      "configuration_count": 80
+      "configuration_count": 112
     },
     {
       "id": "st_dbscan",
       "role": "direct_spatiotemporal",
+      "hypothesis": "A direct conjunctive spatial-temporal density neighborhood can recover incidents without a graph similarity composition or preset cluster count.",
+      "literature_ids": ["birant2007"],
+      "implementation": {
+        "entry_points": ["demo.pipeline.baselines.run_st_dbscan"],
+        "dependencies": ["numpy"],
+        "status": "available"
+      },
       "inputs": ["geo", "time"],
       "preset_k": false,
       "search_space": {
@@ -80,6 +188,13 @@
     {
       "id": "dbscan_geo_time_context",
       "role": "density",
+      "hypothesis": "DBSCAN on standardized observable features tests whether a generic density model with equivalent inputs matches the proposed method.",
+      "literature_ids": ["ester1996"],
+      "implementation": {
+        "entry_points": ["demo.pipeline.baselines.run_dbscan"],
+        "dependencies": ["numpy", "scikit-learn"],
+        "status": "available"
+      },
       "inputs": ["geo", "time", "context"],
       "preset_k": false,
       "search_space": {
@@ -92,6 +207,13 @@
     {
       "id": "hdbscan_geo_time_context",
       "role": "density",
+      "hypothesis": "HDBSCAN tests whether variable-density hierarchy improves incident recovery and noise handling without a preset cluster count.",
+      "literature_ids": ["campello2013"],
+      "implementation": {
+        "entry_points": ["demo.pipeline.baselines.run_hdbscan"],
+        "dependencies": ["numpy", "scikit-learn"],
+        "status": "available"
+      },
       "inputs": ["geo", "time", "context"],
       "preset_k": false,
       "search_space": {
@@ -104,6 +226,13 @@
     {
       "id": "spatial_constrained_agglomerative",
       "role": "spatial_constraint",
+      "hypothesis": "A geographic connectivity constraint plus time-context dissimilarity tests an explicit spatial alternative to multiplicative edge gating.",
+      "literature_ids": ["sklearn_agglomerative"],
+      "implementation": {
+        "entry_points": ["demo.pipeline.baselines.run_spatial_constrained_agglomerative"],
+        "dependencies": ["numpy", "scikit-learn", "scipy"],
+        "status": "available"
+      },
       "inputs": ["geo_connectivity", "time", "context"],
       "preset_k": "calibration",
       "search_space": {
@@ -116,6 +245,13 @@
     {
       "id": "product_leiden",
       "role": "same_representation_partitioner",
+      "hypothesis": "Leiden on the selected product graph isolates the effect of the community-detection algorithm from the representation.",
+      "literature_ids": ["traag2019"],
+      "implementation": {
+        "entry_points": ["demo.pipeline.clustering.run_leiden"],
+        "dependencies": ["igraph", "leidenalg", "numpy"],
+        "status": "available"
+      },
       "inputs": ["selected_product_affinity"],
       "preset_k": false,
       "search_space": {
@@ -126,6 +262,13 @@
     {
       "id": "product_spectral",
       "role": "same_representation_partitioner",
+      "hypothesis": "Spectral clustering on the selected product affinity tests the representation under a non-modularity partitioner with calibration-selected K.",
+      "literature_ids": ["ng2001"],
+      "implementation": {
+        "entry_points": ["demo.pipeline.baselines.run_spectral"],
+        "dependencies": ["numpy", "scikit-learn"],
+        "status": "available"
+      },
       "inputs": ["selected_product_affinity"],
       "preset_k": "calibration",
       "oracle_k_is_primary": false,
@@ -137,6 +280,13 @@
     {
       "id": "coordinate_kmeans",
       "role": "weak_diagnostic_only",
+      "hypothesis": "Coordinate-only K-Means quantifies how much incident structure is available from geography alone and is not an equivalent competitor.",
+      "literature_ids": [],
+      "implementation": {
+        "entry_points": ["demo.pipeline.baselines.run_kmeans"],
+        "dependencies": ["numpy", "scikit-learn"],
+        "status": "available"
+      },
       "inputs": ["geo"],
       "preset_k": "calibration",
       "equivalent_competitor": false,
@@ -149,7 +299,9 @@
   "factorial_ablations": {
     "clustering_factors": ["geography", "time", "context", "knn"],
     "clustering_variant_count": 16,
+    "clustering_effect_orders": [1, 2, 3, 4],
     "priority_factors": ["confidence", "vulnerability", "aggregator"],
-    "report_interactions": true
+    "priority_effect_orders": [1, 2, 3],
+    "report_all_interactions": true
   }
 }

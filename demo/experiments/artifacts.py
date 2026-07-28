@@ -230,7 +230,7 @@ def _collect_checksums(run_dir: Path) -> tuple[dict[str, str], list[str]]:
     violations: list[str] = []
     for path in sorted(run_dir.rglob("*")):
         relative = path.relative_to(run_dir).as_posix()
-        if path.name == "manifest.json":
+        if path == run_dir / "manifest.json":
             continue
         if path.is_symlink():
             violations.append(f"symbolic links are not allowed in a run: {relative}")
@@ -562,13 +562,25 @@ def validate_manifest(path: Path | str) -> dict[str, Any]:
     checksums = manifest["checksums"]
     if not isinstance(checksums, dict):
         raise ArtifactError("manifest checksums must be an object")
+    actual_checksums, violations = _collect_checksums(run_dir)
+    if violations:
+        raise ArtifactError("; ".join(violations))
+    expected_paths = set(checksums)
+    actual_paths = set(actual_checksums)
+    if expected_paths != actual_paths:
+        unexpected = sorted(actual_paths - expected_paths)
+        missing = sorted(expected_paths - actual_paths)
+        raise ArtifactError(
+            "sealed run file set changed; "
+            f"unexpected={unexpected}, missing={missing}"
+        )
     for relative, expected in checksums.items():
         if not isinstance(relative, str) or not isinstance(expected, str):
             raise ArtifactError("invalid checksum record")
         source = _safe_child(run_dir, relative)
         if source.is_symlink() or not source.is_file():
             raise ArtifactError(f"checksummed artifact is absent or unsafe: {relative}")
-        actual = file_sha256(source)
+        actual = actual_checksums[relative]
         if actual != expected:
             raise ArtifactError(
                 f"checksum mismatch for {relative}: expected {expected}, got {actual}"

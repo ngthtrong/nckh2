@@ -43,17 +43,57 @@ class GeographicBound:
         return self.status == "finite"
 
 
+def _positive_finite(value: float, name: str) -> None:
+    if not math.isfinite(value) or value <= 0.0:
+        raise ValueError(f"{name} phải là số hữu hạn > 0, nhận {value!r}")
+
+
+def _validate_similarity_parameters(
+    p: WeightParams,
+    *,
+    alpha: float | None = None,
+) -> None:
+    """Validate the assumptions that keep every primitive similarity in [0,1]."""
+    for name, value in (
+        ("sigma_geo_m", p.sigma_geo_m),
+        ("tau_temp_min", p.tau_temp_min),
+        ("tau_f", p.tau_f),
+        ("tau_e", p.tau_e),
+    ):
+        _positive_finite(value, name)
+    for name, value in (("beta", p.beta), ("gamma", p.gamma)):
+        if not math.isfinite(value) or value < 0.0:
+            raise ValueError(f"{name} phải là số hữu hạn không âm, nhận {value!r}")
+    if alpha is not None and (not math.isfinite(alpha) or alpha < 0.0):
+        raise ValueError(f"alpha phải là số hữu hạn không âm, nhận {alpha!r}")
+
+
+def _stable_log_ratio(numerator: float, denominator: float) -> float:
+    """Compute log(numerator/denominator) accurately when the values are close."""
+    if not (numerator > denominator > 0.0):
+        raise ValueError("stable log ratio requires numerator > denominator > 0")
+    if denominator > numerator / 2.0:
+        return math.log1p((numerator - denominator) / denominator)
+    # Division may overflow for a subnormal denominator even though the
+    # logarithm and resulting radius are finite.
+    return math.log(numerator) - math.log(denominator)
+
+
 def s_geo(a: Event, b: Event, sigma_geo_m: float) -> float:
+    _positive_finite(sigma_geo_m, "sigma_geo_m")
     dist = haversine_m(a.lat, a.lng, b.lat, b.lng)
     return math.exp(-(dist ** 2) / (2.0 * sigma_geo_m ** 2))
 
 
 def s_temp(a: Event, b: Event, tau_temp_min: float) -> float:
+    _positive_finite(tau_temp_min, "tau_temp_min")
     dt_min = abs((a.created_at - b.created_at).total_seconds()) / 60.0
     return math.exp(-dt_min / tau_temp_min)
 
 
 def s_context(a: Event, b: Event, tau_f: float, tau_e: float) -> float:
+    _positive_finite(tau_f, "tau_f")
+    _positive_finite(tau_e, "tau_e")
     d_flood = abs(a.flood - b.flood)
     d_urg = abs(a.urgency - b.urgency)
     return math.exp(-d_flood / tau_f - d_urg / tau_e)
@@ -61,6 +101,7 @@ def s_context(a: Event, b: Event, tau_f: float, tau_e: float) -> float:
 
 def edge_weight_gating(a: Event, b: Event, p: WeightParams) -> float:
     """Dạng nhân/gating đã sửa (Mục 4.2)."""
+    _validate_similarity_parameters(p)
     geo = s_geo(a, b, p.sigma_geo_m)
     temp = s_temp(a, b, p.tau_temp_min)
     ctx = s_context(a, b, p.tau_f, p.tau_e)
@@ -78,6 +119,7 @@ def edge_weight_additive(a: Event, b: Event, p: WeightParams,
     để quét tham số; mọi kết luận cộng-vs-nhân phải nêu rõ alpha đã dùng.
     """
     a_w = p.alpha if alpha is None else alpha
+    _validate_similarity_parameters(p, alpha=a_w)
     geo = s_geo(a, b, p.sigma_geo_m)
     temp = s_temp(a, b, p.tau_temp_min)
     ctx = s_context(a, b, p.tau_f, p.tau_e)
@@ -90,6 +132,7 @@ def edge_weight_additive_normalized(a: Event, b: Event, p: WeightParams) -> floa
     Đây là biến thể cộng công bằng nhất — cùng thang [0,1] với dạng nhân và
     không ưu tiên thành phần nào. Dùng làm baseline chính khi so sánh.
     """
+    _validate_similarity_parameters(p)
     third = 1.0 / 3.0
     geo = s_geo(a, b, p.sigma_geo_m)
     temp = s_temp(a, b, p.tau_temp_min)
@@ -104,6 +147,11 @@ def build_weight_matrix(events: list[Event], p: WeightParams, mode: str = "gatin
     mode: "gating" | "additive" | "additive_norm"
     alpha: chỉ có tác dụng với mode="additive" (None = dùng p.alpha).
     """
+    selected_alpha = p.alpha if alpha is None else alpha
+    _validate_similarity_parameters(
+        p,
+        alpha=selected_alpha if mode == "additive" else None,
+    )
     n = len(events)
     w = np.zeros((n, n), dtype=float)
     if mode == "gating":
@@ -132,6 +180,11 @@ def build_weight_matrix_vec(events: list[Event], p: WeightParams,
     dùng để chứng minh chi phí O(n^2) của bản tham chiếu là chi tiết cài đặt,
     không phải giới hạn của thuật toán (xem exp11).
     """
+    selected_alpha = p.alpha if alpha is None else alpha
+    _validate_similarity_parameters(
+        p,
+        alpha=selected_alpha if mode == "additive" else None,
+    )
     lat = np.radians(np.array([e.lat for e in events]))
     lng = np.radians(np.array([e.lng for e in events]))
     ts = np.array([e.created_at.timestamp() for e in events]) / 60.0
@@ -168,26 +221,9 @@ def _validate_bound_parameters(
     p: WeightParams, theta: float, alpha: float | None = None
 ) -> float:
     """Kiểm các giả thiết chung của đặc tả toán học trước khi phân loại miền."""
-    values = {
-        "theta": theta,
-        "sigma_geo_m": p.sigma_geo_m,
-        "beta": p.beta,
-        "gamma": p.gamma,
-    }
-    if alpha is not None:
-        values["alpha"] = alpha
-    for name, value in values.items():
-        if not math.isfinite(value):
-            raise ValueError(f"{name} phải là số hữu hạn, nhận {value!r}")
-    if p.sigma_geo_m <= 0.0:
-        raise ValueError(f"sigma_geo_m phải > 0, nhận {p.sigma_geo_m!r}")
-    if p.beta < 0.0 or p.gamma < 0.0:
-        raise ValueError(
-            "cận địa lý yêu cầu beta, gamma không âm; "
-            f"nhận beta={p.beta!r}, gamma={p.gamma!r}"
-        )
-    if alpha is not None and alpha < 0.0:
-        raise ValueError(f"cận dạng cộng yêu cầu alpha không âm, nhận {alpha!r}")
+    _validate_similarity_parameters(p, alpha=alpha)
+    if not math.isfinite(theta):
+        raise ValueError(f"theta phải là số hữu hạn, nhận {theta!r}")
     b_sum = p.beta + p.gamma
     if not math.isfinite(b_sum):
         raise ValueError("beta + gamma phải biểu diễn được bằng số hữu hạn")
@@ -215,7 +251,7 @@ def product_distance_bound(p: WeightParams, theta: float) -> GeographicBound:
         return GeographicBound("product", "unbounded", theta, b_sum, None)
     if theta >= b_sum:
         return GeographicBound("product", "empty", theta, b_sum, None)
-    log_ratio = math.log(b_sum) - math.log(theta)
+    log_ratio = _stable_log_ratio(b_sum, theta)
     radius = p.sigma_geo_m * math.sqrt(2.0 * log_ratio)
     if not math.isfinite(radius):
         raise OverflowError("cận product hữu hạn về toán học nhưng tràn kiểu float")
@@ -253,7 +289,7 @@ def additive_distance_bound(
             "additive", "unbounded", theta, b_sum, None, alpha=a_w
         )
     # `theta < total` và `theta > B` kéo theo `a_w > 0`.
-    log_ratio = math.log(a_w) - math.log(theta - b_sum)
+    log_ratio = _stable_log_ratio(a_w, theta - b_sum)
     radius = p.sigma_geo_m * math.sqrt(2.0 * log_ratio)
     if not math.isfinite(radius):
         raise OverflowError("cận additive hữu hạn về toán học nhưng tràn kiểu float")
@@ -299,7 +335,11 @@ def additive_floor(events: list[Event], p: WeightParams,
     `alpha` không ảnh hưởng giá trị trả về (sàn không chứa số hạng địa lý) nhưng
     được nhận vào cho đối xứng API và để gọi tường minh trong các sweep.
     """
-    del alpha  # sàn không phụ thuộc alpha; tham số giữ cho đối xứng API
+    selected_alpha = p.alpha if alpha is None else alpha
+    _validate_similarity_parameters(
+        p,
+        alpha=selected_alpha if mode == "additive" else None,
+    )
     ts = np.array([e.created_at.timestamp() for e in events]) / 60.0
     flood = np.array([e.flood for e in events])
     urg = np.array([e.urgency for e in events])
@@ -389,7 +429,27 @@ def max_retained_distance(events: list[Event], w: np.ndarray, theta: float) -> f
 
 
 def sparsify(w: np.ndarray, p: WeightParams) -> np.ndarray:
-    """Làm thưa đồ thị: strict threshold `weight > theta` + k-NN."""
+    """Làm thưa đồ thị: strict threshold `weight > theta` + k-NN.
+
+    Negative thresholds are refused because a dense zero is the adjacency
+    sentinel for “no edge”; it cannot simultaneously encode a retained
+    zero-weight edge even though mathematically ``0 > theta``.
+    """
+    if (
+        not math.isfinite(p.edge_threshold)
+        or p.edge_threshold < 0.0
+    ):
+        raise ValueError("edge_threshold phải là số hữu hạn không âm")
+    if (
+        isinstance(p.knn, bool)
+        or not isinstance(p.knn, int)
+        or p.knn < 0
+    ):
+        raise ValueError("knn phải là số nguyên không âm")
+    if w.ndim != 2 or w.shape[0] != w.shape[1]:
+        raise ValueError("weight matrix phải là ma trận vuông")
+    if not np.isfinite(w).all() or (w < 0.0).any():
+        raise ValueError("weight matrix phải hữu hạn và không âm")
     n = w.shape[0]
     out = w.copy()
     # (i) strict threshold: proof, diagnostics và code cùng dùng `w > theta`.

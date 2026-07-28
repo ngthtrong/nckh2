@@ -31,6 +31,12 @@ deadline/harm/service fields, or any equivalent alias. The implementation
 constructs the duplicate fingerprint from an explicit observable allow-list;
 it never serializes an `Event` generically.
 
+In candidate data, incident-linked V is a vulnerable-person count constrained
+to `V<=N`; unlinked V-inflation attacks intentionally need not satisfy that
+latent plausibility relation. Inference does not receive linked/unlinked truth,
+so the robust estimator still applies its universal observable cap and reports
+those attacks rather than silently repairing them.
+
 ## 2. Exact duplicate identity
 
 The inference-visible exact fingerprint is SHA-256 over canonical UTF-8 JSON

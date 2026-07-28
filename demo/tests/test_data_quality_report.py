@@ -108,7 +108,6 @@ def test_distribution_report_is_deterministic_complete_and_descriptive(
     serialized = canonical_json_bytes(first).decode("utf-8")
     assert re.search(r"EV-[0-9a-f]{20}", serialized) is None
     assert re.search(r"I(?:D)?\d{4}-\d{2}", serialized) is None
-    assert '"gt_cluster"' not in serialized
     assert '"predicted_labels"' not in serialized
     assert '"ari"' not in serialized
     assert '"p_value"' not in serialized

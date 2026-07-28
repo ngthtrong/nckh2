@@ -16,6 +16,8 @@ try:
         METRIC_CONTRACT_NAME,
         SEED_MANIFEST_NAME,
         ProtocolError,
+        _load_json,
+        _validate_seed_manifest,
         protocol_bundle_sha256,
     )
 except ImportError:  # Direct script/module use with demo/experiments on sys.path.
@@ -24,6 +26,8 @@ except ImportError:  # Direct script/module use with demo/experiments on sys.pat
         METRIC_CONTRACT_NAME,
         SEED_MANIFEST_NAME,
         ProtocolError,
+        _load_json,
+        _validate_seed_manifest,
         protocol_bundle_sha256,
     )
 
@@ -57,20 +61,15 @@ def load_locked_test_seeds(
     ):
         raise ProtocolError("Gate-2 lock does not match the current protocol")
 
+    manifest = _load_json(directory / SEED_MANIFEST_NAME)
+    # Reuse the complete seed-contract validator instead of validating only
+    # the released list.  In particular, a hash-matching manifest may not
+    # relabel a development/calibration seed as test or introduce overlap.
+    _validate_seed_manifest(manifest)
     try:
-        manifest: Any = json.loads(
-            (directory / SEED_MANIFEST_NAME).read_text(encoding="utf-8")
-        )
-        values = manifest["splits"]["test"]
-    except (FileNotFoundError, json.JSONDecodeError, KeyError, TypeError) as exc:
+        values: Any = manifest["splits"]["test"]
+    except (KeyError, TypeError) as exc:  # Defensive; validator checks this.
         raise ProtocolError("test split is absent from the locked seed manifest") from exc
-    if (
-        not isinstance(values, list)
-        or len(values) != 40
-        or any(isinstance(seed, bool) or not isinstance(seed, int) for seed in values)
-        or len(values) != len(set(values))
-    ):
-        raise ProtocolError("locked test split is malformed")
     return tuple(values)
 
 
