@@ -17,7 +17,8 @@ smoke reuses .venv when available and runs the focused Gate-4 tests before the
       same artifact/manuscript verification. It is for quick local diagnosis.
 
 --report writes the verifier's final machine-readable JSON report. Existing
-         files are not overwritten.
+         files are not overwritten. For a sealed checkout, write this report
+         outside the repository; do not replace manifest-bound evidence.
 EOF
 }
 
@@ -138,6 +139,10 @@ if [[ -n "$repro_report" ]]; then
 fi
 "$repro_python" -m demo.experiments.verify_locked_submission \
   "${repro_post_args[@]}"
+
+"$repro_python" -m demo.experiments.lock_submission \
+  --repository-root "$repro_root" \
+  --verify
 
 printf 'PASS: %s reproduction completed without re-executing X0.\n' \
   "$repro_profile"
