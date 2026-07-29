@@ -5,9 +5,11 @@ import gzip
 import hashlib
 import json
 from pathlib import Path
+import subprocess
 
 import pytest
 
+from demo.experiments import lock_submission
 from demo.experiments.pre_gate2 import canonical_json_bytes
 from demo.experiments.promote_results import (
     REQUIRED_DISCLOSURE_CLAIMS,
@@ -608,3 +610,170 @@ def test_verifier_has_no_experiment_execution_import_or_call() -> None:
         if isinstance(node, ast.Call) and isinstance(node.func, ast.Attribute)
     )
     assert not (forbidden_calls & called)
+
+
+def _minimal_submission_lock_fixture(root: Path) -> None:
+    _write_canonical(
+        root,
+        "revision/clean-room-verification.json",
+        {
+            "schema_version": 1,
+            "status": "pass",
+            "summary": {"fail": 0, "incomplete": 0, "pass": 1},
+        },
+    )
+    _write_canonical(
+        root,
+        "revision/submission-policy.json",
+        {
+            "external_submission_inputs": {
+                "public_repository_or_doi": "external-blocked"
+            },
+            "profile": "test-profile",
+        },
+    )
+    _write_bytes(root, "revision/clean-room-full.log", b"PASS\n")
+
+
+def _minimal_lock_settings(
+    monkeypatch: pytest.MonkeyPatch,
+) -> None:
+    monkeypatch.setattr(
+        lock_submission,
+        "SUBMISSION_GLOBS",
+        ("revision/*.json", "revision/*.log"),
+    )
+    monkeypatch.setattr(
+        lock_submission,
+        "REQUIRED_PATHS",
+        frozenset({"revision/clean-room-full.log"}),
+    )
+
+
+def test_submission_lock_rejects_missing_clean_room_transcript(
+    tmp_path: Path,
+    monkeypatch: pytest.MonkeyPatch,
+) -> None:
+    _minimal_lock_settings(monkeypatch)
+    _minimal_submission_lock_fixture(tmp_path)
+    manifest = lock_submission.build_submission_manifest(tmp_path)
+    _write_bytes(
+        tmp_path,
+        lock_submission.MANIFEST_RELATIVE,
+        lock_submission._canonical_json_bytes(manifest),
+    )
+    (tmp_path / "revision/clean-room-full.log").unlink()
+
+    with pytest.raises(
+        lock_submission.SubmissionLockError,
+        match="clean-room-full[.]log",
+    ):
+        lock_submission.verify_submission_lock(tmp_path)
+
+
+def test_submission_lock_detects_crlf_drift(
+    tmp_path: Path,
+    monkeypatch: pytest.MonkeyPatch,
+) -> None:
+    _minimal_lock_settings(monkeypatch)
+    _minimal_submission_lock_fixture(tmp_path)
+    manifest = lock_submission.build_submission_manifest(tmp_path)
+    _write_bytes(
+        tmp_path,
+        lock_submission.MANIFEST_RELATIVE,
+        lock_submission._canonical_json_bytes(manifest),
+    )
+    _write_bytes(
+        tmp_path,
+        "revision/clean-room-full.log",
+        b"first\r\nsecond\r\n",
+    )
+
+    with pytest.raises(
+        lock_submission.SubmissionLockError,
+        match="not canonical LF",
+    ):
+        lock_submission.verify_submission_lock(tmp_path)
+
+
+def test_submission_lock_rejects_present_untracked_required_member(
+    tmp_path: Path,
+    monkeypatch: pytest.MonkeyPatch,
+) -> None:
+    _minimal_lock_settings(monkeypatch)
+    _minimal_submission_lock_fixture(tmp_path)
+    subprocess.run(
+        ["git", "init", "-q", str(tmp_path)],
+        check=True,
+        capture_output=True,
+    )
+
+    with pytest.raises(
+        lock_submission.SubmissionLockError,
+        match="not Git-tracked",
+    ):
+        lock_submission.build_submission_manifest(tmp_path)
+
+
+def test_required_submission_paths_exist_and_are_git_tracked() -> None:
+    root = Path(__file__).resolve().parents[2]
+    missing = sorted(
+        relative
+        for relative in lock_submission.REQUIRED_PATHS
+        if not (root / relative).is_file()
+    )
+    completed = subprocess.run(
+        ["git", "-C", str(root), "ls-files", "-z"],
+        check=True,
+        capture_output=True,
+    )
+    tracked = {
+        raw.decode("utf-8", errors="surrogateescape")
+        for raw in completed.stdout.split(b"\0")
+        if raw
+    }
+    untracked = sorted(lock_submission.REQUIRED_PATHS - tracked)
+
+    assert not missing
+    assert not untracked
+
+
+def test_submission_text_and_json_are_canonical_lf() -> None:
+    root = Path(__file__).resolve().parents[2]
+    paths = lock_submission.collect_submission_paths(root)
+    lock_submission.verify_canonical_lf(paths, root)
+    json_paths = [
+        path for path in paths if path.suffix.lower() == ".json"
+    ] + [root / lock_submission.MANIFEST_RELATIVE]
+    assert json_paths
+    assert all(b"\r" not in path.read_bytes() for path in json_paths)
+
+
+def test_checked_in_submission_lock_verifies() -> None:
+    root = Path(__file__).resolve().parents[2]
+    result = lock_submission.verify_submission_lock(root)
+    assert result["status"] == "pass"
+    assert result["file_count"] >= len(lock_submission.REQUIRED_PATHS)
+
+
+def test_reproduce_verifies_final_lock_without_running_x0() -> None:
+    root = Path(__file__).resolve().parents[2]
+    script = (root / "reproduce.sh").read_text(encoding="utf-8")
+    post_verifier = script.rindex(
+        "-m demo.experiments.verify_locked_submission"
+    )
+    final_lock = script.index(
+        "-m demo.experiments.lock_submission",
+        post_verifier,
+    )
+    final_pass = script.index("PASS:", final_lock)
+    lock_step = script[final_lock:final_pass]
+
+    assert "--verify" in lock_step
+    assert post_verifier < final_lock < final_pass
+    for forbidden in (
+        "demo.experiments.authorize_x0",
+        "demo.experiments.exp23_heldout_evaluation",
+        "demo.experiments.run_candidate",
+    ):
+        assert forbidden not in script
