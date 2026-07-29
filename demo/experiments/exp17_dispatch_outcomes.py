@@ -200,25 +200,32 @@ def _mark_pareto(rows: list[dict[str, object]]) -> None:
         row["dominated_by_policies"] = dominators
 
 
-def _run_seed_from_frozen_root(
-    dataset_root: Path,
+def evaluate_loaded_dispatch_seed(
+    *,
     seed: int,
     stage: str,
-    protocol: TuningProtocol,
-    gate1_lock: Path | str,
+    inference_events: Sequence[object],
+    evaluator_data: dict,
+    source_sha256: str,
 ) -> list[dict[str, object]]:
-    """Run every policy/resource combination from one frozen split file."""
+    """Run every policy/resource combination from authenticated loaded views."""
 
-    if stage not in PRE_GATE2_STAGES:
-        raise ValueError("run_seed accepts only development/calibration")
-    tuning_dataset, data = load_frozen_tuning_views(
-        dataset_root,
-        stage=stage,
-        seed=int(seed),
-        tuning_protocol=protocol,
-        gate1_lock=gate1_lock,
-    )
-    jobs = _dispatch_incidents(data, tuning_dataset.events)
+    if isinstance(seed, bool) or not isinstance(seed, int):
+        raise ValueError("seed must be an integer")
+    if not isinstance(stage, str) or not stage:
+        raise ValueError("stage must be a non-empty string")
+    if not isinstance(evaluator_data, dict):
+        raise ValueError("evaluator_data must be an object")
+    if not isinstance(source_sha256, str) or len(source_sha256) != 64:
+        raise ValueError("source_sha256 must be a SHA-256 identity")
+    inference_events = list(inference_events)
+    if any(
+        getattr(event, "gt_cluster", -1) != -1
+        or getattr(event, "is_fake", False) is not False
+        for event in inference_events
+    ):
+        raise ValueError("evaluator-only fields leaked into dispatch inputs")
+    jobs = _dispatch_incidents(evaluator_data, inference_events)
     rows: list[dict[str, object]] = []
     for scenario in default_resource_scenarios():
         scenario_rows: list[dict[str, object]] = []
@@ -241,8 +248,35 @@ def _run_seed_from_frozen_root(
         _mark_pareto(scenario_rows)
         rows.extend(scenario_rows)
     for row in rows:
-        row["dataset_source_sha256"] = tuning_dataset.source_sha256
+        row["dataset_source_sha256"] = source_sha256
     return rows
+
+
+def _run_seed_from_frozen_root(
+    dataset_root: Path,
+    seed: int,
+    stage: str,
+    protocol: TuningProtocol,
+    gate1_lock: Path | str,
+) -> list[dict[str, object]]:
+    """Load one restricted split and run the shared C4 evaluator."""
+
+    if stage not in PRE_GATE2_STAGES:
+        raise ValueError("run_seed accepts only development/calibration")
+    tuning_dataset, data = load_frozen_tuning_views(
+        dataset_root,
+        stage=stage,
+        seed=int(seed),
+        tuning_protocol=protocol,
+        gate1_lock=gate1_lock,
+    )
+    return evaluate_loaded_dispatch_seed(
+        seed=int(seed),
+        stage=stage,
+        inference_events=tuning_dataset.events,
+        evaluator_data=data,
+        source_sha256=tuning_dataset.source_sha256,
+    )
 
 
 def run_seed(

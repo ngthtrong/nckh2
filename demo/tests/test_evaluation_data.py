@@ -8,6 +8,7 @@ from functools import lru_cache
 from pathlib import Path
 from typing import Any
 
+import numpy as np
 import pytest
 
 import data.schema as candidate_schema
@@ -111,7 +112,55 @@ def _write_protocol(
         json.dumps(
             {
                 "schema_version": "fixture",
-                "methods": [{"id": "fixture_method"}],
+                "methods": [
+                    {
+                        "id": "fixture_method",
+                        "search_space": {
+                            "theta": [0.125, 0.25],
+                            "weights": [[0.2, 0.3, 0.5]],
+                        },
+                        "configuration_count": 2,
+                    }
+                ],
+            },
+            sort_keys=True,
+        ),
+        encoding="utf-8",
+    )
+    (protocol_dir / "calibration_contract.json").write_text(
+        json.dumps(
+            {
+                "schema_version": "calibration-contract-v1",
+                "selection": {
+                    "fixture_label_track": {
+                        "objective": "ari_labeled_reports",
+                        "direction": "higher",
+                    },
+                    "fixture_operational_track": {
+                        "objective": "partition_stability",
+                        "direction": "higher",
+                    },
+                    "tie_break": [
+                        "lower operator_review_burden",
+                        "lower configuration complexity",
+                        "lexicographic config_sha256",
+                    ],
+                },
+                "stability": {"minimum_per_seed": 0.0},
+                "review_policy": {"maximum_rate_per_seed": 1.0},
+                "geographic_constraint": {
+                    "maximum_metres_per_seed": 1_000_000.0,
+                },
+                "graph_constraints": {
+                    "maximum_disconnected_communities_per_seed": 0,
+                    "minimum_retained_fraction_per_seed": 0.0,
+                    "maximum_retained_fraction_per_seed": 1.0,
+                },
+                "matched_composition_constraints": {
+                    "retained_fraction_absolute_tolerance": 0.01,
+                    "mean_degree_relative_tolerance": 0.05,
+                    "joint_selection_rule": "fixture",
+                },
             },
             sort_keys=True,
         ),
@@ -148,11 +197,10 @@ def _write_protocol(
     return protocol_dir, gate2_lock
 
 
-def _bind_gate2_to_gate1(gate2_lock: Path, gate1_lock: Path) -> None:
+def _gate1_hash_binding(gate1_lock: Path) -> dict[str, str]:
     gate1_payload = gate1_lock.read_bytes()
     gate1 = json.loads(gate1_payload)
-    gate2 = json.loads(gate2_lock.read_text(encoding="utf-8"))
-    gate2["gate1_binding"] = {
+    return {
         "gate1_lock_sha256": _sha256(gate1_payload),
         "accepted_run_manifest_sha256": gate1["accepted_run"][
             "manifest_sha256"
@@ -161,6 +209,11 @@ def _bind_gate2_to_gate1(gate2_lock: Path, gate1_lock: Path) -> None:
             "dataset_manifest_sha256"
         ],
     }
+
+
+def _bind_gate2_to_gate1(gate2_lock: Path, gate1_lock: Path) -> None:
+    gate2 = json.loads(gate2_lock.read_text(encoding="utf-8"))
+    gate2["gate1_binding"] = _gate1_hash_binding(gate1_lock)
     gate2_lock.write_text(
         json.dumps(gate2, sort_keys=True),
         encoding="utf-8",
@@ -376,6 +429,51 @@ def test_missing_or_mismatched_gate2_and_wrong_seed_fail_before_gate1(
         )
 
 
+def test_gate2_release_rejects_seed_overlap_even_with_matching_hash(
+    tmp_path: Path,
+) -> None:
+    protocol_dir, gate2_lock = _write_protocol(tmp_path)
+    seed_path = protocol_dir / "seed_manifest.json"
+    manifest = json.loads(seed_path.read_text(encoding="utf-8"))
+    manifest["splits"]["development"][0] = FIXTURE_TEST_SEEDS[0]
+    seed_path.write_text(json.dumps(manifest, sort_keys=True), encoding="utf-8")
+    lock = json.loads(gate2_lock.read_text(encoding="utf-8"))
+    lock["protocol_sha256"] = protocol_bundle_sha256(
+        seed_path,
+        protocol_dir / "metric_contract.json",
+    )
+    gate2_lock.write_text(json.dumps(lock, sort_keys=True), encoding="utf-8")
+
+    with pytest.raises(EvaluationDataError, match="disjoint"):
+        load_evaluation_dataset(
+            tmp_path / "absent-datasets",
+            seed=FIXTURE_SEED,
+            gate2_lock=gate2_lock,
+            gate1_lock=tmp_path / "revision" / "absent-gate1.json",
+            protocol_dir=protocol_dir,
+            repository_root=tmp_path,
+        )
+
+
+def test_gate2_binding_rejects_replaced_gate1_lock_before_dataset_access(
+    tmp_path: Path,
+) -> None:
+    protocol_dir, gate2_lock = _write_protocol(tmp_path)
+    dataset_root, _, gate1_lock = _write_gate1_fixture(tmp_path)
+    _bind_gate2_to_gate1(gate2_lock, gate1_lock)
+    gate1_lock.write_bytes(gate1_lock.read_bytes() + b"\n")
+
+    with pytest.raises(EvaluationDataError, match="differs from the Gate-2"):
+        load_evaluation_dataset(
+            dataset_root,
+            seed=FIXTURE_SEED,
+            gate2_lock=gate2_lock,
+            gate1_lock=gate1_lock,
+            protocol_dir=protocol_dir,
+            repository_root=tmp_path,
+        )
+
+
 def test_evaluation_loader_rejects_wrong_root_and_file_checksum(
     tmp_path: Path,
     fixture_seed_registration: None,
@@ -431,9 +529,31 @@ def test_authenticated_swap_or_relabel_is_rejected_by_schema(
         )
 
 
+def _aggregate_fixture_metrics(
+    rows: list[dict[str, float]],
+) -> dict[str, float]:
+    names = sorted(set.intersection(*(set(row) for row in rows)))
+    aggregate: dict[str, float] = {}
+    for name in names:
+        values = np.asarray([row[name] for row in rows], dtype=float)
+        aggregate[name] = float(np.mean(values))
+        aggregate[f"{name}__sd"] = (
+            float(np.std(values, ddof=1)) if len(values) > 1 else 0.0
+        )
+        aggregate[f"{name}__median"] = float(np.median(values))
+        aggregate[f"{name}__min"] = float(np.min(values))
+        aggregate[f"{name}__max"] = float(np.max(values))
+        aggregate[f"{name}__denominator"] = float(len(values))
+    return aggregate
+
+
 def _write_calibration_source(
     root: Path,
     protocol_dir: Path,
+    gate1_lock: Path,
+    *,
+    select_nonoptimal: bool = False,
+    no_feasible_operational: bool = False,
 ) -> tuple[dict[str, Any], dict[str, Any]]:
     run_id = "calibration-fixture"
     run_dir = root / "demo" / "artifacts" / "runs" / run_id
@@ -456,65 +576,136 @@ def _write_calibration_source(
         }
         checksums[relative] = payload_sha
     calibration_protocol_sha = _canonical_digest(protocol_hashes)
+    gate1_binding = _gate1_hash_binding(gate1_lock)
+    gate1 = json.loads(gate1_lock.read_text(encoding="utf-8"))
+    gate1_run_manifest = (
+        gate1_lock.resolve().parent.parent / gate1["accepted_run"]["manifest"]
+    ).resolve()
+    dataset_manifest_source = (
+        gate1_run_manifest.parent / "work" / "datasets" / "manifest.json"
+    )
+    dataset_snapshot_relative = "inputs/datasets/00-manifest.json"
+    dataset_snapshot = run_dir / dataset_snapshot_relative
+    dataset_snapshot.parent.mkdir(parents=True, exist_ok=True)
+    dataset_snapshot.write_bytes(dataset_manifest_source.read_bytes())
+    checksums[dataset_snapshot_relative] = gate1_binding[
+        "dataset_manifest_sha256"
+    ]
 
-    config = {"theta": 0.125, "weights": [0.2, 0.3, 0.5]}
-    config_sha = _canonical_digest(config)
+    configs = [
+        {"theta": 0.125, "weights": [0.2, 0.3, 0.5]},
+        {"theta": 0.25, "weights": [0.2, 0.3, 0.5]},
+    ]
+    selected_config = configs[0] if select_nonoptimal else configs[1]
+    selected_config_sha = _canonical_digest(selected_config)
     selections: list[dict[str, Any]] = []
     evaluations: list[dict[str, Any]] = []
     promoted_rows: list[dict[str, Any]] = []
+    excluded_rows: list[dict[str, Any]] = []
     for track_id, objective in (
         ("fixture_label_track", "ari_labeled_reports"),
         ("fixture_operational_track", "partition_stability"),
     ):
+        excluded = (
+            no_feasible_operational
+            and track_id == "fixture_operational_track"
+        )
+        effective_selected_config = None if excluded else selected_config
+        effective_selected_sha = None if excluded else selected_config_sha
         selection_identity = {
             "method_id": "fixture_method",
             "track_id": track_id,
             "objective": objective,
             "direction": "higher",
-            "selected_config_sha256": config_sha,
+            "selected_config_sha256": effective_selected_sha,
         }
         selection_sha = _canonical_digest(selection_identity)
         selections.append(
             {
                 **selection_identity,
-                "status": "selected",
-                "selected_config": config,
+                "status": (
+                    "no_feasible_candidate" if excluded else "selected"
+                ),
+                "selected_config": effective_selected_config,
                 "selection_sha256": selection_sha,
-                "considered_configurations": 1,
-                "succeeded_configurations": 1,
-                "feasible_configurations": 1,
-                "rejected": [],
+                "considered_configurations": 2,
+                "succeeded_configurations": 2,
+                "feasible_configurations": 0 if excluded else 2,
+                "rejected": (
+                    [
+                        {
+                            "config_sha256": _canonical_digest(config),
+                            "reasons": [
+                                "geographic_diameter__max=2000000.0 "
+                                "violates <=1000000.0"
+                            ],
+                        }
+                        for config in configs
+                    ]
+                    if excluded
+                    else []
+                ),
             }
         )
-        evaluations.append(
-            {
-                "method_id": "fixture_method",
-                "track_id": track_id,
-                "stage": "calibration",
-                "config": config,
-                "config_sha256": config_sha,
-                "status": "succeeded",
-                "seed_metrics": [
-                    {"seed": float(seed), objective: 0.5}
-                    for seed in CALIBRATION_SEEDS
-                ],
-                "aggregate_metrics": {objective: 0.5},
-                "failures": [],
-                "configuration_evaluation_count": 1,
-                "seed_run_count": len(CALIBRATION_SEEDS),
-                "wall_time_seconds": 0.1,
-            }
-        )
-        promoted_rows.append(
-            {
-                "method_id": "fixture_method",
-                "track_id": track_id,
-                "config": config,
-                "config_sha256": config_sha,
-                "source_artifact_id": "calibration_source",
-                "source_selection_sha256": selection_sha,
-            }
-        )
+        for config in configs:
+            objective_value = 0.5 if config["theta"] == 0.125 else 0.9
+            seed_metrics = []
+            for seed in CALIBRATION_SEEDS:
+                metrics = {
+                    "seed": float(seed),
+                    "partition_stability": (
+                        objective_value
+                        if objective == "partition_stability"
+                        else 1.0
+                    ),
+                    "operator_review_burden_rate": 0.0,
+                    "geographic_diameter": (
+                        2_000_000.0 if excluded else 0.0
+                    ),
+                    "operator_review_burden": 0.0,
+                    "complexity": 2.0,
+                }
+                metrics[objective] = objective_value
+                seed_metrics.append(metrics)
+            evaluations.append(
+                {
+                    "method_id": "fixture_method",
+                    "track_id": track_id,
+                    "stage": "calibration",
+                    "config": config,
+                    "config_sha256": _canonical_digest(config),
+                    "status": "succeeded",
+                    "seed_metrics": seed_metrics,
+                    "aggregate_metrics": _aggregate_fixture_metrics(
+                        seed_metrics
+                    ),
+                    "failures": [],
+                    "configuration_evaluation_count": 1,
+                    "seed_run_count": len(CALIBRATION_SEEDS),
+                    "wall_time_seconds": 0.1,
+                }
+            )
+        if excluded:
+            excluded_rows.append(
+                {
+                    "method_id": "fixture_method",
+                    "track_id": track_id,
+                    "status": "no_feasible_candidate",
+                    "source_artifact_id": "calibration_source",
+                    "source_selection_sha256": selection_sha,
+                }
+            )
+        else:
+            promoted_rows.append(
+                {
+                    "method_id": "fixture_method",
+                    "track_id": track_id,
+                    "config": selected_config,
+                    "config_sha256": selected_config_sha,
+                    "source_artifact_id": "calibration_source",
+                    "source_selection_sha256": selection_sha,
+                }
+            )
     artifact = {
         "schema_version": "calibration-artifact-v1",
         "protocol_sha256": calibration_protocol_sha,
@@ -529,6 +720,15 @@ def _write_calibration_source(
             "stage": "calibration",
             "complete_seed_set": True,
             "seed_limit": None,
+            "frozen_dataset": {
+                "gate1_lock_sha256": gate1_binding["gate1_lock_sha256"],
+                "accepted_run_manifest_sha256": gate1_binding[
+                    "accepted_run_manifest_sha256"
+                ],
+                "dataset_manifest_sha256": gate1_binding[
+                    "dataset_manifest_sha256"
+                ],
+            },
         },
     }
     artifact["artifact_content_sha256"] = _canonical_digest(artifact)
@@ -548,7 +748,11 @@ def _write_calibration_source(
         "status": "succeeded",
         "exit_code": 0,
         "timestamps": {},
-        "command": ["fixture"],
+        "command": [
+            "python",
+            "-m",
+            "demo.experiments.exp18_tuned_baselines",
+        ],
         "repository": {"commit": "fixture", "dirty_patch_sha256": "8" * 64},
         "environment": {"hardware": {}, "blas": {}, "threads": {}},
         "inputs": {
@@ -563,6 +767,12 @@ def _write_calibration_source(
             "metric_contract": {
                 "sha256": protocol_hashes["metric_contract.json"],
             },
+            "datasets": [
+                {
+                    "snapshot": dataset_snapshot_relative,
+                    "sha256": gate1_binding["dataset_manifest_sha256"],
+                }
+            ],
         },
         "checksums": checksums,
     }
@@ -588,6 +798,7 @@ def _write_calibration_source(
         "calibration_protocol_sha256": calibration_protocol_sha,
         "sources": [source],
         "selections": promoted_rows,
+        "exclusions": excluded_rows,
         "audit": {
             "all_calibration_failures_retained": True,
             "configuration_evaluation_count": len(evaluations),
@@ -600,11 +811,17 @@ def test_selected_configs_trace_to_a_sealed_calibration_table(
     tmp_path: Path,
 ) -> None:
     protocol_dir, _ = _write_protocol(tmp_path)
-    selected, _ = _write_calibration_source(tmp_path, protocol_dir)
+    _, _, gate1_lock = _write_gate1_fixture(tmp_path)
+    selected, _ = _write_calibration_source(
+        tmp_path,
+        protocol_dir,
+        gate1_lock,
+    )
     protocol_dir, gate2_lock = _write_protocol(
         tmp_path,
         selected_configs=selected,
     )
+    _bind_gate2_to_gate1(gate2_lock, gate1_lock)
     bundle = load_selected_configs(
         protocol_dir / "selected_configs.json",
         gate2_lock=gate2_lock,
@@ -620,15 +837,89 @@ def test_selected_configs_trace_to_a_sealed_calibration_table(
     assert bundle.sources[0].run_id == "calibration-fixture"
 
 
-def test_selected_configs_reject_protocol_or_artifact_hash_mutation(
+def test_selected_configs_preserve_authenticated_no_feasible_pair(
     tmp_path: Path,
 ) -> None:
     protocol_dir, _ = _write_protocol(tmp_path)
-    selected, source_record = _write_calibration_source(tmp_path, protocol_dir)
+    _, _, gate1_lock = _write_gate1_fixture(tmp_path)
+    selected, _ = _write_calibration_source(
+        tmp_path,
+        protocol_dir,
+        gate1_lock,
+        no_feasible_operational=True,
+    )
     protocol_dir, gate2_lock = _write_protocol(
         tmp_path,
         selected_configs=selected,
     )
+    _bind_gate2_to_gate1(gate2_lock, gate1_lock)
+    bundle = load_selected_configs(
+        protocol_dir / "selected_configs.json",
+        gate2_lock=gate2_lock,
+        protocol_dir=protocol_dir,
+        artifact_root=tmp_path,
+    )
+    exclusion = bundle.exclusion_for(
+        "fixture_method",
+        "fixture_operational_track",
+    )
+    assert exclusion.status == "no_feasible_candidate"
+    assert len(bundle.selections) == 1
+    assert len(bundle.exclusions) == 1
+    with pytest.raises(
+        EvaluationDataError,
+        match="no feasible calibration candidate",
+    ):
+        bundle.selection_for(
+            "fixture_method",
+            "fixture_operational_track",
+        )
+
+
+def test_selected_configs_reject_sealed_nonoptimal_calibration_winner(
+    tmp_path: Path,
+) -> None:
+    protocol_dir, _ = _write_protocol(tmp_path)
+    _, _, gate1_lock = _write_gate1_fixture(tmp_path)
+    selected, _ = _write_calibration_source(
+        tmp_path,
+        protocol_dir,
+        gate1_lock,
+        select_nonoptimal=True,
+    )
+    protocol_dir, gate2_lock = _write_protocol(
+        tmp_path,
+        selected_configs=selected,
+    )
+    _bind_gate2_to_gate1(gate2_lock, gate1_lock)
+
+    with pytest.raises(
+        EvaluationDataError,
+        match="winner/audit is not mechanically reproducible",
+    ):
+        load_selected_configs(
+            protocol_dir / "selected_configs.json",
+            gate2_lock=gate2_lock,
+            protocol_dir=protocol_dir,
+            artifact_root=tmp_path,
+        )
+
+
+def test_selected_configs_reject_protocol_or_artifact_hash_mutation(
+    tmp_path: Path,
+) -> None:
+    protocol_dir, _ = _write_protocol(tmp_path)
+    _, _, gate1_lock = _write_gate1_fixture(tmp_path)
+    selected, source_record = _write_calibration_source(
+        tmp_path,
+        protocol_dir,
+        gate1_lock,
+    )
+    protocol_dir, gate2_lock = _write_protocol(
+        tmp_path,
+        selected_configs=selected,
+    )
+    _bind_gate2_to_gate1(gate2_lock, gate1_lock)
     table = (
         tmp_path
         / "demo"
@@ -646,15 +937,19 @@ def test_selected_configs_reject_protocol_or_artifact_hash_mutation(
             artifact_root=tmp_path,
         )
 
-    fresh_protocol, _ = _write_protocol(tmp_path / "fresh")
+    fresh_root = tmp_path / "fresh"
+    fresh_protocol, _ = _write_protocol(fresh_root)
+    _, _, fresh_gate1 = _write_gate1_fixture(fresh_root)
     selected, _ = _write_calibration_source(
-        tmp_path / "fresh",
+        fresh_root,
         fresh_protocol,
+        fresh_gate1,
     )
     fresh_protocol, fresh_lock = _write_protocol(
-        tmp_path / "fresh",
+        fresh_root,
         selected_configs=selected,
     )
+    _bind_gate2_to_gate1(fresh_lock, fresh_gate1)
     registry_path = fresh_protocol / "selected_configs.json"
     registry = json.loads(registry_path.read_text(encoding="utf-8"))
     registry["selections"][0]["config"]["theta"] = 0.5
@@ -662,15 +957,16 @@ def test_selected_configs_reject_protocol_or_artifact_hash_mutation(
     # Refreshing the fixture lock proves the independent config/source binding,
     # rather than merely exercising the enclosing protocol checksum.
     _, fresh_lock = _write_protocol(
-        tmp_path / "fresh",
+        fresh_root,
         selected_configs=registry,
     )
+    _bind_gate2_to_gate1(fresh_lock, fresh_gate1)
     with pytest.raises(EvaluationDataError, match="config checksum mismatch"):
         load_selected_configs(
             registry_path,
             gate2_lock=fresh_lock,
             protocol_dir=fresh_protocol,
-            artifact_root=tmp_path / "fresh",
+            artifact_root=fresh_root,
         )
 
 
@@ -696,3 +992,35 @@ def test_evaluation_module_has_no_tuning_loader_import_or_export() -> None:
 
     assert "load_tuning_dataset" not in evaluation_data.__all__
     assert not hasattr(evaluation_data, "load_tuning_dataset")
+
+
+def test_pre_gate2_entrypoints_do_not_import_evaluation_release_modules() -> None:
+    experiments = Path(__file__).resolve().parents[1] / "experiments"
+    pre_gate2_entrypoints = (
+        "calibration.py",
+        "exp15_calibrated_comparison.py",
+        "exp16_priority_robustness.py",
+        "exp17_dispatch_outcomes.py",
+        "exp18_tuned_baselines.py",
+        "exp19_factorial_ablation.py",
+        "exp20_output_burden.py",
+        "exp22_runtime_repro.py",
+        "pre_gate2.py",
+    )
+    forbidden = {"evaluation_data", "evaluation_protocol"}
+    violations: list[str] = []
+    for filename in pre_gate2_entrypoints:
+        tree = ast.parse(
+            (experiments / filename).read_text(encoding="utf-8"),
+            filename=filename,
+        )
+        for node in ast.walk(tree):
+            imported: list[str] = []
+            if isinstance(node, ast.Import):
+                imported = [alias.name for alias in node.names]
+            elif isinstance(node, ast.ImportFrom):
+                imported = [node.module or ""]
+            for module in imported:
+                if module.split(".")[-1] in forbidden:
+                    violations.append(f"{filename}:{node.lineno}:{module}")
+    assert violations == []

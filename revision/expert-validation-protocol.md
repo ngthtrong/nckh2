@@ -104,7 +104,7 @@ Elicit ranges before asking for a single setting:
 
 - allocate 100 points across `omega_E`, `omega_F`, and `omega_N`;
 - give minimum, preferred, and maximum acceptable `mu`;
-- review `N_cap`, `V_cap`, `v_scale`, and the 10% single-near-duplicate drift
+- review `N_cap`, `V_cap`, `v_scale`, and the 30% single-near-duplicate drift
   threshold;
 - define hard-stop and mandatory-human-review conditions.
 
@@ -150,7 +150,7 @@ invent a rationale.
 | `V_cap` | `50` | per-evidence-unit vulnerability cap | definition/unit and acceptable range |
 | exact fingerprint | fixed allow-list | fields safe for idempotent collapse | accept/reject/missing fields |
 | near envelope | `100 m`, `10 min`, field tolerances | false-merge vs duplicate-inflation trade-off | acceptable ranges and boundary cases |
-| near drift ceiling | `10%` of score range | acceptable single-copy impact | accept/reject and alternative threshold |
+| near drift ceiling | `30%` of score range | acceptable single-copy impact; the initial 10% draft was falsified before Gate 1 | accept/reject and alternative threshold |
 | `C=0` rule | zero priority contribution | treatment of untrusted reports | accept/reject plus human-review rule |
 | dispatch outcomes | Pareto endpoint set | which harm/efficiency outcomes cannot be omitted | ranked mandatory endpoints |
 

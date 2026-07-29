@@ -4,6 +4,8 @@ from __future__ import annotations
 import argparse
 import hashlib
 import json
+import math
+from dataclasses import replace
 from functools import lru_cache
 from pathlib import Path
 from typing import Any, Mapping, Sequence
@@ -13,9 +15,13 @@ import numpy as np
 from demo.experiments.calibration import (
     CalibrationSelection,
     CandidateEvaluation,
+    MetricConstraint,
     OperationalCalibrationContract,
+    SeedFailure,
+    aggregate_seed_metrics,
     calibration_artifact_content_sha256,
     config_sha256,
+    density_match_diagnostics,
     evaluate_candidates,
     expand_search_space,
     graph_density,
@@ -24,7 +30,6 @@ from demo.experiments.calibration import (
     operational_calibration_metrics,
     operational_selection_constraints,
     select_candidate,
-    selection_identity_sha256,
     sparsify_at_quantile,
     write_calibration_artifact,
 )
@@ -52,12 +57,459 @@ from demo.pipeline.baselines import (
     run_st_dbscan,
     spatiotemporal_distance_matrices,
 )
-from demo.pipeline.clustering import run_leiden
+from demo.pipeline.clustering import disconnected_report, run_leiden
 from demo.pipeline.metrics import cluster_quality, geographic_spread
 from demo.pipeline.weighting import build_weight_matrix_vec
 
 
 SAME_REPRESENTATION_METHODS = {"product_leiden", "product_spectral"}
+_LABEL_AWARE_TOKENS = (
+    "ari",
+    "nmi",
+    "ground_truth",
+    "latent",
+    "incident_split",
+    "incident_merge",
+)
+_CANDIDATE_EVALUATION_FIELDS = {
+    "method_id",
+    "track_id",
+    "stage",
+    "config",
+    "config_sha256",
+    "status",
+    "seed_metrics",
+    "aggregate_metrics",
+    "failures",
+    "configuration_evaluation_count",
+    "seed_run_count",
+    "wall_time_seconds",
+}
+
+
+def _candidate_from_artifact(
+    row: Mapping[str, Any],
+    *,
+    calibration_seeds: Sequence[int],
+    calibration_labels: bool,
+) -> CandidateEvaluation:
+    """Rebuild one candidate solely from its authenticated per-seed records."""
+
+    if set(row) != _CANDIDATE_EVALUATION_FIELDS:
+        raise ValueError("composition evaluation row schema is invalid")
+    method_id = row.get("method_id")
+    track_id = row.get("track_id")
+    config = row.get("config")
+    config_hash = row.get("config_sha256")
+    status = row.get("status")
+    seed_metrics = row.get("seed_metrics")
+    aggregate = row.get("aggregate_metrics")
+    failures = row.get("failures")
+    wall_time = row.get("wall_time_seconds")
+    if (
+        not isinstance(method_id, str)
+        or not method_id
+        or not isinstance(track_id, str)
+        or not track_id
+        or not isinstance(config, dict)
+        or not isinstance(config_hash, str)
+        or config_sha256(config) != config_hash
+        or row.get("stage") != "calibration"
+        or status not in {"succeeded", "failed"}
+        or row.get("configuration_evaluation_count") != 1
+        or row.get("seed_run_count") != len(calibration_seeds)
+        or not isinstance(seed_metrics, list)
+        or not isinstance(aggregate, dict)
+        or not isinstance(failures, list)
+        or isinstance(wall_time, bool)
+        or not isinstance(wall_time, (int, float))
+        or not math.isfinite(float(wall_time))
+        or float(wall_time) < 0.0
+        or round(float(wall_time), 6) != float(wall_time)
+    ):
+        raise ValueError("composition evaluation identity/count is invalid")
+
+    normalized_metrics: list[dict[str, float]] = []
+    metric_seeds: list[int] = []
+    for metric_row in seed_metrics:
+        if (
+            not isinstance(metric_row, dict)
+            or len(metric_row) < 2
+            or any(not isinstance(name, str) or not name for name in metric_row)
+        ):
+            raise ValueError("composition seed metric row is malformed")
+        raw_seed = metric_row.get("seed")
+        if (
+            isinstance(raw_seed, bool)
+            or not isinstance(raw_seed, (int, float))
+            or not math.isfinite(float(raw_seed))
+            or not float(raw_seed).is_integer()
+        ):
+            raise ValueError("composition seed metric identity is malformed")
+        normalized: dict[str, float] = {}
+        for name, raw_value in metric_row.items():
+            if (
+                isinstance(raw_value, bool)
+                or not isinstance(raw_value, (int, float))
+                or not math.isfinite(float(raw_value))
+            ):
+                raise ValueError("composition seed metrics must be finite numeric values")
+            if (
+                not calibration_labels
+                and name != "seed"
+                and any(token in name.casefold() for token in _LABEL_AWARE_TOKENS)
+            ):
+                raise ValueError("label-free composition metrics expose hidden labels")
+            normalized[name] = float(raw_value)
+        metric_seeds.append(int(raw_seed))
+        normalized_metrics.append(normalized)
+
+    normalized_failures: list[SeedFailure] = []
+    failure_seeds: list[int] = []
+    for failure in failures:
+        if (
+            not isinstance(failure, dict)
+            or set(failure) != {"seed", "exception_type", "message"}
+            or isinstance(failure.get("seed"), bool)
+            or not isinstance(failure.get("seed"), int)
+            or not isinstance(failure.get("exception_type"), str)
+            or not failure["exception_type"]
+            or not isinstance(failure.get("message"), str)
+        ):
+            raise ValueError("composition seed failure row is malformed")
+        failure_seeds.append(failure["seed"])
+        normalized_failures.append(
+            SeedFailure(
+                seed=failure["seed"],
+                exception_type=failure["exception_type"],
+                message=failure["message"],
+            )
+        )
+
+    seed_positions = {
+        seed: index for index, seed in enumerate(calibration_seeds)
+    }
+    covered_seeds = metric_seeds + failure_seeds
+    if (
+        len(seed_positions) != len(calibration_seeds)
+        or len(covered_seeds) != len(set(covered_seeds))
+        or set(covered_seeds) != set(calibration_seeds)
+        or metric_seeds
+        != sorted(metric_seeds, key=lambda seed: seed_positions.get(seed, -1))
+        or failure_seeds
+        != sorted(failure_seeds, key=lambda seed: seed_positions.get(seed, -1))
+        or (status == "failed") != bool(normalized_failures)
+    ):
+        raise ValueError(
+            "composition evaluation does not cover the exact calibration seed set"
+        )
+
+    expected_aggregate = aggregate_seed_metrics(normalized_metrics)
+    if (
+        any(
+            not isinstance(name, str)
+            or not name
+            or isinstance(value, bool)
+            or not isinstance(value, (int, float))
+            or not math.isfinite(float(value))
+            for name, value in aggregate.items()
+        )
+        or aggregate != expected_aggregate
+    ):
+        raise ValueError(
+            "composition aggregate metrics are not mechanically reproducible"
+        )
+
+    candidate = CandidateEvaluation(
+        method_id=method_id,
+        track_id=track_id,
+        stage="calibration",
+        config=dict(config),
+        config_sha256=config_hash,
+        status=status,
+        seed_metrics=tuple(normalized_metrics),
+        aggregate_metrics=dict(aggregate),
+        failures=tuple(normalized_failures),
+        configuration_evaluation_count=1,
+        seed_run_count=len(calibration_seeds),
+        wall_time_seconds=float(wall_time),
+    )
+    if candidate.to_dict() != dict(row):
+        raise ValueError("composition evaluation row is not in producer-normal form")
+    return candidate
+
+
+def _density_constraints(
+    reference: CandidateEvaluation,
+    contract: OperationalCalibrationContract,
+) -> tuple[MetricConstraint, ...]:
+    metrics = reference.aggregate_metrics
+    try:
+        fraction = float(metrics["retained_fraction"])
+        degree = float(metrics["mean_degree"])
+    except (KeyError, TypeError, ValueError) as exc:
+        raise ValueError("selected product has no valid density metrics") from exc
+    if not math.isfinite(fraction) or not math.isfinite(degree) or degree < 0.0:
+        raise ValueError("selected product density metrics are invalid")
+    return (
+        MetricConstraint(
+            "retained_fraction",
+            ">=",
+            max(0.0, fraction - contract.retained_fraction_match_tolerance),
+        ),
+        MetricConstraint(
+            "retained_fraction",
+            "<=",
+            min(1.0, fraction + contract.retained_fraction_match_tolerance),
+        ),
+        MetricConstraint(
+            "mean_degree",
+            ">=",
+            degree * (1.0 - contract.mean_degree_match_relative_tolerance),
+        ),
+        MetricConstraint(
+            "mean_degree",
+            "<=",
+            degree * (1.0 + contract.mean_degree_match_relative_tolerance),
+        ),
+    )
+
+
+def _candidate_satisfies(
+    evaluation: CandidateEvaluation,
+    *,
+    objective: str,
+    constraints: Sequence[MetricConstraint],
+) -> bool:
+    return (
+        evaluation.status == "succeeded"
+        and objective in evaluation.aggregate_metrics
+        and all(
+            constraint.violation(evaluation.aggregate_metrics) is None
+            for constraint in constraints
+        )
+    )
+
+
+def _selected_evaluation(
+    evaluations: Sequence[CandidateEvaluation],
+    selection: CalibrationSelection,
+) -> CandidateEvaluation | None:
+    selected_hash = selection.selected_config_sha256
+    if selected_hash is None:
+        return None
+    return next(
+        (
+            evaluation
+            for evaluation in evaluations
+            if evaluation.config_sha256 == selected_hash
+        ),
+        None,
+    )
+
+
+def _verify_composition_selections(
+    evaluations: Sequence[CandidateEvaluation],
+    selections: Sequence[Mapping[str, Any]],
+    *,
+    track_ids: Sequence[str],
+    contract: OperationalCalibrationContract,
+    metadata: Mapping[str, Any],
+) -> dict[str, Mapping[str, Any]]:
+    """Re-run Exp15 selection, including its joint matched-density rule."""
+
+    by_pair: dict[tuple[str, str], list[CandidateEvaluation]] = {}
+    for evaluation in evaluations:
+        by_pair.setdefault(
+            (evaluation.method_id, evaluation.track_id),
+            [],
+        ).append(evaluation)
+    for rows in by_pair.values():
+        rows.sort(key=lambda evaluation: evaluation.config_sha256)
+
+    expected_pairs = {
+        (method_id, track_id)
+        for track_id in track_ids
+        for method_id in COMPOSITION_METHODS
+    }
+    if set(by_pair) != expected_pairs:
+        raise ValueError("composition evaluation grid has an invalid method/track scope")
+
+    raw_selections: dict[tuple[str, str], CalibrationSelection] = {}
+    operational_constraints = operational_selection_constraints(
+        contract,
+        graph_method=True,
+    )
+    for track_id in track_ids:
+        objective, direction = contract.objectives[track_id]
+        for method_id in COMPOSITION_METHODS:
+            raw_selections[(method_id, track_id)] = select_candidate(
+                by_pair[(method_id, track_id)],
+                objective=objective,
+                direction=direction,
+                constraints=operational_constraints,
+            )
+
+    expected_selections: dict[tuple[str, str], CalibrationSelection] = {}
+    expected_joint_audit: list[dict[str, Any]] = []
+    expected_match_rows: list[dict[str, Any]] = []
+    comparator_ids = tuple(
+        method_id
+        for method_id in COMPOSITION_METHODS
+        if method_id != "product_louvain"
+    )
+    for track_id in track_ids:
+        objective, direction = contract.objectives[track_id]
+        product_rows = by_pair[("product_louvain", track_id)]
+        joint_rows: list[CandidateEvaluation] = []
+        for product in product_rows:
+            matchable = _candidate_satisfies(
+                product,
+                objective=objective,
+                constraints=operational_constraints,
+            ) and all(
+                any(
+                    _candidate_satisfies(
+                        comparator,
+                        objective=objective,
+                        constraints=(
+                            *operational_constraints,
+                            *_density_constraints(product, contract),
+                        ),
+                    )
+                    for comparator in by_pair[(comparator_id, track_id)]
+                )
+                for comparator_id in comparator_ids
+            )
+            joint_rows.append(
+                replace(
+                    product,
+                    aggregate_metrics={
+                        **product.aggregate_metrics,
+                        "joint_density_match_available": float(matchable),
+                    },
+                )
+            )
+        product_selection = select_candidate(
+            joint_rows,
+            objective=objective,
+            direction=direction,
+            constraints=(
+                *operational_constraints,
+                MetricConstraint(
+                    "joint_density_match_available",
+                    ">=",
+                    1.0,
+                ),
+            ),
+        )
+        product_evaluation = _selected_evaluation(
+            product_rows,
+            product_selection,
+        )
+        expected_joint_audit.append(
+            {
+                "track_id": track_id,
+                "required_comparators": list(comparator_ids),
+                "joint_matchable_product_configurations": sum(
+                    row.aggregate_metrics["joint_density_match_available"] == 1.0
+                    for row in joint_rows
+                ),
+                "joint_product_selection_status": product_selection.status,
+                "joint_product_selection_sha256": (
+                    product_selection.selection_sha256
+                ),
+            }
+        )
+        for method_id in COMPOSITION_METHODS:
+            rows = by_pair[(method_id, track_id)]
+            if method_id == "product_louvain":
+                selected = product_selection
+            elif product_evaluation is None:
+                selected = raw_selections[(method_id, track_id)]
+            else:
+                selected = select_candidate(
+                    rows,
+                    objective=objective,
+                    direction=direction,
+                    constraints=(
+                        *operational_constraints,
+                        *_density_constraints(product_evaluation, contract),
+                    ),
+                )
+            expected_selections[(method_id, track_id)] = selected
+            selected_evaluation = _selected_evaluation(rows, selected)
+            if product_evaluation is not None and selected_evaluation is not None:
+                expected_match_rows.append(
+                    {
+                        "method_id": method_id,
+                        "track_id": track_id,
+                        **density_match_diagnostics(
+                            {
+                                "retained_fraction": product_evaluation.aggregate_metrics[
+                                    "retained_fraction"
+                                ],
+                                "mean_degree": product_evaluation.aggregate_metrics[
+                                    "mean_degree"
+                                ],
+                            },
+                            {
+                                "retained_fraction": selected_evaluation.aggregate_metrics[
+                                    "retained_fraction"
+                                ],
+                                "mean_degree": selected_evaluation.aggregate_metrics[
+                                    "mean_degree"
+                                ],
+                            },
+                        ),
+                    }
+                )
+
+    observed_selections: dict[tuple[str, str], Mapping[str, Any]] = {}
+    for row in selections:
+        if not isinstance(row, dict):
+            raise ValueError("composition selection row must be an object")
+        pair = (row.get("method_id"), row.get("track_id"))
+        if (
+            not all(isinstance(value, str) for value in pair)
+            or pair in observed_selections
+        ):
+            raise ValueError("composition artifact repeats an invalid selection")
+        observed_selections[(str(pair[0]), str(pair[1]))] = row
+    if set(observed_selections) != expected_pairs:
+        raise ValueError("composition artifact lacks a declared method/track selection")
+    for pair, expected in expected_selections.items():
+        if observed_selections[pair] != expected.to_dict():
+            raise ValueError(
+                "composition winner/audit is not mechanically reproducible for "
+                f"{pair[0]}/{pair[1]}"
+            )
+
+    expected_raw = [
+        raw_selections[(method_id, track_id)].to_dict()
+        for track_id in track_ids
+        for method_id in COMPOSITION_METHODS
+    ]
+    if (
+        metadata.get("raw_unmatched_selections") != expected_raw
+        or metadata.get("joint_composition_selection") != expected_joint_audit
+        or metadata.get("matched_density_degree") != expected_match_rows
+        or metadata.get("matched_retained_fraction_tolerance")
+        != contract.retained_fraction_match_tolerance
+        or metadata.get("matched_mean_degree_relative_tolerance")
+        != contract.mean_degree_match_relative_tolerance
+        or metadata.get("negative_tie_failure_policy")
+        != "all candidate rows retained"
+    ):
+        raise ValueError("composition selection audit metadata is not reproducible")
+
+    selected_products: dict[str, Mapping[str, Any]] = {}
+    for track_id in track_ids:
+        selection = expected_selections[("product_louvain", track_id)]
+        if selection.status != "selected" or selection.selected_config is None:
+            raise ValueError("composition artifact lacks one selected product per track")
+        selected_products[track_id] = dict(selection.selected_config)
+    return selected_products
 
 
 def load_product_selections(
@@ -102,13 +554,19 @@ def load_product_selections(
     ):
         raise ValueError("composition selection artifact protocol hashes do not match")
     metadata = artifact.get("metadata")
+    _, current_frozen_record = resolve_frozen_dataset_root()
     if (
         not isinstance(metadata, dict)
         or metadata.get("stage") != "calibration"
         or metadata.get("complete_seed_set") is not True
         or metadata.get("seed_limit") is not None
+        or metadata.get("calibration_contract_sha256")
+        != calibration_contract.source_sha256
+        or metadata.get("frozen_dataset") != current_frozen_record
     ):
-        raise ValueError("composition selections require the complete calibration split")
+        raise ValueError(
+            "composition selections require the complete authenticated calibration split"
+        )
 
     if source.parent.name != "tables":
         raise ValueError("composition selection artifact must belong to a sealed run")
@@ -145,12 +603,40 @@ def load_product_selections(
         or manifest_protocol.get("sha256") != locked.protocol_sha256
     ):
         raise ValueError("composition run captured a different protocol")
+    manifest_inputs = run_manifest.get("inputs")
+    dataset_inputs = (
+        manifest_inputs.get("datasets")
+        if isinstance(manifest_inputs, dict)
+        else None
+    )
+    expected_dataset_source = (
+        f"{current_frozen_record['dataset_root']}/manifest.json"
+    )
+    if (
+        not isinstance(dataset_inputs, list)
+        or len(dataset_inputs) != 1
+        or not isinstance(dataset_inputs[0], dict)
+        or dataset_inputs[0].get("source") != expected_dataset_source
+        or dataset_inputs[0].get("snapshot")
+        != "inputs/datasets/00-manifest.json"
+        or dataset_inputs[0].get("sha256")
+        != current_frozen_record["dataset_manifest_sha256"]
+        or run_manifest.get("checksums", {}).get(
+            "inputs/datasets/00-manifest.json"
+        )
+        != current_frozen_record["dataset_manifest_sha256"]
+    ):
+        raise ValueError("composition run captured a different dataset manifest")
 
     evaluations = artifact.get("evaluations")
     selections = artifact.get("selections")
     if not isinstance(evaluations, list) or not isinstance(selections, list):
         raise ValueError("composition artifact is missing evaluations or selections")
-    evaluation_index: dict[tuple[str, str, str], dict[str, Any]] = {}
+    evaluation_index: dict[
+        tuple[str, str, str],
+        CandidateEvaluation,
+    ] = {}
+    validated_evaluations: list[CandidateEvaluation] = []
     counts: dict[tuple[str, str], int] = {}
     registry_methods = _registry_methods(_load_registry(BASELINE_REGISTRY))
     allowed_config_hashes = {
@@ -163,7 +649,8 @@ def load_product_selections(
         }
         for method_id in COMPOSITION_METHODS
     }
-    expected_tracks = {track.id for track in locked.tracks}
+    track_specs = {track.id: track for track in locked.tracks}
+    expected_tracks = set(track_specs)
     for row in evaluations:
         if not isinstance(row, dict):
             raise ValueError("composition evaluation row must be an object")
@@ -186,10 +673,16 @@ def load_product_selections(
             or config_hash not in allowed_config_hashes[method_id]
         ):
             raise ValueError("composition evaluation identity/count is invalid")
+        candidate = _candidate_from_artifact(
+            row,
+            calibration_seeds=locked.calibration_seeds,
+            calibration_labels=track_specs[track_id].calibration_labels,
+        )
         key = (method_id, track_id, config_hash)
         if key in evaluation_index:
             raise ValueError("composition artifact repeats an evaluation")
-        evaluation_index[key] = row
+        evaluation_index[key] = candidate
+        validated_evaluations.append(candidate)
         counts[(method_id, track_id)] = counts.get((method_id, track_id), 0) + 1
     expected_counts = {
         (method_id, track_id): len(allowed_config_hashes[method_id])
@@ -209,86 +702,13 @@ def load_product_selections(
     )
     if artifact.get("failed_configuration_count") != observed_failures:
         raise ValueError("composition artifact failure total is inconsistent")
-
-    selected: dict[str, Mapping[str, Any]] = {}
-    seen_selection_ids: set[tuple[str, str]] = set()
-    for row in selections:
-        if not isinstance(row, dict):
-            raise ValueError("composition selection row must be an object")
-        identity = (row.get("method_id"), row.get("track_id"))
-        if not all(isinstance(value, str) for value in identity):
-            raise ValueError("composition selection identity is invalid")
-        typed_identity = (str(identity[0]), str(identity[1]))
-        if typed_identity in seen_selection_ids:
-            raise ValueError("composition artifact repeats a method/track selection")
-        seen_selection_ids.add(typed_identity)
-        config = row.get("selected_config")
-        config_hash = row.get("selected_config_sha256")
-        status = row.get("status")
-        objective = row.get("objective")
-        direction = row.get("direction")
-        expected_objective = calibration_contract.objectives.get(
-            typed_identity[1]
-        )
-        identity_evaluations = [
-            evaluation
-            for (method_id, track_id, _), evaluation in evaluation_index.items()
-            if (method_id, track_id) == typed_identity
-        ]
-        succeeded_count = sum(
-            evaluation.get("status") == "succeeded"
-            for evaluation in identity_evaluations
-        )
-        if (
-            expected_objective is None
-            or (objective, direction) != expected_objective
-            or status not in {"selected", "no_feasible_candidate"}
-            or row.get("considered_configurations")
-            != counts.get(typed_identity)
-            or row.get("succeeded_configurations") != succeeded_count
-            or isinstance(row.get("feasible_configurations"), bool)
-            or not isinstance(row.get("feasible_configurations"), int)
-            or not 0
-            <= row["feasible_configurations"]
-            <= row["succeeded_configurations"]
-            or row.get("selection_sha256")
-            != selection_identity_sha256(
-                method_id=typed_identity[0],
-                track_id=typed_identity[1],
-                objective=objective,
-                direction=direction,
-                selected_config_sha256=config_hash,
-            )
-        ):
-            raise ValueError("composition selection identity/hash/count is invalid")
-        if status == "selected":
-            if (
-                not isinstance(config, dict)
-                or not isinstance(config_hash, str)
-                or config_sha256(config) != config_hash
-            ):
-                raise ValueError("selected composition config hash is invalid")
-            evaluation = evaluation_index.get(
-                (typed_identity[0], typed_identity[1], config_hash)
-            )
-            if evaluation is None or evaluation.get("status") != "succeeded":
-                raise ValueError(
-                    "selected composition config has no successful evaluation"
-                )
-            if typed_identity[0] == "product_louvain":
-                selected[typed_identity[1]] = config
-        elif config is not None or config_hash is not None:
-            raise ValueError("infeasible composition selection must not carry a config")
-    expected_selection_ids = {
-        (method_id, track_id)
-        for method_id in COMPOSITION_METHODS
-        for track_id in expected_tracks
-    }
-    if seen_selection_ids != expected_selection_ids:
-        raise ValueError("composition artifact lacks a declared method/track selection")
-    if set(selected) != expected_tracks:
-        raise ValueError("composition artifact lacks one selected product per track")
-    return selected
+    return _verify_composition_selections(
+        validated_evaluations,
+        selections,
+        track_ids=tuple(track.id for track in locked.tracks),
+        contract=calibration_contract,
+        metadata=metadata,
+    )
 
 
 def _selected_product_graph(
@@ -313,12 +733,13 @@ def _predict_baseline_labels(
     seed: int,
     product_config: Mapping[str, Any] | None,
     st_distance_matrices: Any | None,
-) -> tuple[list[int], int | None, Any | None]:
+) -> tuple[list[int], int | None, Any | None, Any | None]:
     """Run one non-composition adapter with a common prediction contract."""
 
     event_list = list(events)
     noise_label: int | None = None
     representation_density = None
+    representation_graph = None
     if method_id == "st_dbscan":
         labels = run_st_dbscan(
             event_list,
@@ -370,6 +791,7 @@ def _predict_baseline_labels(
                 f"{method_id} requires the frozen product configuration"
             )
         graph = _selected_product_graph(event_list, product_config)
+        representation_graph = graph
         representation_density = graph_density(graph)
         if method_id == "product_leiden":
             labels = run_leiden(
@@ -385,7 +807,12 @@ def _predict_baseline_labels(
             )
     else:
         raise ValueError(f"unsupported registered baseline: {method_id!r}")
-    return list(labels), noise_label, representation_density
+    return (
+        list(labels),
+        noise_label,
+        representation_density,
+        representation_graph,
+    )
 
 
 def evaluate_baseline_seed(
@@ -414,7 +841,12 @@ def evaluate_baseline_seed(
         )
 
     events = list(dataset.events)
-    labels, noise_label, representation_density = _predict_baseline_labels(
+    (
+        labels,
+        noise_label,
+        representation_density,
+        representation_graph,
+    ) = _predict_baseline_labels(
         method_id,
         config,
         events,
@@ -430,7 +862,7 @@ def evaluate_baseline_seed(
             for matrix in st_distance_matrices
         )
     )
-    reverse_labels, reverse_noise_label, _ = _predict_baseline_labels(
+    reverse_labels, reverse_noise_label, _, _ = _predict_baseline_labels(
         method_id,
         config,
         list(reversed(events)),
@@ -466,10 +898,14 @@ def evaluate_baseline_seed(
         ),
     }
     if representation_density is not None:
+        if representation_graph is None:  # pragma: no cover - tuple invariant.
+            raise AssertionError("graph density has no representation graph")
+        connectivity = disconnected_report(representation_graph, labels)
         metrics.update(
             {
                 "retained_fraction": representation_density.retained_fraction,
                 "mean_degree": representation_density.mean_degree,
+                "disconnected_communities": float(connectivity["n_broken"]),
             }
         )
     if calibration_labels:

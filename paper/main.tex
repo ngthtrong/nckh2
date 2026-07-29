@@ -1,17 +1,16 @@
-% LNCS full paper. Quantitative claims trace to demo/data/dataset.json or
-% demo/results/tables/; see loop/loop17/traceability.md.
+% Revised LNCS manuscript. Empirical values are generated from the G0 result
+% lock; see loop/revision/traceability.md and revision/result-lock.json.
 \documentclass[runningheads]{llncs}
 
 \usepackage{iftex}
 \ifPDFTeX
-  \usepackage[utf8]{inputenc}
-  \usepackage[T1]{fontenc}
+  \PackageError{main}{This manuscript must be built with XeLaTeX}{}
 \else
   \usepackage{fontspec}
 \fi
-\usepackage{graphicx}
 \usepackage{amsmath,amssymb}
 \usepackage{booktabs}
+\usepackage{graphicx}
 \usepackage{multirow}
 \usepackage{xcolor}
 \usepackage{hyperref}
@@ -19,490 +18,748 @@
 \urlstyle{rm}
 \emergencystretch=1.5em
 
+% This file is generated exclusively by demo.experiments.promote_results.py.
+\input{generated/revision_results.tex}
+
 \begin{document}
 
-\title{A Product-Kernel Weighted Graph for Flood-Rescue Event Clustering and Cluster-Level Priority Scoring}
-\titlerunning{Product-Kernel Clustering for Flood Rescue}
+\title{Product-Similarity Graph Clustering and Bounded Priority Heuristics for Flood-Rescue Reports: A Synthetic Held-Out Study}
+\titlerunning{Product-Similarity Clustering for Synthetic Rescue Reports}
 
-\author{Lê Thị Ngọc Ảnh \and
-Nguyễn Thanh Trọng \and
-Cao Tường Hưng \and
-Nguyễn Như Quỳnh \and
-Ngô Hưng Thịnh \and
-Nguyễn Thanh Khoa}
-\authorrunning{L. T. N. Ảnh et al.}
-\institute{College of Information and Communication Technology,\\
-Can Tho University, Can Tho, Vietnam\\
-\email{anhb2303861@student.ctu.edu.vn}}
+\author{Anonymous Authors}
+\authorrunning{Anonymous Authors}
+\institute{Author names, order, affiliations, and contact details are pending
+author approval.}
 
 \maketitle
 
 \begin{abstract}
-Flood-rescue coordinators must consolidate noisy, multimodal reports into spatially actionable units before assigning scarce teams. We study a weighted graph whose edge weight is a product of a Gaussian geographic kernel and a temporal--contextual kernel, followed by graph sparsification, community detection, and cluster-level priority scoring. Our main result is analytic: for pruning threshold $0<\theta<1$, every retained product-kernel edge is shorter than $\sigma\sqrt{2\ln(1/\theta)}$; therefore a connected cluster with a shortest spanning path of at most $h$ edges has diameter below $h\sigma\sqrt{2\ln(1/\theta)}$. An additive counterpart has no distance-independent guarantee. We evaluate the pipeline on a 485-report synthetic benchmark designed with spatially overlapping events, unequal densities, temporal overlap, multimodal labels, and mixed fake reports. Coordinate-only baselines reach ARI 0.630, whereas removing context lowers the proposed pipeline's ARI by 0.174. Across 20 regenerated geometries, product gating obtains ARI $0.962\pm0.013$ versus $0.935\pm0.018$ for additive weighting at the shared operational default; the paired 95\% confidence interval of the difference excludes zero. Per-form threshold calibration narrows that empirical claim, so we attribute the contribution to the guarantee rather than universal superiority. Confidence scoring remains a weak heuristic, and real-data validation remains open.
-\keywords{Flood rescue \and Product kernel \and Weighted graph \and Community detection \and Priority scoring.}
+Flood-response streams may contain repeated, incomplete, and conflicting
+reports that must be consolidated before teams are assigned. We study a
+product similarity that gates temporal and contextual compatibility by
+geographic proximity, followed by graph clustering and a bounded,
+duplicate-aware priority heuristic. The mathematical result is conditional:
+in its finite threshold region, every retained product edge has an explicit
+distance bound, while a component bound additionally depends on its observed
+hop diameter. Evaluation uses a frozen synthetic generator with
+\RevisionClaim{gate1.protocol.seed_counts.development} development,
+\RevisionClaim{gate1.protocol.seed_counts.calibration} calibration, and
+\RevisionClaim{gate1.protocol.seed_counts.test} untouched test datasets.
+On the label-aware track, product Louvain has mean ARI
+\RevisionClaim{clustering.summary.benchmark_label_aware.product_louvain.ari_labeled_reports.mean};
+the paired additive-minus-product difference is
+\RevisionClaim{clustering.paired.benchmark_label_aware.additive_louvain.vs.product_louvain.ari_labeled_reports.mean}
+with 95\% CI
+[\RevisionClaim{clustering.paired.benchmark_label_aware.additive_louvain.vs.product_louvain.ari_labeled_reports.paired_confidence_interval.0},
+\RevisionClaim{clustering.paired.benchmark_label_aware.additive_louvain.vs.product_louvain.ari_labeled_reports.paired_confidence_interval.1}].
+This is not universal dominance: product rejects no noise and averages
+\RevisionClaim{clustering.summary.benchmark_label_aware.product_louvain.false_operational_destinations.mean}
+false destinations, whereas ST-DBSCAN trades lower ARI for much stronger noise
+rejection. Exact duplicates leave the revised priority unchanged, but a
+coordinated high-confidence campaign makes its drift worse than the legacy
+score. Independent dispatch outcomes show no benefit over the legacy policy
+and favor nearest-first on harm and deadlines in the tested scenarios.
+Consequently, this is a synthetic methodological study, not field validation
+or a deployment claim.
+\keywords{Flood rescue \and Product similarity \and Graph clustering \and
+Synthetic evaluation \and Priority heuristic.}
 \end{abstract}
 
 \section{Introduction}
 
-Disaster-response streams contain repeated, incomplete, and sometimes false
-reports. Treating each report as an independent rescue destination wastes travel
-capacity; grouping reports solely by coordinates can merge distinct physical
-events that overlap in space or split one event observed at several sites.
-Coordinators also need an ordered dispatch list, not clustering alone.
+Disaster-response streams combine spatial observations, evolving conditions,
+and repeated descriptions of the same physical incident. Treating each report
+as a destination can waste travel capacity; clustering solely by coordinates
+can merge distinct incidents that overlap geographically or split one incident
+reported across several sites. A coordinator also needs to inspect uncertainty
+and policy trade-offs before using any cluster ranking.
 
-We investigate a pipeline that converts each report into compact attributes,
-constructs a spatial--temporal--contextual graph, detects communities, and ranks
-the resulting clusters. The central design is a \emph{product kernel}: geography
-multiplies the temporal--contextual term instead of being added to it. Product
-kernels are established technology---bilateral filtering uses the same
-structural idea~\cite{tomasi1998bilateral}---so the kernel form itself is not
-claimed as novel. Our contribution is its operational localization guarantee
-under threshold sparsification, together with a reproducible evaluation that
-separates that guarantee from threshold-calibration artifacts.
+We investigate a pipeline that converts each report into observable
+attributes, constructs a spatial--temporal--contextual graph, detects
+communities, and computes a bounded cluster-priority heuristic. Its central
+composition is a product similarity: geography multiplies, and can veto, the
+temporal--contextual term. Multiplicative similarities are established
+technology---bilateral filtering uses the same structural
+idea~\cite{tomasi1998bilateral}---so the product form is not claimed as novel.
+Nor do we claim a Mercer or positive-semidefinite kernel on the Haversine
+domain. The narrower question is whether a fully specified product-similarity
+pipeline has a useful edge-localization property and how it behaves under
+calibrated, held-out synthetic comparison.
 
 The contributions are:
 \begin{itemize}
-\item a localization lemma that bounds every retained edge and, consequently,
-the diameter of every connected cluster by quantities known before seeing the
-data; an additive weight has no corresponding distance-independent guarantee;
-\item a cluster priority function with an explicit vulnerability-amplification
-cap and a static population reference, evaluated with a multi-seed,
-multi-depot dispatch simulation; and
-\item an end-to-end evaluation on a synthetic benchmark whose difficulty is
-checked before comparing methods: coordinate-only baselines are weak,
-context ablation changes the partition, and single confidence features do not
-separate fake reports.
+\item a complete threshold-domain statement for product and additive
+similarities, including a strict product edge bound and a component corollary
+conditional on observed hop diameter;
+\item a leakage-controlled protocol with disjoint development, calibration,
+and test seeds, two calibration tracks, tuned direct baselines, operational
+burden metrics, factorial diagnostics, and one sealed held-out run; and
+\item a duplicate-aware priority stress test and algebraically independent
+dispatch simulation that retain adverse results. These experiments establish
+exact-duplicate invariance but do not validate a rescue policy.
 \end{itemize}
 
 \section{Related Work}
 
-\paragraph{Crisis sensing and edge deployment.}
-CrisisMMD~\cite{alam2018crisismmd} and FloodNet~\cite{rahnemoonfar2021floodnet}
-support multimodal disaster analysis. Lightweight vision and language models
-such as MobileNetV3~\cite{howard2019mobilenetv3} and
-DistilBERT~\cite{sanh2019distilbert} motivate on-device extraction, while
-EmergencyNet~\cite{kyrkou2020emergencynet} illustrates embedded inference.
-Our experiments do not benchmark these models: flood level and urgency are
-provided by the generator. Edge extraction is therefore deployment context,
-not an empirical contribution of this paper.
+\paragraph{Crisis sensing and deployment context.}
+CrisisMMD~\cite{alam2018crisismmd} and FloodNet
+~\cite{rahnemoonfar2021floodnet} support multimodal disaster analysis.
+Lightweight models such as MobileNetV3~\cite{howard2019mobilenetv3},
+DistilBERT~\cite{sanh2019distilbert}, and
+EmergencyNet~\cite{kyrkou2020emergencynet} motivate on-device attribute
+extraction. Our generator supplies flood and urgency observations; we do not
+evaluate a vision/language model, device latency, energy, or field network.
+Edge extraction is therefore deployment context rather than an empirical
+contribution.
 
-\paragraph{Graph clustering and spatial constraints.}
-Louvain~\cite{blondel2008louvain} and Leiden~\cite{traag2019leiden} optimize
-weighted modularity without a preset cluster count. K-Means
-~\cite{macqueen1967some}, DBSCAN~\cite{ester1996dbscan}, HDBSCAN
-~\cite{campello2013hdbscan}, and spectral clustering
-~\cite{vonluxburg2007spectral} provide complementary baselines. Spatial
-clustering is also addressed explicitly by ClustGeo
+\paragraph{Graph and spatio-temporal clustering.}
+Louvain~\cite{blondel2008louvain} and
+Leiden~\cite{traag2019leiden} optimize weighted modularity without a preset
+cluster count. DBSCAN~\cite{ester1996dbscan}, HDBSCAN
+~\cite{campello2013hdbscan}, and ST-DBSCAN~\cite{birant2007stdbscan} represent
+density-based alternatives; the latter explicitly joins spatial, temporal,
+and non-spatial criteria. Spatial constraints also appear in ClustGeo
 ~\cite{chavent2018clustgeo}, contiguity-constrained regionalization
-~\cite{assuncao2006efficient}, and broader spatially constrained methods
-~\cite{yuan2021spatial}. These lines make clear that neither multiplying kernels
-nor enforcing compact geography is new in isolation.
+~\cite{assuncao2006efficient}, and broader spatially constrained clustering
+~\cite{yuan2021spatial}. These methods make clear that geographic compactness,
+spatio-temporal density, and graph partitioning are not new in isolation.
 
-\paragraph{Product kernels and positioning.}
-Bilateral filtering multiplies spatial and range kernels so either factor can
-veto an interaction~\cite{tomasi1998bilateral}. We transpose that mechanism
-from pixels to rescue reports. The additive form used below is a controlled
-ablation constructed by us, not a claimed representation of all prior spatial
-clustering. Table~\ref{tab:positioning} locates the narrower contribution.
+\paragraph{Priority and humanitarian allocation.}
+Multi-criteria allocation treats objectives and weights as policy choices
+~\cite{saaty1980ahp,vitoriano2011multicriteria}. Humanitarian logistics exposes
+real tension among equity, efficiency, and efficacy
+~\cite{gralla2014review,huang2012models}. A bounded score is therefore not a
+validated policy: evaluation must use outcomes that do not algebraically
+repeat the score, and it must retain trade-offs against simpler dispatch
+rules.
 
 \begin{table}[t]
-\caption{Positioning of the evaluated contribution.}\label{tab:positioning}
+\caption{Positioning of the evaluated components.}\label{tab:positioning}
 \centering\small
 \setlength{\tabcolsep}{4pt}
 \resizebox{\textwidth}{!}{%
 \begin{tabular}{lcccc}
 \toprule
-Line of work & Product form & Spatial constraint & Cluster ranking & Bound \\
+Line of work & Product & Spatial control & Cluster ranking & Bound \\
 \midrule
-Bilateral filtering~\cite{tomasi1998bilateral} & \checkmark & local & -- & -- \\
+Bilateral filtering~\cite{tomasi1998bilateral} & yes & local & no & no \\
+ST-DBSCAN~\cite{birant2007stdbscan} & no & direct & no & no \\
 ClustGeo/regionalization~\cite{chavent2018clustgeo,assuncao2006efficient}
- & -- & \checkmark & -- & -- \\
-Graph event detection~\cite{sakaki2010earthquake,atefeh2015survey}
- & $\sim$ & $\sim$ & -- & -- \\
-This work & \checkmark & \checkmark & \checkmark & \checkmark \\
+ & no & explicit & no & no \\
+This study & yes & thresholded edge & heuristic & conditional \\
 \bottomrule
 \end{tabular}
 }
 \end{table}
-
-\paragraph{Priority and equity.}
-Multi-criteria emergency allocation has long treated objectives and weights as
-policy choices~\cite{saaty1980ahp,vitoriano2011multicriteria}. Humanitarian
-logistics also exposes genuine tension among equity, efficiency, and efficacy
-~\cite{gralla2014review,huang2012models}. Our vulnerability multiplier is an
-explicit, bounded policy control; outcome evaluation is required because merely
-changing a ranking does not demonstrate benefit.
 
 \section{Method}
 
-\subsection{Report Attributes and Deployment Scope}
+\subsection{Observable Report Representation}
 
-Each report is represented as
+A report is represented as
 \[
 v_i=(L_i,T_i,F_i,E_i,N_i,V_i,C_i),
 \]
-where $L_i$ and $T_i$ are location and time, $F_i,E_i\in[0,1]$ are flood level
-and urgency, $N_i$ is reported population, $V_i\ge0$ is vulnerability mass, and
-$C_i\in(0,1)$ is confidence. A compact JSON representation occupies 105--111
-bytes in our serialization experiment. A prospective mobile client can extract
-$F_i$ and $E_i$ using lightweight image/text models and send only these
-attributes. Because no device latency, memory, energy, or model-accuracy result
-is reported here, this remains a proposed deployment architecture.
+where $L_i,T_i$ are location and time; $F_i,E_i\in[0,1]$ are reported flood
+and urgency evidence; $N_i,V_i$ are reported demand and vulnerability
+evidence; and $C_i\in[0,1]$ is an interpretable provenance/corroboration
+heuristic. $N_i$ and $V_i$ are not treated as counts of unique people because
+the reports have no validated person-identity linkage. Latent incident
+identifiers, unique population, vulnerability truth, deadlines, and harm
+parameters are available only to the synthetic evaluator and are prohibited
+from clustering, tuning, and priority inference.
 
-Confidence is the interpretable heuristic
-\[
-C_i=\operatorname{sigmoid}\!\left(b_0+b_1{\bf1}[\mathrm{image}]
-              +b_2\log(1+n_{\mathrm{corrob},i})\right).
-\]
-It downweights inputs to the priority score; it is not treated as a validated
-misinformation detector.
+Confidence is computed only from observable provenance signals such as image
+availability and corroborating payloads. It gates $E,F,N,$ and $V$
+consistently, but is neither a truth probability nor a misinformation
+detector. The recorded compact application JSON occupies
+\RevisionClaim{runtime.packet.min_bytes}--\RevisionClaim{runtime.packet.max_bytes}
+bytes (median \RevisionClaim{runtime.packet.median_bytes}) over
+\RevisionClaim{runtime.packet.n_packets} reports. These values exclude
+transport framing, HTTP/MQTT headers, TLS, authentication, retransmission, and
+link-layer overhead.
 
-\subsection{Product-Kernel Graph and Localization Guarantee}
+\subsection{Product Similarity and Localization Domain}
 
-For reports $i,j$, let $d_{ij}$ be Haversine distance and
-$\Delta t_{ij}$ the absolute time difference. We define
+Let $d_{ij}$ be Haversine distance and $\Delta t_{ij}$ absolute time
+difference. Define
 \begin{align}
-S_{\mathrm{geo}}(d)&=\exp[-d^2/(2\sigma^2)],\\
-S_{\mathrm{temp}}(\Delta t)&=\exp[-\Delta t/\tau_t],\\
-S_{\mathrm{ctx}}(i,j)&=\exp[-|F_i-F_j|/\tau_F-|E_i-E_j|/\tau_E],\\
-w_{ij}^{\times}&=S_{\mathrm{geo}}(d_{ij})
- [\beta S_{\mathrm{temp}}+\gamma S_{\mathrm{ctx}}],
+G(d)&=\exp[-d^2/(2\sigma^2)],&
+T(\Delta t)&=\exp[-\Delta t/\tau_t],\\
+C(i,j)&=\exp[-|F_i-F_j|/\tau_F-|E_i-E_j|/\tau_E],\\
+w^\times_{ij}&=G(d_{ij})[\beta T(\Delta t_{ij})+\gamma C(i,j)],
 \label{eq:product}
 \end{align}
-with $\beta,\gamma\ge0$ and $\beta+\gamma\le1$. We retain weights above
-$\theta$ and then keep the union of each node's $k$ strongest edges. The
-$k$-nearest operation can only delete edges, so the following result survives
-both sparsification stages.
+where $\alpha,\beta,\gamma\ge0$, $\sigma>0$, and
+$B=\beta+\gamma$. An edge is retained exactly when $w_{ij}>\theta$; a later
+$k$-nearest sparsifier may delete but never add edges.
 
-\begin{lemma}[Localization of product-kernel edges]\label{lem:localization}
-For $0<\theta<1$, every retained edge under~\eqref{eq:product} satisfies
+\begin{theorem}[Product edge localization]\label{thm:product}
+If $B>0$ and $0<\theta<B$, every retained product edge satisfies
 \[
-d_{ij}<r_\theta:=\sigma\sqrt{2\ln(1/\theta)}.
+d_{ij}<r^\times_\theta
+ :=\sigma\sqrt{2\log(B/\theta)}.
 \]
-If any two vertices in a connected component are joined by a path of at most
-$h$ edges, that component has geographic diameter below $h r_\theta$.
-\end{lemma}
+If $\theta\ge B$, the strict retained set is empty; for $\theta\le0$ there is
+generally no non-trivial threshold-induced finite cutoff.
+\end{theorem}
 
 \begin{proof}
-Since both similarities are at most one and $\beta+\gamma\le1$,
-$w_{ij}^{\times}\le S_{\mathrm{geo}}(d_{ij})$. Thus
-$w_{ij}^{\times}>\theta$ implies
-$\exp[-d_{ij}^2/(2\sigma^2)]>\theta$, which is equivalent to
-$d_{ij}<\sigma\sqrt{2\ln(1/\theta)}$. Applying the triangle inequality along
-a path of at most $h$ retained edges gives the component bound.
+Because $T,C\in[0,1]$,
+$w^\times_{ij}\le B\exp[-d_{ij}^2/(2\sigma^2)]$. In the finite region,
+\[
+\theta<w^\times_{ij}
+\le B\exp[-d_{ij}^2/(2\sigma^2)]
+\]
+and strict monotonicity of the logarithm gives the stated radius. If
+$\theta\ge B$, the maximum possible weight cannot exceed the threshold. For
+$\theta\le0$, choosing $T=C=1$ retains arbitrarily distant finite model
+points. Degenerate $B=0$ cases follow from $w^\times=0$.
 \end{proof}
 
-For $\sigma=700$\,m and $\theta=0.05$, every retained edge is shorter than
-1.713\,km. This also enables safe spatial blocking: pairs outside $r_\theta$
-need not be evaluated when constructing the graph.
+\begin{corollary}[Conditional component bound]\label{cor:component}
+In the finite product region, a connected vertex set with at least two
+vertices and unweighted hop-diameter $h<\infty$ has geographic diameter
+$D<h\,r^\times_\theta$.
+\end{corollary}
 
-\paragraph{Why addition has no analogous guarantee.}
-The controlled baseline is
+The corollary follows from the triangle inequality along a path of at most
+$h$ retained edges. A singleton is handled separately with $h=D=0$. It is not
+an ex-ante compact-cluster guarantee: the pipeline does not enforce a useful
+$h$, and a long retained chain may approach the bound. Moreover, calibrated
+graph thresholds are weight quantiles, so the numerical radius is known only
+after the selected threshold is realized.
+
+For the controlled additive composition
 \[
-w_{ij}^{+}=\alpha S_{\mathrm{geo}}+
-            \beta S_{\mathrm{temp}}+\gamma S_{\mathrm{ctx}}.
+w^+_{ij}=\alpha G(d_{ij})+\beta T(\Delta t_{ij})+\gamma C(i,j),
 \]
-Its non-geographic terms create a positive floor independent of distance.
-Because $F,E\in[0,1]$, for example,
-$\gamma S_{\mathrm{ctx}}\ge
-\gamma\exp(-1/\tau_F-1/\tau_E)>0$ when $\gamma>0$. For any threshold below
-that floor, equally timed or context-compatible reports can remain connected
-at arbitrary geographic separation. This does not say additive weighting
-cannot form compact clusters after calibration; it says compactness is not
-guaranteed by $\theta$ and $\sigma$ alone.
+the correct contrast is threshold-dependent. If $\alpha>0$ and
+$B<\theta<B+\alpha$, every retained edge satisfies
+\[
+d_{ij}<r^+_\theta
+ :=\sigma\sqrt{2\log\!\left(\frac{\alpha}{\theta-B}\right)}.
+\]
+At $\theta\ge B+\alpha$ the retained set is empty, while at
+$\theta\le B$ there is generally no non-trivial threshold-induced geographic
+cutoff because the non-geographic contribution can retain arbitrarily distant
+pairs. Thus addition does have a finite region; claiming otherwise would
+overstate Theorem~\ref{thm:product}.
 
-\begin{figure}[t]
-\centering
-\includegraphics[width=.98\textwidth]{figures/fig8_lemma1.png}
-\caption{Measured longest retained edge versus Lemma~\ref{lem:localization}.
-Product gating has zero violations in 38 thresholds. The additive ablation
-($\alpha=0.5$) violates the same bound at 71 of 79 thresholds; the bound is not
-claimed for that form.}\label{fig:lemma}
-\end{figure}
+\subsection{Duplicate-Aware Bounded Priority Heuristic}
 
-\subsection{Community Detection and Cluster Priority}
-
-Louvain partitions the sparse weighted graph; Leiden is checked as a
-drop-in alternative. For cluster $C_k$, we compute
+Exact-payload reports are collapsed by a fingerprint over observable
+location, time, measurements, provenance, and missingness fields. Observable
+near duplicates are coalesced by fixed geographic, temporal, measurement,
+confidence, and missingness tolerances. Let $g$ index the resulting evidence
+families. After clipping $C,F,E$ to $[0,1]$, $N$ to $[0,N_{\rm cap}]$, and
+$V$ to $[0,V_{\rm cap}]$, the revised estimator is
 \begin{align}
-\widetilde E_k &= |C_k|^{-1}\sum_{i\in C_k}E_iC_i, &
-\widetilde F_k &= \max_{i\in C_k}(F_iC_i),\\
-\widetilde N_k &= \min\!\left\{1,
-\frac{\log(1+\sum_{i\in C_k}N_iC_i)}{\log(1+N_{\mathrm{ref}})}\right\},&
-A_k &=1+(\mu-1)\tanh\!\left(\frac{\sum_{i\in C_k}V_i}{s}\right),\\
-R_k&=\omega_E\widetilde E_k+\omega_F\widetilde F_k+
-\omega_N\widetilde N_k,&
-\mathcal P(C_k)&=A_kR_k.
+\widehat E&=
+\frac{\sum_g\max_{i\in g}(C_iE_i)}
+     {\max\{1,\sum_g\max_{i\in g}C_i\}},&
+\widehat F&=\max_g\max_{i\in g}(C_iF_i),\\
+\widehat N&=\max_g\max_{i\in g}(C_iN_i),&
+\widehat V&=\max_g\max_{i\in g}(C_iV_i),\\
+\widetilde N&=\min\!\left\{1,
+\frac{\log(1+\widehat N)}{\log(1+N_{\rm ref})}\right\},&
+A&=1+(\mu-1)\tanh(\widehat V/s),\\
+R&=\omega_E\widehat E+\omega_F\widehat F+\omega_N\widetilde N,&
+\mathcal P&=A R.
+\label{eq:priority}
 \end{align}
-Weights $\boldsymbol\omega$ sum to one and $\mu\in[1,2]$, so
-$\mathcal P\in[0,2)$. We use a static $N_{\mathrm{ref}}=500$ rather than the
-largest current cluster. With a dynamic reference, an unchanged cluster's
-score can change when an unrelated larger cluster appears.
+The maxima for $N,V$ deliberately avoid asserting that overlapping reported
+counts are disjoint. With non-negative normalized weights and
+$1\le\mu\le2$, $\mathcal P\in[0,2]$. The locked policy uses
+$N_{\rm ref}=500$ and $V_{\rm cap}=50$; neither these caps nor the weights have
+expert validation. The legacy ablation preserves report multiplicity and raw
+summation, including a confidence bypass for $V$.
 
 \section{Experimental Design}
 
-\subsection{Hard Synthetic Benchmark}
+\subsection{Frozen Synthetic Data}
 
-The seed-42 dataset contains 485 reports: 421 labeled observations from 13
-physical events, 60 noise reports, and a four-report fake campaign. Event sizes
-and spreads vary from 8--70 observations and 120--900\,m. Three event pairs
-have overlapping spatial envelopes but contrasting $(F,E)$ profiles; another
-pair shares a location but is separated by 3.5\,h; one label is bimodal.
-Thirty-nine reports are fake, 66.7\% of them are placed inside event regions,
-and image availability overlaps between real and fake reports.
+The method-agnostic Gate-1 freeze contains
+\RevisionClaim{gate1.data_contract.n_datasets} independently generated
+datasets, \RevisionClaim{gate1.data_contract.n_reports} reports, and
+\RevisionClaim{data.distribution.overall.scope.n_incidents} latent physical
+incidents. The disjoint split is
+\RevisionClaim{gate1.protocol.seed_counts.development} development,
+\RevisionClaim{gate1.protocol.seed_counts.calibration} calibration, and
+\RevisionClaim{gate1.protocol.seed_counts.test} test seeds. The held-out split
+contains \RevisionClaim{data.quality.split_summaries.test.n_reports_total}
+reports, ranging from
+\RevisionClaim{data.quality.split_summaries.test.n_reports_min} to
+\RevisionClaim{data.quality.split_summaries.test.n_reports_max} per dataset.
 
-\begin{figure}[t]
-\centering
-\includegraphics[width=.98\textwidth]{figures/fig2_map.png}
-\caption{Dataset distribution and the three spatially overlapping event pairs.
-Their centroids are 714--783\,m apart and their spatial envelopes overlap; the
-labels are defined by physical event context rather than by an island center.}
-\label{fig:data}
-\end{figure}
+The generator varies incident geometry, report counts and dispersion,
+time/context overlap, missing fields, provenance, exact and near duplicates,
+unlinked noise, and coordinated campaigns. Each incident has latent
+$N_{\rm true}$, $V_{\rm true}$, service demand, deadline, and a piecewise
+lateness-harm curve. This richer internal truth supports error analysis, but
+the family is still designed by the authors. It cannot establish external
+validity for real floods.
 
-Table~\ref{tab:hardness} is evaluated before method comparison. All five
-pre-registered gates pass. In particular, the combined product graph is not
-guaranteed to win by coordinates alone, and the context term changes the
-partition materially.
+\subsection{Calibration, Baselines, and Leakage Control}
 
-\begin{table}[t]
-\caption{Dataset-hardness gates (seed 42).}\label{tab:hardness}
-\centering\small
-\resizebox{\textwidth}{!}{%
-\begin{tabular}{lcc}
-\toprule
-Gate & Result & Required \\
-\midrule
-K-Means / Haversine agglomerative, coordinates only (ARI)
- & 0.630 / 0.412 & both $<0.75$ \\
-Remove $S_{\mathrm{ctx}}$: ARI drop & 0.174 & $\ge0.08$ \\
-Remove $S_{\mathrm{ctx}}$: drop on overlapping pairs & 0.396 & diagnostic \\
-Sweep $(\tau_F,\tau_E)$: ARI range & 0.071 & $\ge0.01$ \\
-Strongest single fake-report feature (AUC) & 0.690 & $\le0.75$ \\
-Fake reports placed inside event regions & 66.7\% & $\ge55\%$ \\
-\bottomrule
-\end{tabular}
-}
-\end{table}
+Two pre-specified tracks use the same search ceilings and operational
+constraints. The benchmark track may use calibration labels to maximize ARI.
+The operational track is label-free and uses reverse-order partition
+stability, retained density, connectivity, diameter, and review-burden
+constraints. Graph thresholds are calibration-derived weight quantiles rather
+than shared raw thresholds across incompatible scales. Product composition
+comparisons additionally require matched retained fraction and mean degree.
 
-\subsection{Parameters, Metrics, and Statistical Protocol}
+The registry contains product and additive Louvain, a fixed seven-point convex
+similarity mixture (not learned multiple-kernel clustering), ST-DBSCAN,
+standardized DBSCAN/HDBSCAN, spatially constrained agglomerative, and
+same-representation Leiden/spectral diagnostics. Calibration promoted
+\RevisionClaim{gate2.selection.selection_count} feasible method--track
+configurations and authentically retained
+\RevisionClaim{gate2.selection.no_feasible_count} method--track exclusions.
+The exclusions are not converted into poor test scores or silently removed.
 
-Defaults are $\sigma=700$\,m, $\tau_t=45$\,min,
-$(\tau_F,\tau_E)=(0.25,0.35)$, $(\beta,\gamma)=(0.5,0.5)$,
-$\theta=0.05$, $k=12$, resolution $1.0$,
-$(\omega_E,\omega_F,\omega_N)=(0.34,0.33,0.33)$, $s=10$, and $\mu=2$.
-We report ARI/NMI only on labeled points. The primary geographic statistics
-are computed identically for every method over predicted clusters containing
-at least one labeled point; noise-only clusters and unassigned points are
-reported separately. This prevents a method's noise-bin convention from
-determining its apparent diameter.
+The test split remained sealed until the protocol and selections were hashed.
+The candidate suite then ran once without seed, method, track, resume, or
+output filters. It produced
+\RevisionClaim{gate3.coverage.selected_method_seed_rows} selected
+method--seed rows and
+\RevisionClaim{gate3.coverage.exclusion_seed_rows} retained exclusion rows
+over \RevisionClaim{gate3.coverage.test_seed_count} test seeds, with no
+prediction or scientific-seed failure.
 
-Twenty-seed tests regenerate inter-event geometry, group sizes, and spreads
-(not only point jitter). Paired differences use bootstrap 95\% confidence
-intervals and Wilcoxon signed-rank tests. A result is called different only if
-the paired interval excludes zero.
+\subsection{Endpoints and Inference}
+
+Clustering co-primary families are (i) ARI on labeled reports, (ii) incident
+split and merge loss, and (iii) false operational destinations and operator
+review burden over all reports. Noise rejection/absorption and destination
+geographic diameter are key secondary endpoints. Noise label $-1$ is never a
+destination. The standard review policy counts each unresolved report as one
+queue item.
+
+Factorial diagnostics evaluate all on/off combinations of geography, time,
+context, and $k$-nearest pruning, plus confidence, vulnerability, and
+aggregation factors for priority. Main effects are paired factorial contrasts,
+not causal estimates, and must be read with interactions and unmatched cells.
+
+Priority stress tests include exact/near duplicates, low-confidence inflation,
+coordinated high-confidence campaigns, and missing provenance. Dispatch uses
+three resource scenarios and latent outcomes that do not algebraically reuse
+priority, flood, vulnerability, or reported demand. We report latent harm,
+deadline misses, arrival mean/max/CVaR, equity gap, workload, and
+deadline-reached unique population; no single endpoint defines a winning
+policy.
+
+Across test seeds, summaries report mean, standard deviation, median, paired
+bootstrap 95\% CI, paired Wilcoxon signed-rank test, effect size, and
+denominator. Holm adjustment is applied within declared endpoint families.
+All ties, adverse comparisons, failures, and unavailable pairs are retained.
 
 \section{Results}
 
-\subsection{Clustering Across Regenerated Geometries}
+\subsection{Calibrated Clustering}
 
-At the shared operational default $\theta=0.05$, product gating has mean ARI
-$0.9616\pm0.0134$ (95\% CI $[0.9562,0.9675]$), versus
-$0.9348\pm0.0179$ ($[0.9272,0.9426]$) for additive $\alpha=1$.
-The paired ARI difference is 0.0268, CI $[0.0198,0.0345]$,
-$p=1.32\times10^{-4}$. Mean labeled-cluster diameter is 1.54\,km versus
-98.53\,km. These numbers characterize the shared default, not intrinsic
-superiority under every calibrated threshold.
+Table~\ref{tab:clustering} reports both calibration tracks. On the
+label-aware track, product Louvain attains ARI
+\RevisionClaim{clustering.summary.benchmark_label_aware.product_louvain.ari_labeled_reports.mean}
+(SD
+\RevisionClaim{clustering.summary.benchmark_label_aware.product_louvain.ari_labeled_reports.standard_deviation},
+CI [
+\RevisionClaim{clustering.summary.benchmark_label_aware.product_louvain.ari_labeled_reports.paired_confidence_interval.0},
+\RevisionClaim{clustering.summary.benchmark_label_aware.product_louvain.ari_labeled_reports.paired_confidence_interval.1}]).
+Additive-minus-product ARI is
+\RevisionClaim{clustering.paired.benchmark_label_aware.additive_louvain.vs.product_louvain.ari_labeled_reports.mean}
+(CI [
+\RevisionClaim{clustering.paired.benchmark_label_aware.additive_louvain.vs.product_louvain.ari_labeled_reports.paired_confidence_interval.0},
+\RevisionClaim{clustering.paired.benchmark_label_aware.additive_louvain.vs.product_louvain.ari_labeled_reports.paired_confidence_interval.1}],
+Holm $p=$
+\RevisionClaim{clustering.paired.benchmark_label_aware.additive_louvain.vs.product_louvain.ari_labeled_reports.holm_adjusted_p_value}).
+The label-free track gives a smaller additive-minus-product difference of
+\RevisionClaim{clustering.paired.operational_label_free.additive_louvain.vs.product_louvain.ari_labeled_reports.mean}
+(CI [
+\RevisionClaim{clustering.paired.operational_label_free.additive_louvain.vs.product_louvain.ari_labeled_reports.paired_confidence_interval.0},
+\RevisionClaim{clustering.paired.operational_label_free.additive_louvain.vs.product_louvain.ari_labeled_reports.paired_confidence_interval.1}],
+Holm $p=$
+\RevisionClaim{clustering.paired.operational_label_free.additive_louvain.vs.product_louvain.ari_labeled_reports.holm_adjusted_p_value}).
 
 \begin{table}[t]
-\caption{Selected 20-seed results at the shared default. CI is for the mean;
-$\Delta$ is product minus additive.}\label{tab:multiseed}
-\centering\small
+\caption{Held-out means by calibration track. Split, merge, false destinations
+(FD), and noise rejection (NR) are for the label-aware track. Lower is better
+for split, merge, and FD; higher is better for ARI and NR.}\label{tab:clustering}
+\centering\scriptsize
+\setlength{\tabcolsep}{2.6pt}
 \resizebox{\textwidth}{!}{%
-\begin{tabular}{lccc}
+\begin{tabular}{lrrrrrr}
 \toprule
-Metric & Product & Additive $\alpha=1$ & paired $\Delta$ CI \\
+Method & ARI label & ARI label-free & Split & Merge & FD & NR \\
 \midrule
-ARI & 0.962 [0.956,0.968] & 0.935 [0.927,0.943] & [0.020,0.035] \\
-NMI & 0.978 [0.976,0.981] & 0.963 [0.960,0.967] & [0.011,0.019] \\
-Mean labeled diameter (km) & 1.54 [1.51,1.58] & 98.53 [93.10,103.51]
- & $[-101.97,-91.56]$ \\
-Max labeled diameter (km) & 4.44 [4.16,4.75] & 192.27 [186.87,197.15]
- & $[-192.65,-182.57]$ \\
+Product Louvain &
+\RevisionClaim{clustering.summary.benchmark_label_aware.product_louvain.ari_labeled_reports.mean} &
+\RevisionClaim{clustering.summary.operational_label_free.product_louvain.ari_labeled_reports.mean} &
+\RevisionClaim{clustering.summary.benchmark_label_aware.product_louvain.incident_split_loss.mean} &
+\RevisionClaim{clustering.summary.benchmark_label_aware.product_louvain.incident_merge_loss.mean} &
+\RevisionClaim{clustering.summary.benchmark_label_aware.product_louvain.false_operational_destinations.mean} &
+\RevisionClaim{clustering.summary.benchmark_label_aware.product_louvain.noise_rejection_rate.mean} \\
+Product Leiden &
+\RevisionClaim{clustering.summary.benchmark_label_aware.product_leiden.ari_labeled_reports.mean} &
+\RevisionClaim{clustering.summary.operational_label_free.product_leiden.ari_labeled_reports.mean} &
+\RevisionClaim{clustering.summary.benchmark_label_aware.product_leiden.incident_split_loss.mean} &
+\RevisionClaim{clustering.summary.benchmark_label_aware.product_leiden.incident_merge_loss.mean} &
+\RevisionClaim{clustering.summary.benchmark_label_aware.product_leiden.false_operational_destinations.mean} &
+\RevisionClaim{clustering.summary.benchmark_label_aware.product_leiden.noise_rejection_rate.mean} \\
+Additive Louvain &
+\RevisionClaim{clustering.summary.benchmark_label_aware.additive_louvain.ari_labeled_reports.mean} &
+\RevisionClaim{clustering.summary.operational_label_free.additive_louvain.ari_labeled_reports.mean} &
+\RevisionClaim{clustering.summary.benchmark_label_aware.additive_louvain.incident_split_loss.mean} &
+\RevisionClaim{clustering.summary.benchmark_label_aware.additive_louvain.incident_merge_loss.mean} &
+\RevisionClaim{clustering.summary.benchmark_label_aware.additive_louvain.false_operational_destinations.mean} &
+\RevisionClaim{clustering.summary.benchmark_label_aware.additive_louvain.noise_rejection_rate.mean} \\
+Convex similarity &
+\RevisionClaim{clustering.summary.benchmark_label_aware.multiple_similarity_louvain.ari_labeled_reports.mean} &
+\RevisionClaim{clustering.summary.operational_label_free.multiple_similarity_louvain.ari_labeled_reports.mean} &
+\RevisionClaim{clustering.summary.benchmark_label_aware.multiple_similarity_louvain.incident_split_loss.mean} &
+\RevisionClaim{clustering.summary.benchmark_label_aware.multiple_similarity_louvain.incident_merge_loss.mean} &
+\RevisionClaim{clustering.summary.benchmark_label_aware.multiple_similarity_louvain.false_operational_destinations.mean} &
+\RevisionClaim{clustering.summary.benchmark_label_aware.multiple_similarity_louvain.noise_rejection_rate.mean} \\
+Spatial agglomerative &
+\RevisionClaim{clustering.summary.benchmark_label_aware.spatial_constrained_agglomerative.ari_labeled_reports.mean} &
+\RevisionClaim{clustering.summary.operational_label_free.spatial_constrained_agglomerative.ari_labeled_reports.mean} &
+\RevisionClaim{clustering.summary.benchmark_label_aware.spatial_constrained_agglomerative.incident_split_loss.mean} &
+\RevisionClaim{clustering.summary.benchmark_label_aware.spatial_constrained_agglomerative.incident_merge_loss.mean} &
+\RevisionClaim{clustering.summary.benchmark_label_aware.spatial_constrained_agglomerative.false_operational_destinations.mean} &
+\RevisionClaim{clustering.summary.benchmark_label_aware.spatial_constrained_agglomerative.noise_rejection_rate.mean} \\
+ST-DBSCAN &
+\RevisionClaim{clustering.summary.benchmark_label_aware.st_dbscan.ari_labeled_reports.mean} &
+\RevisionClaim{clustering.summary.operational_label_free.st_dbscan.ari_labeled_reports.mean} &
+\RevisionClaim{clustering.summary.benchmark_label_aware.st_dbscan.incident_split_loss.mean} &
+\RevisionClaim{clustering.summary.benchmark_label_aware.st_dbscan.incident_merge_loss.mean} &
+\RevisionClaim{clustering.summary.benchmark_label_aware.st_dbscan.false_operational_destinations.mean} &
+\RevisionClaim{clustering.summary.benchmark_label_aware.st_dbscan.noise_rejection_rate.mean} \\
 \bottomrule
-\end{tabular}
-}
+\end{tabular}}
 \end{table}
 
-\subsection{Baselines and Measurement Convention}
+These ARI results coexist with material operational failures. Product Louvain
+has mean split loss
+\RevisionClaim{clustering.summary.benchmark_label_aware.product_louvain.incident_split_loss.mean},
+merge loss
+\RevisionClaim{clustering.summary.benchmark_label_aware.product_louvain.incident_merge_loss.mean},
+\RevisionClaim{clustering.summary.benchmark_label_aware.product_louvain.false_operational_destinations.mean}
+false destinations, and
+\RevisionClaim{clustering.summary.benchmark_label_aware.product_louvain.operator_review_burden.mean}
+standard-review items (95\% CI [
+\RevisionClaim{clustering.summary.benchmark_label_aware.product_louvain.operator_review_burden.paired_confidence_interval.0},
+\RevisionClaim{clustering.summary.benchmark_label_aware.product_louvain.operator_review_burden.paired_confidence_interval.1}])
+over
+\RevisionClaim{clustering.summary.benchmark_label_aware.product_louvain.operator_review_burden.denominator.analyzed_seeds}
+seeds, with registered metric-denominator total
+\RevisionClaim{clustering.summary.benchmark_label_aware.product_louvain.operator_review_burden.denominator.metric_denominator_sum}
+review decision units (emitted destinations plus unclustered reports). It
+rejects noise at rate
+\RevisionClaim{clustering.summary.benchmark_label_aware.product_louvain.noise_rejection_rate.mean}.
+ST-DBSCAN lowers split loss by
+\RevisionClaim{clustering.paired.benchmark_label_aware.st_dbscan.vs.product_louvain.incident_split_loss.mean}
+(CI [
+\RevisionClaim{clustering.paired.benchmark_label_aware.st_dbscan.vs.product_louvain.incident_split_loss.paired_confidence_interval.0},
+\RevisionClaim{clustering.paired.benchmark_label_aware.st_dbscan.vs.product_louvain.incident_split_loss.paired_confidence_interval.1}])
+and improves noise rejection by
+\RevisionClaim{clustering.paired.benchmark_label_aware.st_dbscan.vs.product_louvain.noise_rejection_rate.mean},
+but its direction-adjusted merge-loss improvement is
+\RevisionClaim{clustering.paired.benchmark_label_aware.st_dbscan.vs.product_louvain.incident_merge_loss.mean}.
+Its lower ARI therefore represents a different error trade-off, not simple
+inferiority.
 
-On seed 42, Louvain and Leiden coincide (ARI 0.9515, mean labeled diameter
-1.50\,km). Agglomerative clustering on the same distance ties them but is given
-$K=52$, the count discovered by Louvain. HDBSCAN reaches nearly the same ARI
-(0.9508), but its 15 labeled clusters average 6.58\,km and reach 79.86\,km;
-three additional clusters contain only noise. Coordinate-only K-Means reaches
-ARI 0.6304. Thus the evidence supports the weighted graph's partition and
-automatic $K$, not a universal claim that Louvain is superior.
+Product Louvain and Leiden are practically tied: Leiden-minus-Louvain ARI is
+\RevisionClaim{clustering.paired.benchmark_label_aware.product_leiden.vs.product_louvain.ari_labeled_reports.mean}
+(CI [
+\RevisionClaim{clustering.paired.benchmark_label_aware.product_leiden.vs.product_louvain.ari_labeled_reports.paired_confidence_interval.0},
+\RevisionClaim{clustering.paired.benchmark_label_aware.product_leiden.vs.product_louvain.ari_labeled_reports.paired_confidence_interval.1}],
+Holm $p=$
+\RevisionClaim{clustering.paired.benchmark_label_aware.product_leiden.vs.product_louvain.ari_labeled_reports.holm_adjusted_p_value}),
+with \RevisionClaim{clustering.paired.benchmark_label_aware.product_leiden.vs.product_louvain.ari_labeled_reports.n_ties}
+ties. Additive also has a smaller emitted-destination geographic diameter than
+product by a direction-adjusted
+\RevisionClaim{clustering.paired.benchmark_label_aware.additive_louvain.vs.product_louvain.geographic_diameter.mean}
+m (CI [
+\RevisionClaim{clustering.paired.benchmark_label_aware.additive_louvain.vs.product_louvain.geographic_diameter.paired_confidence_interval.0},
+\RevisionClaim{clustering.paired.benchmark_label_aware.additive_louvain.vs.product_louvain.geographic_diameter.paired_confidence_interval.1}]).
+The analytic edge property therefore did not imply empirical compactness
+superiority.
 
-\begin{figure}[t]
-\centering
-\includegraphics[width=.98\textwidth]{figures/fig6_baselines.png}
-\caption{Baselines under a common geographic convention. ARI, labeled-cluster
-diameter, and noise absorption reveal different failure modes.}\label{fig:base}
-\end{figure}
+\subsection{Factorial Diagnostics}
 
-\subsection{Context and Parameter Sensitivity}
-
-Removing context lowers global ARI from 0.9515 to 0.7775 and overlapping-pair
-ARI from 0.9379 to 0.5419. The priority rankings remain similar
-($\tau=0.9774$), so context primarily affects event separation rather than
-re-ranking unchanged locations. The wider context sweep is non-flat
-(ARI 0.8809--0.9515), while $\sigma$ and resolution sweeps span 0.182 and
-0.132 ARI respectively.
-
-\begin{figure}[t]
-\centering
-\includegraphics[width=.66\textwidth]{figures/fig3_heatmap.png}
-\caption{Context sensitivity. The earlier narrow sweep lay on a plateau; the
-wider pre-registered grid exposes a 0.071 ARI range.}\label{fig:ctx}
-\end{figure}
-
-\begin{figure}[t]
-\centering
-\includegraphics[width=.48\textwidth]{figures/fig4_sigma_sweep.png}\hfill
-\includegraphics[width=.48\textwidth]{figures/fig5_resolution_sweep.png}
-\caption{Sensitivity to geographic scale (left) and modularity resolution
-(right). The pipeline is not parameter-invariant.}\label{fig:sensitivity}
-\end{figure}
-
-\subsection{Threshold Calibration and Lemma Verification}
-
-A shared numerical threshold is not a scale-invariant comparison: at
-$\theta=0.05$, product gating retains 10.85\% of pairs while additive variants
-retain 95.69--97.97\%. Figure~\ref{fig:default} is therefore a diagnostic of
-the default, not evidence that addition can never produce compact clusters.
-
-\begin{figure}[t]
-\centering
-\includegraphics[width=.9\textwidth]{figures/fig1_ablation.png}
-\caption{Shared-default diagnostic. Additive weights form near-complete graphs
-at $\theta=0.05$; their large diameters here must not be read as an intrinsic
-limit of addition. The right panel illustrates confidence weighting, not
-misinformation detection.}\label{fig:default}
-\end{figure}
-
-We calibrate each form separately using an operational criterion that does not
-use labels: maximum diameter below 5\,km, fewer than half of events in
-singletons, and 5--40 multi-report clusters. Additive $\alpha=1$ has 37 usable
-grid points versus 34 for product gating and reaches a 3.17\,km maximum
-diameter at its best-ARI threshold. Consequently, there is no defensible
-``wider window'' contribution. The invariant result is
-Lemma~\ref{lem:localization}: zero measured violations for product gating, while
-all additive variants violate the analogous bound.
+Table~\ref{tab:factorial} gives pre-specified main effects. Geography, time,
+context, and $k$-nearest pruning have positive full-factorial ARI contrasts.
+However, all interaction orders are reported in the locked artifact and
+\RevisionClaim{gate3.retention.factorial_density_match_failures}
+density-unmatched cells remain in the analysis. The effects cannot be read as
+isolated causal contributions.
 
 \begin{table}[t]
-\caption{Per-form calibration. Normalized windows use $\theta/w_{\max}$;
-retained windows are fractions of all possible edges.}\label{tab:calibration}
-\centering\small
-\begin{tabular}{lccccc}
+\caption{Held-out factorial main effects. Positive means the enabled factor
+improves the declared endpoint; CIs are paired bootstrap intervals and $p_H$
+is Holm adjusted within the factorial family.}\label{tab:factorial}
+\centering\scriptsize
+\setlength{\tabcolsep}{3.2pt}
+\begin{tabular}{llrrr}
 \toprule
-Form & Best ARI & $\theta$ & Usable $\theta/w_{\max}$ & Retained frac. & Viol. \\
+Factorial & Factor & Mean effect & 95\% CI & $p_H$ \\
 \midrule
-Product & 0.9731 & 0.39 & [0.033,0.753] & [0.006,0.112] & 0/38 \\
-Additive $\alpha=.5$ & 0.9768 & 0.90 & [0.670,0.851] & [0.006,0.040] & 71/79 \\
-Additive $\alpha=1$ & 0.9652 & 1.34 & [0.501,0.877] & [0.006,0.078] & 95/99 \\
+Clustering & Geography &
+\RevisionClaim{factorial.clustering.main:geography.mean} &
+[\RevisionClaim{factorial.clustering.main:geography.paired_confidence_interval.0},
+\RevisionClaim{factorial.clustering.main:geography.paired_confidence_interval.1}] &
+\RevisionClaim{factorial.clustering.main:geography.holm_adjusted_p_value} \\
+Clustering & Time &
+\RevisionClaim{factorial.clustering.main:time.mean} &
+[\RevisionClaim{factorial.clustering.main:time.paired_confidence_interval.0},
+\RevisionClaim{factorial.clustering.main:time.paired_confidence_interval.1}] &
+\RevisionClaim{factorial.clustering.main:time.holm_adjusted_p_value} \\
+Clustering & Context &
+\RevisionClaim{factorial.clustering.main:context.mean} &
+[\RevisionClaim{factorial.clustering.main:context.paired_confidence_interval.0},
+\RevisionClaim{factorial.clustering.main:context.paired_confidence_interval.1}] &
+\RevisionClaim{factorial.clustering.main:context.holm_adjusted_p_value} \\
+Clustering & $k$-NN &
+\RevisionClaim{factorial.clustering.main:knn.mean} &
+[\RevisionClaim{factorial.clustering.main:knn.paired_confidence_interval.0},
+\RevisionClaim{factorial.clustering.main:knn.paired_confidence_interval.1}] &
+\RevisionClaim{factorial.clustering.main:knn.holm_adjusted_p_value} \\
+\midrule
+Priority & Confidence &
+\RevisionClaim{factorial.priority.main:confidence.mean} &
+[\RevisionClaim{factorial.priority.main:confidence.paired_confidence_interval.0},
+\RevisionClaim{factorial.priority.main:confidence.paired_confidence_interval.1}] &
+\RevisionClaim{factorial.priority.main:confidence.holm_adjusted_p_value} \\
+Priority & Vulnerability &
+\RevisionClaim{factorial.priority.main:vulnerability.mean} &
+[\RevisionClaim{factorial.priority.main:vulnerability.paired_confidence_interval.0},
+\RevisionClaim{factorial.priority.main:vulnerability.paired_confidence_interval.1}] &
+\RevisionClaim{factorial.priority.main:vulnerability.holm_adjusted_p_value} \\
+Priority & Aggregator &
+\RevisionClaim{factorial.priority.main:aggregator.mean} &
+[\RevisionClaim{factorial.priority.main:aggregator.paired_confidence_interval.0},
+\RevisionClaim{factorial.priority.main:aggregator.paired_confidence_interval.1}] &
+\RevisionClaim{factorial.priority.main:aggregator.holm_adjusted_p_value} \\
 \bottomrule
 \end{tabular}
 \end{table}
 
-\subsection{Priority Stability and Dispatch Outcomes}
+The confidence main effect on latent rank correlation is
+\RevisionClaim{factorial.priority.main:confidence.mean} and is not significant
+after Holm correction ($p_H=$
+\RevisionClaim{factorial.priority.main:confidence.holm_adjusted_p_value}).
+Vulnerability and aggregation effects are positive, but their interaction is
+also substantial:
+\RevisionClaim{factorial.priority.interaction:vulnerability:aggregator.mean}
+(CI [
+\RevisionClaim{factorial.priority.interaction:vulnerability:aggregator.paired_confidence_interval.0},
+\RevisionClaim{factorial.priority.interaction:vulnerability:aggregator.paired_confidence_interval.1}]).
+This supports treating the score as an interacting synthetic diagnostic,
+not an expert-endorsed policy.
 
-Perturbing $\boldsymbol\omega$ by $\pm0.10$ yields mean Kendall
-$\tau=0.9665$ (minimum 0.9276), but the top-three set is preserved in 87\%,
-not 100\%, of trials. Structural perturbations of $\sigma$ yield matched-cluster
-$\tau\ge0.989$. In an online stress sequence, the static population reference
-keeps anchor-cluster priority unchanged ($\tau=1$, zero score drift); a dynamic
-maximum ends at $\tau=0.9111$ with maximum absolute priority drift 0.1265.
+\subsection{Priority Stress Tests and Dispatch Trade-offs}
 
-\begin{figure}[t]
-\centering
-\includegraphics[width=.70\textwidth]{figures/fig7_ranking_stability.png}
-\caption{Ranking stability under 200 weight perturbations per level. Kendall
-$\tau$ measures self-consistency, not correctness.}\label{fig:rank}
-\end{figure}
+At exact-duplicate multiplicity ten, the revised estimator has normalized
+priority drift
+\RevisionClaim{priority.summary.exact_duplicate_10x.duplicate_aware_robust.priority_drift_abs_normalized.mean},
+rank drift
+\RevisionClaim{priority.summary.exact_duplicate_10x.duplicate_aware_robust.mean_rank_drift_normalized.mean},
+and top-$k$ churn
+\RevisionClaim{priority.summary.exact_duplicate_10x.duplicate_aware_robust.top_k_churn.mean}.
+This is exact-payload invariance, not proof of accurate incident population:
+its remaining relative $N$ and $V$ errors are
+\RevisionClaim{priority.summary.exact_duplicate_10x.duplicate_aware_robust.n_error_relative_after.mean}
+and
+\RevisionClaim{priority.summary.exact_duplicate_10x.duplicate_aware_robust.v_error_relative_after.mean}.
 
-The dispatch simulation serves only clusters with at least two reports and one
-report with $C_i\ge0.5$, uses three boats, three depot positions, and 20
-regenerated geometries. Its primary, formula-external metric weights arrival
-time by vulnerable population only in clusters with $F_{\max}>0.7$. Product
-vulnerability amplification improves on omitting vulnerability by 14.82\,min
-(paired CI $[-26.68,-3.73]$, $p=0.0266$). Against additive vulnerability, the
-difference is only $-1.43$\,min with CI $[-10.91,7.88]$ and $p=0.756$.
-Therefore vulnerability-aware scoring helps relative to ignoring vulnerability,
-but the data do not establish that multiplication is better than addition.
+The coordinated high-confidence campaign is a declared failure. Revised
+normalized priority drift is
+\RevisionClaim{priority.summary.coordinated_high_confidence_campaign.duplicate_aware_robust.priority_drift_abs_normalized.mean}
+(CI [
+\RevisionClaim{priority.summary.coordinated_high_confidence_campaign.duplicate_aware_robust.priority_drift_abs_normalized.paired_confidence_interval.0},
+\RevisionClaim{priority.summary.coordinated_high_confidence_campaign.duplicate_aware_robust.priority_drift_abs_normalized.paired_confidence_interval.1}])
+and false-priority lift is
+\RevisionClaim{priority.summary.coordinated_high_confidence_campaign.duplicate_aware_robust.false_priority_lift_normalized.mean}.
+The direction-adjusted revised-versus-legacy improvement is
+\RevisionClaim{priority.paired.coordinated_high_confidence_campaign.priority_drift_abs_normalized.mean}
+(CI [
+\RevisionClaim{priority.paired.coordinated_high_confidence_campaign.priority_drift_abs_normalized.paired_confidence_interval.0},
+\RevisionClaim{priority.paired.coordinated_high_confidence_campaign.priority_drift_abs_normalized.paired_confidence_interval.1}]),
+with the revised estimator worse on
+\RevisionClaim{priority.paired.coordinated_high_confidence_campaign.priority_drift_abs_normalized.n_comparator_better}
+of \RevisionClaim{gate3.coverage.test_seed_count} seeds. Confidence and caps
+bound influence but do not detect coordinated manipulation.
 
-\subsection{Confidence Heuristic and Computational Cost}
+Table~\ref{tab:dispatch} reports direction-adjusted paired effects, where
+positive favors revised priority. Against legacy priority in the nominal
+dual-depot scenario, latent-harm improvement is
+\RevisionClaim{dispatch.paired.nominal_dual_depot.revised_priority.vs.legacy_priority.latent_harm.mean}
+with a CI spanning zero. Against nearest-first, both harm and deadline
+effects are strongly negative. Nearest-first is not declared a universally
+preferred policy because the full artifact also contains arrival, workload,
+coverage, and equity trade-offs. In particular, revised priority has a positive
+direction-adjusted boat-workload-CV benefit of
+\RevisionClaim{dispatch.paired.nominal_dual_depot.revised_priority.vs.nearest_first.boat_workload_cv.mean}
+(CI [
+\RevisionClaim{dispatch.paired.nominal_dual_depot.revised_priority.vs.nearest_first.boat_workload_cv.paired_confidence_interval.0},
+\RevisionClaim{dispatch.paired.nominal_dual_depot.revised_priority.vs.nearest_first.boat_workload_cv.paired_confidence_interval.1}],
+Holm $p=$
+\RevisionClaim{dispatch.paired.nominal_dual_depot.revised_priority.vs.nearest_first.boat_workload_cv.holm_adjusted_p_value});
+nevertheless, its nominal Pareto-frontier frequency is
+\RevisionClaim{dispatch.summary.nominal_dual_depot.revised_priority.pareto_frontier_frequency}
+versus
+\RevisionClaim{dispatch.summary.nominal_dual_depot.nearest_first.pareto_frontier_frequency}
+for nearest-first.
 
-The combined fake score $1-C_i$ has AUC 0.6919
-([0.6095,0.7693]) and AP 0.1546 ([0.1135,0.2267]) against random AP 0.0804.
-The single feature $-n_{\mathrm{corrob}}$ has slightly lower AUC (0.6903) but
-higher AP (0.1680). Conditional AUC is 0.421, 0.468, and 0.623 for
-$n_{\mathrm{corrob}}=0$, 1--5, and $>5$, respectively. The four coordinated
-fake reports attain mean $C_i=0.9273$, above the real-report mean 0.9035.
-Hence $C_i$ is retained only as a transparent downweighting convention.
+\begin{table}[t]
+\caption{Selected dispatch effects (revised policy versus comparator).
+Positive direction-adjusted values favor revised priority; negative values
+favor the comparator.}\label{tab:dispatch}
+\centering\scriptsize
+\setlength{\tabcolsep}{3pt}
+\resizebox{\textwidth}{!}{%
+\begin{tabular}{lllrrr}
+\toprule
+Resources & Comparator & Endpoint & Effect & 95\% CI & $p_H$ \\
+\midrule
+Nominal dual depot & Legacy priority & Latent harm &
+\RevisionClaim{dispatch.paired.nominal_dual_depot.revised_priority.vs.legacy_priority.latent_harm.mean} &
+[\RevisionClaim{dispatch.paired.nominal_dual_depot.revised_priority.vs.legacy_priority.latent_harm.paired_confidence_interval.0},
+\RevisionClaim{dispatch.paired.nominal_dual_depot.revised_priority.vs.legacy_priority.latent_harm.paired_confidence_interval.1}] &
+\RevisionClaim{dispatch.paired.nominal_dual_depot.revised_priority.vs.legacy_priority.latent_harm.holm_adjusted_p_value} \\
+Nominal dual depot & Nearest-first & Latent harm &
+\RevisionClaim{dispatch.paired.nominal_dual_depot.revised_priority.vs.nearest_first.latent_harm.mean} &
+[\RevisionClaim{dispatch.paired.nominal_dual_depot.revised_priority.vs.nearest_first.latent_harm.paired_confidence_interval.0},
+\RevisionClaim{dispatch.paired.nominal_dual_depot.revised_priority.vs.nearest_first.latent_harm.paired_confidence_interval.1}] &
+\RevisionClaim{dispatch.paired.nominal_dual_depot.revised_priority.vs.nearest_first.latent_harm.holm_adjusted_p_value} \\
+Nominal dual depot & Nearest-first & Deadline miss &
+\RevisionClaim{dispatch.paired.nominal_dual_depot.revised_priority.vs.nearest_first.deadline_miss_rate.mean} &
+[\RevisionClaim{dispatch.paired.nominal_dual_depot.revised_priority.vs.nearest_first.deadline_miss_rate.paired_confidence_interval.0},
+\RevisionClaim{dispatch.paired.nominal_dual_depot.revised_priority.vs.nearest_first.deadline_miss_rate.paired_confidence_interval.1}] &
+\RevisionClaim{dispatch.paired.nominal_dual_depot.revised_priority.vs.nearest_first.deadline_miss_rate.holm_adjusted_p_value} \\
+Nominal dual depot & Nearest-first & Workload CV &
+\RevisionClaim{dispatch.paired.nominal_dual_depot.revised_priority.vs.nearest_first.boat_workload_cv.mean} &
+[\RevisionClaim{dispatch.paired.nominal_dual_depot.revised_priority.vs.nearest_first.boat_workload_cv.paired_confidence_interval.0},
+\RevisionClaim{dispatch.paired.nominal_dual_depot.revised_priority.vs.nearest_first.boat_workload_cv.paired_confidence_interval.1}] &
+\RevisionClaim{dispatch.paired.nominal_dual_depot.revised_priority.vs.nearest_first.boat_workload_cv.holm_adjusted_p_value} \\
+Lean Huế & Nearest-first & Latent harm &
+\RevisionClaim{dispatch.paired.lean_hue.revised_priority.vs.nearest_first.latent_harm.mean} &
+[\RevisionClaim{dispatch.paired.lean_hue.revised_priority.vs.nearest_first.latent_harm.paired_confidence_interval.0},
+\RevisionClaim{dispatch.paired.lean_hue.revised_priority.vs.nearest_first.latent_harm.paired_confidence_interval.1}] &
+\RevisionClaim{dispatch.paired.lean_hue.revised_priority.vs.nearest_first.latent_harm.holm_adjusted_p_value} \\
+Lean Huế & Equity aging & Equity gap &
+\RevisionClaim{dispatch.paired.lean_hue.revised_priority.vs.equity_aging.arrival_equity_gap_min.mean} &
+[\RevisionClaim{dispatch.paired.lean_hue.revised_priority.vs.equity_aging.arrival_equity_gap_min.paired_confidence_interval.0},
+\RevisionClaim{dispatch.paired.lean_hue.revised_priority.vs.equity_aging.arrival_equity_gap_min.paired_confidence_interval.1}] &
+\RevisionClaim{dispatch.paired.lean_hue.revised_priority.vs.equity_aging.arrival_equity_gap_min.holm_adjusted_p_value} \\
+\bottomrule
+\end{tabular}}
+\end{table}
 
-Constructing the dense weight matrix is $O(n^2)$; Louvain's favorable sparse
-complexity does not change the end-to-end bound. In the recorded run, 7,200
-events take 46.06\,s on one CPU core, of which the vectorized matrix build takes
-33.76\,s. Lemma~\ref{lem:localization} suggests a scalable implementation:
-spatial indexing can omit all pairs outside $r_\theta$ before evaluating the
-other kernels.
+\subsection{Runtime and Representation Scope}
+
+The development-only Exp22 audit used
+\RevisionClaim{runtime.contract.warmup_repeats} warm-up and
+\RevisionClaim{runtime.contract.measured_repeats} measured isolated workers
+with the thread limit set to
+\RevisionClaim{runtime.contract.thread_limit}. At
+\RevisionClaim{runtime.size.1494.n_events} events, median dense and
+geographic-candidate-pruned total times are
+\RevisionClaim{runtime.size.1494.dense_total_s.median}\,s and
+\RevisionClaim{runtime.size.1494.spatial_total_s.median}\,s. Edge counts,
+matrices (tolerance $10^{-9}$), and partitions agree for all three measured
+sizes.
+
+The spatial path prunes candidate-pair computation but still materializes a
+dense $O(n^2)$ compatibility matrix. The result supports exact geographic
+candidate pruning on the recorded one-core environment; it does not support
+fully sparse memory scaling, field real-time performance, or an end-to-end
+network-packet claim.
 
 \section{Discussion and Threats to Validity}
 
-\paragraph{What is supported.}
-The product form gives a closed-form, data-independent edge-localization
-guarantee and strong shared-default performance on a benchmark where coordinates
-alone do not solve the task. Context has a measurable role specifically on
-overlapping events. Static population normalization prevents unrelated score
-drift. These statements have direct analytic or multi-seed support.
+\paragraph{Supported claims.}
+The complete threshold analysis establishes a strict edge-localization
+property for product similarity and a conditional hop-diameter corollary.
+Under two frozen calibration tracks and one untouched synthetic run, product
+Louvain has higher ARI than the calibrated additive composition. Exact-payload
+deduplication makes the revised priority invariant to exact multiplicity.
+These statements have analytic or locked held-out support.
 
-\paragraph{What is not supported.}
-Per-form calibration shows additive weighting can also produce compact,
-high-ARI partitions; the contribution is not a threshold-window ratio or
-universal empirical dominance. The confidence heuristic is not a reliable fake
-report detector. Product vulnerability amplification is not significantly
-better than additive vulnerability on the primary outcome. Edge-model accuracy
-and on-device resource use are not evaluated.
+\paragraph{Necessary qualifications.}
+Product is not uniformly superior. Leiden ties Louvain; additive has a smaller
+destination diameter; ST-DBSCAN markedly improves split/noise behavior while
+worsening merge loss and ARI; product emits many false destinations. Factorial
+main effects interact and include
+\RevisionClaim{gate3.retention.factorial_density_match_failures}
+density-unmatched cells. The high-confidence campaign defeats the intended
+priority safeguard. Revised priority has no demonstrated latent-harm advantage
+over legacy and is inferior to nearest-first for harm/deadlines in the shown
+scenarios. These negative results prohibit claims of misinformation
+robustness, dispatch benefit, or operational policy validation.
 
-\paragraph{Validity limits.}
-The benchmark is synthetic and covers one regional flood scenario. Its
-ground-truth physical events and hard cases are designed rather than observed.
-Twenty geometries quantify generator variability but cannot replace field data.
-ARI/NMI score label agreement, whereas dispatch simulation depends on a simple
-greedy queue, fixed boat speed, and fixed service time. HDBSCAN and DBSCAN
-remain sensitive to their own hyperparameters, while Louvain depends on
-resolution, $\theta$, and $k$. A real-data sanity check using geolocated,
-time-resolved flood reports is the highest-priority next step.
+\paragraph{Synthetic and policy validity.}
+All reports, incidents, duplicates, and latent outcomes are generated. Multiple
+seeds measure variation within this generator family, not transfer to real
+floods. No authorized incident-level real dataset or rescue/logistics expert
+panel is available. Consequently, weights, caps, near-duplicate tolerances,
+review rules, and dispatch resources are illustrative. The arithmetic
+latitude/longitude centroid is metadata rather than a geodesic optimum.
+External collection, annotation, privacy, and expert protocols are specified,
+but executing them remains future work.
+
+\paragraph{Method and inference validity.}
+ARI uses labeled reports, while split/merge, noise, destinations, and review
+burden expose different failures. Holm adjustment controls declared families
+but does not eliminate generator dependence. The convex comparator is a fixed
+mixture grid, not learned multiple-kernel clustering. Several registered
+methods had no feasible configuration and remain explicit exclusions.
+Community detection depends on resolution and graph sparsification; the
+component theorem does not control $h$. The locked result preserves
+scenario-family tables, including a multimodal-focused family, but G0 does not
+expose a multimodal-specific claim selector. We therefore make no quantitative
+multimodal claim; dedicated multimodal error analysis remains unresolved.
+
+\section{Artifact Availability and Reproducibility}
+
+The single accepted held-out run identifier is:
+\begin{center}
+\small\texttt{20260728T213934Z-85f2a6686a1b-}\\[-2pt]
+\texttt{9797f31f-x0-exp23-heldout}.
+\end{center}
+Its manifest SHA-256 begins \texttt{cbedfe1c}, and its canonical result
+content hash begins \texttt{ddafd634}. Gate 3 records one candidate invocation.
+The G0 promotion includes a selector-compatible compact JSON, the complete
+canonical result as a lossless gzip archive, the original
+\RevisionClaim{promotion.audit.base_selector_count} selectors, audited
+data/runtime tables, a numeric claim catalog, and generated LaTeX values.
+Every empirical number above resolves through
+\texttt{\textbackslash RevisionClaim} to that catalog. The one-command
+\texttt{reproduce.sh} workflow verifies the companion artifact package,
+recomputes selectors and publication values from the sealed result without
+re-executing the held-out experiment, runs the tests, and rebuilds this PDF.
+The package does not claim a public DOI or a clean immutable release commit
+until those external submission steps are completed.
 
 \section{Conclusion}
 
-We presented a product-kernel weighted graph and a bounded cluster-priority
-score for flood-rescue coordination. The main contribution is a localization
-lemma: thresholded product edges, and therefore connected paths, have an
-explicit geographic bound controlled by $\sigma$ and $\theta$. A redesigned
-synthetic benchmark confirms that geography alone is insufficient and that
-context separates spatially overlapping events. Multi-seed results favor
-product gating at the shared operational default, while per-form calibration
-correctly narrows the empirical claim. Priority outcomes support including
-vulnerability but do not distinguish multiplicative from additive treatment;
-confidence scoring remains heuristic. Field validation and sparse,
-spatial-indexed graph construction are required before deployment.
+We presented a product-similarity graph and a bounded, duplicate-aware priority
+heuristic for consolidating synthetic flood-rescue reports. The product form
+has a finite-region edge bound, but cluster compactness remains conditional on
+observed hop diameter. Calibrated held-out results favor product Louvain over
+the additive composition on ARI in both tracks, while direct baselines reveal
+important fragmentation, noise, diameter, and workload trade-offs. Exact
+duplicates are neutralized, yet coordinated high-confidence reports remain a
+failure, and independent dispatch outcomes do not validate the revised
+priority policy. Real incident annotation, expert policy validation, and
+fully sparse implementation are required before any deployment claim.
 
 \begin{credits}
-\subsubsection{\ackname} This research received no specific grant from any
-funding agency in the public, commercial, or not-for-profit sectors.
-\subsubsection{\discintname} The authors have no competing interests to declare.
+\subsubsection{\ackname} No funding statement is asserted in this technical
+artifact; the final declaration is pending author confirmation.
+\subsubsection{\discintname} The competing-interest declaration is pending
+author confirmation.
 \end{credits}
 
 \bibliographystyle{splncs04}

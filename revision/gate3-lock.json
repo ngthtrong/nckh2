@@ -1,0 +1,87 @@
+{
+  "accepted_run": {
+    "exit_code": 0,
+    "invocation": {
+      "candidate_suite_invocation": 1,
+      "path": "work/x0-invocation.json",
+      "sha256": "0c01d0f31c847ee60de2ddcfb3ff6e5ccad4a28962a85b21fef520579cb6befb"
+    },
+    "manifest": "demo/artifacts/runs/20260728T213934Z-85f2a6686a1b-9797f31f-x0-exp23-heldout/manifest.json",
+    "manifest_sha256": "cbedfe1c7089540c050929bae913fea1efb0231f36d199339c3b451ca80d11b5",
+    "result": {
+      "artifact_content_sha256": "ddafd634fbf9f48ddc4dcc583518a11ae5bb4d342fc29087e9865aefbeb18761",
+      "path": "tables/exp23_heldout_evaluation.json",
+      "sha256": "f73bfcd03d57bbd1457c569fedc44ce4f230b0c4d24eb6155653a37ed0c97163",
+      "status": "succeeded"
+    },
+    "run_id": "20260728T213934Z-85f2a6686a1b-9797f31f-x0-exp23-heldout",
+    "selectors": {
+      "path": "tables/exp23_heldout_selectors.json",
+      "selector_content_sha256": "437821d18b9a9c1d9cde5248b2618c4f3274da5d4966274592de6c0b257a10a4",
+      "selector_count": 448,
+      "sha256": "011a6118744bbaa65bfd274a23e3a5ada1eb8b692285bac1a05c00b150c4a7a2"
+    },
+    "status": "succeeded"
+  },
+  "coverage": {
+    "exclusion_seed_rows": 320,
+    "scientific_seed_failures": 0,
+    "selected_method_seed_rows": 480,
+    "selected_prediction_failures": 0,
+    "test_seed_count": 40
+  },
+  "gate": "Gate 3",
+  "locked_at_utc": "2026-07-28T21:45:59.661303+00:00",
+  "rejected_run_ledger": {
+    "path": "revision/rejected-runs.json",
+    "run_count": 3,
+    "sha256": "4773c71816256c7779e73e0d8feac9dab54a49f18287c0a40ae281affdb6f002"
+  },
+  "reopen_conditions": [
+    "accepted run manifest or file-set checksum mismatch",
+    "Gate-1/Gate-2/selected-config/X0 authorization binding change",
+    "result, selector, or invocation checksum mismatch",
+    "mechanical recomputation or selector resolution failure",
+    "confirmed method-independent implementation bug requiring a complete rerun"
+  ],
+  "retention_audit": {
+    "clustering": {
+      "candidate_adverse": 1086,
+      "candidate_favorable": 711,
+      "tied": 1803,
+      "unavailable": 0
+    },
+    "dispatch": {
+      "reference_policy_adverse": 3057,
+      "reference_policy_favorable": 1977,
+      "tied": 366
+    },
+    "factorial_density_match_failures": 80,
+    "negative_tie_adverse_and_failure_rows_retained": true,
+    "priority": {
+      "revised_estimator_adverse": 289,
+      "revised_estimator_favorable": 1265,
+      "tied": 646
+    }
+  },
+  "schema_version": 1,
+  "scope": "single complete held-out result and selector registry",
+  "status": "locked",
+  "upstream_binding": {
+    "gate1_lock_sha256": "ed564170a768b6ef1c41c6c1e8b36bdd4079576189333618a9b9373629c51e7c",
+    "gate2_lock_sha256": "3b386afff6fccb5652395dd1689d990539b5ad2650fb06dde053341253f653d5",
+    "protocol_sha256": "9797f31f3bc7739e935a26f11597a0988adf28b099cb52d97c98381da63e67e7",
+    "selected_configs_sha256": "22256afac1786a5758fca754f59a169fabe8d8f74e9aee65a9b15f7b8d968969",
+    "x0_authorization_sha256": "8fb6483d53fd0ae4f0189964c3a57a210d4aa6c82e9a9eb82f50024141ee5270"
+  },
+  "validation": {
+    "aggregate_and_inference_recomputation": "pass",
+    "input_snapshots": "pass",
+    "invocation_authorization": "pass",
+    "manifest": "pass",
+    "result_schema_and_content_hash": "pass",
+    "selector_resolution_and_checksum": "pass",
+    "source_and_protocol_binding": "pass",
+    "validation_errors": []
+  }
+}
