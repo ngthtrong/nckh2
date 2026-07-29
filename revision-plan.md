@@ -2,7 +2,10 @@
 
 **Bài báo:** “A Product-Kernel Weighted Graph for Flood-Rescue Event Clustering and Cluster-Level Priority Scoring”
 **Trạng thái đầu vào:** Reject and Resubmit, 4/10, reviewer confidence High
-**Phạm vi tài liệu:** chỉ lập kế hoạch; chưa sửa mã phương pháp, chưa chạy lại suite, chưa chỉnh `paper/main.tex`
+**Trạng thái thực thi:** nhánh tái nộp tối thiểu synthetic-methodological đã
+hoàn tất kỹ thuật ngày 29/07/2026; dữ liệu thật, expert panel, public DOI,
+ORCID/authorship/contact approval, funding/COI declarations và venue page limit
+vẫn external-blocked.
 **Nguồn yêu cầu chính:** `phan-bien.md`
 **Snapshot repo được audit:** 28/07/2026
 
@@ -872,35 +875,36 @@ Mỗi rủi ro được giảm bằng protocol hash, owner separation, method-ag
 
 ### P0 scientific correctness
 
-- [ ] Product/additive theorem và code cùng domain/strictness.
-- [ ] Không violation count ngoài domain.
-- [ ] Cluster bound ghi conditional theo measured/controlled `h`.
-- [ ] Test seeds không được tuning truy cập.
-- [ ] Equal tuning budget và matched-density/degree comparisons hoàn tất.
-- [ ] Priority xử lý exact duplicate và C=0 đúng contract.
-- [ ] Latent incident population/vulnerability có evaluation.
-- [ ] Dispatch outcome độc lập hoặc được hạ thành illustration.
-- [ ] Split/merge/noise/workload bao phủ toàn bộ points.
-- [ ] Tie/negative results được giữ và claim tương ứng đã hạ.
+- [x] Product/additive theorem và code cùng domain/strictness.
+- [x] Không violation count ngoài domain.
+- [x] Cluster bound ghi conditional theo measured/controlled `h`.
+- [x] Test seeds không được tuning truy cập.
+- [x] Equal tuning budget và matched-density/degree comparisons hoàn tất.
+- [x] Priority xử lý exact duplicate và C=0 đúng contract.
+- [x] Latent incident population/vulnerability có evaluation.
+- [x] Dispatch outcome độc lập hoặc được hạ thành illustration.
+- [x] Split/merge/noise/workload bao phủ toàn bộ points.
+- [x] Tie/negative results được giữ và claim tương ứng đã hạ.
 
 ### P1 evidence/reproducibility
 
-- [ ] Strong baseline registry hoàn tất.
-- [ ] Factorial ablation có effect size/CI.
-- [ ] Environment/dependency lock.
-- [ ] Run manifest có hardware/seed/config/checksum.
-- [ ] Clean-room full run đạt.
-- [ ] Real-data/expert branch có evidence hoặc explicit blocker/fallback.
+- [x] Strong baseline registry hoàn tất.
+- [x] Factorial ablation có effect size/CI.
+- [x] Environment/dependency lock.
+- [x] Run manifest có hardware/seed/config/checksum.
+- [x] Clean-room full run đạt.
+- [x] Real-data/expert branch có evidence hoặc explicit blocker/fallback.
 
 ### P2 presentation
 
-- [ ] README đồng bộ.
-- [ ] “Kernel” terminology rõ.
-- [ ] SD/CI/multiplicity rõ.
-- [ ] Packet/runtime assumptions rõ.
-- [ ] Không stale log/path/count.
-- [ ] Code/data availability có immutable reference.
-- [ ] Response-to-reviewer phủ toàn bộ concern.
+- [x] README đồng bộ.
+- [x] “Kernel” terminology rõ.
+- [x] SD/CI/multiplicity rõ.
+- [x] Packet/runtime assumptions rõ.
+- [x] Không stale log/path/count.
+- [x] Code/data availability có immutable reference cục bộ; public DOI/release
+  vẫn external-blocked.
+- [x] Response-to-reviewer phủ toàn bộ concern.
 
 ## 16. Thứ tự thực thi đề xuất
 

@@ -1,105 +1,132 @@
 #!/usr/bin/env python3
-"""Kiểm hình trong bài báo có đúng là hình do suite này sinh ra hay không.
+r"""Verify the revised manuscript's figure set and provenance.
 
-Lý do tồn tại: ở loop 13 phát hiện `paper/figures/fig7_ranking_stability.png` là
-artifact tồn đọng từ một phiên bản code cũ (khác cả LOẠI biểu đồ: đường vs cột),
-trong khi mục Reproducibility của bài khẳng định run_all.py sinh ra "every figure
-in this paper". Lỗi đó thoát được 12 vòng phản biện vì không ai so checksum.
-
-Script đọc danh sách hình THỰC SỰ được \\includegraphics trong paper/main.tex,
-rồi so MD5 từng hình với bản trong demo/results/figures/. Chỉ kiểm hình bài dùng,
-nên fig2_map/fig3_heatmap (artifact trực quan hoá của demo, không nằm trong bài)
-không gây báo động giả.
-
-Dùng:  ./.venv/bin/python3 verify_figures.py
-Exit code: 0 = mọi hình khớp; 1 = có hình lệch/thiếu.
+The current revision intentionally contains no figures.  That is a valid,
+auditable state: ``paper/main.tex`` must contain no ``\includegraphics`` call
+and ``paper/figures`` must contain no orphan image.  If a later gate-approved
+revision adds figures, each ``figures/<name>`` inclusion must have a
+byte-identical SHA-256 counterpart in ``demo/results/figures``.
 """
 from __future__ import annotations
 
 import hashlib
 import re
-import sys
 from pathlib import Path
+from typing import Sequence
+
 
 DEMO_DIR = Path(__file__).resolve().parent
-REPO_ROOT = DEMO_DIR.parent
+REPOSITORY_ROOT = DEMO_DIR.parent
 GENERATED_DIR = DEMO_DIR / "results" / "figures"
-PAPER_DIR = REPO_ROOT / "paper" / "figures"
-MAIN_TEX = REPO_ROOT / "paper" / "main.tex"
+PAPER_FIGURE_DIR = REPOSITORY_ROOT / "paper" / "figures"
+MAIN_TEX = REPOSITORY_ROOT / "paper" / "main.tex"
 
-# \includegraphics[...]{figures/fig1_ablation.png}
-INCLUDE_RE = re.compile(r"\\includegraphics(?:\[[^\]]*\])?\{figures/([^}]+)\}")
-
-
-def md5(path: Path) -> str:
-    h = hashlib.md5()
-    with path.open("rb") as fh:
-        for chunk in iter(lambda: fh.read(1 << 16), b""):
-            h.update(chunk)
-    return h.hexdigest()
+INCLUDE_RE = re.compile(
+    r"\\includegraphics(?:\[[^\]]*\])?\{([^}]+)\}",
+)
+IMAGE_SUFFIXES = frozenset({".png", ".jpg", ".jpeg", ".pdf", ".svg"})
 
 
-def figures_used_by_paper() -> list[str]:
-    if not MAIN_TEX.exists():
-        print(f"LỖI: không tìm thấy {MAIN_TEX}")
-        sys.exit(1)
-    names = INCLUDE_RE.findall(MAIN_TEX.read_text(encoding="utf-8"))
-    # giữ thứ tự xuất hiện, bỏ trùng
-    seen, ordered = set(), []
-    for n in names:
-        if n not in seen:
-            seen.add(n)
-            ordered.append(n)
+def file_sha256(path: Path) -> str:
+    digest = hashlib.sha256()
+    with path.open("rb") as stream:
+        for chunk in iter(lambda: stream.read(1 << 20), b""):
+            digest.update(chunk)
+    return digest.hexdigest()
+
+
+def figures_used_by_paper(main_tex: Path = MAIN_TEX) -> list[str]:
+    """Return unique figure arguments in manuscript order."""
+
+    source = main_tex.read_text(encoding="utf-8")
+    seen: set[str] = set()
+    ordered: list[str] = []
+    for raw_name in INCLUDE_RE.findall(source):
+        name = raw_name.strip()
+        if name not in seen:
+            seen.add(name)
+            ordered.append(name)
     return ordered
 
 
-def main() -> int:
-    used = figures_used_by_paper()
-    if not used:
-        print("LỖI: không tìm thấy \\includegraphics nào trong main.tex")
-        return 1
+def verify_figures(
+    *,
+    main_tex: Path = MAIN_TEX,
+    paper_figure_dir: Path = PAPER_FIGURE_DIR,
+    generated_dir: Path = GENERATED_DIR,
+) -> dict[str, object]:
+    """Validate every inclusion and reject stale/orphan paper assets."""
 
-    print(f"Bài báo dùng {len(used)} hình. Đối chiếu với {GENERATED_DIR.relative_to(REPO_ROOT)}:\n")
-    bad = 0
-    for name in used:
-        gen, paper = GENERATED_DIR / name, PAPER_DIR / name
-        if not gen.exists():
-            print(f"  MISSING-GEN  {name}  (bài dùng nhưng suite không sinh ra)")
-            bad += 1
-        elif not paper.exists():
-            print(f"  MISSING      {name}  (thiếu trong paper/figures/)")
-            bad += 1
-        elif md5(gen) != md5(paper):
-            print(f"  STALE        {name}  (paper/ lệch với bản suite sinh ra)")
-            bad += 1
-        else:
-            print(f"  OK           {name}")
+    used = figures_used_by_paper(main_tex)
+    failures: list[str] = []
+    verified: list[dict[str, str]] = []
 
-    # Hình suite sinh ra nhưng bài không dùng: thông tin, không phải lỗi.
-    extra = sorted(p.name for p in GENERATED_DIR.glob("*.png") if p.name not in set(used))
-    if extra:
-        print(f"\nHình của demo không dùng trong bài (bình thường): {', '.join(extra)}")
+    for argument in used:
+        relative = Path(argument)
+        if (
+            relative.is_absolute()
+            or ".." in relative.parts
+            or relative.parts[:1] != ("figures",)
+            or len(relative.parts) != 2
+        ):
+            failures.append(f"unsupported figure path: {argument}")
+            continue
+        name = relative.name
+        paper_path = paper_figure_dir / name
+        generated_path = generated_dir / name
+        if not paper_path.is_file():
+            failures.append(f"missing manuscript figure: {argument}")
+            continue
+        if not generated_path.is_file():
+            failures.append(f"missing generated provenance figure: {name}")
+            continue
+        paper_sha = file_sha256(paper_path)
+        generated_sha = file_sha256(generated_path)
+        if paper_sha != generated_sha:
+            failures.append(f"stale manuscript figure: {name}")
+            continue
+        verified.append({"path": argument, "sha256": paper_sha})
 
-    # Chiều NGƯỢC LẠI: hình MỒ CÔI trong paper/figures/ — có trong thư mục của bài
-    # nhưng không \includegraphics ở đâu. Đây là cảnh báo, không phải lỗi: hình có
-    # thể đang chờ được đưa vào bài (fig2_map/fig3_heatmap/fig8_lemma1 ở vòng 17).
-    # Vẫn phải in ra, vì một hình mồ côi cũng có thể là dấu hiệu bài BỎ SÓT bằng
-    # chứng đã sinh ra được, hoặc còn sót artifact của phiên bản cũ.
-    orphans = sorted(p.name for p in PAPER_DIR.glob("*.png") if p.name not in set(used))
-    if orphans:
-        print(f"\nCẢNH BÁO — hình mồ côi trong paper/figures/ (không được tham chiếu):")
-        for name in orphans:
-            gen = GENERATED_DIR / name
-            tag = ("suite sinh ra được — cân nhắc đưa vào bài" if gen.exists()
-                   else "KHÔNG do suite sinh ra — có thể là artifact cũ, nên xoá")
-            print(f"  {name}  ({tag})")
+    used_names = {
+        Path(argument).name
+        for argument in used
+        if Path(argument).parts[:1] == ("figures",)
+    }
+    paper_assets = (
+        sorted(
+            path.name
+            for path in paper_figure_dir.iterdir()
+            if path.is_file() and path.suffix.lower() in IMAGE_SUFFIXES
+        )
+        if paper_figure_dir.is_dir()
+        else []
+    )
+    orphans = sorted(set(paper_assets) - used_names)
+    failures.extend(f"orphan manuscript figure: {name}" for name in orphans)
 
-    if bad:
-        print(f"\nTHẤT BẠI: {bad} hình lệch/thiếu. Chạy make_figures.py rồi copy sang paper/figures/.")
-        return 1
-    print("\nĐẠT: mọi hình trong bài khớp đúng bản do suite sinh ra.")
-    return 0
+    return {
+        "status": "pass" if not failures else "fail",
+        "included_figure_count": len(used),
+        "verified_figures": verified,
+        "orphan_figures": orphans,
+        "validation_errors": failures,
+    }
+
+
+def main(arguments: Sequence[str] | None = None) -> int:
+    del arguments
+    report = verify_figures()
+    if report["status"] == "pass":
+        count = report["included_figure_count"]
+        print(f"PASS: {count} manuscript figure(s), no stale or orphan assets.")
+        return 0
+    for error in report["validation_errors"]:
+        print(f"FAIL: {error}")
+    return 1
 
 
 if __name__ == "__main__":
-    sys.exit(main())
+    raise SystemExit(main())
+
+
+__all__ = ["figures_used_by_paper", "verify_figures"]

@@ -10,6 +10,11 @@
       "run_id": "20260728T175301Z-1651b35ac599-b556b4f0-gate1-data-freeze",
       "status": "aborted_before_gate_1",
       "rejected_reason": "Run was interrupted immediately after an independent mutation audit found that the candidate validator accepted unexpected top-level evaluation fields. It is unsealed, retained for audit, and permanently ineligible for promotion."
+    },
+    {
+      "run_id": "20260728T202747Z-85f2a6686a1b-0060e5dc-gate2-exp18-baselines",
+      "status": "rejected_before_gate_2",
+      "rejected_reason": "Constraint decomposition found that same-representation graph baselines omitted disconnected_communities from their calibration metrics, making product-Leiden spuriously infeasible. The immutable run is retained; the metric-only bug was fixed for every same-representation baseline and the complete Exp18 grid was rerun without changing seeds, search spaces, objectives, or guardrails."
     }
   ]
 }

@@ -38,6 +38,14 @@ quantiles rather than shared raw values across incompatible weight scales.
 Matched retained-fraction and mean-degree comparisons are additional locked
 tracks. A preset or oracle `K` is always marked diagnostic.
 
+Composition selection is joint but symmetric: among operationally feasible
+product configurations, Exp15 selects the objective-best configuration for
+which every declared non-product composition family has at least one feasible
+retained-fraction/mean-degree match. Each comparator is then selected only
+inside its matched feasible set. This prevents an independently optimal
+product density from making the preregistered comparison impossible; it does
+not enlarge any grid or relax any guardrail.
+
 Noise label `-1` means unassigned and is not a cluster. Methods without a
 noise mechanism assign every report to a cluster; their noise absorption and
 false destinations are evaluated as such.

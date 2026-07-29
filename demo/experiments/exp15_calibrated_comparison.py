@@ -209,6 +209,22 @@ def _selected_evaluation(
     )
 
 
+def _evaluation_satisfies(
+    evaluation: CandidateEvaluation,
+    *,
+    objective: str,
+    constraints: Sequence[MetricConstraint],
+) -> bool:
+    return (
+        evaluation.status == "succeeded"
+        and objective in evaluation.aggregate_metrics
+        and all(
+            constraint.violation(evaluation.aggregate_metrics) is None
+            for constraint in constraints
+        )
+    )
+
+
 def calibrate_composition_methods(
     dataset_root: Path | str,
     *,
@@ -339,30 +355,108 @@ def calibrate_composition_methods(
 
     final_selections: list[CalibrationSelection] = []
     match_rows: list[dict[str, Any]] = []
+    joint_match_audit: list[dict[str, Any]] = []
     for track_id in track_ids:
-        product_raw = raw_selections.get(("product_louvain", track_id))
+        objective, direction = calibration_contract.objectives[track_id]
+        operational_constraints = operational_selection_constraints(
+            calibration_contract,
+            graph_method=True,
+        )
         product_rows = by_method_track.get(("product_louvain", track_id), [])
-        product_evaluation = (
-            _selected_evaluation(product_rows, product_raw)
-            if product_raw is not None
+        comparator_ids = [
+            method_id
+            for method_id in method_ids
+            if method_id != "product_louvain"
+        ]
+        joint_product_rows: list[CandidateEvaluation] = []
+        for product_row in product_rows:
+            every_comparator_available = _evaluation_satisfies(
+                product_row,
+                objective=objective,
+                constraints=operational_constraints,
+            ) and all(
+                any(
+                    _evaluation_satisfies(
+                        comparator_row,
+                        objective=objective,
+                        constraints=(
+                            *operational_constraints,
+                            *_constraints_for_density(product_row),
+                        ),
+                    )
+                    for comparator_row in by_method_track[
+                        (comparator_id, track_id)
+                    ]
+                )
+                for comparator_id in comparator_ids
+            )
+            joint_product_rows.append(
+                replace(
+                    product_row,
+                    aggregate_metrics={
+                        **product_row.aggregate_metrics,
+                        "joint_density_match_available": float(
+                            every_comparator_available
+                        ),
+                    },
+                )
+            )
+        product_selection = (
+            select_candidate(
+                joint_product_rows,
+                objective=objective,
+                direction=direction,
+                constraints=(
+                    *operational_constraints,
+                    MetricConstraint(
+                        "joint_density_match_available",
+                        ">=",
+                        1.0,
+                    ),
+                ),
+            )
+            if joint_product_rows
             else None
+        )
+        product_evaluation = (
+            _selected_evaluation(product_rows, product_selection)
+            if product_selection is not None
+            else None
+        )
+        joint_match_audit.append(
+            {
+                "track_id": track_id,
+                "required_comparators": comparator_ids,
+                "joint_matchable_product_configurations": sum(
+                    row.aggregate_metrics["joint_density_match_available"] == 1.0
+                    for row in joint_product_rows
+                ),
+                "joint_product_selection_status": (
+                    None
+                    if product_selection is None
+                    else product_selection.status
+                ),
+                "joint_product_selection_sha256": (
+                    None
+                    if product_selection is None
+                    else product_selection.selection_sha256
+                ),
+            }
         )
         for method_id in method_ids:
             raw = raw_selections[(method_id, track_id)]
             rows = by_method_track[(method_id, track_id)]
-            if method_id == "product_louvain" or product_evaluation is None:
+            if method_id == "product_louvain":
+                selected = product_selection or raw
+            elif product_evaluation is None:
                 selected = raw
             else:
-                objective, direction = calibration_contract.objectives[track_id]
                 selected = select_candidate(
                     rows,
                     objective=objective,
                     direction=direction,
                     constraints=(
-                        *operational_selection_constraints(
-                            calibration_contract,
-                            graph_method=True,
-                        ),
+                        *operational_constraints,
                         *_constraints_for_density(product_evaluation),
                     ),
                 )
@@ -401,6 +495,7 @@ def calibrate_composition_methods(
         "raw_unmatched_selections": [
             selection.to_dict() for selection in raw_selections.values()
         ],
+        "joint_composition_selection": joint_match_audit,
         "matched_density_degree": match_rows,
         "matched_retained_fraction_tolerance": 0.01,
         "matched_mean_degree_relative_tolerance": 0.05,
