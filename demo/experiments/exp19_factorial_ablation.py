@@ -154,6 +154,201 @@ def _incident_priority_rank_correlation(
     return 0.0 if not math.isfinite(float(correlation)) else float(correlation)
 
 
+def evaluate_loaded_factorial_seed(
+    dataset: Any,
+    *,
+    product_config: Mapping[str, Any],
+    stage: str,
+) -> dict[str, list[dict[str, Any]]]:
+    """Evaluate every frozen factorial cell on one authenticated loaded view.
+
+    This post-load entry point is used by the held-out suite.  It has no seed
+    selection, search-space, or early-stopping argument, and therefore cannot
+    expose an intermediate test subset for tuning.
+    """
+
+    if not isinstance(stage, str) or not stage:
+        raise ValueError("stage must be a non-empty string")
+    if dataset.ground_truth is None:
+        raise RuntimeError("factorial evidence requires the evaluator view")
+    if any(
+        event.gt_cluster != -1 or event.is_fake is not False
+        for event in dataset.events
+    ):
+        raise ValueError("evaluator-only fields leaked into factorial inputs")
+
+    params = _weight_params(product_config)
+    resolution = float(product_config["resolution"])
+    selected_knn = int(product_config.get("knn", DEFAULT_CONFIG.weight.knn))
+    seed = int(dataset.seed)
+    events = list(dataset.events)
+    truth = list(dataset.ground_truth)
+    reference_dense = build_weight_matrix_vec(events, params, mode="gating")
+    reference_graph, reference_threshold = sparsify_at_quantile(
+        reference_dense,
+        float(product_config["threshold_quantile"]),
+        knn=selected_knn,
+    )
+    reference_density = graph_density(reference_graph)
+    geographic, temporal, contextual = primitive_similarity_matrices(
+        events,
+        params,
+    )
+
+    clustering_rows: list[dict[str, Any]] = []
+    for variant in clustering_factorial_variants():
+        started = time.perf_counter()
+        base_row: dict[str, Any] = {
+            "seed": seed,
+            "stage": stage,
+            **variant,
+            "variant_sha256": config_sha256(variant),
+            "source_sha256": dataset.source_sha256,
+        }
+        try:
+            affinity = build_factorial_affinity(
+                geographic,
+                temporal,
+                contextual,
+                variant,
+            )
+            knn = selected_knn if variant["knn"] else 0
+            match = find_density_match(
+                affinity,
+                reference_density,
+                knn_candidates=(knn,),
+            )
+            graph = sparsify(
+                affinity,
+                replace(
+                    params,
+                    edge_threshold=match.threshold,
+                    knn=knn,
+                ),
+            )
+            labels = run_louvain(
+                graph,
+                resolution=resolution,
+                random_state=seed,
+            )
+            quality = cluster_quality(labels, truth)
+            clustering_rows.append(
+                {
+                    **base_row,
+                    "status": "succeeded",
+                    "error": None,
+                    "ari_labeled_reports": float(quality["ari"]),
+                    "ari_denominator": int(quality["n_eval"]),
+                    "reference_threshold": reference_threshold,
+                    "matched_threshold": match.threshold,
+                    "retained_fraction": match.density.retained_fraction,
+                    "mean_degree": match.density.mean_degree,
+                    "retained_fraction_absolute_error": float(
+                        match.diagnostics["retained_fraction_absolute_error"]
+                    ),
+                    "mean_degree_relative_error": float(
+                        match.diagnostics["mean_degree_relative_error"]
+                    ),
+                    "density_matched": bool(match.diagnostics["matched"]),
+                    "wall_time_seconds": round(
+                        time.perf_counter() - started,
+                        6,
+                    ),
+                }
+            )
+        except Exception as exc:
+            clustering_rows.append(
+                {
+                    **base_row,
+                    "status": "failed",
+                    "error": {
+                        "exception_type": type(exc).__name__,
+                        "message": str(exc),
+                    },
+                    "wall_time_seconds": round(
+                        time.perf_counter() - started,
+                        6,
+                    ),
+                }
+            )
+
+    full_labels = run_louvain(
+        reference_graph,
+        resolution=resolution,
+        random_state=seed,
+    )
+    priority_rows: list[dict[str, Any]] = []
+    for variant in priority_factorial_variants():
+        started = time.perf_counter()
+        base_row = {
+            "seed": seed,
+            "stage": stage,
+            **variant,
+            "variant_sha256": config_sha256(variant),
+            "source_sha256": dataset.source_sha256,
+        }
+        try:
+            priority_params = replace(
+                DEFAULT_CONFIG.priority,
+                v_cap_mu=(
+                    DEFAULT_CONFIG.priority.v_cap_mu
+                    if variant["vulnerability"]
+                    else 1.0
+                ),
+            )
+            scores = score_clusters(
+                events,
+                full_labels,
+                priority_params,
+                gate_confidence=variant["confidence"],
+                gate_fmax=variant["confidence"],
+                normalize_v=True,
+                estimator=(
+                    "duplicate_aware_robust"
+                    if variant["aggregator"]
+                    else "legacy_raw"
+                ),
+            )
+            correlation = _incident_priority_rank_correlation(
+                full_labels,
+                scores,
+                truth,
+                dataset.incidents,
+            )
+            priority_rows.append(
+                {
+                    **base_row,
+                    "status": "succeeded",
+                    "error": None,
+                    "priority_rank_correlation": correlation,
+                    "incident_denominator": len(dataset.incidents),
+                    "wall_time_seconds": round(
+                        time.perf_counter() - started,
+                        6,
+                    ),
+                }
+            )
+        except Exception as exc:
+            priority_rows.append(
+                {
+                    **base_row,
+                    "status": "failed",
+                    "error": {
+                        "exception_type": type(exc).__name__,
+                        "message": str(exc),
+                    },
+                    "wall_time_seconds": round(
+                        time.perf_counter() - started,
+                        6,
+                    ),
+                }
+            )
+    return {
+        "clustering_rows": clustering_rows,
+        "priority_rows": priority_rows,
+    }
+
+
 def run_factorial_ablation(
     dataset_root: Path | str,
     *,

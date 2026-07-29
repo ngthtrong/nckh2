@@ -13,6 +13,7 @@ than attempting to contain the circular hash of the bundle that contains it.
 from __future__ import annotations
 
 import hashlib
+import itertools
 import json
 import math
 import sys
@@ -21,6 +22,8 @@ from datetime import datetime
 from pathlib import Path
 from types import MappingProxyType
 from typing import Any, Mapping, Sequence
+
+import numpy as np
 
 
 DEMO_ROOT = Path(__file__).resolve().parents[1]
@@ -52,6 +55,25 @@ DEFAULT_GATE2_LOCK = REPOSITORY_ROOT / "revision" / "gate2-lock.json"
 DEFAULT_SELECTED_CONFIGS = DEFAULT_PROTOCOL_DIR / "selected_configs.json"
 SELECTED_CONFIGS_NAME = "selected_configs.json"
 SHA256_LENGTH = 64
+COMPOSITION_METHODS = frozenset(
+    {
+        "product_louvain",
+        "additive_louvain",
+        "multiple_similarity_louvain",
+    }
+)
+MATCHED_COMPOSITION_METHODS = frozenset(
+    {
+        "additive_louvain",
+        "multiple_similarity_louvain",
+    }
+)
+SAME_REPRESENTATION_METHODS = frozenset(
+    {
+        "product_leiden",
+        "product_spectral",
+    }
+)
 
 
 class EvaluationDataError(ProtocolError):
@@ -106,6 +128,17 @@ class SelectedConfig:
 
 
 @dataclass(frozen=True)
+class SelectedConfigExclusion:
+    """One method/track pair proven infeasible by sealed calibration."""
+
+    method_id: str
+    track_id: str
+    status: str
+    source_artifact_id: str
+    source_selection_sha256: str
+
+
+@dataclass(frozen=True)
 class SelectedConfigSource:
     """Identity of one sealed calibration table used by the selection file."""
 
@@ -125,6 +158,7 @@ class SelectedConfigBundle:
     calibration_protocol_sha256: str
     sources: tuple[SelectedConfigSource, ...]
     selections: tuple[SelectedConfig, ...]
+    exclusions: tuple[SelectedConfigExclusion, ...]
 
     def selection_for(self, method_id: str, track_id: str) -> SelectedConfig:
         matches = [
@@ -133,10 +167,45 @@ class SelectedConfigBundle:
             if row.method_id == method_id and row.track_id == track_id
         ]
         if len(matches) != 1:
+            excluded = [
+                row
+                for row in self.exclusions
+                if row.method_id == method_id and row.track_id == track_id
+            ]
+            if len(excluded) == 1:
+                raise EvaluationDataError(
+                    f"{method_id}/{track_id} has no feasible calibration candidate"
+                )
             raise EvaluationDataError(
                 f"expected one selected config for {method_id}/{track_id}"
             )
         return matches[0]
+
+    def exclusion_for(
+        self,
+        method_id: str,
+        track_id: str,
+    ) -> SelectedConfigExclusion:
+        matches = [
+            row
+            for row in self.exclusions
+            if row.method_id == method_id and row.track_id == track_id
+        ]
+        if len(matches) != 1:
+            raise EvaluationDataError(
+                f"expected one infeasible calibration record for "
+                f"{method_id}/{track_id}"
+            )
+        return matches[0]
+
+
+@dataclass(frozen=True)
+class _SelectionPolicy:
+    objectives: Mapping[str, tuple[str, str]]
+    common_constraints: tuple[tuple[str, str, float], ...]
+    graph_constraints: tuple[tuple[str, str, float], ...]
+    matched_fraction_tolerance: float
+    matched_degree_relative_tolerance: float
 
 
 def _sha256(payload: bytes) -> str:
@@ -640,6 +709,71 @@ def load_evaluation_dataset(
     )
 
 
+def build_evaluator_analysis_view(
+    dataset: EvaluationDataset,
+) -> dict[str, Any]:
+    """Reconstruct the evaluator-only join used by post-Gate-2 analyses.
+
+    Prediction code must continue to receive only ``dataset.events``.  This
+    helper deliberately returns no observable report attributes: it supplies
+    only stable report identities, evaluator annotations, and latent incident
+    records after prediction has already been produced.
+    """
+
+    if len(dataset.events) != len(dataset.evaluator_reports):
+        raise EvaluationDataError(
+            "evaluation events and evaluator reports are not aligned"
+        )
+    event_ids = [str(event.event_id) for event in dataset.events]
+    report_ids = [report.event_id for report in dataset.evaluator_reports]
+    if (
+        len(event_ids) != len(set(event_ids))
+        or len(report_ids) != len(set(report_ids))
+        or event_ids != report_ids
+    ):
+        raise EvaluationDataError(
+            "evaluation event identities and evaluator reports are not aligned"
+        )
+
+    def thaw(value: Any) -> Any:
+        if isinstance(value, Mapping):
+            return {str(key): thaw(nested) for key, nested in value.items()}
+        if isinstance(value, tuple):
+            return [thaw(nested) for nested in value]
+        return value
+
+    reports: list[dict[str, Any]] = []
+    for report in dataset.evaluator_reports:
+        reports.append(
+            {
+                "event_id": report.event_id,
+                "evaluation_only": {
+                    "incident_id": report.incident_id,
+                    "gt_cluster": (
+                        None if report.gt_cluster < 0 else report.gt_cluster
+                    ),
+                    "scenario_family": report.scenario_family,
+                    "duplicate_kind": report.duplicate_kind,
+                    "duplicate_family_id": report.duplicate_family_id,
+                    "coverage_n": report.coverage_n,
+                    "coverage_v": report.coverage_v,
+                    "population_member_indices": list(
+                        report.population_member_indices
+                    ),
+                    "vulnerable_member_indices": list(
+                        report.vulnerable_member_indices
+                    ),
+                    "is_fake": report.is_fake,
+                    "adversary": report.adversary,
+                },
+            }
+        )
+    return {
+        "reports": reports,
+        "incidents": [thaw(incident) for incident in dataset.incidents],
+    }
+
+
 def _artifact_content_sha256(artifact: Mapping[str, Any]) -> str:
     content = dict(artifact)
     recorded = content.pop("artifact_content_sha256", None)
@@ -672,7 +806,10 @@ def _selection_sha256(selection: Mapping[str, Any]) -> str:
         or not isinstance(identity["objective"], str)
         or not identity["objective"]
         or identity["direction"] not in {"higher", "lower"}
-        or not _is_sha256(identity["selected_config_sha256"])
+        or (
+            identity["selected_config_sha256"] is not None
+            and not _is_sha256(identity["selected_config_sha256"])
+        )
     ):
         raise EvaluationDataError("calibration selection identity is malformed")
     return _canonical_mapping_sha256(identity)
@@ -680,6 +817,8 @@ def _selection_sha256(selection: Mapping[str, Any]) -> str:
 
 def _calibration_evaluation_index(
     artifact: Mapping[str, Any],
+    *,
+    calibration_seeds: Sequence[int],
 ) -> dict[tuple[str, str, str], Mapping[str, Any]]:
     """Validate retained candidate identities and aggregate audit counts."""
 
@@ -710,6 +849,7 @@ def _calibration_evaluation_index(
         row_config_count = row.get("configuration_evaluation_count")
         row_seed_count = row.get("seed_run_count")
         failures = row.get("failures")
+        seed_metrics = row.get("seed_metrics")
         if (
             not isinstance(method_id, str)
             or not method_id
@@ -725,10 +865,55 @@ def _calibration_evaluation_index(
             or not isinstance(row_seed_count, int)
             or row_seed_count < 1
             or not isinstance(failures, list)
+            or not isinstance(seed_metrics, list)
             or (status == "failed") != bool(failures)
         ):
             raise EvaluationDataError(
                 "calibration evaluation identity/count is malformed"
+            )
+        metric_seeds: list[int] = []
+        for metric_row in seed_metrics:
+            if not isinstance(metric_row, dict):
+                raise EvaluationDataError("calibration seed metric row is malformed")
+            raw_seed = metric_row.get("seed")
+            if (
+                isinstance(raw_seed, bool)
+                or not isinstance(raw_seed, (int, float))
+                or not math.isfinite(float(raw_seed))
+                or not float(raw_seed).is_integer()
+                or any(
+                    isinstance(value, bool)
+                    or not isinstance(value, (int, float))
+                    or not math.isfinite(float(value))
+                    for name, value in metric_row.items()
+                    if name != "seed"
+                )
+            ):
+                raise EvaluationDataError("calibration seed metric row is malformed")
+            metric_seeds.append(int(raw_seed))
+        failure_seeds: list[int] = []
+        for failure in failures:
+            if (
+                not isinstance(failure, dict)
+                or isinstance(failure.get("seed"), bool)
+                or not isinstance(failure.get("seed"), int)
+            ):
+                raise EvaluationDataError("calibration seed failure row is malformed")
+            failure_seeds.append(failure["seed"])
+        covered = metric_seeds + failure_seeds
+        if (
+            row_seed_count != len(calibration_seeds)
+            or len(covered) != len(set(covered))
+            or set(covered) != set(calibration_seeds)
+        ):
+            raise EvaluationDataError(
+                "calibration evaluation does not cover the exact locked seed set"
+            )
+        aggregate = row.get("aggregate_metrics")
+        expected_aggregate = _aggregate_seed_metrics(seed_metrics)
+        if not isinstance(aggregate, dict) or aggregate != expected_aggregate:
+            raise EvaluationDataError(
+                "calibration aggregate metrics are not mechanically reproducible"
             )
         identity = (method_id, track_id, config_sha)
         if identity in index:
@@ -744,6 +929,644 @@ def _calibration_evaluation_index(
     ):
         raise EvaluationDataError("calibration artifact audit totals are inconsistent")
     return index
+
+
+def _aggregate_seed_metrics(
+    rows: Sequence[Mapping[str, Any]],
+) -> dict[str, float]:
+    if not rows:
+        return {}
+    names = sorted(set.intersection(*(set(row) for row in rows)))
+    aggregate: dict[str, float] = {}
+    for name in names:
+        values = np.asarray([row[name] for row in rows], dtype=float)
+        aggregate[name] = float(np.mean(values))
+        aggregate[f"{name}__sd"] = (
+            float(np.std(values, ddof=1)) if len(values) > 1 else 0.0
+        )
+        aggregate[f"{name}__median"] = float(np.median(values))
+        aggregate[f"{name}__min"] = float(np.min(values))
+        aggregate[f"{name}__max"] = float(np.max(values))
+        aggregate[f"{name}__denominator"] = float(len(values))
+    return aggregate
+
+
+def _configuration_complexity(config: Mapping[str, Any]) -> int:
+    """Reproduce the calibration tie-break without importing tuning code."""
+
+    def count(value: Any) -> int:
+        if isinstance(value, Mapping):
+            return sum(count(nested) for nested in value.values())
+        if isinstance(value, (list, tuple)):
+            return sum(count(nested) for nested in value)
+        if value in (None, False, 0, 0.0, ""):
+            return 0
+        return 1
+
+    return count(dict(config))
+
+
+def _constraint_violation(
+    metrics: Mapping[str, Any],
+    constraint: tuple[str, str, float],
+) -> str | None:
+    metric, operator, limit = constraint
+    if metric not in metrics:
+        return f"missing metric {metric}"
+    value = metrics[metric]
+    if (
+        isinstance(value, bool)
+        or not isinstance(value, (int, float))
+        or not math.isfinite(float(value))
+    ):
+        return f"invalid metric {metric}"
+    feasible = value <= limit if operator == "<=" else value >= limit
+    if feasible:
+        return None
+    return f"{metric}={value} violates {operator}{limit}"
+
+
+def _candidate_satisfies(
+    evaluation: Mapping[str, Any],
+    *,
+    objective: str,
+    constraints: Sequence[tuple[str, str, float]],
+) -> bool:
+    metrics = evaluation.get("aggregate_metrics")
+    return (
+        evaluation.get("status") == "succeeded"
+        and isinstance(metrics, dict)
+        and objective in metrics
+        and all(
+            _constraint_violation(metrics, constraint) is None
+            for constraint in constraints
+        )
+    )
+
+
+def _mechanical_selection(
+    evaluations: Sequence[Mapping[str, Any]],
+    *,
+    objective: str,
+    direction: str,
+    constraints: Sequence[tuple[str, str, float]],
+) -> dict[str, Any]:
+    """Recompute ``select_candidate`` from authenticated candidate rows."""
+
+    if direction not in {"higher", "lower"} or not evaluations:
+        raise EvaluationDataError("calibration selection inputs are malformed")
+    identities = {
+        (
+            row.get("method_id"),
+            row.get("track_id"),
+            row.get("stage"),
+        )
+        for row in evaluations
+    }
+    if len(identities) != 1:
+        raise EvaluationDataError(
+            "calibration selection rows do not share one method/track/stage"
+        )
+    method_id, track_id, stage = next(iter(identities))
+    if (
+        not isinstance(method_id, str)
+        or not method_id
+        or not isinstance(track_id, str)
+        or not track_id
+        or stage != "calibration"
+    ):
+        raise EvaluationDataError("calibration selection identity is malformed")
+
+    feasible: list[Mapping[str, Any]] = []
+    rejected: list[dict[str, Any]] = []
+    succeeded = 0
+    for evaluation in evaluations:
+        metrics = evaluation.get("aggregate_metrics")
+        if not isinstance(metrics, dict):
+            raise EvaluationDataError(
+                "calibration selection metrics are malformed"
+            )
+        reasons: list[str] = []
+        if evaluation.get("status") != "succeeded":
+            reasons.append("seed failure")
+        else:
+            succeeded += 1
+        if objective not in metrics:
+            reasons.append(f"missing objective {objective}")
+        reasons.extend(
+            reason
+            for constraint in constraints
+            if (
+                reason := _constraint_violation(metrics, constraint)
+            )
+            is not None
+        )
+        if reasons:
+            rejected.append(
+                {
+                    "config_sha256": evaluation["config_sha256"],
+                    "reasons": reasons,
+                }
+            )
+        else:
+            feasible.append(evaluation)
+
+    def order(evaluation: Mapping[str, Any]) -> tuple[Any, ...]:
+        metrics = evaluation["aggregate_metrics"]
+        objective_value = metrics[objective]
+        primary = -objective_value if direction == "higher" else objective_value
+        burden = metrics.get("operator_review_burden", math.inf)
+        complexity = metrics.get(
+            "complexity",
+            float(_configuration_complexity(evaluation["config"])),
+        )
+        return primary, burden, complexity, evaluation["config_sha256"]
+
+    selected = min(feasible, key=order) if feasible else None
+    selected_hash = None if selected is None else selected["config_sha256"]
+    identity = {
+        "method_id": method_id,
+        "track_id": track_id,
+        "objective": objective,
+        "direction": direction,
+        "selected_config_sha256": selected_hash,
+    }
+    return {
+        **identity,
+        "status": "selected" if selected is not None else "no_feasible_candidate",
+        "selected_config": None if selected is None else selected["config"],
+        "selection_sha256": _canonical_mapping_sha256(identity),
+        "considered_configurations": len(evaluations),
+        "succeeded_configurations": succeeded,
+        "feasible_configurations": len(feasible),
+        "rejected": rejected,
+    }
+
+
+def _density_constraints(
+    reference: Mapping[str, Any],
+    policy: _SelectionPolicy,
+) -> tuple[tuple[str, str, float], ...]:
+    metrics = reference.get("aggregate_metrics")
+    if not isinstance(metrics, dict):
+        raise EvaluationDataError("product density metrics are malformed")
+    fraction = metrics.get("retained_fraction")
+    degree = metrics.get("mean_degree")
+    if (
+        isinstance(fraction, bool)
+        or not isinstance(fraction, (int, float))
+        or not math.isfinite(float(fraction))
+        or isinstance(degree, bool)
+        or not isinstance(degree, (int, float))
+        or not math.isfinite(float(degree))
+        or fraction < 0.0
+        or degree < 0.0
+    ):
+        raise EvaluationDataError(
+            "product density metrics required by joint selection are absent"
+        )
+    fraction_value = float(fraction)
+    degree_value = float(degree)
+    return (
+        (
+            "retained_fraction",
+            ">=",
+            max(0.0, fraction_value - policy.matched_fraction_tolerance),
+        ),
+        (
+            "retained_fraction",
+            "<=",
+            min(1.0, fraction_value + policy.matched_fraction_tolerance),
+        ),
+        (
+            "mean_degree",
+            ">=",
+            degree_value * (1.0 - policy.matched_degree_relative_tolerance),
+        ),
+        (
+            "mean_degree",
+            "<=",
+            degree_value * (1.0 + policy.matched_degree_relative_tolerance),
+        ),
+    )
+
+
+def _selection_rows_by_pair(
+    artifact: Mapping[str, Any],
+) -> dict[tuple[str, str], Mapping[str, Any]]:
+    raw_selections = artifact.get("selections")
+    if not isinstance(raw_selections, list):
+        raise EvaluationDataError("calibration selections are malformed")
+    required = {
+        "method_id",
+        "track_id",
+        "objective",
+        "direction",
+        "status",
+        "selected_config",
+        "selected_config_sha256",
+        "selection_sha256",
+        "considered_configurations",
+        "succeeded_configurations",
+        "feasible_configurations",
+        "rejected",
+    }
+    result: dict[tuple[str, str], Mapping[str, Any]] = {}
+    for row in raw_selections:
+        if (
+            not isinstance(row, dict)
+            or set(row) != required
+            or not isinstance(row.get("method_id"), str)
+            or not isinstance(row.get("track_id"), str)
+        ):
+            raise EvaluationDataError("calibration selection row schema is malformed")
+        pair = (row["method_id"], row["track_id"])
+        if pair in result:
+            raise EvaluationDataError("calibration artifact repeats a selection")
+        result[pair] = row
+    return result
+
+
+def _verify_mechanical_selections(
+    artifact: Mapping[str, Any],
+    evaluation_index: Mapping[
+        tuple[str, str, str],
+        Mapping[str, Any],
+    ],
+    *,
+    policy: _SelectionPolicy,
+) -> None:
+    """Verify every promoted winner independently from retained seed rows."""
+
+    evaluations_by_pair: dict[
+        tuple[str, str],
+        list[Mapping[str, Any]],
+    ] = {}
+    for (method_id, track_id, _), evaluation in evaluation_index.items():
+        evaluations_by_pair.setdefault((method_id, track_id), []).append(evaluation)
+    selections_by_pair = _selection_rows_by_pair(artifact)
+    if not evaluations_by_pair or set(selections_by_pair) != set(evaluations_by_pair):
+        raise EvaluationDataError(
+            "calibration selections do not cover their retained evaluations"
+        )
+    methods = {method_id for method_id, _ in evaluations_by_pair}
+    composition_methods = methods & COMPOSITION_METHODS
+    if composition_methods and methods != COMPOSITION_METHODS:
+        raise EvaluationDataError(
+            "composition calibration source must contain exactly all declared "
+            "composition families"
+        )
+
+    expected: dict[tuple[str, str], dict[str, Any]] = {}
+    if composition_methods:
+        tracks = {track_id for _, track_id in evaluations_by_pair}
+        graph_constraints = (
+            *policy.common_constraints,
+            *policy.graph_constraints,
+        )
+        for track_id in tracks:
+            objective_direction = policy.objectives.get(track_id)
+            if objective_direction is None:
+                raise EvaluationDataError(
+                    f"calibration track {track_id} has no locked objective"
+                )
+            objective, direction = objective_direction
+            product_rows = evaluations_by_pair.get(
+                ("product_louvain", track_id),
+                [],
+            )
+            comparator_rows = {
+                method_id: evaluations_by_pair.get((method_id, track_id), [])
+                for method_id in MATCHED_COMPOSITION_METHODS
+            }
+            if not product_rows or any(not rows for rows in comparator_rows.values()):
+                raise EvaluationDataError(
+                    "composition calibration is missing a method/track grid"
+                )
+
+            joint_product_rows: list[Mapping[str, Any]] = []
+            for product in product_rows:
+                matchable = _candidate_satisfies(
+                    product,
+                    objective=objective,
+                    constraints=graph_constraints,
+                ) and all(
+                    any(
+                        _candidate_satisfies(
+                            comparator,
+                            objective=objective,
+                            constraints=(
+                                *graph_constraints,
+                                *_density_constraints(product, policy),
+                            ),
+                        )
+                        for comparator in rows
+                    )
+                    for rows in comparator_rows.values()
+                )
+                joint = dict(product)
+                joint["aggregate_metrics"] = {
+                    **product["aggregate_metrics"],
+                    "joint_density_match_available": float(matchable),
+                }
+                joint_product_rows.append(joint)
+            expected_product = _mechanical_selection(
+                joint_product_rows,
+                objective=objective,
+                direction=direction,
+                constraints=(
+                    *graph_constraints,
+                    ("joint_density_match_available", ">=", 1.0),
+                ),
+            )
+            expected[("product_louvain", track_id)] = expected_product
+            selected_product_hash = expected_product[
+                "selected_config_sha256"
+            ]
+            selected_product = next(
+                (
+                    row
+                    for row in product_rows
+                    if row["config_sha256"] == selected_product_hash
+                ),
+                None,
+            )
+            for method_id, rows in comparator_rows.items():
+                constraints = graph_constraints
+                if selected_product is not None:
+                    constraints = (
+                        *graph_constraints,
+                        *_density_constraints(selected_product, policy),
+                    )
+                expected[(method_id, track_id)] = _mechanical_selection(
+                    rows,
+                    objective=objective,
+                    direction=direction,
+                    constraints=constraints,
+                )
+    else:
+        for pair, rows in evaluations_by_pair.items():
+            method_id, track_id = pair
+            objective_direction = policy.objectives.get(track_id)
+            if objective_direction is None:
+                raise EvaluationDataError(
+                    f"calibration track {track_id} has no locked objective"
+                )
+            objective, direction = objective_direction
+            constraints = policy.common_constraints
+            if method_id in SAME_REPRESENTATION_METHODS:
+                constraints = (
+                    *policy.common_constraints,
+                    *policy.graph_constraints,
+                )
+            expected[pair] = _mechanical_selection(
+                rows,
+                objective=objective,
+                direction=direction,
+                constraints=constraints,
+            )
+
+    for pair, expected_row in expected.items():
+        if selections_by_pair.get(pair) != expected_row:
+            method_id, track_id = pair
+            raise EvaluationDataError(
+                "calibration winner/audit is not mechanically reproducible for "
+                f"{method_id}/{track_id}"
+            )
+
+
+def _validate_calibration_command(
+    sealed: Mapping[str, Any],
+    *,
+    composition_source: bool,
+) -> None:
+    command = sealed.get("command")
+    if (
+        not isinstance(command, list)
+        or not command
+        or any(not isinstance(part, str) or not part for part in command)
+    ):
+        raise EvaluationDataError("calibration run command is malformed")
+    expected = (
+        "exp15_calibrated_comparison"
+        if composition_source
+        else "exp18_tuned_baselines"
+    )
+    if not any(
+        part == f"demo.experiments.{expected}"
+        or Path(part).name == f"{expected}.py"
+        for part in command
+    ):
+        raise EvaluationDataError(
+            f"calibration run was not produced by the locked {expected} entrypoint"
+        )
+
+
+def _calibration_seed_tuple(protocol_dir: Path) -> tuple[int, ...]:
+    manifest = _json_object(
+        _read_bytes(
+            protocol_dir / "seed_manifest.json",
+            label="locked seed manifest",
+        ),
+        label="locked seed manifest",
+    )
+    try:
+        seeds = manifest["splits"]["calibration"]
+    except (KeyError, TypeError) as exc:
+        raise EvaluationDataError("locked calibration split is absent") from exc
+    if (
+        not isinstance(seeds, list)
+        or not seeds
+        or any(isinstance(seed, bool) or not isinstance(seed, int) for seed in seeds)
+        or len(seeds) != len(set(seeds))
+    ):
+        raise EvaluationDataError("locked calibration split is malformed")
+    return tuple(seeds)
+
+
+def _selection_policy(
+    protocol_dir: Path,
+) -> _SelectionPolicy:
+    contract = _json_object(
+        _read_bytes(
+            protocol_dir / "calibration_contract.json",
+            label="locked calibration contract",
+        ),
+        label="locked calibration contract",
+    )
+    selection = contract.get("selection")
+    seed_manifest = _json_object(
+        _read_bytes(
+            protocol_dir / "seed_manifest.json",
+            label="locked seed manifest",
+        ),
+        label="locked seed manifest",
+    )
+    try:
+        track_rows = seed_manifest["tuning"]["tracks"]
+    except (KeyError, TypeError) as exc:
+        raise EvaluationDataError("locked calibration tracks are absent") from exc
+    if (
+        not isinstance(track_rows, list)
+        or not track_rows
+        or any(
+            not isinstance(row, dict)
+            or not isinstance(row.get("id"), str)
+            or not row["id"]
+            for row in track_rows
+        )
+    ):
+        raise EvaluationDataError("locked calibration tracks are malformed")
+    track_ids = tuple(row["id"] for row in track_rows)
+    expected_tie_break = [
+        "lower operator_review_burden",
+        "lower configuration complexity",
+        "lexicographic config_sha256",
+    ]
+    if (
+        contract.get("schema_version") != "calibration-contract-v1"
+        or not isinstance(selection, dict)
+        or len(track_ids) != len(set(track_ids))
+        or set(selection) != {*track_ids, "tie_break"}
+        or selection.get("tie_break") != expected_tie_break
+    ):
+        raise EvaluationDataError("locked calibration selection contract is malformed")
+    objectives: dict[str, tuple[str, str]] = {}
+    for track_id in track_ids:
+        row = selection[track_id]
+        if (
+            not isinstance(row, dict)
+            or not isinstance(row.get("objective"), str)
+            or not row["objective"]
+            or row.get("direction") not in {"higher", "lower"}
+        ):
+            raise EvaluationDataError(
+                "locked calibration objective/direction is malformed"
+            )
+        objectives[track_id] = (row["objective"], row["direction"])
+    try:
+        minimum_stability = float(contract["stability"]["minimum_per_seed"])
+        maximum_review = float(
+            contract["review_policy"]["maximum_rate_per_seed"]
+        )
+        maximum_diameter = float(
+            contract["geographic_constraint"]["maximum_metres_per_seed"]
+        )
+        maximum_disconnected = float(
+            contract["graph_constraints"][
+                "maximum_disconnected_communities_per_seed"
+            ]
+        )
+        minimum_retained = float(
+            contract["graph_constraints"][
+                "minimum_retained_fraction_per_seed"
+            ]
+        )
+        maximum_retained = float(
+            contract["graph_constraints"][
+                "maximum_retained_fraction_per_seed"
+            ]
+        )
+        matched_fraction = float(
+            contract["matched_composition_constraints"][
+                "retained_fraction_absolute_tolerance"
+            ]
+        )
+        matched_degree = float(
+            contract["matched_composition_constraints"][
+                "mean_degree_relative_tolerance"
+            ]
+        )
+    except (KeyError, TypeError, ValueError) as exc:
+        raise EvaluationDataError(
+            "locked calibration constraints are incomplete"
+        ) from exc
+    limits = (
+        minimum_stability,
+        maximum_review,
+        maximum_diameter,
+        maximum_disconnected,
+        minimum_retained,
+        maximum_retained,
+        matched_fraction,
+        matched_degree,
+    )
+    if not all(math.isfinite(value) and value >= 0 for value in limits):
+        raise EvaluationDataError("locked calibration constraints are invalid")
+    return _SelectionPolicy(
+        objectives=MappingProxyType(objectives),
+        common_constraints=(
+            ("partition_stability__min", ">=", minimum_stability),
+            ("operator_review_burden_rate__max", "<=", maximum_review),
+            ("geographic_diameter__max", "<=", maximum_diameter),
+        ),
+        graph_constraints=(
+            (
+                "disconnected_communities__max",
+                "<=",
+                maximum_disconnected,
+            ),
+            ("retained_fraction__min", ">=", minimum_retained),
+            ("retained_fraction__max", "<=", maximum_retained),
+        ),
+        matched_fraction_tolerance=matched_fraction,
+        matched_degree_relative_tolerance=matched_degree,
+    )
+
+
+def _registry_config_hashes(
+    protocol_dir: Path,
+) -> dict[str, set[str]]:
+    registry = _json_object(
+        _read_bytes(
+            protocol_dir / "baselines.json",
+            label="locked baseline registry",
+        ),
+        label="locked baseline registry",
+    )
+    methods = registry.get("methods")
+    if not isinstance(methods, list) or not methods:
+        raise EvaluationDataError("locked baseline registry has no methods")
+    result: dict[str, set[str]] = {}
+    for method in methods:
+        if not isinstance(method, dict):
+            raise EvaluationDataError("locked baseline method is malformed")
+        method_id = method.get("id")
+        search_space = method.get("search_space")
+        declared = method.get("configuration_count")
+        if (
+            not isinstance(method_id, str)
+            or not method_id
+            or method_id in result
+            or not isinstance(search_space, dict)
+            or not search_space
+            or isinstance(declared, bool)
+            or not isinstance(declared, int)
+            or not 1 <= declared <= 128
+        ):
+            raise EvaluationDataError("locked baseline search space is malformed")
+        keys = sorted(search_space)
+        axes: list[list[Any]] = []
+        for key in keys:
+            values = search_space[key]
+            if not isinstance(key, str) or not isinstance(values, list) or not values:
+                raise EvaluationDataError("locked baseline search axis is malformed")
+            axes.append(values)
+        hashes = {
+            _canonical_mapping_sha256(
+                {
+                    key: value
+                    for key, value in zip(keys, combination, strict=True)
+                }
+            )
+            for combination in itertools.product(*axes)
+        }
+        if len(hashes) != declared:
+            raise EvaluationDataError(
+                f"locked baseline configuration count is wrong for {method_id}"
+            )
+        result[method_id] = hashes
+    return result
 
 
 def _protocol_member_digest(members: Mapping[str, str]) -> str:
@@ -844,6 +1667,45 @@ def _sealed_protocol_identity(
     return digest, set(member_hashes)
 
 
+def _sealed_dataset_input_matches(
+    sealed: Mapping[str, Any],
+    *,
+    manifest_path: Path,
+    expected_sha256: str,
+) -> bool:
+    inputs = sealed.get("inputs")
+    datasets = inputs.get("datasets") if isinstance(inputs, dict) else None
+    if not isinstance(datasets, list) or len(datasets) != 1:
+        return False
+    for record in datasets:
+        if (
+            not isinstance(record, dict)
+            or not isinstance(record.get("snapshot"), str)
+            or not _is_sha256(record.get("sha256"))
+            or Path(record["snapshot"]).parts[:2] != ("inputs", "datasets")
+        ):
+            raise EvaluationDataError(
+                "calibration run dataset input record is malformed"
+            )
+        snapshot = _safe_relative_path(
+            manifest_path.parent,
+            record["snapshot"],
+            label="sealed calibration dataset input",
+        )
+        observed_sha = _sha256(
+            _read_bytes(snapshot, label="sealed calibration dataset input")
+        )
+        if (
+            observed_sha != record["sha256"]
+            or sealed.get("checksums", {}).get(record["snapshot"]) != observed_sha
+        ):
+            raise EvaluationDataError(
+                "calibration run dataset input checksum mismatch"
+            )
+        return observed_sha == expected_sha256
+    return False
+
+
 def _expected_method_track_pairs(
     protocol_dir: Path,
 ) -> set[tuple[str, str]]:
@@ -912,10 +1774,10 @@ def load_selected_configs(
         )
     # This authenticates the complete current protocol bundle, including the
     # selected-config file, before any calibration artifact is consulted.
-    try:
-        load_locked_test_seeds(gate2_lock, directory)
-    except ProtocolError as exc:
-        raise EvaluationDataError(str(exc)) from exc
+    released_seeds, gate1_binding = _gate2_data_binding(
+        Path(gate2_lock),
+        directory,
+    )
 
     selected_payload = _read_bytes(selected_path, label="selected-config registry")
     registry = _json_object(selected_payload, label="selected-config registry")
@@ -924,6 +1786,7 @@ def load_selected_configs(
         "calibration_protocol_sha256",
         "sources",
         "selections",
+        "exclusions",
     }
     allowed_top = required_top | {"audit"}
     if (
@@ -933,6 +1796,7 @@ def load_selected_configs(
         or not _is_sha256(registry.get("calibration_protocol_sha256"))
         or not isinstance(registry.get("sources"), list)
         or not isinstance(registry.get("selections"), list)
+        or not isinstance(registry.get("exclusions"), list)
     ):
         raise EvaluationDataError("selected-config registry schema is malformed")
     if "audit" in registry and not isinstance(registry["audit"], dict):
@@ -945,6 +1809,10 @@ def load_selected_configs(
         raise EvaluationDataError(
             "current pre-selection protocol differs from calibration artifacts"
         )
+    calibration_seeds = _calibration_seed_tuple(directory)
+    selection_policy = _selection_policy(directory)
+    selection_objectives = selection_policy.objectives
+    registry_config_hashes = _registry_config_hashes(directory)
 
     root = Path(artifact_root).resolve()
     source_records: list[SelectedConfigSource] = []
@@ -1071,7 +1939,48 @@ def load_selected_configs(
             raise EvaluationDataError(
                 f"calibration artifact binding mismatch for {source_id}"
             )
-        evaluation_indexes[source_id] = _calibration_evaluation_index(artifact)
+        metadata = artifact.get("metadata")
+        frozen_dataset = (
+            metadata.get("frozen_dataset")
+            if isinstance(metadata, dict)
+            else None
+        )
+        if (
+            not isinstance(frozen_dataset, dict)
+            or any(
+                frozen_dataset.get(field) != gate1_binding[field]
+                for field in (
+                    "gate1_lock_sha256",
+                    "accepted_run_manifest_sha256",
+                    "dataset_manifest_sha256",
+                )
+            )
+            or not _sealed_dataset_input_matches(
+                sealed,
+                manifest_path=manifest_path,
+                expected_sha256=gate1_binding["dataset_manifest_sha256"],
+            )
+        ):
+            raise EvaluationDataError(
+                f"calibration dataset provenance mismatch for {source_id}"
+            )
+        evaluation_index = _calibration_evaluation_index(
+            artifact,
+            calibration_seeds=calibration_seeds,
+        )
+        methods_in_source = {
+            method_id for method_id, _, _ in evaluation_index
+        }
+        _validate_calibration_command(
+            sealed,
+            composition_source=bool(methods_in_source & COMPOSITION_METHODS),
+        )
+        _verify_mechanical_selections(
+            artifact,
+            evaluation_index,
+            policy=selection_policy,
+        )
+        evaluation_indexes[source_id] = evaluation_index
         artifacts[source_id] = artifact
         source_ids.add(source_id)
         source_locations.add(source_location)
@@ -1147,6 +2056,7 @@ def load_selected_configs(
                 f"{method_id}/{track_id}"
             )
         source_selection = matching[0]
+        expected_objective = selection_objectives.get(track_id)
         source_evaluation = evaluation_indexes[source_id].get(
             (method_id, track_id, config_sha)
         )
@@ -1162,6 +2072,12 @@ def load_selected_configs(
             or source_selection.get("selected_config_sha256") != config_sha
             or source_selection.get("selection_sha256") != source_selection_sha
             or _selection_sha256(source_selection) != source_selection_sha
+            or expected_objective is None
+            or (
+                source_selection.get("objective"),
+                source_selection.get("direction"),
+            )
+            != expected_objective
             or source_evaluation is None
             or source_evaluation.get("status") != "succeeded"
             or source_evaluation.get("config") != config
@@ -1169,6 +2085,10 @@ def load_selected_configs(
             != len(pair_evaluations)
             or source_selection.get("succeeded_configurations")
             != sum(row.get("status") == "succeeded" for row in pair_evaluations)
+            or {
+                str(row.get("config_sha256")) for row in pair_evaluations
+            }
+            != registry_config_hashes.get(method_id)
         ):
             raise EvaluationDataError(
                 f"selected config differs from calibration source for "
@@ -1187,12 +2107,117 @@ def load_selected_configs(
             )
         )
 
+    excluded_records: list[SelectedConfigExclusion] = []
+    excluded_pairs: set[tuple[str, str]] = set()
+    required_exclusion_fields = {
+        "method_id",
+        "track_id",
+        "status",
+        "source_artifact_id",
+        "source_selection_sha256",
+    }
+    for raw_exclusion in registry["exclusions"]:
+        if (
+            not isinstance(raw_exclusion, dict)
+            or set(raw_exclusion) != required_exclusion_fields
+        ):
+            raise EvaluationDataError("selected-config exclusion schema is malformed")
+        method_id = raw_exclusion["method_id"]
+        track_id = raw_exclusion["track_id"]
+        status = raw_exclusion["status"]
+        source_id = raw_exclusion["source_artifact_id"]
+        source_selection_sha = raw_exclusion["source_selection_sha256"]
+        if (
+            not isinstance(method_id, str)
+            or not method_id
+            or not isinstance(track_id, str)
+            or not track_id
+            or status != "no_feasible_candidate"
+            or not isinstance(source_id, str)
+            or source_id not in artifacts
+            or not _is_sha256(source_selection_sha)
+        ):
+            raise EvaluationDataError(
+                "selected-config exclusion identity is malformed"
+            )
+        pair = (method_id, track_id)
+        if pair in selected_pairs or pair in excluded_pairs:
+            raise EvaluationDataError(
+                f"duplicate selected/excluded config for {method_id}/{track_id}"
+            )
+        matching = [
+            row
+            for row in artifacts[source_id]["selections"]
+            if isinstance(row, dict)
+            and row.get("method_id") == method_id
+            and row.get("track_id") == track_id
+        ]
+        if len(matching) != 1:
+            raise EvaluationDataError(
+                f"calibration source has no unique exclusion for "
+                f"{method_id}/{track_id}"
+            )
+        source_selection = matching[0]
+        pair_evaluations = [
+            row
+            for (candidate_method, candidate_track, _), row in
+            evaluation_indexes[source_id].items()
+            if candidate_method == method_id and candidate_track == track_id
+        ]
+        expected_objective = selection_objectives.get(track_id)
+        if (
+            source_selection.get("status") != "no_feasible_candidate"
+            or source_selection.get("selected_config") is not None
+            or source_selection.get("selected_config_sha256") is not None
+            or source_selection.get("selection_sha256") != source_selection_sha
+            or _selection_sha256(source_selection) != source_selection_sha
+            or expected_objective is None
+            or (
+                source_selection.get("objective"),
+                source_selection.get("direction"),
+            )
+            != expected_objective
+            or source_selection.get("considered_configurations")
+            != len(pair_evaluations)
+            or source_selection.get("succeeded_configurations")
+            != sum(row.get("status") == "succeeded" for row in pair_evaluations)
+            or source_selection.get("feasible_configurations") != 0
+            or not isinstance(source_selection.get("rejected"), list)
+            or len(source_selection["rejected"]) != len(pair_evaluations)
+            or {
+                str(row.get("config_sha256")) for row in pair_evaluations
+            }
+            != registry_config_hashes.get(method_id)
+        ):
+            raise EvaluationDataError(
+                f"infeasible calibration record differs from source for "
+                f"{method_id}/{track_id}"
+            )
+        excluded_pairs.add(pair)
+        referenced_sources.add(source_id)
+        excluded_records.append(
+            SelectedConfigExclusion(
+                method_id=method_id,
+                track_id=track_id,
+                status=status,
+                source_artifact_id=source_id,
+                source_selection_sha256=source_selection_sha,
+            )
+        )
+
     expected_pairs = _expected_method_track_pairs(directory)
-    if selected_pairs != expected_pairs:
-        missing = sorted(expected_pairs - selected_pairs)
-        unexpected = sorted(selected_pairs - expected_pairs)
+    expected_tracks = {track for _, track in expected_pairs}
+    if set(selection_objectives) != expected_tracks:
         raise EvaluationDataError(
-            "selected configs do not cover the locked method/track cross-product; "
+            "calibration contract tracks differ from the seed protocol"
+        )
+    covered_pairs = selected_pairs | excluded_pairs
+    if covered_pairs != expected_pairs:
+        missing = sorted(expected_pairs - covered_pairs)
+        unexpected = sorted(covered_pairs - expected_pairs)
+        raise EvaluationDataError(
+            "selected/excluded configs do not cover the locked method/track "
+            "cross-product; "
             f"missing={missing}, unexpected={unexpected}"
         )
     if referenced_sources != source_ids:
@@ -1221,11 +2246,33 @@ def load_selected_configs(
                 "product representation"
             )
 
+    end_released, end_gate1_binding = _gate2_data_binding(
+        Path(gate2_lock),
+        directory,
+    )
+    end_preselection_sha, end_preselection_members = (
+        _preselection_protocol_identity(directory)
+    )
+    if (
+        tuple(end_released) != tuple(released_seeds)
+        or dict(end_gate1_binding) != dict(gate1_binding)
+        or _read_bytes(selected_path, label="selected-config registry")
+        != selected_payload
+        or end_preselection_sha != current_preselection_sha
+        or end_preselection_members != current_preselection_members
+    ):
+        raise EvaluationDataError(
+            "Gate-2 protocol or selected-config registry changed during validation"
+        )
+
     return SelectedConfigBundle(
         calibration_protocol_sha256=calibration_protocol_sha,
         sources=tuple(sorted(source_records, key=lambda row: row.id)),
         selections=tuple(
             sorted(selected_records, key=lambda row: (row.method_id, row.track_id))
+        ),
+        exclusions=tuple(
+            sorted(excluded_records, key=lambda row: (row.method_id, row.track_id))
         ),
     )
 
@@ -1239,7 +2286,9 @@ __all__ = [
     "EvaluatorReport",
     "SelectedConfig",
     "SelectedConfigBundle",
+    "SelectedConfigExclusion",
     "SelectedConfigSource",
+    "build_evaluator_analysis_view",
     "load_evaluation_dataset",
     "load_selected_configs",
 ]

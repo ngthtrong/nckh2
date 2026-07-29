@@ -456,25 +456,36 @@ def _oracle_complete_event(
     )
 
 
-def _run_seed_from_frozen_root(
-    dataset_root: Path,
+def evaluate_loaded_priority_seed(
+    *,
     seed: int,
     stage: str,
-    protocol: TuningProtocol,
-    gate1_lock: Path | str,
+    inference_events: Sequence[Event],
+    evaluator_data: dict,
+    source_sha256: str,
 ) -> list[dict[str, object]]:
-    """Run every C3 scenario from one exact frozen split file."""
+    """Run every C3 scenario after an authenticated view has been loaded.
 
-    if stage not in PRE_GATE2_STAGES:
-        raise ValueError("run_seed accepts only development/calibration")
-    tuning_dataset, data = load_frozen_tuning_views(
-        dataset_root,
-        stage=stage,
-        seed=int(seed),
-        tuning_protocol=protocol,
-        gate1_lock=gate1_lock,
-    )
-    inference_events = list(tuning_dataset.events)
+    The caller supplies sanitized inference events separately from evaluator
+    annotations.  This pure post-load entry point is shared by the restricted
+    calibration runner and the one-shot held-out runner.
+    """
+
+    if isinstance(seed, bool) or not isinstance(seed, int):
+        raise ValueError("seed must be an integer")
+    if not isinstance(stage, str) or not stage:
+        raise ValueError("stage must be a non-empty string")
+    if not isinstance(evaluator_data, dict):
+        raise ValueError("evaluator_data must be an object")
+    if not isinstance(source_sha256, str) or len(source_sha256) != 64:
+        raise ValueError("source_sha256 must be a SHA-256 identity")
+    inference_events = list(inference_events)
+    if any(
+        event.gt_cluster != -1 or event.is_fake is not False
+        for event in inference_events
+    ):
+        raise ValueError("evaluator-only fields leaked into priority inputs")
+    data = evaluator_data
     events_by_id = {
         str(event.event_id): event for event in inference_events
     }
@@ -692,8 +703,35 @@ def _run_seed_from_frozen_root(
             )
         )
     for row in rows:
-        row["dataset_source_sha256"] = tuning_dataset.source_sha256
+        row["dataset_source_sha256"] = source_sha256
     return rows
+
+
+def _run_seed_from_frozen_root(
+    dataset_root: Path,
+    seed: int,
+    stage: str,
+    protocol: TuningProtocol,
+    gate1_lock: Path | str,
+) -> list[dict[str, object]]:
+    """Load one restricted split and run the shared C3 evaluator."""
+
+    if stage not in PRE_GATE2_STAGES:
+        raise ValueError("run_seed accepts only development/calibration")
+    tuning_dataset, data = load_frozen_tuning_views(
+        dataset_root,
+        stage=stage,
+        seed=int(seed),
+        tuning_protocol=protocol,
+        gate1_lock=gate1_lock,
+    )
+    return evaluate_loaded_priority_seed(
+        seed=int(seed),
+        stage=stage,
+        inference_events=tuning_dataset.events,
+        evaluator_data=data,
+        source_sha256=tuning_dataset.source_sha256,
+    )
 
 
 def run_seed(

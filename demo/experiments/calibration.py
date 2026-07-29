@@ -607,6 +607,14 @@ def _aggregate_seed_metrics(
     return aggregate
 
 
+def aggregate_seed_metrics(
+    rows: Sequence[Mapping[str, float]],
+) -> dict[str, float]:
+    """Recompute the exact aggregate representation stored in artifacts."""
+
+    return _aggregate_seed_metrics(rows)
+
+
 def evaluate_candidates(
     method_id: str,
     track_id: str,
@@ -1363,6 +1371,7 @@ __all__ = [
     "MetricConstraint",
     "OperationalCalibrationContract",
     "TuningDataset",
+    "aggregate_seed_metrics",
     "calibration_artifact_content_sha256",
     "canonical_config_json",
     "config_sha256",
@@ -1382,6 +1391,7 @@ __all__ = [
     "quantile_threshold",
     "select_candidate",
     "selection_identity_sha256",
+    "SeedFailure",
     "sparsify_at_quantile",
     "write_calibration_artifact",
 ]

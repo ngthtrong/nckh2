@@ -1,153 +1,185 @@
-# Phân cụm và xếp hạng sự kiện cứu hộ bão lũ bằng đồ thị trọng số
+# Product-Similarity Clustering and Bounded Priority Heuristics
 
-Đây là mã nguồn và tài liệu nghiên cứu cho khung **Weighted Graph-Based Event
-Clustering and Priority Scoring for Flood-Rescue Coordination Using Edge AI**.
-Khung giải pháp chuyển mỗi báo cáo cứu hộ thành một vector thuộc tính gọn nhẹ,
-xây dựng đồ thị không gian–thời gian–ngữ cảnh, phân cụm bằng Louvain/Leiden và
-xếp hạng các cụm để hỗ trợ điều phối cứu hộ.
+Kho lưu trữ này chứa mã nguồn, protocol, artifact và bản thảo cho một nghiên
+cứu phương pháp về gom nhóm báo cáo cứu hộ lũ và xếp hạng ưu tiên. Đánh giá
+hiện tại dùng dữ liệu **synthetic** được sinh theo protocol đã khóa. Đây không
+phải là bằng chứng triển khai ngoài hiện trường, không xác nhận hiệu quả cứu hộ
+thực tế và không thay thế đánh giá của chuyên gia.
 
-Kho lưu trữ hiện tập trung vào **mô hình toán học, pipeline thực nghiệm, bộ dữ
-liệu mô phỏng, dashboard minh họa và bài báo khoa học**. Mobile app, mô hình AI
-trên thiết bị biên và backend thời gian thực chưa được triển khai trong phiên
-bản này.
+Pipeline nghiên cứu gồm:
 
-## Ý tưởng chính
+1. biểu diễn báo cáo bằng thuộc tính quan sát được;
+2. xây dựng đồ thị với product similarity không gian--thời gian--ngữ cảnh;
+3. phân cụm báo cáo thành các incident candidate;
+4. tính bounded, duplicate-aware priority heuristic;
+5. đánh giá clustering, robustness và dispatch bằng latent synthetic truth.
 
-Mỗi sự kiện cứu hộ được biểu diễn bởi:
+Các trọng số và ngưỡng priority là lựa chọn minh họa trong protocol, không phải
+policy đã được cơ quan cứu hộ phê duyệt.
 
-```text
-vᵢ = (Lᵢ, Tᵢ, Fᵢ, Eᵢ, Nᵢ, Vᵢ, Cᵢ)
-```
+## Trạng thái revision và các gate
 
-Trong đó `L` là vị trí, `T` là thời gian, `F` là mức ngập, `E` là mức khẩn cấp,
-`N` là số người mắc kẹt, `V` là mức dễ bị tổn thương và `C` là độ tin cậy của
-báo cáo.
+Revision hiện dùng chuỗi khóa sau:
 
-Pipeline gồm bốn bước:
+| Mốc | Nội dung được khóa | Bản ghi có thẩm quyền |
+|---|---|---|
+| Gate 1 | Method contract, generator/schema, dữ liệu synthetic và môi trường | [`revision/gate1-lock.json`](revision/gate1-lock.json) |
+| Gate 2 | Calibration protocol, cấu hình được chọn và thời điểm mở test split | [`revision/gate2-lock.json`](revision/gate2-lock.json) |
+| X0 | Một complete held-out evaluation đã được cấp quyền và thực thi | [`revision/x0-release.json`](revision/x0-release.json) |
+| Gate 3 | Accepted held-out run, recomputation, coverage và rejected-run ledger | [`revision/gate3-lock.json`](revision/gate3-lock.json) |
+| G0 | Transactional promotion thành nguồn số liệu duy nhất cho manuscript | [`revision/result-lock.json`](revision/result-lock.json) |
+| Gate 4 | Clean-room, claim/PDF audit và khóa submission cục bộ | [`revision/final-audit.md`](revision/final-audit.md) |
 
-1. Trích xuất vector thuộc tính tại thiết bị biên.
-2. Tạo đồ thị trọng số với khoảng cách địa lý đóng vai trò **cổng nhân**
-   (multiplicative gate), hạn chế việc ghép các điểm ở quá xa nhau.
-3. Phân cụm các sự kiện thành vùng tác nghiệp bằng Louvain hoặc Leiden.
-4. Tính điểm ưu tiên cấp cụm, trong đó mức dễ bị tổn thương đóng vai trò hệ số
-   khuếch đại.
+X0 đã hoàn tất và đã được Gate 3/G0 khóa. **Không chạy lại X0** trong quy trình
+tái lập submission. Một X0 mới chỉ hợp lệ sau khi reopen các gate liên quan
+theo đúng `reopen_conditions` trong lock; không được chạy lại để tìm kết quả
+thuận lợi hơn.
 
-## Kết quả nổi bật
+## Nguồn sự thật đã promote
 
-Các kết quả dưới đây được sinh từ bộ dữ liệu mô phỏng tất định gồm 285 sự kiện
-tại Huế, Quảng Trị, Quảng Nam và Đà Nẵng (`seed=42`):
+Mọi số thực nghiệm trong [`paper/main.tex`](paper/main.tex) phải đi qua
+`\RevisionClaim{...}`. Chuỗi nguồn tương ứng là:
 
-| Kết quả | Giá trị |
-|---|---:|
-| ARI của Louvain/Leiden | 0.892 |
-| Đường kính cụm trung bình: trọng số cộng → gating | 100.07 km → 0.30 km |
-| Modularity trung bình qua 10 seed | 0.8311 |
-| Giảm số nạn nhân ảo nhờ confidence gate | 55% |
-| Kendall's τ trung bình khi nhiễu trọng số ±0.10 | 0.9857 |
-| Top-3 được giữ nguyên khi nhiễu trọng số ±0.10 | 99% |
-| Kích thước gói metadata JSON | 100–111 byte |
+- [`revision/result-lock.json`](revision/result-lock.json): danh mục artifact
+  đã promote cùng checksum;
+- [`loop/revision/claim-selectors.json`](loop/revision/claim-selectors.json):
+  catalog claim máy đọc được;
+- [`paper/generated/revision_results.tex`](paper/generated/revision_results.tex):
+  macro LaTeX sinh cơ học từ catalog;
+- [`loop/revision/traceability.md`](loop/revision/traceability.md): hợp đồng
+  truy vết và mandatory adverse disclosures;
+- [`demo/results/tables/exp23_heldout_summary.json`](demo/results/tables/exp23_heldout_summary.json)
+  và
+  [`demo/results/tables/exp23_heldout_evaluation.json.gz`](demo/results/tables/exp23_heldout_evaluation.json.gz):
+  summary cùng complete held-out archive;
+- [`demo/results/tables/exp22_runtime_repro.json`](demo/results/tables/exp22_runtime_repro.json),
+  [`demo/results/tables/data_distribution_report_v4.json`](demo/results/tables/data_distribution_report_v4.json)
+  và
+  [`demo/results/tables/data_quality_summary_v4.json`](demo/results/tables/data_quality_summary_v4.json):
+  ancillary evidence được G0 ràng buộc.
+- [`revision/locked-artifacts.tar.gz`](revision/locked-artifacts.tar.gz) cùng
+  [`revision/artifact-package-manifest.json`](revision/artifact-package-manifest.json):
+  companion package để xác minh các run manifest bị gitignore; gói không chứa
+  held-out/test seed dataset và chỉ giữ một development fixture cần cho full
+  clean-clone test suite.
 
-Đây là kết quả trên **dữ liệu synthetic**, không phải bằng chứng về hiệu năng
-triển khai cứu hộ thực tế. Các giới hạn và hướng kiểm chứng tiếp theo được trình
-bày trong bài báo.
+Không chỉnh tay các file trên. Một file nằm trong `demo/results/` nhưng không
+được liệt kê trong `revision/result-lock.json` không phải nguồn evidence của
+revision.
 
-## Cấu trúc dự án
+## Cấu trúc hiện hành
 
 ```text
 .
 ├── demo/
-│   ├── data/                 # Sinh và lưu bộ dữ liệu synthetic
-│   ├── pipeline/             # Thuộc tính, trọng số, phân cụm, ưu tiên, metrics
-│   ├── experiments/          # 10 nhóm thí nghiệm và mã sinh hình
-│   ├── results/
-│   │   ├── tables/           # Kết quả thô dạng JSON
-│   │   └── figures/          # Biểu đồ dùng trong bài báo
-│   ├── dashboard/            # Dashboard Leaflet tự chứa dữ liệu
-│   └── run_all.py            # Chạy toàn bộ pipeline 13 bước
+│   ├── data/                 # Synthetic generator, schema và frozen datasets
+│   ├── pipeline/             # Weighting, clustering, priority và metrics
+│   ├── simulation/           # Independent dispatch simulator
+│   ├── protocol/             # Seed, calibration, baseline và metric contracts
+│   ├── experiments/          # Revision experiments, runners và promotion code
+│   ├── artifacts/runs/       # Isolated no-overwrite run directories
+│   ├── results/tables/       # Promoted tables cùng historical local outputs
+│   ├── environment/          # Environment capture helpers
+│   └── tests/                # Unit, property, protocol và artifact tests
 ├── paper/
-│   ├── main.tex              # Bài báo theo định dạng Springer LNCS
+│   ├── main.tex
 │   ├── references.bib
-│   ├── figures/
-│   └── main.pdf              # Bản PDF đã biên dịch
-├── resource/                 # Thuyết minh và tài liệu giải thích công thức
-├── loop/                     # Báo cáo review và kế hoạch xử lý theo vòng
-├── archive/                  # Tài liệu phiên bản cũ, không dùng làm nguồn hiện tại
-└── LaTeX2e_Proceedings_Template/
-                               # Template LNCS tham khảo
+│   └── generated/revision_results.tex
+├── revision/                 # Contracts, gate locks, audits và response ledger
+├── loop/revision/            # Claim catalog và traceability
+├── archive/                  # Pre-revision assets, không thuộc submission
+├── reproduce.sh              # One-command clean-room verification
+├── pyproject.toml
+└── requirements.lock
 ```
 
-## Cài đặt
+Chi tiết riêng của workspace thực nghiệm nằm tại
+[`demo/README.md`](demo/README.md).
 
-Yêu cầu Python 3.11 trở lên. Từ thư mục gốc của dự án:
+## Môi trường
+
+Môi trường được khóa cho **CPython 3.12**; miền tương thích chính xác nằm trong
+[`pyproject.toml`](pyproject.toml). Cài đúng dependency pins từ
+[`requirements.lock`](requirements.lock):
 
 ```bash
-python3 -m venv demo/.venv
-source demo/.venv/bin/activate
+python3.12 -m venv .venv
+source .venv/bin/activate
 python -m pip install --upgrade pip
-python -m pip install numpy networkx python-louvain scikit-learn scipy \
-  matplotlib igraph leidenalg
+python -m pip install -r requirements.lock
 ```
 
-`igraph` và `leidenalg` cần thiết cho các thí nghiệm sử dụng Leiden. Louvain có
-thể chạy chỉ với `networkx` và `python-louvain`, nhưng `run_all.py` cần đầy đủ
-các thư viện ở trên.
+Không thay `requirements.lock` bằng danh sách package không pin khi kiểm tra
+tái lập.
 
-## Chạy thực nghiệm
+## Tái lập submission
 
-Chạy toàn bộ quy trình:
+Từ thư mục gốc của repository:
 
 ```bash
-cd demo
-./.venv/bin/python run_all.py
+./reproduce.sh
 ```
 
-Quy trình sẽ tạo lại dataset, chạy 10 nhóm thí nghiệm, sinh 7 hình và dựng lại
-dashboard. Kết quả được ghi vào:
-
-- `demo/results/tables/*.json`
-- `demo/results/figures/*.png`
-- `demo/dashboard/dashboard.html`
-
-Có thể chạy riêng từng phần, ví dụ:
+Mặc định, `reproduce.sh` tạo một virtual environment tạm mới từ lock, xác minh
+gói artifact và mọi checksum, chạy toàn bộ test suite, kiểm tra claim
+traceability, rồi dựng và audit PDF mà không gọi candidate X0 thêm lần nào.
+Profile nhanh chỉ dành cho chẩn đoán cục bộ:
 
 ```bash
-cd demo
-./.venv/bin/python data/generate.py
-./.venv/bin/python experiments/exp1_formula_validation.py
-./.venv/bin/python experiments/exp4_baselines.py
-./.venv/bin/python experiments/make_figures.py
-./.venv/bin/python dashboard/build_dashboard.py
+./reproduce.sh --profile smoke
 ```
 
-Mở `demo/dashboard/dashboard.html` trong trình duyệt để xem bản đồ và thứ tự ưu
-tiên của các cụm. Dashboard nhúng dữ liệu trực tiếp vào HTML, nhưng cần Internet
-để tải Leaflet và lớp bản đồ OpenStreetMap.
+Không thay thế entrypoint này bằng một lần chạy experiment tùy ý.
 
-## Biên dịch bài báo
+Kết quả clean-room chính thức được ghi tại
+[`revision/clean-room-report.md`](revision/clean-room-report.md); chi tiết máy
+đọc được nằm trong
+[`revision/clean-room-verification.json`](revision/clean-room-verification.json).
+Toàn bộ stdout/stderr của lượt chạy chính thức được lưu tại
+[`revision/clean-room-full.log`](revision/clean-room-full.log).
+Quyết định Gate 4 và ranh giới external-blocked nằm trong
+[`revision/final-audit.md`](revision/final-audit.md); trạng thái nguồn chính xác
+được khóa bằng
+[`revision/submission-checksums.json`](revision/submission-checksums.json).
 
-Máy cần có bộ công cụ LaTeX hỗ trợ `pdflatex` và `bibtex`:
+Yêu cầu hệ thống cho manuscript là XeLaTeX và BibTeX. Trình tự build thủ công
+tương ứng là:
 
 ```bash
 cd paper
-pdflatex main.tex
+xelatex -interaction=nonstopmode -halt-on-error main.tex
 bibtex main
-pdflatex main.tex
-pdflatex main.tex
+xelatex -interaction=nonstopmode -halt-on-error main.tex
+xelatex -interaction=nonstopmode -halt-on-error main.tex
 ```
 
-Các hình trong `paper/figures/` được đồng bộ từ kết quả thực nghiệm. Khi thay
-đổi công thức hoặc tham số, nên chạy lại `demo/run_all.py`, kiểm tra các file
-JSON, cập nhật hình trong bài báo rồi mới biên dịch lại `paper/main.pdf`.
+File `paper/generated/revision_results.tex` phải được giữ nguyên khi build.
 
-## Tính tái lập và phạm vi
+## Phân biệt reproduction và mã legacy
 
-- Dataset mặc định dùng `seed=42`, gồm 240 sự kiện lõi, 20 điểm nhiễu và 25 sự
-  kiện stress-test.
-- Tham số mặc định nằm tại `demo/pipeline/config.py`.
-- Mỗi thí nghiệm ghi kết quả máy đọc được dưới dạng JSON.
-- `archive/` chỉ dùng để lưu phiên bản cũ và không phản ánh trạng thái hiện tại.
-- Kết quả chưa được xác nhận trên dữ liệu cứu hộ thực, dữ liệu mạng xã hội hoặc
-  trong điều kiện vận hành ngoài hiện trường.
+[`demo/run_all.py`](demo/run_all.py) là integration harness của pipeline cũ.
+Nó được giữ cho mục đích lịch sử/phát triển nhưng **không** phải entrypoint tái
+lập revision, không tạo nguồn số liệu cho manuscript hiện tại và không được
+dùng thay `./reproduce.sh`.
+
+Các module riêng lẻ có thể dùng cho phát triển sau khi hiểu protocol, nhưng
+mọi output mới chỉ là candidate artifact. Nó không trở thành evidence cho bài
+báo nếu chưa đi qua gate, validation và transactional promotion.
+
+## Phạm vi và giới hạn
+
+- Nghiên cứu hiện chỉ được xác nhận trên dữ liệu synthetic đã khóa.
+- Chưa có dữ liệu cứu hộ thật đủ quyền sử dụng và incident-level annotation.
+- Chưa có expert panel xác nhận policy weights, caps hoặc operational utility.
+- Dispatch là mô phỏng với latent outcomes độc lập, không phải thử nghiệm hiện
+  trường.
+- Runtime benchmark kiểm tra exact candidate pruning nhưng vẫn dùng dense
+  compatibility storage; repository không tuyên bố implementation fully sparse.
+- Tên/thứ tự tác giả, affiliation/contact, ORCID, funding và
+  competing-interest declarations chưa được phê duyệt; manuscript dùng
+  placeholder thay vì tự suy đoán.
+- Public repository URL, DOI và release authority là external submission
+  actions, không được suy đoán trong tài liệu.
 
 ## Nhóm nghiên cứu
 
@@ -156,3 +188,6 @@ JSON, cập nhật hình trong bài báo rồi mới biên dịch lại `paper/m
 - Thành viên: Nguyễn Thanh Trọng, Cao Tường Hưng, Nguyễn Như Quỳnh, Ngô Hưng Thịnh
 
 Đơn vị: Trường Công nghệ Thông tin và Truyền thông, Đại học Cần Thơ.
+
+Danh sách nhóm repository này không phải thứ tự tác giả đã được phê duyệt cho
+submission; author block chính thức vẫn là đầu vào external-blocked.

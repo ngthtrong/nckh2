@@ -43,7 +43,8 @@
   "matched_composition_constraints": {
     "retained_fraction_absolute_tolerance": 0.01,
     "mean_degree_relative_tolerance": 0.05,
-    "scope": "calibration-seed mean relative to selected product configuration"
+    "scope": "calibration-seed mean relative to selected product configuration",
+    "joint_selection_rule": "choose the objective-best operationally feasible product configuration for which every declared non-product composition family has at least one operationally feasible density/degree match; then select each comparator within its matched feasible set"
   },
   "constraint_aggregation": "per-seed extrema; every seed must satisfy each applicable guardrail",
   "failure_policy": "retain every failed and infeasible configuration; never relax a constraint after evaluation release"

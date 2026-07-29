@@ -1,0 +1,118 @@
+{
+  "ancillary_bindings": {
+    "gate1_manifest": {
+      "path": "demo/artifacts/runs/20260728T181154Z-1651b35ac599-225cd4b0-gate1-data-freeze/manifest.json",
+      "sha256": "626a8f36a73f94a554b1fb98efe756726084ca74b13186b4f659bae0d0963175"
+    },
+    "runtime_manifest": {
+      "path": "demo/artifacts/runs/20260728T205453Z-85f2a6686a1b-0060e5dc-gate2-exp22-runtime/manifest.json",
+      "sha256": "429d82f4897c2c52313e7bc38d0109949d256cb8e5484988d9f47bff2bd46de6"
+    }
+  },
+  "coverage": {
+    "excluded_method_track_pairs": 8,
+    "exclusion_seed_rows": 320,
+    "factorial_density_match_failures": 80,
+    "scientific_seed_failures": 0,
+    "selected_method_seed_rows": 480,
+    "selected_method_track_pairs": 12,
+    "selected_prediction_failures": 0,
+    "test_seed_count": 40
+  },
+  "gate": "G0 result promotion",
+  "gate3_binding": {
+    "accepted_artifact_content_sha256": "ddafd634fbf9f48ddc4dcc583518a11ae5bb4d342fc29087e9865aefbeb18761",
+    "accepted_manifest_sha256": "cbedfe1c7089540c050929bae913fea1efb0231f36d199339c3b451ca80d11b5",
+    "accepted_result_sha256": "f73bfcd03d57bbd1457c569fedc44ce4f230b0c4d24eb6155653a37ed0c97163",
+    "accepted_run_id": "20260728T213934Z-85f2a6686a1b-9797f31f-x0-exp23-heldout",
+    "accepted_selector_content_sha256": "437821d18b9a9c1d9cde5248b2618c4f3274da5d4966274592de6c0b257a10a4",
+    "accepted_selector_sha256": "011a6118744bbaa65bfd274a23e3a5ada1eb8b692285bac1a05c00b150c4a7a2",
+    "path": "revision/gate3-lock.json",
+    "sha256": "7a2976d2aa767858a688eecf31876a7be7374c479373a2e939ff742d552b5c98"
+  },
+  "locked_at_utc": "2026-07-28T22:04:08.186207+00:00",
+  "promoted_artifacts": {
+    "claim-selectors.json": {
+      "bytes": 6624772,
+      "path": "loop/revision/claim-selectors.json",
+      "sha256": "528fb3c52a73b25aec45f3d1b28a2d02377f3c61011f929ab94930772c9cc18b"
+    },
+    "data_distribution_report_v4.json": {
+      "bytes": 488061,
+      "path": "demo/results/tables/data_distribution_report_v4.json",
+      "sha256": "34c7a7bf8d279ea41ea4392ae836a2e0b4c0fe0e6f49b564a9b959c46908d0f6"
+    },
+    "data_quality_summary_v4.json": {
+      "bytes": 2358,
+      "path": "demo/results/tables/data_quality_summary_v4.json",
+      "sha256": "056855e592cace0565b31ef87c1984fe7f3caac64f6c1e56803c57c451b0e9b3"
+    },
+    "exp22_runtime_repro.json": {
+      "bytes": 42547,
+      "path": "demo/results/tables/exp22_runtime_repro.json",
+      "sha256": "200df0b991126332097909a5e04f06f4c3916e2b02928cc793390a652ae62a0d"
+    },
+    "exp23_heldout_evaluation.json.gz": {
+      "bytes": 3230914,
+      "path": "demo/results/tables/exp23_heldout_evaluation.json.gz",
+      "sha256": "95ec9630fde9ab83ba4c7c68a7f08cba4bcf45a338c12c2abfc3fa1de1f916d5"
+    },
+    "exp23_heldout_selectors.json": {
+      "bytes": 108401,
+      "path": "demo/results/tables/exp23_heldout_selectors.json",
+      "sha256": "011a6118744bbaa65bfd274a23e3a5ada1eb8b692285bac1a05c00b150c4a7a2"
+    },
+    "exp23_heldout_summary.json": {
+      "bytes": 9180328,
+      "path": "demo/results/tables/exp23_heldout_summary.json",
+      "sha256": "3388cd33b45cda973f1b8b5836454581ef9284bed1cc168e2fb418b00d93d24d"
+    },
+    "revision_results.tex": {
+      "bytes": 1477854,
+      "path": "paper/generated/revision_results.tex",
+      "sha256": "3c0d5650c6338541ac62fe9ca7f92228ab54979be07c0a13b8ef0b9b23370b50"
+    },
+    "traceability.md": {
+      "bytes": 3802,
+      "path": "loop/revision/traceability.md",
+      "sha256": "9de15a0da83266f1d0479beae0288202ea34ee17d2a8b00335c7ff2d198a2790"
+    }
+  },
+  "promotion_script": {
+    "path": "demo/experiments/promote_results.py",
+    "sha256": "7b7a9ab771dfeae996f2e465c91f4151cc3a8634a495220e335cbf006326a9be"
+  },
+  "reopen_conditions": [
+    "Gate-3 accepted source or upstream binding changes",
+    "promoted artifact checksum mismatch",
+    "complete archive decompression mismatch",
+    "base or extension selector resolution failure",
+    "claim rendering or mandatory adverse-disclosure coverage failure",
+    "confirmed upstream scientific defect requiring a gate reopen"
+  ],
+  "schema_version": 1,
+  "scope": "single Gate-3-approved held-out source plus audited Gate-1/Exp22 ancillary evidence",
+  "status": "locked",
+  "traceability": {
+    "all_base_selectors_resolve": true,
+    "all_claim_values_and_rounding_recomputed": true,
+    "base_selector_count": 448,
+    "complete_archive_round_trip": true,
+    "negative_tie_adverse_failure_and_exclusion_evidence_retained": true,
+    "numeric_claim_count": 9451,
+    "required_disclosure_count": 10,
+    "selector_root_count": 461
+  },
+  "validation": {
+    "claim_selector_and_rendering": "pass",
+    "compact_selector_resolution": "pass",
+    "complete_archive_round_trip": "pass",
+    "exclusive_transaction": "pass",
+    "gate1_ancillary_binding": "pass",
+    "gate3_and_upstream_binding": "pass",
+    "gate3_candidate_revalidation": "pass",
+    "rejected_run_exclusion": "pass",
+    "runtime_manifest_and_equivalence": "pass",
+    "validation_errors": []
+  }
+}
