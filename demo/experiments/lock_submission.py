@@ -11,6 +11,7 @@ import argparse
 import hashlib
 import json
 from pathlib import Path, PurePosixPath
+import subprocess
 from typing import Any, Iterable, Mapping, Sequence
 
 
@@ -19,6 +20,8 @@ DEFAULT_MANIFEST = REPOSITORY_ROOT / "revision" / "submission-checksums.json"
 MANIFEST_RELATIVE = "revision/submission-checksums.json"
 
 SUBMISSION_GLOBS = (
+    ".gitattributes",
+    ".gitignore",
     "README.md",
     "demo/README.md",
     "phan-bien.md",
@@ -58,14 +61,40 @@ SUBMISSION_GLOBS = (
     "revision/*.tar.gz",
 )
 
+CANONICAL_LF_SUFFIXES = frozenset(
+    {
+        ".bib",
+        ".bst",
+        ".cjs",
+        ".cls",
+        ".csv",
+        ".html",
+        ".json",
+        ".lock",
+        ".log",
+        ".md",
+        ".mmd",
+        ".py",
+        ".sh",
+        ".tex",
+        ".toml",
+        ".txt",
+    }
+)
+CANONICAL_LF_PATHS = frozenset({".gitattributes", ".gitignore"})
+
 REQUIRED_PATHS = frozenset(
     {
+        ".gitattributes",
+        ".gitignore",
         "README.md",
         "demo/README.md",
         "requirements.lock",
         "reproduce.sh",
+        "demo/experiments/lock_submission.py",
         "demo/experiments/package_locked_artifacts.py",
         "demo/experiments/verify_locked_submission.py",
+        "demo/tests/test_locked_submission.py",
         "demo/results/tables/exp23_heldout_evaluation.json.gz",
         "loop/revision/claim-selectors.json",
         "paper/generated/revision_results.tex",
@@ -143,6 +172,61 @@ def collect_submission_paths(
     return tuple(paths[name] for name in sorted(paths))
 
 
+def verify_canonical_lf(
+    paths: Iterable[Path],
+    root: Path,
+) -> None:
+    """Reject carriage returns in submission text that is required to be LF."""
+
+    invalid: list[str] = []
+    for path in paths:
+        relative = _safe_relative(path, root)
+        pure = PurePosixPath(relative)
+        if (
+            relative not in CANONICAL_LF_PATHS
+            and pure.suffix.lower() not in CANONICAL_LF_SUFFIXES
+        ):
+            continue
+        if b"\r" in path.read_bytes():
+            invalid.append(relative)
+    if invalid:
+        raise SubmissionLockError(
+            "submission text is not canonical LF: " + ", ".join(sorted(invalid))
+        )
+
+
+def verify_required_paths_tracked(root: Path) -> None:
+    """Require tracked Gate-4 members when verification runs in a Git checkout."""
+
+    try:
+        probe = subprocess.run(
+            ["git", "-C", str(root), "rev-parse", "--is-inside-work-tree"],
+            check=False,
+            capture_output=True,
+            text=True,
+        )
+    except OSError:
+        return
+    if probe.returncode != 0 or probe.stdout.strip() != "true":
+        return
+    completed = subprocess.run(
+        ["git", "-C", str(root), "ls-files", "-z"],
+        check=True,
+        capture_output=True,
+    )
+    tracked = {
+        raw.decode("utf-8", errors="surrogateescape")
+        for raw in completed.stdout.split(b"\0")
+        if raw
+    }
+    untracked = sorted(REQUIRED_PATHS - tracked)
+    if untracked:
+        raise SubmissionLockError(
+            "required submission members are not Git-tracked: "
+            + ", ".join(untracked)
+        )
+
+
 def _file_records(paths: Iterable[Path], root: Path) -> list[dict[str, Any]]:
     records: list[dict[str, Any]] = []
     seen: set[str] = set()
@@ -184,7 +268,14 @@ def build_submission_manifest(
     ):
         raise SubmissionLockError("clean-room machine report is not a complete pass")
     paths = collect_submission_paths(root)
+    verify_required_paths_tracked(root)
+    verify_canonical_lf(paths, root)
     records = _file_records(paths, root)
+    transcript_sha256 = next(
+        row["sha256"]
+        for row in records
+        if row["path"] == "revision/clean-room-full.log"
+    )
     return {
         "clean_room_binding": {
             "path": "revision/clean-room-verification.json",
@@ -194,7 +285,9 @@ def build_submission_manifest(
                 if row["path"] == "revision/clean-room-verification.json"
             ),
             "status": "pass",
-            "test_result": "235 passed, 41 subtests passed",
+            "transcript_path": "revision/clean-room-full.log",
+            "transcript_sha256": transcript_sha256,
+            "verification_summary": verification["summary"],
         },
         "external_submission_blockers": policy["external_submission_inputs"],
         "file_count": len(records),
@@ -316,5 +409,7 @@ __all__ = [
     "build_submission_manifest",
     "collect_submission_paths",
     "create_submission_lock",
+    "verify_canonical_lf",
+    "verify_required_paths_tracked",
     "verify_submission_lock",
 ]

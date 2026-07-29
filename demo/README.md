@@ -99,9 +99,16 @@ Entrypoint submission nằm ở repository root:
 
 Mặc định script tạo virtual environment tạm từ dependency lock, kiểm tra gói
 artifact, promoted checksums, claim resolution và toàn bộ tests, rồi dựng và
-audit manuscript mà không thực thi X0 lần nữa. Dùng
+audit manuscript, sau đó xác minh final submission lock mà không thực thi X0
+lần nữa. Dùng
 `./reproduce.sh --profile smoke` chỉ để chẩn đoán cục bộ nhanh; submission
 evidence luôn lấy từ profile `full`.
+
+Report/transcript của một lượt final phải được ghi ra ngoài checkout. Không
+`tee` vào `revision/clean-room-full.log` trong khi chạy: file đó đã nằm trong
+submission manifest. Khi reseal, tích hợp evidence được sinh ra trước, tạo lại
+manifest bằng `demo.experiments.lock_submission`, rồi chạy một fresh clone với
+output capture ở ngoài clone.
 
 Các manifest run bị gitignore được phục hồi/xác minh từ
 [`../revision/locked-artifacts.tar.gz`](../revision/locked-artifacts.tar.gz)
