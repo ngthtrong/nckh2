@@ -88,15 +88,17 @@ them and are sealed by the final source-state manifest.
 
 ## Literal clean-room reproduction
 
-The full profile ran in `/tmp/nckh2-cleanroom-final.Bg31pI/repo`, a source copy
-that initially contained no Git metadata, virtual environment, materialized
-run directory, paper build output, prior machine-verification report, or prior
-full transcript. A fresh CPython 3.12 environment installed the exact
-`requirements.lock` pins.
+The evidence-generation full profile ran in
+`/home/ngthtrong/.cache/nckh2-gate4-bootstrap-5988a0d/repo`, a clean detached
+Git worktree with canonical LF text, no virtual environment, no materialized
+run directory, and no LaTeX auxiliary outputs. A fresh CPython 3.12
+environment installed the exact `requirements.lock` pins. Report and transcript
+outputs were captured outside the checkout so the manifest-bound transcript
+was never overwritten during final-lock verification.
 
 - Materialization from the companion package: 72 created, 0 pre-existing,
   0 replaced.
-- Full suite: 235 passed and 41 subtests passed in 32.47 seconds.
+- Full suite: 242 passed and 41 subtests passed in 58.04 seconds.
 - Locked-output verifier: 11 checks passed, 0 failed, 0 incomplete.
 - Held-out/test seed datasets in the package: 0; the sole seed fixture is a
   development fixture required by tests.
@@ -105,19 +107,21 @@ full transcript. A fresh CPython 3.12 environment installed the exact
 - Companion-package SHA-256:
   `e7b9bcfcda6897853074fa9c21820545440bf0f3022a2c02ab80d64dd9192d1a`.
 - Machine-report SHA-256:
-  `99890788fde80bdc47c493ad285c25fa30f7d99352946f85aa233c2d8f2691b2`.
+  `d669e4b403b564d7a93aa8c864f6bb6cd83dcc996bea1cb658c9cd504d4d21af`.
 - Full-transcript SHA-256:
-  `082f33376d2f87d125c1c46a956ac74018457d4aa0dc2c8a6e2c6272795bc24e`.
+  `6f58d49ef556a0bbec2be3ec99cbcd696dfe7888bb6da465ddc35767508d4cad`.
 
 The machine result is preserved in
 `revision/clean-room-verification.json`; the human-readable execution record
 and full transcript are `revision/clean-room-report.md` and
 `revision/clean-room-full.log`.
 
-The clean source matched the current code, manuscript, READMEs, response,
-policy, verifier, lock tool, and tests byte-for-byte when the run started.
-Only generated evidence integration and the documentary hash updates in this
-report/final audit followed the run; the final manifest binds those additions.
+The run retained every Gate-1, Gate-2, Gate-3, and G0 binding and rebuilt the
+same PDF. It did not modify the generator, weighting, priority, selected
+configurations, held-out results, or promoted scientific artifacts. Generated
+Gate-4 evidence and documentary updates were integrated afterward, bound by a
+regenerated submission manifest, and then subjected to a separate fresh-clone
+seal verification.
 
 ## Publication-output audit
 
@@ -143,7 +147,11 @@ under `archive/loop17-paper-assets/` and are not publication evidence.
 
 `README.md` points to the verification reports; both `README.md` and
 `demo/README.md` document the locked workflow, exact dependency installation,
-XeLaTeX build, and companion package.
+XeLaTeX build, companion package, external evidence capture, and final
+submission-lock step. `.gitattributes` forces canonical LF for submission text
+even when `core.autocrlf=true`, while binary artifacts are marked `-text`.
+Every required submission member, including `revision/clean-room-full.log`, is
+present and Git-tracked.
 `loop/revision/traceability.md`, the response, this audit, and the change ledger
 all use the G0 source of truth. No stale Loop-17 result path, manually typed
 live-manuscript headline value, unresolved claim ID, or live manuscript figure
