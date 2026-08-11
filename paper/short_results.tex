@@ -1,0 +1,81 @@
+% GENERATED FILE: accepted confirmation evidence only. DO NOT EDIT.
+% Raw confirmation rows and oracle diagnostics are outside this renderer.
+\newif\ifshortresultsconfirmed
+\shortresultsconfirmedtrue
+\newcommand{\ShortUnavailable}{\textsc{Confirmed results available}}
+\newcommand{\ShortResult}[1]{\PackageError{short_results}{Unknown result selector `#1'}{Use only generated named result macros or tables.}}
+\newcommand{\ShortAdverseNullRetained}{true}
+\newcommand{\ShortConfirmationAnalysisSHA}{\texttt{60550c2b09295928ed3c27113a4ca8955f12228e4b64d0af5432ca9cf9b33ffb}}
+\newcommand{\ShortConfirmationResultSHA}{\texttt{a7497eaa80d8d7260cc12a603a2240364184b04574260dee2bc685ead7333cf8}}
+\newcommand{\ShortConfirmationPayloadSHA}{\texttt{d1b584b99fff4801645e75af96b26c37dbff092ed2bcd666128f6a512864d8e5}}
+\newcommand{\ShortCalibrationSelectionSHA}{\texttt{8f390f1969bafee5c6aed760332128a421da24b5e11282394e4f7c7eeb1f45da}}
+\newcommand{\ShortProtocolSHA}{\texttt{754cdb90a592003dbf5319535ebb476d2baebe19f07a67eaab562ba99c3f575e}}
+\newcommand{\ShortEffectCell}[3]{$#1\,[#2,#3]$}
+\newcommand{\ShortClusteringClaimGate}{blocked}
+\newcommand{\ShortPriorityClaimGate}{blocked}
+\newcommand{\ShortDuplicateClaimGate}{eligible}
+\newcommand{\ShortDispatchEvidenceGate}{blocked}
+\newcommand{\ShortProductConfiguration}{config.product\_louvain.097}
+\newcommand{\ShortAdditiveConfiguration}{config.additive\_louvain.084}
+\newcommand{\ShortSTDBSCANConfiguration}{config.st\_dbscan.056}
+\newcommand{\ShortHDBSCANConfiguration}{config.hdbscan.007}
+
+\newcommand{\ShortClusteringResultsTable}{%
+\begin{table}[t]
+\centering\small
+\caption{Clustering descriptives over 40 paired master seeds. FD, NR, and Review denote false destinations per 100 reports, noise rejection, and review items per 100 reports; no adverse or null result is suppressed.}
+\label{tab:short-clustering-results}
+\begin{tabular}{llrrrr}
+\toprule
+Regime & Method & ARI & FD & NR & Review \\
+\midrule
+ID & Product & 0.73 & 4.98 & 0.00 & 16.53 \\
+ID & Additive & 0.90 & 4.89 & 0.00 & 9.91 \\
+ID & ST-DBSCAN & 0.85 & 0.00 & 0.97 & 9.66 \\
+ID & HDBSCAN & 0.85 & 0.07 & 0.41 & 6.95 \\
+\midrule
+OOD & Product & 0.36 & 17.13 & 0.00 & 45.35 \\
+OOD & Additive & 0.46 & 13.02 & 0.00 & 37.53 \\
+OOD & ST-DBSCAN & 0.56 & 0.41 & 0.88 & 43.20 \\
+OOD & HDBSCAN & 0.56 & 1.18 & 0.39 & 31.18 \\
+\bottomrule
+\end{tabular}
+\end{table}%
+}
+
+\newcommand{\ShortPriorityDispatchResultsTable}{%
+\begin{table}[t]
+\centering\footnotesize
+\setlength{\tabcolsep}{2pt}
+\caption{Paired headline effects with 95\% bootstrap confidence intervals. Every $\Delta$ is improvement-oriented, so positive favors the revised heuristic; adverse and null effects remain visible. Dispatch values first average the three locked scenarios within each master seed; H is harm and D is deadline-miss percentage points.}
+\label{tab:short-priority-dispatch-results}
+\begin{tabular}{@{}llcc@{}}
+\toprule
+\multicolumn{4}{l}{\textit{Panel A: Priority alignment (revised minus baseline)}} \\
+\multicolumn{2}{l}{Baseline} & ID $\Delta$NDCG@5 & OOD $\Delta$NDCG@5 \\
+\midrule
+\multicolumn{2}{l}{Legacy} & \ShortEffectCell{-0.09}{-0.12}{-0.06} & \ShortEffectCell{-0.07}{-0.10}{-0.03} \\
+\multicolumn{2}{l}{Urgency only} & \ShortEffectCell{+0.07}{+0.02}{+0.12} & \ShortEffectCell{-0.04}{-0.09}{+0.01} \\
+\multicolumn{2}{l}{Population only} & \ShortEffectCell{+0.44}{+0.38}{+0.49} & \ShortEffectCell{+0.32}{+0.24}{+0.39} \\
+\multicolumn{2}{l}{Simple linear} & \ShortEffectCell{-0.01}{-0.03}{+0.01} & \ShortEffectCell{+0.00}{-0.02}{+0.02} \\
+\multicolumn{2}{l}{Random} & \ShortEffectCell{+0.41}{+0.33}{+0.49} & \ShortEffectCell{+0.21}{+0.13}{+0.29} \\
+\midrule
+\multicolumn{4}{l}{\textit{Panel B: Predicted-cluster dispatch (revised versus policy)}} \\
+Policy & Endp. & ID $\Delta$ & OOD $\Delta$ \\
+\midrule
+Legacy & H & \ShortEffectCell{-11.46}{-19.13}{-3.20} & \ShortEffectCell{-13.65}{-22.59}{-4.75} \\
+ & D & \ShortEffectCell{+0.74}{-0.55}{+2.25} & \ShortEffectCell{-1.00}{-2.00}{-0.02} \\
+Urgency only & H & \ShortEffectCell{+4.40}{-4.39}{+14.32} & \ShortEffectCell{+0.06}{-13.32}{+15.45} \\
+ & D & \ShortEffectCell{-1.83}{-3.60}{-0.19} & \ShortEffectCell{-0.86}{-1.93}{+0.06} \\
+Population only & H & \ShortEffectCell{+63.35}{+47.88}{+79.41} & \ShortEffectCell{+49.53}{+18.17}{+85.96} \\
+ & D & \ShortEffectCell{+3.26}{+1.56}{+5.05} & \ShortEffectCell{+1.17}{+0.26}{+2.15} \\
+Simple linear & H & \ShortEffectCell{-2.37}{-6.55}{+1.74} & \ShortEffectCell{-2.72}{-9.74}{+5.79} \\
+ & D & \ShortEffectCell{-0.47}{-1.33}{+0.39} & \ShortEffectCell{-0.38}{-1.25}{+0.46} \\
+Random & H & \ShortEffectCell{+59.27}{+40.46}{+79.90} & \ShortEffectCell{+38.35}{+13.39}{+65.46} \\
+ & D & \ShortEffectCell{-0.29}{-2.27}{+1.78} & \ShortEffectCell{-0.19}{-1.56}{+1.13} \\
+Nearest first & H & \ShortEffectCell{-33.57}{-47.88}{-19.80} & \ShortEffectCell{-30.88}{-53.46}{-7.95} \\
+ & D & \ShortEffectCell{-13.68}{-15.94}{-11.51} & \ShortEffectCell{-7.54}{-9.66}{-5.45} \\
+\bottomrule
+\end{tabular}
+\end{table}%
+}

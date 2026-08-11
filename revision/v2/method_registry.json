@@ -1,0 +1,162 @@
+{
+  "schema_version": "v2.method-registry.1",
+  "id": "registry.methods.v2",
+  "canonical_id_pattern": "^[a-z][a-z0-9]*(?:[._-][a-z0-9]+)*$",
+  "configuration_index_origin": 0,
+  "paired_comparisons": [
+    {
+      "id": "comparison.product_vs_additive",
+      "role": "matched_search_space_for_symmetric_independent_selection",
+      "confirmation_estimand": "independently_selected_product_pipeline_vs_independently_selected_additive_pipeline",
+      "pair_id_template": "pair.nuisance.{index:03d}",
+      "configuration_id_template": "config.{method_slug}.{index:03d}",
+      "expected_pair_count": 128,
+      "operator_is_only_differing_execution_field": true,
+      "operators": [
+        {
+          "method_id": "method.product_louvain",
+          "method_slug": "product_louvain",
+          "operator": "product"
+        },
+        {
+          "method_id": "method.additive_louvain",
+          "method_slug": "additive_louvain",
+          "operator": "additive"
+        }
+      ],
+      "shared_fixed_parameters": {
+        "alpha": 0.5,
+        "beta": 0.5,
+        "candidate_pool_k_multiplier": 4,
+        "candidate_pool_min_neighbors": 64,
+        "candidate_pool_rule": "spatial_knn_with_complete_boundary_tie_query_then_canonical_truncation_and_undirected_union",
+        "community_detector": "louvain",
+        "gamma": 0.5,
+        "tau_E": 0.35,
+        "tau_F": 0.25,
+        "threshold_population": "shared_geographically_pregated_candidate_pairs",
+        "threshold_policy": "empirical_nonzero_quantile",
+        "weight_normalization": "frozen_v2"
+      },
+      "axis_order": [
+        "sigma_geo_m",
+        "tau_t_min",
+        "threshold_quantile",
+        "k",
+        "resolution"
+      ],
+      "axes": {
+        "sigma_geo_m": [
+          500,
+          700,
+          900,
+          1200
+        ],
+        "tau_t_min": [
+          30,
+          60
+        ],
+        "threshold_quantile": [
+          0.85,
+          0.9,
+          0.95,
+          0.98
+        ],
+        "k": [
+          8,
+          16
+        ],
+        "resolution": [
+          0.8,
+          1.2
+        ]
+      }
+    }
+  ],
+  "independent_grids": [
+    {
+      "id": "grid.st_dbscan",
+      "method_id": "method.st_dbscan",
+      "configuration_id_template": "config.st_dbscan.{index:03d}",
+      "expected_configuration_count": 64,
+      "axis_order": [
+        "spatial_eps_m",
+        "temporal_eps_min",
+        "min_samples"
+      ],
+      "axes": {
+        "spatial_eps_m": [
+          250,
+          500,
+          750,
+          1000
+        ],
+        "temporal_eps_min": [
+          15,
+          30,
+          60,
+          120
+        ],
+        "min_samples": [
+          3,
+          5,
+          8,
+          12
+        ]
+      },
+      "fixed_parameters": {
+        "neighborhood_rule": "spatial_and_temporal_conjunction",
+        "noise_label": -1
+      }
+    },
+    {
+      "id": "grid.hdbscan",
+      "method_id": "method.hdbscan_geo_time",
+      "configuration_id_template": "config.hdbscan.{index:03d}",
+      "expected_configuration_count": 96,
+      "axis_order": [
+        "min_cluster_size",
+        "min_samples",
+        "spatial_scale_m",
+        "temporal_scale_min"
+      ],
+      "axes": {
+        "min_cluster_size": [
+          3,
+          5,
+          10,
+          20
+        ],
+        "min_samples": [
+          1,
+          3,
+          5,
+          10
+        ],
+        "spatial_scale_m": [
+          250,
+          500,
+          1000
+        ],
+        "temporal_scale_min": [
+          30,
+          60
+        ]
+      },
+      "fixed_parameters": {
+        "feature_view": "observable_geo_time",
+        "metric": "euclidean",
+        "noise_label": -1
+      }
+    }
+  ],
+  "budget_policy": {
+    "paired_comparison_pairs": 128,
+    "paired_comparison_total_executions": 256,
+    "st_dbscan_configurations": 64,
+    "hdbscan_configurations": 96,
+    "complete_grid_required": true,
+    "early_stopping": "forbidden",
+    "post_hoc_grid_expansion": "forbidden"
+  }
+}
