@@ -122,7 +122,8 @@ Từ thư mục gốc của repository:
 
 Mặc định, `reproduce.sh` tạo một virtual environment tạm mới từ lock, xác minh
 gói artifact và mọi checksum, chạy toàn bộ test suite, kiểm tra claim
-traceability, rồi dựng và audit PDF mà không gọi candidate X0 thêm lần nào.
+traceability, dựng và audit PDF, rồi xác minh final submission lock trước khi
+in `PASS`, mà không gọi candidate X0 thêm lần nào.
 Profile nhanh chỉ dành cho chẩn đoán cục bộ:
 
 ```bash
@@ -130,6 +131,22 @@ Profile nhanh chỉ dành cho chẩn đoán cục bộ:
 ```
 
 Không thay thế entrypoint này bằng một lần chạy experiment tùy ý.
+
+Khi cần lưu output của một lượt xác minh đã seal, phải ghi report và transcript
+ra ngoài checkout:
+
+```bash
+capture_root="$(mktemp -d)"
+./reproduce.sh --profile full \
+  --report "$capture_root/verification.json" \
+  >"$capture_root/full.log" 2>&1
+```
+
+Không pipe lượt final qua `tee revision/clean-room-full.log`: transcript này là
+thành viên đã được submission manifest khóa, nên ghi đè nó trong lúc
+`lock_submission --verify` chạy sẽ làm verification thất bại. Quy trình reseal
+tách evidence-generation, tích hợp report/transcript, tạo lại manifest bằng
+lock tool, rồi xác minh manifest đó trên fresh clone với output ở ngoài clone.
 
 Kết quả clean-room chính thức được ghi tại
 [`revision/clean-room-report.md`](revision/clean-room-report.md); chi tiết máy
