@@ -3,18 +3,19 @@
 ## Outcome
 
 - Profile: `full`
-- Completed at: `2026-07-28T23:07:29Z`
+- Completed at: `2026-07-29T16:03:19Z`
 - Status: **PASS**
 - Held-out execution: **not invoked**
-- Clean workspace: `/tmp/nckh2-cleanroom-final.Bg31pI/repo`
+- Clean workspace:
+  `/home/ngthtrong/.cache/nckh2-gate4-bootstrap-5988a0d/repo`
 
 Entrypoint:
 
 ```bash
-set -o pipefail
+capture_root=/home/ngthtrong/.cache/nckh2-gate4-bootstrap-5988a0d
 ./reproduce.sh --profile full \
-  --report revision/clean-room-verification.json 2>&1 \
-  | tee revision/clean-room-full.log
+  --report "$capture_root/verification.json" \
+  >"$capture_root/full.log" 2>&1
 ```
 
 The workflow created a temporary CPython 3.12 virtual environment, installed
@@ -22,15 +23,21 @@ every exact pin in `requirements.lock`, verified and materialized the companion
 artifact allowlist without overwriting any file, ran the complete test suite,
 verified the Gate-3 recomputation binding and independently checked the compact
 projection, selectors, claim graph, and publication values, then built the
-paper with XeLaTeX--BibTeX--XeLaTeX twice.
+paper with XeLaTeX--BibTeX--XeLaTeX twice and verified the final submission
+lock before reporting `PASS`.
 
-This run used a literal clean source copy, not the working repository. Before
-execution, the copy had no `.git`, `.venv`, `demo/.venv`,
-`demo/artifacts/runs`, `paper/main.pdf`, `paper/main.log`, prior
-machine-verification report, or prior full-run transcript. The source copy
-excluded all LaTeX build outputs; the workflow reconstructed the locked run
-members from the companion archive and generated the publication outputs from
-source.
+This evidence-generation run used a clean detached Git worktree, not the
+Windows working repository. Before execution it had no virtual environment,
+materialized `demo/artifacts/runs` tree, or LaTeX auxiliary outputs. The
+tracked PDF and prior sealed evidence were present as baseline members; the
+workflow reconstructed the allowlisted run members, rebuilt the PDF from
+source, and verified byte identity.
+
+The report and stdout/stderr were captured outside the checkout and then
+integrated byte-for-byte. They were not written through `tee` to their tracked
+paths because the final lock verifies the transcript itself. After evidence
+integration, the submission manifest is regenerated and verified in a
+separate fresh-clone pass.
 
 ## Environment
 
@@ -49,7 +56,7 @@ the exact versions in `requirements.lock`; the lock SHA-256 is
 
 ## Test and artifact evidence
 
-- Full suite: **235 passed, 41 subtests passed** in 32.47 seconds.
+- Full suite: **242 passed, 41 subtests passed** in 58.04 seconds.
 - Artifact package: 72 allowlisted members, 79,801,263 bytes unpacked,
   4,706,161 bytes compressed.
 - Package SHA-256:
@@ -84,9 +91,9 @@ the exact versions in `requirements.lock`; the lock SHA-256 is
 
 The machine-readable post-build report is
 `revision/clean-room-verification.json` with SHA-256
-`99890788fde80bdc47c493ad285c25fa30f7d99352946f85aa233c2d8f2691b2`.
+`d669e4b403b564d7a93aa8c864f6bb6cd83dcc996bea1cb658c9cd504d4d21af`.
 The persisted full transcript is `revision/clean-room-full.log` with SHA-256
-`082f33376d2f87d125c1c46a956ac74018457d4aa0dc2c8a6e2c6272795bc24e`.
+`6f58d49ef556a0bbec2be3ec99cbcd696dfe7888bb6da465ddc35767508d4cad`.
 
 ## Scope of the pass
 
@@ -97,12 +104,12 @@ aggregate/inference recomputation rather than rerunning that validation or X0.
 A new X0 invocation would violate the locked protocol unless the relevant
 gates were formally reopened.
 
-The frozen clean-room source was byte-identical to the current scientific
-code, manuscript source, READMEs, reviewer response, policy, verifier, lock
-tool, and tests at execution time. Post-run edits are limited to integrating
-the generated report/transcript/PDF and updating this report/final audit with
-their hashes; the final submission manifest binds that complete documentary
-state.
+The clean run retained the Gate-1, Gate-2, Gate-3, and G0 bindings and rebuilt
+the same PDF. No generator, weighting, priority, selected configuration,
+held-out result, or promoted scientific artifact changed. Post-run edits are
+limited to integrating generated Gate-4 evidence and updating reproduction
+documentation; the regenerated submission manifest binds that documentary
+state and is checked separately from a fresh clone.
 
 The technical local submission profile passes. Real-data collection, expert
 elicitation, authorship/contact/ORCID approval, funding and competing-interest
