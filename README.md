@@ -1,4 +1,35 @@
-# Product-Similarity Clustering and Bounded Priority Heuristics
+# ISDS 2026 short paper v2 (canonical)
+
+The canonical manuscript is now [`paper/short.tex`](paper/short.tex), with
+[`paper/main.tex`](paper/main.tex) as its submission entrypoint. Both build to
+an eight-page LNCS/CCIS PDF. Quantitative tables are generated from the accepted
+v2 analysis through [`paper/short_results.tex`](paper/short_results.tex).
+
+Reproduce the accepted synthetic analysis without generating confirmation data:
+
+```bash
+python -m demo.v2.reproduce reproduce_core
+pytest -q demo/tests/test_v2_*.py
+```
+
+The authoritative v2 protocol, evidence chain, interpretation limits and
+external-data command are documented in
+[`revision/v2/README.md`](revision/v2/README.md). Current completion and
+submission blockers are in
+[`revision/v2/IMPLEMENTATION_STATUS.md`](revision/v2/IMPLEMENTATION_STATUS.md).
+
+The accepted result is principally negative: product clustering did not beat
+additive clustering, revised ranking did not establish general alignment or
+predicted-dispatch benefit, and coordinated campaigns defeated the bounded
+score despite exact-duplicate invariance. No field/deployment claim is allowed.
+
+## Historical Exp23 workflow (not canonical for short paper v2)
+
+Everything below this heading is retained for provenance of the earlier
+11-page/Exp23 revision. Its locks, selectors and
+`paper/generated/revision_results.tex` are not evidence for the v2 short paper.
+
+### Product-Similarity Clustering and Bounded Priority Heuristics
 
 Kho lưu trữ này chứa mã nguồn, protocol, artifact và bản thảo cho một nghiên
 cứu phương pháp về gom nhóm báo cáo cứu hộ lũ và xếp hạng ưu tiên. Đánh giá
