@@ -1,0 +1,65 @@
+{
+  "formula_version": "paper-missing-aware-cij-v1",
+  "selected": {
+    "product_cij_louvain": {
+      "sigma": 700,
+      "tau_t": 60,
+      "q": 0.9,
+      "knn": 8,
+      "resolution": 1.2
+    },
+    "additive_cij_louvain": {
+      "alpha": 1.0,
+      "sigma": 700,
+      "tau_t": 60,
+      "q": 0.95,
+      "knn": 8,
+      "resolution": 1.2
+    },
+    "convex_cij_louvain": {
+      "mix": [
+        0.6,
+        0.2,
+        0.2
+      ],
+      "sigma": 900,
+      "tau_t": 60,
+      "q": 0.9,
+      "knn": 8,
+      "resolution": 1.2
+    },
+    "geo_time_dbscan": {
+      "spatial_eps": 800,
+      "temporal_eps": 60,
+      "min_samples": 3
+    },
+    "dbscan_all": {
+      "eps": 0.35,
+      "min_samples": 3,
+      "scaler": "robust"
+    },
+    "hdbscan_all": {
+      "min_cluster_size": 5,
+      "min_samples": 3,
+      "scaler": "robust"
+    },
+    "spatial_agglomerative": {
+      "radius": 1800,
+      "k": 16
+    },
+    "coordinate_kmeans": {
+      "k": 20
+    },
+    "product_cij_leiden": {
+      "resolution": 1.4
+    },
+    "additive_cij_louvain_matched_density": {
+      "alpha": 0.5,
+      "sigma": 700,
+      "tau_t": 60,
+      "resolution": 1.2,
+      "q": 0.89,
+      "knn": 8
+    }
+  }
+}
