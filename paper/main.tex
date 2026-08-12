@@ -145,7 +145,9 @@ Here $\operatorname{sigmoid}(x)=(1+e^{-x})^{-1}$. This is a pipeline rule,
 not a calibrated truth model. No independent receipt timestamp or source
 family is assumed.
 
-The admission indicator $a_i=\mathbf{1}\{L_i,T_i\text{ are observed}\}$.
+Following the general missing-variable kernel problem~\cite{smola2005missing},
+we use the following fail-closed construction. The admission indicator
+$a_i=\mathbf{1}\{L_i,T_i\text{ are observed}\}$.
 Thus $a_i a_j=0$ prevents an edge involving a report whose geographic or
 temporal separation is undefined; such a report follows the manual-review
 path. Missing $F_i$ or $E_i$ is not zero-imputed: let $I_F(i,j),I_E(i,j)$
@@ -268,42 +270,47 @@ linear score, stable random, and---for dispatch---nearest-first.
 
 \section{Experimental Design}
 
-\paragraph{Two artifact bundles.}
-RQ1 uses generator 3.0.0, seeds 1--80, and 20 development, 20 calibration,
-and 40 benchmark-test runs. The last 40 are a benchmark split within the
-same generator regime, not an unseen OOD test. RQ2 and RQ3 use candidate
-generator 4.1.0, test seeds 3000--3039, and bundle SHA
-\texttt{a7c7a3f7...f2d7e1}; their manifests are stored with the result CSVs.
-Both bundles are geographically anchored to the Copernicus EMSR848 Central
-Viet Nam flood activation; incidents, reports, duplicates, campaigns, and
-labels remain synthetic.
+\paragraph{Data contract and splits.}
+The artifact contains 80 independently seeded synthetic datasets
+geographically anchored to the Copernicus EMSR848 Central Viet Nam flood
+activation. Copernicus EMS, OpenStreetMap, and WorldPop provide geographic or
+historical anchors; rescue incidents, reports, duplicates, coordinated
+campaigns, vulnerability, and incident labels are synthetic. Every run has 16
+latent incidents, 288--370 reports, exact and near duplicates, and three
+coordinated nonincident campaigns of 20 reports each. Across all runs are
+26,288 reports: 17,901 genuine, 3,587 duplicate, and 4,800 coordinated
+nonincident reports. Runs 1--20 are reserved for development, runs 21--40 for
+calibration, and runs 41--80 for held-out testing. All runs use one fixed
+generator regime, so the experiment measures within-generator variation, not
+mechanism-shift OOD transfer. Inference reads only
+\texttt{algorithm\_input.json}; ground truth is opened after predictions for a
+test run have been produced.
 
-\paragraph{RQ1 clustering.}
-The calibration notebook selects each composition independently by mean ARI,
-then standard deviation and canonical configuration JSON. Product uses
-$\sigma=700$ m, $\tau_t=60$ min, quantile $.90$, and $k=8$; additive uses
-$\alpha=1$, the same scales and $k$, and quantile $.95$. The common candidate
-pool and grid make the comparison reproducible but not causal. ARI is primary;
-NMI, pair F1, diameter, edge fraction, and operational-noise fields are
-descriptive. Paired differences use 10,000 bootstrap resamples, Wilcoxon
-tests, and Holm correction~\cite{hubert1985comparing}. K-means is the
-coordinate comparator~\cite{macqueen1967some}.
+\paragraph{Selection and comparators.}
+The current notebook evaluates complete small grids on the 20 calibration
+runs and selects mean ARI, breaking ties by standard deviation and canonical
+configuration JSON. Product and additive use fixed $\tau_F=.25$,
+$\tau_E=.35$, and $\beta=\gamma=.5$. Selected product Louvain uses
+$\sigma=700$ m, $\tau_t=60$ min, quantile $.90$, $k=8$, and resolution $1.2$.
+Selected additive Louvain uses $\alpha=1$, $\sigma=700$ m, $\tau_t=60$ min,
+quantile $.95$, $k=8$, and resolution $1.2$. Because selected quantiles
+differ, this is an independently calibrated pipeline comparison, not a
+matched-density operator comparison. Comparators are a convex similarity,
+product Leiden, geo-time DBSCAN, DBSCAN/HDBSCAN on scaled observable features,
+spatially constrained agglomerative clustering, and coordinate K-means. The
+implemented geo-time DBSCAN lacks ST-DBSCAN's non-spatial criterion and is
+named accordingly.
 
-\paragraph{RQ2 score isolation.}
-The evaluator generates an independent relevance signal from latent incident
-benefit and computes NDCG@5, Spearman correlation, and top-five overlap. It
-uses oracle incident grouping only to isolate score behavior; inference sees
-observable reports only. Exact duplicates, near duplicates, contradictions,
-missingness, and coordinated campaigns are injected as stress scenarios.
-
-\paragraph{RQ3 error propagation.}
-The scheduler receives Product, matched-density Additive, or oracle partitions
-and compares revised, legacy, FIFO, nearest-first, equity-aging, and workload
-smoothing policies. The conservative evaluator permits one destination per
-incident, charges split trips and fake-only dispatches, and scores unserved
-incidents at 480 minutes. Paired effects use the CSV column \texttt{mean}, whose
-positive direction is already oriented as better for the candidate; raw
-lower-is-better differences have the opposite sign.
+\paragraph{Endpoints and inference.}
+ARI on incident-linked reports~\cite{hubert1985comparing} is the primary
+endpoint; NMI, pairwise F1, geographic diameter, runtime, false destinations,
+fake absorption, noise rejection, retained-edge fraction, and mean degree are
+descriptive or operational diagnostics. The benchmark includes a matched-
+density product--additive comparison. Seed-paired ARI differences use 10,000
+bootstrap resamples, Wilcoxon signed-rank tests, and Holm correction. The
+priority stress tests and predicted-cluster dispatch evaluation use independent
+benefit, deadline, service, access-delay, and harm outputs reported in Section~4;
+no clustering metric is substituted for those outcomes.
 
 \section{Results}
 
@@ -439,11 +446,12 @@ deployment claims.
 
 \section{Artifact and Conclusion}
 
-The result folders contain the RQ1 summary and paired comparisons, RQ2/RQ3
-CSVs, SHA manifests, and the deterministic figure-generation script. The
-publication figures are generated from the checked-in CSVs; the original
-artifact PNGs remain available for audit. Every reported number is bound to a
-current result row and its generator/configuration hash.
+The accompanying artifact contains the 80-run dataset, benchmark notebooks,
+calibration grid, selected configurations, per-run test results, paired
+comparisons, and the deterministic figure-generation script. The publication
+figures are generated from the result CSVs; the original artifact PNGs remain
+available for audit. Every reported number is generated from an accepted CSV
+row and its documented generator and configuration metadata.
 
 In conclusion, the study establishes conditional graph bounds and documents
 competitive within-generator clustering, exact-duplicate invariance, and
