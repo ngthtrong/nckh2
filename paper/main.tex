@@ -11,7 +11,6 @@
 \usepackage{graphicx}
 \usepackage{xcolor}
 \usepackage{hyperref}
-\usepackage{orcidlink}
 \renewcommand\UrlFont{\color{blue}\rmfamily}
 \urlstyle{rm}
 \graphicspath{{figures/}}
@@ -19,18 +18,21 @@
 
 \begin{document}
 
-\title{Product-Similarity Graph Clustering and Bounded Priority Heuristics
-for Flood-Rescue Reports: A Synthetic Held-Out Study}
-\titlerunning{Product-Similarity Graph Clustering for Flood-Rescue Reports}
+% ISDS 2026 submission category: short paper (6--8 pages, references included).
+\title{Stress-Testing Product-Gated Clustering and Bounded Priority Ranking
+for Flood-Rescue Reports: A Synthetic Study}
+\titlerunning{Stress-Testing Flood-Rescue Report Clustering and Ranking}
 
-\author{Ngoc-Anh Le\,\orcidlink{0009-0006-7453-1009} \and
-Nhu-Quynh Nguyen\,\orcidlink{0009-0008-7396-697X} \and
-Thanh-Trong Nguyen\,\orcidlink{0009-0007-6976-5131} \and
-Tuong-Hung Cao\,\orcidlink{0009-0003-5886-2666} \and
-Hung-Thinh Nguyen\,\orcidlink{0009-0004-8668-4462} \and
-Thanh-Khoa Nguyen\,\orcidlink{0000-0002-0012-1158}}
-\authorrunning{Le et al.}
-\institute{}
+\author{Thanh-Trong Nguyen\inst{1}\orcidID{0009-0007-6976-5131}\thanks{Corresponding author.} \and
+Ngoc-Anh Le\inst{1}\orcidID{0009-0006-7453-1009} \and
+Nhu-Quynh Nguyen\inst{1}\orcidID{0009-0008-7396-697X} \and
+Tuong-Hung Cao\inst{1}\orcidID{0009-0003-5886-2666} \and
+Hung-Thinh Ngo\inst{1}\orcidID{0009-0004-8668-4462} \and
+Thanh-Khoa Nguyen\inst{1}\orcidID{0000-0002-0012-1158}}
+\authorrunning{T.-T. Nguyen et al.}
+\institute{College of Information and Communication Technology,
+Can Tho University, Can Tho, Vietnam\\
+\email{ngthtrong204@gmail.com}}
 
 \maketitle
 
@@ -40,7 +42,7 @@ reports, while clustering and priority scores are often evaluated without
 measuring their scheduling consequences. We audit a fail-closed batch
 pipeline in which observable reports form a sparse graph, unresolved reports
 go to review, duplicate families feed a bounded score, and evaluator-only
-truth is joined after predicted-cluster scheduling. The clustering benchmark
+truth is joined only after the relevant prediction or schedule is locked. The clustering benchmark
 contains 80 synthetic runs from generator 3.0.0: additive Louvain has mean
 ARI $0.9191$, product Leiden $0.9165$, and product Louvain $0.9072$.
 Product minus independently tuned additive is $-0.0118$ (bootstrap 95\% CI
@@ -93,7 +95,8 @@ scheduler that cannot consult incident truth.
 We address these gaps with a fail-closed batch pipeline: reports with
 observable location and time enter a sparse graph, incomplete reports go to
 manual review, duplicate families feed a bounded ranking, and evaluator-only
-truth joins after predicted-cluster scheduling. We ask: (RQ1) does
+truth joins only after the relevant predicted partition, ranking diagnostic,
+or schedule is locked. We ask: (RQ1) does
 independently selected product composition improve clustering over additive
 composition? (RQ2) does the duplicate-aware score align with an independently
 generated benefit under report-level stress tests? (RQ3) how do predicted
@@ -111,14 +114,17 @@ within-generator, so the artifact is not a validated rescue policy.
 Figure~\ref{fig:pipeline} fixes the information boundary. Receipt-visible
 fields flow through graph construction, ranking, and a batch scheduler. Missing
 location or event time routes a report to review. Incident identity, benefit,
-deadline, and harm are stored separately and join only after a schedule exists.
+deadline, and harm are stored separately and join only after the corresponding
+partition, ranking diagnostic, or schedule has been locked.
 
 \begin{figure}[t]
 \centering
 \includegraphics[width=\textwidth]{pipeline_v2.pdf}
 \caption{Observable pipeline (solid), manual-review path (orange), and
-evaluator-only truth join (dashed). The scheduler receives predicted clusters,
-never incident truth.}
+evaluator-only protocols (dashed). RQ1 opens truth after the predicted
+partition is locked; RQ2 uses oracle grouping only to isolate the ranking rule;
+RQ3 opens outcome truth after the predicted schedule is locked. Candidate
+inference never receives incident truth.}
 \label{fig:pipeline}
 \end{figure}
 
@@ -316,7 +322,9 @@ density product--additive comparison. Seed-paired ARI differences use 10,000
 bootstrap resamples, Wilcoxon signed-rank tests, and Holm correction. The
 priority stress tests and predicted-cluster dispatch evaluation use independent
 benefit, deadline, service, access-delay, and harm outputs reported in Section~4;
-no clustering metric is substituted for those outcomes.
+no clustering metric is substituted for those outcomes. RQ2 uses oracle
+incident grouping solely for score isolation; RQ3 schedules predicted
+partitions and includes an oracle partition only as an evaluator comparator.
 
 \section{Results}
 
