@@ -207,6 +207,10 @@ def test_colab_notebook_is_valid_and_explains_each_code_cell() -> None:
     assert notebook["nbformat"] == 4
     cells = notebook["cells"]
     assert len(cells) >= 20
+    notebook_source = "\n".join(
+        "".join(cell.get("source", [])) for cell in cells if cell["cell_type"] == "code"
+    )
+    assert "_blas_supports_fpe" in notebook_source
     for index, cell in enumerate(cells):
         if cell["cell_type"] != "code":
             continue
