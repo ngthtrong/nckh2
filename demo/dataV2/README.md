@@ -107,6 +107,12 @@ Notebook chỉ báo cáo descriptive statistics và paired bootstrap percentile 
 CI theo run. Không có p-value, tuning, priority/dispatch evaluation hay claim
 confirmatory.
 
+Nếu Colab báo lỗi NumPy/SciPy private symbol như
+`_blas_supports_fpe`, hãy chọn **Runtime → Restart session**, checkout lại đúng
+commit rồi chạy notebook từ đầu. Cell cài môi trường có compatibility shim
+no-op cho symbol này và sẽ dừng rõ ràng nếu binary package vẫn không nhất quán;
+không chạy tiếp từ cell import trong kernel đã lỗi.
+
 ## Các quality finding phải giữ nguyên
 
 - `gt_cluster`/`is_fake` xuất hiện trong observable table nhưng bị loại trước inference.
