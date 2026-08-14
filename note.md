@@ -82,3 +82,7 @@ thái hiện hành là nội dung của resolution log này.
   Code dùng MIT; manuscript, bảng, hình và synthetic artifacts nguyên gốc của
   nhóm dùng CC BY 4.0. Copernicus EMS, OpenStreetMap, WorldPop, Springer/
   LaTeX templates và tài sản bên thứ ba khác giữ license/attribution gốc.
+- Artifact cố định đã được phát hành thành GitHub Release `v1.0.0` tại commit
+  `04e0f04a7376cbbb02a1a95ecb4e3147d56c575b` và được Zenodo lưu trữ với DOI
+  phiên bản `10.5281/zenodo.21934402`. Bản thảo trích dẫn artifact như một mục
+  bibliography riêng và tách `Conclusion` khỏi `Data and Code Availability`.
