@@ -48,7 +48,8 @@
   \newcommand{\Comment}[1]{\hfill{\footnotesize\(\triangleright\)~##1}}%
   \providecommand{\textproc}[1]{\textsc{##1}}%
 }
-\usepackage{placeins}
+\usepackage{flafter}
+\usepackage{needspace}
 \renewcommand\UrlFont{\color{blue}\rmfamily}
 \urlstyle{rm}
 \graphicspath{{figures/}}
@@ -66,11 +67,15 @@ Ngoc-Anh Le\inst{1}\orcidID{0009-0006-7453-1009} \and
 Nhu-Quynh Nguyen\inst{1}\orcidID{0009-0008-7396-697X} \and
 Tuong-Hung Cao\inst{1}\orcidID{0009-0003-5886-2666} \and
 Hung-Thinh Ngo\inst{1}\orcidID{0009-0004-8668-4462} \and
-Thanh-Khoa Nguyen\inst{1}\orcidID{0000-0002-0012-1158}}
+Xuan-Phuong Chau\inst{1} \and
+Lan Phuong Phan\inst{1} \and
+Thanh-Khoa Nguyen\inst{1}\orcidID{0000-0002-0012-1158}\thanks{Corresponding author.}}
 \authorrunning{T.-T. Nguyen et al.}
 \institute{College of Information and Communication Technology,
 Can Tho University, Can Tho, Vietnam\\
-\email{ngthtrong204@gmail.com}}
+\email{\{trongb2305615, anhb2303861, quynhb2303777,
+hungb2303873, thinhb2303904\}@student.ctu.edu.vn\\
+\{cxphuong, pplan, ntkhoa\}@ctu.edu.vn}}
 
 \maketitle
 
@@ -158,7 +163,7 @@ fields flow through graph construction, ranking, and a batch scheduler. Missing
 location or event time routes a report to review. Incident identity, benefit,
 deadline, and harm are stored separately and join only after a schedule exists.
 
-\begin{figure}[t]
+\begin{figure}[!htbp]
 \centering
 \includegraphics[width=\textwidth]{pipeline_v2.pdf}
 \caption{Observable pipeline (solid), manual-review path (orange), and
@@ -173,56 +178,6 @@ similarity-graph construction and clustering (Section~2.2), duplicate-aware
 cluster scoring (Section~2.3, detailed as a subroutine in
 Algorithm~\ref{alg:priority}), and scheduling. The evaluator-only truth join
 is described after the algorithm and is never an input to this inference path.
-
-\begin{algorithm}[!tbp]
-\caption{Fail-closed observable report pipeline (Fig.~\ref{fig:pipeline})}
-\label{alg:pipeline}
-\begin{algorithmic}[1]
-\Require Reports $R=\{r_i\}$; kernel scales $\sigma,\tau_t,\tau_F,\tau_E$;
-weights $\beta,\gamma$ (and $\alpha$ for the additive composition); quantile
-$q$; neighbour cap $k$; Louvain/Leiden resolution $\rho$; composition
-$m\in\{\text{product},\text{additive}\}$
-\Ensure Dispatch schedule $S$; the algorithm below never reads incident
-identity, benefit, deadline, or harm labels
-\State $R_{\rm obs}\gets\emptyset$; $R_{\rm review}\gets\emptyset$
-\For{each report $r_i\in R$}
-    \State $a_i\gets\mathbf{1}\{L_i,T_i\text{ observed}\}$ \Comment{Section~2.1}
-    \If{$a_i=0$}
-        \State $R_{\rm review}\gets R_{\rm review}\cup\{r_i\}$
-        \Comment{orange manual-review path}
-    \Else
-        \State $R_{\rm obs}\gets R_{\rm obs}\cup\{r_i\}$
-    \EndIf
-\EndFor
-\State Compute each $n_i^{\rm corrob}$ from unique observable payloads in the
-full $R_{\rm obs}$, then set
-\Statex \hspace{1em}$Q_i\gets\operatorname{sigmoid}\bigl(b_0+b_1\mathbf{1}\{\text{image}_i\}
- +b_2\log(1+n_i^{\rm corrob})\bigr)$ for every $r_i\in R_{\rm obs}$
-\State $E_0\gets$ \Call{BuildSimilarityEdges}{$R_{\rm obs},m,\sigma,\tau_t,\tau_F,\tau_E,\alpha,\beta,\gamma$}
-\Comment{BuildSimilarityEdges computes $G,T,C$ on the full eligible pair matrix}
-\State $\theta\gets q$-quantile of the nonzero weights in $E_0$
-\State $E_\theta\gets\{(i,j,w_{ij})\in E_0:w_{ij}>\theta\}$
-\State $E\gets E_\theta\ \cup\ \text{(endpoint-wise top-}k\text{ edges in }E_\theta\text{), symmetrized by OR}$
-\State $\mathcal{G}\gets(R_{\rm obs},E)$
-\State $\mathcal{C}\gets$ Louvain$/$Leiden$(\mathcal{G},\rho)$
-\Comment{predicted clusters, never incident truth}
-\For{each predicted cluster $C_k\in\mathcal{C}$}
-    \State $P_k\gets$ \Call{PriorityScore}{$C_k$} \Comment{Algorithm~\ref{alg:priority}}
-\EndFor
-\State $S\gets$ Scheduler$(\{(C_k,P_k):C_k\in\mathcal{C}\})$
-\Comment{scheduler sees predicted clusters and $P_k$ only}
-\State \Return $S$
-\end{algorithmic}
-\end{algorithm}
-
-\FloatBarrier
-
-After $S$ is fixed, the offline evaluator may join $S$ and $R_{\rm review}$
-with incident identity, benefit, deadline, and harm labels to compute ARI,
-NDCG@5, and dispatch outcomes. This dashed path is not available to the
-inference algorithm. In the current artifacts, the core schema requires
-location and event time, so the manual-review branch is a fail-closed design
-boundary rather than an empirically exercised missingness condition.
 
 \subsection{Report Attributes and Missingness}
 
@@ -278,6 +233,7 @@ C_{ij}=\exp\!\left[-\frac{|F_i-F_j|}{\tau_F}
 \]
 The missingness extension is specified and unit-tested, but missingness
 robustness is not claimed as an empirical result of this benchmark.
+
 \subsection{Similarity Graph and Derived Bounds}
 
 For Haversine distance $d_{ij}$ and time difference $\Delta t_{ij}$, define
@@ -352,6 +308,60 @@ nonempty positive-threshold domain, whereas additive composition has such a
 bound only above the maximum non-geographic contribution. Neither statement
 alone implies better empirical clustering.
 
+\Needspace*{0.62\textheight}
+\begin{algorithm}[H]
+\caption{Fail-closed observable report pipeline (Fig.~\ref{fig:pipeline})}
+\label{alg:pipeline}
+\begin{algorithmic}[1]
+\footnotesize
+\Require Reports $R=\{r_i\}$; kernel scales $\sigma,\tau_t,\tau_F,\tau_E$;
+\Statex \hspace{2.5em}weights $\beta,\gamma$ (and $\alpha$ for the additive
+composition); quantile $q$; neighbour cap $k$; Louvain/Leiden resolution $\rho$;
+composition $m\in\{\text{product},\text{additive}\}$
+\Ensure Dispatch schedule $S$; the algorithm below never reads incident
+\Statex \hspace{2.5em}identity, benefit, deadline, or harm labels
+\State $R_{\rm obs}\gets\emptyset$; $R_{\rm review}\gets\emptyset$
+\For{each report $r_i\in R$}
+    \State $a_i\gets\mathbf{1}\{L_i,T_i\text{ observed}\}$ \Comment{Section~2.1}
+    \If{$a_i=0$}
+        \State $R_{\rm review}\gets R_{\rm review}\cup\{r_i\}$
+        \Comment{orange manual-review path}
+    \Else
+        \State $R_{\rm obs}\gets R_{\rm obs}\cup\{r_i\}$
+    \EndIf
+\EndFor
+\State Compute each $n_i^{\rm corrob}$ from unique observable payloads in the
+full $R_{\rm obs}$, then set
+\Statex \hspace{1em}$\begin{aligned}
+Q_i&\gets\operatorname{sigmoid}\bigl(b_0+b_1\mathbf{1}\{\text{image}_i\}\\[-.2ex]
+&\qquad{}+b_2\log(1+n_i^{\rm corrob})\bigr)\text{ for every }r_i\in R_{\rm obs}
+\end{aligned}$
+\State $E_0\gets$ \Call{BuildSimilarityEdges}{$R_{\rm obs},m,\sigma,\tau_t,\tau_F,\tau_E,$
+\Statex \hspace{2.5em}$\alpha,\beta,\gamma$}
+\Statex \hspace{2.5em}\textit{BuildSimilarityEdges computes $G,T,C$ on the full eligible pair matrix}
+\State $\theta\gets q$-quantile of the nonzero weights in $E_0$
+\State $E_\theta\gets\{(i,j,w_{ij})\in E_0:w_{ij}>\theta\}$
+\State $E\gets E_\theta\ \cup\ \text{(endpoint-wise top-}k\text{ edges in }E_\theta\text{),}$
+\Statex \hspace{2.5em}$\text{symmetrized by OR}$
+\State $\mathcal{G}\gets(R_{\rm obs},E)$
+\State $\mathcal{C}\gets$ Louvain$/$Leiden$(\mathcal{G},\rho)$
+\Comment{predicted clusters, never incident truth}
+\For{each predicted cluster $C_k\in\mathcal{C}$}
+    \State $P_k\gets$ \Call{PriorityScore}{$C_k$} \Comment{Algorithm~\ref{alg:priority}}
+\EndFor
+\State $S\gets$ Scheduler$(\{(C_k,P_k):C_k\in\mathcal{C}\})$
+\Statex \hspace{2.5em}\textit{scheduler sees predicted clusters and $P_k$ only}
+\State \Return $S$
+\end{algorithmic}
+\end{algorithm}
+
+After $S$ is fixed, the offline evaluator may join $S$ and $R_{\rm review}$
+with incident identity, benefit, deadline, and harm labels to compute ARI,
+NDCG@5, and dispatch outcomes. This dashed path is not available to the
+inference algorithm. In the current artifacts, the core schema requires
+location and event time, so the manual-review branch is a fail-closed design
+boundary rather than an empirically exercised missingness condition.
+
 \subsection{Duplicate-Aware Bounded Ranking}
 
 Exact duplicate payloads share a canonical fingerprint. Near duplicates are
@@ -387,28 +397,29 @@ reports a first such analysis. Comparators are a
 multiplicity-sensitive legacy score, urgency-only, population-only, a simple
 linear score, stable random, and---for dispatch---nearest-first.
 
-\begin{algorithm}[!tbp]
+\Needspace*{0.36\textheight}
+\begin{algorithm}[H]
 \caption{\textproc{PriorityScore}: duplicate-aware bounded priority (Eq.~\ref{eq:priority})}
 \label{alg:priority}
 \begin{algorithmic}[1]
+\footnotesize
 \Function{PriorityScore}{cluster $C_k$}
     \State $\mathcal F_k\gets$ ExactFingerprintGroups$(C_k)$ and
     NearDuplicateComponents$(C_k)$
-    \State $\bar E_k\gets\dfrac{\sum_{h\in\mathcal F_k}\max_{i\in h}Q_iE_i}
-    {\max(1,\sum_{h\in\mathcal F_k}\max_{i\in h}Q_i)}$
+    \State $\bar E_k\gets\dfrac{\sum_{g\in\mathcal F_k}\max_{i\in g}Q_iE_i}
+    {\max(1,\sum_{g\in\mathcal F_k}\max_{i\in g}Q_i)}$
     \Comment{one representative per evidence family}
-    \State $\bar F_k\gets\max_{h\in\mathcal F_k}\max_{i\in h}Q_iF_i$
-    \State $\bar N_k\gets\min\!\Bigl(1,\dfrac{\log\bigl(1+\max_{h\in\mathcal F_k}\max_{i\in h}Q_i\min(N_i,N_{\rm ref})\bigr)}
-    {\log(1+N_{\rm ref})}\Bigr)$
-    \State $\bar V_k\gets\max_{h\in\mathcal F_k}\max_{i\in h}Q_i\min(V_i,V_{\rm cap})$
-    \State $P_k\gets\bigl[1+(\mu-1)\tanh(\bar V_k/s)\bigr]
-    \bigl(\omega_E\bar E_k+\omega_F\bar F_k+\omega_N\bar N_k\bigr)$
+    \State $\bar F_k\gets\max_{g\in\mathcal F_k}\max_{i\in g}Q_iF_i$
+    \State $\bar N_k\gets\min\!\Bigl(1,$
+    \Statex \hspace{2.5em}$\displaystyle\dfrac{\log\bigl(1+\max_{g\in\mathcal F_k}\max_{i\in g}Q_i
+    \min(N_i,N_{\rm ref})\bigr)}{\log(1+N_{\rm ref})}\Bigr)$
+    \State $\bar V_k\gets\max_{g\in\mathcal F_k}\max_{i\in g}Q_i\min(V_i,V_{\rm cap})$
+    \State $P_k\gets\bigl[1+(\mu-1)\tanh(\bar V_k/s)\bigr]$
+    \Statex \hspace{2.5em}$\displaystyle\bigl(\omega_E\bar E_k+\omega_F\bar F_k+\omega_N\bar N_k\bigr)$
     \State \Return $P_k$
 \EndFunction
 \end{algorithmic}
 \end{algorithm}
-
-\FloatBarrier
 
 \section{Experimental Design}
 
@@ -496,7 +507,9 @@ deadline outcomes over the legacy score, and performs significantly worse
 than a naive nearest-first baseline on both. The remainder of this section
 presents the supporting statistical detail.
 
-\begin{table}[t]
+\Needspace*{0.32\textheight}
+Table~\ref{tab:clustering-results} reports the held-out clustering summary.
+\begin{table}[H]
 \centering\scriptsize
 \caption{RQ1 benchmark-test summary over 40 runs. Intervals are bootstrap
 95\% confidence intervals; diameter is descriptive.}
@@ -534,14 +547,18 @@ The product pipeline has zero fake absorption and zero fake rejection but a
 still forming fake-only destinations. This is an adverse operational result,
 not evidence of misinformation robustness.
 
-\begin{figure}[t]
+Figure~\ref{fig:rq1-benchmark} visualizes the held-out ARI comparison.
+% \Needspace*{0.38\textheight}
+\begin{figure}[H]
 \centering
 \includegraphics[width=\textwidth]{rq1_benchmark.pdf}
 \caption{RQ1 held-out ARI means generated from the benchmark summary CSV.}
 \label{fig:rq1-benchmark}
 \end{figure}
 
-\begin{table}[t]
+Table~\ref{tab:stress-results} collects the headline RQ2 and RQ3 contrasts.
+% \Needspace*{0.36\textheight}
+\begin{table}[H]
 \centering\scriptsize
 \caption{Headline RQ2/RQ3 results from the candidate-4.1 artifacts. RQ3
 effects and p-values use 40 seed pairs after averaging the three resource
@@ -578,7 +595,9 @@ drift .1688 and false-priority lift .8828; revised drift is worse than legacy
 by $-.1379$ (Holm $p\approx9.1\times10^{-12}$). Boundedness therefore does
 not guarantee ranking reliability.
 
-\begin{figure}[t]
+Figure~\ref{fig:rq2-priority} shows the priority-alignment comparison.
+% \Needspace*{0.34\textheight}
+\begin{figure}[H]
 \centering
 \includegraphics[width=\textwidth]{rq2_priority.pdf}
 \caption{RQ2 priority-alignment comparison generated from the candidate-4.1
@@ -596,7 +615,9 @@ under the revised policy on harm (Holm $p=.000168$), and worse than oracle on
 the corresponding dispatch outcomes. Predicted split, merge, and fake-only
 destinations therefore propagate into operational consequences.
 
-\begin{figure}[t]
+Figure~\ref{fig:rq3-dispatch} shows the corresponding dispatch effects.
+\Needspace*{0.34\textheight}
+\begin{figure}[H]
 \centering
 \includegraphics[width=\textwidth]{rq3_dispatch.pdf}
 \caption{RQ3 Product-partition paired effects on latent harm generated from
@@ -618,11 +639,12 @@ policy-valid interval $[1,2]$. The locked rerun evaluates 21 configurations
 (one shared baseline and two or three tested levels for each constant) on the
 same 40 held-out seeds, yielding 840 seed-level observations. A constant is
 considered stable if the mean metric varies by less than $0.01$ across its
-valid tested levels. Table~\ref{tab:sensitivity} reports ranges copied from
-the sensitivity summary CSV; no value is inferred from the fixed-
-configuration comparisons.
+valid tested levels. The sensitivity summary CSV provides the ranges below; no
+value is inferred from the fixed-configuration comparisons.
 
-\begin{table}[t]
+\Needspace*{0.24\textheight}
+Table~\ref{tab:sensitivity} reports these ranges.
+\begin{table}[H]
 \centering\scriptsize
 \caption{Candidate-4.1 one-at-a-time sensitivity of mean NDCG@5 to fixed
 heuristic constants. Each range is the minimum--maximum mean over the tested
@@ -719,6 +741,13 @@ License, and the manuscript, tables, figures, and original synthetic
 artifacts are released under CC BY 4.0. These grants exclude Copernicus EMS,
 OpenStreetMap, WorldPop, Springer/LaTeX templates, and other third-party
 materials, which retain their original terms and required attribution.
+
+\begin{credits}
+\subsubsection{\ackname} This study is funded by the Can Tho University, Code:
+THS2026-68.
+
+\subsubsection{\discintname} The authors have no competing interests to declare.
+\end{credits}
 
 \bibliographystyle{splncs04}
 \bibliography{references}
