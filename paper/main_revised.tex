@@ -614,34 +614,36 @@ analysis on the Candidate-4.1 ranking task. Each valid constant is perturbed
 around its reference value while all other constants are held fixed, and
 NDCG@5 is recomputed on the same 40 test seeds. The $\omega$ variants perturb
 one component at a time and renormalize the vector; $\mu$ is restricted to its
-policy-valid interval $[1,2]$. Table~\ref{tab:sensitivity} will report the
-resulting metric ranges once the locked rerun is complete; a constant is
+policy-valid interval $[1,2]$. The locked rerun evaluates 21 configurations
+(one shared baseline and two or three tested levels for each constant) on the
+same 40 held-out seeds, yielding 840 seed-level observations. A constant is
 considered stable if the mean metric varies by less than $0.01$ across its
-valid tested levels. No sensitivity value is inferred from the existing fixed-
-configuration CSVs.
+valid tested levels. Table~\ref{tab:sensitivity} reports ranges copied from
+the sensitivity summary CSV; no value is inferred from the fixed-
+configuration comparisons.
 
 \begin{table}[t]
 \centering\scriptsize
 \caption{Candidate-4.1 one-at-a-time sensitivity of mean NDCG@5 to fixed
-heuristic constants. The metric-range cells remain pending until the locked
-40-seed rerun is completed; values must be copied from its summary CSV, not
-estimated.}
+heuristic constants. Each range is the minimum--maximum mean over the tested
+levels, including the reference level, on 40 test seeds. All spans are below
+0.01 under the locked rerun.}
 \label{tab:sensitivity}
 \resizebox{\textwidth}{!}{%
 \begin{tabular}{lccc}
 \toprule
 Constant & Reference/default value & Tested levels & Metric range\\
 \midrule
-$b_0$ ($Q_i$ intercept) & $-0.20$ & $[-0.24,-0.16]$ & [FILL IN]\\
-$b_1$ (image weight) & $1.40$ & $[1.12,1.68]$ & [FILL IN]\\
-$b_2$ (corroboration weight) & $0.90$ & $[0.72,1.08]$ & [FILL IN]\\
-$\omega_E$ & $.34$ & component $\times\{.8,1,1.2\}$, renormalized & [FILL IN]\\
-$\omega_F$ & $.33$ & component $\times\{.8,1,1.2\}$, renormalized & [FILL IN]\\
-$\omega_N$ & $.33$ & component $\times\{.8,1,1.2\}$, renormalized & [FILL IN]\\
-$\mu$ (vulnerability amplification) & $2$ & $\{1.6,1.8,2.0\}$ & [FILL IN]\\
-$s$ (vulnerability saturation) & $10$ & $[8,12]$ & [FILL IN]\\
-$N_{\rm ref}$ & $500$ & $[400,600]$ & [FILL IN]\\
-$V_{\rm cap}$ & $50$ & $[40,60]$ & [FILL IN]\\
+$b_0$ ($Q_i$ intercept) & $-0.20$ & $[-0.24,-0.16]$ & $[.6653,.6672]$\\
+$b_1$ (image weight) & $1.40$ & $[1.12,1.68]$ & $[.6669,.6687]$\\
+$b_2$ (corroboration weight) & $0.90$ & $[0.72,1.08]$ & $[.6667,.6679]$\\
+$\omega_E$ & $.34$ & component $\times\{.8,1,1.2\}$, renormalized & $[.6663,.6714]$\\
+$\omega_F$ & $.33$ & component $\times\{.8,1,1.2\}$, renormalized & $[.6625,.6679]$\\
+$\omega_N$ & $.33$ & component $\times\{.8,1,1.2\}$, renormalized & $[.6663,.6697]$\\
+$\mu$ (vulnerability amplification) & $2$ & $\{1.6,1.8,2.0\}$ & $[.6644,.6683]$\\
+$s$ (vulnerability saturation) & $10$ & $[8,12]$ & $[.6665,.6713]$\\
+$N_{\rm ref}$ & $500$ & $[400,600]$ & $[.6669,.6669]$\\
+$V_{\rm cap}$ & $50$ & $[40,60]$ & $[.6669,.6669]$\\
 \bottomrule
 \end{tabular}
 }
@@ -664,6 +666,13 @@ Dispatch results confirm that a bounded score cannot substitute for a
 validated operational objective; clustering errors and fake-only destinations
 are transmitted to scheduling.
 
+The local sensitivity analysis is stable over the tested intervals: every
+constant has a mean-NDCG@5 span below $0.01$ across the 40 held-out seeds. The
+largest span is for $\omega_F$ ($.00546$), while changing $V_{\rm cap}$ from
+40 to 60 leaves the mean unchanged at the reported precision. These results
+support numerical robustness within the tested neighborhood only; they do not
+validate the constants outside those levels or replace expert validation.
+
 All reports, incidents, relevance signals, and dispatch outcomes are
 synthetic. RQ1 varies seeds within generator 3.0.0, while RQ2/RQ3 use a
 separate candidate-4.1 bundle; neither tests mechanism-shift OOD transfer or
@@ -681,17 +690,20 @@ benchmark notebooks, calibration grids, selected configurations, per-run test
 results, paired comparisons, the seed-level RQ3 reanalysis, and a deterministic
 figure-generation script. The publication figures are generated from result
 CSVs; every reported number is tied to an accepted CSV row and documented
-generator/configuration metadata. The raw anchor snapshot and third-party
-license record still require a provenance audit before public release.
+generator/configuration metadata. Raw upstream anchor snapshots are not
+redistributed in this artifact, and third-party materials remain governed by
+their own provenance and license records.
 
 \paragraph{Data and Code Availability.}
-The analysis code, derived synthetic result tables, manifests, and figure
-generation script will be released in an immutable repository or DOI after
-the provenance and third-party-license audit is complete. Until that release,
-reviewers may request the derived artifact bundle from the corresponding
-author. The final camera-ready version will state the public URL, immutable
-revision, and the separately approved code/data licenses; no public URL or
-license is asserted in this revision.
+The analysis code and derived synthetic result tables are available at
+\url{https://github.com/ngthtrong/nckh2}. The rerun used generator commit
+\texttt{a6be3e988dad1aa442c8c8e158c2bba96b2b7fb9}; the RQ2 manifest records
+SHA-256 hashes for every reported CSV, including the 840-row sensitivity
+artifact and its 30-row summary. Original code is released under the MIT
+License, and the manuscript, tables, figures, and original synthetic
+artifacts are released under CC BY 4.0. These grants exclude Copernicus EMS,
+OpenStreetMap, WorldPop, Springer/LaTeX templates, and other third-party
+materials, which retain their original terms and required attribution.
 
 In conclusion, the study establishes conditional graph bounds and documents
 competitive within-generator clustering, exact-duplicate invariance, and
