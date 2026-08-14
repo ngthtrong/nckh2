@@ -1,6 +1,9 @@
 
-Ghi chú cho Tác giả — Các chỉnh sửa đã chèn vào main.tex
+Ghi chú cho Tác giả — Các chỉnh sửa đã chèn vào main_revised.tex
 Bài: Stress-Testing Product-Gated Clustering and Bounded Priority Ranking for Flood-Rescue Reports — ISDS 2026 (Long paper, 12–15 trang)
+
+Trạng thái: phần ghi chú ban đầu dưới đây là baseline trước audit; các điểm
+đã được xác minh hoặc sửa được ghi đè bởi mục “Resolution log” ở cuối file.
 
 1. Đánh giá bố cục sau khi thêm Algorithm
    Cách chèn Algorithm 1 và Algorithm 2 (dùng \usepackage{algorithm} + \usepackage{algpseudocode}, đặt ngay sau Fig. 1, có \caption và \label riêng, được \ref từ văn bản) là bố cục chuẩn cho hội nghị dạng Springer LNCS/CCIS: Algorithm được coi là một loại "float" độc lập, đánh số riêng với Figure/Table, không xung đột. Việc tách công thức priority thành một subroutine riêng (Algorithm 2, gọi từ Algorithm 1) cũng là cách trình bày phổ biến khi pipeline có một bước tính toán phức tạp.
@@ -43,3 +46,33 @@ Ngoài điểm 3.4, toàn bộ Algorithm 1 được transliterate (chuyển th�
 •	Xác nhận công thức priority per-family, sửa Eq. nếu cần, đối chiếu Algorithm 2 (mục 3.4).
 •	Đọc lại Algorithm 1 so với code thật (mục 3.5).
 •	Biên dịch bằng XeLaTeX trên Overleaf và kiểm tra số trang cuối cùng (12–15 trang) cùng vị trí trôi nổi của 2 Algorithm.
+
+## Resolution log for the long-paper revision
+
+Các điểm dưới đây đã được xử lý trong `paper/main_revised.tex` và artifact
+RQ3; các ô số liệu sensitivity vẫn cố ý để `[FILL IN]` vì tác giả đang chạy
+lại thí nghiệm.
+
+- Priority được xác minh là một giá trị `P_k` cho mỗi predicted
+  cluster/destination. Exact và near-duplicate families `g` được tạo bên
+  trong cluster `C_k`; Eq. priority và Algorithm 2 đã dùng chỉ số
+  `k`/`\mathcal F_k` tương ứng.
+- Algorithm 1 đã rút gọn thành inference path observable-only, bỏ candidate
+  pool không có trong notebook, và chuyển truth join ra evaluator prose.
+  Algorithm 1 ở sau Fig. 1; Algorithm 2 ở sau Eq. priority; cả hai dùng
+  `[!tbp]` và `\FloatBarrier`.
+- Holm prose đã được sửa theo family thực tế: RQ1 gồm 9 contrasts; RQ2
+  dùng comparator/scenario-specific families; RQ3 dùng family 14 endpoints
+  cho từng comparison block. Không còn tuyên bố preregistration không có
+  bằng chứng.
+- RQ1 và Candidate 4.1 của RQ2/RQ3 đã được mô tả thành hai artifact suites,
+  với split, số lượng report và provenance riêng.
+- RQ3 có thêm `rq3_dispatch_test_seed.csv` và
+  `rq3_paired_comparisons_seed.csv`: ba resource scenarios được trung bình
+  trong seed, suy luận chính dùng 40 seed pairs; CSV cũ 120 seed×scenario
+  được giữ làm diagnostic.
+- Table sensitivity đã sửa metric thành NDCG@5, policy-valid `\mu`, và
+  normalized one-at-a-time `\omega`. Các giá trị `Metric range` chưa được
+  điền.
+- Availability hiện không tự tạo URL/license; bản camera-ready chỉ điền
+  sau provenance/license audit và phát hành immutable revision.
