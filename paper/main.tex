@@ -11,6 +11,44 @@
 \usepackage{graphicx}
 \usepackage{xcolor}
 \usepackage{hyperref}
+% Use the standard algorithm packages when available.  The compact fallback
+% keeps this manuscript buildable on minimal TeX Live images; it is bypassed
+% automatically on Overleaf and other installations that provide the packages.
+\IfFileExists{algorithm.sty}{%
+  \usepackage{algorithm}%
+}{%
+  \usepackage{float}%
+  \newfloat{algorithm}{tbp}{loa}%
+  \floatname{algorithm}{Algorithm}%
+}
+\IfFileExists{algpseudocode.sty}{%
+  \usepackage{algpseudocode}%
+}{%
+  \newcounter{algline}%
+  \newenvironment{algorithmic}[1][1]{%
+    \setcounter{algline}{0}%
+    \begin{list}{}{\setlength{\leftmargin}{3.2em}\setlength{\labelwidth}{2.4em}%
+      \setlength{\labelsep}{0.6em}\setlength{\itemsep}{0.15ex}\setlength{\parsep}{0pt}%
+      \setlength{\topsep}{0.2ex}}\small\normalfont}{\end{list}}%
+  \newcommand{\algitem}{\stepcounter{algline}%
+    \item[{\makebox[2.4em][r]{\thealgline:}}]}%
+  \newcommand{\State}{\algitem}%
+  \newcommand{\Statex}{\item[]}%
+  \newcommand{\Require}{\item[\textbf{Require:}]}%
+  \newcommand{\Ensure}{\item[\textbf{Ensure:}]}%
+  \newcommand{\For}[1]{\algitem\textbf{for}~##1~\textbf{do}}%
+  \newcommand{\EndFor}{\algitem\textbf{end for}}%
+  \newcommand{\If}[1]{\algitem\textbf{if}~##1~\textbf{then}}%
+  \newcommand{\Else}{\algitem\textbf{else}}%
+  \newcommand{\EndIf}{\algitem\textbf{end if}}%
+  \newcommand{\Function}[2]{\algitem\textbf{function}~\textproc{##1}(##2)}%
+  \newcommand{\EndFunction}{\algitem\textbf{end function}}%
+  \newcommand{\Call}[2]{\textproc{##1}(##2)}%
+  \newcommand{\Return}{\textbf{return}~}%
+  \newcommand{\Comment}[1]{\hfill{\footnotesize\(\triangleright\)~##1}}%
+  \providecommand{\textproc}[1]{\textsc{##1}}%
+}
+\usepackage{placeins}
 \renewcommand\UrlFont{\color{blue}\rmfamily}
 \urlstyle{rm}
 \graphicspath{{figures/}}
@@ -18,7 +56,7 @@
 
 \begin{document}
 
-% ISDS 2026 submission category: short paper (6--8 pages, references included).
+% ISDS 2026 submission category: long paper (12--15 pages, references included).
 \title{Stress-Testing Product-Gated Clustering and Bounded Priority Ranking
 for Flood-Rescue Reports: A Synthetic Study}
 \titlerunning{Stress-Testing Flood-Rescue Report Clustering and Ranking}
@@ -42,7 +80,7 @@ reports, while clustering and priority scores are often evaluated without
 measuring their scheduling consequences. We audit a fail-closed batch
 pipeline in which observable reports form a sparse graph, unresolved reports
 go to review, duplicate families feed a bounded score, and evaluator-only
-truth is joined only after the relevant prediction or schedule is locked. The clustering benchmark
+truth is joined after predicted-cluster scheduling. The clustering benchmark
 contains 80 synthetic runs from generator 3.0.0: additive Louvain has mean
 ARI $0.9191$, product Leiden $0.9165$, and product Louvain $0.9072$.
 Product minus independently tuned additive is $-0.0118$ (bootstrap 95\% CI
@@ -95,8 +133,7 @@ scheduler that cannot consult incident truth.
 We address these gaps with a fail-closed batch pipeline: reports with
 observable location and time enter a sparse graph, incomplete reports go to
 manual review, duplicate families feed a bounded ranking, and evaluator-only
-truth joins only after the relevant predicted partition, ranking diagnostic,
-or schedule is locked. We ask: (RQ1) does
+truth joins after predicted-cluster scheduling. We ask: (RQ1) does
 independently selected product composition improve clustering over additive
 composition? (RQ2) does the duplicate-aware score align with an independently
 generated benefit under report-level stress tests? (RQ3) how do predicted
@@ -106,27 +143,86 @@ explicitly separated artifact bundles.
 The contributions are (i) an observable-only pipeline with explicit review and
 evaluator boundaries; (ii) auditable threshold statements and a proposed
 duplicate-aware score; and (iii) a paired diagnostic reporting clustering,
-ranking, dispatch, and adverse results. The evidence remains synthetic and
-within-generator, so the artifact is not a validated rescue policy.
+ranking, dispatch, and adverse results. We emphasize that the primary
+scientific value of this study lies not in a performance improvement but in
+the auditable negative and boundary results themselves: propagation errors
+and adversarial vulnerabilities that remain invisible to accuracy-only
+benchmarks are made explicit and quantified here. The evidence remains
+synthetic and within-generator, so the artifact is not a validated rescue
+policy.
 
 \section{Observable Pipeline and Methods}
 
 Figure~\ref{fig:pipeline} fixes the information boundary. Receipt-visible
 fields flow through graph construction, ranking, and a batch scheduler. Missing
 location or event time routes a report to review. Incident identity, benefit,
-deadline, and harm are stored separately and join only after the corresponding
-partition, ranking diagnostic, or schedule has been locked.
+deadline, and harm are stored separately and join only after a schedule exists.
 
 \begin{figure}[t]
 \centering
 \includegraphics[width=\textwidth]{pipeline_v2.pdf}
 \caption{Observable pipeline (solid), manual-review path (orange), and
-evaluator-only protocols (dashed). RQ1 opens truth after the predicted
-partition is locked; RQ2 uses oracle grouping only to isolate the ranking rule;
-RQ3 opens outcome truth after the predicted schedule is locked. Candidate
-inference never receives incident truth.}
+evaluator-only truth join (dashed). The scheduler receives predicted clusters,
+never incident truth.}
 \label{fig:pipeline}
 \end{figure}
+
+Algorithm~\ref{alg:pipeline} restates the executable inference path as
+pseudocode: admission gating and manual-review routing (Section~2.1),
+similarity-graph construction and clustering (Section~2.2), duplicate-aware
+cluster scoring (Section~2.3, detailed as a subroutine in
+Algorithm~\ref{alg:priority}), and scheduling. The evaluator-only truth join
+is described after the algorithm and is never an input to this inference path.
+
+\begin{algorithm}[!tbp]
+\caption{Fail-closed observable report pipeline (Fig.~\ref{fig:pipeline})}
+\label{alg:pipeline}
+\begin{algorithmic}[1]
+\Require Reports $R=\{r_i\}$; kernel scales $\sigma,\tau_t,\tau_F,\tau_E$;
+weights $\beta,\gamma$ (and $\alpha$ for the additive composition); quantile
+$q$; neighbour cap $k$; Louvain/Leiden resolution $\rho$; composition
+$m\in\{\text{product},\text{additive}\}$
+\Ensure Dispatch schedule $S$; the algorithm below never reads incident
+identity, benefit, deadline, or harm labels
+\State $R_{\rm obs}\gets\emptyset$; $R_{\rm review}\gets\emptyset$
+\For{each report $r_i\in R$}
+    \State $a_i\gets\mathbf{1}\{L_i,T_i\text{ observed}\}$ \Comment{Section~2.1}
+    \If{$a_i=0$}
+        \State $R_{\rm review}\gets R_{\rm review}\cup\{r_i\}$
+        \Comment{orange manual-review path}
+    \Else
+        \State $R_{\rm obs}\gets R_{\rm obs}\cup\{r_i\}$
+    \EndIf
+\EndFor
+\State Compute each $n_i^{\rm corrob}$ from unique observable payloads in the
+full $R_{\rm obs}$, then set
+\Statex \hspace{1em}$Q_i\gets\operatorname{sigmoid}\bigl(b_0+b_1\mathbf{1}\{\text{image}_i\}
+ +b_2\log(1+n_i^{\rm corrob})\bigr)$ for every $r_i\in R_{\rm obs}$
+\State $E_0\gets$ \Call{BuildSimilarityEdges}{$R_{\rm obs},m,\sigma,\tau_t,\tau_F,\tau_E,\alpha,\beta,\gamma$}
+\Comment{BuildSimilarityEdges computes $G,T,C$ on the full eligible pair matrix}
+\State $\theta\gets q$-quantile of the nonzero weights in $E_0$
+\State $E_\theta\gets\{(i,j,w_{ij})\in E_0:w_{ij}>\theta\}$
+\State $E\gets E_\theta\ \cup\ \text{(endpoint-wise top-}k\text{ edges in }E_\theta\text{), symmetrized by OR}$
+\State $\mathcal{G}\gets(R_{\rm obs},E)$
+\State $\mathcal{C}\gets$ Louvain$/$Leiden$(\mathcal{G},\rho)$
+\Comment{predicted clusters, never incident truth}
+\For{each predicted cluster $C_k\in\mathcal{C}$}
+    \State $P_k\gets$ \Call{PriorityScore}{$C_k$} \Comment{Algorithm~\ref{alg:priority}}
+\EndFor
+\State $S\gets$ Scheduler$(\{(C_k,P_k):C_k\in\mathcal{C}\})$
+\Comment{scheduler sees predicted clusters and $P_k$ only}
+\State \Return $S$
+\end{algorithmic}
+\end{algorithm}
+
+\FloatBarrier
+
+After $S$ is fixed, the offline evaluator may join $S$ and $R_{\rm review}$
+with incident identity, benefit, deadline, and harm labels to compute ARI,
+NDCG@5, and dispatch outcomes. This dashed path is not available to the
+inference algorithm. In the current artifacts, the core schema requires
+location and event time, so the manual-review branch is a fail-closed design
+boundary rather than an empirically exercised missingness condition.
 
 \subsection{Report Attributes and Missingness}
 
@@ -143,8 +239,9 @@ truth. The implementation also carries observable support fields such as
 image presence, source type, province, and missing-field flags; these support
 $Q_i$ and duplicate fingerprints but are not additional latent labels.
 
-The score $Q_i$ is computed from observable image presence and a capped count
-$n_i^{\rm corrob}$ of nearby corroborating payloads using the proposed
+The score $Q_i$ is computed from observable image presence and the number of
+nearby corroborating observable payloads (counted by unique payload identity)
+using the proposed
 heuristic
 \[
 \begin{aligned}
@@ -199,14 +296,21 @@ The product is a spatial gate motivated by spatial--range products such as
 bilateral filtering~\cite{tomasi1998bilateral}; both compositions and all
 weights here are defined by this paper.
 All scales $\sigma,\tau_t,\tau_F,\tau_E$ are strictly positive and the
-weights are nonnegative. The implementation first forms a common spatial
-candidate pool of at most $\max(64,4k)$ neighbours per eligible report,
-including all boundary-distance ties before canonical truncation. It computes
-an empirical nonzero-weight quantile, retains strict above-threshold edges,
-keeps the union of endpoint-wise top-$k$ edges, and applies Louvain. Product
+weights are nonnegative. The implementation forms the eligible pair matrix,
+computes an empirical nonzero-weight quantile, retains strict
+above-threshold edges, keeps the union of endpoint-wise top-$k$ edges, and
+applies Louvain. Product
 and additive candidates have the same pool and grid, but each family is
 selected independently; the estimand is therefore a pipeline comparison, not
-an operator-only causal effect.
+an operator-only causal effect. Because product and additive pipelines are
+calibrated on separate quantile grids, reflecting how each would be tuned
+independently in practice, we treat this independently calibrated contrast
+as the primary estimand for RQ1 throughout the paper: it answers whether a
+practitioner who tunes each pipeline separately, as would occur in practice,
+obtains a net benefit from product composition. Section~\ref{sec:results}
+also reports a matched-density contrast, which equalizes retained-edge
+fraction and mean degree across compositions, as a secondary robustness
+diagnostic that isolates the composition operator from calibration choices.
 
 \begin{theorem}[Product edge localization]
 Let $B=\beta+\gamma>0$. If a product edge with threshold $0<\theta<B$ is
@@ -252,20 +356,22 @@ alone implies better empirical clustering.
 
 Exact duplicate payloads share a canonical fingerprint. Near duplicates are
 joined by deterministic connected components under the observable envelope;
-this transitive rule is not complete linkage. Let $g$ index the resulting
-evidence families. The revised estimator uses confidence-gated family maxima
-and avoids treating overlapping reports as disjoint people. Write
+this transitive rule is not complete linkage. For a predicted cluster $C_k$,
+let $\mathcal F_k$ denote the resulting exact/near-duplicate evidence
+families inside that cluster. The revised estimator uses one confidence-gated
+priority per cluster and family maxima so that overlapping reports are not
+treated as disjoint people. Write
 $\widetilde N_i=\min(N_i,N_{\rm ref})$ and
 $\widetilde V_i=\min(V_i,V_{\rm cap})$ for the nonnegative clipped claims:
 \begin{align}
-\bar E&=\frac{\sum_g\max_{i\in g}Q_iE_i}
- {\max(1,\sum_g\max_{i\in g}Q_i)},&
-\bar F&=\max_{g,i\in g}Q_iF_i,\nonumber\\
-\bar N&=\min\!\left(1,\frac{\log(1+\max_{g,i\in g}Q_i\widetilde N_i)}
+\bar E_k&=\frac{\sum_{g\in\mathcal F_k}\max_{i\in g}Q_iE_i}
+ {\max(1,\sum_{g\in\mathcal F_k}\max_{i\in g}Q_i)},&
+\bar F_k&=\max_{g\in\mathcal F_k}\max_{i\in g}Q_iF_i,\nonumber\\
+\bar N_k&=\min\!\left(1,\frac{\log(1+\max_{g\in\mathcal F_k}\max_{i\in g}Q_i\widetilde N_i)}
  {\log(1+N_{\rm ref})}\right),&
-\bar V&=\max_{g,i\in g}Q_i\widetilde V_i,\nonumber\\
-P&=\left[1+(\mu-1)\tanh(\bar V/s)\right]
- (\omega_E\bar E+\omega_F\bar F+\omega_N\bar N).
+\bar V_k&=\max_{g\in\mathcal F_k}\max_{i\in g}Q_i\widetilde V_i,\nonumber\\
+P_k&=\left[1+(\mu-1)\tanh(\bar V_k/s)\right]
+ (\omega_E\bar E_k+\omega_F\bar F_k+\omega_N\bar N_k).
 \label{eq:priority}
 \end{align}
 The candidate source snapshot associated with the RQ2/RQ3 artifacts specifies
@@ -276,27 +382,61 @@ bounds individual evidence, and the hyperbolic tangent saturates vulnerability
 amplification. Reliability-aware truth discovery motivates using $Q_i$ but does
 not derive these maxima~\cite{wang2012truth}. Transformation, normalization,
 and weights require sensitivity and expert validation
-~\cite{tate2012vulnerability,gralla2014review}. Comparators are a
+~\cite{tate2012vulnerability,gralla2014review}; Section~\ref{sec:sensitivity}
+reports a first such analysis. Comparators are a
 multiplicity-sensitive legacy score, urgency-only, population-only, a simple
 linear score, stable random, and---for dispatch---nearest-first.
+
+\begin{algorithm}[!tbp]
+\caption{\textproc{PriorityScore}: duplicate-aware bounded priority (Eq.~\ref{eq:priority})}
+\label{alg:priority}
+\begin{algorithmic}[1]
+\Function{PriorityScore}{cluster $C_k$}
+    \State $\mathcal F_k\gets$ ExactFingerprintGroups$(C_k)$ and
+    NearDuplicateComponents$(C_k)$
+    \State $\bar E_k\gets\dfrac{\sum_{h\in\mathcal F_k}\max_{i\in h}Q_iE_i}
+    {\max(1,\sum_{h\in\mathcal F_k}\max_{i\in h}Q_i)}$
+    \Comment{one representative per evidence family}
+    \State $\bar F_k\gets\max_{h\in\mathcal F_k}\max_{i\in h}Q_iF_i$
+    \State $\bar N_k\gets\min\!\Bigl(1,\dfrac{\log\bigl(1+\max_{h\in\mathcal F_k}\max_{i\in h}Q_i\min(N_i,N_{\rm ref})\bigr)}
+    {\log(1+N_{\rm ref})}\Bigr)$
+    \State $\bar V_k\gets\max_{h\in\mathcal F_k}\max_{i\in h}Q_i\min(V_i,V_{\rm cap})$
+    \State $P_k\gets\bigl[1+(\mu-1)\tanh(\bar V_k/s)\bigr]
+    \bigl(\omega_E\bar E_k+\omega_F\bar F_k+\omega_N\bar N_k\bigr)$
+    \State \Return $P_k$
+\EndFunction
+\end{algorithmic}
+\end{algorithm}
+
+\FloatBarrier
 
 \section{Experimental Design}
 
 \paragraph{Data contract and splits.}
-The artifact contains 80 independently seeded synthetic datasets
-geographically anchored to the Copernicus EMSR848 Central Viet Nam flood
-activation. Copernicus EMS, OpenStreetMap, and WorldPop provide geographic or
-historical anchors; rescue incidents, reports, duplicates, coordinated
-campaigns, vulnerability, and incident labels are synthetic. Every run has 16
-latent incidents, 288--370 reports, exact and near duplicates, and three
-coordinated nonincident campaigns of 20 reports each. Across all runs are
-26,288 reports: 17,901 genuine, 3,587 duplicate, and 4,800 coordinated
-nonincident reports. Runs 1--20 are reserved for development, runs 21--40 for
-calibration, and runs 41--80 for held-out testing. All runs use one fixed
-generator regime, so the experiment measures within-generator variation, not
-mechanism-shift OOD transfer. Inference reads only
-\texttt{algorithm\_input.json}; ground truth is opened after predictions for a
-test run have been produced.
+The study uses two explicitly separated artifact suites. RQ1 uses the tracked
+generator-3.0 bundle, a semi-synthetic dataset with geographic anchors from
+the Copernicus EMSR848 Central Viet Nam activation; Copernicus EMS,
+OpenStreetMap, and WorldPop provide geographic or historical anchors, while
+incidents, reports, duplicates, coordinated attacks, vulnerability, and
+labels are synthetic. It contains 80 runs with 16 latent incidents and
+26,288 reports (17,901 genuine, 3,587 duplicate, and 4,800 coordinated
+nonincident reports), with 288--370 reports per run. Runs 1--20 are
+development, 21--40 calibration, and 41--80 the test split held out from
+calibration. These are within-generator tests, not mechanism-shift OOD
+transfer.
+
+RQ2 and RQ3 use a separately generated Candidate-4.1 bundle. This bundle is
+a fully synthetic regional scenario defined by the generator and is not
+claimed to be EMSR848-anchored. It contains 80 datasets, 16 incidents per
+dataset, 30,229 reports in total, and 339--424 reports per dataset; the
+development, calibration, and test seeds are 1000--1019, 2000--2019, and
+3000--3039. Across its splits there are 1,554 fake reports and 2,560 labeled
+duplicates (1,280 exact and 1,280 near). Each base dataset contains one
+five-report coordinated high-confidence campaign and one report for each of
+four low-confidence attack types; RQ2 stress scenarios perturb these inputs.
+For both suites, inference reads only observable
+\texttt{algorithm\_input.json}; ground truth is opened only after predictions
+are fixed.
 
 \paragraph{Selection and comparators.}
 The current notebook evaluates complete small grids on the 20 calibration
@@ -319,14 +459,42 @@ endpoint; NMI, pairwise F1, geographic diameter, runtime, false destinations,
 fake absorption, noise rejection, retained-edge fraction, and mean degree are
 descriptive or operational diagnostics. The benchmark includes a matched-
 density product--additive comparison. Seed-paired ARI differences use 10,000
-bootstrap resamples, Wilcoxon signed-rank tests, and Holm correction. The
-priority stress tests and predicted-cluster dispatch evaluation use independent
-benefit, deadline, service, access-delay, and harm outputs reported in Section~4;
-no clustering metric is substituted for those outcomes. RQ2 uses oracle
-incident grouping solely for score isolation; RQ3 schedules predicted
-partitions and includes an oracle partition only as an evaluator comparator.
+bootstrap resamples, Wilcoxon signed-rank tests, and Holm correction; RQ2
+and RQ3 paired comparisons use 5,000 bootstrap resamples with the locked
+analysis seed. The
+reported p-values use explicitly exported analysis families. RQ1 applies one
+Holm family to all nine Product-Louvain-versus-comparator ARI contrasts; the
+three product/additive/Leiden contrasts are the primary comparisons and the
+remaining baselines are secondary diagnostics. RQ2 uses five
+comparator-specific three-endpoint families for alignment (NDCG@5, Spearman,
+and top-five overlap) and one five-endpoint family per robustness scenario
+(priority drift, mean-rank drift, top-k churn, N-error, and V-error); false
+priority lift is descriptive. For RQ3, each fixed candidate/comparator/context
+block applies Holm across all 14 dispatch endpoints. The primary RQ3 revision
+aggregates the three resource scenarios within each seed, so each paired test
+uses 40 seed pairs; the original 120 seed-by-scenario analysis is retained as
+a diagnostic artifact. RQ2 alignment uses oracle incident groups only to
+isolate ranking, whereas RQ3 evaluates predicted clusters. The priority stress
+tests and dispatch evaluation use independent benefit, deadline, service,
+access-delay, and harm outputs; no clustering metric is substituted for those
+outcomes.
 
 \section{Results}
+\label{sec:results}
+
+In summary, across the 40 held-out test runs neither graph-clustering
+composition shows a statistically robust advantage: additive Louvain attains
+the highest mean ARI ($.9191$), but its margin over product variants does not
+survive multiple-comparison correction under either calibration framing. For
+priority ranking, the proposed duplicate-aware score removes exact-duplicate
+inflation but does not show a general alignment advantage over simpler
+comparators, and shows larger priority/rank drift than the legacy score under
+a single realistic adversarial pattern---a coordinated high-confidence
+reporting campaign. Downstream, these behaviors propagate into the dispatch
+simulation: the revised policy shows no established improvement in harm or
+deadline outcomes over the legacy score, and performs significantly worse
+than a naive nearest-first baseline on both. The remainder of this section
+presents the supporting statistical detail.
 
 \begin{table}[t]
 \centering\scriptsize
@@ -375,9 +543,11 @@ not evidence of misinformation robustness.
 
 \begin{table}[t]
 \centering\scriptsize
-\caption{Headline RQ2/RQ3 results from the candidate-4.1 artifacts. Positive
-paired effects favor the revised candidate; lower-is-better metrics use the
-artifact's oriented sign convention.}
+\caption{Headline RQ2/RQ3 results from the candidate-4.1 artifacts. RQ3
+effects and p-values use 40 seed pairs after averaging the three resource
+scenarios within seed; the original 120 seed-by-scenario analysis is
+diagnostic. Positive paired effects favor the revised candidate; lower-is-better
+metrics use the artifact's oriented sign convention.}
 \label{tab:stress-results}
 \begin{tabular}{llrr}
 \toprule
@@ -387,12 +557,13 @@ RQ2 & Revised NDCG@5 (absolute) & .6669 & --\\
     & Random NDCG@5 (absolute) & .6763 & --\\
     & Revised $-$ legacy NDCG@5 & +.0121 & .5882\\
     & Exact-duplicate priority drift & 0 & --\\
-    & Coordinated-campaign drift & .1688 & --\\
-RQ3 & Revised $-$ legacy, Product harm & $-14.34$ & .675\\
-    & Revised $-$ legacy, Product deadline & +.0188 & .160\\
-    & Revised $-$ nearest, Product harm & $-69.88$ & $1.8\times10^{-7}$\\
-    & Revised $-$ nearest, Product deadline & $-.1771$ & $3.0\times10^{-15}$\\
-    & Product $-$ matched Additive harm & $-18.34$ & .000151\\
+    & Coordinated-campaign drift (revised absolute) & .1688 & --\\
+    & Revised $-$ legacy campaign drift & $-.1379$ & $9.1\times10^{-12}$\\
+RQ3 & Revised $-$ legacy, Product harm & $-14.34$ & .563\\
+    & Revised $-$ legacy, Product deadline & +.0188 & .247\\
+    & Revised $-$ nearest, Product harm & $-69.88$ & $4.1\times10^{-5}$\\
+    & Revised $-$ nearest, Product deadline & $-.1771$ & $1.3\times10^{-6}$\\
+    & Product $-$ matched Additive harm & $-18.34$ & .000168\\
 \bottomrule
 \end{tabular}
 \end{table}
@@ -415,11 +586,13 @@ summary CSV.}
 \label{fig:rq2-priority}
 \end{figure}
 
-For RQ3, revised versus legacy on the Product partition has harm effect
-$-14.34$ (Holm $p=.675$) and deadline effect $+.0188$ (Holm $p=.160$), so no
-general improvement is established. Revised is significantly worse than
-nearest-first on both harm and deadline. Product is also worse than matched-
-density Additive under the revised policy on harm, and worse than oracle on
+For RQ3, after averaging the three resource scenarios within each seed,
+revised versus legacy on the Product partition has harm effect $-14.34$
+(Holm $p=.563$) and deadline effect $+.0188$ (Holm $p=.247$), so no general
+improvement is established. Revised is significantly worse than nearest-first
+on both harm (Holm $p=4.1\times10^{-5}$) and deadline (Holm
+$p=1.3\times10^{-6}$). Product is also worse than matched-density Additive
+under the revised policy on harm (Holm $p=.000168$), and worse than oracle on
 the corresponding dispatch outcomes. Predicted split, merge, and fake-only
 destinations therefore propagate into operational consequences.
 
@@ -427,9 +600,54 @@ destinations therefore propagate into operational consequences.
 \centering
 \includegraphics[width=\textwidth]{rq3_dispatch.pdf}
 \caption{RQ3 Product-partition paired effects on latent harm generated from
-the dispatch comparison CSV; positive values are improvement-oriented.}
+the seed-level dispatch comparison CSV; positive values are
+improvement-oriented.}
 \label{fig:rq3-dispatch}
 \end{figure}
+
+\subsection{Sensitivity of Heuristic Constants}
+\label{sec:sensitivity}
+
+To assess robustness to the fixed constants in $Q_i$ (Section~2.1) and $P$
+(Eq.~\ref{eq:priority}), we define a local one-at-a-time sensitivity
+analysis on the Candidate-4.1 ranking task. Each valid constant is perturbed
+around its reference value while all other constants are held fixed, and
+NDCG@5 is recomputed on the same 40 test seeds. The $\omega$ variants perturb
+one component at a time and renormalize the vector; $\mu$ is restricted to its
+policy-valid interval $[1,2]$. The locked rerun evaluates 21 configurations
+(one shared baseline and two or three tested levels for each constant) on the
+same 40 held-out seeds, yielding 840 seed-level observations. A constant is
+considered stable if the mean metric varies by less than $0.01$ across its
+valid tested levels. Table~\ref{tab:sensitivity} reports ranges copied from
+the sensitivity summary CSV; no value is inferred from the fixed-
+configuration comparisons.
+
+\begin{table}[t]
+\centering\scriptsize
+\caption{Candidate-4.1 one-at-a-time sensitivity of mean NDCG@5 to fixed
+heuristic constants. Each range is the minimum--maximum mean over the tested
+levels, including the reference level, on 40 test seeds. All spans are below
+0.01 under the locked rerun.}
+\label{tab:sensitivity}
+\resizebox{\textwidth}{!}{%
+\begin{tabular}{lccc}
+\toprule
+Constant & Reference/default value & Tested levels & Metric range\\
+\midrule
+$b_0$ ($Q_i$ intercept) & $-0.20$ & $[-0.24,-0.16]$ & $[.6653,.6672]$\\
+$b_1$ (image weight) & $1.40$ & $[1.12,1.68]$ & $[.6669,.6687]$\\
+$b_2$ (corroboration weight) & $0.90$ & $[0.72,1.08]$ & $[.6667,.6679]$\\
+$\omega_E$ & $.34$ & component $\times\{.8,1,1.2\}$, renormalized & $[.6663,.6714]$\\
+$\omega_F$ & $.33$ & component $\times\{.8,1,1.2\}$, renormalized & $[.6625,.6679]$\\
+$\omega_N$ & $.33$ & component $\times\{.8,1,1.2\}$, renormalized & $[.6663,.6697]$\\
+$\mu$ (vulnerability amplification) & $2$ & $\{1.6,1.8,2.0\}$ & $[.6644,.6683]$\\
+$s$ (vulnerability saturation) & $10$ & $[8,12]$ & $[.6665,.6713]$\\
+$N_{\rm ref}$ & $500$ & $[400,600]$ & $[.6669,.6669]$\\
+$V_{\rm cap}$ & $50$ & $[40,60]$ & $[.6669,.6669]$\\
+\bottomrule
+\end{tabular}
+}
+\end{table}
 
 \section{Discussion and Threats to Validity}
 
@@ -448,6 +666,13 @@ Dispatch results confirm that a bounded score cannot substitute for a
 validated operational objective; clustering errors and fake-only destinations
 are transmitted to scheduling.
 
+The local sensitivity analysis is stable over the tested intervals: every
+constant has a mean-NDCG@5 span below $0.01$ across the 40 held-out seeds. The
+largest span is for $\omega_F$ ($.00546$), while changing $V_{\rm cap}$ from
+40 to 60 leaves the mean unchanged at the reported precision. These results
+support numerical robustness within the tested neighborhood only; they do not
+validate the constants outside those levels or replace expert validation.
+
 All reports, incidents, relevance signals, and dispatch outcomes are
 synthetic. RQ1 varies seeds within generator 3.0.0, while RQ2/RQ3 use a
 separate candidate-4.1 bundle; neither tests mechanism-shift OOD transfer or
@@ -458,21 +683,42 @@ measure extraction accuracy, device latency, memory, energy, provenance
 authenticity, or real-world harm. These limitations preclude policy or
 deployment claims.
 
-\section{Artifact and Conclusion}
+\section{Conclusion}
 
-The accompanying artifact contains the 80-run dataset, benchmark notebooks,
-calibration grid, selected configurations, per-run test results, paired
-comparisons, and the deterministic figure-generation script. The publication
-figures are generated from the result CSVs; the original artifact PNGs remain
-available for audit. Every reported number is generated from an accepted CSV
-row and its documented generator and configuration metadata.
+The study establishes conditional graph bounds and documents competitive
+within-generator clustering, exact-duplicate invariance, and important
+negative results for ranking and dispatch. It does not establish ranking
+alignment, dispatch benefit, misinformation robustness, policy validity, or
+deployment readiness. The contribution is an auditable stress-test boundary
+around those claims, not a validated rescue policy.
 
-In conclusion, the study establishes conditional graph bounds and documents
-competitive within-generator clustering, exact-duplicate invariance, and
-important negative results for ranking and dispatch. It does not establish
-ranking alignment, dispatch benefit, misinformation robustness, policy
-validity, or deployment readiness. The contribution is an auditable
-stress-test boundary around those claims, not a validated rescue policy.
+\section*{Data and Code Availability}
+
+The accompanying artifact record contains the two data-suite manifests,
+benchmark notebooks, calibration grids, selected configurations, per-run test
+results, paired comparisons, the seed-level RQ3 reanalysis, and a deterministic
+figure-generation script. The publication figures are generated from result
+CSVs; every reported number is tied to an accepted CSV row and documented
+generator/configuration metadata. Raw upstream anchor snapshots are not
+redistributed in this artifact, and third-party materials remain governed by
+their own provenance and license records.
+
+The versioned research artifact is archived on
+Zenodo~\cite{nguyen2026floodartifact} and corresponds to
+\href{https://github.com/ngthtrong/nckh2/releases/tag/v1.0.0}{GitHub Release
+v1.0.0} at commit
+\href{https://github.com/ngthtrong/nckh2/commit/04e0f04a7376cbbb02a1a95ecb4e3147d56c575b}{\texttt{04e0f04}}.
+The development version remains available on the
+\href{https://github.com/ngthtrong/nckh2/tree/clean}{\texttt{clean} branch}.
+The rerun used generator commit
+\href{https://github.com/ngthtrong/nckh2/commit/a6be3e988dad1aa442c8c8e158c2bba96b2b7fb9}{\texttt{a6be3e9}};
+the RQ2 manifest records
+SHA-256 hashes for every reported CSV, including the 840-row sensitivity
+artifact and its 30-row summary. Original code is released under the MIT
+License, and the manuscript, tables, figures, and original synthetic
+artifacts are released under CC BY 4.0. These grants exclude Copernicus EMS,
+OpenStreetMap, WorldPop, Springer/LaTeX templates, and other third-party
+materials, which retain their original terms and required attribution.
 
 \bibliographystyle{splncs04}
 \bibliography{references}
