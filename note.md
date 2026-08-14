@@ -49,9 +49,9 @@ Ngoài điểm 3.4, toàn bộ Algorithm 1 được transliterate (chuyển th�
 
 ## Resolution log for the long-paper revision
 
-Các điểm dưới đây đã được xử lý trong `paper/main_revised.tex` và artifact
-RQ3; các ô số liệu sensitivity vẫn cố ý để `[FILL IN]` vì tác giả đang chạy
-lại thí nghiệm.
+Các điểm dưới đây đã được xử lý trong `paper/main_revised.tex` và các artifact
+RQ2/RQ3. Các ghi chú lịch sử phía trên được giữ nguyên để đối chiếu; trạng
+thái hiện hành là nội dung của resolution log này.
 
 - Priority được xác minh là một giá trị `P_k` cho mỗi predicted
   cluster/destination. Exact và near-duplicate families `g` được tạo bên
@@ -72,7 +72,13 @@ lại thí nghiệm.
   trong seed, suy luận chính dùng 40 seed pairs; CSV cũ 120 seed×scenario
   được giữ làm diagnostic.
 - Table sensitivity đã sửa metric thành NDCG@5, policy-valid `\mu`, và
-  normalized one-at-a-time `\omega`. Các giá trị `Metric range` chưa được
-  điền.
-- Availability hiện không tự tạo URL/license; bản camera-ready chỉ điền
-  sau provenance/license audit và phát hành immutable revision.
+  normalized one-at-a-time `\omega`. Rerun khóa trên 40 test seeds sinh 21
+  cấu hình/840 hàng seed-level và 30 hàng summary; cả 10 span đều dưới .01.
+  Các range trong bảng được chép từ
+  `demo/results/rq2_results/rq2_parameter_sensitivity_summary.csv`.
+- Artifact RQ2 đã được chuẩn hóa về `demo/results/rq2_results/`; manifest mới
+  chứa và xác minh SHA-256 cho hai CSV sensitivity.
+- Data/code availability hiện trỏ tới `https://github.com/ngthtrong/nckh2`.
+  Code dùng MIT; manuscript, bảng, hình và synthetic artifacts nguyên gốc của
+  nhóm dùng CC BY 4.0. Copernicus EMS, OpenStreetMap, WorldPop, Springer/
+  LaTeX templates và tài sản bên thứ ba khác giữ license/attribution gốc.
