@@ -683,7 +683,16 @@ measure extraction accuracy, device latency, memory, energy, provenance
 authenticity, or real-world harm. These limitations preclude policy or
 deployment claims.
 
-\section{Artifact and Conclusion}
+\section{Conclusion}
+
+The study establishes conditional graph bounds and documents competitive
+within-generator clustering, exact-duplicate invariance, and important
+negative results for ranking and dispatch. It does not establish ranking
+alignment, dispatch benefit, misinformation robustness, policy validity, or
+deployment readiness. The contribution is an auditable stress-test boundary
+around those claims, not a validated rescue policy.
+
+\section*{Data and Code Availability}
 
 The accompanying artifact record contains the two data-suite manifests,
 benchmark notebooks, calibration grids, selected configurations, per-run test
@@ -694,23 +703,16 @@ generator/configuration metadata. Raw upstream anchor snapshots are not
 redistributed in this artifact, and third-party materials remain governed by
 their own provenance and license records.
 
-\paragraph{Data and Code Availability.}
 The analysis code and derived synthetic result tables are available at
 \url{https://github.com/ngthtrong/nckh2}. The rerun used generator commit
-\texttt{a6be3e988dad1aa442c8c8e158c2bba96b2b7fb9}; the RQ2 manifest records
+\href{https://github.com/ngthtrong/nckh2/commit/a6be3e988dad1aa442c8c8e158c2bba96b2b7fb9}{\texttt{a6be3e9}};
+the RQ2 manifest records
 SHA-256 hashes for every reported CSV, including the 840-row sensitivity
 artifact and its 30-row summary. Original code is released under the MIT
 License, and the manuscript, tables, figures, and original synthetic
 artifacts are released under CC BY 4.0. These grants exclude Copernicus EMS,
 OpenStreetMap, WorldPop, Springer/LaTeX templates, and other third-party
 materials, which retain their original terms and required attribution.
-
-In conclusion, the study establishes conditional graph bounds and documents
-competitive within-generator clustering, exact-duplicate invariance, and
-important negative results for ranking and dispatch. It does not establish
-ranking alignment, dispatch benefit, misinformation robustness, policy
-validity, or deployment readiness. The contribution is an auditable
-stress-test boundary around those claims, not a validated rescue policy.
 
 \bibliographystyle{splncs04}
 \bibliography{references}
