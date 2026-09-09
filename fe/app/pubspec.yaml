@@ -1,0 +1,38 @@
+name: app
+description: "Ứng dụng cứu hộ offline-first: nhận diện ảnh on-device, gửi thích ứng theo mạng, SMS fallback."
+publish_to: 'none'
+version: 0.1.0+1
+
+environment:
+  sdk: ^3.12.2
+
+dependencies:
+  flutter:
+    sdk: flutter
+  # any = resolver tự chọn bản mới nhất tương thích (app nội bộ, không publish)
+  connectivity_plus: any
+  dio: any
+  flutter_image_compress: any
+  geolocator: any
+  hive_ce: any
+  hive_ce_flutter: any
+  image_picker: any
+  intl: any
+  onnxruntime: any
+  path_provider: any
+  permission_handler: any
+  url_launcher: any
+  uuid: any
+  workmanager: any
+
+dev_dependencies:
+  flutter_test:
+    sdk: flutter
+  flutter_lints: ^6.0.0
+
+flutter:
+  uses-material-design: true
+  assets:
+    - assets/
+    - assets/models/
+    - assets/images/

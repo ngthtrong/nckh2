@@ -1,0 +1,29 @@
+import 'dart:typed_data';
+
+import '../../domain/entities/ai_tag.dart';
+import '../../domain/repositories/inference_repository.dart';
+import '../datasources/inference_local_datasource.dart';
+
+class InferenceRepositoryImpl implements InferenceRepository {
+  final InferenceLocalDataSource dataSource;
+
+  InferenceRepositoryImpl(this.dataSource);
+
+  @override
+  bool get ready => dataSource.ready;
+
+  @override
+  Future<void> loadModel() async {
+    await dataSource.loadModel();
+  }
+
+  @override
+  Future<InferenceResult?> classifyImage(Uint8List imageBytes) async {
+    return dataSource.classifyImage(imageBytes);
+  }
+
+  @override
+  List<AiTag> generateAiTags(String? label, double? confidence) {
+    return dataSource.generateAiTags(label, confidence);
+  }
+}
