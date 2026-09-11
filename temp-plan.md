@@ -1,112 +1,76 @@
+# Kế hoạch camera-ready đã triển khai: EasyChair và RQ1 v2
 
-# Kế hoạch hoàn thiện camera-ready theo CCIS/Springer và LTP
+Ngày cập nhật: 11/09/2026 UTC. Baseline thực thi: nhánh `clean`, HEAD
+`edefb9c`; bản đã nộp trước đây là tag `v1.0.1`. Kế hoạch này thay thế các bản
+nháp trước. Commit, push, release, ký LTP và upload EasyChair không thuộc lần
+triển khai này.
 
-## 1. Quy định nộp bài đã xác nhận
+## 1. Audit và lựa chọn bằng chứng — đã hoàn thành
 
-Dùng [remind_for_camera_ready.md](/home/ngthtrong/nckh2/docs/camera-ready/remind_for_camera_ready.md:5) làm hướng dẫn riêng cho bài Springer CCIS:
+- Giữ `src/results/rq1_results/` làm nguồn chính và
+  `src/results/rq1_results_v2/full/` làm lần chạy đối chiếu; không gộp thành 80
+  run độc lập và không chọn nguồn theo kết quả tốt hơn.
+- Cả hai gói đều đủ 280 checkpoint, 1.400 fit, 92.617 mapping, 35 summary và
+  300 paired effect. Các thống kê và 5.000 bootstrap được tái tính bằng NumPy
+  2.5.1 với sai số tối đa `1e-10`.
+- Manifest lần đầu có 288 checksum/Python 3.13.15; v2 có 287
+  checksum/Python 3.12.13. Protocol và package versions giống nhau nhưng chưa
+  khóa `python_version`.
+- Bảy checkpoint smoke v2 khớp full ở mọi kết quả ngoài runtime; 35 smoke fit
+  chỉ là kiểm tra kỹ thuật.
+- Báo cáo keyed comparison 1.400 dòng xác nhận 43 thay đổi ARI, chỉ thuộc copy
+  2× của bốn phương pháp đồ thị. Control, GPS, time và copy 5× không đổi.
+- Việc còn chờ: ZIP gốc và xác nhận runtime/resume của hai lần; notebook đã
+  thực thi của v2. Chưa tuyên bố tái lập xuyên môi trường đạt.
 
-- Hạn cuối: **16/09/2026**; múi giờ chưa được ghi nên hoàn tất nội bộ chậm nhất ngày 15/09 và không chờ sát hạn.
-- Giới hạn **12–15 trang nghiêm ngặt**, bao gồm tài liệu tham khảo.
-- Nộp bằng tài khoản tác giả trên EasyChair:
+## 2. Nội dung khoa học và bố cục — đã hoàn thành
 
-  1. Một ZIP chứa toàn bộ LaTeX source cần thiết.
-  2. PDF camera-ready tương ứng chính xác với source ZIP.
-- Copyright/LTP là tài liệu riêng, phải hoàn thành và gửi sớm nhất có thể.
-- Không nộp response letter vì hướng dẫn không yêu cầu; tài liệu phản hồi tiếp tục giữ nội bộ.
+- Bốn nhóm phương trình confidence, contextual similarity, graph affinities và
+  priority được đánh số liên tục; ký hiệu, miền, đơn vị, scale, trọng số và
+  miền `0 <= P_k <= mu` được giải thích tại chỗ.
+- Pseudocode tham chiếu phương trình thay vì khai triển lặp; thuật toán, cấu
+  hình và dữ liệu không đổi.
+- Bảng stress RQ1 được thay bằng heatmap 6 × 5 của mean paired Delta ARI từ
+  lần đầu. Script khóa nguồn, kiểm tra đúng 30 ô và xuất PDF vector có số ghi
+  trực tiếp, đọc được ở grayscale.
+- Giữ kết quả bất lợi Product Louvain copy 5×: Delta `-.6108`, CI
+  `[-.6318,-.5881]`; nêu v2 chỉ làm thay đổi nhẹ ARI copy 2× và không gộp runs.
+- Xóa hai hình RQ2/RQ3 và bảng headline trùng lặp; giữ benchmark, robustness và
+  sensitivity. Bản Docker/Tectonic hiện có đúng 15 trang.
+- Chỉ Thanh-Trong Nguyen là corresponding author; tám tác giả được giữ theo
+  xác nhận ban tổ chức đã duyệt.
 
-## 2. Công thức, biểu đồ và bố cục 15 trang
+## 3. Quyền nội dung và khả dụng dữ liệu — đã hoàn thành trong workspace
 
-### Công thức
+- MIT được giới hạn rõ cho source code. `LICENSE-CONTENT` không cấp CC BY mới
+  từ snapshot hiện tại; contribution camera-ready thuộc LTP khi hợp đồng được
+  ký, phần phi code ngoài hợp đồng được bảo lưu quyền.
+- Không sửa tag/release/metadata `v1.0.1` và không tuyên bố thu hồi quyền đã cấp
+  cho snapshot cũ.
+- Data and Code Availability phân biệt `v1.0.1`, artifact stress chính và v2;
+  kết quả mới không được mô tả là đã nằm trong release cũ.
 
-- Định nghĩa tại chỗ mọi ký hiệu còn thiếu: chỉ báo ảnh; các scale \(\sigma,\tau_t,\tau_F,\tau_E\); trọng số \(\alpha,\beta,\gamma,\omega\); các thành phần \(\bar E_k,\bar F_k,\bar N_k,\bar V_k\); và miền của \(P_k\).
-- Đánh số liên tục bốn nhóm công thức chính: confidence, contextual similarity, graph affinities và priority.
-- Nêu các ràng buộc trọng số và giới hạn \(0\le P_k\le\mu\).
-- Bỏ công thức rút gọn bị lặp; thu gọn phần khai triển lại công thức trong pseudocode thành tham chiếu phương trình.
-- Đối chiếu công thức với code sinh kết quả; không thay đổi thuật toán.
+## 4. Gói EasyChair — đã build sạch, chờ nhóm duyệt
 
-### Biểu đồ RQ1
+- ZIP source có `main.tex` tại root, bibliography, `main.bbl`, `llncs.cls`,
+  `splncs04.bst` và chỉ hai hình đang dùng; loại notebook, kết quả, cache và tài
+  liệu nội bộ.
+- Trường dự kiến: main file `main.tex`, engine `xelatex`, bibliography
+  `bibtex`; PDF phải tương ứng với ZIP.
+- Đã có alt text cho pipeline và heatmap. Hạn ghi nhận là 16/09/2026; nhóm cần
+  xác nhận giờ/múi giờ và hoàn tất nội bộ ngày 15/09.
+- Build Tectonic là kiểm tra bổ sung. Chuỗi sạch
+  `xelatex -> bibtex -> xelatex -> xelatex` từ ZIP đã đạt bằng TeX Live 2026,
+  không có lỗi, undefined citation/reference hoặc overfull box và cho 15 trang.
+  Phải chạy lại chuỗi này nếu nhóm duyệt thêm thay đổi.
 
-- Thay bảng stress RQ1 bằng heatmap 6 stress × 5 phương pháp.
-- Mỗi ô biểu diễn mean \(\Delta\)ARI stress-minus-control, có dấu và bốn chữ số thập phân.
-- Nguồn duy nhất là `rq1_stress_paired_effects.csv`, lọc `metric=ari_original`.
-- Xuất PDF vector, chữ tối thiểu 7 pt, đọc được khi in grayscale.
-- Giữ trong văn bản kết quả Product Louvain 5×: \(\Delta=-.6108\), CI \([-.6318,-.5881]\).
-- Không dùng heatmap hoặc CI để tuyên bố ưu thế thống kê giữa các phương pháp.
+## 5. Việc nhóm phải hoàn tất
 
-### Cắt phần trùng lặp
-
-- Xóa hai hình RQ2/RQ3 và bảng headline RQ2/RQ3 vì kết quả chính đã có trong văn bản và bảng chi tiết.
-- Rút đoạn mở đầu Results, caption dài và các câu lặp số liệu.
-- Giữ pipeline figure, bảng benchmark RQ1, bảng robustness RQ2 và bảng sensitivity.
-- Không chỉnh lề, font toàn bài hoặc cấu trúc `llncs` để ép số trang.
-- Tiêu chí cuối là đúng 15 trang.
-
-## 3. Tác giả và LTP
-
-Theo xác nhận của bạn, danh sách tám tác giả đã được ban tổ chức chấp thuận:
-
-- Giữ đủ tám tác giả hiện tại và lưu lại bằng chứng chấp thuận của ban tổ chức.
-- Chỉ **Thanh-Trong Nguyen** được đánh dấu corresponding author.
-- Danh sách và thứ tự trên bài, EasyChair và LTP phải giống hệt nhau.
-- Điền vào [LTP Singapore](/home/ngthtrong/nckh2/docs/camera-ready/SNCS_ProceedingsPaper_LTP_ST_SN_Singapore.docx.md:9):
-
-  - tên bài chính xác theo camera-ready;
-  - đủ tám họ tên tác giả;
-  - corresponding author: Thanh-Trong Nguyen;
-  - giữ nguyên tên hội nghị và volume editors đã được điền sẵn.
-- Thanh-Trong Nguyen ký thay mặt toàn bộ tác giả sau khi có sự đồng thuận của nhóm.
-- In, ký tay, ghi ngày/địa chỉ/email và scan thành PDF rõ nét; không dùng chữ ký đánh máy.
-- Sau khi ký, không thay đổi title, danh sách, thứ tự hoặc corresponding author nếu chưa xin phép lại.
-
-## 4. Chuyển quyền nội dung từ CC BY sang LTP
-
-Áp dụng lựa chọn “xóa CC BY cho toàn bộ content” từ trạng thái hiện tại trở đi:
-
-- Không sửa lịch sử hoặc tag `v1.0.1`; giấy phép đã cấp cho snapshot đó không thể bị thu hồi hồi tố.
-- Thay nội dung `LICENSE-CONTENT` bằng thông báo quyền mới:
-
-  - không còn cấp CC BY cho manuscript, bảng, hình hoặc synthetic result artifacts;
-  - camera-ready contribution chịu điều khoản của Springer LTP;
-  - các nội dung phi phần mềm khác được bảo lưu quyền nếu không có thông báo riêng;
-  - nội dung bên thứ ba tiếp tục theo giấy phép gốc.
-- Giữ `LICENSE` MIT nhưng ghi rõ MIT chỉ áp dụng cho source code, không áp dụng cho manuscript, figures, tables, datasets hoặc result artifacts.
-- Xóa câu khẳng định manuscript/artifact là CC BY trong Data and Code Availability.
-- Không thay đổi giấy phép hoặc metadata của bản Zenodo `v1.0.1` đã phát hành.
-- Không tạo release camera-ready mới trước khi thống nhất được metadata giấy phép cho gói chứa cả code MIT và content không còn CC BY.
-
-## 5. Chuẩn bị source ZIP và accessibility
-
-Tạo gói nộp trong thư mục staging sạch, chỉ gồm:
-
-- `main.tex`, `references.bib`, `main.bbl`;
-- `llncs.cls`, `splncs04.bst`;
-- các hình thực sự được tham chiếu trong bản cuối;
-- các source phụ thực sự được `\input` hoặc cần cho build.
-
-Loại khỏi ZIP:
-
-- `.aux`, `.log`, `.out`, cache và file tạm;
-- PDF/hình cũ không còn sử dụng;
-- notebook, checkpoint, CSV kết quả và tài liệu nội bộ;
-- reviewer response và audit/checkpoint nội bộ.
-
-Chuẩn bị alt text cho pipeline và heatmap vì [LTP yêu cầu alt text khi nộp hình](/home/ngthtrong/nckh2/docs/camera-ready/SNCS_ProceedingsPaper_LTP_ST_SN_Singapore.docx.md:65). Chỉ upload file alt-text riêng nếu EasyChair hoặc ban tổ chức cung cấp trường/biểu mẫu tương ứng.
-
-## 6. Kiểm tra bàn giao
-
-- Sinh heatmap từ CSV và kiểm tra đủ đúng 30 ô.
-- Chạy audit đầy đủ RQ1/RQ2/RQ3; không thay đổi checksum artifact gốc.
-- Build lại từ chính source ZIP đã giải nén trong môi trường sạch.
-- Xác nhận PDF tạo từ ZIP giống nội dung PDF upload.
-- Kiểm tra:
-
-  - đúng 15 trang;
-  - không lỗi LaTeX, citation/reference chưa xác định hoặc overfull box;
-  - công thức được đánh số liên tục và mọi biến được giải thích;
-  - hình vector, caption đúng vị trí và đọc được ở 100%/grayscale;
-  - tám tác giả và một corresponding author;
-  - acknowledgment, funding và disclosure đầy đủ;
-  - không có nội dung kể lại quá trình phản biện.
-- Chạy `git diff --check`, rà diff và cập nhật checkpoint.
-- Nhóm duyệt PDF, source ZIP, LTP scan và alt text trước khi upload.
-- Commit, push, release, ký LTP và upload EasyChair là các bước riêng; không tự động thực hiện.
+| Ưu tiên | Bên phụ trách | Việc | Bằng chứng đóng việc |
+|---|---|---|---|
+| P0 | Người chạy Colab | Gửi ZIP gốc hai lần, notebook v2 và lịch sử runtime/resume | Hash ZIP và nguồn checkpoint được xác nhận |
+| P0 | Người liên hệ hội nghị | Xác nhận giờ/múi giờ, kênh alt text và LTP | Lưu hướng dẫn chính thức |
+| P1 | Nhóm tác giả | Duyệt PDF, heatmap, kết luận, tám tác giả và một corresponding author | Chấp thuận bằng văn bản |
+| P1 | Thanh-Trong Nguyen | Hoàn thiện, ký tay và scan LTP sau khi nhóm đồng thuận | PDF LTP rõ nét, metadata khớp |
+| P2 | Artifact owner | Quyết định release/DOI mới cho kết quả camera-ready | Bài trỏ đúng archive nếu phát hành |
+| P2 | Submission owner | Upload ZIP, PDF và LTP sau duyệt cuối | Biên nhận EasyChair/đăng ký |
