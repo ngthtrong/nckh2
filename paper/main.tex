@@ -10,7 +10,7 @@
 \usepackage{booktabs}
 \usepackage{graphicx}
 \usepackage{xcolor}
-\usepackage{hyperref}
+\usepackage[hidelinks]{hyperref}
 % Use the standard algorithm packages when available.  The compact fallback
 % keeps this manuscript buildable on minimal TeX Live images; it is bypassed
 % automatically on Overleaf and other installations that provide the packages.
@@ -86,8 +86,9 @@ measuring their scheduling consequences. We audit a fail-closed batch
 pipeline in which observable reports form a sparse graph, unresolved reports
 go to review, duplicate families feed a bounded score, and evaluator-only
 truth is joined after predicted-cluster scheduling. The clustering benchmark
-contains 80 synthetic runs from generator 3.0.0: additive Louvain has mean
-ARI $0.9191$, product Leiden $0.9165$, and product Louvain $0.9072$.
+contains 80 synthetic runs from generator 3.0.0: an additive-affinity
+Louvain comparator has mean ARI $0.9191$, while the spatially gated product
+affinity has $0.9165$ with Leiden and $0.9072$ with Louvain.
 Product minus independently tuned additive is $-0.0118$ (bootstrap 95\% CI
 $[-0.0226,-0.0024]$), but its Holm-adjusted test is not significant
 ($p=.2560$). A matched-density comparison reverses the point estimate but is
@@ -127,6 +128,13 @@ and HDBSCAN~\cite{ester1996dbscan} offer plausible consolidation mechanisms.
 Multiplicative spatial--range terms occur in bilateral filtering
 \cite{tomasi1998bilateral}; we adapt that structure to a product graph, while
 testing the exact gate and its bounds here.
+Throughout the paper, \emph{Product Louvain} denotes Louvain applied to a
+graph whose temporal and contextual affinity is multiplied by a spatial gate;
+\emph{Product Leiden} keeps that graph and changes only the community
+detector. \emph{Additive Louvain} instead sums the spatial, temporal, and
+contextual terms. The \emph{matched-density Additive} diagnostic adjusts its
+sparsification settings without labels to approximate the Product graph's
+retained-edge fraction and mean degree.
 
 \paragraph{Humanitarian logistics and dispatch.}
 Relief-routing models expose competing equity, efficacy, and efficiency
@@ -148,13 +156,13 @@ explicitly separated artifact bundles.
 The contributions are (i) an observable-only pipeline with explicit review and
 evaluator boundaries; (ii) auditable threshold statements and a proposed
 duplicate-aware score; and (iii) a paired diagnostic reporting clustering,
-ranking, dispatch, and adverse results. We emphasize that the primary
-scientific value of this study lies not in a performance improvement but in
-the auditable negative and boundary results themselves: propagation errors
-and adversarial vulnerabilities that remain invisible to accuracy-only
-benchmarks are made explicit and quantified here. The evidence remains
-synthetic and within-generator, so the artifact is not a validated rescue
-policy.
+ranking, dispatch, and adverse results. The practical value is diagnostic:
+the spatial gate supplies a checkable edge-localization condition, family-wise
+aggregation supplies an exact-duplicate invariance test, and the downstream
+evaluation exposes when strong clustering scores fail to improve dispatch.
+These safeguards can serve as implementation checks, but they do not establish
+superiority or field utility. The evidence remains synthetic and
+within-generator, so the artifact is not a validated rescue policy.
 
 \section{Observable Pipeline and Methods}
 
@@ -253,20 +261,18 @@ bilateral filtering~\cite{tomasi1998bilateral}; both compositions and all
 weights here are defined by this paper.
 All scales $\sigma,\tau_t,\tau_F,\tau_E$ are strictly positive and the
 weights are nonnegative. The implementation forms the eligible pair matrix,
-computes an empirical nonzero-weight quantile, retains strict
-above-threshold edges, keeps the union of endpoint-wise top-$k$ edges, and
-applies Louvain. Product
-and additive candidates have the same pool and grid, but each family is
-selected independently; the estimand is therefore a pipeline comparison, not
-an operator-only causal effect. Because product and additive pipelines are
-calibrated on separate quantile grids, reflecting how each would be tuned
-independently in practice, we treat this independently calibrated contrast
-as the primary estimand for RQ1 throughout the paper: it answers whether a
-practitioner who tunes each pipeline separately, as would occur in practice,
-obtains a net benefit from product composition. Section~\ref{sec:results}
-also reports a matched-density contrast, which equalizes retained-edge
-fraction and mean degree across compositions, as a secondary robustness
-diagnostic that isolates the composition operator from calibration choices.
+computes an empirical nonzero-weight quantile, removes weights at or below
+that threshold, retains the endpoint-wise top-$k$ among the remaining directed
+neighbours, and symmetrizes their union before community detection. Thus an
+undirected node may have degree above $k$ when another node selects it.
+Product and additive candidates are selected independently; the estimand is
+therefore a pipeline comparison, not an operator-only causal effect. We treat
+this independently calibrated contrast as the primary estimand for RQ1
+because it asks whether each tuned pipeline provides a net empirical benefit.
+Section~\ref{sec:results} also reports a matched-density contrast as a
+secondary diagnostic. It reduces differences in retained-edge fraction and
+mean degree, but different edge weights and memberships remain, so it does not
+identify a causal effect of the composition operator.
 
 \begin{theorem}[Product edge localization]
 Let $B=\beta+\gamma>0$. If a product edge with threshold $0<\theta<B$ is
@@ -336,13 +342,14 @@ full $R_{\rm obs}$, then set
 Q_i&\gets\operatorname{sigmoid}\bigl(b_0+b_1\mathbf{1}\{\text{image}_i\}\\[-.2ex]
 &\qquad{}+b_2\log(1+n_i^{\rm corrob})\bigr)\text{ for every }r_i\in R_{\rm obs}
 \end{aligned}$
-\State $E_0\gets$ \Call{BuildSimilarityEdges}{$R_{\rm obs},m,\sigma,\tau_t,\tau_F,\tau_E,$
-\Statex \hspace{2.5em}$\alpha,\beta,\gamma$}
+\State $E_0\gets$ \Call{BuildSimilarityEdges}{$R_{\rm obs},m$}
+\Statex \hspace{2.5em}\textit{using the fixed scales and weights above}
 \Statex \hspace{2.5em}\textit{BuildSimilarityEdges computes $G,T,C$ on the full eligible pair matrix}
 \State $\theta\gets q$-quantile of the nonzero weights in $E_0$
 \State $E_\theta\gets\{(i,j,w_{ij})\in E_0:w_{ij}>\theta\}$
-\State $E\gets E_\theta\ \cup\ \text{(endpoint-wise top-}k\text{ edges in }E_\theta\text{),}$
-\Statex \hspace{2.5em}$\text{symmetrized by OR}$
+\State $E^{\to}\gets\{(i,j,w_{ij})\in E_\theta:j\text{ is among }i\text{'s top-}k$
+\Statex \hspace{2.5em}$\text{neighbours in }E_\theta\}$
+\State $E\gets\{\{i,j\}: (i,j)\in E^{\to}\text{ or }(j,i)\in E^{\to}\}$
 \State $\mathcal{G}\gets(R_{\rm obs},E)$
 \State $\mathcal{C}\gets$ Louvain$/$Leiden$(\mathcal{G},\rho)$
 \Comment{predicted clusters, never incident truth}
@@ -393,9 +400,12 @@ amplification. Reliability-aware truth discovery motivates using $Q_i$ but does
 not derive these maxima~\cite{wang2012truth}. Transformation, normalization,
 and weights require sensitivity and expert validation
 ~\cite{tate2012vulnerability,gralla2014review}; Section~\ref{sec:sensitivity}
-reports a first such analysis. Comparators are a
-multiplicity-sensitive legacy score, urgency-only, population-only, a simple
-linear score, stable random, and---for dispatch---nearest-first.
+reports a first such analysis. Comparators are a multiplicity-sensitive legacy
+score, urgency-only, population-only, a simple linear score, stable random,
+and---for dispatch---nearest-first. These controls respectively test raw
+report multiplicity, single-factor policies, an unbounded linear combination,
+chance ordering, and a travel-time heuristic; none is presented as an
+endorsed rescue policy.
 
 \Needspace*{0.36\textheight}
 \begin{algorithm}[H]
@@ -426,8 +436,9 @@ linear score, stable random, and---for dispatch---nearest-first.
 \paragraph{Data contract and splits.}
 The study uses two explicitly separated artifact suites. RQ1 uses the tracked
 generator-3.0 bundle, a semi-synthetic dataset with geographic anchors from
-the Copernicus EMSR848 Central Viet Nam activation; Copernicus EMS,
-OpenStreetMap, and WorldPop provide geographic or historical anchors, while
+the Copernicus EMSR848 Central Viet Nam activation~\cite{copernicusEMSR848};
+Copernicus EMS, OpenStreetMap extracts, and the 2025 WorldPop constrained
+population surface~\cite{worldpop2025vietnam} provide geographic or historical anchors, while
 incidents, reports, duplicates, coordinated attacks, vulnerability, and
 labels are synthetic. It contains 80 runs with 16 latent incidents and
 26,288 reports (17,901 genuine, 3,587 duplicate, and 4,800 coordinated
@@ -449,11 +460,37 @@ For both suites, inference reads only observable
 \texttt{algorithm\_input.json}; ground truth is opened only after predictions
 are fixed.
 
+\begin{table}[t]
+\centering\tiny
+\setlength{\tabcolsep}{3pt}
+\caption{Artifact construction. Geographic anchors do not make simulated
+reports or outcomes into field observations.}
+\label{tab:data-realism}
+\begin{tabular}{p{.20\textwidth}p{.34\textwidth}p{.34\textwidth}}
+\toprule
+Layer & Generator 3.0 (RQ1) & Candidate 4.1 (RQ2/RQ3)\\
+\midrule
+Geographic context & EMSR848 context, OSM-derived anchors, and WorldPop cells
+& Synthetic regional geometry; no EMSR848 claim\\
+Reports/linkage & Synthetic incidents, reports, duplicates, fake campaigns,
+and labels & Synthetic incidents, reports, duplicates, and attack cases\\
+Operational truth & Need and vulnerability simulated; population is not
+trapped-person truth & Benefit, deadlines, service, access, and harm simulated\\
+Representativeness & Within-generator geographic plausibility; no source
+snapshot or row lineage & Controlled stress cases; no field sample or transfer\\
+\bottomrule
+\end{tabular}
+\end{table}
+
 \paragraph{Selection and comparators.}
 The current notebook evaluates complete small grids on the 20 calibration
 runs and selects mean ARI, breaking ties by standard deviation and canonical
 configuration JSON. Product and additive use fixed $\tau_F=.25$,
-$\tau_E=.35$, and $\beta=\gamma=.5$. Selected product Louvain uses
+$\tau_E=.35$, and $\beta=\gamma=.5$. The Product grid varies
+$\sigma\in\{700,1200\}$ m, $\tau_t\in\{30,60\}$ min,
+$q\in\{.90,.95\}$, and $k\in\{8,16\}$; the Additive grid varies
+$\alpha\in\{1/3,1\}$, the same $\sigma,q,k$ sets, and fixes
+$\tau_t=60$ min. Both fix resolution at $1.2$. Selected product Louvain uses
 $\sigma=700$ m, $\tau_t=60$ min, quantile $.90$, $k=8$, and resolution $1.2$.
 Selected additive Louvain uses $\alpha=1$, $\sigma=700$ m, $\tau_t=60$ min,
 quantile $.95$, $k=8$, and resolution $1.2$. Because selected quantiles
@@ -462,7 +499,11 @@ matched-density operator comparison. Comparators are a convex similarity,
 product Leiden, geo-time DBSCAN, DBSCAN/HDBSCAN on scaled observable features,
 spatially constrained agglomerative clustering, and coordinate K-means. The
 implemented geo-time DBSCAN lacks ST-DBSCAN's non-spatial criterion and is
-named accordingly.
+named accordingly. Product Leiden separates graph construction from community
+detection; convex and additive variants test affinity composition; the
+matched-density variant reduces a sparsity imbalance; density methods and
+spatial agglomeration provide non-community alternatives; and coordinate
+K-means is a geometry-only sanity comparator.
 
 \paragraph{Endpoints and inference.}
 ARI on incident-linked reports~\cite{hubert1985comparing} is the primary
@@ -500,16 +541,15 @@ survive multiple-comparison correction under either calibration framing. For
 priority ranking, the proposed duplicate-aware score removes exact-duplicate
 inflation but does not show a general alignment advantage over simpler
 comparators, and shows larger priority/rank drift than the legacy score under
-a single realistic adversarial pattern---a coordinated high-confidence
-reporting campaign. Downstream, these behaviors propagate into the dispatch
+a controlled adversarial pattern---a coordinated high-confidence reporting
+campaign. Downstream, these behaviors propagate into the dispatch
 simulation: the revised policy shows no established improvement in harm or
 deadline outcomes over the legacy score, and performs significantly worse
 than a naive nearest-first baseline on both. The remainder of this section
 presents the supporting statistical detail.
 
-\Needspace*{0.32\textheight}
 Table~\ref{tab:clustering-results} reports the held-out clustering summary.
-\begin{table}[H]
+\begin{table}[t]
 \centering\scriptsize
 \caption{RQ1 benchmark-test summary over 40 runs. Intervals are bootstrap
 95\% confidence intervals; diameter is descriptive.}
@@ -547,18 +587,9 @@ The product pipeline has zero fake absorption and zero fake rejection but a
 still forming fake-only destinations. This is an adverse operational result,
 not evidence of misinformation robustness.
 
-Figure~\ref{fig:rq1-benchmark} visualizes the held-out ARI comparison.
-% \Needspace*{0.38\textheight}
-\begin{figure}[H]
-\centering
-\includegraphics[width=\textwidth]{rq1_benchmark.pdf}
-\caption{RQ1 held-out ARI means generated from the benchmark summary CSV.}
-\label{fig:rq1-benchmark}
-\end{figure}
-
 Table~\ref{tab:stress-results} collects the headline RQ2 and RQ3 contrasts.
 % \Needspace*{0.36\textheight}
-\begin{table}[H]
+\begin{table}[t]
 \centering\scriptsize
 \caption{Headline RQ2/RQ3 results from the candidate-4.1 artifacts. RQ3
 effects and p-values use 40 seed pairs after averaging the three resource
@@ -597,13 +628,49 @@ not guarantee ranking reliability.
 
 Figure~\ref{fig:rq2-priority} shows the priority-alignment comparison.
 % \Needspace*{0.34\textheight}
-\begin{figure}[H]
+\begin{figure}[t]
 \centering
-\includegraphics[width=\textwidth]{rq2_priority.pdf}
+\includegraphics[width=.72\textwidth]{rq2_priority.pdf}
 \caption{RQ2 priority-alignment comparison generated from the candidate-4.1
 summary CSV.}
 \label{fig:rq2-priority}
 \end{figure}
+
+Table~\ref{tab:rq2-robustness} expands the robustness audit beyond the two
+headline cases. The revised score is invariant to exact-copy multiplicity and
+usually changes less under near duplication, missingness, contradictory
+evidence, and low-confidence flood inflation. Its bounded form is nevertheless
+more sensitive than the legacy score to coordinated high-confidence reports
+and to inflated population or vulnerability evidence. These are controlled
+synthetic perturbations, not estimates of attack prevalence or field error.
+
+\begin{table}[t]
+\centering\scriptsize
+\caption{RQ2 robustness means over the held-out Candidate-4.1 test split.
+$n$ counts target-perturbation rows; $\Delta P$ is absolute normalized priority
+drift, $\Delta r$ is normalized mean-rank drift, and churn is top-five churn.
+R/L denote revised/legacy; lower is better.}
+\label{tab:rq2-robustness}
+\resizebox{\textwidth}{!}{%
+\begin{tabular}{lrrrrrrr}
+\toprule
+Scenario & $n$ & $\Delta P_R$ & $\Delta P_L$ & $\Delta r_R$ & $\Delta r_L$ & Churn$_R$ & Churn$_L$\\
+\midrule
+Exact duplicate $2\times$ & 40 & .0000 & .0026 & .0000 & .0015 & .0000 & .0000\\
+Exact duplicate $5\times$ & 40 & .0000 & .0086 & .0000 & .0046 & .0000 & .0100\\
+Exact duplicate $10\times$ & 40 & .0000 & .0148 & .0000 & .0075 & .0000 & .0150\\
+Near duplicate & 320 & .0016 & .0055 & .0004 & .0017 & .0006 & .0019\\
+Contradictory $F/E$ & 40 & .0484 & .0611 & .0171 & .0290 & .0450 & .1100\\
+Missingness/zero-imputation & 628 & .0063 & .0075 & .0019 & .0025 & .0029 & .0064\\
+Low-confidence $E$ inflation & 40 & .0034 & .0012 & .0008 & .0006 & .0050 & .0000\\
+Low-confidence $F$ inflation & 40 & .0026 & .0072 & .0000 & .0040 & .0000 & .0150\\
+Low-confidence $N$ inflation & 40 & .0696 & .0140 & .0240 & .0071 & .0600 & .0150\\
+Low-confidence $V$ inflation & 40 & .0758 & .0074 & .0263 & .0040 & .0500 & .0150\\
+Coordinated high-confidence & 40 & .1688 & .0309 & .0175 & .0006 & .0350 & .0000\\
+\bottomrule
+\end{tabular}%
+}
+\end{table}
 
 For RQ3, after averaging the three resource scenarios within each seed,
 revised versus legacy on the Product partition has harm effect $-14.34$
@@ -616,15 +683,25 @@ the corresponding dispatch outcomes. Predicted split, merge, and fake-only
 destinations therefore propagate into operational consequences.
 
 Figure~\ref{fig:rq3-dispatch} shows the corresponding dispatch effects.
-\Needspace*{0.34\textheight}
-\begin{figure}[H]
+\begin{figure}[t]
 \centering
-\includegraphics[width=\textwidth]{rq3_dispatch.pdf}
+\includegraphics[width=.72\textwidth]{rq3_dispatch.pdf}
 \caption{RQ3 Product-partition paired effects on latent harm generated from
 the seed-level dispatch comparison CSV; positive values are
 improvement-oriented.}
 \label{fig:rq3-dispatch}
 \end{figure}
+
+Resource-specific Product-partition means (revised, legacy, nearest-first) for
+harm and deadline-miss rate were: lean Hue, 691.37, 653.79, 585.55 and .9188,
+.9203, .8203; nominal dual depot, 315.01, 303.16, 230.00 and .8453, .8594,
+.6313; and regional surge, 113.53, 119.93, 94.71 and .6672, .7078, .4484.
+Revised priority lowers mean
+deadline misses relative to legacy in the nominal and surge scenarios, and
+lowers harm only in surge; nearest-first is lower on both outcomes in every
+scenario. These means are descriptive. Primary inference still averages the
+three scenarios within each seed, giving 40 seed-level pairs rather than
+treating the 120 seed--scenario rows as independent.
 
 \subsection{Sensitivity of Heuristic Constants}
 \label{sec:sensitivity}
@@ -642,9 +719,8 @@ considered stable if the mean metric varies by less than $0.01$ across its
 valid tested levels. The sensitivity summary CSV provides the ranges below; no
 value is inferred from the fixed-configuration comparisons.
 
-\Needspace*{0.24\textheight}
 Table~\ref{tab:sensitivity} reports these ranges.
-\begin{table}[H]
+\begin{table}[t]
 \centering\scriptsize
 \caption{Candidate-4.1 one-at-a-time sensitivity of mean NDCG@5 to fixed
 heuristic constants. Each range is the minimum--maximum mean over the tested
@@ -704,6 +780,11 @@ validated the priority weights, caps, or utility. The study also does not
 measure extraction accuracy, device latency, memory, energy, provenance
 authenticity, or real-world harm. These limitations preclude policy or
 deployment claims.
+The RQ1 geographic anchors improve contextual plausibility, but the archived
+artifact does not contain the raw upstream snapshots, their source checksums,
+or per-row lineage. Consequently, Table~\ref{tab:data-realism} supports only a
+transparent account of construction, not independent provenance verification
+or representativeness of real rescue-report errors.
 
 \section{Conclusion}
 
@@ -716,31 +797,19 @@ around those claims, not a validated rescue policy.
 
 \section*{Data and Code Availability}
 
-The accompanying artifact record contains the two data-suite manifests,
-benchmark notebooks, calibration grids, selected configurations, per-run test
-results, paired comparisons, the seed-level RQ3 reanalysis, and a deterministic
-figure-generation script. The publication figures are generated from result
-CSVs; every reported number is tied to an accepted CSV row and documented
-generator/configuration metadata. Raw upstream anchor snapshots are not
-redistributed in this artifact, and third-party materials remain governed by
-their own provenance and license records.
-
-The versioned research artifact is archived on
-Zenodo~\cite{nguyen2026floodartifact} and corresponds to
+The versioned artifact is archived on Zenodo~\cite{nguyen2026floodartifact}
+and corresponds to
 \href{https://github.com/ngthtrong/nckh2/releases/tag/v1.0.1}{GitHub Release
-v1.0.1}. The cited concept DOI resolves to the latest archived release while
-the GitHub tag identifies the exact source snapshot.
-The development version remains available on the
-\href{https://github.com/ngthtrong/nckh2/tree/clean}{\texttt{clean} branch}.
-The rerun used generator commit
-\href{https://github.com/ngthtrong/nckh2/commit/a6be3e988dad1aa442c8c8e158c2bba96b2b7fb9}{\texttt{a6be3e9}};
-the RQ2 manifest records
-SHA-256 hashes for every reported CSV, including the 840-row sensitivity
-artifact and its 30-row summary. Original code is released under the MIT
-License, and the manuscript, tables, figures, and original synthetic
-artifacts are released under CC BY 4.0. These grants exclude Copernicus EMS,
-OpenStreetMap, WorldPop, Springer/LaTeX templates, and other third-party
-materials, which retain their original terms and required attribution.
+v1.0.1}; the tag identifies the exact source snapshot and the concept DOI the
+latest archive. It includes suite manifests, notebooks, locked configurations,
+per-run results, paired comparisons, the 40-seed RQ3 reanalysis, figure code,
+and result hashes. The exact RQ1 benchmark notebook/configuration snapshot is
+\href{https://github.com/ngthtrong/nckh2/commit/6ac75c202d04934deb46d84486132e54d42d735f}{\texttt{6ac75c2}};
+the generator/external-benchmark package is retained at
+\href{https://github.com/ngthtrong/nckh2/commit/a6be3e988dad1aa442c8c8e158c2bba96b2b7fb9}{\texttt{a6be3e9}}.
+Raw upstream anchor snapshots are not redistributed. Original code is MIT
+licensed and original manuscript/artifact content is CC BY 4.0; third-party
+materials retain their original terms.
 
 \begin{credits}
 \subsubsection{\ackname} This study is funded by the Can Tho University, Code:

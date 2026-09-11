@@ -9,6 +9,20 @@ là dữ liệu mô phỏng có kiểm soát.
 Không được gọi bundle này là real rescue-report dataset, independent real-world
 validation hoặc confirmation evidence.
 
+## Vị trí artifact và mã thực thi
+
+Nhánh `clean` hiện giữ bundle tại `src/data/` và notebook benchmark RQ1, nhưng
+không giữ package Python `demo/` đã sinh dữ liệu và chạy external sanity
+benchmark. Với các lệnh `demo/...` bên dưới, checkout commit đầy đủ
+`a6be3e988dad1aa442c8c8e158c2bba96b2b7fb9`; tree `demo/dataV2` tại commit đó
+trùng tree `src/data` hiện tại (`5bb8f9e5f1bb1c4deec8f0db1351e27d1bf30333`).
+
+Riêng benchmark phân cụm RQ1 được khóa tại commit
+`6ac75c202d04934deb46d84486132e54d42d735f`: notebook
+`src/results/Benchmark_Cij_Baselines_Colab.ipynb`, cấu hình đã chọn và
+`src/data` cùng tồn tại trong snapshot này. Hai commit phục vụ hai workflow
+khác nhau và không được dùng lẫn đường dẫn.
+
 ## Phạm vi hiện tại
 
 - 80 run: `run_001`–`run_080`, seed 1–80.
@@ -85,11 +99,18 @@ Batch runner:
 
 ## Notebook Colab
 
-Mở [datav2_external_benchmark_colab.ipynb](../notebooks/datav2_external_benchmark_colab.ipynb)
-trên Colab. Notebook yêu cầu clone một commit SHA cố định, cài
-`requirements.lock` cùng `pyarrow==18.1.0`, chạy smoke test rồi mới chạy full
-80 run. Notebook sinh ZIP đầy đủ gồm per-run JSON, CSV tổng hợp, CI ghép cặp,
-campaign/dedup audit, hình PNG/PDF, provenance, manifest và executed notebook.
+Notebook external-sanity gốc nằm trong commit lịch sử tại
+[`demo/notebooks/datav2_external_benchmark_colab.ipynb`](https://github.com/ngthtrong/nckh2/blob/a6be3e988dad1aa442c8c8e158c2bba96b2b7fb9/demo/notebooks/datav2_external_benchmark_colab.ipynb).
+Notebook đã sinh benchmark phân cụm RQ1 nằm tại
+[`src/results/Benchmark_Cij_Baselines_Colab.ipynb`](https://github.com/ngthtrong/nckh2/blob/6ac75c202d04934deb46d84486132e54d42d735f/src/results/Benchmark_Cij_Baselines_Colab.ipynb).
+Notebook reviewer-stress mới nằm tại
+[`src/results/RQ1_Reviewer_Stress_Colab.ipynb`](../results/RQ1_Reviewer_Stress_Colab.ipynb).
+Mỗi workflow yêu cầu clone đúng commit SHA tương ứng. Notebook reviewer-stress
+tự khóa snapshot RQ1 `6ac75c2`, checksum notebook nguồn, cấu hình và dữ liệu,
+đồng thời cài đúng các phiên bản package được notebook RQ1 gốc ghi lại. Nó chạy
+smoke test trước batch 1.400 lượt và sinh ZIP gồm checkpoint, CSV tổng hợp,
+paired bootstrap CI, duplicate mapping, runtime log, manifest và executed
+notebook.
 
 Quy trình:
 
