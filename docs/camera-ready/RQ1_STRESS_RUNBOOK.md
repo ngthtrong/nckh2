@@ -1,8 +1,24 @@
 # RQ1 reviewer stress experiment: group runbook
 
-Use `src/results/RQ1_Reviewer_Stress_Colab.ipynb`. This is the only new heavy
-experiment prepared for the current revision. Do not rerun RQ2/RQ3 unless a
-separate evidence audit finds a conclusion-changing defect.
+Use `src/results/RQ1_Reviewer_Stress_Colab.ipynb` only for an explicitly
+approved future rerun. The completed Colab outputs are in
+`src/results/rq1_results/`, and their independent audit is recorded in
+`RQ1_STRESS_AUDIT.md`. Do not rerun RQ1/RQ2/RQ3 unless a separate evidence
+audit finds a conclusion-changing defect.
+
+## Returned-run status
+
+- Numerical audit accepted all 288 manifest hashes, 280 checkpoints, 1,400
+  fits, 92,617 copy mappings, 35 summaries, and 300 paired bootstrap rows.
+- The returned run used Python 3.13.15 with the pinned package versions. Its
+  manifest records that version, but its protocol did not hash
+  `python_version`.
+- The current notebook and builder do hash `python_version`. They are therefore
+  stricter than the executed protocol and cannot resume its checkpoints.
+- The original ZIP is not in the repository. Its notebook-recorded SHA-256 is
+  `d53624bbb3e681504ce9691a77b93610559183187bfe731a3f7fd10de6e034c2`.
+  The group must provide that ZIP and state whether checkpoints were resumed
+  across a runtime change to close package-level provenance.
 
 ## Locked design
 
@@ -67,6 +83,6 @@ mapping to the source report is evaluator-only.
 - Null and adverse results remain visible. The camera-ready text must not claim
   robustness beyond these fixed stresses.
 
-After these checks, update the manuscript and reviewer response with the actual
-means and paired confidence intervals. Until then, the experiment status is
-**prepared; results pending**.
+These checks have passed for the extracted artifact, and the audited results
+are integrated into the manuscript. The experiment status is **numerically
+accepted; original ZIP and runtime/resume confirmation pending**.

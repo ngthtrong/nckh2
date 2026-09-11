@@ -3,9 +3,9 @@
 Paper 6444: *Stress-Testing Product-Gated Clustering and Bounded Priority
 Ranking for Flood-Rescue Reports: A Synthetic Study*
 
-This draft describes changes already supported by the repository. Text marked
-**PENDING GROUP RERUN** must be replaced with audited results before this
-document is submitted or shared as a final response.
+This is an internal response draft. It describes only changes supported by the
+repository and should be submitted only if the conference or author group
+requires a response document. Page and line references wait for the final PDF.
 
 ## General response
 
@@ -25,11 +25,11 @@ additional robustness and resource-condition results.
 We agree that neither proposed component consistently outperforms the
 baselines. The revised Introduction and Discussion now identify three narrower
 benefits supported by the evidence: a finite edge-localization condition for
-the product gate, invariance of the family-wise score to exact transport
-copies, and an end-to-end audit that reveals when clustering quality does not
-improve dispatch. We explicitly state that these are engineering checks and
-diagnostic findings rather than evidence of overall superiority or field
-benefit.
+the product gate, invariance of the family-wise score to exact transport copies
+when evidence grouping and other score inputs are fixed, and an end-to-end
+audit that reveals when clustering quality does not improve dispatch. We
+explicitly state that these are engineering checks and diagnostic findings
+rather than evidence of overall superiority or field benefit.
 
 ### 2. Realism of the synthetic scenarios
 
@@ -51,12 +51,22 @@ four low-confidence inflation attacks, and a coordinated high-confidence
 campaign. It also reports descriptive results under all three locked RQ3
 resource conditions.
 
-**PENDING GROUP RERUN:** We prepared a fixed, no-retuning RQ1 stress protocol
-covering independent Gaussian GPS noise at 100 m and 300 m, timestamp noise at
-15 min and 60 min, and exact transport-copy multiplicities of 2 and 5. The
-protocol applies five fixed methods to 40 locked test runs (1,400 fits) and
-uses paired bootstrap differences from the unperturbed condition. Insert the
-audited result and manuscript location here after the group returns the ZIP.
+The fixed, no-retuning RQ1 stress protocol covers independent Gaussian GPS
+noise at 100 m and 300 m, timestamp noise at 15 min and 60 min, and exact
+transport-copy multiplicities of 2 and 5. It applies five fixed methods to 40
+locked test runs (1,400 fits) and uses paired bootstrap differences from each
+method's unperturbed control. All 1,400 rows, 280 checkpoints, artifact hashes,
+copy mappings, summaries, and 300 paired effects passed independent audit.
+
+All tested GPS and timestamp conditions lower mean ARI. No method has the
+highest mean ARI in every condition. Twofold exact copies slightly increase
+mean ARI for the four graph methods, whereas fivefold copies reduce them to
+approximately .29--.30. Product Louvain falls from .9072 to .2964, a paired
+change of -.6108 with unadjusted bootstrap 95% CI [-.6318,-.5881]. Geo-time
+DBSCAN remains at .4978 under exact copying from a lower control baseline. The
+manuscript distinguishes score-level exact-copy invariance under fixed
+grouping from clustering and end-to-end invariance, and does not assign a
+causal mechanism to the graph-method discontinuity.
 
 ### Minor comments: terminology and baselines
 

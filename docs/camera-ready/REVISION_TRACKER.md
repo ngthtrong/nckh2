@@ -1,36 +1,52 @@
-# ISDS-2026 reviewer revision tracker
+# ISDS-2026 camera-ready evidence tracker
 
-Baseline: submission 6444, Git tag `v1.0.1` (`be95d4c`).  Working baseline:
-`clean` at `d73549b` before this revision. Deadline stated in the acceptance
-email: 16 September 2026.
+Submission baseline: tag `v1.0.1` (`be95d4c`). Camera-ready integration
+baseline: branch `clean` at `9fbc49c`. Deadline stated in the acceptance email:
+16 September 2026; the group must confirm the time zone and final instructions.
 
-Status meanings: **complete** is backed by tracked text or verified existing
-artifacts; **prepared** means a reproducible rerun package exists but the group
-has not returned results; **waiting** requires external information.
+This tracker evaluates the committee comments against the study's direction
+and repository evidence. It is an internal decision record, not a checklist
+that the manuscript must reproduce and not part of the camera-ready narrative.
 
-| Reviewer comment | Manuscript response | Evidence | Status |
-|---|---|---|---|
-| R1/R3: proposed methods do not consistently beat baselines; explain advantage and practical value | Introduction contributions and Discussion distinguish checkable spatial localization, exact-copy invariance, and downstream failure detection from superiority or field utility | RQ1 theorem/results; RQ2 robustness CSV; RQ3 seed-level analysis | Complete |
-| R1/R3: justify realism and representativeness of synthetic data | Experimental Design now separates geographic anchors, simulated reports, simulated operational truth, and unsupported representativeness claims for generator 3.0 and Candidate 4.1 | `src/data/README.md`, run manifests, Copernicus EMSR848 activation record, WorldPop dataset record | Complete |
-| R1/R3: add robustness under noise, duplication, and operational variation | Results now report all 11 existing RQ2 stress scenarios and the three locked RQ3 resource scenarios. A fixed RQ1 GPS/time/copy experiment is ready for group execution | RQ2/RQ3 manifest checks pass; `src/results/RQ1_Reviewer_Stress_Colab.ipynb` | Prepared; group result pending |
-| R2/R3: ARI is poorly aligned with operational utility | RQ3 text explicitly interprets split/merge/fake destinations and reports resource-specific descriptive means while retaining 40 seed-level pairs for primary inference | `rq3_partition_losses.csv`, `rq3_destination_assignments.csv`, seed-level reanalysis provenance | Complete |
-| R2/R3: no misinformation, policy, or field readiness proof | Abstract, Results, Discussion, data-realism table, and Conclusion retain the coordinated-campaign failure and deployment limitations | RQ2 coordinated-campaign rows; manuscript threats to validity | Complete |
-| R1/R3: define product/additive terms | Definitions are placed at the first detailed clustering discussion; the abstract describes additive affinity and spatially gated product affinity | Similarity equations and selected configurations | Complete |
-| R1/R3: explain baseline selection | Experimental Design groups clustering baselines by the question each controls; ranking section does the same for policy comparators | Locked RQ1/RQ2/RQ3 configurations | Complete |
-| Internal consistency: top-k pseudocode | Pseudocode now keeps only each endpoint's top-k above-threshold neighbours and symmetrizes by OR | Exact RQ1 benchmark notebook at `6ac75c2` | Complete |
-| Internal consistency: tuning grids | Paper now records the actual Product and Additive grids separately | RQ1 notebook/configuration snapshot at `6ac75c2` | Complete |
-| Internal consistency: matched-density claim | Language now says the diagnostic reduces density imbalance but does not identify a causal operator effect | Density diagnostics and paper discussion | Complete |
-| Camera-ready format, page limit, and required files | Apply conference instructions when received; scientific cuts or metadata changes require group confirmation | Follow-up email not yet received | Waiting |
+Status meanings: **integrated** is backed by audited evidence and manuscript
+text; **retained** means the existing position remains appropriate;
+**conditional** requires an external decision or artifact.
 
-## Evidence gates
+| Observation | Evidence assessment | Fit with the study | Camera-ready decision | Status |
+|---|---|---|---|---|
+| Proposed methods do not consistently beat baselines; practical value needs a narrower statement | Correct: the adjusted RQ1 comparisons do not establish composition superiority, and RQ2/RQ3 do not establish policy benefit | Central to an audit and failure-boundary study | Frame edge localization, fixed-group score invariance, and downstream failure exposure as diagnostic checks | Integrated |
+| Synthetic-data realism and representativeness need clearer boundaries | Correct: geographic anchors are documented, but incidents, reports, attacks, labels, and operational outcomes are simulated; source snapshots and row lineage are unavailable | Central to credible scope claims | Keep the construction table and explicit non-representativeness limitations | Integrated |
+| Robustness under measurement noise, copies, and resource variation should be exposed | Correct and directly testable without changing the locked methods | Strengthens the stated stress-testing direction | Report audited RQ1 fixed stresses, all 11 RQ2 scenarios, and all three RQ3 resource conditions | Integrated |
+| ARI alone is insufficient for operational utility | Correct: RQ1 and RQ3 use different suites, and dispatch endpoints contradict a simple proxy-to-utility inference | Central to end-to-end failure analysis | Keep RQ1 clustering and RQ3 dispatch conclusions separate; retain 40 seed-level RQ3 pairs | Integrated |
+| Misinformation and field readiness are not demonstrated | Correct: the coordinated campaign is adverse and no field or expert validation exists | Defines the valid evidence boundary | Retain explicit limitations; make no deployment, policy, or misinformation-robustness claim | Retained |
+| Product/Additive terms and comparator roles require definitions | Correct and consistent with the implemented methods | Improves reproducibility without changing the contribution | Retain definitions, separate tuning grids, and comparator-control rationale | Integrated |
+| Top-k pseudocode must match executable behavior | Correct: the code thresholds, selects endpoint-wise directed top-k, then symmetrizes by OR | Required for technical accuracy | Describe the implementation exactly; do not redesign the method | Integrated |
+| Matched-density isolates the composition operator | Too strong: density is approximately aligned, while weights and edge membership still differ | A causal claim would exceed the study | Retain it as a non-causal density-control diagnostic | Retained |
+| Camera-ready format, page limit, and upload package | Not established by repository evidence; only the email deadline is recorded | Publication requirement rather than a scientific result | Apply only after the group supplies authoritative instructions | Conditional |
 
-- Do not add RQ1 supplementary stress results to the paper until all 40 test
-  runs, seven conditions, and five methods are present exactly once (1,400 fit
-  rows), the protocol/configuration hashes match, and no failure is hidden.
-- Keep adverse and null results. Do not tune from the RQ1 test stresses.
-- Treat RQ2 scenario summaries and RQ3 resource summaries as descriptive.
-  Primary RQ3 inference remains 40 seed-level pairs after averaging the three
-  resource scenarios within seed.
-- The archived upstream geographic snapshots, source checksums, and per-row
-  lineage are unavailable. Current source pages describe provenance intent but
-  do not independently verify each generated row.
+## RQ1 stress evidence gate
+
+- Numerical audit passed: 288 hashes, 280 checkpoints, 1,400 unique fits,
+  92,617 mapping rows, 35 summaries, and 300 independently replayed paired
+  bootstrap rows.
+- Control ARI and pairwise F1 match the locked benchmark per run; no retuning
+  or hidden failure was found.
+- Both the slight 2x improvement and the adverse 5x graph-method collapse are
+  retained. The study does not assign a causal mechanism to the discontinuity.
+- Score-level exact-copy invariance is stated only for fixed evidence grouping
+  and other score inputs; it is not extended to upstream clustering or the
+  end-to-end pipeline.
+- Package provenance is conditional on receiving the original ZIP with
+  SHA-256 `d53624bbb3e681504ce9691a77b93610559183187bfe731a3f7fd10de6e034c2`
+  and the group's runtime/resume confirmation.
+
+## Open publication gates
+
+- The current integrated PDF is 17 pages. A temporary build verified that
+  removing the two figures whose values are already in tables/prose, removing
+  the duplicate headline RQ2/RQ3 table, and tightening the Results summary and
+  RQ1 stress caption produces 15 pages without changing reported results.
+- Final page/line references in the internal response draft wait for the final
+  layout.
+- Submission, registration, archival release creation, and final author-group
+  approval have not occurred.
