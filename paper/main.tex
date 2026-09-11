@@ -92,12 +92,16 @@ affinity has $0.9165$ with Leiden and $0.9072$ with Louvain.
 Product minus independently tuned additive is $-0.0118$ (bootstrap 95\% CI
 $[-0.0226,-0.0024]$), but its Holm-adjusted test is not significant
 ($p=.2560$). A matched-density comparison reverses the point estimate but is
-also inconclusive. In a separate candidate-4.1 bundle, the revised score has
+also inconclusive. Under fixed configurations, location and timestamp noise
+reduce clustering accuracy, while fivefold exact transport copies reduce all
+four graph variants to mean ARI near $.30$. In a separate candidate-4.1
+bundle, the revised score has
 NDCG@5 $0.6669$ versus $0.6763$ for a random comparator and does not show a
-general alignment advantage; exact duplicates are invariant but coordinated
-high-confidence campaigns remain a failure mode. Dispatch results similarly
-show no general benefit over the legacy score and a clear cost relative to
-nearest-first. These are synthetic, within-generator diagnostics:
+general alignment advantage; its family-wise score is invariant to exact
+copies when evidence grouping is fixed, but coordinated high-confidence
+campaigns remain a failure mode. Dispatch results similarly show no general
+benefit over the legacy score and a clear cost relative to nearest-first.
+These are synthetic, within-generator diagnostics:
 boundedness and clustering accuracy do not establish source authenticity,
 policy validity, field benefit, or deployment readiness.
 \keywords{Flood rescue \and Graph clustering \and Synthetic stress test \and
@@ -156,13 +160,14 @@ explicitly separated artifact bundles.
 The contributions are (i) an observable-only pipeline with explicit review and
 evaluator boundaries; (ii) auditable threshold statements and a proposed
 duplicate-aware score; and (iii) a paired diagnostic reporting clustering,
-ranking, dispatch, and adverse results. The practical value is diagnostic:
-the spatial gate supplies a checkable edge-localization condition, family-wise
-aggregation supplies an exact-duplicate invariance test, and the downstream
-evaluation exposes when strong clustering scores fail to improve dispatch.
-These safeguards can serve as implementation checks, but they do not establish
-superiority or field utility. The evidence remains synthetic and
-within-generator, so the artifact is not a validated rescue policy.
+stress behavior, ranking, dispatch, and adverse results. The practical value
+is diagnostic: the spatial gate supplies a checkable edge-localization
+condition, family-wise aggregation supplies an exact-copy invariance test
+under fixed evidence grouping, and the downstream evaluation exposes when
+strong clustering scores fail to improve dispatch. These safeguards can serve
+as implementation checks, but they do not establish superiority or field
+utility. The evidence remains synthetic and within-generator, so the artifact
+is not a validated rescue policy.
 
 \section{Observable Pipeline and Methods}
 
@@ -482,6 +487,20 @@ snapshot or row lineage & Controlled stress cases; no field sample or transfer\\
 \end{tabular}
 \end{table}
 
+\paragraph{Fixed clustering stresses.}
+The 40 held-out generator-3.0 test runs are also evaluated under seven fixed
+conditions: the unmodified control; independent Gaussian location noise with
+100 m or 300 m standard deviation on each local axis; independent Gaussian
+timestamp noise with 15 min or 60 min standard deviation; and exact transport
+copies at total multiplicity two or five, where only the observable report
+identifier changes. Five configurations selected before this stress
+evaluation are retained without tuning: Product Louvain, Additive Louvain,
+matched-density Additive, Product Leiden, and geo-time DBSCAN. Each method
+receives the same deterministic perturbation for a run and condition, yielding
+$40\times7\times5=1{,}400$ fits. These controlled levels characterize the
+tested pipeline and are not estimates of field measurement error or duplicate
+prevalence.
+
 \paragraph{Selection and comparators.}
 The current notebook evaluates complete small grids on the 20 calibration
 runs and selects mean ARI, breaking ties by standard deviation and canonical
@@ -530,6 +549,14 @@ isolate ranking, whereas RQ3 evaluates predicted clusters. The priority stress
 tests and dispatch evaluation use independent benefit, deadline, service,
 access-delay, and harm outputs; no clustering metric is substituted for those
 outcomes.
+For the fixed RQ1 stresses, ARI and pairwise F1 on the original
+incident-linked reports keep the evaluation unit comparable across copy
+multiplicities. Metrics over all perturbed payloads and contamination,
+false-destination, and graph-density diagnostics remain descriptive. Each
+stress condition is paired with its method's control by run; 5,000 bootstrap
+resamples estimate the mean within-method change and its unadjusted 95\% CI.
+These intervals describe stress-versus-control changes and are not tests of
+between-method superiority.
 
 \section{Results}
 \label{sec:results}
@@ -577,7 +604,7 @@ additive is $-0.01184$ with CI $[-0.02257,-0.00240]$, with 9 wins, 19 ties,
 and 12 losses; raw $p=.0987$ and Holm $p=.2560$. Product minus matched-density
 additive is $+0.00989$ with CI $[-0.00100,0.02082]$ and Holm $p=.2560$.
 Product Leiden versus Product Louvain has Holm $p=.1120$. Thus neither
-composition advantage is established. Product and matched-density additive
+composition advantage is established. Product and matched-density Additive
 have nearly equal retained-edge fractions ($.03011$ and $.03021$) and mean
 degrees (9.90 and 9.94), so the matched-density contrast is a useful diagnostic
 but not a causal operator comparison.
@@ -586,6 +613,45 @@ The product pipeline has zero fake absorption and zero fake rejection but a
 16.49\% false-destination rate; fake reports avoid genuine destinations while
 still forming fake-only destinations. This is an adverse operational result,
 not evidence of misinformation robustness.
+
+Table~\ref{tab:rq1-fixed-stress} reports the fixed clustering stresses. All
+tested location and timestamp noise levels reduce mean ARI relative to each
+method's control, and no method has the highest mean ARI in every condition.
+For Product Louvain, mean ARI changes from $.9072$ at control to $.7816$ with
+300 m GPS noise and $.7442$ with 60 min timestamp noise.
+
+\begin{table}[t]
+\centering\tiny
+\setlength{\tabcolsep}{2.8pt}
+\caption{Mean RQ1 ARI over 40 held-out runs under fixed synthetic stresses.
+P-Louvain, A-Louvain, MD-Add., P-Leiden, and GT-DBSCAN denote Product Louvain,
+Additive Louvain, matched-density Additive, Product Leiden, and geo-time
+DBSCAN. Evaluation uses the original incident-linked reports.}
+\label{tab:rq1-fixed-stress}
+\begin{tabular}{lrrrrr}
+\toprule
+Condition & P-Louvain & A-Louvain & MD-Add. & P-Leiden & GT-DBSCAN\\
+\midrule
+Control & .9072 & .9191 & .8973 & .9165 & .4978\\
+GPS noise, 100 m & .8956 & .8971 & .8787 & .9047 & .4678\\
+GPS noise, 300 m & .7816 & .7626 & .7991 & .7912 & .3709\\
+Time noise, 15 min & .8722 & .8815 & .8536 & .8850 & .4856\\
+Time noise, 60 min & .7442 & .7646 & .7075 & .7604 & .4432\\
+Exact copies, $2\times$ & .9314 & .9337 & .9181 & .9313 & .4978\\
+Exact copies, $5\times$ & .2964 & .2971 & .2917 & .2964 & .4978\\
+\bottomrule
+\end{tabular}
+\end{table}
+
+Doubling exact payloads slightly increases mean ARI for all four graph
+variants and leaves geo-time DBSCAN unchanged. At fivefold multiplicity, all
+four graph variants fall to mean ARI near $.30$, while DBSCAN remains at its
+lower control value of $.4978$. Product Louvain changes by $-.6108$ with an
+unadjusted paired-bootstrap 95\% CI $[-.6318,-.5881]$. This discontinuity may
+reflect how replicated nodes interact with thresholding and endpoint-wise
+top-$k$ sparsification, but the protocol does not isolate that mechanism.
+The result therefore delimits two different safeguards: score-level
+invariance does not imply clustering invariance or end-to-end robustness.
 
 Table~\ref{tab:stress-results} collects the headline RQ2 and RQ3 contrasts.
 % \Needspace*{0.36\textheight}
@@ -756,13 +822,22 @@ The matched-density point estimate reverses the direction, yet its adjusted
 test remains inconclusive. The graph theorem is therefore a localization
 property, not evidence of a preferred composition.
 
-The revised score removes exact-duplicate inflation and limits multiplicity,
-but it does not show a general alignment advantage. Its coordinated-campaign
-failure is especially important: an adversary can create a high-confidence
-pattern that remains numerically bounded while still perturbing the ranking.
-Dispatch results confirm that a bounded score cannot substitute for a
-validated operational objective; clustering errors and fake-only destinations
-are transmitted to scheduling.
+The fixed clustering stresses further show that the selected configurations
+degrade under increasing location and timestamp noise. Exact-copy behavior is
+non-monotone: doubling payloads slightly improves the four graph variants on
+average, whereas fivefold multiplicity substantially degrades them. The
+observed discontinuity motivates a targeted sparsification analysis, but does
+not identify thresholding or top-$k$ selection as its cause.
+
+The revised score removes exact-duplicate inflation when the evidence-family
+partition and other score inputs are fixed, but it does not show a general
+alignment advantage. This score-level property does not constrain an upstream
+clusterer whose graph changes as transport copies are introduced. Its
+coordinated-campaign failure is also important: an adversary can create a
+high-confidence pattern that remains numerically bounded while still
+perturbing the ranking. Dispatch results confirm that a bounded score cannot
+substitute for a validated operational objective; clustering errors and
+fake-only destinations are transmitted to scheduling.
 
 The local sensitivity analysis is stable over the tested intervals: every
 constant has a mean-NDCG@5 span below $0.01$ across the 40 held-out seeds. The
@@ -788,12 +863,15 @@ or representativeness of real rescue-report errors.
 
 \section{Conclusion}
 
-The study establishes conditional graph bounds and documents competitive
-within-generator clustering, exact-duplicate invariance, and important
-negative results for ranking and dispatch. It does not establish ranking
-alignment, dispatch benefit, misinformation robustness, policy validity, or
-deployment readiness. The contribution is an auditable stress-test boundary
-around those claims, not a validated rescue policy.
+The study establishes conditional graph-localization bounds and exact-copy
+invariance of the family-wise priority score under fixed evidence grouping.
+Fixed clustering stresses reveal degradation under location and timestamp
+noise, and substantial degradation across all four graph variants at
+fivefold exact-copy multiplicity. Thus score-level invariance does not imply
+clustering invariance or end-to-end robustness. Together with the ranking and
+dispatch results, the evidence provides an auditable characterization of
+failure modes, while leaving general superiority, policy validity, and field
+readiness unestablished.
 
 \section*{Data and Code Availability}
 
@@ -807,9 +885,12 @@ and result hashes. The exact RQ1 benchmark notebook/configuration snapshot is
 \href{https://github.com/ngthtrong/nckh2/commit/6ac75c202d04934deb46d84486132e54d42d735f}{\texttt{6ac75c2}};
 the generator/external-benchmark package is retained at
 \href{https://github.com/ngthtrong/nckh2/commit/a6be3e988dad1aa442c8c8e158c2bba96b2b7fb9}{\texttt{a6be3e9}}.
-Raw upstream anchor snapshots are not redistributed. Original code is MIT
-licensed and original manuscript/artifact content is CC BY 4.0; third-party
-materials retain their original terms.
+The camera-ready development branch additionally contains the fixed RQ1
+stress protocol, executed notebook, per-run results, paired effects, and
+checksum manifest; these files are separate from release \texttt{v1.0.1}
+until a new archival release is created. Raw upstream anchor snapshots are not
+redistributed. Original code is MIT licensed and original manuscript/artifact
+content is CC BY 4.0; third-party materials retain their original terms.
 
 \begin{credits}
 \subsubsection{\ackname} This study is funded by the Can Tho University, Code:
