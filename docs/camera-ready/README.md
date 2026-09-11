@@ -1,47 +1,36 @@
 # ISDS-2026 camera-ready workspace
 
-This directory tracks the camera-ready state of submission 6444 from the
-submitted `v1.0.1` artifact. The working manuscript is `paper/main.tex` on
-`clean`; the current integration baseline is commit `9fbc49c` (`CR_0.1`).
-
-The conference email gives 16 September 2026 as the camera-ready and
-registration deadline. Page limits, upload contents, and response-letter
-requirements remain pending the conference's follow-up instructions.
+This is the status entry point for paper 6444. Work continued from branch
+`clean` at `edefb9c`; the submitted archive remains tag `v1.0.1` (`be95d4c`).
+The manuscript contains the final scientific design and evidence, not the
+review or revision history.
 
 ## Current state
 
-- The paper defines the named clustering variants, explains comparator roles,
-  corrects the top-k pseudocode, documents the separate tuning grids, and
-  limits the matched-density interpretation.
-- Existing RQ2/RQ3 evidence was checked against its SHA-256 manifests. The
-  paper now summarizes all 11 RQ2 stress scenarios and all three RQ3 resource
-  scenarios without changing the primary 40-seed inference.
-- The fixed RQ1 clustering stress run has returned. Its 288 manifest hashes,
-  280 checkpoints, 1,400 fits, 92,617 duplicate mappings, 35 summaries, and 300
-  paired bootstrap rows pass independent audit with NumPy 2.5.1. The paper now
-  reports its fixed GPS, timestamp, and exact-copy conditions.
-- Numerical integration is complete. Package provenance remains open because
-  the original ZIP is absent and the group has not confirmed whether a
-  checkpoint was resumed across a Colab runtime change. The executed run used
-  Python 3.13.15; that version appears in the manifest but was not included in
-  the returned protocol hash.
-- `paper/main.pdf` builds successfully with hidden link borders. The integrated
-  draft is 17 pages; a measured 15-page layout that removes two redundant
-  figures and one redundant headline table is awaiting author approval.
-- Author, corresponding-author, and funding changes after `v1.0.1` are group
-  confirmed and retained.
+- Both RQ1 stress runs pass independent numerical audit: 280 checkpoints,
+  1,400 fits, 92,617 mappings, 35 summaries, and 300 paired effects per run.
+  The first run is the fixed manuscript source; v2 is an unpooled replication.
+- The 43 changed ARI rows are confined to graph methods under 2x copies. The
+  major GPS, time-noise, and 5x conclusions are unchanged.
+- The manuscript defines all equation variables, uses a validated 30-cell
+  vector heatmap, removes redundant RQ2/RQ3 visuals, has eight authors and one
+  corresponding author, and builds to 15 pages with Dockerized Tectonic.
+- Source packaging and alt text are prepared. The extracted ZIP passes the
+  XeLaTeX/BibTeX four-command build in TeX Live 2026 at 15 pages. Signed LTP,
+  author approval, and upload remain external gates.
+- Package provenance is still open for both original ZIP files, runtime/resume
+  history, and the v2 executed notebook.
 
-## Files
+## Working files
 
-- `RQ1_STRESS_AUDIT.md`: reproducible numerical and provenance audit.
-- `REVISION_TRACKER.md`: evidence-based assessment and open gates.
-- `REVIEWER_RESPONSE.md`: internal English response draft, used only if the
-  conference or author group requires it.
-- `RQ1_STRESS_RUNBOOK.md`: locked protocol, returned-run reconciliation, and
-  future rerun instructions.
-- `../checkpoints/2026-09-11-01-rq1-stress-integration.md`: current handoff
-  checkpoint.
+- `RQ1_STRESS_AUDIT.md`: reproducible two-run numerical/provenance audit.
+- `RQ1_STRESS_RUNBOOK.md`: returned-run status and future-rerun boundary.
+- `REVISION_TRACKER.md`: internal evidence and publication decision tracker.
+- `SUBMISSION_CHECKLIST.md`: EasyChair fields, package contents, and final gates.
+- `FIGURE_ALT_TEXT.md`: alt text for the two final figures.
+- `REVIEWER_RESPONSE.md`: internal draft only; submit only if requested.
+- `../../temp-plan.md`: implementation status and owner handoff.
+- `../checkpoints/2026-09-11-02-camera-ready-finalization.md`: latest checkpoint.
 
-Submission, registration, archival release creation, and push are outside this
-workspace update. The group tasks and completion criteria are recorded in the
-current checkpoint.
+No commit, push, public release, registration, LTP signature, or EasyChair
+upload is performed by this workspace update.

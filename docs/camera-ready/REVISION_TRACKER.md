@@ -1,52 +1,36 @@
 # ISDS-2026 camera-ready evidence tracker
 
-Submission baseline: tag `v1.0.1` (`be95d4c`). Camera-ready integration
-baseline: branch `clean` at `9fbc49c`. Deadline stated in the acceptance email:
-16 September 2026; the group must confirm the time zone and final instructions.
+Submitted baseline: `v1.0.1` (`be95d4c`). Implementation baseline: branch
+`clean` at `edefb9c`. Stated deadline: 16 September 2026; exact time zone is
+still pending. This internal tracker evaluates evidence and fit with the study;
+it is not part of the manuscript narrative.
 
-This tracker evaluates the committee comments against the study's direction
-and repository evidence. It is an internal decision record, not a checklist
-that the manuscript must reproduce and not part of the camera-ready narrative.
+| Observation or requirement | Evidence and fit | Decision | Status |
+|---|---|---|---|
+| Product/Additive superiority is not established | Adjusted RQ1 comparisons remain inconclusive | Present localization as a checkable property, not superiority | Integrated |
+| Synthetic realism must be bounded | Reports, attacks, labels and outcomes are simulated; upstream lineage is incomplete | Retain construction table and field-validity limits | Integrated |
+| Measurement/copy stress should be exposed | Two fully audited fixed-protocol runs exist | Use primary values; report v2 as unpooled replication | Integrated |
+| RQ1 does not establish dispatch benefit | RQ3 is a separate Candidate-4.1 suite | Keep clustering and dispatch conclusions separate | Integrated |
+| Exact-copy score invariance can be overgeneralized | It requires fixed grouping and inputs | Do not extend it to clustering or the pipeline | Integrated |
+| Formula notation needed completion | Four main equation groups checked against implemented rules | Define variables, units, ranges and continuous numbering | Integrated |
+| Dense prose duplicated numeric tables | Validated Delta-ARI cells support a compact visual | Use 30-cell vector heatmap; remove redundant figures/table | Integrated |
+| Two RQ1 runs differ | 43 ARI rows differ only at graph 2x; other result/runtime differences exist | Do not pool or assign a Python/threshold cause | Integrated |
+| Strict 12–15 pages | Dockerized Tectonic produces 15 pages | Preserve LNCS margins/fonts and final science | Verified |
+| Eight-author change | User records organizer approval | Keep eight names; retain approval evidence | Group evidence pending |
+| One corresponding author | Manuscript marks Thanh-Trong only | Match PDF, EasyChair and LTP | Integrated |
+| EasyChair package fields | Local instructions specify ZIP, PDF, LTP, main file and engines | `main.tex` root; select XeLaTeX/BibTeX; clean ZIP build passed | Verified |
+| Accessibility | LTP requests figure alt text | Provide alt text for pipeline and heatmap | Prepared |
+| New-content licensing | Team chose no new CC BY grant | MIT code only; LTP contribution; preserve v1.0.1 history | Integrated |
 
-Status meanings: **integrated** is backed by audited evidence and manuscript
-text; **retained** means the existing position remains appropriate;
-**conditional** requires an external decision or artifact.
+## Remaining gates
 
-| Observation | Evidence assessment | Fit with the study | Camera-ready decision | Status |
-|---|---|---|---|---|
-| Proposed methods do not consistently beat baselines; practical value needs a narrower statement | Correct: the adjusted RQ1 comparisons do not establish composition superiority, and RQ2/RQ3 do not establish policy benefit | Central to an audit and failure-boundary study | Frame edge localization, fixed-group score invariance, and downstream failure exposure as diagnostic checks | Integrated |
-| Synthetic-data realism and representativeness need clearer boundaries | Correct: geographic anchors are documented, but incidents, reports, attacks, labels, and operational outcomes are simulated; source snapshots and row lineage are unavailable | Central to credible scope claims | Keep the construction table and explicit non-representativeness limitations | Integrated |
-| Robustness under measurement noise, copies, and resource variation should be exposed | Correct and directly testable without changing the locked methods | Strengthens the stated stress-testing direction | Report audited RQ1 fixed stresses, all 11 RQ2 scenarios, and all three RQ3 resource conditions | Integrated |
-| ARI alone is insufficient for operational utility | Correct: RQ1 and RQ3 use different suites, and dispatch endpoints contradict a simple proxy-to-utility inference | Central to end-to-end failure analysis | Keep RQ1 clustering and RQ3 dispatch conclusions separate; retain 40 seed-level RQ3 pairs | Integrated |
-| Misinformation and field readiness are not demonstrated | Correct: the coordinated campaign is adverse and no field or expert validation exists | Defines the valid evidence boundary | Retain explicit limitations; make no deployment, policy, or misinformation-robustness claim | Retained |
-| Product/Additive terms and comparator roles require definitions | Correct and consistent with the implemented methods | Improves reproducibility without changing the contribution | Retain definitions, separate tuning grids, and comparator-control rationale | Integrated |
-| Top-k pseudocode must match executable behavior | Correct: the code thresholds, selects endpoint-wise directed top-k, then symmetrizes by OR | Required for technical accuracy | Describe the implementation exactly; do not redesign the method | Integrated |
-| Matched-density isolates the composition operator | Too strong: density is approximately aligned, while weights and edge membership still differ | A causal claim would exceed the study | Retain it as a non-causal density-control diagnostic | Retained |
-| Camera-ready format, page limit, and upload package | Not established by repository evidence; only the email deadline is recorded | Publication requirement rather than a scientific result | Apply only after the group supplies authoritative instructions | Conditional |
+- Original ZIP and runtime/resume confirmation for both RQ1 runs; executed v2
+  notebook.
+- Repeat the clean `xelatex -> bibtex -> xelatex -> xelatex` build only if an
+  approved final edit changes the source ZIP.
+- Conference confirmation of deadline time zone and alt-text delivery channel.
+- Final author review of PDF, source ZIP, metadata and hand-signed LTP.
+- Registration/upload receipts and any new archive/release decision.
 
-## RQ1 stress evidence gate
-
-- Numerical audit passed: 288 hashes, 280 checkpoints, 1,400 unique fits,
-  92,617 mapping rows, 35 summaries, and 300 independently replayed paired
-  bootstrap rows.
-- Control ARI and pairwise F1 match the locked benchmark per run; no retuning
-  or hidden failure was found.
-- Both the slight 2x improvement and the adverse 5x graph-method collapse are
-  retained. The study does not assign a causal mechanism to the discontinuity.
-- Score-level exact-copy invariance is stated only for fixed evidence grouping
-  and other score inputs; it is not extended to upstream clustering or the
-  end-to-end pipeline.
-- Package provenance is conditional on receiving the original ZIP with
-  SHA-256 `d53624bbb3e681504ce9691a77b93610559183187bfe731a3f7fd10de6e034c2`
-  and the group's runtime/resume confirmation.
-
-## Open publication gates
-
-- The current integrated PDF is 17 pages. A temporary build verified that
-  removing the two figures whose values are already in tables/prose, removing
-  the duplicate headline RQ2/RQ3 table, and tightening the Results summary and
-  RQ1 stress caption produces 15 pages without changing reported results.
-- Final page/line references in the internal response draft wait for the final
-  layout.
-- Submission, registration, archival release creation, and final author-group
-  approval have not occurred.
+No additional experiment is assigned by default. A rerun requires a
+conclusion-affecting defect and separate approval.

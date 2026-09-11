@@ -16,7 +16,9 @@ from pathlib import Path
 
 ROOT = Path(__file__).resolve().parents[2]
 RESULTS = ROOT / "src" / "results"
-STRESS = RESULTS / "rq1_results"
+PRIMARY_STRESS = RESULTS / "rq1_results"
+REPLICATION_STRESS = RESULTS / "rq1_results_v2" / "full"
+REPLICATION_SMOKE = RESULTS / "rq1_results_v2" / "smoke" / "checkpoints"
 RQ1_SOURCE_COMMIT = "6ac75c202d04934deb46d84486132e54d42d735f"
 RQ1_DATA_TREE = "5bb8f9e5f1bb1c4deec8f0db1351e27d1bf30333"
 RQ1_NOTEBOOK_SHA256 = "13a586af7ac5331dd1afe354b9e5c9a46b90e0ff2f6ac6f71dbdc3badd6ca7ef"
@@ -162,7 +164,9 @@ def verify_executed_notebook() -> dict[str, object]:
     return {"executed_cells": executed_cells, "zip_sha256_from_output": EXPECTED_ZIP_SHA256}
 
 
-def verify_rq1_stress_artifact(base: dict[str, object]) -> dict[str, object]:
+def verify_rq1_stress_artifact(
+    base: dict[str, object], stress_dir: Path, *, require_executed_notebook: bool = False
+) -> dict[str, object]:
     """Verify returned RQ1 stress artifacts, including exact bootstrap replay."""
     try:
         import numpy as np
@@ -172,16 +176,15 @@ def verify_rq1_stress_artifact(base: dict[str, object]) -> dict[str, object]:
         ) from error
     assert np.__version__ == "2.5.1", np.__version__
 
-    manifest = json.loads((STRESS / "manifest.json").read_text(encoding="utf-8"))
-    protocol = json.loads((STRESS / "protocol.json").read_text(encoding="utf-8"))
-    selected_used = json.loads((STRESS / "selected_configs.used.json").read_text(encoding="utf-8"))
+    manifest = json.loads((stress_dir / "manifest.json").read_text(encoding="utf-8"))
+    protocol = json.loads((stress_dir / "protocol.json").read_text(encoding="utf-8"))
+    selected_used = json.loads((stress_dir / "selected_configs.used.json").read_text(encoding="utf-8"))
 
     assert canonical_sha256(protocol) == EXPECTED_PROTOCOL_SHA256
     assert manifest["protocol"] == protocol
     assert manifest["protocol_sha256"] == EXPECTED_PROTOCOL_SHA256
     assert manifest["checkpoint_count"] == 280
     assert manifest["fit_rows"] == 1400
-    assert manifest["python_version"].startswith("3.13.15 ")
     assert "python_version" not in protocol
     assert manifest["package_versions"]["numpy"] == "2.5.1"
     assert protocol["source_commit"] == RQ1_SOURCE_COMMIT
@@ -192,16 +195,15 @@ def verify_rq1_stress_artifact(base: dict[str, object]) -> dict[str, object]:
     assert protocol["prediction_before_truth"] is True
 
     actual_artifact_files = {
-        str(path.relative_to(STRESS))
-        for path in STRESS.rglob("*")
+        str(path.relative_to(stress_dir))
+        for path in stress_dir.rglob("*")
         if path.is_file() and path.name != "manifest.json"
     }
-    assert len(manifest["artifacts"]) == 288
     assert set(manifest["artifacts"]) == actual_artifact_files
     for relative_path, expected in manifest["artifacts"].items():
-        assert sha256(STRESS / relative_path) == expected, relative_path
+        assert sha256(stress_dir / relative_path) == expected, relative_path
 
-    failure_paths = list(STRESS.rglob("failures.jsonl"))
+    failure_paths = list(stress_dir.rglob("failures.jsonl"))
     assert all(not path.read_text(encoding="utf-8").strip() for path in failure_paths)
 
     required_names = ("algorithm_input.json", "ground_truth.json", "run_manifest.json")
@@ -226,7 +228,7 @@ def verify_rq1_stress_artifact(base: dict[str, object]) -> dict[str, object]:
     assert protocol["selected_configs"] == expected_selected
 
     checkpoints = []
-    for path in sorted((STRESS / "checkpoints").glob("*.json")):
+    for path in sorted((stress_dir / "checkpoints").glob("*.json")):
         payload = json.loads(path.read_text(encoding="utf-8"))
         assert payload["protocol_sha256"] == EXPECTED_PROTOCOL_SHA256
         assert payload["source_commit"] == RQ1_SOURCE_COMMIT
@@ -241,7 +243,7 @@ def verify_rq1_stress_artifact(base: dict[str, object]) -> dict[str, object]:
     }
     assert {(item["run_id"], item["scenario"]) for item in checkpoints} == expected_checkpoints
 
-    per_run_rows = read_rows(STRESS / "aggregate/rq1_stress_per_run.csv")
+    per_run_rows = read_rows(stress_dir / "aggregate/rq1_stress_per_run.csv")
     expected_tuples = {
         (run_id, scenario, method)
         for run_id in protocol["test_runs"]
@@ -278,7 +280,7 @@ def verify_rq1_stress_artifact(base: dict[str, object]) -> dict[str, object]:
                 (run_id, method, "pair F1"),
             )
 
-    aggregate_mapping = read_rows(STRESS / "aggregate/rq1_stress_duplication_mapping.csv")
+    aggregate_mapping = read_rows(stress_dir / "aggregate/rq1_stress_duplication_mapping.csv")
     checkpoint_mapping = [row for item in checkpoints for row in item["duplication_mapping"]]
     assert len(aggregate_mapping) == len(checkpoint_mapping) == 92617
     mapping_fields = tuple(aggregate_mapping[0])
@@ -322,7 +324,7 @@ def verify_rq1_stress_artifact(base: dict[str, object]) -> dict[str, object]:
         "retained_edge_fraction",
         "mean_degree",
     )
-    summary_rows = read_rows(STRESS / "aggregate/rq1_stress_summary.csv")
+    summary_rows = read_rows(stress_dir / "aggregate/rq1_stress_summary.csv")
     assert len(summary_rows) == 35
     for summary in summary_rows:
         selected = [
@@ -348,7 +350,7 @@ def verify_rq1_stress_artifact(base: dict[str, object]) -> dict[str, object]:
                 (summary["scenario"], summary["method"], metric, "std"),
             )
 
-    effect_rows = read_rows(STRESS / "aggregate/rq1_stress_paired_effects.csv")
+    effect_rows = read_rows(stress_dir / "aggregate/rq1_stress_paired_effects.csv")
     assert len(effect_rows) == 300
     for effect in effect_rows:
         values = np.array(
@@ -390,8 +392,21 @@ def verify_rq1_stress_artifact(base: dict[str, object]) -> dict[str, object]:
                 (effect["method"], effect["scenario"], effect["metric"]),
             )
 
-    notebook = verify_executed_notebook()
+    notebook: dict[str, object] = {}
+    if require_executed_notebook:
+        notebook = verify_executed_notebook()
+        assert manifest["executed_notebook"]["status"] == "captured"
+    else:
+        assert manifest["executed_notebook"]["status"] in {
+            "captured",
+            "manual-download-required",
+        }
+    try:
+        display_path = str(stress_dir.relative_to(ROOT))
+    except ValueError:
+        display_path = str(stress_dir)
     return {
+        "path": display_path,
         "manifest_files": len(manifest["artifacts"]),
         "checkpoints": len(checkpoints),
         "fit_rows": len(per_run_rows),
@@ -399,12 +414,134 @@ def verify_rq1_stress_artifact(base: dict[str, object]) -> dict[str, object]:
         "mapping_rows": len(aggregate_mapping),
         "audit_numpy": np.__version__,
         "colab_python": manifest["python_version"],
+        "executed_notebook_status": manifest["executed_notebook"]["status"],
+        "protocol": protocol,
+        "per_run_rows": per_run_rows,
         **notebook,
     }
 
 
 def manuscript_number(value: str) -> str:
     return value.lstrip("0") if value.startswith("0.") else value.replace("-0.", "-.")
+
+
+def verify_replication_smoke(replication: dict[str, object]) -> dict[str, int]:
+    """Check the seven run-041 smoke checkpoints without treating them as data."""
+    protocol = replication["protocol"]
+    full_dir = REPLICATION_STRESS / "checkpoints"
+    smoke_paths = sorted(REPLICATION_SMOKE.glob("*.json"))
+    assert len(smoke_paths) == len(protocol["scenarios"]) == 7
+    fits = 0
+    for smoke_path in smoke_paths:
+        smoke = json.loads(smoke_path.read_text(encoding="utf-8"))
+        full = json.loads((full_dir / smoke_path.name).read_text(encoding="utf-8"))
+        assert smoke["run_id"] == full["run_id"] == "run_041"
+        assert smoke["scenario"] == full["scenario"]
+        assert smoke["protocol_sha256"] == full["protocol_sha256"] == EXPECTED_PROTOCOL_SHA256
+        assert smoke["duplication_mapping"] == full["duplication_mapping"]
+        assert len(smoke["rows"]) == len(full["rows"]) == 5
+        fits += len(smoke["rows"])
+        for smoke_row, full_row in zip(smoke["rows"], full["rows"]):
+            assert smoke_row["method"] == full_row["method"]
+            for field in smoke_row:
+                if field != "runtime_seconds":
+                    assert smoke_row[field] == full_row[field], (
+                        smoke_path.name,
+                        smoke_row["method"],
+                        field,
+                    )
+    return {"checkpoints": len(smoke_paths), "fits": fits}
+
+
+def compare_stress_runs(
+    primary: dict[str, object],
+    replication: dict[str, object],
+    output_path: Path | None = None,
+) -> dict[str, object]:
+    """Compare two complete runs by run-condition-method key, without pooling."""
+    assert primary["protocol"] == replication["protocol"]
+    primary_mapping = PRIMARY_STRESS / "aggregate/rq1_stress_duplication_mapping.csv"
+    replication_mapping = REPLICATION_STRESS / "aggregate/rq1_stress_duplication_mapping.csv"
+    assert primary_mapping.read_bytes() == replication_mapping.read_bytes()
+
+    key_fields = ("run_id", "scenario", "method")
+    primary_index = {
+        tuple(row[field] for field in key_fields): row for row in primary["per_run_rows"]
+    }
+    replication_index = {
+        tuple(row[field] for field in key_fields): row for row in replication["per_run_rows"]
+    }
+    assert set(primary_index) == set(replication_index)
+
+    changed_field_counts: Counter[str] = Counter()
+    ari_changes: list[tuple[str, str, str]] = []
+    comparison_rows: list[dict[str, object]] = []
+    for key in sorted(primary_index):
+        first = primary_index[key]
+        second = replication_index[key]
+        assert set(first) == set(second)
+        changed_results: list[str] = []
+        tiny_differences: list[str] = []
+        max_result_delta = 0.0
+        for field in first:
+            if first[field] == second[field]:
+                continue
+            changed_field_counts[field] += 1
+            if field == "runtime_seconds":
+                continue
+            try:
+                delta = abs(float(second[field]) - float(first[field]))
+            except (TypeError, ValueError):
+                changed_results.append(field)
+                continue
+            if delta <= TOLERANCE:
+                tiny_differences.append(field)
+            else:
+                changed_results.append(field)
+                max_result_delta = max(max_result_delta, delta)
+        if first["ari_original"] != second["ari_original"]:
+            ari_changes.append(key)
+        comparison_rows.append(
+            {
+                "run_id": key[0],
+                "scenario": key[1],
+                "method": key[2],
+                "runtime_changed": first["runtime_seconds"] != second["runtime_seconds"],
+                "result_changed_fields": ";".join(changed_results),
+                "tiny_numeric_fields_le_1e-10": ";".join(tiny_differences),
+                "max_abs_result_delta": f"{max_result_delta:.17g}",
+                "ari_primary": first["ari_original"],
+                "ari_v2": second["ari_original"],
+                "ari_v2_minus_primary": f'{float(second["ari_original"]) - float(first["ari_original"]):.17g}',
+            }
+        )
+
+    graph_methods = {
+        "product_cij_louvain",
+        "additive_cij_louvain",
+        "additive_cij_louvain_matched_density",
+        "product_cij_leiden",
+    }
+    assert len(ari_changes) == 43
+    assert {key[1] for key in ari_changes} == {"exact_transport_copy_2x"}
+    assert {key[2] for key in ari_changes} == graph_methods
+    assert changed_field_counts["runtime_seconds"] == 1400
+
+    if output_path is not None:
+        output_path.parent.mkdir(parents=True, exist_ok=True)
+        with output_path.open("w", encoding="utf-8", newline="") as handle:
+            writer = csv.DictWriter(handle, fieldnames=list(comparison_rows[0]))
+            writer.writeheader()
+            writer.writerows(comparison_rows)
+
+    return {
+        "keys": len(primary_index),
+        "ari_changes": len(ari_changes),
+        "ari_scenarios": sorted({key[1] for key in ari_changes}),
+        "ari_methods": sorted({key[2] for key in ari_changes}),
+        "changed_field_counts": dict(sorted(changed_field_counts.items())),
+        "mapping_sha256": sha256(primary_mapping),
+    }
 
 
 def verify_manuscript(base: dict[str, object]) -> None:
@@ -484,39 +621,31 @@ def verify_manuscript(base: dict[str, object]) -> None:
         assert tuple(values) == expected
         assert all(value in paper for value in values)
 
-    stress_summary = {
-        (row["scenario"], row["method"]): row
-        for row in read_rows(STRESS / "aggregate/rq1_stress_summary.csv")
-    }
-    paper_rows = {
-        "baseline": "Control",
-        "gps_noise_100m": "GPS noise, 100 m",
-        "gps_noise_300m": "GPS noise, 300 m",
-        "time_noise_15min": "Time noise, 15 min",
-        "time_noise_60min": "Time noise, 60 min",
-        "exact_transport_copy_2x": r"Exact copies, $2\times$",
-        "exact_transport_copy_5x": r"Exact copies, $5\times$",
-    }
-    methods = (
-        "product_cij_louvain",
-        "additive_cij_louvain",
-        "additive_cij_louvain_matched_density",
-        "product_cij_leiden",
-        "geo_time_dbscan",
-    )
-    for scenario, label in paper_rows.items():
-        values = [
-            manuscript_number(
-                f'{float(stress_summary[(scenario, method)]["ari_original_mean"]):.4f}'
-            )
-            for method in methods
-        ]
-        expected_row = f'{label} & ' + " & ".join(values) + r"\\"
-        assert expected_row in paper, expected_row
+    effect_rows = [
+        row
+        for row in read_rows(PRIMARY_STRESS / "aggregate/rq1_stress_paired_effects.csv")
+        if row["metric"] == "ari_original"
+    ]
+    assert len(effect_rows) == 30
+    assert len({(row["scenario"], row["method"]) for row in effect_rows}) == 30
+    assert all(int(row["paired_runs"]) == 40 for row in effect_rows)
+    assert all(int(row["bootstrap_resamples"]) == 5000 for row in effect_rows)
+    heatmap = ROOT / "paper/figures/rq1_stress_delta_ari.pdf"
+    assert heatmap.read_bytes().startswith(b"%PDF-")
+    assert "rq1_stress_delta_ari.pdf" in paper
     for text in ("-.6108", "[-.6318,-.5881]"):
         assert text in paper, text
     normalized_paper = " ".join(paper.split())
     assert "score-level invariance does not imply clustering invariance" in normalized_paper
+    for label in ("eq:confidence", "eq:context", "eq:similarities", "eq:priority"):
+        assert paper.count(f"\\label{{{label}}}") == 1
+    assert paper.count(r"\thanks{Corresponding author.}") == 1
+    assert "tab:rq1-fixed-stress" not in paper
+    assert "tab:stress-results" not in paper
+    assert "fig:rq2-priority" not in paper
+    assert "fig:rq3-dispatch" not in paper
+    assert "CC BY 4.0" not in paper
+    assert "reviewer" not in paper.lower()
 
 
 def main() -> None:
@@ -526,34 +655,71 @@ def main() -> None:
         action="store_true",
         help="verify source artifacts and returned RQ1 stress results without reading manuscript quotations",
     )
+    parser.add_argument(
+        "--stress-dir",
+        action="append",
+        type=Path,
+        help="audit a complete stress-artifact directory; repeat for multiple runs",
+    )
+    parser.add_argument(
+        "--comparison-output",
+        type=Path,
+        help="write a keyed primary-v2 comparison CSV (requires the default two artifacts)",
+    )
     args = parser.parse_args()
 
     base = verify_base_artifacts()
-    stress = verify_rq1_stress_artifact(base)
+    stress_dirs = args.stress_dir or [PRIMARY_STRESS, REPLICATION_STRESS]
+    audited = [
+        verify_rq1_stress_artifact(
+            base,
+            path.resolve(),
+            require_executed_notebook=path.resolve() == PRIMARY_STRESS.resolve(),
+        )
+        for path in stress_dirs
+    ]
     print("PASS RQ2 and RQ3 manifests and RQ3 40-seed provenance")
     print("PASS submitted RQ1 snapshot, data tree, configurations, and 400 benchmark rows")
+    for stress in audited:
+        print(
+            f'PASS {stress["path"]}: {stress["manifest_files"]} hashes, '
+            f'{stress["checkpoints"]} checkpoints, {stress["fit_rows"]} fits, '
+            f'{stress["mapping_rows"]} mappings; 35 summaries and '
+            f'{stress["paired_effect_rows"]} bootstrap rows replayed with NumPy '
+            f'{stress["audit_numpy"]}'
+        )
+        print(
+            f'RECORDED {stress["path"]}: Python {stress["colab_python"]}; '
+            f'executed notebook status={stress["executed_notebook_status"]}; '
+            "python_version is not protocol-hashed"
+        )
+    if {Path(item["path"]).as_posix() for item in audited} == {
+        Path("src/results/rq1_results").as_posix(),
+        Path("src/results/rq1_results_v2/full").as_posix(),
+    }:
+        by_path = {item["path"]: item for item in audited}
+        smoke = verify_replication_smoke(by_path["src/results/rq1_results_v2/full"])
+        comparison = compare_stress_runs(
+            by_path["src/results/rq1_results"],
+            by_path["src/results/rq1_results_v2/full"],
+            args.comparison_output,
+        )
+        print(
+            f'PASS v2 smoke: {smoke["checkpoints"]} technical checkpoints / '
+            f'{smoke["fits"]} fits match full results except runtime (not added to n)'
+        )
+        print(
+            f'PASS keyed primary-v2 comparison: {comparison["keys"]} rows, '
+            f'{comparison["ari_changes"]} ARI changes confined to 2x graph methods; '
+            "runs remain separate"
+        )
     print(
-        "PASS returned RQ1 stress artifact: "
-        f'{stress["manifest_files"]} hashes, {stress["checkpoints"]} checkpoints, '
-        f'{stress["fit_rows"]} fits, {stress["mapping_rows"]} mappings'
-    )
-    print(
-        "PASS exact recomputation: 35 summaries and "
-        f'{stress["paired_effect_rows"]} paired bootstrap rows with NumPy {stress["audit_numpy"]}'
-    )
-    print("PASS executed notebook provenance and completion markers")
-    print(
-        "OPEN provenance gate: original ZIP file is absent; compare it with",
-        stress["zip_sha256_from_output"],
-    )
-    print(
-        "RECORDED limitation: Colab used",
-        stress["colab_python"],
-        "but python_version was not protocol-hashed",
+        "OPEN provenance gates: original ZIP/runtime-resume confirmations for both runs, "
+        "and the v2 executed notebook"
     )
     if not args.artifact_only:
         verify_manuscript(base)
-        print("PASS manuscript quotations for RQ1 benchmark/stress, RQ2, and RQ3")
+        print("PASS manuscript quotations, formula labels, and heatmap integration")
 
 
 if __name__ == "__main__":

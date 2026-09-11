@@ -5,7 +5,8 @@ Ranking for Flood-Rescue Reports: A Synthetic Study*
 
 This is an internal response draft. It describes only changes supported by the
 repository and should be submitted only if the conference or author group
-requires a response document. Page and line references wait for the final PDF.
+requires a response document. The current final-layout draft is 15 pages;
+exact page and line references should be added only after author sign-off.
 
 ## General response
 
@@ -56,7 +57,9 @@ noise at 100 m and 300 m, timestamp noise at 15 min and 60 min, and exact
 transport-copy multiplicities of 2 and 5. It applies five fixed methods to 40
 locked test runs (1,400 fits) and uses paired bootstrap differences from each
 method's unperturbed control. All 1,400 rows, 280 checkpoints, artifact hashes,
-copy mappings, summaries, and 300 paired effects passed independent audit.
+copy mappings, summaries, and 300 paired effects passed independent audit in
+both the primary run and an unpooled replication. The manuscript heatmap uses
+the primary run selected before comparison.
 
 All tested GPS and timestamp conditions lower mean ARI. No method has the
 highest mean ARI in every condition. Twofold exact copies slightly increase
@@ -67,6 +70,12 @@ DBSCAN remains at .4978 under exact copying from a lower control baseline. The
 manuscript distinguishes score-level exact-copy invariance under fixed
 grouping from clustering and end-to-end invariance, and does not assign a
 causal mechanism to the graph-method discontinuity.
+
+The replication changes 43 original-report ARI rows, all for graph methods at
+twofold copies. Its aggregate twofold values differ slightly, while control,
+GPS, timestamp, and fivefold-copy ARI and the main conclusions are unchanged.
+The runs are not pooled, and the differences are not attributed to Python or
+sparsification without an isolating experiment.
 
 ### Minor comments: terminology and baselines
 
@@ -104,5 +113,5 @@ campaign remains a documented adverse result.
 Reviewer 3 raises the same substantive issues concerning advantage, synthetic
 realism, robustness, downstream alignment, misinformation/field readiness,
 terminology, and baseline rationale. The corresponding revisions are described
-in the responses above. The final response will add exact page and line numbers
-after the conference format and final PDF pagination are known.
+in the responses above. Exact page and line references should use the approved
+submission PDF rather than this internal draft.

@@ -1,93 +1,97 @@
-# RQ1 fixed-stress artifact audit
+# RQ1 fixed-stress primary and replication audit
 
 Date: 2026-09-11 UTC
 
-## Scope
+## Scope and source selection
 
-This audit covers the returned fixed-configuration RQ1 stress artifact in
-`src/results/rq1_results/` and the executed notebook
-`src/results/RQ1_Reviewer_Stress_Colab_After_Run.ipynb`. It does not rerun the
-1,400 clustering fits or alter any returned CSV, JSON, checkpoint, or notebook.
+The audit covers the primary artifact in `src/results/rq1_results/`, its
+executed notebook, the independent replication in
+`src/results/rq1_results_v2/full/`, and the seven v2 smoke checkpoints. It does
+not rerun the 1,400 clustering fits or alter any returned artifact.
 
-The locked source is commit
-`6ac75c202d04934deb46d84486132e54d42d735f`, data tree
-`5bb8f9e5f1bb1c4deec8f0db1351e27d1bf30333`, selected-configuration SHA-256
-`e3c9f1ad333575862126315595835f01a7b660ac59c240ed0e282f653fb265f6`,
-and protocol SHA-256
-`8618feb9e58683dc33392fffb5a977777108ca76dd5828f145a2a4ca05dc7245`.
+The primary run is the fixed source for manuscript values and the heatmap; v2
+is a replication check. They are not pooled and the source was not selected by
+which run performed better. Both use protocol SHA-256
+`8618feb9e58683dc33392fffb5a977777108ca76dd5828f145a2a4ca05dc7245`, source
+commit `6ac75c202d04934deb46d84486132e54d42d735f`, and data tree
+`5bb8f9e5f1bb1c4deec8f0db1351e27d1bf30333`.
 
-## Reproduction command
-
-The independent audit used Python 3.12.3 with NumPy 2.5.1 installed in an
-isolated user directory:
+## Reproduction commands
 
 ```bash
 PYTHONPATH=/home/ngthtrong/.local/share/nckh2-rq1-audit/site-packages \
-  python3 src/results/verify_camera_ready_evidence.py --artifact-only
+  python3 src/results/verify_camera_ready_evidence.py --artifact-only \
+  --comparison-output src/results/rq1_results_v2/comparison_with_primary.csv
+
+MPLCONFIGDIR=/tmp/nckh2-matplotlib \
+PYTHONPATH=/tmp/nckh2-camera-ready-figures \
+  python3 src/results/plot_rq1_stress_heatmap.py
 ```
 
-Running the command without `--artifact-only` also checks every quoted
-RQ1/RQ2/RQ3 manuscript value, including each cell of the fixed-stress ARI
-table.
+The audit environment is Python 3.12.3 with NumPy 2.5.1 isolated from the
+project environment. Absolute tolerance for finite recomputed results is
+`1e-10`.
 
 ## Passed checks
 
-- All 288 files named by `manifest.json` recompute to their recorded SHA-256.
-- The artifact contains exactly 280 run-condition checkpoints and 1,400 unique
-  run-condition-method rows: 40 held-out runs, seven conditions, and five
-  methods.
-- No non-empty `failures.jsonl` is present. Every checkpoint uses the locked
-  source commit, data tree, and protocol hash.
-- The 120 required input files match the locked source snapshot byte for byte;
-  their canonical inventory hash and the selected configurations match the
-  protocol.
-- Every per-run CSV value agrees with its checkpoint. Every control ARI and
-  pairwise-F1 value agrees exactly with the original RQ1 benchmark row.
-- All 35 summary rows were recomputed for mean, sample standard deviation, and
-  count with absolute tolerance `1e-10`.
-- All 300 paired-effect rows were recomputed, including the exact seeded 5,000
-  bootstrap resamples and 2.5/97.5 percentiles, with NumPy 2.5.1 and absolute
-  tolerance `1e-10`.
-- All 92,617 duplication-mapping rows agree with their checkpoints. Each source
-  report has exactly two or five total copies, all perturbed identifiers are
-  unique, and every mapping points back to the correct source identifier.
-- The executed notebook contains no error output and records passing source,
-  data, transformation, formula, smoke, full-batch, and aggregation gates.
+| Check | Primary | V2 |
+|---|---:|---:|
+| Manifest SHA-256 entries | 288/288 | 287/287 |
+| Run-condition checkpoints | 280 | 280 |
+| Unique run-condition-method rows | 1,400 | 1,400 |
+| Duplication mappings | 92,617 | 92,617 |
+| Recomputed summary rows | 35 | 35 |
+| Replayed paired-effect rows | 300 | 300 |
+| Executed notebook | Present and checked | Missing; manual download required |
+| Python recorded by manifest | 3.13.15 | 3.12.13 |
 
-## Evidence-supported findings
+For each artifact, all CSV rows match their checkpoints; every control ARI and
+pairwise-F1 value matches the locked benchmark; all source inventory and
+selected configurations match the protocol; and no non-empty failure log is
+present. Mean, sample standard deviation, counts, and exact seeded 5,000-sample
+bootstrap intervals were recomputed. Metrics not applicable to DBSCAN have
+count zero and blank outputs as specified.
 
-All tested GPS and timestamp noise conditions lower mean ARI relative to each
-method's control. No method has the highest mean ARI in all seven conditions.
-For Product Louvain, mean ARI is `.9072` at control, `.7816` under 300 m GPS
-noise, and `.7442` under 60 min timestamp noise.
+The v2 smoke directory contains exactly seven run-041 checkpoints and 35 fits.
+Every scientific field and duplication mapping agrees with the corresponding
+full checkpoint; only runtime differs. Smoke results are not added to the
+sample size.
 
-Exact-copy behavior is non-monotone. Twofold total multiplicity slightly raises
-mean ARI for the four graph variants. Fivefold multiplicity lowers them to
-approximately `.29`--`.30`; Product Louvain changes by `-.6108` with an
-unadjusted paired-bootstrap 95% CI `[-.6318,-.5881]`. Geo-time DBSCAN remains
-at `.4978` under both copy conditions from a substantially lower control
-baseline. The artifact does not isolate the mechanism behind the graph-method
-discontinuity.
+## Keyed primary-v2 comparison
 
-These findings concern upstream clustering. Exact-copy invariance of the
-family-wise priority score applies when the evidence grouping and other score
-inputs are fixed; it does not imply clustering or end-to-end invariance.
+`src/results/rq1_results_v2/comparison_with_primary.csv` compares all 1,400
+keys `(run_id, scenario, method)` and separates runtime, differences no larger
+than `1e-10`, and larger result changes. Runtime differs on all 1,400 rows.
+The duplication mapping is byte-identical.
+
+There are 43 changed `ari_original` rows, all in `exact_transport_copy_2x` and
+all in the four graph methods. Aggregate means are:
+
+| Method | Primary | V2 |
+|---|---:|---:|
+| Product Louvain | .9314 | .9342 |
+| Additive Louvain | .9337 | .9322 |
+| Matched-density Additive | .9181 | .9183 |
+| Product Leiden | .9313 | .9289 |
+
+Control, GPS, timestamp, and fivefold-copy ARI values are unchanged. The main
+conclusions also remain: twofold copies slightly raise graph-method ARI,
+fivefold copies cause a large collapse, and no method leads every condition.
+Product Louvain at 5x remains Delta `-.6108`, unadjusted 95% CI
+`[-.6318,-.5881]`. Differences in graph density, edge count, other metrics,
+and runtime are recorded but do not identify a causal mechanism.
 
 ## Open provenance gates
 
-- The notebook output records the original ZIP SHA-256 as
-  `d53624bbb3e681504ce9691a77b93610559183187bfe731a3f7fd10de6e034c2`,
-  but the ZIP file itself is not in the repository and could not be hashed
-  independently.
-- Colab ran Python 3.13.15 with the pinned package versions. The manifest
-  records the full version, but the returned protocol did not include
-  `python_version` in its protocol hash. The current notebook includes this
-  additional guard, so it must not be treated as byte-identical to the
-  executed protocol or used to resume these checkpoints.
-- The group still needs to state whether any saved checkpoint was resumed
-  across a Colab runtime change. This affects provenance reporting, not the
-  arithmetic checks above.
+- Obtain the original ZIP for each run and compare its SHA-256. The primary
+  notebook recorded
+  `d53624bbb3e681504ce9691a77b93610559183187bfe731a3f7fd10de6e034c2`.
+- Obtain the executed v2 notebook; its manifest records
+  `manual-download-required` after notebook self-capture failed.
+- Record whether either run resumed checkpoints across a runtime change.
+- Both manifests record Python, but the shared returned protocol did not hash
+  `python_version`. Therefore cross-environment reproducibility is not marked
+  complete and the observed differences are not attributed to Python.
 
-The numerical artifact is accepted for manuscript integration. Package-level
-provenance remains pending the original ZIP and the group's runtime/resume
-confirmation.
+The numerical evidence is accepted for the stated manuscript use. Package
+provenance remains pending the items above.
