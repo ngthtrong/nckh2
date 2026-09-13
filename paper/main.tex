@@ -73,8 +73,9 @@ Thanh-Khoa Nguyen\inst{1}\orcidID{0000-0002-0012-1158}}
 \authorrunning{T.-T. Nguyen et al.}
 \institute{College of Information and Communication Technology,
 Can Tho University, Can Tho, Vietnam\\
-\email{\{trongb2305615, anhb2303861, quynhb2303777,
-hungb2303873, thinhb2303904\}@student.ctu.edu.vn\\
+\email{trongb2305615@student.ctu.edu.vn\\
+\{anhb2303861, quynhb2303777, hungb2303873,
+thinhb2303904\}@student.ctu.edu.vn\\
 \{cxphuong, pplan, ntkhoa\}@ctu.edu.vn}}
 
 \maketitle
@@ -86,9 +87,10 @@ measuring their scheduling consequences. We audit a fail-closed batch
 pipeline in which observable reports form a sparse graph, unresolved reports
 go to review, duplicate families feed a bounded score, and evaluator-only
 truth is joined after predicted-cluster scheduling. The clustering benchmark
-contains 80 synthetic runs from generator 3.0.0: an additive-affinity
-Louvain comparator has mean ARI $0.9191$, while the spatially gated product
-affinity has $0.9165$ with Leiden and $0.9072$ with Louvain.
+contains 80 synthetic runs from generator 3.0.0: using Louvain community
+detection, an additive-affinity graph has mean ARI $0.9191$, while the
+spatially gated product-affinity graph has $0.9165$ with the Leiden community
+detector and $0.9072$ with Louvain.
 Product minus independently tuned additive is $-0.0118$ (bootstrap 95\% CI
 $[-0.0226,-0.0024]$), but its Holm-adjusted test is not significant
 ($p=.2560$). A matched-density comparison reverses the point estimate but is
@@ -302,14 +304,16 @@ This is an edge statement. A component-diameter claim additionally needs a
 bounded observed hop diameter; long transitive chains remain possible.
 
 \begin{corollary}[Conditional component bound]
-In the finite product region, a connected component with unweighted observed
-hop diameter $h<\infty$ and geographic diameter $D$ satisfies
-$D<hr_\theta^\times$, where
-$r_\theta^\times=\sigma\sqrt{2\log(B/\theta)}$. A singleton has $h=D=0$.
+In the finite product region, a connected component with at least two nodes,
+unweighted observed hop diameter $1\leq h<\infty$, and geographic diameter
+$D$ satisfies $D<hr_\theta^\times$, where
+$r_\theta^\times=\sigma\sqrt{2\log(B/\theta)}$. A singleton has $h=D=0$ and
+is handled separately.
 \end{corollary}
-The result follows from the triangle inequality along a path of at most $h$
-retained edges. It is a conditional post-hoc component bound, not an ex-ante
-compactness guarantee: the pipeline does not control $h$.
+For a non-singleton, the result follows from the triangle inequality along a
+path of at most $h$ retained edges. It is a conditional post-hoc component
+bound, not an ex-ante compactness guarantee: the pipeline does not control
+$h$.
 
 For the additive form, assume $\alpha>0$. If
 $B<\theta<B+\alpha$, every retained edge satisfies
@@ -644,9 +648,10 @@ Table~\ref{tab:rq2-robustness} expands the robustness audit beyond the two
 headline cases. The revised score is invariant to exact-copy multiplicity and
 usually changes less under near duplication, missingness, contradictory
 evidence, and low-confidence flood inflation. Its bounded form is nevertheless
-more sensitive than the legacy score to coordinated high-confidence reports
-and to inflated population or vulnerability evidence. These are controlled
-synthetic perturbations, not estimates of attack prevalence or field error.
+more sensitive than the legacy score to low-confidence urgency, population,
+or vulnerability inflation and to coordinated high-confidence reports. These
+are controlled synthetic perturbations, not estimates of attack prevalence or
+field error.
 
 \begin{table}[t]
 \centering\scriptsize
@@ -800,15 +805,15 @@ and result hashes. The exact RQ1 benchmark notebook/configuration snapshot is
 \href{https://github.com/ngthtrong/nckh2/commit/6ac75c202d04934deb46d84486132e54d42d735f}{\texttt{6ac75c2}};
 the generator/external-benchmark package is retained at
 \href{https://github.com/ngthtrong/nckh2/commit/a6be3e988dad1aa442c8c8e158c2bba96b2b7fb9}{\texttt{a6be3e9}}.
-The repository branch associated with this version additionally contains the
-primary fixed RQ1 stress artifact and an independent rerun under the same locked protocol,
-including per-run results, paired effects, and checksum manifests. The primary
-artifact includes its executed notebook; collection of the rerun's executed
-notebook remains pending. These files are separate from release
-\texttt{v1.0.1} until a new archival release is created, and the two runs are
-not pooled as independent observations. Raw upstream anchor snapshots are not
-redistributed. Original code is MIT licensed. Publication and reuse of the
-contribution follow the applicable Springer publishing agreement;
+The public \href{https://github.com/ngthtrong/nckh2/tree/5fad10ddbe6e899769b59fe774850a41d2ac8d7d}{\texttt{clean} branch at
+commit \texttt{5fad10d}} additionally contains the primary fixed RQ1 stress
+artifact and an independent rerun under the same locked protocol, including
+per-run results, paired effects, and checksum manifests. The primary artifact
+includes its executed notebook; collection of the rerun's executed notebook
+remains pending. These files are not part of release \texttt{v1.0.1}, and the
+two runs are not pooled as independent observations. Raw upstream anchor
+snapshots are not redistributed. Original code is MIT licensed. Publication
+and reuse of the contribution follow the applicable Springer publishing agreement;
 other non-code materials and third-party content retain their stated terms.
 
 \begin{credits}

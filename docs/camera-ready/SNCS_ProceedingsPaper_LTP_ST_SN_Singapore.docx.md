@@ -13,15 +13,15 @@
 |  |  |  |
 | Volume Editor(s) Name(s): | Nguyen Thai-Nghe, Thanh-Nghi Do, Salem Benferhat, Liang-Chih Yu, Yu-Ting Tsai |  |
 |  |  |  |
-| Proposed Title of the Contribution: | Click here to enter text. | (the ‘Contribution’) |
+| Proposed Title of the Contribution: | Stress-Testing Product-Gated Clustering and Bounded Priority Ranking for Flood-Rescue Reports: A Synthetic Study | (the ‘Contribution’) |
 |  |  |  |
 | Series \- The Contribution may be published in the following series: | A Springer Nature Computer Science book series (CCIS, LNAI, LNBI, LNBIP or LNCS |  |
 |  |  |  |
-| Author(s) Full Name(s): | Click here to enter text. | (the ‘Author’) |
+| Author(s) Full Name(s): | Thanh-Trong Nguyen; Ngoc-Anh Le; Nhu-Quynh Nguyen; Tuong-Hung Cao; Hung-Thinh Ngo; Xuan-Phuong Chau; Lan Phuong Phan; Thanh-Khoa Nguyen | (the ‘Author’) |
 |  |  |  |
 | *When Author is more than one person the expression “Author” as used in this Agreement will apply collectively unless otherwise indicated.* |  |  |
 |  |  |  |
-| Corresponding Author Name:&nbsp; | Click here to enter text. |  |
+| Corresponding Author Name:&nbsp; | Thanh-Trong Nguyen |  |
 
 &nbsp;
 
@@ -144,13 +144,13 @@ This Agreement shall be governed by, and shall be construed in accordance with, 
 
 | Signed for and on behalf of the Author \[Ha&nbsp; |  | Print Name: |  | Date: |
 | ----- | :---- | :---- | :---- | :---- |
-|  |  |       |  |       |
+|  |  | Thanh-Trong Nguyen |  |       |
 
 &nbsp;
 
-| Address: |  |        |
+| Address: |  | College of Information and Communication Technology, Can Tho University, Can Tho, Vietnam |
 | :---- | :---- | :---- |
-|  Email: |  |       |
+|  Email: |  | trongb2305615@student.ctu.edu.vn |
 
 &nbsp;
 

@@ -640,6 +640,11 @@ def verify_manuscript(base: dict[str, object]) -> None:
     for label in ("eq:confidence", "eq:context", "eq:similarities", "eq:priority"):
         assert paper.count(f"\\label{{{label}}}") == 1
     assert paper.count(r"\thanks{Corresponding author.}") == 1
+    assert "trongb2305615@student.ctu.edu.vn" in paper
+    assert "with at least two nodes" in normalized_paper
+    assert "A singleton has $h=D=0$ and is handled separately" in normalized_paper
+    assert "low-confidence urgency, population, or vulnerability inflation" in normalized_paper
+    assert "5fad10ddbe6e899769b59fe774850a41d2ac8d7d" in paper
     assert "tab:rq1-fixed-stress" not in paper
     assert "tab:stress-results" not in paper
     assert "fig:rq2-priority" not in paper
