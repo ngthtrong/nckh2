@@ -5,8 +5,9 @@ Ranking for Flood-Rescue Reports: A Synthetic Study*
 
 This is an internal response draft. It describes only changes supported by the
 repository and should be submitted only if the conference or author group
-requires a response document. The current final-layout draft is 15 pages;
-exact page and line references should be added only after author sign-off.
+requires a response document. The current final-layout draft is 15 pages. The
+page references below identify the generated camera-ready PDF and must be
+refreshed if the manuscript changes after author sign-off.
 
 ## General response
 
@@ -19,6 +20,12 @@ readiness. We also expanded the synthetic-data construction and limitations,
 defined the named method variants, explained the comparator roles, and exposed
 additional robustness and resource-condition results.
 
+The fixed RQ1 measurement/copy stress is the additional experiment introduced
+for the camera-ready revision. The complete 11-scenario RQ2 table, the
+resource-specific RQ3 means, and the 840-observation local sensitivity study
+expand reporting of analyses already present in the submitted study and are
+not presented as newly collected field evidence.
+
 ## Reviewer 1
 
 ### 1. Specific advantage and practical value
@@ -30,7 +37,8 @@ the product gate, invariance of the family-wise score to exact transport copies
 when evidence grouping and other score inputs are fixed, and an end-to-end
 audit that reveals when clustering quality does not improve dispatch. We
 explicitly state that these are engineering checks and diagnostic findings
-rather than evidence of overall superiority or field benefit.
+rather than evidence of overall superiority or field benefit (Introduction,
+p. 2; Discussion, pp. 12--13).
 
 ### 2. Realism of the synthetic scenarios
 
@@ -42,7 +50,8 @@ Candidate 4.1 is fully synthetic and is not described as EMSR848-anchored.
 Benefit, deadlines, service demand, access delay, and harm are also simulated
 evaluator-only outputs. We further disclose that the archived artifact lacks
 the raw upstream snapshots, source checksums, and per-row lineage, so the
-evaluation does not demonstrate field representativeness.
+evaluation does not demonstrate field representativeness. The construction
+table appears on p. 9 and the corresponding validity limits on p. 13.
 
 ### 3. Additional robustness experiments
 
@@ -60,6 +69,10 @@ method's unperturbed control. All 1,400 rows, 280 checkpoints, artifact hashes,
 copy mappings, summaries, and 300 paired effects passed independent audit in
 both the primary run and an unpooled replication. The manuscript heatmap uses
 the primary run selected before comparison.
+
+The fixed protocol is defined on p. 8, its paired results are discussed on
+p. 10, and the annotated heatmap appears on p. 11. The expanded RQ2 table is
+on p. 12; the resource-specific RQ3 means are on p. 11.
 
 All tested GPS and timestamp conditions lower mean ARI. No method has the
 highest mean ARI in every condition. Twofold exact copies slightly increase
@@ -87,6 +100,10 @@ The ranking baselines isolate raw multiplicity, single-factor ordering, linear
 combination, chance ordering, and travel time. None is described as an endorsed
 rescue policy.
 
+The Abstract now also identifies Louvain and Leiden as community detectors and
+Product/Additive as graph-affinity constructions, so the terminology is
+readable from its first occurrence (Abstract, p. 1; full definitions, p. 2).
+
 ## Reviewer 2
 
 ### 1. Downstream alignment
@@ -98,7 +115,7 @@ surge resource conditions, and relate them to split, merge, and fake-only
 destinations. The primary RQ3 inference still averages the three conditions
 within each seed, retaining 40 independent seed-level pairs. The expanded
 analysis reinforces the original conclusion: attractive proxy metrics do not
-guarantee operational benefit.
+guarantee operational benefit (Results, pp. 10--11).
 
 ### 2. Field readiness
 
@@ -106,7 +123,8 @@ We retained and strengthened the limitation throughout the Abstract,
 Experimental Design, Discussion, and Conclusion. The work does not establish
 misinformation robustness, expert policy validity, source authenticity, or
 field deployment readiness. In particular, the coordinated high-confidence
-campaign remains a documented adverse result.
+campaign remains a documented adverse result (Abstract, p. 1; Discussion and
+Conclusion, pp. 12--13).
 
 ## Reviewer 3
 

@@ -38,7 +38,12 @@ triển khai này.
 - Xóa hai hình RQ2/RQ3 và bảng headline trùng lặp; giữ benchmark, robustness và
   sensitivity. Bản Docker/Tectonic hiện có đúng 15 trang.
 - Chỉ Thanh-Trong Nguyen là corresponding author; tám tác giả được giữ theo
-  xác nhận ban tổ chức đã duyệt.
+  xác nhận ban tổ chức đã duyệt. Email liên hệ được ghi đầy đủ là
+  `trongb2305615@student.ctu.edu.vn` và phải khớp EasyChair, LTP và đầu mối
+  nhận proof.
+- Audit sau cùng tách singleton khỏi hệ quả `D < h r`, bổ sung urgency
+  inflation vào diễn giải bất lợi, và định nghĩa community detector/affinity
+  construction ngay lần xuất hiện đầu trong Abstract.
 
 ## 3. Quyền nội dung và khả dụng dữ liệu — đã hoàn thành trong workspace
 
@@ -49,6 +54,8 @@ triển khai này.
   cho snapshot cũ.
 - Data and Code Availability phân biệt `v1.0.1`, artifact stress chính và v2;
   kết quả mới không được mô tả là đã nằm trong release cũ.
+- Remote đã được kiểm tra: `clean` công khai ở commit `5fad10d` và tag
+  `v1.0.1` vẫn là `be95d4c`.
 
 ## 4. Gói EasyChair — đã build sạch, chờ nhóm duyệt
 
@@ -63,14 +70,15 @@ triển khai này.
   `xelatex -> bibtex -> xelatex -> xelatex` từ ZIP đã đạt bằng TeX Live 2026,
   không có lỗi, undefined citation/reference hoặc overfull box và cho 15 trang.
   Phải chạy lại chuỗi này nếu nhóm duyệt thêm thay đổi.
+- Thanh-Trong Nguyen, Ngoc-Anh Le, Nhu-Quynh Nguyen, Tuong-Hung Cao, Hung-Thinh Ngo, Xuan-Phuong Chau, Lan Phuong Phan, and Thanh-Khoa Nguyen
 
 ## 5. Việc nhóm phải hoàn tất
 
-| Ưu tiên | Bên phụ trách | Việc | Bằng chứng đóng việc |
-|---|---|---|---|
-| P0 | Người chạy Colab | Gửi ZIP gốc hai lần, notebook v2 và lịch sử runtime/resume | Hash ZIP và nguồn checkpoint được xác nhận |
-| P0 | Người liên hệ hội nghị | Xác nhận giờ/múi giờ, kênh alt text và LTP | Lưu hướng dẫn chính thức |
-| P1 | Nhóm tác giả | Duyệt PDF, heatmap, kết luận, tám tác giả và một corresponding author | Chấp thuận bằng văn bản |
-| P1 | Thanh-Trong Nguyen | Hoàn thiện, ký tay và scan LTP sau khi nhóm đồng thuận | PDF LTP rõ nét, metadata khớp |
-| P2 | Artifact owner | Quyết định release/DOI mới cho kết quả camera-ready | Bài trỏ đúng archive nếu phát hành |
-| P2 | Submission owner | Upload ZIP, PDF và LTP sau duyệt cuối | Biên nhận EasyChair/đăng ký |
+| Ưu tiên | Bên phụ trách             | Việc                                                                         | Bằng chứng đóng việc                         |
+| --------- | ---------------------------- | ----------------------------------------------------------------------------- | ------------------------------------------------- |
+| P0        | Người chạy Colab          | Gửi ZIP gốc hai lần, notebook v2 và lịch sử runtime/resume              | Hash ZIP và nguồn checkpoint được xác nhận |
+| P0        | Người liên hệ hội nghị | Xác nhận giờ/múi giờ, kênh alt text và LTP                             | Lưu hướng dẫn chính thức                    |
+| P1        | Nhóm tác giả              | Duyệt PDF, heatmap, kết luận, tám tác giả và một corresponding author | Chấp thuận bằng văn bản                      |
+| P1        | Thanh-Trong Nguyen           | Hoàn thiện, ký tay và scan LTP sau khi nhóm đồng thuận                | PDF LTP rõ nét, metadata khớp                  |
+| P2        | Artifact owner               | Quyết định release/DOI mới cho kết quả camera-ready                     | Bài trỏ đúng archive nếu phát hành         |
+| P2        | Submission owner             | Upload ZIP, PDF và LTP sau duyệt cuối                                      | Biên nhận EasyChair/đăng ký                  |

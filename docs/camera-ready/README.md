@@ -14,7 +14,11 @@ review or revision history.
   major GPS, time-noise, and 5x conclusions are unchanged.
 - The manuscript defines all equation variables, uses a validated 30-cell
   vector heatmap, removes redundant RQ2/RQ3 visuals, has eight authors and one
-  corresponding author, and builds to 15 pages with Dockerized Tectonic.
+  corresponding author with an explicit email. The strict component bound now
+  excludes singletons, and the RQ2 narrative includes the adverse urgency-
+  inflation comparison.
+- The public `clean` branch was verified at `5fad10d`; it contains the two RQ1
+  stress artifacts, which remain separate from release `v1.0.1`.
 - Source packaging and alt text are prepared. The extracted ZIP passes the
   XeLaTeX/BibTeX four-command build in TeX Live 2026 at 15 pages. Signed LTP,
   author approval, and upload remain external gates.
@@ -30,7 +34,7 @@ review or revision history.
 - `FIGURE_ALT_TEXT.md`: alt text for the two final figures.
 - `REVIEWER_RESPONSE.md`: internal draft only; submit only if requested.
 - `../../temp-plan.md`: implementation status and owner handoff.
-- `../checkpoints/2026-09-11-02-camera-ready-finalization.md`: latest checkpoint.
+- `../checkpoints/2026-09-11-04-ltp-metadata-prepared.md`: latest checkpoint.
 
 No commit, push, public release, registration, LTP signature, or EasyChair
 upload is performed by this workspace update.
