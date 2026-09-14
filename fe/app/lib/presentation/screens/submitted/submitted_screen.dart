@@ -1,7 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
 
-import '../../../core/constants/app_colors.dart';
 import '../../../domain/entities/rescue_record.dart';
 import '../../widgets/quick_call_panel.dart';
 import '../../widgets/status_tracker.dart';

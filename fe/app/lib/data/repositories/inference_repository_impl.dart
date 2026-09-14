@@ -1,5 +1,6 @@
 import 'dart:typed_data';
 
+import '../../domain/entities/ai_model_type.dart';
 import '../../domain/entities/ai_tag.dart';
 import '../../domain/repositories/inference_repository.dart';
 import '../datasources/inference_local_datasource.dart';
@@ -11,6 +12,25 @@ class InferenceRepositoryImpl implements InferenceRepository {
 
   @override
   bool get ready => dataSource.ready;
+
+  @override
+  AiModelType get currentModel => dataSource.currentModel;
+
+  @override
+  bool get isDualComparison => dataSource.isDualComparison;
+
+  @override
+  ModelBenchmarkComparison? get latestComparison => dataSource.latestComparison;
+
+  @override
+  void setModel(AiModelType model) {
+    dataSource.setModel(model);
+  }
+
+  @override
+  void setDualComparison(bool enabled) {
+    dataSource.setDualComparison(enabled);
+  }
 
   @override
   Future<void> loadModel() async {

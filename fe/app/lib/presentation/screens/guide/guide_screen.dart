@@ -3,7 +3,6 @@ import 'package:flutter/material.dart';
 import '../../../core/constants/app_colors.dart';
 import '../../../core/constants/emergency_data.dart';
 import '../../../domain/entities/first_aid_item.dart';
-import '../../../domain/entities/region.dart';
 import '../../widgets/phone_link_card.dart';
 
 class GuideScreen extends StatefulWidget {

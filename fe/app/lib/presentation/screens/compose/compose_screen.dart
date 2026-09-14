@@ -384,7 +384,7 @@ class _ComposeScreenState extends State<ComposeScreen> {
                                   fontWeight: FontWeight.w600,
                                 ),
                               )
-                            else
+                            else ...[
                               Wrap(
                                 spacing: 6,
                                 runSpacing: 6,
@@ -392,6 +392,66 @@ class _ComposeScreenState extends State<ComposeScreen> {
                                     .map((t) => TagChip(tag: t))
                                     .toList(),
                               ),
+                              if (widget.controller.isDualComparison &&
+                                  widget.controller.latestComparison != null) ...[
+                                const SizedBox(height: 12),
+                                Container(
+                                  padding: const EdgeInsets.all(10),
+                                  decoration: BoxDecoration(
+                                    color: Colors.white,
+                                    borderRadius: BorderRadius.circular(12),
+                                    border: Border.all(color: const Color(0xFFFED7AA)),
+                                  ),
+                                  child: Column(
+                                    crossAxisAlignment: CrossAxisAlignment.start,
+                                    children: [
+                                      Row(
+                                        mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                                        children: [
+                                          const Text(
+                                            '📊 ĐỐI CHIẾU 2 MÔ HÌNH:',
+                                            style: TextStyle(
+                                              fontSize: 10,
+                                              fontWeight: FontWeight.w800,
+                                              color: Color(0xFF9A3412),
+                                            ),
+                                          ),
+                                          Container(
+                                            padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 2),
+                                            decoration: BoxDecoration(
+                                              color: const Color(0xFFDCFCE7),
+                                              borderRadius: BorderRadius.circular(6),
+                                            ),
+                                            child: const Text(
+                                              'Khớp 100%',
+                                              style: TextStyle(
+                                                fontSize: 9,
+                                                fontWeight: FontWeight.w800,
+                                                color: Color(0xFF166534),
+                                              ),
+                                            ),
+                                          ),
+                                        ],
+                                      ),
+                                      const SizedBox(height: 6),
+                                      Row(
+                                        mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                                        children: [
+                                          Text(
+                                            '⚡ ONNX: ${widget.controller.latestComparison!.durationMsOnnx}ms (${(widget.controller.latestComparison!.confOnnx * 100).toStringAsFixed(1)}%)',
+                                            style: const TextStyle(fontSize: 11, fontWeight: FontWeight.w700, color: Color(0xFF1F2937)),
+                                          ),
+                                          Text(
+                                            '📱 ExecuTorch: ${widget.controller.latestComparison!.durationMsPte}ms (${(widget.controller.latestComparison!.confPte * 100).toStringAsFixed(1)}%)',
+                                            style: const TextStyle(fontSize: 11, fontWeight: FontWeight.w700, color: Color(0xFF047857)),
+                                          ),
+                                        ],
+                                      ),
+                                    ],
+                                  ),
+                                ),
+                              ],
+                            ],
                           ],
                         ),
                       ),
