@@ -1,0 +1,30 @@
+{
+  "model_name": "flood_mobilenetv3_large",
+  "format": "executorch_pte",
+  "file": "flood_mobilenetv3_large.pte",
+  "input_shape": [
+    1,
+    3,
+    224,
+    224
+  ],
+  "classes": [
+    "low",
+    "medium",
+    "high",
+    "non_flood"
+  ],
+  "image_size": 224,
+  "normalization": {
+    "mean": [
+      0.485,
+      0.456,
+      0.406
+    ],
+    "std": [
+      0.229,
+      0.224,
+      0.225
+    ]
+  }
+}

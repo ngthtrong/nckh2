@@ -1,5 +1,5 @@
-"""Web App kiểm thử Mô hình PyTorch (.pth) và ONNX (.onnx)
-So sánh song song kết quả dự đoán giữa mô hình PyTorch gốc (.pth) và mô hình đã convert (.onnx).
+"""Web App kiểm thử Mô hình PyTorch (.pth), ONNX (.onnx) và ExecuTorch (.pte)
+So sánh song song kết quả dự đoán giữa mô hình PyTorch gốc (.pth), mô hình ONNX (.onnx) và mô hình ExecuTorch (.pte).
 
 Chạy ứng dụng:
     .venv\\Scripts\\python.exe app_web.py
@@ -33,6 +33,7 @@ if not CHECKPOINT_PTH.exists():
     CHECKPOINT_PTH = ROOT / "app" / "model.pth"
 
 CHECKPOINT_ONNX = ROOT / "app" / "assets" / "models" / "model.onnx"
+CHECKPOINT_PTE = ROOT / "model" / "Edge Ai" / "flood_mobilenetv3_large.pte"
 
 DEFAULT_CONFIG = (
     ROOT / "model" / "models" / "mobilenetv3_large_relabel" / "config_mobilenetv3_large.json"
@@ -98,6 +99,19 @@ if CHECKPOINT_ONNX.exists():
     except Exception as e:
         print(f"✗ Error loading .onnx model: {e}")
 
+# Nạp ExecuTorch (.pte)
+pte_module = None
+pte_loaded = False
+if CHECKPOINT_PTE.exists():
+    try:
+        from executorch.extension.pybindings.portable_lib import _load_for_executorch
+
+        pte_module = _load_for_executorch(str(CHECKPOINT_PTE))
+        pte_loaded = True
+        print(f"✓ ExecuTorch (.pte) model loaded: {CHECKPOINT_PTE.name}")
+    except Exception as e:
+        print(f"✗ Error loading .pte model: {e}")
+
 # Transform ảnh
 transform = transforms.Compose([
     transforms.Resize((image_size, image_size)),
@@ -128,7 +142,7 @@ HTML_TEMPLATE = """
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>So Sánh Mô Hình AI: PyTorch (.pth) vs ONNX (.onnx)</title>
+    <title>So Sánh Mô Hình AI: PyTorch (.pth) vs ONNX (.onnx) vs ExecuTorch (.pte)</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <link href="https://fonts.googleapis.com/css2?family=Work+Sans:wght@600;700;800;900&family=Nunito:wght@500;600;700&display=swap" rel="stylesheet">
     <style>
@@ -139,10 +153,10 @@ HTML_TEMPLATE = """
 <body class="min-h-screen pb-12">
     <!-- Header -->
     <header class="bg-[#C62828] text-white py-6 px-6 shadow-md mb-8">
-        <div class="max-w-5xl mx-auto flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
+        <div class="max-w-7xl mx-auto flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
             <div>
                 <p class="text-white/70 text-xs font-bold uppercase tracking-widest">NCKH - Cứu Hộ Lũ Lụt</p>
-                <h1 class="text-2xl sm:text-3xl font-heading font-black">So Sánh Mô Hình: .pth vs .onnx</h1>
+                <h1 class="text-2xl sm:text-3xl font-heading font-black">So Sánh Mô Hình: .pth vs .onnx vs .pte</h1>
             </div>
             <div class="flex flex-wrap items-center gap-2">
                 <span class="px-3 py-1.5 rounded-xl bg-white/20 text-xs font-extrabold flex items-center gap-1.5">
@@ -153,12 +167,16 @@ HTML_TEMPLATE = """
                     <span class="w-2.5 h-2.5 rounded-full {{ 'bg-green-400' if onnx_loaded else 'bg-red-400' }}"></span>
                     ONNX (.onnx): {{ 'Ready' if onnx_loaded else 'Missing' }}
                 </span>
+                <span class="px-3 py-1.5 rounded-xl bg-white/20 text-xs font-extrabold flex items-center gap-1.5">
+                    <span class="w-2.5 h-2.5 rounded-full {{ 'bg-green-400' if pte_loaded else 'bg-red-400' }}"></span>
+                    ExecuTorch (.pte): {{ 'Ready' if pte_loaded else 'Missing' }}
+                </span>
             </div>
         </div>
     </header>
 
-    <!-- Main Container -->
-    <main class="max-w-5xl mx-auto px-4 grid grid-cols-1 lg:grid-cols-3 gap-6">
+    <!-- Main Container: 4 Columns -->
+    <main class="max-w-7xl mx-auto px-4 grid grid-cols-1 md:grid-cols-2 xl:grid-cols-4 gap-6">
         <!-- Panel 1: Upload Zone -->
         <div class="bg-white rounded-3xl p-6 shadow-sm border border-gray-100 flex flex-col justify-between">
             <div>
@@ -172,7 +190,7 @@ HTML_TEMPLATE = """
                 <div id="dropZone" class="border-2 border-dashed border-gray-300 rounded-2xl p-6 text-center hover:border-[#C62828] hover:bg-red-50/30 transition-all cursor-pointer">
                     <input type="file" id="fileInput" accept="image/*" class="hidden">
                     <div id="previewContainer" class="hidden mb-4">
-                        <img id="imagePreview" src="" alt="Preview" class="max-h-56 mx-auto rounded-xl object-contain shadow-md">
+                        <img id="imagePreview" src="" alt="Preview" class="max-h-48 mx-auto rounded-xl object-contain shadow-md">
                     </div>
                     <div id="uploadPrompt">
                         <div class="w-12 h-12 rounded-full bg-red-50 text-[#C62828] flex items-center justify-center mx-auto mb-3">
@@ -187,7 +205,7 @@ HTML_TEMPLATE = """
             </div>
 
             <button id="btnPredict" disabled class="mt-6 w-full bg-[#C62828] text-white font-heading font-extrabold text-base py-4 rounded-2xl shadow-lg disabled:opacity-40 hover:bg-[#8E0000] active:scale-[0.98] transition-all flex items-center justify-center gap-2">
-                <span id="btnText">Chạy So Sánh .pth vs .onnx</span>
+                <span id="btnText">Chạy So Sánh 3 Mô Hình</span>
                 <div id="btnSpinner" class="hidden w-5 h-5 border-2 border-white border-t-transparent rounded-full animate-spin"></div>
             </button>
         </div>
@@ -227,7 +245,7 @@ HTML_TEMPLATE = """
         <div class="bg-white rounded-3xl p-6 shadow-sm border border-gray-100 flex flex-col justify-between">
             <div>
                 <h2 class="text-gray-800 font-heading font-extrabold text-base mb-4 flex items-center justify-between">
-                    <span class="flex items-center gap-2">⚡ ONNX Converted (.onnx)</span>
+                    <span class="flex items-center gap-2">⚡ ONNX (.onnx)</span>
                     <span id="onnxTime" class="text-xs font-bold text-gray-400"></span>
                 </h2>
 
@@ -251,6 +269,37 @@ HTML_TEMPLATE = """
 
             <div class="text-[11px] text-gray-400 bg-gray-50 p-2.5 rounded-xl border border-gray-100">
                 <strong>Source:</strong> ONNX Runtime Exported Model
+            </div>
+        </div>
+
+        <!-- Panel 4: Result ExecuTorch (.pte) -->
+        <div class="bg-white rounded-3xl p-6 shadow-sm border border-gray-100 flex flex-col justify-between">
+            <div>
+                <h2 class="text-gray-800 font-heading font-extrabold text-base mb-4 flex items-center justify-between">
+                    <span class="flex items-center gap-2">📱 ExecuTorch (.pte)</span>
+                    <span id="pteTime" class="text-xs font-bold text-gray-400"></span>
+                </h2>
+
+                <div id="pteEmpty" class="py-12 text-center text-gray-400 text-sm font-bold">Chưa có kết quả</div>
+
+                <div id="pteContent" class="hidden space-y-4">
+                    <div id="pteBestCard" class="p-3.5 rounded-2xl border flex items-center justify-between">
+                        <div>
+                            <p class="text-[10px] text-gray-500 uppercase font-bold tracking-wider">Dự đoán</p>
+                            <p id="pteBestLabel" class="font-heading font-black text-base"></p>
+                        </div>
+                        <span id="pteBestConf" class="text-xl font-black font-heading text-gray-800"></span>
+                    </div>
+
+                    <div class="bg-gray-50 p-3 rounded-2xl border border-gray-100 space-y-2">
+                        <p class="text-[11px] font-bold uppercase tracking-wider text-gray-500">Xác suất các lớp</p>
+                        <div id="pteBars" class="space-y-2"></div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="text-[11px] text-gray-400 bg-gray-50 p-2.5 rounded-xl border border-gray-100">
+                <strong>Source:</strong> ExecuTorch Mobile Runtime (.pte)
             </div>
         </div>
     </main>
@@ -347,11 +396,23 @@ HTML_TEMPLATE = """
                     renderBars('onnxBars', data.onnx.probabilities, data.translations);
                 }
 
+                // Render ExecuTorch (.pte)
+                if (data.executorch) {
+                    document.getElementById('pteEmpty').classList.add('hidden');
+                    document.getElementById('pteContent').classList.remove('hidden');
+                    document.getElementById('pteTime').textContent = data.executorch.duration_ms + ' ms';
+                    document.getElementById('pteBestLabel').textContent = data.executorch.label_vi;
+                    document.getElementById('pteBestConf').textContent = (data.executorch.confidence * 100).toFixed(1) + '%';
+                    document.getElementById('pteBestCard').className = 'p-3.5 rounded-2xl border flex items-center justify-between ' + data.executorch.color_class;
+
+                    renderBars('pteBars', data.executorch.probabilities, data.translations);
+                }
+
             } catch (err) {
                 alert('Lỗi server: ' + err);
             } finally {
                 btnPredict.disabled = false;
-                btnText.textContent = 'Chạy So Sánh .pth vs .onnx';
+                btnText.textContent = 'Chạy So Sánh 3 Mô Hình';
                 btnSpinner.classList.add('hidden');
             }
         });
@@ -387,6 +448,7 @@ def index():
         HTML_TEMPLATE,
         pth_loaded=pth_loaded,
         onnx_loaded=onnx_loaded,
+        pte_loaded=pte_loaded,
     )
 
 
@@ -406,6 +468,7 @@ def predict():
 
         result_pth = None
         result_onnx = None
+        result_pte = None
 
         # 1. Inference PyTorch (.pth)
         if pth_loaded:
@@ -448,9 +511,29 @@ def predict():
                 "color_class": LABEL_COLORS.get(best_cls_onnx, "bg-gray-100"),
             }
 
+        # 3. Inference ExecuTorch (.pte)
+        if pte_loaded and pte_module is not None:
+            t0 = time.perf_counter()
+            pte_out = pte_module.forward((tensor.cpu(),))[0].numpy()[0]
+            t1 = time.perf_counter()
+
+            probs_dict_pte = {class_order[i]: float(pte_out[i]) for i in range(len(class_order))}
+            best_idx_pte = int(np.argmax(pte_out))
+            best_cls_pte = class_order[best_idx_pte]
+
+            result_pte = {
+                "predicted_class": best_cls_pte,
+                "label_vi": LABEL_TRANSLATIONS.get(best_cls_pte, best_cls_pte),
+                "confidence": round(float(pte_out[best_idx_pte]), 4),
+                "duration_ms": round((t1 - t0) * 1000, 1),
+                "probabilities": probs_dict_pte,
+                "color_class": LABEL_COLORS.get(best_cls_pte, "bg-gray-100"),
+            }
+
         return jsonify({
             "pytorch": result_pth,
             "onnx": result_onnx,
+            "executorch": result_pte,
             "translations": LABEL_TRANSLATIONS,
         })
 
@@ -459,11 +542,12 @@ def predict():
 
 
 if __name__ == "__main__":
-    print("\n" + "=" * 65)
-    print("🚀 Server Web So Sánh Mô Hình PyTorch (.pth) vs ONNX (.onnx)")
-    print(f"📌 Checkpoint .pth:  {CHECKPOINT_PTH.name} ({'Sẵn sàng' if pth_loaded else 'Chưa có'})")
-    print(f"📌 Checkpoint .onnx: {CHECKPOINT_ONNX.name} ({'Sẵn sàng' if onnx_loaded else 'Chưa có'})")
-    print(f"📌 Trình tính toán:  {device}")
+    print("\n" + "=" * 70)
+    print("🚀 Server Web So Sánh Mô Hình: PyTorch (.pth) vs ONNX (.onnx) vs ExecuTorch (.pte)")
+    print(f"📌 Checkpoint .pth:        {CHECKPOINT_PTH.name} ({'Sẵn sàng' if pth_loaded else 'Chưa có'})")
+    print(f"📌 Checkpoint .onnx:       {CHECKPOINT_ONNX.name} ({'Sẵn sàng' if onnx_loaded else 'Chưa có'})")
+    print(f"📌 Checkpoint .pte:        {CHECKPOINT_PTE.name} ({'Sẵn sàng' if pte_loaded else 'Chưa có'})")
+    print(f"📌 Trình tính toán PyTorch: {device}")
     print("🌐 Mở trình duyệt truy cập: http://localhost:5000")
-    print("=" * 65 + "\n")
+    print("=" * 70 + "\n")
     app.run(host="0.0.0.0", port=5000, debug=False)
