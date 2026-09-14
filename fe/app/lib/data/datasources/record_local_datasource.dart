@@ -1,4 +1,3 @@
-import 'dart:convert';
 import 'package:hive_ce_flutter/hive_flutter.dart';
 import '../../domain/entities/ai_tag.dart';
 import '../../domain/entities/rescue_record.dart';

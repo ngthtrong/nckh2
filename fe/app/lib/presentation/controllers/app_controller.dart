@@ -1,6 +1,5 @@
 import 'dart:async';
 import 'dart:io';
-import 'dart:typed_data';
 
 import 'package:connectivity_plus/connectivity_plus.dart';
 import 'package:flutter/foundation.dart';
@@ -8,8 +7,11 @@ import 'package:geolocator/geolocator.dart';
 import 'package:image_picker/image_picker.dart';
 import 'package:permission_handler/permission_handler.dart';
 
+import '../../data/datasources/user_local_datasource.dart';
+import '../../domain/entities/ai_model_type.dart';
 import '../../domain/entities/ai_tag.dart';
 import '../../domain/entities/rescue_record.dart';
+import '../../domain/entities/user.dart';
 import '../../domain/usecases/analyze_image_usecase.dart';
 import '../../domain/usecases/get_rescue_records_usecase.dart';
 import '../../domain/usecases/send_sos_usecase.dart';
@@ -23,6 +25,7 @@ class AppController extends ChangeNotifier {
   final RescueRepository rescueRepository;
   final InferenceRepository inferenceRepository;
   final NetworkRepository networkRepository;
+  final UserLocalDataSource userLocalDataSource;
 
   late final SendSosUseCase _sendSosUseCase;
   late final SubmitRescuePostUseCase _submitRescuePostUseCase;
@@ -41,12 +44,17 @@ class AppController extends ChangeNotifier {
   double currentLng = 106.7009;
 
   RescueRecord? lastSubmittedPost;
+  User? currentUser;
+  bool isGuest = false;
+
+  bool get isAuthenticated => currentUser != null || isGuest;
 
   AppController({
     required this.rescueRepository,
     required this.inferenceRepository,
     required this.networkRepository,
-  }) {
+    UserLocalDataSource? userLocalDataSource,
+  }) : userLocalDataSource = userLocalDataSource ?? UserLocalDataSource() {
     _sendSosUseCase = SendSosUseCase(rescueRepository);
     _submitRescuePostUseCase = SubmitRescuePostUseCase(rescueRepository);
     _getRescueRecordsUseCase = GetRescueRecordsUseCase(rescueRepository);
@@ -54,11 +62,80 @@ class AppController extends ChangeNotifier {
     _syncPendingRecordsUseCase = SyncPendingRecordsUseCase(rescueRepository);
   }
 
+  Future<bool> login(String username, String password) async {
+    final saved = userLocalDataSource.getUser();
+    if (saved != null) {
+      if (saved.username == username.trim() && saved.password == password) {
+        currentUser = saved;
+        isGuest = false;
+        notifyListeners();
+        return true;
+      }
+    }
+    // Demo fallback account if not registered yet
+    if (username.trim() == 'cuuho' && password == '123456') {
+      final demoUser = User(
+        username: 'cuuho',
+        password: password,
+        phone: '0901234567',
+        address: 'Quận 1, TP. Hồ Chí Minh',
+      );
+      await userLocalDataSource.saveUser(demoUser);
+      currentUser = demoUser;
+      isGuest = false;
+      notifyListeners();
+      return true;
+    }
+    return false;
+  }
+
+  Future<bool> register(User user) async {
+    await userLocalDataSource.saveUser(user);
+    currentUser = user;
+    isGuest = false;
+    notifyListeners();
+    return true;
+  }
+
+  Future<void> updateUser(User user) async {
+    await userLocalDataSource.saveUser(user);
+    currentUser = user;
+    notifyListeners();
+  }
+
+  Future<void> logout() async {
+    await userLocalDataSource.deleteUser();
+    currentUser = null;
+    isGuest = false;
+    notifyListeners();
+  }
+
+  void continueAsGuest() {
+    isGuest = true;
+    notifyListeners();
+  }
+
   List<RescueRecord> get records => _getRescueRecordsUseCase();
   int get pendingCount => rescueRepository.getPendingCount();
 
+  AiModelType get currentModel => inferenceRepository.currentModel;
+  bool get isDualComparison => inferenceRepository.isDualComparison;
+  ModelBenchmarkComparison? get latestComparison => inferenceRepository.latestComparison;
+
+  void switchAiModel(AiModelType model) {
+    inferenceRepository.setModel(model);
+    notifyListeners();
+  }
+
+  void toggleDualComparison(bool enabled) {
+    inferenceRepository.setDualComparison(enabled);
+    notifyListeners();
+  }
+
   Future<void> init() async {
     await rescueRepository.init();
+    await userLocalDataSource.init();
+    currentUser = userLocalDataSource.getUser();
     unawaited(inferenceRepository.loadModel().then((_) {
       isModelReady = inferenceRepository.ready;
       notifyListeners();

@@ -3,6 +3,7 @@ import 'package:url_launcher/url_launcher.dart';
 
 import '../../../core/constants/app_colors.dart';
 import '../../controllers/app_controller.dart';
+import '../../widgets/ai_model_settings_sheet.dart';
 import '../../widgets/app_header.dart';
 import '../../widgets/compose_cta_card.dart';
 import '../../widgets/sos_button.dart';
@@ -187,8 +188,10 @@ class _HomeScreenState extends State<HomeScreen> {
               _statusRow(
                 icon: Icons.memory,
                 label: 'Mô hình AI offline',
-                value: c.isModelReady ? 'Sẵn sàng' : 'Đang nạp',
+                value: c.isModelReady ? c.currentModel.badgeText : 'Đang nạp',
                 isGreen: c.isModelReady,
+                actionLabel: 'Cài đặt',
+                onTap: () => AiModelSettingsSheet.show(context, c),
               ),
               const Divider(height: 24, color: Color(0xFFF3F4F6)),
               _statusRow(
@@ -209,19 +212,35 @@ class _HomeScreenState extends State<HomeScreen> {
     required String label,
     required String value,
     required bool isGreen,
+    String? actionLabel,
+    VoidCallback? onTap,
   }) {
-    return Row(
+    final rowContent = Row(
       children: [
         Icon(icon, color: AppColors.primaryRed, size: 20),
         const SizedBox(width: 10),
         Expanded(
-          child: Text(
-            label,
-            style: const TextStyle(
-              color: Color(0xFF374151),
-              fontSize: 14,
-              fontWeight: FontWeight.w700,
-            ),
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Text(
+                label,
+                style: const TextStyle(
+                  color: Color(0xFF374151),
+                  fontSize: 14,
+                  fontWeight: FontWeight.w700,
+                ),
+              ),
+              if (actionLabel != null)
+                Text(
+                  'Chạm để đổi (.onnx / .pte) · So sánh',
+                  style: TextStyle(
+                    color: Colors.grey.shade500,
+                    fontSize: 10,
+                    fontWeight: FontWeight.w600,
+                  ),
+                ),
+            ],
           ),
         ),
         Text(
@@ -233,15 +252,31 @@ class _HomeScreenState extends State<HomeScreen> {
           ),
         ),
         const SizedBox(width: 6),
-        Container(
-          width: 8,
-          height: 8,
-          decoration: BoxDecoration(
-            shape: BoxShape.circle,
-            color: isGreen ? const Color(0xFF16A34A) : const Color(0xFFEA580C),
+        if (onTap != null)
+          const Icon(Icons.tune_rounded, size: 16, color: Color(0xFF6B7280))
+        else
+          Container(
+            width: 8,
+            height: 8,
+            decoration: BoxDecoration(
+              shape: BoxShape.circle,
+              color: isGreen ? const Color(0xFF16A34A) : const Color(0xFFEA580C),
+            ),
           ),
-        ),
       ],
     );
+
+    if (onTap != null) {
+      return InkWell(
+        onTap: onTap,
+        borderRadius: BorderRadius.circular(10),
+        child: Padding(
+          padding: const EdgeInsets.symmetric(vertical: 4),
+          child: rowContent,
+        ),
+      );
+    }
+
+    return rowContent;
   }
 }
