@@ -25,6 +25,31 @@ class HomeScreen extends StatefulWidget {
 class _HomeScreenState extends State<HomeScreen> {
   SosState _sosState = SosState.idle;
 
+  @override
+  void initState() {
+    super.initState();
+    widget.controller.addListener(_onControllerChange);
+  }
+
+  void _onControllerChange() {
+    if (mounted) setState(() {});
+  }
+
+  @override
+  void didUpdateWidget(covariant HomeScreen oldWidget) {
+    super.didUpdateWidget(oldWidget);
+    if (oldWidget.controller != widget.controller) {
+      oldWidget.controller.removeListener(_onControllerChange);
+      widget.controller.addListener(_onControllerChange);
+    }
+  }
+
+  @override
+  void dispose() {
+    widget.controller.removeListener(_onControllerChange);
+    super.dispose();
+  }
+
   Future<void> _handleSos() async {
     if (_sosState != SosState.idle) return;
     setState(() => _sosState = SosState.pressed);
@@ -190,7 +215,9 @@ class _HomeScreenState extends State<HomeScreen> {
                 label: 'Mô hình AI offline',
                 value: c.isModelReady ? c.currentModel.badgeText : 'Đang nạp',
                 isGreen: c.isModelReady,
-                actionLabel: 'Cài đặt',
+                actionLabel: c.isModelReady
+                    ? 'Chạm để đổi (.onnx / .pte) · Chạy benchmark'
+                    : 'Đang tải model on-device...',
                 onTap: () => AiModelSettingsSheet.show(context, c),
               ),
               const Divider(height: 24, color: Color(0xFFF3F4F6)),
@@ -233,7 +260,7 @@ class _HomeScreenState extends State<HomeScreen> {
               ),
               if (actionLabel != null)
                 Text(
-                  'Chạm để đổi (.onnx / .pte) · So sánh',
+                  actionLabel,
                   style: TextStyle(
                     color: Colors.grey.shade500,
                     fontSize: 10,

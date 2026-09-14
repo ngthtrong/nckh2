@@ -3,6 +3,7 @@ import 'dart:io';
 
 import 'package:connectivity_plus/connectivity_plus.dart';
 import 'package:flutter/foundation.dart';
+import 'package:flutter/services.dart';
 import 'package:geolocator/geolocator.dart';
 import 'package:image_picker/image_picker.dart';
 import 'package:permission_handler/permission_handler.dart';
@@ -39,6 +40,7 @@ class AppController extends ChangeNotifier {
   bool isBusy = false;
   String networkLabel = 'WiFi';
   bool isModelReady = false;
+  bool isBenchmarking = false;
   String locationLabel = 'GPS tự động · TP. Hồ Chí Minh';
   double currentLat = 10.7769;
   double currentLng = 106.7009;
@@ -139,13 +141,19 @@ class AppController extends ChangeNotifier {
     unawaited(inferenceRepository.loadModel().then((_) {
       isModelReady = inferenceRepository.ready;
       notifyListeners();
+    }).catchError((e) {
+      debugPrint('Notice loading AI model: $e');
+      isModelReady = inferenceRepository.ready;
+      notifyListeners();
     }));
 
     unawaited(Permission.locationWhenInUse.request().then((_) async {
       try {
         final pos = await Geolocator.getCurrentPosition(
-          desiredAccuracy: LocationAccuracy.high,
-          timeLimit: const Duration(seconds: 5),
+          locationSettings: const LocationSettings(
+            accuracy: LocationAccuracy.high,
+            timeLimit: Duration(seconds: 5),
+          ),
         );
         currentLat = pos.latitude;
         currentLng = pos.longitude;
@@ -251,6 +259,26 @@ class AppController extends ChangeNotifier {
       );
       return picked?.path;
     } catch (_) {
+      return null;
+    }
+  }
+
+  Future<InferenceResult?> testModelBenchmark() async {
+    if (isBenchmarking) return null;
+    isBenchmarking = true;
+    notifyListeners();
+
+    try {
+      final ByteData raw = await rootBundle.load('assets/images/app_logo.png');
+      final bytes = raw.buffer.asUint8List(raw.offsetInBytes, raw.lengthInBytes);
+      final result = await inferenceRepository.classifyImage(bytes);
+      isBenchmarking = false;
+      notifyListeners();
+      return result;
+    } catch (e) {
+      debugPrint('Benchmark test error: $e');
+      isBenchmarking = false;
+      notifyListeners();
       return null;
     }
   }
