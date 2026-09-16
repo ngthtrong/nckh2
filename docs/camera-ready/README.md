@@ -13,15 +13,16 @@ review or revision history.
 - The 43 changed ARI rows are confined to graph methods under 2x copies. The
   major GPS, time-noise, and 5x conclusions are unchanged.
 - The manuscript defines all equation variables, uses a validated 30-cell
-  vector heatmap, removes redundant RQ2/RQ3 visuals, has eight authors and one
-  corresponding author with an explicit email. The strict component bound now
-  excludes singletons, and the RQ2 narrative includes the adverse urgency-
-  inflation comparison.
+  vector heatmap and a two-panel descriptive RQ3 figure, and has eight authors
+  and one corresponding author with an explicit email. The strict component
+  bound excludes singletons, and Results separate clustering, ranking,
+  dispatch, and sensitivity claims.
 - The public `clean` branch was verified at `5fad10d`; it contains the two RQ1
   stress artifacts, which remain separate from release `v1.0.1`.
-- Source packaging and alt text are prepared. The extracted ZIP passes the
-  XeLaTeX/BibTeX four-command build in TeX Live 2026 at 15 pages. Signed LTP,
-  author approval, and upload remain external gates.
+- Source packaging and alt text are prepared. The edited source and a fresh
+  ZIP extraction pass the available Tectonic build at 15 pages. The required
+  XeLaTeX/BibTeX four-command build must be repeated in a TeX Live environment
+  before upload. Signed LTP, author approval, and upload remain external gates.
 - Package provenance is still open for both original ZIP files, runtime/resume
   history, and the v2 executed notebook.
 
@@ -31,7 +32,7 @@ review or revision history.
 - `RQ1_STRESS_RUNBOOK.md`: returned-run status and future-rerun boundary.
 - `REVISION_TRACKER.md`: internal evidence and publication decision tracker.
 - `SUBMISSION_CHECKLIST.md`: EasyChair fields, package contents, and final gates.
-- `FIGURE_ALT_TEXT.md`: alt text for the two final figures.
+- `FIGURE_ALT_TEXT.md`: alt text for the three final figures.
 - `REVIEWER_RESPONSE.md`: internal draft only; submit only if requested.
 - `../../temp-plan.md`: implementation status and owner handoff.
 - `../checkpoints/2026-09-11-04-ltp-metadata-prepared.md`: latest checkpoint.

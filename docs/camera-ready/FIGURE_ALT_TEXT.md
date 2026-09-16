@@ -18,5 +18,17 @@ geo-time DBSCAN. Rows are GPS noise at 100 and 300 metres, timestamp noise at
 15 and 60 minutes, and exact copies at total multiplicity two and five. All
 GPS/time cells are negative. Twofold-copy graph cells are slightly positive,
 while fivefold-copy graph cells are approximately minus 0.61; both DBSCAN copy
-cells are zero. Every cell is printed numerically so color is not required.
+cells are zero. A symmetric color scale spans minus 0.65 to plus 0.65, and each
+column label gives the method's control ARI. Every cell is printed numerically
+so color is not required; zero change is not presented as high absolute ARI.
 
+## RQ3 dispatch conditions
+
+Two-panel point chart of descriptive means for the Product partition over 40
+test seeds per resource condition. The left panel shows simulated harm and the
+right shows deadline-miss rate as a percentage. Each panel compares revised,
+legacy, and nearest-first policies in lean Hue, nominal dual-depot, and regional
+surge conditions. Colors and marker shapes distinguish policies, and every
+point is labeled numerically. Nearest-first is lower on both outcomes in all
+three tested conditions. The points are descriptive condition means; primary
+inference averages conditions within each seed and uses 40 seed-level pairs.

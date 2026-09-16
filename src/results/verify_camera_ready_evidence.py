@@ -602,6 +602,11 @@ def verify_manuscript(base: dict[str, object]) -> None:
     }
     rq3_rows = base["rq3_rows"]
     assert {row["resource_scenario"] for row in rq3_rows} == set(rq3_expected)
+    rq3_percent_expected = {
+        "lean_hue": ("91.9", "92.0", "82.0"),
+        "nominal_dual_depot": ("84.5", "85.9", "63.1"),
+        "regional_surge": ("66.7", "70.8", "44.8"),
+    }
     for scenario, expected in rq3_expected.items():
         values = []
         for metric in ("latent_harm", "deadline_miss_rate"):
@@ -619,7 +624,54 @@ def verify_manuscript(base: dict[str, object]) -> None:
                 formatted = str(mean.quantize(quantum, rounding=ROUND_HALF_UP))
                 values.append(formatted if metric == "latent_harm" else formatted.lstrip("0"))
         assert tuple(values) == expected
-        assert all(value in paper for value in values)
+        percentages = tuple(f"{float(value) * 100:.1f}" for value in values[3:])
+        assert percentages == rq3_percent_expected[scenario]
+
+    rq3_figure = ROOT / "paper/figures/rq3_dispatch_conditions.pdf"
+    assert rq3_figure.read_bytes().startswith(b"%PDF-")
+    assert "rq3_dispatch_conditions.pdf" in paper
+
+    rq3_paired = read_rows(RESULTS / "rq3_results/rq3_paired_comparisons_seed.csv")
+    product_policy = [
+        row
+        for row in rq3_paired
+        if row["dimension"] == "policy"
+        and row["candidate"] == "revised_priority"
+        and row["comparator"] == "legacy_priority"
+        and json.loads(row["fixed"])["partition"] == "product_cij"
+        and row["metric"] in {"latent_harm", "deadline_miss_rate"}
+    ]
+    assert len(product_policy) == 2
+    by_metric = {row["metric"]: row for row in product_policy}
+    close(
+        float(by_metric["latent_harm"]["mean_difference_candidate_minus_comparator"]),
+        14.34147785,
+        "RQ3 revised-minus-legacy harm direction",
+    )
+    close(
+        float(by_metric["deadline_miss_rate"]["mean_difference_candidate_minus_comparator"]),
+        -0.01875,
+        "RQ3 revised-minus-legacy deadline direction",
+    )
+    assert "increases simulated harm by 14.34" in paper
+    assert "reducing the deadline-miss rate by 1.88 percentage points" in paper
+
+    rq2_paired = read_rows(RESULTS / "rq2_results/rq2_paired_comparisons.csv")
+    campaign = [
+        row
+        for row in rq2_paired
+        if row["candidate"] == "duplicate_aware_robust"
+        and row["comparator"] == "legacy_raw"
+        and row["scenario"] == "coordinated_high_confidence_campaign"
+        and row["metric"] == "priority_drift_abs_normalized"
+    ]
+    assert len(campaign) == 1
+    close(
+        float(campaign[0]["mean_difference_candidate_minus_comparator"]),
+        0.13788,
+        "RQ2 campaign revised-minus-legacy drift direction",
+    )
+    assert "increasing revised drift by .1379 relative to" in paper
 
     effect_rows = [
         row
@@ -648,7 +700,7 @@ def verify_manuscript(base: dict[str, object]) -> None:
     assert "tab:rq1-fixed-stress" not in paper
     assert "tab:stress-results" not in paper
     assert "fig:rq2-priority" not in paper
-    assert "fig:rq3-dispatch" not in paper
+    assert paper.count(r"\label{fig:rq3-dispatch}") == 1
     assert "CC BY 4.0" not in paper
     assert "reviewer" not in paper.lower()
 
