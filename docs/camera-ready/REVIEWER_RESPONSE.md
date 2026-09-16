@@ -18,7 +18,9 @@ checkable safeguards and expose failure propagation, but the experiments do
 not establish general performance superiority, policy validity, or field
 readiness. We also expanded the synthetic-data construction and limitations,
 defined the named method variants, explained the comparator roles, and exposed
-additional robustness and resource-condition results.
+additional robustness and resource-condition results. The Results are now
+organized by RQ so clustering, ranking, and dispatch safeguards and
+limitations are assessed separately.
 
 The fixed RQ1 measurement/copy stress is the additional experiment introduced
 for the camera-ready revision. The complete 11-scenario RQ2 table, the
@@ -38,7 +40,7 @@ when evidence grouping and other score inputs are fixed, and an end-to-end
 audit that reveals when clustering quality does not improve dispatch. We
 explicitly state that these are engineering checks and diagnostic findings
 rather than evidence of overall superiority or field benefit (Introduction,
-p. 2; Discussion, pp. 12--13).
+pp. 2--3; Discussion, p. 13).
 
 ### 2. Realism of the synthetic scenarios
 
@@ -70,9 +72,9 @@ copy mappings, summaries, and 300 paired effects passed independent audit in
 both the primary run and an unpooled replication. The manuscript heatmap uses
 the primary run selected before comparison.
 
-The fixed protocol is defined on p. 8, its paired results are discussed on
-p. 10, and the annotated heatmap appears on p. 11. The expanded RQ2 table is
-on p. 12; the resource-specific RQ3 means are on p. 11.
+The fixed protocol is defined on p. 8, its paired results begin on p. 9, and
+the benchmark table and annotated heatmap appear on p. 10. The expanded RQ2
+table is on p. 11; the resource-specific RQ3 figure is on p. 12.
 
 All tested GPS and timestamp conditions lower mean ARI. No method has the
 highest mean ARI in every condition. Twofold exact copies slightly increase
@@ -109,13 +111,15 @@ readable from its first occurrence (Abstract, p. 1; full definitions, p. 2).
 ### 1. Downstream alignment
 
 We agree. The revised Results separate the RQ1 clustering suite from the
-Candidate-4.1 RQ3 suite and do not infer dispatch utility from ARI. We now show
-descriptive harm and deadline-miss means for each of the lean, nominal, and
-surge resource conditions, and relate them to split, merge, and fake-only
-destinations. The primary RQ3 inference still averages the three conditions
-within each seed, retaining 40 independent seed-level pairs. The expanded
-analysis reinforces the original conclusion: attractive proxy metrics do not
-guarantee operational benefit (Results, pp. 10--11).
+Candidate-4.1 RQ2/RQ3 suite and do not infer dispatch utility from ARI. RQ2
+uses oracle incident grouping to isolate ranking; because alignment remains
+weak there, the limitation cannot be attributed solely to clustering. A new
+two-panel presentation shows descriptive harm and deadline-miss means for the
+lean, nominal, and surge resource conditions and relates them to split, merge,
+and fake-only destinations. The primary RQ3 inference still averages the three
+conditions within each seed, retaining 40 independent seed-level pairs. The
+expanded analysis reinforces the original conclusion: attractive proxy
+metrics do not guarantee operational benefit.
 
 ### 2. Field readiness
 
@@ -124,7 +128,7 @@ Experimental Design, Discussion, and Conclusion. The work does not establish
 misinformation robustness, expert policy validity, source authenticity, or
 field deployment readiness. In particular, the coordinated high-confidence
 campaign remains a documented adverse result (Abstract, p. 1; Discussion and
-Conclusion, pp. 12--13).
+Conclusion, pp. 13--14).
 
 ## Reviewer 3
 

@@ -34,6 +34,7 @@ def referenced_figures(main_text: str) -> list[Path]:
     assert {path.name for path in figures} == {
         "pipeline_v2.pdf",
         "rq1_stress_delta_ari.pdf",
+        "rq3_dispatch_conditions.pdf",
     }, figures
     return figures
 
@@ -85,4 +86,3 @@ def main() -> None:
 
 if __name__ == "__main__":
     main()
-

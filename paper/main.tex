@@ -62,14 +62,14 @@
 for Flood-Rescue Reports: A Synthetic Study}
 \titlerunning{Stress-Testing Flood-Rescue Report Clustering and Ranking}
 
-\author{Thanh-Trong Nguyen\inst{1}\orcidID{0009-0007-6976-5131}\thanks{Corresponding author.} \and
+\author{Thanh-Trong Nguyen\inst{1}\orcidID{0009-0007-6976-5131} \and
 Ngoc-Anh Le\inst{1}\orcidID{0009-0006-7453-1009} \and
 Nhu-Quynh Nguyen\inst{1}\orcidID{0009-0008-7396-697X} \and
 Tuong-Hung Cao\inst{1}\orcidID{0009-0003-5886-2666} \and
 Hung-Thinh Ngo\inst{1}\orcidID{0009-0004-8668-4462} \and
 Xuan-Phuong Chau\inst{1} \and
 Lan Phuong Phan\inst{1} \and
-Thanh-Khoa Nguyen\inst{1}\orcidID{0000-0002-0012-1158}}
+Thanh-Khoa Nguyen\inst{1}\orcidID{0000-0002-0012-1158}\thanks{Corresponding author.}}
 \authorrunning{T.-T. Nguyen et al.}
 \institute{College of Information and Communication Technology,
 Can Tho University, Can Tho, Vietnam\\
@@ -87,25 +87,22 @@ measuring their scheduling consequences. We audit a fail-closed batch
 pipeline in which observable reports form a sparse graph, unresolved reports
 go to review, duplicate families feed a bounded score, and evaluator-only
 truth is joined after predicted-cluster scheduling. The clustering benchmark
-contains 80 synthetic runs from generator 3.0.0: using Louvain community
-detection, an additive-affinity graph has mean ARI $0.9191$, while the
-spatially gated product-affinity graph has $0.9165$ with the Leiden community
-detector and $0.9072$ with Louvain.
-Product minus independently tuned additive is $-0.0118$ (bootstrap 95\% CI
-$[-0.0226,-0.0024]$), but its Holm-adjusted test is not significant
-($p=.2560$). A matched-density comparison reverses the point estimate but is
-also inconclusive. Under fixed configurations, location and timestamp noise
-reduce clustering accuracy, while fivefold exact transport copies reduce all
-four graph variants to mean ARI near $.30$. In a separate candidate-4.1
-bundle, the revised score has
-NDCG@5 $0.6669$ versus $0.6763$ for a random comparator and does not show a
-general alignment advantage; its family-wise score is invariant to exact
-copies when evidence grouping is fixed, but coordinated high-confidence
-campaigns remain a failure mode. Dispatch results similarly show no general
-benefit over the legacy score and a clear cost relative to nearest-first.
-These are synthetic, within-generator diagnostics:
-boundedness and clustering accuracy do not establish source authenticity,
-policy validity, field benefit, or deployment readiness.
+contains 80 synthetic runs from generator 3.0.0, of which 40 are held out for
+testing. Additive Louvain has mean ARI $0.9191$ and Product Louvain $.9072$.
+Their mean paired difference is $-0.0118$ (unadjusted bootstrap 95\% CI
+$[-0.0226,-0.0024]$), while the Holm-adjusted Wilcoxon test is not significant
+($p=.2560$); no composition advantage is established. Under fixed
+configurations, location and timestamp noise reduce accuracy, and fivefold
+exact transport copies reduce all four graph variants to mean ARI near $.30$.
+In a separate candidate-4.1 bundle, the revised score has NDCG@5 $.6669$, a
+lower point estimate than the random comparator's $.6763$, and shows no
+general alignment advantage even under oracle incident grouping. Its
+family-wise value is invariant to exact copies when grouping and inputs are
+fixed, but coordinated high-confidence campaigns remain a failure mode.
+Dispatch shows no general benefit over the legacy score and worse harm and
+deadline outcomes than nearest-first. These within-generator synthetic
+diagnostics delineate mathematical safeguards without establishing source
+authenticity, policy validity, field benefit, or deployment readiness.
 \keywords{Flood rescue \and Graph clustering \and Synthetic stress test \and
 Priority ranking \and Negative results.}
 \end{abstract}
@@ -156,20 +153,19 @@ truth joins after predicted-cluster scheduling. We ask: (RQ1) does
 independently selected product composition improve clustering over additive
 composition? (RQ2) does the duplicate-aware score align with an independently
 generated benefit under report-level stress tests? (RQ3) how do predicted
-split, merge, and noise errors propagate into dispatch? The questions use two
-explicitly separated artifact bundles.
+split, merge, and noise errors propagate into dispatch? RQ1 and RQ2/RQ3 use
+separate artifact bundles; their results characterize different pipeline
+stages rather than one empirical chain over a common sample.
 
-The contributions are (i) an observable-only pipeline with explicit review and
-evaluator boundaries; (ii) auditable threshold statements and a proposed
-duplicate-aware score; and (iii) a paired diagnostic reporting clustering,
-stress behavior, ranking, dispatch, and adverse results. The practical value
-is diagnostic: the spatial gate supplies a checkable edge-localization
-condition, family-wise aggregation supplies an exact-copy invariance test
-under fixed evidence grouping, and the downstream evaluation exposes when
-strong clustering scores fail to improve dispatch. These safeguards can serve
-as implementation checks, but they do not establish superiority or field
-utility. The evidence remains synthetic and within-generator, so the artifact
-is not a validated rescue policy.
+The contributions delineate safeguards at three stages. At clustering, the
+spatial gate supplies a checkable conditional edge-localization bound. At
+ranking, family-wise aggregation supplies an exact-copy invariance property
+when evidence grouping and score inputs are fixed. At dispatch, a paired audit
+tests whether these upstream properties translate to simulated outcomes and
+exposes cases where they do not. The pipeline also makes the manual-review and
+evaluator-only boundaries explicit. These are diagnostic and implementation
+checks, not evidence of general superiority or field utility; the artifact is
+not a validated rescue policy.
 
 \section{Observable Pipeline and Methods}
 
@@ -431,8 +427,8 @@ rescue policy.
 \begin{algorithmic}[1]
 \footnotesize
 \Function{PriorityScore}{cluster $C_k$}
-    \State $\mathcal F_k\gets$ ExactFingerprintGroups$(C_k)$ and
-    NearDuplicateComponents$(C_k)$
+    \State $\mathcal F_k\gets$ exact-fingerprint groups and deterministic
+    near-duplicate connected components within $C_k$
     \State Compute $\bar E_k,\bar F_k,\bar N_k,\bar V_k$ by Eq.~\ref{eq:priority}
     \State Compute $P_k$ by Eq.~\ref{eq:priority}
     \State \Return $P_k$
@@ -470,23 +466,23 @@ For both suites, inference reads only observable
 are fixed.
 
 \begin{table}[t]
-\centering\tiny
+\centering\footnotesize
 \setlength{\tabcolsep}{3pt}
 \caption{Artifact construction. Geographic anchors do not make simulated
 reports or outcomes into field observations.}
 \label{tab:data-realism}
-\begin{tabular}{p{.20\textwidth}p{.34\textwidth}p{.34\textwidth}}
+\begin{tabular}{p{.20\textwidth}p{.35\textwidth}p{.35\textwidth}}
 \toprule
 Layer & Generator 3.0 (RQ1) & Candidate 4.1 (RQ2/RQ3)\\
 \midrule
-Geographic context & EMSR848 context, OSM-derived anchors, and WorldPop cells
-& Synthetic regional geometry; no EMSR848 claim\\
-Reports/linkage & Synthetic incidents, reports, duplicates, fake campaigns,
-and labels & Synthetic incidents, reports, duplicates, and attack cases\\
-Operational truth & Need and vulnerability simulated; population is not
-trapped-person truth & Benefit, deadlines, service, access, and harm simulated\\
-Representativeness & Within-generator geographic plausibility; no source
-snapshot or row lineage & Controlled stress cases; no field sample or transfer\\
+Geographic context & EMSR848 context, OSM anchors, WorldPop cells
+& Synthetic geometry; no EMSR848 claim\\
+Reports/linkage & Synthetic incidents, reports, duplicates, campaigns, labels
+& Synthetic incidents, reports, duplicates, attacks\\
+Operational truth & Simulated need and vulnerability; population is not
+trapped-person truth & Simulated benefit, deadlines, service, access, harm\\
+External validity & Geographic plausibility only; no source snapshot or row
+lineage & Controlled stresses; no field sample or transfer\\
 \bottomrule
 \end{tabular}
 \end{table}
@@ -529,47 +525,30 @@ imbalance, and supply density-, hierarchy-, and geometry-based controls.
 ARI on incident-linked reports~\cite{hubert1985comparing} is the primary
 endpoint; NMI, pairwise F1, geographic diameter, runtime, false destinations,
 fake absorption, noise rejection, retained-edge fraction, and mean degree are
-descriptive or operational diagnostics. The benchmark includes a matched-
-density product--additive comparison. Seed-paired ARI differences use 10,000
-bootstrap resamples, Wilcoxon signed-rank tests, and Holm correction; RQ2
-and RQ3 paired comparisons use 5,000 bootstrap resamples with the locked
-analysis seed. The
-reported p-values use explicitly exported analysis families. RQ1 applies one
-Holm family to all nine Product-Louvain-versus-comparator ARI contrasts; the
-three product/additive/Leiden contrasts are the primary comparisons and the
-remaining baselines are secondary diagnostics. RQ2 uses five
-comparator-specific three-endpoint families for alignment (NDCG@5, Spearman,
-and top-five overlap) and one five-endpoint family per robustness scenario
-(priority drift, mean-rank drift, top-k churn, N-error, and V-error); false
-priority lift is descriptive. For RQ3, each fixed candidate/comparator/context
-block applies Holm across all 14 dispatch endpoints. The primary RQ3 revision
-aggregates the three resource scenarios within each seed, so each paired test
-uses 40 seed pairs; the original 120 seed-by-scenario analysis is retained as
-a diagnostic artifact. RQ2 alignment uses oracle incident groups only to
-isolate ranking, whereas RQ3 evaluates predicted clusters. The priority stress
-tests and dispatch evaluation use independent benefit, deadline, service,
-access-delay, and harm outputs; no clustering metric is substituted for those
-outcomes.
-For the fixed RQ1 stresses, ARI and pairwise F1 on the original
-incident-linked reports keep the evaluation unit comparable across copy
-multiplicities. Metrics over all perturbed payloads and contamination,
-false-destination, and graph-density diagnostics remain descriptive. Each
-stress condition is paired with its method's control by run; 5,000 bootstrap
-resamples estimate the mean within-method change and its unadjusted 95\% CI.
-These intervals describe stress-versus-control changes and are not tests of
+descriptive or operational diagnostics. RQ1 paired differences use 10,000
+bootstrap resamples, Wilcoxon tests, and Holm correction; RQ2/RQ3 use 5,000
+resamples. Reported p-values follow exported families. RQ1 adjusts all nine
+Product-Louvain contrasts, with the product/additive/Leiden contrasts primary.
+RQ2 adjusts three alignment endpoints within comparator and five robustness
+endpoints within scenario; false-priority lift is descriptive. RQ3 adjusts 14
+dispatch endpoints within each candidate/comparator/context block and
+aggregates resource conditions within seed, retaining 40 pairs; the original
+120 seed--condition analysis is diagnostic. RQ2 uses oracle groups to isolate
+ranking, while RQ3 uses predicted clusters and independent simulated outcomes.
+
+Fixed-stress ARI and pairwise F1 use original incident-linked reports so copy
+multiplicities share an evaluation unit; all-payload and graph diagnostics are
+descriptive. Each condition is paired with its method's control over 40 runs.
+The 5,000-resample unadjusted CIs describe within-method change, not
 between-method superiority.
 
 \section{Results}
 \label{sec:results}
 
-Across the 40 held-out runs, neither graph composition has a statistically
-robust advantage. The duplicate-aware score removes exact-copy inflation
-under fixed grouping but fails under a coordinated high-confidence campaign.
-Its dispatch policy shows no general benefit over the legacy score and is
-worse than nearest-first on harm and deadlines. The details follow.
+\subsection{RQ1: Clustering Accuracy and Fixed Stresses}
 
 Table~\ref{tab:clustering-results} reports the held-out clustering summary.
-\begin{table}[t]
+\begin{table}[!htbp]
 \centering\scriptsize
 \caption{RQ1 benchmark-test summary over 40 runs. Intervals are bootstrap
 95\% confidence intervals; diameter is descriptive.}
@@ -593,14 +572,16 @@ DBSCAN, all features & .4741 [.4273,.5201] & .5488 & .9340\\
 \end{table}
 
 Additive Louvain has the highest mean ARI. Product minus independently tuned
-additive is $-0.01184$ with CI $[-0.02257,-0.00240]$, with 9 wins, 19 ties,
-and 12 losses; raw $p=.0987$ and Holm $p=.2560$. Product minus matched-density
-additive is $+0.00989$ with CI $[-0.00100,0.02082]$ and Holm $p=.2560$.
-Product Leiden versus Product Louvain has Holm $p=.1120$. Thus neither
-composition advantage is established. Product and matched-density Additive
-have nearly equal retained-edge fractions ($.03011$ and $.03021$) and mean
-degrees (9.90 and 9.94), so the matched-density contrast is a useful diagnostic
-but not a causal operator comparison.
+Additive Louvain is $-0.01184$ with an unadjusted bootstrap CI
+$[-0.02257,-0.00240]$, with 9 wins, 19 ties, and 12 losses. The Wilcoxon test
+has raw $p=.0987$ and Holm-adjusted $p=.2560$; the interval and test use
+different procedures, and the adjusted test does not establish a composition
+advantage. Product minus matched-density Additive is $+0.00989$ with
+unadjusted CI $[-0.00100,0.02082]$ and Holm-adjusted $p=.2560$; Product Leiden
+versus Product Louvain has Holm-adjusted $p=.1120$. Product and matched-density
+Additive have similar retained-edge fractions ($.03011$ and $.03021$) and mean
+degrees (9.90 and 9.94), making their contrast a density diagnostic rather
+than a causal estimate of the composition operator.
 
 The product pipeline has zero fake absorption and zero fake rejection but a
 16.49\% false-destination rate; fake reports avoid genuine destinations while
@@ -612,48 +593,33 @@ paired changes from each method's control. All tested location and timestamp
 noise levels reduce mean ARI, and no method has the highest mean ARI in every
 condition.
 
-\begin{figure}[t]
+\begin{figure}[!htbp]
 \centering
 \includegraphics[width=.92\textwidth]{rq1_stress_delta_ari.pdf}
 \caption{Mean paired change in RQ1 ARI relative to each method's control over
 40 held-out runs. Cells use original incident-linked reports; negative values
-indicate degradation; MD Additive denotes matched-density Additive. Intervals
-are not shown and no between-method test is implied.}
+indicate degradation; labels give control ARI, and zero change does not imply
+high absolute accuracy. MD Additive denotes matched-density Additive.
+Intervals are not shown and no between-method test is implied.}
 \label{fig:rq1-fixed-stress}
 \end{figure}
 
 Twofold copies slightly increase ARI for all four graph variants, whereas
 fivefold copies reduce their means to approximately $.30$; geo-time DBSCAN
-remains at its lower control mean. For Product Louvain, the fivefold change is
-$-.6108$ with an unadjusted paired-bootstrap 95\% CI $[-.6318,-.5881]$.
-Thresholding and endpoint-wise top-$k$ sparsification are plausible mechanisms,
-but this protocol does not isolate a cause. For original-report ARI, an
-independent rerun under the same locked protocol changed only the aggregate
-twofold-copy graph values slightly; the main GPS, time-noise, fivefold-copy,
-and cross-condition conclusions were unchanged. The two runs are not pooled.
-Thus score-level invariance does not imply clustering invariance or end-to-end
+remains at its lower control mean. These two tested multiplicities show a
+non-monotone response, not a beneficial duplication effect or an identified
+collapse threshold. For Product Louvain, the fivefold change is $-.6108$ with
+an unadjusted paired-bootstrap 95\% CI $[-.6318,-.5881]$. Thresholding and
+endpoint-wise top-$k$ sparsification are possible explanations, but the
+protocol does not isolate a mechanism. An independent, unpooled rerun changes
+only the aggregate twofold-copy graph values slightly; the GPS, timestamp,
+fivefold-copy, and cross-condition conclusions remain unchanged. Thus
+score-level invariance does not imply clustering invariance or end-to-end
 robustness.
 
-For RQ2, revised NDCG@5 is .6669 (CI [.6306,.7018]), Spearman is -.0304
-(CI [-.1165,.0549]), and top-five overlap is .285 (CI [.2349,.3400]). The
-revised score is above legacy on NDCG@5 by .0121, but the Holm-adjusted
-contrast is not significant; it is below population-only (.6709) and random
-(.6763). Exact duplication at 2$\times$, 5$\times$, and 10$\times$ produces
-zero revised priority drift. A coordinated high-confidence campaign produces
-drift .1688 and false-priority lift .8828; revised drift is worse than legacy
-by $-.1379$ (Holm $p\approx9.1\times10^{-12}$). Boundedness therefore does
-not guarantee ranking reliability.
+\subsection{RQ2: Copy Invariance and Benefit Alignment}
 
-Table~\ref{tab:rq2-robustness} expands the robustness audit beyond the two
-headline cases. The revised score is invariant to exact-copy multiplicity and
-usually changes less under near duplication, missingness, contradictory
-evidence, and low-confidence flood inflation. Its bounded form is nevertheless
-more sensitive than the legacy score to low-confidence urgency, population,
-or vulnerability inflation and to coordinated high-confidence reports. These
-are controlled synthetic perturbations, not estimates of attack prevalence or
-field error.
-
-\begin{table}[t]
+\begin{table}[!htbp]
 \centering\scriptsize
 \caption{RQ2 robustness means over the held-out Candidate-4.1 test split.
 $n$ counts target-perturbation rows; $\Delta P$ is absolute normalized priority
@@ -681,26 +647,65 @@ Coordinated high-confidence & 40 & .1688 & .0309 & .0175 & .0006 & .0350 & .0000
 }
 \end{table}
 
-For RQ3, after averaging the three resource scenarios within each seed,
-revised versus legacy on the Product partition has harm effect $-14.34$
-(Holm $p=.563$) and deadline effect $+.0188$ (Holm $p=.247$), so no general
-improvement is established. Revised is significantly worse than nearest-first
-on both harm (Holm $p=4.1\times10^{-5}$) and deadline (Holm
-$p=1.3\times10^{-6}$). Product is also worse than matched-density Additive
-under the revised policy on harm (Holm $p=.000168$), and worse than oracle on
-the corresponding dispatch outcomes. Predicted split, merge, and fake-only
-destinations therefore propagate into operational consequences.
+Under oracle incident grouping, revised NDCG@5 is .6669 (CI
+[.6306,.7018]), Spearman is -.0304 (CI [-.1165,.0549]), and top-five overlap
+is .285 (CI [.2349,.3400]). Revised exceeds legacy on NDCG@5 by .0121, but
+the Holm-adjusted contrast is not significant. Its NDCG@5 point estimate is
+lower than population-only (.6709) and random (.6763); these point estimates
+do not by themselves establish significant differences. Because oracle
+grouping removes upstream clustering errors from this RQ, the weak alignment
+cannot be attributed solely to clustering.
 
-Resource-specific Product-partition means (revised, legacy, nearest-first) for
-harm and deadline-miss rate were: lean Hue, 691.37, 653.79, 585.55 and .9188,
-.9203, .8203; nominal dual depot, 315.01, 303.16, 230.00 and .8453, .8594,
-.6313; and regional surge, 113.53, 119.93, 94.71 and .6672, .7078, .4484.
-Revised priority lowers mean
-deadline misses relative to legacy in the nominal and surge scenarios, and
-lowers harm only in surge; nearest-first is lower on both outcomes in every
-scenario. These means are descriptive. Primary inference still averages the
-three scenarios within each seed, giving 40 seed-level pairs rather than
-treating the 120 seed--scenario rows as independent.
+Exact duplication at 2$\times$, 5$\times$, and 10$\times$ produces zero
+revised priority drift when evidence grouping and inputs are fixed. A
+coordinated high-confidence campaign instead produces drift .1688 and
+false-priority lift .8828, increasing revised drift by .1379 relative to
+legacy (Holm-adjusted $p\approx9.1\times10^{-12}$). Boundedness and
+exact-copy invariance therefore do not guarantee ranking reliability.
+
+Table~\ref{tab:rq2-robustness} expands the robustness audit beyond the two
+headline cases. The revised score is invariant to exact-copy multiplicity and
+usually changes less under near duplication, missingness, contradictory
+evidence, and low-confidence flood inflation. Its bounded form is nevertheless
+more sensitive than the legacy score to low-confidence urgency, population,
+or vulnerability inflation and to coordinated high-confidence reports. These
+are controlled synthetic perturbations, not estimates of attack prevalence or
+field error.
+
+Together, the oracle-group alignment and perturbation results separate narrow
+invariance from empirical utility: exact-copy invariance holds under fixed
+inputs, while benefit alignment remains unestablished.
+
+\subsection{RQ3: Dispatch Outcomes}
+
+After averaging the three resource scenarios within each seed, revised
+priority on the Product partition increases simulated harm by 14.34 relative
+to legacy while reducing the deadline-miss rate by 1.88 percentage points;
+neither contrast is significant after Holm correction ($p=.563$ and
+$p=.247$, respectively). Revised is worse than nearest-first on both harm
+(Holm-adjusted $p=4.1\times10^{-5}$) and deadline misses (Holm-adjusted
+$p=1.3\times10^{-6}$). Product is also worse than matched-density Additive
+under revised priority on harm (Holm-adjusted $p=.000168$), and worse than
+oracle on the corresponding outcomes. Predicted split, merge, and fake-only
+destinations therefore have measurable scheduling consequences.
+
+\begin{figure}[!htbp]
+\centering
+\includegraphics[width=\textwidth]{rq3_dispatch_conditions.pdf}
+\caption{Descriptive Product-partition means over 40 test seeds for each
+resource condition. Points are not additional independent samples or
+between-policy tests. Primary inference averages the three conditions within
+each seed and uses 40 seed-level pairs. Lower is better for both panels.}
+\label{fig:rq3-dispatch}
+\end{figure}
+
+Figure~\ref{fig:rq3-dispatch} shows that nearest-first has lower mean harm and
+deadline-miss rate in every tested condition. Revised priority lowers mean
+deadline misses relative to legacy in the nominal and surge conditions and
+lowers mean harm only in surge. One plausible explanation is that need-based
+ranking does not fully represent travel costs and scheduling constraints, but
+this experiment neither isolates that mechanism nor establishes
+nearest-first as a field policy.
 
 \subsection{Sensitivity of Heuristic Constants}
 \label{sec:sensitivity}
@@ -712,14 +717,10 @@ around its reference value while all other constants are held fixed, and
 NDCG@5 is recomputed on the same 40 test seeds. The $\omega$ variants perturb
 one component at a time and renormalize the vector; $\mu$ is restricted to its
 policy-valid interval $[1,2]$. The locked rerun evaluates 21 configurations
-(one shared baseline and two or three tested levels for each constant) on the
-same 40 held-out seeds, yielding 840 seed-level observations. A constant is
-considered stable if the mean metric varies by less than $0.01$ across its
-valid tested levels. The sensitivity summary CSV provides the ranges below; no
-value is inferred from the fixed-configuration comparisons.
-
-Table~\ref{tab:sensitivity} reports these ranges.
-\begin{table}[t]
+on the same 40 held-out seeds, yielding 840 seed-level observations.
+Table~\ref{tab:sensitivity} reports the tested levels and mean-NDCG@5 ranges;
+no value is inferred from unrelated fixed-configuration comparisons.
+\begin{table}[!htbp]
 \centering\scriptsize
 \caption{Candidate-4.1 one-at-a-time sensitivity of mean NDCG@5 to fixed
 heuristic constants. Each range is the minimum--maximum mean over the tested
@@ -746,75 +747,57 @@ $V_{\rm cap}$ & $50$ & $[40,60]$ & $[.6669,.6669]$\\
 }
 \end{table}
 
+All mean-NDCG@5 spans are below $.01$ over the tested levels; the largest is
+$.00546$ for $\omega_F$. The unchanged reported mean for $N_{\rm ref}$ and
+$V_{\rm cap}$ does not imply invariant per-seed scores or rankings. More
+generally, local numerical stability coexists with weak benefit alignment and
+does not validate the scoring rule or the constants outside these levels.
+
 \section{Discussion and Threats to Validity}
 
-The results separate mathematical safeguards from empirical utility. Product
-gating supplies a finite edge bound, but neither the independently tuned nor
-matched-density comparison establishes a preferred composition. Location,
-timestamp, and exact-copy stresses expose further clustering failures without
-identifying thresholding or top-$k$ selection as their cause. Likewise, score
-invariance requires a fixed evidence-family partition and fixed inputs; it
-does not constrain an upstream graph changed by transport copies. A bounded
-score can still shift under a coordinated campaign, and cannot substitute for
-a validated operational objective when clustering errors and fake-only
-destinations reach scheduling.
+The safeguards have stage-specific scope. Product gating gives a finite
+conditional edge bound, yet no composition advantage is established and the
+fixed stresses expose clustering sensitivity. The scheduler exposes
+consequences of both imperfect destinations and an unvalidated ranking
+objective. Clustering accuracy, score boundedness, and local parameter
+stability answer distinct questions and cannot substitute for downstream
+validation.
 
-The local sensitivity analysis is stable over the tested intervals: every
-constant has a mean-NDCG@5 span below $0.01$ across the 40 held-out seeds. The
-largest span is for $\omega_F$ ($.00546$), while changing $V_{\rm cap}$ from
-40 to 60 leaves the mean unchanged at the reported precision. These results
-support numerical robustness within the tested neighborhood only; they do not
-validate the constants outside those levels or replace expert validation.
-
-All reports, incidents, relevance signals, and dispatch outcomes are
-synthetic. RQ1 varies seeds within generator 3.0.0, while RQ2/RQ3 use a
-separate candidate-4.1 bundle; neither tests mechanism-shift OOD transfer or
-field performance. RQ1 does not provide an empirical missingness test because
-all evaluated reports contain the four core attributes. No expert panel
-validated the priority weights, caps, or utility. The study also does not
-measure extraction accuracy, device latency, memory, energy, provenance
-authenticity, or real-world harm. These limitations preclude policy or
-deployment claims.
-The RQ1 geographic anchors improve contextual plausibility, but the archived
-artifact does not contain the raw upstream snapshots, their source checksums,
-or per-row lineage. Consequently, Table~\ref{tab:data-realism} supports only a
-transparent account of construction, not independent provenance verification
-or representativeness of real rescue-report errors.
+All data and outcomes are synthetic, and the separate RQ1 and RQ2/RQ3
+generators do not test OOD transfer or field performance. RQ1 lacks an
+empirical missingness test; the score lacks expert validation; and extraction,
+deployment cost, source authenticity, and actual harm remain unmeasured.
+Geographic anchors add context, but no raw snapshots, checksums, or row
+lineage. Table~\ref{tab:data-realism} therefore documents construction, not
+provenance or representativeness. These limits preclude policy or deployment
+claims.
 
 \section{Conclusion}
 
-The study establishes conditional graph-localization bounds and exact-copy
-invariance of the family-wise priority score under fixed evidence grouping.
-Fixed clustering stresses reveal degradation under location and timestamp
-noise, and substantial degradation across all four graph variants at
-fivefold exact-copy multiplicity. Thus score-level invariance does not imply
-clustering invariance or end-to-end robustness. Together with the ranking and
-dispatch results, the evidence provides an auditable characterization of
-failure modes, while leaving general superiority, policy validity, and field
-readiness unestablished.
+Product gating gives conditional edge-localization bounds, and family-wise
+scoring is copy-invariant under fixed grouping and inputs. Neither ensures
+clustering stability, benefit-aligned ranking, or better dispatch: fivefold
+copies degrade graph clustering, ranking remains weak under oracle grouping,
+and nearest-first has lower harm and deadline misses in every tested resource
+condition. These endpoints require separate evaluation; clustering accuracy
+and score boundedness are not downstream validation. Applicability remains
+limited to the tested synthetic generators and configurations, without
+establishing superiority, policy validity, or field readiness.
 
 \section*{Data and Code Availability}
 
-The versioned artifact is archived on Zenodo~\cite{nguyen2026floodartifact}
-and corresponds to
+The Zenodo artifact~\cite{nguyen2026floodartifact} corresponds to
 \href{https://github.com/ngthtrong/nckh2/releases/tag/v1.0.1}{GitHub Release
-v1.0.1}; the tag identifies the exact source snapshot and the concept DOI the
-latest archive. It includes suite manifests, notebooks, locked configurations,
-per-run results, paired comparisons, the 40-seed RQ3 reanalysis, figure code,
-and result hashes. The exact RQ1 benchmark notebook/configuration snapshot is
+v1.0.1}. The RQ1 benchmark snapshot is
 \href{https://github.com/ngthtrong/nckh2/commit/6ac75c202d04934deb46d84486132e54d42d735f}{\texttt{6ac75c2}};
-the generator/external-benchmark package is retained at
+the generator and external benchmark are at
 \href{https://github.com/ngthtrong/nckh2/commit/a6be3e988dad1aa442c8c8e158c2bba96b2b7fb9}{\texttt{a6be3e9}}.
-The public \href{https://github.com/ngthtrong/nckh2/tree/5fad10ddbe6e899769b59fe774850a41d2ac8d7d}{\texttt{clean} branch at
-commit \texttt{5fad10d}} additionally contains the primary fixed RQ1 stress
-artifact and an independent rerun under the same locked protocol, including
-per-run results, paired effects, and checksum manifests. The primary artifact
-includes its executed notebook; collection of the rerun's executed notebook
-remains pending. These files are not part of release \texttt{v1.0.1}, and the
-two runs are not pooled as independent observations. Raw upstream anchor
-snapshots are not redistributed. Original code is MIT licensed. Publication
-and reuse of the contribution follow the applicable Springer publishing agreement;
-other non-code materials and third-party content retain their stated terms.
+The public \href{https://github.com/ngthtrong/nckh2/tree/5fad10ddbe6e899769b59fe774850a41d2ac8d7d}{\texttt{clean} commit
+\texttt{5fad10d}} adds primary fixed-stress results and an independent,
+unpooled rerun. The primary notebook is included; the rerun notebook is
+pending. These additions are outside \texttt{v1.0.1}; raw anchors are not
+redistributed. Code is MIT licensed; the contribution follows the Springer
+agreement, and other content retains its stated terms.
 
 \begin{credits}
 \subsubsection{\ackname} This study is funded by the Can Tho University, Code:

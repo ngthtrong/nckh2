@@ -16,6 +16,7 @@ ROOT = Path(__file__).resolve().parents[2]
 DEFAULT_INPUT = (
     ROOT / "src/results/rq1_results/aggregate/rq1_stress_paired_effects.csv"
 )
+DEFAULT_SUMMARY = ROOT / "src/results/rq1_results/aggregate/rq1_stress_summary.csv"
 DEFAULT_OUTPUT = ROOT / "paper/figures/rq1_stress_delta_ari.pdf"
 
 SCENARIOS = (
@@ -57,12 +58,24 @@ def load_matrix(path: Path) -> list[list[float]]:
     return [[index[(scenario, method)] for method, _ in METHODS] for scenario, _ in SCENARIOS]
 
 
-def render(matrix: list[list[float]], output: Path) -> None:
+def load_controls(path: Path) -> list[float]:
+    with path.open(encoding="utf-8", newline="") as handle:
+        rows = list(csv.DictReader(handle))
+    baseline = {
+        row["method"]: float(row["ari_original_mean"])
+        for row in rows
+        if row["scenario"] == "baseline"
+    }
+    assert set(baseline) == {method for method, _ in METHODS}, baseline
+    return [baseline[method] for method, _ in METHODS]
+
+
+def render(matrix: list[list[float]], controls: list[float], output: Path) -> None:
     import matplotlib as mpl
 
     mpl.use("Agg")
     import matplotlib.pyplot as plt
-    from matplotlib.colors import TwoSlopeNorm
+    from matplotlib.colors import Normalize
 
     mpl.rcParams.update(
         {
@@ -76,10 +89,14 @@ def render(matrix: list[list[float]], output: Path) -> None:
             "pdf.fonttype": 42,
         }
     )
-    fig, ax = plt.subplots(figsize=(7.0, 2.4), constrained_layout=True)
-    norm = TwoSlopeNorm(vmin=-0.65, vcenter=0.0, vmax=0.04)
+    fig, ax = plt.subplots(figsize=(7.2, 2.35), constrained_layout=True)
+    norm = Normalize(vmin=-0.65, vmax=0.65)
     image = ax.imshow(matrix, cmap="PuOr", norm=norm, aspect="auto")
-    ax.set_xticks(range(len(METHODS)), labels=[label for _, label in METHODS])
+    labels = [
+        f"{label}\nc={control:.4f}"
+        for (_, label), control in zip(METHODS, controls)
+    ]
+    ax.set_xticks(range(len(METHODS)), labels=labels)
     ax.set_yticks(range(len(SCENARIOS)), labels=[label for _, label in SCENARIOS])
     ax.tick_params(axis="both", length=0)
 
@@ -94,7 +111,7 @@ def render(matrix: list[list[float]], output: Path) -> None:
                 va="center",
                 color=foreground,
                 fontsize=12,
-                fontweight="semibold",
+                fontweight="bold",
             )
 
     colorbar = fig.colorbar(image, ax=ax, fraction=0.030, pad=0.02)
@@ -115,6 +132,7 @@ def render(matrix: list[list[float]], output: Path) -> None:
 def main() -> None:
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument("--input", type=Path, default=DEFAULT_INPUT)
+    parser.add_argument("--summary", type=Path, default=DEFAULT_SUMMARY)
     parser.add_argument("--output", type=Path, default=DEFAULT_OUTPUT)
     parser.add_argument(
         "--check",
@@ -123,11 +141,13 @@ def main() -> None:
     )
     args = parser.parse_args()
     matrix = load_matrix(args.input)
+    controls = load_controls(args.summary)
     print(f"PASS 30 paired ARI cells from {args.input}")
+    print("PASS control ARI " + " ".join(f"{value:.4f}" for value in controls))
     for (scenario, _), row in zip(SCENARIOS, matrix):
         print(scenario, " ".join(f"{value:+.4f}" for value in row))
     if not args.check:
-        render(matrix, args.output)
+        render(matrix, controls, args.output)
         print(f"WROTE {args.output}")
 
 

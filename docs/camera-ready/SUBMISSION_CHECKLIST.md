@@ -21,7 +21,8 @@ the exact time and time zone still require confirmation. Internal target:
 - `main.tex` is at ZIP root and has no prohibited character.
 - Include `references.bib`, generated `main.bbl`, `llncs.cls`,
   `splncs04.bst`, `figures/pipeline_v2.pdf`, and
-  `figures/rq1_stress_delta_ari.pdf`.
+  `figures/rq1_stress_delta_ari.pdf`, and
+  `figures/rq3_dispatch_conditions.pdf`.
 - Exclude caches, logs, old figures, notebooks, experimental results, audit,
   checkpoints, response draft, and other internal documents.
 - From a fresh extraction, run:
@@ -48,9 +49,10 @@ python3 scripts/package_camera_ready.py
 ## Metadata and rights
 
 - Title and eight-author order must match PDF, EasyChair, and LTP.
-- Thanh-Trong Nguyen is the only corresponding author, proof contact, and the
-  Corresponding Author Name to enter on the LTP. His header email is
-  `trongb2305615@student.ctu.edu.vn`.
+- Thanh-Khoa Nguyen is the only corresponding author and proof contact.
+  His header email is `ntkhoa@ctu.edu.vn`. Update the Corresponding Author
+  Name on the LTP and EasyChair metadata to match before submission; the
+  previously prepared LTP metadata names Thanh-Trong Nguyen.
 - Retain the organizer's written approval for the eight-author list.
 - Confirm acknowledgment `THS2026-68`, affiliations, ORCIDs, email, and
   competing-interest statement.
