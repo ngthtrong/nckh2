@@ -121,8 +121,10 @@ class AppController extends ChangeNotifier {
   int get pendingCount => rescueRepository.getPendingCount();
 
   AiModelType get currentModel => inferenceRepository.currentModel;
+  bool get isPteReady => inferenceRepository.pteReady;
   bool get isDualComparison => inferenceRepository.isDualComparison;
-  ModelBenchmarkComparison? get latestComparison => inferenceRepository.latestComparison;
+  ModelBenchmarkComparison? get latestComparison =>
+      inferenceRepository.latestComparison;
 
   void switchAiModel(AiModelType model) {
     inferenceRepository.setModel(model);
@@ -138,36 +140,44 @@ class AppController extends ChangeNotifier {
     await rescueRepository.init();
     await userLocalDataSource.init();
     currentUser = userLocalDataSource.getUser();
-    unawaited(inferenceRepository.loadModel().then((_) {
-      isModelReady = inferenceRepository.ready;
-      notifyListeners();
-    }).catchError((e) {
-      debugPrint('Notice loading AI model: $e');
-      isModelReady = inferenceRepository.ready;
-      notifyListeners();
-    }));
+    unawaited(
+      inferenceRepository
+          .loadModel()
+          .then((_) {
+            isModelReady = inferenceRepository.ready;
+            notifyListeners();
+          })
+          .catchError((e) {
+            debugPrint('Notice loading AI model: $e');
+            isModelReady = inferenceRepository.ready;
+            notifyListeners();
+          }),
+    );
 
-    unawaited(Permission.locationWhenInUse.request().then((_) async {
-      try {
-        final pos = await Geolocator.getCurrentPosition(
-          locationSettings: const LocationSettings(
-            accuracy: LocationAccuracy.high,
-            timeLimit: Duration(seconds: 5),
-          ),
-        );
-        currentLat = pos.latitude;
-        currentLng = pos.longitude;
-        locationLabel =
-            '${currentLat.toStringAsFixed(4)}° N, ${currentLng.toStringAsFixed(4)}° E · TP. Hồ Chí Minh';
-        notifyListeners();
-      } catch (_) {}
-    }));
+    unawaited(
+      Permission.locationWhenInUse.request().then((_) async {
+        try {
+          final pos = await Geolocator.getCurrentPosition(
+            locationSettings: const LocationSettings(
+              accuracy: LocationAccuracy.high,
+              timeLimit: Duration(seconds: 5),
+            ),
+          );
+          currentLat = pos.latitude;
+          currentLng = pos.longitude;
+          locationLabel =
+              '${currentLat.toStringAsFixed(4)}° N, ${currentLng.toStringAsFixed(4)}° E · TP. Hồ Chí Minh';
+          notifyListeners();
+        } catch (_) {}
+      }),
+    );
 
     _connSub = networkRepository.networkChanges.listen((results) async {
       networkLabel = await networkRepository.getCurrentNetworkType();
       notifyListeners();
-      final hasNet = results.any((e) =>
-          e == ConnectivityResult.wifi || e == ConnectivityResult.mobile);
+      final hasNet = results.any(
+        (e) => e == ConnectivityResult.wifi || e == ConnectivityResult.mobile,
+      );
       if (hasNet && pendingCount > 0) {
         await syncPending();
       }
@@ -270,7 +280,10 @@ class AppController extends ChangeNotifier {
 
     try {
       final ByteData raw = await rootBundle.load('assets/images/app_logo.png');
-      final bytes = raw.buffer.asUint8List(raw.offsetInBytes, raw.lengthInBytes);
+      final bytes = raw.buffer.asUint8List(
+        raw.offsetInBytes,
+        raw.lengthInBytes,
+      );
       final result = await inferenceRepository.classifyImage(bytes);
       isBenchmarking = false;
       notifyListeners();

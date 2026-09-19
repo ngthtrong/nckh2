@@ -22,19 +22,19 @@ import onnxruntime as ort
 import torch
 from torch import nn
 from torchvision import models, transforms
-from PIL import Image
+from PIL import Image, ImageOps
 
 ROOT = Path(__file__).resolve().parents[1]
 CHECKPOINT_PTH = (
     ROOT
     / "model"
     / "models"
-    / "mobilenetv3_large_relabel"
-    / "flood_mobilenetv3_large_relabel_best.pth"
+    / "mobilenetv3_large_relabel_v2"
+    / "flood_mobilenetv3_large_relabel_v2_best.pth"
 )
 CHECKPOINT_ONNX = ROOT / "app" / "assets" / "models" / "model.onnx"
 CONFIG_JSON = (
-    ROOT / "model" / "models" / "mobilenetv3_large_relabel" / "config_mobilenetv3_large.json"
+    ROOT / "model" / "models" / "mobilenetv3_large_relabel_v2" / "config_mobilenetv3_large_v2.json"
 )
 LABELS_JSON = ROOT / "app" / "assets" / "labels.json"
 
@@ -83,6 +83,7 @@ def run_verification() -> None:
     image_size = int(config.get("image_size", 224))
     mean = [0.485, 0.456, 0.406]
     std = [0.229, 0.224, 0.225]
+    letterbox_fill = tuple(config.get("letterbox_fill", [124, 116, 104]))
 
     print(f"  • Kích thước ảnh đầu vào: {image_size}x{image_size}")
     print(f"  • Thứ tự Kênh Màu: RGB (Khớp giữa PyTorch PIL và Flutter RGBA filter)")
@@ -90,16 +91,26 @@ def run_verification() -> None:
     print(f"  • Chuẩn hóa ImageNet: Mean={mean}, Std={std}")
 
     # Tạo sample image ngẫu nhiên để test pipeline
-    dummy_img = Image.new("RGB", (300, 300), color=(128, 150, 200))
+    dummy_img = Image.new("RGB", (320, 180), color=(128, 150, 200))
     py_transform = transforms.Compose([
-        transforms.Resize((image_size, image_size)),
+        transforms.Lambda(lambda image: ImageOps.pad(
+            image,
+            (image_size, image_size),
+            method=Image.Resampling.BICUBIC,
+            color=letterbox_fill,
+        )),
         transforms.ToTensor(),
         transforms.Normalize(mean=mean, std=std),
     ])
     tensor_py = py_transform(dummy_img).unsqueeze(0) # [1, 3, 224, 224]
 
     # Mô phỏng Flutter Preprocessing (Raw RGBA -> RGB NCHW)
-    img_resized = dummy_img.resize((image_size, image_size))
+    img_resized = ImageOps.pad(
+        dummy_img,
+        (image_size, image_size),
+        method=Image.Resampling.BICUBIC,
+        color=letterbox_fill,
+    )
     rgba_bytes = img_resized.convert("RGBA").tobytes()
     px_count = image_size * image_size
     data_flutter = np.zeros((1, 3, image_size, image_size), dtype=np.float32)

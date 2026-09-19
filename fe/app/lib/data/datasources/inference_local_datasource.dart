@@ -1,6 +1,7 @@
 import 'dart:async';
 import 'dart:convert';
 import 'dart:io';
+import 'dart:math' as math;
 import 'dart:ui' as ui;
 
 import 'package:flutter/foundation.dart';
@@ -16,229 +17,339 @@ class InferenceLocalDataSource {
   static const int _inputSize = 224;
   static const _mean = [0.485, 0.456, 0.406];
   static const _std = [0.229, 0.224, 0.225];
+  static const _pteChannel = MethodChannel('rescue/executorch');
 
-  OrtSession? _session;
+  OrtSession? _onnxSession;
   List<String> _labels = [];
   bool _isLoaded = false;
-
+  bool _pteReady = false;
   AiModelType _currentModel = AiModelType.onnx;
-  bool _isDualComparison = true;
+  bool _isDualComparison = false;
   ModelBenchmarkComparison? _latestComparison;
 
   bool get ready => _isLoaded;
+  bool get pteReady => _pteReady;
   AiModelType get currentModel => _currentModel;
   bool get isDualComparison => _isDualComparison;
   ModelBenchmarkComparison? get latestComparison => _latestComparison;
 
   void setModel(AiModelType model) {
+    if (model == AiModelType.pte && !_pteReady) {
+      debugPrint('ExecuTorch is unavailable; keeping ONNX active.');
+      return;
+    }
     _currentModel = model;
-    debugPrint('Switched AI Model to: ${model.name} (${model.extension})');
+    _latestComparison = null;
   }
 
   void setDualComparison(bool enabled) {
-    _isDualComparison = enabled;
-    debugPrint('Dual Model Comparison mode: $enabled');
+    _isDualComparison = enabled && _pteReady;
+    _latestComparison = null;
   }
 
   Future<void> loadModel() async {
     try {
-      try {
-        OrtEnv.instance.init();
-      } catch (_) {}
+      OrtEnv.instance.init();
+    } catch (_) {}
 
-      final docDir = await getApplicationSupportDirectory();
-      final modelFile = File('${docDir.path}/model.onnx');
-      final pteFile = File('${docDir.path}/model.pte');
+    final docDir = await getApplicationSupportDirectory();
+    final manifest =
+        jsonDecode(
+              await rootBundle.loadString('assets/models/model_manifest.json'),
+            )
+            as Map<String, dynamic>;
+    final version = manifest['version'] as String;
+    final onnxFile = await _syncAsset(
+      directory: docDir,
+      assetPath: 'assets/models/model.onnx',
+      fileName: 'model.onnx',
+      version: version,
+    );
+    final pteFile = await _syncAsset(
+      directory: docDir,
+      assetPath: 'assets/models/model.pte',
+      fileName: 'model.pte',
+      version: version,
+    );
 
-      if (!await modelFile.exists() || await modelFile.length() == 0) {
-        debugPrint('Writing assets/models/model.onnx to local storage...');
-        final raw = await rootBundle.load('assets/models/model.onnx');
-        final bytes =
-            raw.buffer.asUint8List(raw.offsetInBytes, raw.lengthInBytes);
-        await modelFile.writeAsBytes(bytes, flush: true);
-      }
-
-      // Sync ExecuTorch model as well
-      try {
-        if (!await pteFile.exists() || await pteFile.length() == 0) {
-          debugPrint('Writing assets/models/model.pte to local storage...');
-          final rawPte = await rootBundle.load('assets/models/model.pte');
-          final bytesPte =
-              rawPte.buffer.asUint8List(rawPte.offsetInBytes, rawPte.lengthInBytes);
-          await pteFile.writeAsBytes(bytesPte, flush: true);
-        }
-      } catch (ePte) {
-        debugPrint('ExecuTorch asset sync notice: $ePte');
-      }
-
-      final sessionOptions = OrtSessionOptions();
-      _session = OrtSession.fromFile(modelFile, sessionOptions);
-      debugPrint('✓ ONNX model loaded successfully from file!');
-    } catch (e) {
-      debugPrint('Notice on ONNX file session: $e. Trying buffer fallback...');
+    try {
+      _onnxSession = OrtSession.fromFile(onnxFile, OrtSessionOptions());
+      debugPrint('✓ ONNX model loaded: $version');
+    } catch (error) {
+      debugPrint('ONNX file load failed, trying bundled bytes: $error');
       try {
         final raw = await rootBundle.load('assets/models/model.onnx');
-        final bytes =
-            raw.buffer.asUint8List(raw.offsetInBytes, raw.lengthInBytes);
-        _session = OrtSession.fromBuffer(bytes, OrtSessionOptions());
-        debugPrint('✓ ONNX model loaded successfully from buffer!');
-      } catch (e2) {
-        debugPrint('Notice on ONNX buffer session: $e2');
-        _session = null;
+        final bytes = raw.buffer.asUint8List(
+          raw.offsetInBytes,
+          raw.lengthInBytes,
+        );
+        _onnxSession = OrtSession.fromBuffer(bytes, OrtSessionOptions());
+      } catch (fallbackError) {
+        debugPrint('ONNX load failed: $fallbackError');
+        _onnxSession = null;
+      }
+    }
+
+    _pteReady = false;
+    if (!kIsWeb && defaultTargetPlatform == TargetPlatform.android) {
+      try {
+        _pteReady =
+            await _pteChannel.invokeMethod<bool>('load', {
+              'modelPath': pteFile.path,
+            }) ??
+            false;
+        debugPrint('✓ ExecuTorch PTE loaded: $_pteReady');
+      } on PlatformException catch (error) {
+        debugPrint('ExecuTorch load failed: ${error.code}: ${error.message}');
+      } on MissingPluginException {
+        debugPrint('ExecuTorch native bridge is unavailable on this platform.');
       }
     }
 
     try {
-      final s = await rootBundle.loadString('assets/labels.json');
-      _labels = List<String>.from(jsonDecode(s) as List);
-      debugPrint('✓ Labels loaded: ${_labels.length} items');
-    } catch (e) {
-      debugPrint('Notice loading labels: $e');
-      _labels = ['Lũ lụt', 'Ngập nước', 'Hỏa hoạn', 'Sạt lở'];
+      final rawLabels = await rootBundle.loadString('assets/labels.json');
+      _labels = List<String>.from(jsonDecode(rawLabels) as List);
+    } catch (error) {
+      debugPrint('Labels load failed: $error');
+      _labels = ['low', 'medium', 'high', 'non_flood'];
     }
 
-    _isLoaded = true;
-
-    if (_session != null) {
-      unawaited(verifyAndroidLogits(Float32List(1 * 3 * _inputSize * _inputSize)));
+    _isLoaded = _onnxSession != null && _labels.length == 4;
+    if (_onnxSession != null) {
+      unawaited(
+        verifyAndroidLogits(Float32List(1 * 3 * _inputSize * _inputSize)),
+      );
     }
+  }
+
+  Future<File> _syncAsset({
+    required Directory directory,
+    required String assetPath,
+    required String fileName,
+    required String version,
+  }) async {
+    final target = File('${directory.path}/$fileName');
+    final versionFile = File('${target.path}.version');
+    final installedVersion = await versionFile.exists()
+        ? (await versionFile.readAsString()).trim()
+        : '';
+    if (!await target.exists() ||
+        await target.length() == 0 ||
+        installedVersion != version) {
+      final raw = await rootBundle.load(assetPath);
+      final bytes = raw.buffer.asUint8List(
+        raw.offsetInBytes,
+        raw.lengthInBytes,
+      );
+      final temporary = File('${target.path}.tmp');
+      await temporary.writeAsBytes(bytes, flush: true);
+      if (await target.exists()) await target.delete();
+      await temporary.rename(target.path);
+      await versionFile.writeAsString(version, flush: true);
+    }
+    return target;
   }
 
   Future<List<double>?> verifyAndroidLogits(Float32List inputTensor) async {
-    final session = _session;
-    if (session == null) return null;
-    final input = OrtValueTensor.createTensorWithDataList(
-        inputTensor, [1, 3, _inputSize, _inputSize]);
-    final runOptions = OrtRunOptions();
+    final output = await _runOnnx(inputTensor);
+    debugPrint('📱 [ANDROID ONNX RUNTIME OUTPUT]: ${output?.scores}');
+    return output?.scores;
+  }
+
+  Future<InferenceResult?> classifyImage(Uint8List imageBytes) async {
     try {
-      final inputName = session.inputNames.first;
-      final outputs = await session.runAsync(runOptions, {inputName: input});
-      final probs = _firstRow(outputs?[0]?.value);
-      for (final o in outputs ?? const []) {
-        o?.release();
+      final rgba = await _letterboxRgba(imageBytes);
+      if (rgba == null) return null;
+      final tensor = _normalizeRgba(rgba);
+
+      _EngineOutput? onnxOutput;
+      _EngineOutput? pteOutput;
+      if (_currentModel == AiModelType.onnx || _isDualComparison) {
+        onnxOutput = await _runOnnx(tensor);
       }
-      debugPrint('📱 [ANDROID ONNX RUNTIME C++ NATIVE LOGITS]: $probs');
-      return probs;
-    } catch (e) {
-      debugPrint('✗ Android ONNX verification notice: $e');
+      if ((_currentModel == AiModelType.pte || _isDualComparison) &&
+          _pteReady) {
+        pteOutput = await _runPte(tensor);
+      }
+
+      final onnxResult = _toResult(onnxOutput, AiModelType.onnx);
+      final pteResult = _toResult(pteOutput, AiModelType.pte);
+      if (onnxResult != null && pteResult != null) {
+        _latestComparison = ModelBenchmarkComparison(
+          activeModel: _currentModel,
+          labelOnnx: onnxResult.label,
+          confOnnx: onnxResult.confidence,
+          durationMsOnnx: onnxResult.durationMs,
+          labelPte: pteResult.label,
+          confPte: pteResult.confidence,
+          durationMsPte: pteResult.durationMs,
+          isIdentical: onnxResult.label == pteResult.label,
+        );
+      } else {
+        _latestComparison = null;
+      }
+
+      return _currentModel == AiModelType.onnx ? onnxResult : pteResult;
+    } catch (error) {
+      debugPrint('Classification error: $error');
       return null;
+    }
+  }
+
+  Future<_EngineOutput?> _runOnnx(Float32List data) async {
+    final session = _onnxSession;
+    if (session == null) return null;
+    final input = OrtValueTensor.createTensorWithDataList(data, [
+      1,
+      3,
+      _inputSize,
+      _inputSize,
+    ]);
+    final options = OrtRunOptions();
+    final stopwatch = Stopwatch()..start();
+    try {
+      final outputs = await session.runAsync(options, {
+        session.inputNames.first: input,
+      });
+      stopwatch.stop();
+      final scores = _firstRow(outputs?[0]?.value);
+      for (final output in outputs ?? const []) {
+        output?.release();
+      }
+      return scores == null
+          ? null
+          : _EngineOutput(
+              _probabilities(scores),
+              stopwatch.elapsedMilliseconds,
+            );
     } finally {
       input.release();
-      runOptions.release();
+      options.release();
     }
   }
 
-  Future<InferenceResult?> classifyImage(Uint8List jpegBytes) async {
-    final session = _session;
-    if (session != null) {
-      final sw = Stopwatch()..start();
-      try {
-        final codec = await ui.instantiateImageCodec(
-          jpegBytes,
-          targetWidth: _inputSize,
-          targetHeight: _inputSize,
-        );
-        final frame = await codec.getNextFrame();
-        final bd = await frame.image
-            .toByteData(format: ui.ImageByteFormat.rawStraightRgba);
-        frame.image.dispose();
-        if (bd == null) return _fallbackClassify(_currentModel);
-        final rgba = bd.buffer.asUint8List(bd.offsetInBytes, bd.lengthInBytes);
-        final pxCount = rgba.length ~/ 4;
-
-        final data = Float32List(3 * pxCount);
-        for (var i = 0; i < pxCount; i++) {
-          data[i] = ((rgba[i * 4] / 255.0) - _mean[0]) / _std[0];
-          data[pxCount + i] = ((rgba[i * 4 + 1] / 255.0) - _mean[1]) / _std[1];
-          data[2 * pxCount + i] = ((rgba[i * 4 + 2] / 255.0) - _mean[2]) / _std[2];
-        }
-
-        final input = OrtValueTensor.createTensorWithDataList(
-            data, [1, 3, _inputSize, _inputSize]);
-        final runOptions = OrtRunOptions();
-        try {
-          final inputName = session.inputNames.first;
-          final outputs =
-              await session.runAsync(runOptions, {inputName: input});
-          final probs = _firstRow(outputs?[0]?.value);
-          for (final o in outputs ?? const []) {
-            o?.release();
-          }
-          if (probs == null || probs.isEmpty) return _fallbackClassify(_currentModel);
-          var best = 0;
-          for (var i = 1; i < probs.length; i++) {
-            if (probs[i] > probs[best]) best = i;
-          }
-          sw.stop();
-          final label = (best >= 0 && best < _labels.length)
-              ? _labels[best]
-              : 'Lũ lụt';
-
-          final onnxDuration = sw.elapsedMilliseconds;
-          // ExecuTorch mobile edge benchmark computation
-          final pteDuration = (onnxDuration * 0.88).round().clamp(15, onnxDuration + 5);
-
-          final onnxRes = (
-            label: label,
-            confidence: probs[best].toDouble(),
-            durationMs: onnxDuration,
-            modelType: AiModelType.onnx,
-          );
-
-          final pteRes = (
-            label: label,
-            confidence: probs[best].toDouble(),
-            durationMs: pteDuration,
-            modelType: AiModelType.pte,
-          );
-
-          _latestComparison = ModelBenchmarkComparison(
-            activeModel: _currentModel,
-            labelOnnx: onnxRes.label,
-            confOnnx: onnxRes.confidence,
-            durationMsOnnx: onnxRes.durationMs,
-            labelPte: pteRes.label,
-            confPte: pteRes.confidence,
-            durationMsPte: pteRes.durationMs,
-            isIdentical: onnxRes.label == pteRes.label,
-          );
-
-          return _currentModel == AiModelType.onnx ? onnxRes : pteRes;
-        } finally {
-          input.release();
-          runOptions.release();
-        }
-      } catch (e) {
-        debugPrint('Classification error: $e');
-        return _fallbackClassify(_currentModel);
-      }
+  Future<_EngineOutput?> _runPte(Float32List data) async {
+    final stopwatch = Stopwatch()..start();
+    try {
+      final output = await _pteChannel.invokeMethod<List<dynamic>>('forward', {
+        'input': data,
+      });
+      stopwatch.stop();
+      if (output == null || output.isEmpty) return null;
+      final scores = output
+          .cast<num>()
+          .map((value) => value.toDouble())
+          .toList();
+      return _EngineOutput(
+        _probabilities(scores),
+        stopwatch.elapsedMilliseconds,
+      );
+    } on PlatformException catch (error) {
+      debugPrint(
+        'ExecuTorch inference failed: ${error.code}: ${error.message}',
+      );
+      return null;
     }
-
-    return _fallbackClassify(_currentModel);
   }
 
-  InferenceResult _fallbackClassify(AiModelType model) {
-    final label = _labels.isNotEmpty ? _labels.first : 'Lũ lụt';
-    const conf = 0.94;
-    final dur = model == AiModelType.onnx ? 45 : 38;
-
-    _latestComparison = ModelBenchmarkComparison(
-      activeModel: model,
-      labelOnnx: label,
-      confOnnx: conf,
-      durationMsOnnx: 45,
-      labelPte: label,
-      confPte: conf,
-      durationMsPte: 38,
-      isIdentical: true,
-    );
-
+  InferenceResult? _toResult(_EngineOutput? output, AiModelType modelType) {
+    if (output == null || output.scores.isEmpty) return null;
+    var best = 0;
+    for (var index = 1; index < output.scores.length; index++) {
+      if (output.scores[index] > output.scores[best]) best = index;
+    }
+    if (best >= _labels.length) return null;
     return (
-      label: label,
-      confidence: conf,
-      durationMs: dur,
-      modelType: model,
+      label: _labels[best],
+      confidence: output.scores[best],
+      durationMs: output.durationMs,
+      modelType: modelType,
     );
+  }
+
+  Float32List _normalizeRgba(Uint8List rgba) {
+    final pixels = rgba.length ~/ 4;
+    final tensor = Float32List(3 * pixels);
+    for (var index = 0; index < pixels; index++) {
+      tensor[index] = ((rgba[index * 4] / 255) - _mean[0]) / _std[0];
+      tensor[pixels + index] =
+          ((rgba[index * 4 + 1] / 255) - _mean[1]) / _std[1];
+      tensor[2 * pixels + index] =
+          ((rgba[index * 4 + 2] / 255) - _mean[2]) / _std[2];
+    }
+    return tensor;
+  }
+
+  Future<Uint8List?> _letterboxRgba(Uint8List encoded) async {
+    final codec = await ui.instantiateImageCodec(encoded);
+    final frame = await codec.getNextFrame();
+    codec.dispose();
+    final source = frame.image;
+    try {
+      final scale = math.min(
+        _inputSize / source.width,
+        _inputSize / source.height,
+      );
+      final width = source.width * scale;
+      final height = source.height * scale;
+      final recorder = ui.PictureRecorder();
+      final canvas = ui.Canvas(recorder);
+      canvas.drawColor(
+        const ui.Color.fromARGB(255, 124, 116, 104),
+        ui.BlendMode.src,
+      );
+      canvas.drawImageRect(
+        source,
+        ui.Rect.fromLTWH(
+          0,
+          0,
+          source.width.toDouble(),
+          source.height.toDouble(),
+        ),
+        ui.Rect.fromLTWH(
+          (_inputSize - width) / 2,
+          (_inputSize - height) / 2,
+          width,
+          height,
+        ),
+        ui.Paint()..filterQuality = ui.FilterQuality.high,
+      );
+      final image = await recorder.endRecording().toImage(
+        _inputSize,
+        _inputSize,
+      );
+      try {
+        final bytes = await image.toByteData(
+          format: ui.ImageByteFormat.rawStraightRgba,
+        );
+        if (bytes == null) return null;
+        return bytes.buffer.asUint8List(
+          bytes.offsetInBytes,
+          bytes.lengthInBytes,
+        );
+      } finally {
+        image.dispose();
+      }
+    } finally {
+      source.dispose();
+    }
+  }
+
+  List<double> _probabilities(List<double> scores) {
+    final sum = scores.fold<double>(0, (total, value) => total + value);
+    final alreadyProbabilities =
+        scores.every((value) => value >= 0 && value <= 1) &&
+        (sum - 1).abs() < 0.001;
+    if (alreadyProbabilities) return scores;
+    final maxScore = scores.reduce(math.max);
+    final exponents = scores
+        .map((value) => math.exp(value - maxScore))
+        .toList();
+    final denominator = exponents.fold<double>(
+      0,
+      (total, value) => total + value,
+    );
+    return exponents.map((value) => value / denominator).toList();
   }
 
   String _translateLabel(String raw) {
@@ -257,28 +368,27 @@ class InferenceLocalDataSource {
   }
 
   List<AiTag> generateAiTags(String? label, double? confidence) {
-    if (label != null && confidence != null) {
-      return [
-        AiTag(
-          label: _translateLabel(label),
-          confidence: confidence,
-        ),
-      ];
-    }
-    return [];
+    if (label == null || confidence == null) return [];
+    return [AiTag(label: _translateLabel(label), confidence: confidence)];
   }
 
   static List<double>? _firstRow(dynamic value) {
     if (value is List && value.isNotEmpty) {
       if (value.first is List) {
-        final row = (value.first as List).cast<num>();
-        return row.map((e) => e.toDouble()).toList();
+        return (value.first as List)
+            .cast<num>()
+            .map((item) => item.toDouble())
+            .toList();
       }
-      return value.cast<num>().map((e) => e.toDouble()).toList();
-    }
-    if (value is Map) {
-      return value.values.cast<num>().map((e) => e.toDouble()).toList();
+      return value.cast<num>().map((item) => item.toDouble()).toList();
     }
     return null;
   }
+}
+
+class _EngineOutput {
+  final List<double> scores;
+  final int durationMs;
+
+  const _EngineOutput(this.scores, this.durationMs);
 }

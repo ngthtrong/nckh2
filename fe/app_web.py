@@ -17,7 +17,7 @@ from torch import nn
 from torchvision import models, transforms
 import onnxruntime as ort
 import numpy as np
-from PIL import Image
+from PIL import Image, ImageOps
 from flask import Flask, request, jsonify, render_template_string
 
 # Cấu hình đường dẫn
@@ -26,8 +26,8 @@ CHECKPOINT_PTH = (
     ROOT
     / "model"
     / "models"
-    / "mobilenetv3_large_relabel"
-    / "flood_mobilenetv3_large_relabel_best.pth"
+    / "mobilenetv3_large_relabel_v2"
+    / "flood_mobilenetv3_large_relabel_v2_best.pth"
 )
 if not CHECKPOINT_PTH.exists():
     CHECKPOINT_PTH = ROOT / "app" / "model.pth"
@@ -36,7 +36,7 @@ CHECKPOINT_ONNX = ROOT / "app" / "assets" / "models" / "model.onnx"
 CHECKPOINT_PTE = ROOT / "model" / "Edge Ai" / "flood_mobilenetv3_large.pte"
 
 DEFAULT_CONFIG = (
-    ROOT / "model" / "models" / "mobilenetv3_large_relabel" / "config_mobilenetv3_large.json"
+    ROOT / "model" / "models" / "mobilenetv3_large_relabel_v2" / "config_mobilenetv3_large_v2.json"
 )
 
 # 1. Khởi tạo PyTorch
@@ -47,10 +47,12 @@ if DEFAULT_CONFIG.exists():
     class_order = config.get("class_order", ["low", "medium", "high", "non_flood"])
     dropout = float(config.get("dropout", 0.35))
     image_size = int(config.get("image_size", 224))
+    letterbox_fill = tuple(config.get("letterbox_fill", [124, 116, 104]))
 else:
     class_order = ["low", "medium", "high", "non_flood"]
     dropout = 0.35
     image_size = 224
+    letterbox_fill = (124, 116, 104)
 
 
 def build_model(num_classes: int, dropout: float) -> nn.Module:
@@ -114,7 +116,14 @@ if CHECKPOINT_PTE.exists():
 
 # Transform ảnh
 transform = transforms.Compose([
-    transforms.Resize((image_size, image_size)),
+    transforms.Lambda(
+        lambda image: ImageOps.pad(
+            image,
+            (image_size, image_size),
+            method=Image.Resampling.BICUBIC,
+            color=letterbox_fill,
+        )
+    ),
     transforms.ToTensor(),
     transforms.Normalize(mean=[0.485, 0.456, 0.406], std=[0.229, 0.224, 0.225]),
 ])

@@ -11,6 +11,7 @@ typedef InferenceResult = ({
 
 abstract class InferenceRepository {
   bool get ready;
+  bool get pteReady;
   AiModelType get currentModel;
   bool get isDualComparison;
   ModelBenchmarkComparison? get latestComparison;

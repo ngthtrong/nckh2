@@ -9,11 +9,7 @@ class SettingsScreen extends StatefulWidget {
   final AppController controller;
   final VoidCallback? onGoAuth;
 
-  const SettingsScreen({
-    super.key,
-    required this.controller,
-    this.onGoAuth,
-  });
+  const SettingsScreen({super.key, required this.controller, this.onGoAuth});
 
   @override
   State<SettingsScreen> createState() => _SettingsScreenState();
@@ -71,14 +67,20 @@ class _SettingsScreenState extends State<SettingsScreen> {
                           ),
                         ),
                         IconButton(
-                          icon: const Icon(Icons.close, color: Color(0xFF6B7280)),
+                          icon: const Icon(
+                            Icons.close,
+                            color: Color(0xFF6B7280),
+                          ),
                           onPressed: () => Navigator.of(sheetContext).pop(),
                         ),
                       ],
                     ),
                     const SizedBox(height: 16),
                     Container(
-                      padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
+                      padding: const EdgeInsets.symmetric(
+                        horizontal: 16,
+                        vertical: 12,
+                      ),
                       decoration: BoxDecoration(
                         color: const Color(0xFFF9FAFB),
                         borderRadius: BorderRadius.circular(16),
@@ -125,18 +127,28 @@ class _SettingsScreenState extends State<SettingsScreen> {
                         hintText: '0901 234 567',
                         filled: true,
                         fillColor: const Color(0xFFF9FAFB),
-                        contentPadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 14),
+                        contentPadding: const EdgeInsets.symmetric(
+                          horizontal: 16,
+                          vertical: 14,
+                        ),
                         border: OutlineInputBorder(
                           borderRadius: BorderRadius.circular(16),
-                          borderSide: const BorderSide(color: Color(0xFFE5E7EB)),
+                          borderSide: const BorderSide(
+                            color: Color(0xFFE5E7EB),
+                          ),
                         ),
                         enabledBorder: OutlineInputBorder(
                           borderRadius: BorderRadius.circular(16),
-                          borderSide: const BorderSide(color: Color(0xFFE5E7EB)),
+                          borderSide: const BorderSide(
+                            color: Color(0xFFE5E7EB),
+                          ),
                         ),
                         focusedBorder: OutlineInputBorder(
                           borderRadius: BorderRadius.circular(16),
-                          borderSide: const BorderSide(color: AppColors.primaryRed, width: 1.5),
+                          borderSide: const BorderSide(
+                            color: AppColors.primaryRed,
+                            width: 1.5,
+                          ),
                         ),
                       ),
                     ),
@@ -158,18 +170,28 @@ class _SettingsScreenState extends State<SettingsScreen> {
                         hintText: 'Nhập địa chỉ của bạn',
                         filled: true,
                         fillColor: const Color(0xFFF9FAFB),
-                        contentPadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 14),
+                        contentPadding: const EdgeInsets.symmetric(
+                          horizontal: 16,
+                          vertical: 14,
+                        ),
                         border: OutlineInputBorder(
                           borderRadius: BorderRadius.circular(16),
-                          borderSide: const BorderSide(color: Color(0xFFE5E7EB)),
+                          borderSide: const BorderSide(
+                            color: Color(0xFFE5E7EB),
+                          ),
                         ),
                         enabledBorder: OutlineInputBorder(
                           borderRadius: BorderRadius.circular(16),
-                          borderSide: const BorderSide(color: Color(0xFFE5E7EB)),
+                          borderSide: const BorderSide(
+                            color: Color(0xFFE5E7EB),
+                          ),
                         ),
                         focusedBorder: OutlineInputBorder(
                           borderRadius: BorderRadius.circular(16),
-                          borderSide: const BorderSide(color: AppColors.primaryRed, width: 1.5),
+                          borderSide: const BorderSide(
+                            color: AppColors.primaryRed,
+                            width: 1.5,
+                          ),
                         ),
                       ),
                     ),
@@ -192,32 +214,48 @@ class _SettingsScreenState extends State<SettingsScreen> {
                         style: ElevatedButton.styleFrom(
                           backgroundColor: AppColors.primaryRed,
                           foregroundColor: Colors.white,
-                          shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
+                          shape: RoundedRectangleBorder(
+                            borderRadius: BorderRadius.circular(16),
+                          ),
                           elevation: 0,
                         ),
                         onPressed: () async {
                           final phone = phoneController.text.trim();
                           final address = addressController.text.trim();
                           if (phone.isEmpty) {
-                            setModalState(() => errorMessage = 'Vui lòng nhập số điện thoại.');
+                            setModalState(
+                              () =>
+                                  errorMessage = 'Vui lòng nhập số điện thoại.',
+                            );
                             return;
                           }
                           if (address.isEmpty) {
-                            setModalState(() => errorMessage = 'Vui lòng nhập địa chỉ thường trú.');
+                            setModalState(
+                              () => errorMessage =
+                                  'Vui lòng nhập địa chỉ thường trú.',
+                            );
                             return;
                           }
-                          final updated = user.copyWith(phone: phone, address: address);
+                          final updated = user.copyWith(
+                            phone: phone,
+                            address: address,
+                          );
                           await widget.controller.updateUser(updated);
                           if (sheetContext.mounted) {
                             Navigator.of(sheetContext).pop();
                             ScaffoldMessenger.of(context).showSnackBar(
-                              const SnackBar(content: Text('Cập nhật thông tin thành công!')),
+                              const SnackBar(
+                                content: Text('Cập nhật thông tin thành công!'),
+                              ),
                             );
                           }
                         },
                         child: const Text(
                           'Lưu thay đổi',
-                          style: TextStyle(fontSize: 15, fontWeight: FontWeight.w800),
+                          style: TextStyle(
+                            fontSize: 15,
+                            fontWeight: FontWeight.w800,
+                          ),
                         ),
                       ),
                     ),
@@ -286,7 +324,10 @@ class _SettingsScreenState extends State<SettingsScreen> {
                           ),
                         ),
                         IconButton(
-                          icon: const Icon(Icons.close, color: Color(0xFF6B7280)),
+                          icon: const Icon(
+                            Icons.close,
+                            color: Color(0xFF6B7280),
+                          ),
                           onPressed: () => Navigator.of(sheetContext).pop(),
                         ),
                       ],
@@ -296,7 +337,8 @@ class _SettingsScreenState extends State<SettingsScreen> {
                       label: 'MẬT KHẨU HIỆN TẠI',
                       controller: currentPassController,
                       show: showCurrent,
-                      onToggle: () => setModalState(() => showCurrent = !showCurrent),
+                      onToggle: () =>
+                          setModalState(() => showCurrent = !showCurrent),
                     ),
                     const SizedBox(height: 14),
                     _buildPasswordField(
@@ -310,7 +352,8 @@ class _SettingsScreenState extends State<SettingsScreen> {
                       label: 'XÁC NHẬN MẬT KHẨU MỚI',
                       controller: confirmPassController,
                       show: showConfirm,
-                      onToggle: () => setModalState(() => showConfirm = !showConfirm),
+                      onToggle: () =>
+                          setModalState(() => showConfirm = !showConfirm),
                     ),
                     if (errorMessage != null) ...[
                       const SizedBox(height: 10),
@@ -331,7 +374,9 @@ class _SettingsScreenState extends State<SettingsScreen> {
                         style: ElevatedButton.styleFrom(
                           backgroundColor: AppColors.primaryRed,
                           foregroundColor: Colors.white,
-                          shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
+                          shape: RoundedRectangleBorder(
+                            borderRadius: BorderRadius.circular(16),
+                          ),
                           elevation: 0,
                         ),
                         onPressed: () async {
@@ -340,15 +385,24 @@ class _SettingsScreenState extends State<SettingsScreen> {
                           final confirm = confirmPassController.text;
 
                           if (current != user.password) {
-                            setModalState(() => errorMessage = 'Mật khẩu hiện tại không đúng.');
+                            setModalState(
+                              () => errorMessage =
+                                  'Mật khẩu hiện tại không đúng.',
+                            );
                             return;
                           }
                           if (next.length < 6) {
-                            setModalState(() => errorMessage = 'Mật khẩu mới tối thiểu 6 ký tự.');
+                            setModalState(
+                              () => errorMessage =
+                                  'Mật khẩu mới tối thiểu 6 ký tự.',
+                            );
                             return;
                           }
                           if (next != confirm) {
-                            setModalState(() => errorMessage = 'Mật khẩu xác nhận không khớp.');
+                            setModalState(
+                              () => errorMessage =
+                                  'Mật khẩu xác nhận không khớp.',
+                            );
                             return;
                           }
 
@@ -357,13 +411,18 @@ class _SettingsScreenState extends State<SettingsScreen> {
                           if (sheetContext.mounted) {
                             Navigator.of(sheetContext).pop();
                             ScaffoldMessenger.of(context).showSnackBar(
-                              const SnackBar(content: Text('Đổi mật khẩu thành công!')),
+                              const SnackBar(
+                                content: Text('Đổi mật khẩu thành công!'),
+                              ),
                             );
                           }
                         },
                         child: const Text(
                           'Đổi mật khẩu',
-                          style: TextStyle(fontSize: 15, fontWeight: FontWeight.w800),
+                          style: TextStyle(
+                            fontSize: 15,
+                            fontWeight: FontWeight.w800,
+                          ),
                         ),
                       ),
                     ),
@@ -403,10 +462,15 @@ class _SettingsScreenState extends State<SettingsScreen> {
             hintText: '••••••••',
             filled: true,
             fillColor: const Color(0xFFF9FAFB),
-            contentPadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 14),
+            contentPadding: const EdgeInsets.symmetric(
+              horizontal: 16,
+              vertical: 14,
+            ),
             suffixIcon: IconButton(
               icon: Icon(
-                show ? Icons.visibility_off_outlined : Icons.visibility_outlined,
+                show
+                    ? Icons.visibility_off_outlined
+                    : Icons.visibility_outlined,
                 color: const Color(0xFF9CA3AF),
                 size: 20,
               ),
@@ -422,7 +486,10 @@ class _SettingsScreenState extends State<SettingsScreen> {
             ),
             focusedBorder: OutlineInputBorder(
               borderRadius: BorderRadius.circular(16),
-              borderSide: const BorderSide(color: AppColors.primaryRed, width: 1.5),
+              borderSide: const BorderSide(
+                color: AppColors.primaryRed,
+                width: 1.5,
+              ),
             ),
           ),
         ),
@@ -441,9 +508,7 @@ class _SettingsScreenState extends State<SettingsScreen> {
         Container(
           width: double.infinity,
           padding: const EdgeInsets.fromLTRB(20, 24, 20, 20),
-          decoration: const BoxDecoration(
-            color: AppColors.primaryRed,
-          ),
+          decoration: const BoxDecoration(color: AppColors.primaryRed),
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
@@ -481,7 +546,9 @@ class _SettingsScreenState extends State<SettingsScreen> {
                   padding: const EdgeInsets.symmetric(vertical: 24),
                   decoration: const BoxDecoration(
                     color: Colors.white,
-                    border: Border(bottom: BorderSide(color: Color(0xFFF3F4F6))),
+                    border: Border(
+                      bottom: BorderSide(color: Color(0xFFF3F4F6)),
+                    ),
                   ),
                   child: Column(
                     children: [
@@ -493,7 +560,9 @@ class _SettingsScreenState extends State<SettingsScreen> {
                           shape: BoxShape.circle,
                           boxShadow: [
                             BoxShadow(
-                              color: AppColors.primaryRed.withValues(alpha: 0.25),
+                              color: AppColors.primaryRed.withValues(
+                                alpha: 0.25,
+                              ),
                               blurRadius: 12,
                               offset: const Offset(0, 4),
                             ),
@@ -509,7 +578,11 @@ class _SettingsScreenState extends State<SettingsScreen> {
                                   fontWeight: FontWeight.w900,
                                 ),
                               )
-                            : const Icon(Icons.person_outline, color: Colors.white, size: 36),
+                            : const Icon(
+                                Icons.person_outline,
+                                color: Colors.white,
+                                size: 36,
+                              ),
                       ),
                       const SizedBox(height: 12),
                       Text(
@@ -522,7 +595,9 @@ class _SettingsScreenState extends State<SettingsScreen> {
                       ),
                       const SizedBox(height: 4),
                       Text(
-                        user != null ? user.phone : 'Chưa đăng nhập tài khoản cứu hộ',
+                        user != null
+                            ? user.phone
+                            : 'Chưa đăng nhập tài khoản cứu hộ',
                         style: const TextStyle(
                           fontSize: 14,
                           fontWeight: FontWeight.w500,
@@ -538,7 +613,9 @@ class _SettingsScreenState extends State<SettingsScreen> {
                           style: OutlinedButton.styleFrom(
                             foregroundColor: AppColors.primaryRed,
                             side: const BorderSide(color: AppColors.primaryRed),
-                            shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+                            shape: RoundedRectangleBorder(
+                              borderRadius: BorderRadius.circular(12),
+                            ),
                           ),
                         ),
                       ],
@@ -548,7 +625,10 @@ class _SettingsScreenState extends State<SettingsScreen> {
 
                 // Settings cards
                 Padding(
-                  padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 16),
+                  padding: const EdgeInsets.symmetric(
+                    horizontal: 16,
+                    vertical: 16,
+                  ),
                   child: Column(
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
@@ -605,115 +685,42 @@ class _SettingsScreenState extends State<SettingsScreen> {
                         child: Column(
                           crossAxisAlignment: CrossAxisAlignment.start,
                           children: [
-                            const Text(
-                              'Lựa chọn Engine suy luận',
-                              style: TextStyle(
-                                fontSize: 14,
-                                fontWeight: FontWeight.w700,
-                                color: Color(0xFF1F2937),
-                              ),
-                            ),
-                            const SizedBox(height: 10),
                             ...AiModelType.values.map((model) {
-                              final isSelected = c.currentModel == model;
-                              return InkWell(
-                                onTap: () => c.switchAiModel(model),
-                                borderRadius: BorderRadius.circular(12),
-                                child: Container(
-                                  margin: const EdgeInsets.symmetric(vertical: 4),
-                                  padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 10),
-                                  decoration: BoxDecoration(
-                                    color: isSelected ? Colors.white : Colors.transparent,
-                                    borderRadius: BorderRadius.circular(12),
-                                    border: Border.all(
-                                      color: isSelected ? AppColors.primaryRed : Colors.transparent,
-                                      width: 1.5,
-                                    ),
-                                  ),
-                                  child: Row(
-                                    children: [
-                                      Icon(
-                                        isSelected ? Icons.radio_button_checked : Icons.radio_button_off,
-                                        color: isSelected ? AppColors.primaryRed : const Color(0xFF9CA3AF),
-                                        size: 20,
-                                      ),
-                                      const SizedBox(width: 10),
-                                      Expanded(
-                                        child: Column(
-                                          crossAxisAlignment: CrossAxisAlignment.start,
-                                          children: [
-                                            Text(
-                                              model.name,
-                                              style: TextStyle(
-                                                fontSize: 14,
-                                                fontWeight: FontWeight.w700,
-                                                color: isSelected ? const Color(0xFF1F2937) : const Color(0xFF4B5563),
-                                              ),
-                                            ),
-                                            Text(
-                                              model.description,
-                                              style: const TextStyle(
-                                                fontSize: 11,
-                                                color: Color(0xFF6B7280),
-                                              ),
-                                            ),
-                                          ],
-                                        ),
-                                      ),
-                                      Container(
-                                        padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
-                                        decoration: BoxDecoration(
-                                          color: isSelected
-                                              ? AppColors.primaryRed.withValues(alpha: 0.1)
-                                              : const Color(0xFFF3F4F6),
-                                          borderRadius: BorderRadius.circular(8),
-                                        ),
-                                        child: Text(
-                                          model.extension,
-                                          style: TextStyle(
-                                            fontSize: 11,
-                                            fontWeight: FontWeight.w800,
-                                            color: isSelected ? AppColors.primaryRed : const Color(0xFF6B7280),
-                                          ),
-                                        ),
-                                      ),
-                                    ],
-                                  ),
+                              final available =
+                                  model == AiModelType.onnx || c.isPteReady;
+                              final selected = c.currentModel == model;
+                              return ListTile(
+                                contentPadding: EdgeInsets.zero,
+                                onTap: available
+                                    ? () => c.switchAiModel(model)
+                                    : null,
+                                title: Text(model.name),
+                                subtitle: Text(
+                                  available
+                                      ? model.description
+                                      : 'Runtime chưa sẵn sàng trên thiết bị này',
+                                ),
+                                trailing: Icon(
+                                  selected
+                                      ? Icons.radio_button_checked
+                                      : Icons.radio_button_off,
+                                  color: selected
+                                      ? AppColors.primaryRed
+                                      : const Color(0xFF9CA3AF),
                                 ),
                               );
                             }),
-                            const Divider(height: 24, color: Color(0xFFE5E7EB)),
-                            Row(
-                              mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                              children: [
-                                const Expanded(
-                                  child: Column(
-                                    crossAxisAlignment: CrossAxisAlignment.start,
-                                    children: [
-                                      Text(
-                                        'So sánh song song (.onnx vs .pte)',
-                                        style: TextStyle(
-                                          fontSize: 13,
-                                          fontWeight: FontWeight.w700,
-                                          color: Color(0xFF1F2937),
-                                        ),
-                                      ),
-                                      Text(
-                                        'Chạy song song 2 mô hình khi chụp ảnh để đo benchmark',
-                                        style: TextStyle(
-                                          fontSize: 11,
-                                          color: Color(0xFF6B7280),
-                                        ),
-                                      ),
-                                    ],
-                                  ),
-                                ),
-                                Switch.adaptive(
-                                  value: c.isDualComparison,
-                                  onChanged: c.toggleDualComparison,
-                                  activeTrackColor: AppColors.primaryRed,
-                                ),
-                              ],
+                            const Divider(height: 16),
+                            SwitchListTile.adaptive(
+                              contentPadding: EdgeInsets.zero,
+                              title: const Text('So sánh ONNX và PTE thật'),
+                              subtitle: const Text(
+                                'Chạy cả hai runtime trên cùng tensor đầu vào',
+                              ),
+                              value: c.isDualComparison,
+                              onChanged: c.isPteReady
+                                  ? c.toggleDualComparison
+                                  : null,
                             ),
                           ],
                         ),
@@ -733,9 +740,13 @@ class _SettingsScreenState extends State<SettingsScreen> {
                         child: Column(
                           children: [
                             const Padding(
-                              padding: EdgeInsets.symmetric(horizontal: 16, vertical: 14),
+                              padding: EdgeInsets.symmetric(
+                                horizontal: 16,
+                                vertical: 14,
+                              ),
                               child: Row(
-                                mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                                mainAxisAlignment:
+                                    MainAxisAlignment.spaceBetween,
                                 children: [
                                   Text(
                                     'Phiên bản ứng dụng',
@@ -761,15 +772,23 @@ class _SettingsScreenState extends State<SettingsScreen> {
                               onTap: () {
                                 ScaffoldMessenger.of(context).showSnackBar(
                                   const SnackBar(
-                                    content: Text('Hệ thống hỗ trợ cứu hộ khẩn cấp - Dữ liệu bảo mật cục bộ trên thiết bị.'),
+                                    content: Text(
+                                      'Hệ thống hỗ trợ cứu hộ khẩn cấp - Dữ liệu bảo mật cục bộ trên thiết bị.',
+                                    ),
                                   ),
                                 );
                               },
-                              borderRadius: const BorderRadius.vertical(bottom: Radius.circular(20)),
+                              borderRadius: const BorderRadius.vertical(
+                                bottom: Radius.circular(20),
+                              ),
                               child: const Padding(
-                                padding: EdgeInsets.symmetric(horizontal: 16, vertical: 14),
+                                padding: EdgeInsets.symmetric(
+                                  horizontal: 16,
+                                  vertical: 14,
+                                ),
                                 child: Row(
-                                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                                  mainAxisAlignment:
+                                      MainAxisAlignment.spaceBetween,
                                   children: [
                                     Text(
                                       'Chính sách bảo mật & Dữ liệu',
@@ -779,7 +798,11 @@ class _SettingsScreenState extends State<SettingsScreen> {
                                         color: Color(0xFF374151),
                                       ),
                                     ),
-                                    Icon(Icons.chevron_right, size: 18, color: Color(0xFF9CA3AF)),
+                                    Icon(
+                                      Icons.chevron_right,
+                                      size: 18,
+                                      color: Color(0xFF9CA3AF),
+                                    ),
                                   ],
                                 ),
                               ),
@@ -798,23 +821,45 @@ class _SettingsScreenState extends State<SettingsScreen> {
                           style: OutlinedButton.styleFrom(
                             backgroundColor: const Color(0xFFFEF2F2),
                             side: const BorderSide(color: Color(0xFFFECACA)),
-                            shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
+                            shape: RoundedRectangleBorder(
+                              borderRadius: BorderRadius.circular(16),
+                            ),
                           ),
                           onPressed: () async {
                             final confirm = await showDialog<bool>(
                               context: context,
                               builder: (dialogCtx) => AlertDialog(
-                                shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(20)),
-                                title: const Text('Đăng xuất', style: TextStyle(fontWeight: FontWeight.w800)),
-                                content: const Text('Bạn có chắc chắn muốn đăng xuất khỏi ứng dụng không?'),
+                                shape: RoundedRectangleBorder(
+                                  borderRadius: BorderRadius.circular(20),
+                                ),
+                                title: const Text(
+                                  'Đăng xuất',
+                                  style: TextStyle(fontWeight: FontWeight.w800),
+                                ),
+                                content: const Text(
+                                  'Bạn có chắc chắn muốn đăng xuất khỏi ứng dụng không?',
+                                ),
                                 actions: [
                                   TextButton(
-                                    onPressed: () => Navigator.of(dialogCtx).pop(false),
-                                    child: const Text('Hủy', style: TextStyle(color: Color(0xFF6B7280))),
+                                    onPressed: () =>
+                                        Navigator.of(dialogCtx).pop(false),
+                                    child: const Text(
+                                      'Hủy',
+                                      style: TextStyle(
+                                        color: Color(0xFF6B7280),
+                                      ),
+                                    ),
                                   ),
                                   TextButton(
-                                    onPressed: () => Navigator.of(dialogCtx).pop(true),
-                                    child: const Text('Đăng xuất', style: TextStyle(color: AppColors.primaryRed, fontWeight: FontWeight.w700)),
+                                    onPressed: () =>
+                                        Navigator.of(dialogCtx).pop(true),
+                                    child: const Text(
+                                      'Đăng xuất',
+                                      style: TextStyle(
+                                        color: AppColors.primaryRed,
+                                        fontWeight: FontWeight.w700,
+                                      ),
+                                    ),
                                   ),
                                 ],
                               ),
@@ -826,7 +871,11 @@ class _SettingsScreenState extends State<SettingsScreen> {
                               }
                             }
                           },
-                          icon: const Icon(Icons.logout_rounded, color: AppColors.primaryRed, size: 20),
+                          icon: const Icon(
+                            Icons.logout_rounded,
+                            color: AppColors.primaryRed,
+                            size: 20,
+                          ),
                           label: const Text(
                             'Đăng xuất',
                             style: TextStyle(
