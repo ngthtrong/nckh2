@@ -14,6 +14,9 @@ class InferenceRepositoryImpl implements InferenceRepository {
   bool get ready => dataSource.ready;
 
   @override
+  bool get pteReady => dataSource.pteReady;
+
+  @override
   AiModelType get currentModel => dataSource.currentModel;
 
   @override
@@ -23,14 +26,10 @@ class InferenceRepositoryImpl implements InferenceRepository {
   ModelBenchmarkComparison? get latestComparison => dataSource.latestComparison;
 
   @override
-  void setModel(AiModelType model) {
-    dataSource.setModel(model);
-  }
+  void setModel(AiModelType model) => dataSource.setModel(model);
 
   @override
-  void setDualComparison(bool enabled) {
-    dataSource.setDualComparison(enabled);
-  }
+  void setDualComparison(bool enabled) => dataSource.setDualComparison(enabled);
 
   @override
   Future<void> loadModel() async {

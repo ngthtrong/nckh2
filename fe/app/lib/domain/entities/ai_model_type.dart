@@ -13,7 +13,7 @@ enum AiModelType {
     extension: '.pte',
     assetPath: 'assets/models/model.pte',
     badgeText: 'ExecuTorch (.pte)',
-    description: 'Mô hình PyTorch Edge Native chuyên dụng cho thiết bị di động.',
+    description: 'Chạy model PTE thật bằng ExecuTorch native trên Android.',
   );
 
   final String id;
@@ -38,11 +38,9 @@ class ModelBenchmarkComparison {
   final String labelOnnx;
   final double confOnnx;
   final int durationMsOnnx;
-
   final String labelPte;
   final double confPte;
   final int durationMsPte;
-
   final bool isIdentical;
 
   const ModelBenchmarkComparison({

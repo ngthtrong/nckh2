@@ -40,22 +40,26 @@ from sklearn.metrics import (
 import torch
 from torch import nn
 from torchvision import models, transforms
-from PIL import Image, ImageStat
+from PIL import Image, ImageOps, ImageStat
 
 ROOT = Path(__file__).resolve().parents[1]
 CHECKPOINT_A = (
     ROOT
     / "model"
     / "models"
-    / "mobilenetv3_large_relabel"
-    / "flood_mobilenetv3_large_relabel_best.pth"
+    / "mobilenetv3_large_relabel_v2"
+    / "flood_mobilenetv3_large_relabel_v2_best.pth"
 )
 CHECKPOINT_ONNX = ROOT / "app" / "assets" / "models" / "model.onnx"
 CONFIG_JSON = (
-    ROOT / "model" / "models" / "mobilenetv3_large_relabel" / "config_mobilenetv3_large.json"
+    ROOT / "model" / "models" / "mobilenetv3_large_relabel_v2" / "config_mobilenetv3_large_v2.json"
+)
+SPLIT_CSV = (
+    ROOT / "model" / "models" / "mobilenetv3_large_relabel_v2"
+    / "split_train_val_test_mobilenetv3_large_v2.csv"
 )
 DATASET_DIR = ROOT / "model" / "Dataset_Flood"
-REPORTS_DIR = ROOT / "reports" / "model_comparison"
+REPORTS_DIR = ROOT / "reports" / "model_comparison_v2"
 
 REPORTS_DIR.mkdir(parents=True, exist_ok=True)
 
@@ -164,6 +168,7 @@ def main() -> None:
     num_classes = len(class_order)
     dropout = float(config.get("dropout", 0.35))
     image_size = int(config.get("image_size", 224))
+    letterbox_fill = tuple(config.get("letterbox_fill", [124, 116, 104]))
     device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
 
     print(f"• Classes ({num_classes}): {class_order}")
@@ -180,27 +185,29 @@ def main() -> None:
     onnx_input_name = onnx_session.get_inputs()[0].name
 
     transform = transforms.Compose([
-        transforms.Resize((image_size, image_size)),
+        transforms.Lambda(lambda image: ImageOps.pad(
+            image,
+            (image_size, image_size),
+            method=Image.Resampling.BICUBIC,
+            color=letterbox_fill,
+        )),
         transforms.ToTensor(),
         transforms.Normalize(mean=[0.485, 0.456, 0.406], std=[0.229, 0.224, 0.225]),
     ])
 
     # 3. Collect Dataset Images
-    all_image_paths = []
-    all_gt_labels = []
-    all_gt_indices = []
+    split_df = pd.read_csv(SPLIT_CSV)
+    test_df = split_df[split_df["split"] == "test"].copy()
+    all_image_paths = [Path(path) for path in test_df["path"]]
+    all_gt_labels = test_df["label"].tolist()
+    all_gt_indices = [class_to_idx[label] for label in all_gt_labels]
 
-    for cls in class_order:
-        cls_dir = DATASET_DIR / cls
-        if cls_dir.exists():
-            for f in sorted(cls_dir.rglob("*")):
-                if f.suffix.lower() in [".jpg", ".jpeg", ".png", ".webp", ".avif"]:
-                    all_image_paths.append(f)
-                    all_gt_labels.append(cls)
-                    all_gt_indices.append(class_to_idx[cls])
+    missing = [str(path) for path in all_image_paths if not path.is_file()]
+    if missing:
+        raise FileNotFoundError(f"Test split contains {len(missing)} missing files; first={missing[0]}")
 
     total_images = len(all_image_paths)
-    print(f"✓ Đã thu thập {total_images} ảnh từ tập dữ liệu {DATASET_DIR.name}\n")
+    print(f"✓ Chỉ đánh giá {total_images} ảnh thuộc test split độc lập\n")
 
     # 4. Evaluation Loop
     results = []

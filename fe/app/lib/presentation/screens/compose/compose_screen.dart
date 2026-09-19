@@ -84,7 +84,8 @@ class _ComposeScreenState extends State<ComposeScreen> {
 
   @override
   Widget build(BuildContext context) {
-    final canSubmit = (_trappedCount > 0 ||
+    final canSubmit =
+        (_trappedCount > 0 ||
             _injuredCount > 0 ||
             _vulnerableGroups.isNotEmpty ||
             _descController.text.trim().isNotEmpty ||
@@ -103,12 +104,17 @@ class _ComposeScreenState extends State<ComposeScreen> {
                 onPressed: canSubmit ? _handleSubmit : null,
                 style: ElevatedButton.styleFrom(
                   backgroundColor: AppColors.primaryRed,
-                  disabledBackgroundColor: AppColors.primaryRed.withOpacity(0.4),
+                  disabledBackgroundColor: AppColors.primaryRed.withOpacity(
+                    0.4,
+                  ),
                   elevation: 0,
                   shape: RoundedRectangleBorder(
                     borderRadius: BorderRadius.circular(20),
                   ),
-                  padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+                  padding: const EdgeInsets.symmetric(
+                    horizontal: 16,
+                    vertical: 8,
+                  ),
                 ),
                 child: _isSubmitting
                     ? const SizedBox(
@@ -139,7 +145,9 @@ class _ComposeScreenState extends State<ComposeScreen> {
                     // Location bar
                     Container(
                       padding: const EdgeInsets.symmetric(
-                          horizontal: 14, vertical: 10),
+                        horizontal: 14,
+                        vertical: 10,
+                      ),
                       decoration: BoxDecoration(
                         color: const Color(0xFFFEF2F2),
                         borderRadius: BorderRadius.circular(12),
@@ -147,8 +155,11 @@ class _ComposeScreenState extends State<ComposeScreen> {
                       ),
                       child: Row(
                         children: [
-                          const Icon(Icons.location_on,
-                              color: AppColors.primaryRed, size: 18),
+                          const Icon(
+                            Icons.location_on,
+                            color: AppColors.primaryRed,
+                            size: 18,
+                          ),
                           const SizedBox(width: 8),
                           Expanded(
                             child: Text(
@@ -233,18 +244,21 @@ class _ComposeScreenState extends State<ComposeScreen> {
                         fillColor: const Color(0xFFF9FAFB),
                         border: OutlineInputBorder(
                           borderRadius: BorderRadius.circular(16),
-                          borderSide:
-                              const BorderSide(color: Color(0xFFE5E7EB)),
+                          borderSide: const BorderSide(
+                            color: Color(0xFFE5E7EB),
+                          ),
                         ),
                         enabledBorder: OutlineInputBorder(
                           borderRadius: BorderRadius.circular(16),
-                          borderSide:
-                              const BorderSide(color: Color(0xFFE5E7EB)),
+                          borderSide: const BorderSide(
+                            color: Color(0xFFE5E7EB),
+                          ),
                         ),
                         focusedBorder: OutlineInputBorder(
                           borderRadius: BorderRadius.circular(16),
-                          borderSide:
-                              const BorderSide(color: AppColors.primaryRed),
+                          borderSide: const BorderSide(
+                            color: AppColors.primaryRed,
+                          ),
                         ),
                         contentPadding: const EdgeInsets.all(14),
                       ),
@@ -324,8 +338,11 @@ class _ComposeScreenState extends State<ComposeScreen> {
                                   color: Colors.black54,
                                   shape: BoxShape.circle,
                                 ),
-                                child: const Icon(Icons.close,
-                                    color: Colors.white, size: 16),
+                                child: const Icon(
+                                  Icons.close,
+                                  color: Colors.white,
+                                  size: 16,
+                                ),
                               ),
                             ),
                           ),
@@ -349,8 +366,11 @@ class _ComposeScreenState extends State<ComposeScreen> {
                           children: [
                             Row(
                               children: [
-                                const Icon(Icons.psychology,
-                                    color: Color(0xFFC2410C), size: 20),
+                                const Icon(
+                                  Icons.psychology,
+                                  color: Color(0xFFC2410C),
+                                  size: 20,
+                                ),
                                 const SizedBox(width: 6),
                                 const Text(
                                   'AI NHẬN DIỆN HIỆN TRƯỜNG',
@@ -392,62 +412,17 @@ class _ComposeScreenState extends State<ComposeScreen> {
                                     .map((t) => TagChip(tag: t))
                                     .toList(),
                               ),
-                              if (widget.controller.isDualComparison &&
-                                  widget.controller.latestComparison != null) ...[
-                                const SizedBox(height: 12),
-                                Container(
-                                  padding: const EdgeInsets.all(10),
-                                  decoration: BoxDecoration(
-                                    color: Colors.white,
-                                    borderRadius: BorderRadius.circular(12),
-                                    border: Border.all(color: const Color(0xFFFED7AA)),
-                                  ),
-                                  child: Column(
-                                    crossAxisAlignment: CrossAxisAlignment.start,
-                                    children: [
-                                      Row(
-                                        mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                                        children: [
-                                          const Text(
-                                            '📊 ĐỐI CHIẾU 2 MÔ HÌNH:',
-                                            style: TextStyle(
-                                              fontSize: 10,
-                                              fontWeight: FontWeight.w800,
-                                              color: Color(0xFF9A3412),
-                                            ),
-                                          ),
-                                          Container(
-                                            padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 2),
-                                            decoration: BoxDecoration(
-                                              color: const Color(0xFFDCFCE7),
-                                              borderRadius: BorderRadius.circular(6),
-                                            ),
-                                            child: const Text(
-                                              'Khớp 100%',
-                                              style: TextStyle(
-                                                fontSize: 9,
-                                                fontWeight: FontWeight.w800,
-                                                color: Color(0xFF166534),
-                                              ),
-                                            ),
-                                          ),
-                                        ],
-                                      ),
-                                      const SizedBox(height: 6),
-                                      Row(
-                                        mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                                        children: [
-                                          Text(
-                                            '⚡ ONNX: ${widget.controller.latestComparison!.durationMsOnnx}ms (${(widget.controller.latestComparison!.confOnnx * 100).toStringAsFixed(1)}%)',
-                                            style: const TextStyle(fontSize: 11, fontWeight: FontWeight.w700, color: Color(0xFF1F2937)),
-                                          ),
-                                          Text(
-                                            '📱 ExecuTorch: ${widget.controller.latestComparison!.durationMsPte}ms (${(widget.controller.latestComparison!.confPte * 100).toStringAsFixed(1)}%)',
-                                            style: const TextStyle(fontSize: 11, fontWeight: FontWeight.w700, color: Color(0xFF047857)),
-                                          ),
-                                        ],
-                                      ),
-                                    ],
+                              if (widget.controller.latestComparison !=
+                                  null) ...[
+                                const SizedBox(height: 10),
+                                Text(
+                                  'ONNX ${widget.controller.latestComparison!.durationMsOnnx} ms · '
+                                  'PTE ${widget.controller.latestComparison!.durationMsPte} ms · '
+                                  '${widget.controller.latestComparison!.isIdentical ? 'cùng nhãn' : 'khác nhãn'}',
+                                  style: const TextStyle(
+                                    fontSize: 11,
+                                    fontWeight: FontWeight.w700,
+                                    color: Color(0xFF9A3412),
                                   ),
                                 ),
                               ],
@@ -483,19 +458,25 @@ class _ComposeScreenState extends State<ComposeScreen> {
                           Text(
                             '1. Điền chính xác số lượng người cần hỗ trợ.',
                             style: TextStyle(
-                                color: Color(0xFF4B5563), fontSize: 12),
+                              color: Color(0xFF4B5563),
+                              fontSize: 12,
+                            ),
                           ),
                           SizedBox(height: 4),
                           Text(
                             '2. Chụp ảnh rõ toàn cảnh hiện trường.',
                             style: TextStyle(
-                                color: Color(0xFF4B5563), fontSize: 12),
+                              color: Color(0xFF4B5563),
+                              fontSize: 12,
+                            ),
                           ),
                           SizedBox(height: 4),
                           Text(
                             '3. Mô tả các địa điểm mốc gần nhất (ví dụ: gần nhà văn hóa, cây xăng...).',
                             style: TextStyle(
-                                color: Color(0xFF4B5563), fontSize: 12),
+                              color: Color(0xFF4B5563),
+                              fontSize: 12,
+                            ),
                           ),
                         ],
                       ),

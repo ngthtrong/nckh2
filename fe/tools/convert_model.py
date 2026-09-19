@@ -5,12 +5,13 @@ Run from the repository root:
 
 Optional:
     python tools/convert_model.py --checkpoint path/to/model_best.pth \
-        --output app/assets/models/model.onnx
+        --output "model/Edge Ai/flood_mobilenetv3_large.onnx"
 """
 
 from __future__ import annotations
 
 import argparse
+import hashlib
 import json
 from pathlib import Path
 from typing import Any
@@ -25,13 +26,15 @@ DEFAULT_CHECKPOINT = (
     ROOT
     / "model"
     / "models"
-    / "mobilenetv3_large_relabel"
-    / "flood_mobilenetv3_large_relabel_best.pth"
+    / "mobilenetv3_large_relabel_v2"
+    / "flood_mobilenetv3_large_relabel_v2_best.pth"
 )
 DEFAULT_CONFIG = (
-    ROOT / "model" / "models" / "mobilenetv3_large_relabel" / "config_mobilenetv3_large.json"
+    ROOT / "model" / "models" / "mobilenetv3_large_relabel_v2" / "config_mobilenetv3_large_v2.json"
 )
-DEFAULT_OUTPUT = ROOT / "app" / "assets" / "models" / "model.onnx"
+DEFAULT_OUTPUT_DIR = ROOT / "model" / "Edge Ai"
+DEFAULT_OUTPUT = DEFAULT_OUTPUT_DIR / "flood_mobilenetv3_large.onnx"
+DEFAULT_MANIFEST = DEFAULT_OUTPUT_DIR / "model_manifest.json"
 
 
 class ProbabilityModel(nn.Module):
@@ -78,11 +81,57 @@ def remove_module_prefix(state_dict: dict[str, torch.Tensor]) -> dict[str, torch
     }
 
 
+def sha256_file(path: Path) -> str:
+    digest = hashlib.sha256()
+    with path.open("rb") as file:
+        for chunk in iter(lambda: file.read(1024 * 1024), b""):
+            digest.update(chunk)
+    return digest.hexdigest()
+
+
+def update_manifest(
+    manifest_path: Path,
+    checkpoint_path: Path,
+    config: dict[str, Any],
+    onnx_path: Path,
+) -> dict[str, Any]:
+    """Record only artifacts exported from the same source checkpoint."""
+    checkpoint_sha = sha256_file(checkpoint_path)
+    manifest: dict[str, Any] = {}
+    if manifest_path.exists():
+        current = json.loads(manifest_path.read_text(encoding="utf-8"))
+        if current.get("checkpoint_sha256") == checkpoint_sha:
+            manifest = current
+
+    onnx_sha = sha256_file(onnx_path)
+    manifest.update({
+        "checkpoint_sha256": checkpoint_sha,
+        "onnx_sha256": onnx_sha,
+        "input_size": int(config.get("image_size", 224)),
+        "preprocess": "letterbox_rgb_124_116_104",
+        "letterbox_fill": list(config.get("letterbox_fill", [124, 116, 104])),
+        "class_order": config["class_order"],
+    })
+    hashes = [manifest.get("onnx_sha256"), manifest.get("pte_sha256")]
+    suffix = "-".join(value[:12] for value in hashes if value)
+    model_version = config.get("model_version", "v2")
+    manifest["version"] = f"mobilenetv3-{model_version}-{suffix}"
+    manifest["artifacts_complete"] = all(hashes)
+
+    manifest_path.parent.mkdir(parents=True, exist_ok=True)
+    manifest_path.write_text(
+        json.dumps(manifest, ensure_ascii=False, indent=2) + "\n",
+        encoding="utf-8",
+    )
+    return manifest
+
+
 def parse_args() -> argparse.Namespace:
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument("--checkpoint", type=Path, default=DEFAULT_CHECKPOINT)
     parser.add_argument("--config", type=Path, default=DEFAULT_CONFIG)
     parser.add_argument("--output", type=Path, default=DEFAULT_OUTPUT)
+    parser.add_argument("--manifest", type=Path, default=DEFAULT_MANIFEST)
     return parser.parse_args()
 
 
@@ -125,10 +174,13 @@ def main() -> None:
         dynamo=False,
     )
 
+    manifest = update_manifest(args.manifest, args.checkpoint, config, args.output)
+
     print(f"Exported: {args.output}")
     print(f"Classes ({len(class_order)}): {class_order}")
     print(f"Input: {tuple(sample.shape)}")
     print("Output: probabilities (softmax)")
+    print(f"Manifest: {args.manifest} ({manifest['version']})")
 
 
 if __name__ == "__main__":

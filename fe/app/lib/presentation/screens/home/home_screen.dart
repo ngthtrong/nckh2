@@ -86,10 +86,7 @@ class _HomeScreenState extends State<HomeScreen> {
           AppHeader(networkLabel: c.networkLabel),
 
           // SOS Section
-          SosButtonSection(
-            state: _sosState,
-            onPressed: _handleSos,
-          ),
+          SosButtonSection(state: _sosState, onPressed: _handleSos),
 
           // Compose CTA Card (Giữ nguyên kích thước như cũ)
           ComposeCtaCard(onPressed: widget.onComposePressed),
@@ -126,11 +123,7 @@ class _HomeScreenState extends State<HomeScreen> {
   }
 
   Widget _buildQuickEmergencyNumbers() {
-    final items = [
-      ('112', 'Cứu nạn'),
-      ('114', 'Cứu hỏa'),
-      ('115', 'Cấp cứu'),
-    ];
+    final items = [('112', 'Cứu nạn'), ('114', 'Cứu hỏa'), ('115', 'Cấp cứu')];
 
     return Row(
       children: items.map((c) {
@@ -216,7 +209,7 @@ class _HomeScreenState extends State<HomeScreen> {
                 value: c.isModelReady ? c.currentModel.badgeText : 'Đang nạp',
                 isGreen: c.isModelReady,
                 actionLabel: c.isModelReady
-                    ? 'Chạm để đổi (.onnx / .pte) · Chạy benchmark'
+                    ? 'Chạm để đổi ONNX/PTE và benchmark'
                     : 'Đang tải model on-device...',
                 onTap: () => AiModelSettingsSheet.show(context, c),
               ),
@@ -287,7 +280,9 @@ class _HomeScreenState extends State<HomeScreen> {
             height: 8,
             decoration: BoxDecoration(
               shape: BoxShape.circle,
-              color: isGreen ? const Color(0xFF16A34A) : const Color(0xFFEA580C),
+              color: isGreen
+                  ? const Color(0xFF16A34A)
+                  : const Color(0xFFEA580C),
             ),
           ),
       ],
