@@ -1,6 +1,13 @@
 $ErrorActionPreference = "Stop"
 $root = (Resolve-Path (Join-Path $PSScriptRoot "..\..")).Path
 
+Push-Location $root
+try {
+    $androidDiffBefore = (git diff --binary -- fe/app | Out-String)
+    $androidStatusBefore = (git status --porcelain=v1 --untracked-files=all -- fe/app | Out-String)
+}
+finally { Pop-Location }
+
 & (Join-Path $PSScriptRoot "test_backend.ps1")
 if ($LASTEXITCODE -ne 0) { exit $LASTEXITCODE }
 & (Join-Path $PSScriptRoot "export_web_model.ps1")
@@ -30,8 +37,11 @@ finally { Pop-Location }
 
 Push-Location $root
 try {
-    git diff --exit-code -- fe/app
-    if ($LASTEXITCODE -ne 0) { throw "Android source changed inside the isolated worktree." }
+    $androidDiffAfter = (git diff --binary -- fe/app | Out-String)
+    $androidStatusAfter = (git status --porcelain=v1 --untracked-files=all -- fe/app | Out-String)
+    if ($androidDiffAfter -ne $androidDiffBefore -or $androidStatusAfter -ne $androidStatusBefore) {
+        throw "Android source changed while the web verification was running."
+    }
 }
 finally { Pop-Location }
 
