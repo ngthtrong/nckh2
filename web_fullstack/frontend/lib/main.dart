@@ -8,4 +8,3 @@ Future<void> main() async {
   final controller = await RescueController.create();
   runApp(RescueApp(controller: controller));
 }
-
