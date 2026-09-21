@@ -1,17 +1,12 @@
-# flood_rescue_web
+# Flood Rescue Web
 
-Flood rescue web PWA with in-browser AI and offline reporting.
+This is the standalone Flutter Web/PWA interface for the flood rescue system. The app:
 
-## Getting Started
+- runs the ONNX model directly in Chrome with WebGPU and falls back to WASM;
+- captures an image and location after the user grants browser permissions;
+- stores reports in IndexedDB while offline and syncs automatically when the network returns;
+- sends real report data to the FastAPI backend without mocks or no-op adapters;
+- exposes the SMS flow only when the backend enables an SMS provider.
 
-This project is a starting point for a Flutter application.
-
-A few resources to get you started if this is your first Flutter project:
-
-- [Learn Flutter](https://docs.flutter.dev/get-started/learn-flutter)
-- [Write your first Flutter app](https://docs.flutter.dev/get-started/codelab)
-- [Flutter learning resources](https://docs.flutter.dev/reference/learning-resources)
-
-For help getting started with Flutter development, view the
-[online documentation](https://docs.flutter.dev/), which offers tutorials,
-samples, guidance on mobile development, and a full API reference.
+Never place API secrets in the frontend. Backend configuration and complete run instructions are in
+[`../README.md`](../README.md).

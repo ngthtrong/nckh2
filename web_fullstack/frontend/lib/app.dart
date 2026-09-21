@@ -1,7 +1,10 @@
+import 'dart:async';
+
 import 'package:flutter/material.dart';
 
 import 'controllers/rescue_controller.dart';
 import 'screens/home_screen.dart';
+import 'services/browser_online_events.dart';
 
 class RescueApp extends StatefulWidget {
   const RescueApp({super.key, required this.controller});
@@ -13,10 +16,21 @@ class RescueApp extends StatefulWidget {
 }
 
 class _RescueAppState extends State<RescueApp> {
+  StreamSubscription<void>? _onlineSubscription;
+
   @override
   void initState() {
     super.initState();
     widget.controller.initialize();
+    _onlineSubscription = browserOnlineEvents.listen((_) {
+      unawaited(widget.controller.retrySync());
+    });
+  }
+
+  @override
+  void dispose() {
+    _onlineSubscription?.cancel();
+    super.dispose();
   }
 
   @override
