@@ -6,6 +6,8 @@ from app.config import Settings, get_settings
 from app.database import ReportRepository
 from app.report_service import ReportService
 from app.routes.reports import router as reports_router
+from app.routes.sms import router as sms_router
+from app.sms import SmsService, TwilioSmsGateway
 
 
 def create_app(settings: Settings | None = None) -> FastAPI:
@@ -21,6 +23,12 @@ def create_app(settings: Settings | None = None) -> FastAPI:
         repository,
         resolved_settings.upload_dir,
         resolved_settings.max_image_bytes,
+    )
+    application.state.sms_service = SmsService(repository, resolved_settings)
+    application.state.sms_gateway = TwilioSmsGateway(
+        resolved_settings.twilio_account_sid,
+        resolved_settings.twilio_auth_token,
+        resolved_settings.twilio_from_number,
     )
     application.add_middleware(
         CORSMiddleware,
@@ -55,6 +63,7 @@ def create_app(settings: Settings | None = None) -> FastAPI:
         return Response(content=b"\0" * (64 * 1024), media_type="application/octet-stream")
 
     application.include_router(reports_router)
+    application.include_router(sms_router)
 
     return application
 
