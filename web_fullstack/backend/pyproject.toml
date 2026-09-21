@@ -1,0 +1,34 @@
+[build-system]
+requires = ["setuptools>=68"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "flood-rescue-web-backend"
+version = "0.1.0"
+description = "Standalone API for flood rescue web reports and guarded SMS dispatch."
+requires-python = ">=3.11"
+dependencies = [
+  "fastapi>=0.115,<1",
+  "httpx>=0.27,<1",
+  "pydantic-settings>=2.6,<3",
+  "python-multipart>=0.0.12,<1",
+  "twilio>=9.3,<10",
+  "uvicorn[standard]>=0.32,<1",
+]
+
+[project.optional-dependencies]
+dev = [
+  "pytest>=8.3,<9",
+  "pytest-cov>=6,<7",
+]
+
+[tool.pytest.ini_options]
+addopts = "-ra --basetemp=.pytest_tmp"
+testpaths = ["tests"]
+filterwarnings = [
+  "ignore:Using `httpx` with `starlette.testclient` is deprecated:starlette.exceptions.StarletteDeprecationWarning",
+  "ignore:The anyio.abc.BlockingPortal alias is deprecated:DeprecationWarning",
+]
+
+[tool.setuptools.packages.find]
+include = ["app*"]
