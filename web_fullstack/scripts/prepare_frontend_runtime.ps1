@@ -14,7 +14,16 @@ try {
         "ort-wasm-simd-threaded.jsep.mjs",
         "ort-wasm-simd-threaded.jsep.wasm"
     ) | ForEach-Object {
-        Copy-Item -LiteralPath (Join-Path $source $_) -Destination (Join-Path $target $_) -Force
+        $sourceFile = Join-Path $source $_
+        $targetFile = Join-Path $target $_
+        $needsCopy = -not (Test-Path -LiteralPath $targetFile)
+        if (-not $needsCopy) {
+            $needsCopy = (Get-FileHash -LiteralPath $sourceFile).Hash -ne `
+                (Get-FileHash -LiteralPath $targetFile).Hash
+        }
+        if ($needsCopy) {
+            Copy-Item -LiteralPath $sourceFile -Destination $targetFile -Force
+        }
     }
 }
 finally { Pop-Location }
