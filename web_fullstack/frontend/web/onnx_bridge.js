@@ -39,7 +39,7 @@
       if (typeof ort === "undefined") {
         throw new Error("ONNX Runtime Web was not loaded.");
       }
-      ort.env.wasm.wasmPaths = "vendor/ort/";
+      ort.env.wasm.wasmPaths = new URL("vendor/ort/", window.location.href).href;
       ort.env.wasm.numThreads = 1;
 
       const response = await fetch(manifestUrl, { cache: "force-cache" });
