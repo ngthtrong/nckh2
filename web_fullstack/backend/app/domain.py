@@ -39,3 +39,26 @@ class ReportRead(BaseModel):
     image_mime_type: str | None
     status: ReportStatus
 
+
+class SmsStatus(StrEnum):
+    pending = "pending"
+    queued = "queued"
+    sent = "sent"
+    delivered = "delivered"
+    failed = "failed"
+
+
+class SmsRequest(BaseModel):
+    recipient: str = Field(pattern=r"^\+[1-9][0-9]{7,14}$")
+    idempotency_key: str = Field(min_length=3, max_length=128, pattern=r"^[A-Za-z0-9+_.:-]+$")
+    confirmed: bool
+
+
+class SmsMessageRead(BaseModel):
+    id: str
+    report_id: str
+    recipient: str
+    provider_message_id: str | None
+    status: SmsStatus
+    created_at: str
+    updated_at: str
