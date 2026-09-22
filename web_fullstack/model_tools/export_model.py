@@ -21,11 +21,11 @@ DEFAULT_CHECKPOINT = REPOSITORY_ROOT / "fe" / "app" / "model.pth"
 DEFAULT_CONFIG = Path(__file__).resolve().with_name("model_config.json")
 DEFAULT_MODEL = (
     REPOSITORY_ROOT
-    / "web_fullstack"
-    / "frontend"
+    / "fe"
+    / "app"
     / "web"
     / "models"
-    / "flood_mobilenetv3_large.onnx"
+    / "model.onnx"
 )
 DEFAULT_MANIFEST = DEFAULT_MODEL.with_name("model_manifest.json")
 

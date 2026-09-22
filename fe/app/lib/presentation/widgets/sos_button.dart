@@ -22,14 +22,27 @@ class SosButtonSection extends StatefulWidget {
 class _SosButtonSectionState extends State<SosButtonSection>
     with SingleTickerProviderStateMixin {
   late AnimationController _animController;
+  late Animation<double> _scaleAnimation;
 
   @override
   void initState() {
     super.initState();
+
     _animController = AnimationController(
       vsync: this,
-      duration: const Duration(seconds: 2),
-    )..repeat();
+      duration: const Duration(milliseconds: 700),
+    );
+
+    _scaleAnimation = Tween<double>(
+      begin: 0.92,
+      end: 1.0,
+    ).animate(
+      CurvedAnimation(
+        parent: _animController,
+        curve: Curves.easeInOut,
+      ),
+    );
+    _animController.repeat(reverse: true);
   }
 
   @override
@@ -64,86 +77,97 @@ class _SosButtonSectionState extends State<SosButtonSection>
             ),
           ),
           const SizedBox(height: 18),
-          Stack(
-            alignment: Alignment.center,
-            children: [
-              if (widget.state == SosState.idle)
-                AnimatedBuilder(
-                  animation: _animController,
-                  builder: (context, child) {
-                    final value = _animController.value;
-                    return Container(
-                      width: 100 + (value * 30),
-                      height: 100 + (value * 30),
+          SizedBox(
+            width: 130,
+            height: 130,
+            child: Stack(
+              alignment: Alignment.center,
+              children: [
+                if (widget.state == SosState.idle)
+                  AnimatedBuilder(
+                    animation: _animController,
+                    builder: (context, child) {
+                      final value = _animController.value;
+                      return Container(
+                        width: 100 + (value * 30),
+                        height: 100 + (value * 30),
+                        decoration: BoxDecoration(
+                          shape: BoxShape.circle,
+                          color: AppColors.primaryRed.withValues(
+                            alpha: 0.25 * (1 - value),
+                          ),
+                        ),
+                      );
+                    },
+                  ),
+                ScaleTransition(
+                  scale: _scaleAnimation,
+                  child: GestureDetector(
+                    onTap: widget.onPressed,
+                    child: AnimatedContainer(
+                      duration: const Duration(milliseconds: 200),
+                      width: 120,
+                      height: 120,
                       decoration: BoxDecoration(
                         shape: BoxShape.circle,
-                        color: AppColors.primaryRed.withValues(
-                          alpha: 0.25 * (1 - value),
-                        ),
+                        color: widget.state == SosState.sent
+                            ? const Color(0xFF16A34A)
+                            : widget.state == SosState.pressed
+                                ? AppColors.primaryRedDark
+                                : AppColors.primaryRed,
+                        boxShadow: const [
+                          BoxShadow(
+                            color: Colors.black26,
+                            blurRadius: 12,
+                            offset: Offset(0, 6),
+                          ),
+                        ],
                       ),
-                    );
-                  },
-                ),
-              GestureDetector(
-                onTap: widget.onPressed,
-                child: AnimatedContainer(
-                  duration: const Duration(milliseconds: 200),
-                  width: 100,
-                  height: 100,
-                  decoration: BoxDecoration(
-                    shape: BoxShape.circle,
-                    color: widget.state == SosState.sent
-                        ? const Color(0xFF16A34A)
-                        : widget.state == SosState.pressed
-                        ? AppColors.primaryRedDark
-                        : AppColors.primaryRed,
-                    boxShadow: const [
-                      BoxShadow(
-                        color: Colors.black26,
-                        blurRadius: 12,
-                        offset: Offset(0, 6),
+                      child: Column(
+                        mainAxisAlignment: MainAxisAlignment.center,
+                        children: [
+                          if (widget.state == SosState.sent) ...[
+                            const Icon(
+                              Icons.check,
+                              color: Colors.white,
+                              size: 38,
+                            ),
+                            const SizedBox(height: 2),
+                            const Text(
+                              'Đã gửi!',
+                              style: TextStyle(
+                                color: Colors.white,
+                                fontSize: 12,
+                                fontWeight: FontWeight.w800,
+                              ),
+                            ),
+                          ] else ...[
+                            const Text(
+                              'SOS',
+                              style: TextStyle(
+                                color: Colors.white,
+                                fontSize: 30,
+                                fontWeight: FontWeight.w900,
+                                letterSpacing: 1.5,
+                              ),
+                            ),
+                            const SizedBox(height: 2),
+                            const Text(
+                              'Nhấn để gọi',
+                              style: TextStyle(
+                                color: Colors.white70,
+                                fontSize: 12,
+                                fontWeight: FontWeight.w600,
+                              ),
+                            ),
+                          ],
+                        ],
                       ),
-                    ],
-                  ),
-                  child: Column(
-                    mainAxisAlignment: MainAxisAlignment.center,
-                    children: [
-                      if (widget.state == SosState.sent) ...[
-                        const Icon(Icons.check, color: Colors.white, size: 38),
-                        const SizedBox(height: 2),
-                        const Text(
-                          'Đã gửi!',
-                          style: TextStyle(
-                            color: Colors.white,
-                            fontSize: 10,
-                            fontWeight: FontWeight.w800,
-                          ),
-                        ),
-                      ] else ...[
-                        const Text(
-                          'SOS',
-                          style: TextStyle(
-                            color: Colors.white,
-                            fontSize: 30,
-                            fontWeight: FontWeight.w900,
-                            letterSpacing: 1.5,
-                          ),
-                        ),
-                        const SizedBox(height: 2),
-                        const Text(
-                          'Nhấn để gọi',
-                          style: TextStyle(
-                            color: Colors.white70,
-                            fontSize: 10,
-                            fontWeight: FontWeight.w600,
-                          ),
-                        ),
-                      ],
-                    ],
+                    ),
                   ),
                 ),
-              ),
-            ],
+              ],
+            ),
           ),
           if (widget.state == SosState.sent) ...[
             const SizedBox(height: 12),

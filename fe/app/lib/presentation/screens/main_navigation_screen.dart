@@ -12,6 +12,7 @@ import 'settings/settings_screen.dart';
 import 'submitted/submitted_screen.dart';
 
 enum AppViewMode { tabs, compose, submitted }
+
 enum AuthViewMode { login, register }
 
 class MainNavigationScreen extends StatefulWidget {
@@ -37,6 +38,13 @@ class _MainNavigationScreenState extends State<MainNavigationScreen> {
 
   void _onControllerChange() {
     if (mounted) setState(() {});
+  }
+
+  void _returnToTabs() {
+    setState(() {
+      _viewMode = AppViewMode.tabs;
+      _currentTab = 0;
+    });
   }
 
   @override
@@ -71,22 +79,31 @@ class _MainNavigationScreenState extends State<MainNavigationScreen> {
 
     // 2. Compose Flow
     if (_viewMode == AppViewMode.compose) {
-      return ComposeScreen(
-        controller: widget.controller,
-        onBack: () => setState(() => _viewMode = AppViewMode.tabs),
-        onSuccess: () => setState(() => _viewMode = AppViewMode.submitted),
+      return PopScope(
+        canPop: false,
+        onPopInvokedWithResult: (didPop, result) {
+          if (!didPop) _returnToTabs();
+        },
+        child: ComposeScreen(
+          controller: widget.controller,
+          onBack: _returnToTabs,
+          onSuccess: () => setState(() => _viewMode = AppViewMode.submitted),
+        ),
       );
     }
 
     // 3. Submitted Flow
     if (_viewMode == AppViewMode.submitted &&
         widget.controller.lastSubmittedPost != null) {
-      return SubmittedScreen(
-        record: widget.controller.lastSubmittedPost!,
-        onHomePressed: () => setState(() {
-          _viewMode = AppViewMode.tabs;
-          _currentTab = 0;
-        }),
+      return PopScope(
+        canPop: false,
+        onPopInvokedWithResult: (didPop, result) {
+          if (!didPop) _returnToTabs();
+        },
+        child: SubmittedScreen(
+          record: widget.controller.lastSubmittedPost!,
+          onHomePressed: _returnToTabs,
+        ),
       );
     }
 
@@ -100,10 +117,11 @@ class _MainNavigationScreenState extends State<MainNavigationScreen> {
           children: [
             HomeScreen(
               controller: widget.controller,
-              onComposePressed: () => setState(() => _viewMode = AppViewMode.compose),
+              onComposePressed: () =>
+                  setState(() => _viewMode = AppViewMode.compose),
             ),
-            HistoryScreen(controller: widget.controller),
             const GuideScreen(),
+            HistoryScreen(controller: widget.controller),
             SettingsScreen(
               controller: widget.controller,
               onGoAuth: () => setState(() => _authMode = AuthViewMode.login),
@@ -117,20 +135,26 @@ class _MainNavigationScreenState extends State<MainNavigationScreen> {
         type: BottomNavigationBarType.fixed,
         selectedItemColor: AppColors.primaryRed,
         unselectedItemColor: const Color(0xFF9CA3AF),
-        selectedLabelStyle: const TextStyle(fontWeight: FontWeight.w800, fontSize: 12),
-        unselectedLabelStyle: const TextStyle(fontWeight: FontWeight.w600, fontSize: 12),
+        selectedLabelStyle: const TextStyle(
+          fontWeight: FontWeight.w800,
+          fontSize: 12,
+        ),
+        unselectedLabelStyle: const TextStyle(
+          fontWeight: FontWeight.w600,
+          fontSize: 12,
+        ),
         items: const [
           BottomNavigationBarItem(
             icon: Icon(Icons.home_rounded),
             label: 'Trang chủ',
           ),
           BottomNavigationBarItem(
-            icon: Icon(Icons.history_rounded),
-            label: 'Lịch sử',
-          ),
-          BottomNavigationBarItem(
             icon: Icon(Icons.menu_book_rounded),
             label: 'Hướng dẫn',
+          ),
+          BottomNavigationBarItem(
+            icon: Icon(Icons.history_rounded),
+            label: 'Lịch sử',
           ),
           BottomNavigationBarItem(
             icon: Icon(Icons.settings_rounded),
