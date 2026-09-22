@@ -2,16 +2,17 @@ import 'dart:typed_data';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:app/domain/entities/ai_model_type.dart';
 import 'package:app/domain/repositories/inference_repository.dart';
-import 'package:app/data/datasources/inference_local_datasource.dart';
+import 'package:app/data/datasources/inference/inference_data_source.dart';
+import 'package:app/data/datasources/inference/inference_data_source_factory.dart';
 import 'package:app/data/repositories/inference_repository_impl.dart';
 
 void main() {
   group('InferenceRepository & AI Model Settings Test', () {
-    late InferenceLocalDataSource dataSource;
+    late InferenceDataSource dataSource;
     late InferenceRepository repository;
 
     setUp(() {
-      dataSource = InferenceLocalDataSource();
+      dataSource = createInferenceDataSource();
       repository = InferenceRepositoryImpl(dataSource);
     });
 

@@ -9,11 +9,14 @@ import 'package:flutter/services.dart';
 import 'package:onnxruntime/onnxruntime.dart';
 import 'package:path_provider/path_provider.dart';
 
-import '../../domain/entities/ai_model_type.dart';
-import '../../domain/entities/ai_tag.dart';
-import '../../domain/repositories/inference_repository.dart';
+import '../../../domain/entities/ai_model_type.dart';
+import '../../../domain/entities/ai_tag.dart';
+import '../../../domain/repositories/inference_repository.dart';
+import 'inference_data_source.dart';
 
-class InferenceLocalDataSource {
+InferenceDataSource createInferenceDataSource() => InferenceNativeDataSource();
+
+class InferenceNativeDataSource implements InferenceDataSource {
   static const int _inputSize = 224;
   static const _mean = [0.485, 0.456, 0.406];
   static const _std = [0.229, 0.224, 0.225];
@@ -27,12 +30,22 @@ class InferenceLocalDataSource {
   bool _isDualComparison = false;
   ModelBenchmarkComparison? _latestComparison;
 
+  @override
   bool get ready => _isLoaded;
+
+  @override
   bool get pteReady => _pteReady;
+
+  @override
   AiModelType get currentModel => _currentModel;
+
+  @override
   bool get isDualComparison => _isDualComparison;
+
+  @override
   ModelBenchmarkComparison? get latestComparison => _latestComparison;
 
+  @override
   void setModel(AiModelType model) {
     if (model == AiModelType.pte && !_pteReady) {
       debugPrint('ExecuTorch is unavailable; keeping ONNX active.');
@@ -42,11 +55,13 @@ class InferenceLocalDataSource {
     _latestComparison = null;
   }
 
+  @override
   void setDualComparison(bool enabled) {
     _isDualComparison = enabled && _pteReady;
     _latestComparison = null;
   }
 
+  @override
   Future<void> loadModel() async {
     try {
       OrtEnv.instance.init();
@@ -156,6 +171,7 @@ class InferenceLocalDataSource {
     return output?.scores;
   }
 
+  @override
   Future<InferenceResult?> classifyImage(Uint8List imageBytes) async {
     try {
       final rgba = await _letterboxRgba(imageBytes);
@@ -367,6 +383,7 @@ class InferenceLocalDataSource {
     }
   }
 
+  @override
   List<AiTag> generateAiTags(String? label, double? confidence) {
     if (label == null || confidence == null) return [];
     return [AiTag(label: _translateLabel(label), confidence: confidence)];

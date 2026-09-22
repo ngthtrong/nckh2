@@ -3,10 +3,10 @@ import 'dart:typed_data';
 import '../../domain/entities/ai_model_type.dart';
 import '../../domain/entities/ai_tag.dart';
 import '../../domain/repositories/inference_repository.dart';
-import '../datasources/inference_local_datasource.dart';
+import '../datasources/inference/inference_data_source.dart';
 
 class InferenceRepositoryImpl implements InferenceRepository {
-  final InferenceLocalDataSource dataSource;
+  final InferenceDataSource dataSource;
 
   InferenceRepositoryImpl(this.dataSource);
 
