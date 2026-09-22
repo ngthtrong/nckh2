@@ -1,5 +1,4 @@
 import 'dart:async';
-import 'dart:io';
 
 import 'package:connectivity_plus/connectivity_plus.dart';
 import 'package:flutter/foundation.dart';
@@ -11,6 +10,7 @@ import 'package:permission_handler/permission_handler.dart';
 import '../../data/datasources/user_local_datasource.dart';
 import '../../domain/entities/ai_model_type.dart';
 import '../../domain/entities/ai_tag.dart';
+import '../../domain/entities/rescue_image.dart';
 import '../../domain/entities/rescue_record.dart';
 import '../../domain/entities/user.dart';
 import '../../domain/usecases/analyze_image_usecase.dart';
@@ -219,7 +219,7 @@ class AppController extends ChangeNotifier {
     required int injuredCount,
     required List<String> vulnerableGroups,
     required String description,
-    required String? imagePath,
+    required RescueImage? image,
     required List<AiTag> aiTags,
   }) async {
     if (isBusy) return null;
@@ -230,8 +230,7 @@ class AppController extends ChangeNotifier {
       final record = await _submitRescuePostUseCase(
         lat: currentLat,
         lng: currentLng,
-        imagePath: imagePath,
-        images: imagePath != null ? [imagePath] : [],
+        image: image,
         aiTags: aiTags,
         trappedCount: trappedCount,
         injuredCount: injuredCount,
@@ -250,16 +249,15 @@ class AppController extends ChangeNotifier {
     }
   }
 
-  Future<List<AiTag>> analyzeImage(String imagePath) async {
+  Future<List<AiTag>> analyzeImage(RescueImage image) async {
     try {
-      final bytes = await File(imagePath).readAsBytes();
-      return await _analyzeImageUseCase(bytes);
+      return await _analyzeImageUseCase(image.bytes);
     } catch (_) {
       return [];
     }
   }
 
-  Future<String?> pickImage({required ImageSource source}) async {
+  Future<RescueImage?> pickImage({required ImageSource source}) async {
     try {
       final picked = await _picker.pickImage(
         source: source,
@@ -267,10 +265,27 @@ class AppController extends ChangeNotifier {
         maxHeight: 1200,
         imageQuality: 80,
       );
-      return picked?.path;
+      if (picked == null) return null;
+      return RescueImage(
+        bytes: await picked.readAsBytes(),
+        fileName: picked.name,
+        mimeType: _imageMimeType(picked.name),
+      );
     } catch (_) {
       return null;
     }
+  }
+
+  String _imageMimeType(String fileName) {
+    final extension = fileName.split('.').last.toLowerCase();
+    return switch (extension) {
+      'png' => 'image/png',
+      'webp' => 'image/webp',
+      'gif' => 'image/gif',
+      'heic' => 'image/heic',
+      'heif' => 'image/heif',
+      _ => 'image/jpeg',
+    };
   }
 
   Future<InferenceResult?> testModelBenchmark() async {

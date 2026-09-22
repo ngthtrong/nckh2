@@ -1,5 +1,6 @@
 import 'package:hive_ce_flutter/hive_flutter.dart';
 import '../../domain/entities/ai_tag.dart';
+import '../../domain/entities/rescue_image.dart';
 import '../../domain/entities/rescue_record.dart';
 
 class RecordLocalDataSource {
@@ -19,8 +20,7 @@ class RecordLocalDataSource {
       'createdAtMs': record.createdAt.millisecondsSinceEpoch,
       'lat': record.lat,
       'lng': record.lng,
-      'imagePath': record.imagePath,
-      'images': record.images,
+      'image': record.image?.toMap(),
       'aiLabel': record.aiLabel,
       'aiConfidence': record.aiConfidence,
       'aiTags': record.aiTags.map((e) => e.toJson()).toList(),
@@ -53,13 +53,11 @@ class RecordLocalDataSource {
         vulnerable = rawVulnerable.map((e) => e.toString()).toList();
       }
 
-      final rawImages = m['images'] as List?;
-      List<String> images = [];
-      if (rawImages != null) {
-        images = rawImages.map((e) => e.toString()).toList();
-      }
+      final rawImage = m['image'];
+      final image = rawImage is Map ? RescueImage.fromMap(rawImage) : null;
 
-      final createdAtMs = (m['createdAtMs'] as num?)?.toInt() ??
+      final createdAtMs =
+          (m['createdAtMs'] as num?)?.toInt() ??
           DateTime.now().millisecondsSinceEpoch;
 
       return RescueRecord(
@@ -67,8 +65,7 @@ class RecordLocalDataSource {
         createdAt: DateTime.fromMillisecondsSinceEpoch(createdAtMs),
         lat: (m['lat'] as num?)?.toDouble() ?? 10.7769,
         lng: (m['lng'] as num?)?.toDouble() ?? 106.7009,
-        imagePath: m['imagePath'] as String?,
-        images: images,
+        image: image,
         aiLabel: m['aiLabel'] as String?,
         aiConfidence: (m['aiConfidence'] as num?)?.toDouble(),
         aiTags: tags,

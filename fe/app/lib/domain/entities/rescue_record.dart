@@ -1,12 +1,12 @@
 import 'ai_tag.dart';
+import 'rescue_image.dart';
 
 class RescueRecord {
   final String id;
   final DateTime createdAt;
   final double lat;
   final double lng;
-  final String? imagePath;
-  final List<String> images;
+  final RescueImage? image;
   final String? aiLabel;
   final double? aiConfidence;
   final List<AiTag> aiTags;
@@ -23,8 +23,7 @@ class RescueRecord {
     required this.createdAt,
     required this.lat,
     required this.lng,
-    this.imagePath,
-    this.images = const [],
+    this.image,
     this.aiLabel,
     this.aiConfidence,
     this.aiTags = const [],
@@ -42,8 +41,7 @@ class RescueRecord {
     DateTime? createdAt,
     double? lat,
     double? lng,
-    String? imagePath,
-    List<String>? images,
+    RescueImage? image,
     String? aiLabel,
     double? aiConfidence,
     List<AiTag>? aiTags,
@@ -60,8 +58,7 @@ class RescueRecord {
       createdAt: createdAt ?? this.createdAt,
       lat: lat ?? this.lat,
       lng: lng ?? this.lng,
-      imagePath: imagePath ?? this.imagePath,
-      images: images ?? this.images,
+      image: image ?? this.image,
       aiLabel: aiLabel ?? this.aiLabel,
       aiConfidence: aiConfidence ?? this.aiConfidence,
       aiTags: aiTags ?? this.aiTags,

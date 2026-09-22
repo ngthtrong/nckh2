@@ -1,9 +1,9 @@
-import 'dart:io';
 import 'package:flutter/material.dart';
 import 'package:image_picker/image_picker.dart';
 
 import '../../../core/constants/app_colors.dart';
 import '../../../domain/entities/ai_tag.dart';
+import '../../../domain/entities/rescue_image.dart';
 import '../../controllers/app_controller.dart';
 import '../../widgets/number_stepper_input.dart';
 import '../../widgets/screen_header.dart';
@@ -32,20 +32,20 @@ class _ComposeScreenState extends State<ComposeScreen> {
   List<String> _vulnerableGroups = [];
   final TextEditingController _descController = TextEditingController();
 
-  String? _imagePath;
+  RescueImage? _image;
   List<AiTag> _aiTags = [];
   bool _isAnalyzing = false;
   bool _isSubmitting = false;
 
   Future<void> _pickPhoto(ImageSource source) async {
-    final path = await widget.controller.pickImage(source: source);
-    if (path != null) {
+    final image = await widget.controller.pickImage(source: source);
+    if (image != null) {
       setState(() {
-        _imagePath = path;
+        _image = image;
         _isAnalyzing = true;
       });
 
-      final tags = await widget.controller.analyzeImage(path);
+      final tags = await widget.controller.analyzeImage(image);
       if (mounted) {
         setState(() {
           _aiTags = tags;
@@ -64,7 +64,7 @@ class _ComposeScreenState extends State<ComposeScreen> {
       injuredCount: _injuredCount,
       vulnerableGroups: _vulnerableGroups,
       description: _descController.text.trim(),
-      imagePath: _imagePath,
+      image: _image,
       aiTags: _aiTags,
     );
 
@@ -89,7 +89,7 @@ class _ComposeScreenState extends State<ComposeScreen> {
             _injuredCount > 0 ||
             _vulnerableGroups.isNotEmpty ||
             _descController.text.trim().isNotEmpty ||
-            _imagePath != null) &&
+            _image != null) &&
         !_isSubmitting;
 
     return Scaffold(
@@ -311,14 +311,14 @@ class _ComposeScreenState extends State<ComposeScreen> {
                         ),
                       ],
                     ),
-                    if (_imagePath != null) ...[
+                    if (_image != null) ...[
                       const SizedBox(height: 12),
                       Stack(
                         children: [
                           ClipRRect(
                             borderRadius: BorderRadius.circular(16),
-                            child: Image.file(
-                              File(_imagePath!),
+                            child: Image.memory(
+                              _image!.bytes,
                               height: 160,
                               width: double.infinity,
                               fit: BoxFit.cover,
@@ -329,7 +329,7 @@ class _ComposeScreenState extends State<ComposeScreen> {
                             right: 8,
                             child: GestureDetector(
                               onTap: () => setState(() {
-                                _imagePath = null;
+                                _image = null;
                                 _aiTags = [];
                               }),
                               child: Container(
