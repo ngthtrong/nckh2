@@ -18,9 +18,7 @@ class ScreenHeader extends StatelessWidget {
       padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
       decoration: const BoxDecoration(
         color: Colors.white,
-        border: Border(
-          bottom: BorderSide(color: Color(0xFFF3F4F6), width: 1),
-        ),
+        border: Border(bottom: BorderSide(color: Color(0xFFF3F4F6), width: 1)),
       ),
       child: Row(
         children: [
@@ -38,7 +36,7 @@ class ScreenHeader extends StatelessWidget {
               ),
             ),
           ),
-          if (action != null) action!,
+          ?action,
         ],
       ),
     );
