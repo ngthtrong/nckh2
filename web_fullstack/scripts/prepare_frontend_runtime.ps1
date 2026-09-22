@@ -1,11 +1,13 @@
 $ErrorActionPreference = "Stop"
-$frontendDir = (Resolve-Path (Join-Path $PSScriptRoot "..\frontend")).Path
-Push-Location $frontendDir
+$root = (Resolve-Path (Join-Path $PSScriptRoot "..\..")).Path
+$appDir = (Resolve-Path (Join-Path $root "fe\app")).Path
+$runtimeDir = (Resolve-Path (Join-Path $appDir "web_runtime")).Path
+Push-Location $runtimeDir
 try {
-    npm install
+    npm ci
     if ($LASTEXITCODE -ne 0) { exit $LASTEXITCODE }
-    $source = Join-Path $frontendDir "node_modules\onnxruntime-web\dist"
-    $target = Join-Path $frontendDir "web\vendor\ort"
+    $source = Join-Path $runtimeDir "node_modules\onnxruntime-web\dist"
+    $target = Join-Path $appDir "web\vendor\ort"
     New-Item -ItemType Directory -Force -Path $target | Out-Null
     @(
         "ort.all.min.js",

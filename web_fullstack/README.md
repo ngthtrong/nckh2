@@ -1,11 +1,11 @@
 # NCKH Flood Rescue — Web Full-stack
 
-Đây là phiên bản web/backend được tách riêng hoàn toàn. Source Android chính vẫn nằm tại `fe/app` và không được import hoặc chỉnh sửa bởi phần mới.
+Frontend Android và Chrome dùng chung một Flutter package tại `fe/app`. Mọi chỉnh sửa giao diện chỉ thực hiện trong `fe/app/lib/presentation`; backend và công cụ model vẫn nằm trong `web_fullstack`.
 
 ## Cấu trúc
 
 - `backend/`: FastAPI, SQLite, lưu ảnh và tích hợp Twilio có kiểm soát.
-- `frontend/`: Flutter Web/PWA chạy AI ONNX trực tiếp trong Chrome, lưu offline và đồng bộ báo cáo.
+- `../fe/app/`: UI Flutter dùng chung, ONNX native/PTE trên Android và ONNX Runtime Web trên Chrome.
 - `model_tools/`: công cụ xuất checkpoint PyTorch sang ONNX cho trình duyệt.
 - `scripts/`: lệnh kiểm thử và chạy từng thành phần.
 - `DESIGN.md`: kiến trúc, giới hạn nền tảng và tiêu chí hoàn thành.
@@ -26,7 +26,7 @@ Sau đó mở `http://127.0.0.1:8080`. Backend chạy tại `http://127.0.0.1:80
 powershell -ExecutionPolicy Bypass -File web_fullstack/scripts/verify.ps1
 ```
 
-Script kiểm tra backend, parity/export ONNX, Flutter tests, analyzer, release build, artifact PWA và xác nhận `fe/app` không bị thay đổi.
+Script kiểm tra backend, parity/export ONNX, Flutter tests, analyzer, APK debug và Web release từ cùng `fe/app`.
 
 ## API key cần điền sau
 
