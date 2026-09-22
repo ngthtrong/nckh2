@@ -54,10 +54,43 @@ class _HomeScreenState extends State<HomeScreen> {
     if (_sosState != SosState.idle) return;
     setState(() => _sosState = SosState.pressed);
 
-    await widget.controller.sendSos();
+    var sendSmsConfirmed = false;
+    if (widget.controller.smsAvailable && mounted) {
+      final recipient = widget.controller.smsCapabilities.recipient ?? '';
+      final maskedRecipient = recipient.length <= 4
+          ? recipient
+          : '${'•' * (recipient.length - 4)}${recipient.substring(recipient.length - 4)}';
+      sendSmsConfirmed =
+          await showDialog<bool>(
+            context: context,
+            builder: (context) => AlertDialog(
+              title: const Text('Xác nhận gửi SMS'),
+              content: Text(
+                'Gửi cảnh báo tới $maskedRecipient? Nhà cung cấp SMS có thể tính phí cho tin nhắn này.',
+              ),
+              actions: [
+                TextButton(
+                  onPressed: () => Navigator.pop(context, false),
+                  child: const Text('Chỉ gửi báo cáo'),
+                ),
+                FilledButton(
+                  onPressed: () => Navigator.pop(context, true),
+                  child: const Text('Gửi báo cáo + SMS'),
+                ),
+              ],
+            ),
+          ) ??
+          false;
+    }
+
+    final record = await widget.controller.sendSos(
+      sendSmsConfirmed: sendSmsConfirmed,
+    );
 
     if (mounted) {
-      setState(() => _sosState = SosState.sent);
+      setState(
+        () => _sosState = record == null ? SosState.idle : SosState.sent,
+      );
       Future.delayed(const Duration(seconds: 3), () {
         if (mounted) {
           setState(() => _sosState = SosState.idle);
@@ -86,7 +119,11 @@ class _HomeScreenState extends State<HomeScreen> {
           AppHeader(networkLabel: c.networkLabel),
 
           // SOS Section
-          SosButtonSection(state: _sosState, onPressed: _handleSos),
+          SosButtonSection(
+            state: _sosState,
+            onPressed: _handleSos,
+            statusMessage: c.statusMessage,
+          ),
 
           // Compose CTA Card (Giữ nguyên kích thước như cũ)
           ComposeCtaCard(onPressed: widget.onComposePressed),

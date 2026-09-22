@@ -7,6 +7,10 @@ class RecordLocalDataSource {
   static const String boxName = 'records';
   Box<Map>? _box;
 
+  RecordLocalDataSource();
+
+  RecordLocalDataSource.withBox(Box<Map> box) : _box = box;
+
   Future<void> init() async {
     await Hive.initFlutter();
     _box = await Hive.openBox<Map>(boxName);
@@ -31,6 +35,7 @@ class RecordLocalDataSource {
       'sendMode': record.sendMode,
       'synced': record.synced,
       'status': record.status,
+      'lastError': record.lastError,
     };
     await _box?.put(record.id, map);
   }
@@ -76,6 +81,7 @@ class RecordLocalDataSource {
         sendMode: m['sendMode'] as String? ?? m['mode'] as String? ?? 'direct',
         synced: m['synced'] as bool? ?? (m['status'] == 'sent'),
         status: m['status'] as String? ?? 'processing',
+        lastError: m['lastError'] as String?,
       );
     }).toList();
 

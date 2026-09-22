@@ -1,86 +1,125 @@
 import 'dart:convert';
+import 'dart:typed_data';
+
 import 'package:dio/dio.dart';
-import 'package:flutter/services.dart';
-import 'package:flutter_image_compress/flutter_image_compress.dart';
 
 import '../../config.dart';
+import '../../domain/entities/rescue_image.dart';
 import '../../domain/entities/rescue_record.dart';
+import 'image/image_compressor.dart';
+import 'image/image_compressor_factory.dart';
 
-typedef UploadResult = ({bool ok, int bytesSent, int durationMs});
+typedef UploadResult = ({
+  bool ok,
+  int bytesSent,
+  int durationMs,
+  String? error,
+});
+
+enum UploadImageMode { original, compressed, textOnly }
 
 class SenderRemoteDataSource {
-  static const _smsChannel = MethodChannel('rescue/sms');
+  SenderRemoteDataSource({Dio? dio, ImageCompressor? imageCompressor})
+    : _dio =
+          dio ??
+          Dio(
+            BaseOptions(
+              baseUrl: kServerBaseUrl,
+              connectTimeout: const Duration(seconds: 10),
+              sendTimeout: const Duration(seconds: 60),
+              receiveTimeout: const Duration(seconds: 30),
+            ),
+          ),
+      _imageCompressor = imageCompressor ?? createImageCompressor();
 
-  final Dio _dio = Dio(BaseOptions(
-    connectTimeout: const Duration(seconds: 10),
-    sendTimeout: const Duration(seconds: 60),
-    receiveTimeout: const Duration(seconds: 30),
-  ));
+  final Dio _dio;
+  final ImageCompressor _imageCompressor;
 
-  Future<UploadResult> upload(RescueRecord rec, Uint8List? jpeg) async {
-    final meta = jsonEncode({
-      'id': rec.id,
-      'createdAt': rec.createdAt.toIso8601String(),
-      'lat': rec.lat,
-      'lng': rec.lng,
-      'trappedCount': rec.trappedCount,
-      'injuredCount': rec.injuredCount,
-      'vulnerableGroups': rec.vulnerableGroups,
-      'description': rec.description,
-      'aiTags': rec.aiTags.map((e) => e.toJson()).toList(),
-      'sendMode': rec.sendMode,
-    });
-    final sw = Stopwatch()..start();
-    final form = FormData.fromMap({
-      'meta': meta,
-      if (jpeg != null)
-        'image': MultipartFile.fromBytes(jpeg, filename: '${rec.id}.jpg'),
-    });
-    var bytesSent = meta.length;
+  Future<UploadResult> upload(
+    RescueRecord record,
+    Uint8List? imageBytes,
+  ) async {
+    final stopwatch = Stopwatch()..start();
     try {
-      bytesSent = form.length;
-    } catch (_) {}
-    try {
-      await _dio.post('$kServerBaseUrl/api/reports', data: form);
-      sw.stop();
+      final throughput = await _measureBytesPerSecond();
+      final mode = _selectMode(
+        bytesPerSecond: throughput,
+        hasImage: imageBytes != null,
+      );
+      RescueImage? uploadImage;
+      if (mode == UploadImageMode.original && record.image != null) {
+        uploadImage = record.image;
+      } else if (mode == UploadImageMode.compressed && imageBytes != null) {
+        uploadImage = await _imageCompressor.compress(imageBytes);
+      }
+
+      final fields = <String, dynamic>{
+        'report_id': record.id,
+        'created_at': record.createdAt.toUtc().toIso8601String(),
+        'description': record.description,
+        'trapped_count': record.trappedCount,
+        'injured_count': record.injuredCount,
+        'vulnerable_groups': jsonEncode(record.vulnerableGroups),
+        if (record.aiLabel != null) 'ai_label': record.aiLabel,
+        if (record.aiConfidence != null) 'ai_confidence': record.aiConfidence,
+        'latitude': record.lat,
+        'longitude': record.lng,
+        if (uploadImage != null)
+          'image': MultipartFile.fromBytes(
+            uploadImage.bytes,
+            filename: uploadImage.fileName,
+            contentType: DioMediaType.parse(uploadImage.mimeType),
+          ),
+      };
+      final form = FormData.fromMap(fields);
+      final response = await _dio.post<Map<String, dynamic>>(
+        '/api/reports',
+        data: form,
+      );
+      if (response.data?['id'] != record.id) {
+        throw StateError('Backend trả về report ID không khớp.');
+      }
+      stopwatch.stop();
       return (
         ok: true,
-        bytesSent: jpeg != null ? bytesSent + jpeg.length : bytesSent,
-        durationMs: sw.elapsedMilliseconds,
+        bytesSent: form.length,
+        durationMs: stopwatch.elapsedMilliseconds,
+        error: null,
       );
-    } catch (_) {
-      sw.stop();
-      return (ok: false, bytesSent: 0, durationMs: sw.elapsedMilliseconds);
+    } catch (error) {
+      stopwatch.stop();
+      return (
+        ok: false,
+        bytesSent: 0,
+        durationMs: stopwatch.elapsedMilliseconds,
+        error: 'Không thể gửi báo cáo: $error',
+      );
     }
   }
 
-  Future<Uint8List?> compress(
-    Uint8List src, {
-    int quality = kCompressQualityMedium,
-    int maxSide = kCompressMaxSideMedium,
-  }) async {
-    try {
-      return await FlutterImageCompress.compressWithList(
-        src,
-        minWidth: maxSide,
-        minHeight: maxSide,
-        quality: quality,
-        format: CompressFormat.jpeg,
-      );
-    } catch (_) {
-      return null;
+  Future<double> _measureBytesPerSecond() async {
+    final stopwatch = Stopwatch()..start();
+    final response = await _dio.get<List<int>>(
+      '/probe',
+      options: Options(responseType: ResponseType.bytes),
+    );
+    stopwatch.stop();
+    final length = response.data?.length ?? 0;
+    final seconds =
+        stopwatch.elapsedMicroseconds / Duration.microsecondsPerSecond;
+    return seconds <= 0 ? double.infinity : length / seconds;
+  }
+
+  UploadImageMode _selectMode({
+    required double bytesPerSecond,
+    required bool hasImage,
+  }) {
+    if (!hasImage || bytesPerSecond < 32 * 1024) {
+      return UploadImageMode.textOnly;
     }
-  }
-
-  Future<void> sendSms(String to, String body) async {
-    await _smsChannel.invokeMethod<bool>('sendSms', {'to': to, 'body': body});
-  }
-
-  String smsBody(RescueRecord r) {
-    final pos = '${r.lat.toStringAsFixed(5)},${r.lng.toStringAsFixed(5)}';
-    final vulnerable = r.vulnerableGroups.join(',');
-    return 'SOS|pos:$pos|trapped:${r.trappedCount}|injured:${r.injuredCount}'
-        '${vulnerable.isNotEmpty ? '|vuln:$vulnerable' : ''}'
-        '${r.description.isNotEmpty ? '|note:${r.description}' : ''}';
+    if (bytesPerSecond < 256 * 1024) {
+      return UploadImageMode.compressed;
+    }
+    return UploadImageMode.original;
   }
 }

@@ -3,10 +3,19 @@ library;
 
 /// Base URL server. `10.0.2.2` = loopback của máy tính khi chạy emulator Android.
 /// Đổi thành IP LAN/VPN thật khi test trên máy vật lý hoặc deploy.
-const String kServerBaseUrl = 'http://10.0.2.2:8000';
+const String kServerBaseUrl = String.fromEnvironment(
+  'API_BASE_URL',
+  defaultValue: 'http://10.0.2.2:8000',
+);
 
 /// Số tổng đài nhận SMS fallback — BẮT BUỘC thay bằng số thật.
 const String kEmergencyPhone = '+840000000000';
+
+/// Số nhận SMS thật. Truyền bằng `--dart-define=SMS_RECIPIENT=+84...`.
+const String kSmsRecipient = String.fromEnvironment(
+  'SMS_RECIPIENT',
+  defaultValue: kEmergencyPhone,
+);
 
 /// Probe throughput: server cần phục vụ 1 file tĩnh ~64KB tại đường dẫn này.
 const String kProbeUrl = '$kServerBaseUrl/probe';
