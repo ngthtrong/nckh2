@@ -3,10 +3,10 @@ import 'dart:async';
 import 'package:connectivity_plus/connectivity_plus.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/services.dart';
-import 'package:geolocator/geolocator.dart';
 import 'package:image_picker/image_picker.dart';
-import 'package:permission_handler/permission_handler.dart';
 
+import '../../data/datasources/location/location_data_source.dart';
+import '../../data/datasources/sync/platform_sync.dart';
 import '../../data/datasources/user_local_datasource.dart';
 import '../../domain/entities/ai_model_type.dart';
 import '../../domain/entities/ai_tag.dart';
@@ -27,6 +27,8 @@ class AppController extends ChangeNotifier {
   final InferenceRepository inferenceRepository;
   final NetworkRepository networkRepository;
   final UserLocalDataSource userLocalDataSource;
+  final LocationDataSource locationDataSource;
+  final PlatformSync platformSync;
 
   late final SendSosUseCase _sendSosUseCase;
   late final SubmitRescuePostUseCase _submitRescuePostUseCase;
@@ -44,6 +46,8 @@ class AppController extends ChangeNotifier {
   String locationLabel = 'GPS tự động · TP. Hồ Chí Minh';
   double currentLat = 10.7769;
   double currentLng = 106.7009;
+  String? locationError;
+  String? syncError;
 
   RescueRecord? lastSubmittedPost;
   User? currentUser;
@@ -55,6 +59,8 @@ class AppController extends ChangeNotifier {
     required this.rescueRepository,
     required this.inferenceRepository,
     required this.networkRepository,
+    required this.locationDataSource,
+    required this.platformSync,
     UserLocalDataSource? userLocalDataSource,
   }) : userLocalDataSource = userLocalDataSource ?? UserLocalDataSource() {
     _sendSosUseCase = SendSosUseCase(rescueRepository);
@@ -154,23 +160,24 @@ class AppController extends ChangeNotifier {
           }),
     );
 
-    unawaited(
-      Permission.locationWhenInUse.request().then((_) async {
-        try {
-          final pos = await Geolocator.getCurrentPosition(
-            locationSettings: const LocationSettings(
-              accuracy: LocationAccuracy.high,
-              timeLimit: Duration(seconds: 5),
-            ),
-          );
-          currentLat = pos.latitude;
-          currentLng = pos.longitude;
-          locationLabel =
-              '${currentLat.toStringAsFixed(4)}° N, ${currentLng.toStringAsFixed(4)}° E · TP. Hồ Chí Minh';
-          notifyListeners();
-        } catch (_) {}
-      }),
-    );
+    try {
+      final point = await locationDataSource.current();
+      currentLat = point.latitude;
+      currentLng = point.longitude;
+      locationLabel =
+          '${currentLat.toStringAsFixed(4)}° N, ${currentLng.toStringAsFixed(4)}° E · TP. Hồ Chí Minh';
+      locationError = null;
+    } catch (error) {
+      locationError = error.toString();
+    }
+    notifyListeners();
+
+    try {
+      await platformSync.start(syncPending);
+      syncError = null;
+    } catch (error) {
+      syncError = error.toString();
+    }
 
     _connSub = networkRepository.networkChanges.listen((results) async {
       networkLabel = await networkRepository.getCurrentNetworkType();
@@ -190,6 +197,7 @@ class AppController extends ChangeNotifier {
   @override
   void dispose() {
     _connSub?.cancel();
+    unawaited(platformSync.dispose());
     super.dispose();
   }
 
@@ -312,7 +320,13 @@ class AppController extends ChangeNotifier {
   }
 
   Future<void> syncPending() async {
-    await _syncPendingRecordsUseCase();
-    notifyListeners();
+    try {
+      await _syncPendingRecordsUseCase();
+      syncError = null;
+    } catch (error) {
+      syncError = error.toString();
+    } finally {
+      notifyListeners();
+    }
   }
 }
