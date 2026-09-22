@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:workmanager/workmanager.dart';
 
-import 'data/datasources/inference_local_datasource.dart';
+import 'data/datasources/inference/inference_data_source_factory.dart';
 import 'data/datasources/network_remote_datasource.dart';
 import 'data/datasources/record_local_datasource.dart';
 import 'data/datasources/sender_remote_datasource.dart';
@@ -31,7 +31,7 @@ void main() {
 
   final recordLocalDS = RecordLocalDataSource();
   final senderRemoteDS = SenderRemoteDataSource();
-  final inferenceLocalDS = InferenceLocalDataSource();
+  final inferenceLocalDS = createInferenceDataSource();
   final networkRemoteDS = NetworkRemoteDataSource();
 
   final rescueRepository = RescueRepositoryImpl(
