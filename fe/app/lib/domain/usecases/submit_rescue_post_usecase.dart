@@ -1,4 +1,5 @@
 import '../entities/ai_tag.dart';
+import '../entities/rescue_image.dart';
 import '../entities/rescue_record.dart';
 import '../repositories/rescue_repository.dart';
 
@@ -10,8 +11,7 @@ class SubmitRescuePostUseCase {
   Future<RescueRecord> call({
     required double lat,
     required double lng,
-    String? imagePath,
-    List<String> images = const [],
+    RescueImage? image,
     List<AiTag> aiTags = const [],
     int trappedCount = 0,
     int injuredCount = 0,
@@ -24,8 +24,7 @@ class SubmitRescuePostUseCase {
       createdAt: DateTime.now(),
       lat: lat,
       lng: lng,
-      imagePath: imagePath,
-      images: images,
+      image: image,
       aiTags: aiTags,
       trappedCount: trappedCount,
       injuredCount: injuredCount,

@@ -1,6 +1,3 @@
-import 'dart:io';
-import 'dart:typed_data';
-
 import '../../domain/entities/rescue_record.dart';
 import '../../domain/repositories/rescue_repository.dart';
 import '../datasources/record_local_datasource.dart';
@@ -37,12 +34,7 @@ class RescueRepositoryImpl implements RescueRepository {
 
   @override
   Future<bool> sendRecord(RescueRecord record) async {
-    Uint8List? imageBytes;
-    if (record.imagePath != null && File(record.imagePath!).existsSync()) {
-      imageBytes = await File(record.imagePath!).readAsBytes();
-    }
-
-    final result = await senderDataSource.upload(record, imageBytes);
+    final result = await senderDataSource.upload(record, record.image?.bytes);
     if (result.ok) {
       return true;
     }
@@ -59,8 +51,9 @@ class RescueRepositoryImpl implements RescueRepository {
 
   @override
   Future<void> syncPendingRecords() async {
-    final pending =
-        getAllRecords().where((r) => !r.synced || r.status == 'pending');
+    final pending = getAllRecords().where(
+      (r) => !r.synced || r.status == 'pending',
+    );
     for (final record in pending) {
       final success = await sendRecord(record);
       if (success) {
