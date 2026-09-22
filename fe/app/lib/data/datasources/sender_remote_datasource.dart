@@ -1,4 +1,5 @@
 import 'dart:convert';
+import 'package:crypto/crypto.dart';
 import 'package:dio/dio.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_image_compress/flutter_image_compress.dart';
@@ -11,11 +12,13 @@ typedef UploadResult = ({bool ok, int bytesSent, int durationMs});
 class SenderRemoteDataSource {
   static const _smsChannel = MethodChannel('rescue/sms');
 
-  final Dio _dio = Dio(BaseOptions(
-    connectTimeout: const Duration(seconds: 10),
-    sendTimeout: const Duration(seconds: 60),
-    receiveTimeout: const Duration(seconds: 30),
-  ));
+  final Dio _dio = Dio(
+    BaseOptions(
+      connectTimeout: const Duration(seconds: 10),
+      sendTimeout: const Duration(seconds: 60),
+      receiveTimeout: const Duration(seconds: 30),
+    ),
+  );
 
   Future<UploadResult> upload(RescueRecord rec, Uint8List? jpeg) async {
     final meta = jsonEncode({
@@ -29,6 +32,8 @@ class SenderRemoteDataSource {
       'description': rec.description,
       'aiTags': rec.aiTags.map((e) => e.toJson()).toList(),
       'sendMode': rec.sendMode,
+      if (jpeg != null) 'imageSha256': 'sha256:${sha256.convert(jpeg)}',
+      if (jpeg != null) 'imageSizeBytes': jpeg.length,
     });
     final sw = Stopwatch()..start();
     final form = FormData.fromMap({
@@ -41,7 +46,11 @@ class SenderRemoteDataSource {
       bytesSent = form.length;
     } catch (_) {}
     try {
-      await _dio.post('$kServerBaseUrl/api/reports', data: form);
+      await _dio.post(
+        '$kServerBaseUrl/api/reports',
+        data: form,
+        options: Options(headers: {'X-Message-Contract-Version': '1'}),
+      );
       sw.stop();
       return (
         ok: true,
