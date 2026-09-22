@@ -14,6 +14,7 @@ from pathlib import Path
 ROOT = Path(__file__).resolve().parents[1]
 PAPER = ROOT / "paper"
 DEFAULT_OUTPUT = PAPER / "submission"
+ALT_TEXT = ROOT / "paper_6444_ALT_Text.xlsx"
 FIXED_FILES = ("main.tex", "references.bib", "main.bbl", "llncs.cls", "splncs04.bst")
 FORBIDDEN_SUFFIXES = {".aux", ".log", ".out", ".blg", ".synctex.gz"}
 
@@ -45,6 +46,9 @@ def create_package(output_dir: Path) -> tuple[Path, Path]:
     assert not re.search(r"[\s\\/><,;'\"|]", main_path.name)
     main_text = main_path.read_text(encoding="utf-8")
     figures = referenced_figures(main_text)
+    assert ALT_TEXT.is_file(), f"missing figure alt text: {ALT_TEXT}"
+    with zipfile.ZipFile(ALT_TEXT) as workbook:
+        assert workbook.testzip() is None, "invalid alt-text workbook"
     for name in FIXED_FILES:
         assert (PAPER / name).is_file(), f"missing submission source: paper/{name}"
     final_pdf = PAPER / "main.pdf"
@@ -57,6 +61,7 @@ def create_package(output_dir: Path) -> tuple[Path, Path]:
         stage = Path(temporary)
         for name in FIXED_FILES:
             shutil.copy2(PAPER / name, stage / name)
+        shutil.copy2(ALT_TEXT, stage / ALT_TEXT.name)
         (stage / "figures").mkdir()
         for figure in figures:
             shutil.copy2(figure, stage / "figures" / figure.name)
@@ -70,7 +75,8 @@ def create_package(output_dir: Path) -> tuple[Path, Path]:
     with zipfile.ZipFile(zip_path) as archive:
         names = set(archive.namelist())
         assert "main.tex" in names and not any(name.startswith("paper/") for name in names)
-        assert len(names) == len(FIXED_FILES) + len(figures)
+        assert len(names) == len(FIXED_FILES) + len(figures) + 1
+        assert archive.read(ALT_TEXT.name) == ALT_TEXT.read_bytes()
         assert not any(name.startswith("src/") or name.startswith("docs/") for name in names)
     return zip_path, pdf_path
 

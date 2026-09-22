@@ -1,9 +1,9 @@
 # EasyChair camera-ready checklist
 
 Source: `remind_for_camera_ready.md`, Springer LNCS/CCIS author instructions,
-and the local LTP. Deadline recorded by the organizers: **16 September 2026**;
-the exact time and time zone still require confirmation. Internal target:
-15 September 2026.
+and the local LTP. The organizer's additional alt-text notice gives the update
+deadline as **15:00 on 21 September 2026**; the notice does not specify a time
+zone. This supersedes the earlier 16 September deadline for this update.
 
 ## EasyChair fields
 
@@ -23,6 +23,8 @@ the exact time and time zone still require confirmation. Internal target:
   `splncs04.bst`, `figures/pipeline_v2.pdf`, and
   `figures/rq1_stress_delta_ari.pdf`, and
   `figures/rq3_dispatch_conditions.pdf`.
+- Include `paper_6444_ALT_Text.xlsx` at ZIP root, with three figure rows,
+  matching source filenames, embedded thumbnails, and reviewed alt text.
 - Exclude caches, logs, old figures, notebooks, experimental results, audit,
   checkpoints, response draft, and other internal documents.
 - From a fresh extraction, run:
@@ -71,7 +73,9 @@ python3 scripts/package_camera_ready.py
 
 ## Final external gates
 
-- Confirm deadline time/time zone and how alt text must be delivered.
+- Confirm the deadline time zone. Alt text must be delivered as
+  `paper_6444_ALT_Text.xlsx` inside the LaTeX source ZIP, per the organizer's
+  additional notice.
 - Group approves PDF, ZIP, metadata, alt text, and LTP scan.
 - Submission owner uploads the three EasyChair files and retains receipts.
 - Commit, push, registration, public release, and new archive are separate
