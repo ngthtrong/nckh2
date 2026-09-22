@@ -17,6 +17,7 @@ class RescueRecord {
   final String sendMode;
   final bool synced;
   final String status;
+  final String? lastError;
 
   const RescueRecord({
     required this.id,
@@ -34,6 +35,7 @@ class RescueRecord {
     required this.sendMode,
     this.synced = false,
     this.status = 'processing',
+    this.lastError,
   });
 
   RescueRecord copyWith({
@@ -52,6 +54,7 @@ class RescueRecord {
     String? sendMode,
     bool? synced,
     String? status,
+    Object? lastError = _unchanged,
   }) {
     return RescueRecord(
       id: id ?? this.id,
@@ -69,6 +72,11 @@ class RescueRecord {
       sendMode: sendMode ?? this.sendMode,
       synced: synced ?? this.synced,
       status: status ?? this.status,
+      lastError: identical(lastError, _unchanged)
+          ? this.lastError
+          : lastError as String?,
     );
   }
 }
+
+const Object _unchanged = Object();

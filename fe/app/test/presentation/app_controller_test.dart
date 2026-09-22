@@ -2,6 +2,7 @@ import 'dart:async';
 import 'dart:typed_data';
 
 import 'package:app/data/datasources/location/location_data_source.dart';
+import 'package:app/data/datasources/sms/sms_gateway.dart';
 import 'package:app/data/datasources/sync/platform_sync.dart';
 import 'package:app/data/datasources/user_local_datasource.dart';
 import 'package:app/domain/entities/ai_model_type.dart';
@@ -38,6 +39,27 @@ class FakePlatformSync implements PlatformSync {
   }
 
   Future<void> close() => reconnects.close();
+}
+
+class FakeSmsGateway implements SmsGateway {
+  int sendCalls = 0;
+
+  @override
+  Future<SmsCapabilities> capabilities() async => const SmsCapabilities(
+    available: true,
+    recipient: '+84901234567',
+    provider: 'test',
+  );
+
+  @override
+  Future<SmsSendResult> sendConfirmed({
+    required String reportId,
+    required String recipient,
+    required String idempotencyKey,
+  }) async {
+    sendCalls++;
+    return const SmsSendResult(status: 'queued');
+  }
 }
 
 class FakeRescueRepository implements RescueRepository {
@@ -115,11 +137,13 @@ class FakeUserLocalDataSource extends UserLocalDataSource {
 void main() {
   late FakeRescueRepository rescueRepository;
   late FakePlatformSync platformSync;
+  late FakeSmsGateway smsGateway;
   late AppController controller;
 
   setUp(() {
     rescueRepository = FakeRescueRepository();
     platformSync = FakePlatformSync();
+    smsGateway = FakeSmsGateway();
     controller = AppController(
       rescueRepository: rescueRepository,
       inferenceRepository: FakeInferenceRepository(),
@@ -127,6 +151,7 @@ void main() {
       userLocalDataSource: FakeUserLocalDataSource(),
       locationDataSource: FakeLocationDataSource(),
       platformSync: platformSync,
+      smsGateway: smsGateway,
     );
   });
 
@@ -155,5 +180,15 @@ void main() {
 
     expect(rescueRepository.syncCalls, 1);
     expect(controller.syncError, isNull);
+  });
+
+  test('SMS is sent only after explicit confirmation', () async {
+    await controller.init();
+
+    await controller.sendSos(sendSmsConfirmed: false);
+    expect(smsGateway.sendCalls, 0);
+
+    await controller.sendSos(sendSmsConfirmed: true);
+    expect(smsGateway.sendCalls, 1);
   });
 }

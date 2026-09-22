@@ -5,6 +5,7 @@ import 'data/datasources/location/location_data_source_factory.dart';
 import 'data/datasources/network_remote_datasource.dart';
 import 'data/datasources/record_local_datasource.dart';
 import 'data/datasources/sender_remote_datasource.dart';
+import 'data/datasources/sms/sms_gateway_factory.dart';
 import 'data/datasources/sync/platform_sync_factory.dart';
 import 'data/repositories/inference_repository_impl.dart';
 import 'data/repositories/network_repository_impl.dart';
@@ -33,6 +34,7 @@ void main() {
     networkRepository: networkRepository,
     locationDataSource: createLocationDataSource(),
     platformSync: createPlatformSync(),
+    smsGateway: createSmsGateway(),
   );
 
   runApp(RescueApp(controller: controller));

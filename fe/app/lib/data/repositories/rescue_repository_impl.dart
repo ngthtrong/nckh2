@@ -38,15 +38,14 @@ class RescueRepositoryImpl implements RescueRepository {
     if (result.ok) {
       return true;
     }
-
-    // Attempt SMS fallback
-    try {
-      final sms = senderDataSource.smsBody(record);
-      await senderDataSource.sendSms('114', sms);
-      return true;
-    } catch (_) {
-      return false;
-    }
+    await saveRecord(
+      record.copyWith(
+        synced: false,
+        status: 'pending',
+        lastError: result.error ?? 'Không thể gửi báo cáo.',
+      ),
+    );
+    return false;
   }
 
   @override
@@ -57,7 +56,9 @@ class RescueRepositoryImpl implements RescueRepository {
     for (final record in pending) {
       final success = await sendRecord(record);
       if (success) {
-        await saveRecord(record.copyWith(synced: true, status: 'dispatched'));
+        await saveRecord(
+          record.copyWith(synced: true, status: 'dispatched', lastError: null),
+        );
       }
     }
   }

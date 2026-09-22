@@ -6,11 +6,13 @@ enum SosState { idle, pressed, sent }
 class SosButtonSection extends StatefulWidget {
   final SosState state;
   final VoidCallback onPressed;
+  final String? statusMessage;
 
   const SosButtonSection({
     super.key,
     required this.state,
     required this.onPressed,
+    this.statusMessage,
   });
 
   @override
@@ -145,9 +147,10 @@ class _SosButtonSectionState extends State<SosButtonSection>
           ),
           if (widget.state == SosState.sent) ...[
             const SizedBox(height: 12),
-            const Text(
-              '✓ Đội cứu hộ đã nhận vị trí của bạn',
-              style: TextStyle(
+            Text(
+              widget.statusMessage ?? '✓ Đội cứu hộ đã nhận vị trí của bạn',
+              textAlign: TextAlign.center,
+              style: const TextStyle(
                 color: Color(0xFF15803D),
                 fontSize: 12,
                 fontWeight: FontWeight.w700,

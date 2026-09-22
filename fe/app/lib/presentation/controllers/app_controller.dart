@@ -4,8 +4,10 @@ import 'package:connectivity_plus/connectivity_plus.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/services.dart';
 import 'package:image_picker/image_picker.dart';
+import 'package:uuid/uuid.dart';
 
 import '../../data/datasources/location/location_data_source.dart';
+import '../../data/datasources/sms/sms_gateway.dart';
 import '../../data/datasources/sync/platform_sync.dart';
 import '../../data/datasources/user_local_datasource.dart';
 import '../../domain/entities/ai_model_type.dart';
@@ -29,6 +31,7 @@ class AppController extends ChangeNotifier {
   final UserLocalDataSource userLocalDataSource;
   final LocationDataSource locationDataSource;
   final PlatformSync platformSync;
+  final SmsGateway smsGateway;
 
   late final SendSosUseCase _sendSosUseCase;
   late final SubmitRescuePostUseCase _submitRescuePostUseCase;
@@ -48,12 +51,18 @@ class AppController extends ChangeNotifier {
   double currentLng = 106.7009;
   String? locationError;
   String? syncError;
+  SmsCapabilities smsCapabilities = const SmsCapabilities(
+    available: false,
+    message: 'Đang kiểm tra khả năng gửi SMS.',
+  );
+  String? statusMessage;
 
   RescueRecord? lastSubmittedPost;
   User? currentUser;
   bool isGuest = false;
 
   bool get isAuthenticated => currentUser != null || isGuest;
+  bool get smsAvailable => smsCapabilities.available;
 
   AppController({
     required this.rescueRepository,
@@ -61,6 +70,7 @@ class AppController extends ChangeNotifier {
     required this.networkRepository,
     required this.locationDataSource,
     required this.platformSync,
+    required this.smsGateway,
     UserLocalDataSource? userLocalDataSource,
   }) : userLocalDataSource = userLocalDataSource ?? UserLocalDataSource() {
     _sendSosUseCase = SendSosUseCase(rescueRepository);
@@ -146,6 +156,7 @@ class AppController extends ChangeNotifier {
     await rescueRepository.init();
     await userLocalDataSource.init();
     currentUser = userLocalDataSource.getUser();
+    smsCapabilities = await smsGateway.capabilities();
     unawaited(
       inferenceRepository
           .loadModel()
@@ -201,7 +212,7 @@ class AppController extends ChangeNotifier {
     super.dispose();
   }
 
-  Future<RescueRecord?> sendSos() async {
+  Future<RescueRecord?> sendSos({bool sendSmsConfirmed = false}) async {
     if (isBusy) return null;
     isBusy = true;
     notifyListeners();
@@ -212,10 +223,29 @@ class AppController extends ChangeNotifier {
         lng: currentLng,
         sendMode: networkLabel == 'none' ? 'queuedOffline' : 'direct',
       );
+      if (sendSmsConfirmed) {
+        final recipient = smsCapabilities.recipient;
+        if (!smsCapabilities.available || recipient == null) {
+          statusMessage = smsCapabilities.message ?? 'SMS hiện không khả dụng.';
+        } else {
+          final result = await smsGateway.sendConfirmed(
+            reportId: record.id,
+            recipient: recipient,
+            idempotencyKey: const Uuid().v4(),
+          );
+          statusMessage = 'SMS: ${result.status}';
+        }
+      } else if (!smsCapabilities.available) {
+        statusMessage =
+            'Báo cáo đã được lưu; SMS chưa được cấu hình nên không được gửi.';
+      } else {
+        statusMessage = 'Báo cáo đã được lưu; SMS chưa được gửi.';
+      }
       isBusy = false;
       notifyListeners();
       return record;
-    } catch (_) {
+    } catch (error) {
+      statusMessage = 'Không thể hoàn tất yêu cầu SOS: $error';
       isBusy = false;
       notifyListeners();
       return null;
