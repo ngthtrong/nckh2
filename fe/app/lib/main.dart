@@ -1,30 +1,16 @@
 import 'package:flutter/material.dart';
-import 'package:workmanager/workmanager.dart';
 
 import 'data/datasources/inference/inference_data_source_factory.dart';
+import 'data/datasources/location/location_data_source_factory.dart';
 import 'data/datasources/network_remote_datasource.dart';
 import 'data/datasources/record_local_datasource.dart';
 import 'data/datasources/sender_remote_datasource.dart';
+import 'data/datasources/sync/platform_sync_factory.dart';
 import 'data/repositories/inference_repository_impl.dart';
 import 'data/repositories/network_repository_impl.dart';
 import 'data/repositories/rescue_repository_impl.dart';
 import 'presentation/controllers/app_controller.dart';
 import 'presentation/screens/splash_screen.dart';
-
-@pragma('vm:entry-point')
-void callbackDispatcher() {
-  Workmanager().executeTask((task, inputData) async {
-    final recordLocalDS = RecordLocalDataSource();
-    final senderRemoteDS = SenderRemoteDataSource();
-    await recordLocalDS.init();
-    final rescueRepo = RescueRepositoryImpl(
-      localDataSource: recordLocalDS,
-      senderDataSource: senderRemoteDS,
-    );
-    await rescueRepo.syncPendingRecords();
-    return true;
-  });
-}
 
 void main() {
   WidgetsFlutterBinding.ensureInitialized();
@@ -45,6 +31,8 @@ void main() {
     rescueRepository: rescueRepository,
     inferenceRepository: inferenceRepository,
     networkRepository: networkRepository,
+    locationDataSource: createLocationDataSource(),
+    platformSync: createPlatformSync(),
   );
 
   runApp(RescueApp(controller: controller));
