@@ -1,8 +1,8 @@
-import 'dart:io';
 import 'package:flutter/material.dart';
 import 'package:image_picker/image_picker.dart';
 
 import '../../../core/constants/app_colors.dart';
+import '../../../core/platform/local_file.dart';
 import '../../../domain/entities/ai_tag.dart';
 import '../../controllers/app_controller.dart';
 import '../../widgets/number_stepper_input.dart';
@@ -317,8 +317,8 @@ class _ComposeScreenState extends State<ComposeScreen> {
                         children: [
                           ClipRRect(
                             borderRadius: BorderRadius.circular(16),
-                            child: Image.file(
-                              File(_imagePath!),
+                            child: Image(
+                              image: localImageProvider(_imagePath!),
                               height: 160,
                               width: double.infinity,
                               fit: BoxFit.cover,

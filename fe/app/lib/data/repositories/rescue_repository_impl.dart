@@ -1,11 +1,11 @@
 import 'dart:convert';
-import 'dart:io';
 import 'dart:typed_data';
 
 import 'package:dio/dio.dart';
 
 import '../../domain/entities/rescue_record.dart';
 import '../../domain/repositories/rescue_repository.dart';
+import '../../core/platform/local_file.dart';
 import '../datasources/outbox_local_datasource.dart';
 import '../datasources/record_local_datasource.dart';
 import '../datasources/sender_remote_datasource.dart';
@@ -144,8 +144,14 @@ class RescueRepositoryImpl implements RescueRepository {
   Future<bool> _finishAttachment(RescueRecord record) async {
     if (outboxDataSource.messageForRecord(record.id) != null) return false;
     final path = record.imagePath;
-    if (path == null || !File(path).existsSync()) return true;
-    final Uint8List imageBytes = await File(path).readAsBytes();
+    if (path == null || path.isEmpty) return true;
+    late final Uint8List imageBytes;
+    try {
+      imageBytes = await readLocalFile(path);
+    } catch (_) {
+      return true;
+    }
+    if (imageBytes.isEmpty) return true;
     return (await senderDataSource.upload(record, imageBytes)).ok;
   }
 
