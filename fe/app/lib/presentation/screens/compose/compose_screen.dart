@@ -104,8 +104,8 @@ class _ComposeScreenState extends State<ComposeScreen> {
                 onPressed: canSubmit ? _handleSubmit : null,
                 style: ElevatedButton.styleFrom(
                   backgroundColor: AppColors.primaryRed,
-                  disabledBackgroundColor: AppColors.primaryRed.withOpacity(
-                    0.4,
+                  disabledBackgroundColor: AppColors.primaryRed.withValues(
+                    alpha: 0.4,
                   ),
                   elevation: 0,
                   shape: RoundedRectangleBorder(

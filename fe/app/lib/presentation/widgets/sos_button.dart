@@ -75,7 +75,9 @@ class _SosButtonSectionState extends State<SosButtonSection>
                       height: 100 + (value * 30),
                       decoration: BoxDecoration(
                         shape: BoxShape.circle,
-                        color: AppColors.primaryRed.withOpacity(0.25 * (1 - value)),
+                        color: AppColors.primaryRed.withValues(
+                          alpha: 0.25 * (1 - value),
+                        ),
                       ),
                     );
                   },
@@ -91,14 +93,14 @@ class _SosButtonSectionState extends State<SosButtonSection>
                     color: widget.state == SosState.sent
                         ? const Color(0xFF16A34A)
                         : widget.state == SosState.pressed
-                            ? AppColors.primaryRedDark
-                            : AppColors.primaryRed,
+                        ? AppColors.primaryRedDark
+                        : AppColors.primaryRed,
                     boxShadow: const [
                       BoxShadow(
                         color: Colors.black26,
                         blurRadius: 12,
                         offset: Offset(0, 6),
-                      )
+                      ),
                     ],
                   ),
                   child: Column(
