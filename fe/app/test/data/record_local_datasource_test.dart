@@ -38,11 +38,15 @@ void main() {
         fileName: 'scene.png',
         mimeType: 'image/png',
       ),
+      aiLabel: 'high',
+      aiConfidence: 0.91,
       trappedCount: 2,
       injuredCount: 1,
       vulnerableGroups: const ['trẻ em'],
       description: 'Nước đang dâng',
       sendMode: 'direct',
+      status: 'pending',
+      lastError: 'Mất kết nối',
     );
 
     await dataSource.saveRecord(record);
@@ -52,6 +56,35 @@ void main() {
     expect(restored.image?.bytes, [1, 2, 3, 4]);
     expect(restored.image?.fileName, 'scene.png');
     expect(restored.image?.mimeType, 'image/png');
+    expect(restored.aiLabel, 'high');
+    expect(restored.aiConfidence, 0.91);
+    expect(restored.trappedCount, 2);
+    expect(restored.injuredCount, 1);
     expect(restored.vulnerableGroups, ['trẻ em']);
+    expect(restored.description, 'Nước đang dâng');
+    expect(restored.status, 'pending');
+    expect(restored.lastError, 'Mất kết nối');
+  });
+
+  test('copyWith can clear a sync error after a successful upload', () {
+    final failed = RescueRecord(
+      id: 'report-retry',
+      createdAt: DateTime.utc(2026, 9, 22),
+      lat: 10,
+      lng: 106,
+      sendMode: 'textOnly',
+      status: 'pending',
+      lastError: 'Mất kết nối',
+    );
+
+    final synced = failed.copyWith(
+      synced: true,
+      status: 'dispatched',
+      lastError: null,
+    );
+
+    expect(synced.synced, isTrue);
+    expect(synced.status, 'dispatched');
+    expect(synced.lastError, isNull);
   });
 }

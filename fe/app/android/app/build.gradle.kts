@@ -49,5 +49,4 @@ dependencies {
     implementation("com.facebook.fbjni:fbjni:0.7.0")
     implementation("com.facebook.soloader:nativeloader:0.10.5")
     implementation("androidx.core:core-ktx:1.13.1")
-    implementation("org.jetbrains.kotlin:kotlin-stdlib:1.9.23")
 }

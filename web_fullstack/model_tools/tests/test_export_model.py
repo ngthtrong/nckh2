@@ -3,7 +3,14 @@ from pathlib import Path
 
 import torch
 
-from export_model import build_manifest, remove_module_prefix
+from export_model import DEFAULT_MANIFEST, DEFAULT_MODEL, build_manifest, remove_module_prefix
+
+
+def test_default_artifacts_target_the_shared_flutter_app():
+    assert DEFAULT_MODEL.as_posix().endswith("fe/app/web/models/model.onnx")
+    assert DEFAULT_MANIFEST.as_posix().endswith(
+        "fe/app/web/models/model_manifest.json"
+    )
 
 
 def test_remove_module_prefix_only_changes_prefixed_keys():

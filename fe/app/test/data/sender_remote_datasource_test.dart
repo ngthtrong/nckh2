@@ -79,6 +79,25 @@ Dio testDio(RecordingAdapter adapter) {
 }
 
 void main() {
+  test('selects the upload image mode from measured throughput', () {
+    expect(
+      selectUploadImageMode(bytesPerSecond: 300 * 1024, hasImage: true),
+      UploadImageMode.original,
+    );
+    expect(
+      selectUploadImageMode(bytesPerSecond: 64 * 1024, hasImage: true),
+      UploadImageMode.compressed,
+    );
+    expect(
+      selectUploadImageMode(bytesPerSecond: 10 * 1024, hasImage: true),
+      UploadImageMode.textOnly,
+    );
+    expect(
+      selectUploadImageMode(bytesPerSecond: 1024 * 1024, hasImage: false),
+      UploadImageMode.textOnly,
+    );
+  });
+
   test(
     'upload uses the FastAPI multipart contract with the real image',
     () async {

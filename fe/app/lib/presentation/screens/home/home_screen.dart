@@ -7,6 +7,7 @@ import '../../widgets/ai_model_settings_sheet.dart';
 import '../../widgets/app_header.dart';
 import '../../widgets/compose_cta_card.dart';
 import '../../widgets/sos_button.dart';
+import '../../widgets/sms_confirmation_dialog.dart';
 
 class HomeScreen extends StatefulWidget {
   final AppController controller;
@@ -57,30 +58,10 @@ class _HomeScreenState extends State<HomeScreen> {
     var sendSmsConfirmed = false;
     if (widget.controller.smsAvailable && mounted) {
       final recipient = widget.controller.smsCapabilities.recipient ?? '';
-      final maskedRecipient = recipient.length <= 4
-          ? recipient
-          : '${'•' * (recipient.length - 4)}${recipient.substring(recipient.length - 4)}';
-      sendSmsConfirmed =
-          await showDialog<bool>(
-            context: context,
-            builder: (context) => AlertDialog(
-              title: const Text('Xác nhận gửi SMS'),
-              content: Text(
-                'Gửi cảnh báo tới $maskedRecipient? Nhà cung cấp SMS có thể tính phí cho tin nhắn này.',
-              ),
-              actions: [
-                TextButton(
-                  onPressed: () => Navigator.pop(context, false),
-                  child: const Text('Chỉ gửi báo cáo'),
-                ),
-                FilledButton(
-                  onPressed: () => Navigator.pop(context, true),
-                  child: const Text('Gửi báo cáo + SMS'),
-                ),
-              ],
-            ),
-          ) ??
-          false;
+      sendSmsConfirmed = await showSmsConfirmation(
+        context,
+        recipient: recipient,
+      );
     }
 
     final record = await widget.controller.sendSos(

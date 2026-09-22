@@ -53,9 +53,9 @@ class _GuideScreenState extends State<GuideScreen> {
           color: Colors.white,
           child: Row(
             children: [
-              _buildTabButton('Dùng app', 0),
+              _buildTabButton('Dùng ứng dụng', 0),
               _buildTabButton('Sơ cứu', 1),
-              _buildTabButton('Số điện thoại', 2),
+              _buildTabButton('Số khẩn cấp', 2),
             ],
           ),
         ),

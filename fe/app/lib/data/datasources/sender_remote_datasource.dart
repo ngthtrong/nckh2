@@ -18,6 +18,19 @@ typedef UploadResult = ({
 
 enum UploadImageMode { original, compressed, textOnly }
 
+UploadImageMode selectUploadImageMode({
+  required double bytesPerSecond,
+  required bool hasImage,
+}) {
+  if (!hasImage || bytesPerSecond < 32 * 1024) {
+    return UploadImageMode.textOnly;
+  }
+  if (bytesPerSecond < 256 * 1024) {
+    return UploadImageMode.compressed;
+  }
+  return UploadImageMode.original;
+}
+
 class SenderRemoteDataSource {
   SenderRemoteDataSource({Dio? dio, ImageCompressor? imageCompressor})
     : _dio =
@@ -42,7 +55,7 @@ class SenderRemoteDataSource {
     final stopwatch = Stopwatch()..start();
     try {
       final throughput = await _measureBytesPerSecond();
-      final mode = _selectMode(
+      final mode = selectUploadImageMode(
         bytesPerSecond: throughput,
         hasImage: imageBytes != null,
       );
@@ -108,18 +121,5 @@ class SenderRemoteDataSource {
     final seconds =
         stopwatch.elapsedMicroseconds / Duration.microsecondsPerSecond;
     return seconds <= 0 ? double.infinity : length / seconds;
-  }
-
-  UploadImageMode _selectMode({
-    required double bytesPerSecond,
-    required bool hasImage,
-  }) {
-    if (!hasImage || bytesPerSecond < 32 * 1024) {
-      return UploadImageMode.textOnly;
-    }
-    if (bytesPerSecond < 256 * 1024) {
-      return UploadImageMode.compressed;
-    }
-    return UploadImageMode.original;
   }
 }
