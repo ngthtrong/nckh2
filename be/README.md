@@ -10,19 +10,19 @@ Server giả lập (Mock Server) viết bằng Python (FastAPI) phục vụ ti�
 
 - **PowerShell**:
   ```powershell
-  cd E:\RHNA\1Visual\NCKH\nckh2\be
+  cd be
   .\run.ps1
   ```
 - **CMD**:
   ```cmd
-  cd E:\RHNA\1Visual\NCKH\nckh2\be
+  cd be
   run.bat
   ```
 
 ### Cách 2: Khởi chạy thủ công bằng venv
 
 ```powershell
-cd E:\RHNA\1Visual\NCKH\nckh2\be
+cd be
 .\.venv\Scripts\Activate.ps1
 python main.py
 ```
@@ -99,7 +99,7 @@ Tùy vào môi trường chạy Flutter app, cấu hình `kServerBaseUrl` trong 
 Chạy script kiểm thử tự động để gửi dữ liệu mô phỏng từ FE lên server:
 
 ```powershell
-cd E:\RHNA\1Visual\NCKH\nckh2\be
+cd be
 .\.venv\Scripts\python.exe test_client.py
 ```
 
