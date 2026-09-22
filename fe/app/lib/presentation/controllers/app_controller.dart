@@ -1,5 +1,4 @@
 import 'dart:async';
-import 'dart:io';
 
 import 'package:connectivity_plus/connectivity_plus.dart';
 import 'package:flutter/foundation.dart';
@@ -9,6 +8,7 @@ import 'package:image_picker/image_picker.dart';
 import 'package:permission_handler/permission_handler.dart';
 
 import '../../data/datasources/user_local_datasource.dart';
+import '../../core/platform/local_file.dart';
 import '../../domain/entities/ai_model_type.dart';
 import '../../domain/entities/ai_tag.dart';
 import '../../domain/entities/rescue_record.dart';
@@ -252,7 +252,7 @@ class AppController extends ChangeNotifier {
 
   Future<List<AiTag>> analyzeImage(String imagePath) async {
     try {
-      final bytes = await File(imagePath).readAsBytes();
+      final bytes = await readLocalFile(imagePath);
       return await _analyzeImageUseCase(bytes);
     } catch (_) {
       return [];
