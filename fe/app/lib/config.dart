@@ -3,10 +3,7 @@ library;
 
 /// Base URL server. `10.0.2.2` = loopback của máy tính khi chạy emulator Android.
 /// Đổi thành IP LAN/VPN thật khi test trên máy vật lý hoặc deploy.
-const String kServerBaseUrl = String.fromEnvironment(
-  'API_BASE_URL',
-  defaultValue: 'http://10.0.2.2:8000',
-);
+const String kServerBaseUrl = 'http://localhost:8000';
 
 /// Số tổng đài nhận SMS fallback — BẮT BUỘC thay bằng số thật.
 const String kEmergencyPhone = '+840000000000';

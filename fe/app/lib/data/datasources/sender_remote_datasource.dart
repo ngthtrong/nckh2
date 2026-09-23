@@ -74,7 +74,8 @@ class SenderRemoteDataSource {
         'injured_count': record.injuredCount,
         'vulnerable_groups': jsonEncode(record.vulnerableGroups),
         if (record.aiLabel != null) 'ai_label': record.aiLabel,
-        if (record.aiConfidence != null) 'ai_confidence': record.aiConfidence,
+        if (record.aiConfidence != null)
+          'ai_confidence': record.aiConfidence,
         'latitude': record.lat,
         'longitude': record.lng,
         if (uploadImage != null)
