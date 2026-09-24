@@ -1,0 +1,126 @@
+{
+  "bootstrap_random_seed": 20260729,
+  "bootstrap_resamples": 5000,
+  "data_tree": "5bb8f9e5f1bb1c4deec8f0db1351e27d1bf30333",
+  "dataset_inventory_sha256": "c120b69ce87e6c547295084b7daf87d3110c93d6c5937d751c6c140ffcefe0bc",
+  "implementation_id": "rq1-reviewer-stress-2026-09-08-v1",
+  "interpretation": "Synthetic stress levels; not estimates of field error.",
+  "methods": [
+    "product_cij_louvain",
+    "additive_cij_louvain",
+    "additive_cij_louvain_matched_density",
+    "product_cij_leiden",
+    "geo_time_dbscan"
+  ],
+  "no_retuning": true,
+  "prediction_before_truth": true,
+  "protocol_id": "ISDS-6444-RQ1-reviewer-stress-v1",
+  "scenarios": {
+    "baseline": {
+      "kind": "baseline"
+    },
+    "exact_transport_copy_2x": {
+      "copies": 2,
+      "kind": "duplicate"
+    },
+    "exact_transport_copy_5x": {
+      "copies": 5,
+      "kind": "duplicate"
+    },
+    "gps_noise_100m": {
+      "kind": "gps",
+      "sigma_m": 100.0
+    },
+    "gps_noise_300m": {
+      "kind": "gps",
+      "sigma_m": 300.0
+    },
+    "time_noise_15min": {
+      "kind": "time",
+      "sigma_min": 15.0
+    },
+    "time_noise_60min": {
+      "kind": "time",
+      "sigma_min": 60.0
+    }
+  },
+  "selected_config_sha256": "e3c9f1ad333575862126315595835f01a7b660ac59c240ed0e282f653fb265f6",
+  "selected_configs": {
+    "additive_cij_louvain": {
+      "alpha": 1.0,
+      "knn": 8,
+      "q": 0.95,
+      "resolution": 1.2,
+      "sigma": 700,
+      "tau_t": 60
+    },
+    "additive_cij_louvain_matched_density": {
+      "alpha": 0.5,
+      "knn": 8,
+      "q": 0.89,
+      "resolution": 1.2,
+      "sigma": 700,
+      "tau_t": 60
+    },
+    "geo_time_dbscan": {
+      "min_samples": 3,
+      "spatial_eps": 800,
+      "temporal_eps": 60
+    },
+    "product_cij_leiden": {
+      "resolution": 1.4
+    },
+    "product_cij_louvain": {
+      "knn": 8,
+      "q": 0.9,
+      "resolution": 1.2,
+      "sigma": 700,
+      "tau_t": 60
+    }
+  },
+  "source_commit": "6ac75c202d04934deb46d84486132e54d42d735f",
+  "source_notebook_sha256": "13a586af7ac5331dd1afe354b9e5c9a46b90e0ff2f6ac6f71dbdc3badd6ca7ef",
+  "stress_random_seed": 20260908,
+  "test_runs": [
+    "run_041",
+    "run_042",
+    "run_043",
+    "run_044",
+    "run_045",
+    "run_046",
+    "run_047",
+    "run_048",
+    "run_049",
+    "run_050",
+    "run_051",
+    "run_052",
+    "run_053",
+    "run_054",
+    "run_055",
+    "run_056",
+    "run_057",
+    "run_058",
+    "run_059",
+    "run_060",
+    "run_061",
+    "run_062",
+    "run_063",
+    "run_064",
+    "run_065",
+    "run_066",
+    "run_067",
+    "run_068",
+    "run_069",
+    "run_070",
+    "run_071",
+    "run_072",
+    "run_073",
+    "run_074",
+    "run_075",
+    "run_076",
+    "run_077",
+    "run_078",
+    "run_079",
+    "run_080"
+  ]
+}
