@@ -1,0 +1,261 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Mock Server - Flood Rescue Receiver Dashboard</title>
+    <!-- Tailwind CSS CDN -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+    <style>
+        body { font-family: 'Inter', sans-serif; }
+        code, pre { font-family: 'JetBrains Mono', monospace; }
+        .glass-card {
+            background: rgba(255, 255, 255, 0.95);
+            backdrop-filter: blur(12px);
+            border: 1px solid rgba(226, 232, 240, 0.8);
+        }
+    </style>
+</head>
+<body class="bg-slate-50 text-slate-800 min-h-screen">
+    <!-- Header -->
+    <header class="bg-gradient-to-r from-red-700 via-rose-700 to-red-800 text-white shadow-md sticky top-0 z-40">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-3.5 flex flex-wrap items-center justify-between gap-4">
+            <div class="flex items-center gap-3">
+                <div class="w-10 h-10 rounded-xl bg-white/10 flex items-center justify-center border border-white/20 shadow-inner">
+                    <svg class="w-6 h-6 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 11a7 7 0 01-7 7m0 0a7 7 0 01-7-7m7 7v4m0 0H8m4 0h4m-4-8a3 3 0 100-6 3 3 0 000 6z" />
+                    </svg>
+                </div>
+                <div>
+                    <h1 class="text-xl font-bold tracking-tight flex items-center gap-2">
+                        Rescue Mock Server
+                        <span class="text-xs font-semibold px-2 py-0.5 rounded-full bg-emerald-500/20 text-emerald-200 border border-emerald-400/30 flex items-center gap-1">
+                            <span class="w-1.5 h-1.5 rounded-full bg-emerald-400 animate-ping"></span>
+                            Online :8000
+                        </span>
+                    </h1>
+                    <p class="text-xs text-rose-100/80">Bộ thu dữ liệu cứu hộ từ Frontend Flutter (NCKH)</p>
+                </div>
+            </div>
+
+            <div class="flex items-center gap-2.5">
+                <a href="/docs" target="_blank" class="text-xs font-medium bg-white/10 hover:bg-white/20 border border-white/20 px-3 py-1.5 rounded-lg transition flex items-center gap-1.5">
+                    <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 20l4-16m4 4l4 4-4 4M6 16l-4-4 4-4"/></svg>
+                    Swagger API Docs
+                </a>
+                <button onclick="location.reload()" class="text-xs font-semibold bg-white text-red-700 hover:bg-rose-50 px-3 py-1.5 rounded-lg shadow-sm transition flex items-center gap-1.5">
+                    <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15"/></svg>
+                    Làm mới
+                </button>
+            </div>
+        </div>
+    </header>
+
+    <!-- Main Content -->
+    <main class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-6 space-y-6">
+        <!-- Stats Row -->
+        <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
+            <div class="glass-card rounded-2xl p-4 shadow-sm">
+                <div class="text-xs font-semibold uppercase tracking-wider text-slate-400 mb-1">Tổng báo cáo nhận</div>
+                <div class="text-3xl font-extrabold text-slate-800" id="stat-total">{{ reports|length }}</div>
+                <div class="text-xs text-slate-500 mt-1 flex items-center gap-1">
+                    <span class="text-emerald-600 font-medium">● Đang lắng nghe</span> cổng 8000
+                </div>
+            </div>
+
+            <div class="glass-card rounded-2xl p-4 shadow-sm">
+                <div class="text-xs font-semibold uppercase tracking-wider text-slate-400 mb-1">Có ảnh đính kèm</div>
+                <div class="text-3xl font-extrabold text-indigo-600" id="stat-images">
+                    {{ reports|selectattr('imageUrl')|list|length }}
+                </div>
+                <div class="text-xs text-slate-500 mt-1">Lưu trữ tại <code class="text-slate-700 bg-slate-100 px-1 rounded">be/uploads/</code></div>
+            </div>
+
+            <div class="glass-card rounded-2xl p-4 shadow-sm">
+                <div class="text-xs font-semibold uppercase tracking-wider text-slate-400 mb-1">Kích thước Probe</div>
+                <div class="text-3xl font-extrabold text-amber-600">64 KB</div>
+                <div class="text-xs text-slate-500 mt-1">Đường dẫn: <code class="text-slate-700 bg-slate-100 px-1 rounded">GET /probe</code></div>
+            </div>
+
+            <div class="glass-card rounded-2xl p-4 shadow-sm">
+                <div class="text-xs font-semibold uppercase tracking-wider text-slate-400 mb-1">Báo cáo gần nhất</div>
+                <div class="text-sm font-bold text-slate-800 truncate" id="stat-latest">
+                    {% if reports|length > 0 %}
+                        {{ reports[0].serverReceivedAt }}
+                    {% else %}
+                        Chưa có dữ liệu
+                    {% endif %}
+                </div>
+                <div class="text-xs text-slate-500 mt-1">Tự động cập nhật mỗi 5s</div>
+            </div>
+        </div>
+
+        <!-- Endpoints Cheat Sheet -->
+        <div class="glass-card rounded-2xl p-5 shadow-sm border-l-4 border-l-rose-600">
+            <h2 class="text-sm font-bold text-slate-800 mb-2 flex items-center gap-2">
+                <svg class="w-4 h-4 text-rose-600" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"/></svg>
+                Thông tin API Contract cho Frontend Flutter
+            </h2>
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-3 text-xs">
+                <div class="bg-slate-100/70 p-2.5 rounded-lg border border-slate-200">
+                    <span class="font-bold text-emerald-700">GET /probe</span>
+                    <p class="text-slate-600 mt-0.5">Dùng để FE tính throughput tốc độ mạng trước khi gửi tin. Trả về đúng 65,536 bytes.</p>
+                </div>
+                <div class="bg-slate-100/70 p-2.5 rounded-lg border border-slate-200">
+                    <span class="font-bold text-blue-700">POST /api/reports</span>
+                    <p class="text-slate-600 mt-0.5"><code class="text-slate-800 font-mono">multipart/form-data</code> với <code class="font-mono text-slate-800">meta</code> (JSON) + <code class="font-mono text-slate-800">image</code> (JPEG tùy chọn).</p>
+                </div>
+            </div>
+        </div>
+
+        <!-- Reports Table -->
+        <div class="glass-card rounded-2xl shadow-sm overflow-hidden">
+            <div class="px-5 py-4 border-b border-slate-200 flex flex-wrap items-center justify-between gap-3 bg-slate-50/50">
+                <div>
+                    <h2 class="text-base font-bold text-slate-800">Danh Sách Báo Cáo Cứu Hộ Đã Tiếp Nhận</h2>
+                    <p class="text-xs text-slate-500">Dữ liệu được lưu trong <code class="bg-slate-200/60 px-1 py-0.5 rounded text-slate-700">SQLite: be/data/rescue_reports.db</code> (Ảnh lưu tại <code class="bg-slate-200/60 px-1 py-0.5 rounded text-slate-700">be/uploads/</code>)</p>
+                </div>
+                <div class="flex items-center gap-2">
+                    <button onclick="clearReports()" class="text-xs text-rose-600 hover:text-rose-700 hover:bg-rose-50 px-2.5 py-1.5 rounded-lg border border-rose-200 font-semibold transition">
+                        Xóa tất cả báo cáo
+                    </button>
+                </div>
+            </div>
+
+            {% if reports|length == 0 %}
+                <div class="p-12 text-center">
+                    <div class="w-16 h-16 rounded-full bg-slate-100 flex items-center justify-center mx-auto mb-3 text-slate-400">
+                        <svg class="w-8 h-8" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M20 13V6a2 2 0 00-2-2H6a2 2 0 00-2 2v7m16 0v5a2 2 0 01-2 2H6a2 2 0 01-2-2v-5m16 0h-2.586a1 1 0 00-.707.293l-2.414 2.414a1 1 0 01-.707.293h-3.172a1 1 0 01-.707-.293l-2.414-2.414A1 1 0 006.586 13H4"/></svg>
+                    </div>
+                    <h3 class="text-sm font-semibold text-slate-700">Chưa có báo cáo nào được gửi lên</h3>
+                    <p class="text-xs text-slate-400 max-w-sm mx-auto mt-1">Khởi động ứng dụng Flutter hoặc chạy <code class="bg-slate-100 px-1 py-0.5 rounded text-slate-600">python test_client.py</code> để gửi thử dữ liệu mẫu.</p>
+                </div>
+            {% else %}
+                <div class="overflow-x-auto">
+                    <table class="w-full text-left text-xs">
+                        <thead class="bg-slate-100/70 text-slate-600 uppercase font-semibold text-[11px] border-b border-slate-200">
+                            <tr>
+                                <th class="py-3 px-4">Thời gian nhận</th>
+                                <th class="py-3 px-4">ID Báo Cáo</th>
+                                <th class="py-3 px-4">Vị trí (GPS)</th>
+                                <th class="py-3 px-4">Số nạn nhân</th>
+                                <th class="py-3 px-4">Chế độ gửi / Nhãn</th>
+                                <th class="py-3 px-4">Ảnh đính kèm</th>
+                                <th class="py-3 px-4 text-right">Chi tiết</th>
+                            </tr>
+                        </thead>
+                        <tbody class="divide-y divide-slate-200/70">
+                            {% for r in reports %}
+                            {% set p = r.payload %}
+                            <tr class="hover:bg-slate-50 transition">
+                                <td class="py-3 px-4 font-mono text-slate-500 whitespace-nowrap">
+                                    {{ r.serverReceivedAt[:19].replace('T', ' ') }}
+                                </td>
+                                <td class="py-3 px-4 font-mono font-medium text-slate-800">
+                                    {{ r.id }}
+                                </td>
+                                <td class="py-3 px-4 whitespace-nowrap">
+                                    {% if p.lat is defined and p.lat is not none and p.lng is defined and p.lng is not none %}
+                                        <a href="https://www.google.com/maps?q={{ p.lat }},{{ p.lng }}" target="_blank" class="text-blue-600 hover:underline flex items-center gap-1 font-mono">
+                                            <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z"/><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 11a3 3 0 11-6 0 3 3 0 016 0z"/></svg>
+                                            {{ "%.4f"|format(p.lat) }}, {{ "%.4f"|format(p.lng) }}
+                                        </a>
+                                    {% else %}
+                                        <span class="text-slate-400 italic">Không có GPS</span>
+                                    {% endif %}
+                                </td>
+                                <td class="py-3 px-4 whitespace-nowrap">
+                                    {% if p.trappedCount is defined or p.injuredCount is defined %}
+                                        <div class="flex items-center gap-1.5">
+                                            <span class="px-2 py-0.5 rounded bg-rose-100 text-rose-700 font-semibold" title="Mắc kẹt">
+                                                🚨 {{ p.trappedCount|default(0) }} kẹt
+                                            </span>
+                                            <span class="px-2 py-0.5 rounded bg-amber-100 text-amber-700 font-semibold" title="Bị thương">
+                                                🩹 {{ p.injuredCount|default(0) }} thương
+                                            </span>
+                                        </div>
+                                    {% else %}
+                                        <span class="text-slate-400">-</span>
+                                    {% endif %}
+                                </td>
+                                <td class="py-3 px-4">
+                                    <div class="flex flex-col gap-1">
+                                        <span class="font-medium text-slate-700">
+                                            {{ p.sendMode|default(p.mode)|default('unknown') }}
+                                        </span>
+                                        {% if p.aiTags is defined and p.aiTags %}
+                                            <div class="flex flex-wrap gap-1">
+                                                {% for tag in p.aiTags %}
+                                                <span class="bg-indigo-50 text-indigo-700 border border-indigo-200 px-1.5 py-0.5 rounded text-[10px]">
+                                                    {{ tag.label }} ({{ (tag.confidence * 100)|round|int }}%)
+                                                </span>
+                                                {% endfor %}
+                                            </div>
+                                        {% elif p.label is defined %}
+                                            <span class="text-[11px] text-slate-500 font-medium">Nhãn: {{ p.label }}</span>
+                                        {% endif %}
+                                    </div>
+                                </td>
+                                <td class="py-3 px-4">
+                                    {% if r.imageUrl %}
+                                        <a href="{{ r.imageUrl }}" target="_blank" class="block w-12 h-12 rounded-lg overflow-hidden border border-slate-200 shadow-sm hover:opacity-80 transition">
+                                            <img src="{{ r.imageUrl }}" alt="Report Photo" class="w-full h-full object-cover">
+                                        </a>
+                                    {% else %}
+                                        <span class="text-slate-400 italic">Không có ảnh</span>
+                                    {% endif %}
+                                </td>
+                                <td class="py-3 px-4 text-right">
+                                    <button onclick='viewDetails({{ r|tojson }})' class="text-xs bg-slate-100 hover:bg-slate-200 text-slate-700 px-2.5 py-1 rounded font-medium transition">
+                                        Xem JSON
+                                    </button>
+                                </td>
+                            </tr>
+                            {% endfor %}
+                        </tbody>
+                    </table>
+                </div>
+            {% endif %}
+        </div>
+    </main>
+
+    <!-- Modal for JSON Inspection -->
+    <div id="json-modal" class="fixed inset-0 bg-slate-900/50 backdrop-blur-sm z-50 hidden flex items-center justify-center p-4">
+        <div class="bg-white rounded-2xl max-w-2xl w-full max-h-[85vh] flex flex-col shadow-2xl overflow-hidden">
+            <div class="px-5 py-4 border-b border-slate-200 flex items-center justify-between bg-slate-50">
+                <h3 class="text-sm font-bold text-slate-800" id="modal-title">Chi Tiết Báo Cáo JSON</h3>
+                <button onclick="closeModal()" class="text-slate-400 hover:text-slate-600">
+                    <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"/></svg>
+                </button>
+            </div>
+            <div class="p-4 overflow-y-auto flex-1">
+                <pre id="modal-content" class="text-xs bg-slate-900 text-emerald-400 p-4 rounded-xl overflow-x-auto"></pre>
+            </div>
+            <div class="px-5 py-3 border-t border-slate-200 bg-slate-50 text-right">
+                <button onclick="closeModal()" class="text-xs bg-slate-800 text-white px-4 py-1.5 rounded-lg font-medium hover:bg-slate-700 transition">
+                    Đóng
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        function viewDetails(data) {
+            document.getElementById('modal-title').textContent = 'Chi Tiết: ' + data.id;
+            document.getElementById('modal-content').textContent = JSON.stringify(data, null, 2);
+            document.getElementById('json-modal').classList.remove('hidden');
+        }
+        function closeModal() {
+            document.getElementById('json-modal').classList.add('hidden');
+        }
+        async function clearReports() {
+            if (!confirm("Bạn có chắc chắn muốn xóa toàn bộ lịch sử báo cáo không?")) return;
+            const res = await fetch('/api/reports', { method: 'DELETE' });
+            if (res.ok) location.reload();
+        }
+    </script>
+</body>
+</html>

@@ -1,0 +1,166 @@
+{
+  "metadata": {
+    "checkpoint_model_a": "E:\\RHNA\\1Visual\\NCKH\\model\\models\\mobilenetv3_large_relabel\\flood_mobilenetv3_large_relabel_best.pth",
+    "checkpoint_model_b_onnx": "E:\\RHNA\\1Visual\\NCKH\\app\\assets\\models\\model.onnx",
+    "dataset_path": "E:\\RHNA\\1Visual\\NCKH\\model\\Dataset_Flood",
+    "total_samples": 1625,
+    "class_ordering": [
+      "low",
+      "medium",
+      "high",
+      "non_flood"
+    ],
+    "pytorch_version": "2.14.0+cu126",
+    "device": "cuda"
+  },
+  "agreement": {
+    "total_images": 1625,
+    "agree_count": 1625,
+    "disagree_count": 0,
+    "agree_rate": 1.0,
+    "disagree_rate": 0.0
+  },
+  "disagreement_breakdown": {
+    "a_correct_b_wrong": 0,
+    "a_wrong_b_correct": 0,
+    "both_wrong_diff_class": 0
+  },
+  "confidence_margin": {
+    "model_a_pytorch": {
+      "conf_mean": 0.8302049366327432,
+      "conf_median": 0.8856610655784607,
+      "margin_mean": 0.7051927259172887,
+      "margin_median": 0.8068064674735069
+    },
+    "model_b_onnx": {
+      "conf_mean": 0.8302175451242007,
+      "conf_median": 0.8860692381858826,
+      "margin_mean": 0.7051980721466959,
+      "margin_median": 0.8058108985424042
+    }
+  },
+  "probability_distribution_metrics": {
+    "cosine_similarity": {
+      "mean": 0.9999977363806505,
+      "median": 0.9999998807907104,
+      "p95": 1.0000001192092896,
+      "max": 1.0000001192092896
+    },
+    "l1_distance": {
+      "mean": 0.00163993227152521,
+      "median": 0.0009097135625779629,
+      "p95": 0.0056373195722699155,
+      "max": 0.018558170646429062
+    },
+    "l2_distance": {
+      "mean": 0.0010578254633412424,
+      "median": 0.0005770405405201018,
+      "p95": 0.003641674062237143,
+      "max": 0.011386235244572163
+    },
+    "max_abs_diff": {
+      "mean": 0.0008065777421355821,
+      "median": 0.00044018030166625977,
+      "p95": 0.0027837336063385,
+      "max": 0.00925484299659729
+    },
+    "js_divergence": {
+      "mean": 1.3572370609499922e-06,
+      "median": 4.373544300051435e-07,
+      "p95": NaN,
+      "max": 7.713260856689885e-05
+    }
+  },
+  "classification_metrics": {
+    "model_a_pytorch": {
+      "accuracy": 0.8658461538461538,
+      "balanced_accuracy": 0.8529055903695112,
+      "macro_f1": 0.8545959057289624,
+      "ece": 0.03696836719146142,
+      "brier_score": 0.20789914047365898
+    },
+    "model_b_onnx": {
+      "accuracy": 0.8658461538461538,
+      "balanced_accuracy": 0.8529055903695112,
+      "macro_f1": 0.8545959057289624,
+      "ece": 0.036959839123945994,
+      "brier_score": 0.20788223056678592
+    },
+    "per_class": {
+      "low": {
+        "precision_a": 0.8032036613272311,
+        "precision_b": 0.8032036613272311,
+        "recall_a": 0.904639175257732,
+        "recall_b": 0.904639175257732,
+        "f1_a": 0.850909090909091,
+        "f1_b": 0.850909090909091,
+        "diff_recall": 0.0
+      },
+      "medium": {
+        "precision_a": 0.7900552486187845,
+        "precision_b": 0.7900552486187845,
+        "recall_a": 0.7944444444444444,
+        "recall_b": 0.7944444444444444,
+        "f1_a": 0.7922437673130194,
+        "f1_b": 0.7922437673130194,
+        "diff_recall": 0.0
+      },
+      "high": {
+        "precision_a": 0.90625,
+        "precision_b": 0.90625,
+        "recall_a": 0.7521613832853026,
+        "recall_b": 0.7521613832853026,
+        "f1_a": 0.8220472440944881,
+        "f1_b": 0.8220472440944881,
+        "diff_recall": 0.0
+      },
+      "non_flood": {
+        "precision_a": 0.9460966542750929,
+        "precision_b": 0.9460966542750929,
+        "recall_a": 0.960377358490566,
+        "recall_b": 0.960377358490566,
+        "f1_a": 0.9531835205992509,
+        "f1_b": 0.9531835205992509,
+        "diff_recall": 0.0
+      }
+    }
+  },
+  "image_distribution_stats": {
+    "brightness": {
+      "mean": 110.65163158964951,
+      "std": 29.01928430724294,
+      "median": 113.1886690391459,
+      "p5": 58.86035654218746,
+      "p95": 155.330627040267
+    },
+    "contrast": {
+      "mean": 54.737157052424294,
+      "std": 10.623422915081658,
+      "median": 55.116053469208,
+      "p5": 36.84603441508552,
+      "p95": 71.65846928044242
+    },
+    "sharpness": {
+      "mean": 338.20831872764,
+      "std": 242.86437992631323,
+      "median": 284.9225769042969,
+      "p5": 53.85865478515625,
+      "p95": 795.6397583007812
+    },
+    "saturation": {
+      "mean": 66.58266581757859,
+      "std": 31.67854605129835,
+      "median": 60.367957204433495,
+      "p5": 26.052093586388093,
+      "p95": 129.63516956147694
+    },
+    "aspect_ratio": {
+      "mean": 1.5351839582551385,
+      "std": 0.31573897208916407,
+      "median": 1.5027322404371584,
+      "p5": 0.75,
+      "p95": 2.0
+    }
+  },
+  "case_decision": "CASE A — Hai model thực sự tương đương 100% (High Agreement & Identical Distribution)"
+}
