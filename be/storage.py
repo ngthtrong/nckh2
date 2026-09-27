@@ -334,6 +334,61 @@ def clear_reports() -> int:
     return count
 
 
+class StatusUpdateError(Exception):
+    """Cập nhật trạng thái bị từ chối; ``code`` theo docs/contact_connect.md."""
+
+    def __init__(self, code: str, message: Optional[str] = None) -> None:
+        super().__init__(message or code)
+        self.code = code
+        self.message = message
+
+
+def apply_status_update(
+    conn: sqlite3.Connection, target_id: Any, new_status: Any, new_version: Any
+) -> Tuple[Dict[str, Any], str]:
+    """Kiểm tra và ghi chuyển trạng thái (chưa commit). Trả về (kết quả, trạng thái cũ)."""
+    if not target_id or new_status not in VALID_RESCUE_STATUS_ORDER or not isinstance(new_version, int):
+        raise StatusUpdateError("INVALID_PAYLOAD")
+
+    current_rep = conn.execute(
+        "SELECT status, status_version FROM reports WHERE id = ?", (target_id,)
+    ).fetchone()
+    if not current_rep:
+        raise StatusUpdateError("REPORT_NOT_FOUND", f"Không tìm thấy báo cáo {target_id}")
+
+    curr_status = current_rep["status"]
+    curr_version = current_rep["status_version"] or 1
+
+    # statusVersion phải lớn hơn version hiện tại
+    if new_version <= curr_version:
+        raise StatusUpdateError(
+            "INVALID_STATUS_VERSION", f"statusVersion {new_version} <= hiện tại {curr_version}"
+        )
+
+    # Chỉ được tiến về phía trước: processing -> dispatched -> resolved
+    curr_rank = VALID_RESCUE_STATUS_ORDER.get(curr_status, 1)
+    new_rank = VALID_RESCUE_STATUS_ORDER.get(new_status, 1)
+    if new_rank < curr_rank:
+        raise StatusUpdateError(
+            "INVALID_STATUS_TRANSITION", f"Không thể lùi trạng thái từ {curr_status} về {new_status}"
+        )
+
+    conn.execute(
+        "UPDATE reports SET status = ?, status_version = ? WHERE id = ?",
+        (new_status, new_version, target_id),
+    )
+    return {"id": target_id, "status": new_status, "statusVersion": new_version}, curr_status
+
+
+def update_report_status(report_id: str, new_status: str, new_version: int) -> Dict[str, Any]:
+    """Cập nhật trạng thái từ dashboard điều phối (cùng quy tắc với UPDATE_RESCUE_STATUS)."""
+    with get_db_connection() as conn:
+        result, curr_status = apply_status_update(conn, report_id, new_status, new_version)
+        conn.commit()
+    logger.info(f"[CRUD][STATUS] {report_id}: {curr_status} -> v{new_version} {new_status}")
+    return result
+
+
 def process_sync_messages(messages: List[Dict[str, Any]]) -> List[Dict[str, Any]]:
     """Xử lý danh sách message theo contact_connect.md trong transaction an toàn."""
     results = []
@@ -480,69 +535,24 @@ def process_sync_messages(messages: List[Dict[str, Any]]) -> List[Dict[str, Any]
                 })
 
             elif op_type == "UPDATE_RESCUE_STATUS":
-                target_id = payload.get("id")
-                new_status = payload.get("status")
-                new_version = payload.get("statusVersion")
-
-                if not target_id or new_status not in VALID_RESCUE_STATUS_ORDER or not isinstance(new_version, int):
-                    logger.warning(f"[SYNC][REJECTED] msg={msg_id} op=UPDATE_RESCUE_STATUS code=INVALID_PAYLOAD")
+                try:
+                    res_data, curr_status = apply_status_update(
+                        conn, payload.get("id"), payload.get("status"), payload.get("statusVersion")
+                    )
+                except StatusUpdateError as err:
+                    logger.warning(f"[SYNC][REJECTED] msg={msg_id} op=UPDATE_RESCUE_STATUS code={err.code}")
                     results.append({
                         "message_id": msg_id,
                         "status": "rejected",
                         "retryable": False,
-                        "code": "INVALID_PAYLOAD",
-                        "result": None,
+                        "code": err.code,
+                        "result": {"error": err.message} if err.message else None,
                     })
                     continue
 
-                rep_cur = conn.execute("SELECT status, status_version FROM reports WHERE id = ?", (target_id,))
-                current_rep = rep_cur.fetchone()
-                if not current_rep:
-                    logger.warning(f"[SYNC][REJECTED] msg={msg_id} code=REPORT_NOT_FOUND target={target_id}")
-                    results.append({
-                        "message_id": msg_id,
-                        "status": "rejected",
-                        "retryable": False,
-                        "code": "REPORT_NOT_FOUND",
-                        "result": {"error": f"Không tìm thấy báo cáo {target_id}"},
-                    })
-                    continue
-
-                curr_status = current_rep["status"]
-                curr_version = current_rep["status_version"] or 1
-
-                # statusVersion phải lớn hơn version hiện tại
-                if new_version <= curr_version:
-                    logger.warning(f"[SYNC][REJECTED] msg={msg_id} code=INVALID_STATUS_VERSION v{new_version}<=v{curr_version}")
-                    results.append({
-                        "message_id": msg_id,
-                        "status": "rejected",
-                        "retryable": False,
-                        "code": "INVALID_STATUS_VERSION",
-                        "result": {"error": f"statusVersion {new_version} <= hiện tại {curr_version}"},
-                    })
-                    continue
-
-                # Chỉ được tiến về phía trước: processing -> dispatched -> resolved
-                curr_rank = VALID_RESCUE_STATUS_ORDER.get(curr_status, 1)
-                new_rank = VALID_RESCUE_STATUS_ORDER.get(new_status, 1)
-                if new_rank < curr_rank:
-                    logger.warning(f"[SYNC][REJECTED] msg={msg_id} code=INVALID_STATUS_TRANSITION {curr_status}->{new_status}")
-                    results.append({
-                        "message_id": msg_id,
-                        "status": "rejected",
-                        "retryable": False,
-                        "code": "INVALID_STATUS_TRANSITION",
-                        "result": {"error": f"Không thể lùi trạng thái từ {curr_status} về {new_status}"},
-                    })
-                    continue
-
-                conn.execute(
-                    "UPDATE reports SET status = ?, status_version = ? WHERE id = ?",
-                    (new_status, new_version, target_id),
-                )
-
-                res_data = {"id": target_id, "status": new_status, "statusVersion": new_version}
+                target_id = res_data["id"]
+                new_status = res_data["status"]
+                new_version = res_data["statusVersion"]
 
                 conn.execute(
                     """
