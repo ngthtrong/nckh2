@@ -1,5 +1,7 @@
 import 'package:app/core/sync/payload_hash.dart';
 import 'package:app/data/models/sync_message_model.dart';
+import 'package:app/data/models/rescue_record_payload.dart';
+import 'package:app/domain/entities/rescue_record.dart';
 import 'package:flutter_test/flutter_test.dart';
 
 void main() {
@@ -39,5 +41,33 @@ void main() {
       'payload',
     });
     expect(message.toRequestJson(), isNot(contains('attempt_count')));
+  });
+
+  test('payload cứu hộ chứa tình trạng khẩn cấp đã chọn', () {
+    final payload = rescueRecordPayload(
+      RescueRecord(
+        id: 'rescue-1',
+        createdAt: DateTime.utc(2026, 9, 27),
+        lat: 10.0405,
+        lng: 105.7606,
+        trappedCount: 2,
+        injuredCount: 1,
+        vulnerableGroups: const ['Trẻ em'],
+        cannotMove: true,
+        severeSigns: const ['unresponsive', 'heavy_bleeding'],
+        description: 'Nước đang dâng',
+        sendMode: 'direct',
+      ),
+    );
+
+    expect(payload['L_i'], {'lat': 10.0405, 'lon': 105.7606});
+    expect(payload['N_i'], 2);
+    expect(payload['injury_count'], 1);
+    expect(payload['urgency_features'], {
+      'cannot_move': true,
+      'severe_condition': true,
+      'severe_signs': ['unresponsive', 'heavy_bleeding'],
+    });
+    expect(payload['image_attached'], false);
   });
 }

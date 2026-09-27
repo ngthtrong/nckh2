@@ -8,10 +8,15 @@ Server giả lập (Mock Server) viết bằng Python (FastAPI) phục vụ ti�
 
 ### Cách 1: Dùng script tiện ích (khuyến nghị trên Windows)
 
-- **PowerShell**:
+- **PowerShell (khuyến nghị, không phụ thuộc Execution Policy)**:
   ```powershell
   cd be
-  .\run.ps1
+  .\run.bat
+  ```
+- **PowerShell dùng `run.ps1`**:
+  ```powershell
+  cd be
+  powershell -NoProfile -ExecutionPolicy Bypass -File .\run.ps1
   ```
 - **CMD**:
   ```cmd
@@ -19,13 +24,44 @@ Server giả lập (Mock Server) viết bằng Python (FastAPI) phục vụ ti�
   run.bat
   ```
 
-### Cách 2: Khởi chạy thủ công bằng venv
+Hai script sẽ tự đồng bộ `requirements.txt` vào `.venv` trước khi chạy, kể cả
+khi môi trường đã tồn tại.
+
+### Cách 2: Khởi chạy thủ công bằng venv, không cần activate
 
 ```powershell
 cd be
-.\.venv\Scripts\Activate.ps1
-python main.py
+.\.venv\Scripts\python.exe -m pip install -r requirements.txt
+.\.venv\Scripts\python.exe -m uvicorn main:app --host 0.0.0.0 --port 8000
 ```
+
+Đây là cách ổn định nhất vì gọi trực tiếp Python trong `.venv`, không chạy
+`Activate.ps1` nên không bị chặn bởi PowerShell Execution Policy.
+
+### Cách 3: Activate `.venv`
+
+**PowerShell** (chỉ nới Execution Policy cho cửa sổ hiện tại):
+
+```powershell
+Set-ExecutionPolicy -Scope Process -ExecutionPolicy Bypass
+.\.venv\Scripts\Activate.ps1
+```
+
+**CMD**:
+
+```cmd
+.venv\Scripts\activate.bat
+```
+
+Sau khi kích hoạt thành công, đầu dòng lệnh sẽ có `(.venv)`. Có thể khởi động
+server bằng:
+
+```text
+python -m pip install -r requirements.txt
+python -m uvicorn main:app --host 0.0.0.0 --port 8000
+```
+
+Đường dẫn phải bắt đầu bằng `.\.venv`; `..venv` là sai vì thiếu dấu `\`.
 
 Server sẽ lắng nghe trên cổng `8000` tại tất cả interface mạng (`0.0.0.0:8000`).
 

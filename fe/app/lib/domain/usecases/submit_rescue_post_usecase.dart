@@ -16,6 +16,8 @@ class SubmitRescuePostUseCase {
     int trappedCount = 0,
     int injuredCount = 0,
     List<String> vulnerableGroups = const [],
+    bool cannotMove = false,
+    List<String> severeSigns = const [],
     String description = '',
     required String sendMode,
   }) async {
@@ -30,6 +32,8 @@ class SubmitRescuePostUseCase {
       trappedCount: trappedCount,
       injuredCount: injuredCount,
       vulnerableGroups: vulnerableGroups,
+      cannotMove: cannotMove,
+      severeSigns: severeSigns,
       description: description,
       sendMode: sendMode,
       synced: false,

@@ -37,6 +37,11 @@ CREATE INDEX IF NOT EXISTS idx_reports_received_at
 ON reports (server_received_at DESC);
 ```
 
+`raw_payload` lưu cả `urgency_features` và các alias nghiên cứu `L_i`, `T_i`,
+`N_i`, `injury_count`, `E_i`, `vulnerability_flags`, `V_i`, `note`,
+`image_attached`. Các field này chưa tách thành cột riêng; payload cũ không có
+chúng vẫn hợp lệ và được hiểu với giá trị mặc định `false`/mảng rỗng ở mobile.
+
 Khi khởi động, mock server tự migrate database cũ: default `received` được đổi
 thành `processing`, các dòng legacy có trạng thái `received` cũng được chuẩn hóa
 thành `processing`, không xóa dữ liệu báo cáo.

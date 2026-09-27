@@ -11,6 +11,7 @@ import '../datasources/record_local_datasource.dart';
 import '../datasources/sender_remote_datasource.dart';
 import '../datasources/sync_remote_datasource.dart';
 import '../models/sync_message_model.dart';
+import '../models/rescue_record_payload.dart';
 
 class RescueRepositoryImpl implements RescueRepository {
   final RecordLocalDataSource localDataSource;
@@ -69,7 +70,7 @@ class RescueRepositoryImpl implements RescueRepository {
   }
 
   Future<void> _enqueue(RescueRecord record) =>
-      outboxDataSource.enqueueCreate(_payload(record));
+      outboxDataSource.enqueueCreate(rescueRecordPayload(record));
 
   Future<void> _flushOutbox() async {
     var batch = outboxDataSource.readyMessages();
@@ -158,18 +159,4 @@ class RescueRepositoryImpl implements RescueRepository {
         }),
       )
       .length;
-
-  Map<String, dynamic> _payload(RescueRecord record) => {
-    'id': record.id,
-    'createdAt': record.createdAt.toUtc().toIso8601String(),
-    'lat': record.lat,
-    'lng': record.lng,
-    'trappedCount': record.trappedCount,
-    'injuredCount': record.injuredCount,
-    'vulnerableGroups': record.vulnerableGroups,
-    'description': record.description,
-    'aiTags': record.aiTags.map((tag) => tag.toJson()).toList(),
-    'sendMode': record.sendMode,
-    'status': record.status,
-  };
 }

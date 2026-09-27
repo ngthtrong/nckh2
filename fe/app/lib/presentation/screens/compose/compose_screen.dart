@@ -5,7 +5,9 @@ import 'package:image_picker/image_picker.dart';
 import '../../../core/constants/app_colors.dart';
 import '../../../domain/entities/ai_tag.dart';
 import '../../controllers/app_controller.dart';
+import '../../widgets/emergency_condition_selector.dart';
 import '../../widgets/number_stepper_input.dart';
+import '../../widgets/payload_demo_panel.dart';
 import '../../widgets/screen_header.dart';
 import '../../widgets/tag_chip.dart';
 import '../../widgets/vulnerable_group_selector.dart';
@@ -30,6 +32,9 @@ class _ComposeScreenState extends State<ComposeScreen> {
   int _trappedCount = 0;
   int _injuredCount = 0;
   List<String> _vulnerableGroups = [];
+  bool _cannotMove = false;
+  List<String> _severeSigns = [];
+  final DateTime _draftCreatedAt = DateTime.now().toUtc();
   final TextEditingController _descController = TextEditingController();
 
   String? _imagePath;
@@ -63,6 +68,8 @@ class _ComposeScreenState extends State<ComposeScreen> {
       trappedCount: _trappedCount,
       injuredCount: _injuredCount,
       vulnerableGroups: _vulnerableGroups,
+      cannotMove: _cannotMove,
+      severeSigns: _severeSigns,
       description: _descController.text.trim(),
       imagePath: _imagePath,
       aiTags: _aiTags,
@@ -88,6 +95,8 @@ class _ComposeScreenState extends State<ComposeScreen> {
         (_trappedCount > 0 ||
             _injuredCount > 0 ||
             _vulnerableGroups.isNotEmpty ||
+            _cannotMove ||
+            _severeSigns.isNotEmpty ||
             _descController.text.trim().isNotEmpty ||
             _imagePath != null) &&
         !_isSubmitting;
@@ -104,8 +113,8 @@ class _ComposeScreenState extends State<ComposeScreen> {
                 onPressed: canSubmit ? _handleSubmit : null,
                 style: ElevatedButton.styleFrom(
                   backgroundColor: AppColors.primaryRed,
-                  disabledBackgroundColor: AppColors.primaryRed.withOpacity(
-                    0.4,
+                  disabledBackgroundColor: AppColors.primaryRed.withValues(
+                    alpha: 0.4,
                   ),
                   elevation: 0,
                   shape: RoundedRectangleBorder(
@@ -207,6 +216,16 @@ class _ComposeScreenState extends State<ComposeScreen> {
                       value: _injuredCount,
                       icon: Icons.local_hospital_outlined,
                       onChanged: (val) => setState(() => _injuredCount = val),
+                    ),
+                    const SizedBox(height: 18),
+
+                    EmergencyConditionSelector(
+                      cannotMove: _cannotMove,
+                      severeSigns: _severeSigns,
+                      onCannotMoveChanged: (value) =>
+                          setState(() => _cannotMove = value),
+                      onSevereSignsChanged: (values) =>
+                          setState(() => _severeSigns = values),
                     ),
                     const SizedBox(height: 18),
 
@@ -433,6 +452,9 @@ class _ComposeScreenState extends State<ComposeScreen> {
                       const SizedBox(height: 18),
                     ],
 
+                    PayloadDemoPanel(payload: _buildPayloadDemo()),
+                    const SizedBox(height: 18),
+
                     // Tips Panel
                     Container(
                       width: double.infinity,
@@ -490,4 +512,26 @@ class _ComposeScreenState extends State<ComposeScreen> {
       ),
     );
   }
+
+  Map<String, dynamic> _buildPayloadDemo() => {
+    'L_i': {
+      'lat': widget.controller.currentLat,
+      'lon': widget.controller.currentLng,
+    },
+    'T_i': _draftCreatedAt.toIso8601String(),
+    'N_i': _trappedCount,
+    'injury_count': _injuredCount,
+    'urgency_features': {
+      'cannot_move': _cannotMove,
+      'severe_condition': _severeSigns.isNotEmpty,
+      'severe_signs': _severeSigns,
+    },
+    'E_i': null,
+    'vulnerability_flags': _vulnerableGroups,
+    'V_i': _vulnerableGroups.length,
+    'note': _descController.text.trim().isEmpty
+        ? null
+        : _descController.text.trim(),
+    'image_attached': _imagePath != null,
+  };
 }
