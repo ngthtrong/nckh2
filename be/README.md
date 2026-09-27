@@ -36,8 +36,9 @@ Server sẽ lắng nghe trên cổng `8000` tại tất cả interface mạng (`
 ## 2. Các Địa Chỉ Truy Cập
 
 - **Web Dashboard điều phối**: [http://localhost:8000/](http://localhost:8000/)  
-  Đăng nhập bằng tên điều phối viên (ghi vào nhật ký) và mật khẩu chung
-  `RESCUE_DASHBOARD_PASSWORD` (mặc định `cuuho2026`, **đổi khi triển khai thật**).
+  Lần đầu đăng nhập bằng tài khoản quản trị `admin` / `cuuho2026` (hoặc `RESCUE_ADMIN_USERNAME` /
+  `RESCUE_ADMIN_PASSWORD` đặt trước khi tạo DB; **đổi mật khẩu khi triển khai thật**), rồi tạo tài
+  khoản riêng cho từng điều phối viên ở mục "Tài khoản". Tên hiển thị được ghi vào nhật ký thao tác.
   Chức năng: bản đồ (tô màu theo cụm/trạng thái, bản đồ nhiệt, hiện báo cáo đã kết thúc),
   xếp hạng cụm ưu tiên, hàng "Cần xem xét" cho báo cáo thiếu GPS (nhập vị trí trên bản
   đồ hoặc bằng tọa độ), bảng báo cáo có tìm kiếm/lọc/sắp xếp/phân trang và chọn nhiều,
@@ -113,8 +114,10 @@ Tùy vào môi trường chạy Flutter app, cấu hình `kServerBaseUrl` trong 
   ```
 
 ### API dashboard (cần đăng nhập)
-Đăng nhập qua `POST /api/auth/login` `{"operator": "...", "password": "..."}`: server đặt
-cookie HttpOnly và trả `token` để script gọi bằng `Authorization: Bearer <token>`.
+Đăng nhập qua `POST /api/auth/login` `{"username": "...", "password": "..."}`: server đặt
+cookie HttpOnly và trả `token` để script gọi bằng `Authorization: Bearer <token>`. Vai trò
+`admin` quản lý tài khoản (`/api/operators`), tải sao lưu và xóa dữ liệu demo; `operator` làm
+các thao tác điều phối còn lại.
 Danh sách đầy đủ và mã lỗi: [`docs/contact_connect.md`](../docs/contact_connect.md#endpoint-dành-cho-dashboard-điều-phối).
 
 | Endpoint | Mục đích |
@@ -129,15 +132,20 @@ Danh sách đầy đủ và mã lỗi: [`docs/contact_connect.md`](../docs/conta
 | `GET/POST /api/teams`, `PATCH /api/teams/{id}` | Đội cứu hộ |
 | `GET /api/stats` | Số lượng theo trạng thái, thời gian phản ứng, lưu lượng 24 giờ |
 | `GET /api/export?format=csv\|geojson` | Xuất theo bộ lọc (CSV có BOM cho Excel) |
-| `GET /api/admin/backup` | Tải bản sao lưu SQLite nhất quán |
-| `DELETE /api/reports` | Xóa toàn bộ dữ liệu, chỉ khi `RESCUE_ALLOW_WIPE=1` |
+| `POST /api/auth/password` | Đổi mật khẩu của mình |
+| `GET/POST /api/operators`, `PATCH /api/operators/{id}` | (admin) Tài khoản: tạo, sửa, khóa, đặt lại mật khẩu |
+| `GET /api/admin/backup[?images=1]` | (admin) Bản sao lưu SQLite; `images=1` là ZIP kèm thư mục ảnh |
+| `DELETE /api/reports` | (admin) Xóa toàn bộ dữ liệu, chỉ khi `RESCUE_ALLOW_WIPE=1` |
+| `GET /healthz` | Kiểm tra sống cho Docker/giám sát (không cần đăng nhập) |
 
 ### Biến môi trường
 
 | Biến | Mặc định | Ý nghĩa |
 |---|---|---|
 | `RESCUE_DB_FILE`, `RESCUE_UPLOADS_DIR` | `data/rescue_reports.db`, `uploads` | DB và thư mục ảnh (tương đối theo `be/`) |
-| `RESCUE_DASHBOARD_PASSWORD` | `cuuho2026` | Mật khẩu chung của điều phối viên |
+| `RESCUE_ADMIN_USERNAME`, `RESCUE_ADMIN_PASSWORD` | `admin`, `cuuho2026` | Tài khoản quản trị tạo khi DB chưa có tài khoản (`RESCUE_DASHBOARD_PASSWORD` cũ vẫn là mật khẩu dự phòng) |
+| `RESCUE_TRUSTED_PROXIES` | trống | Proxy được tin `X-Forwarded-For` (IP, CIDR hoặc tên máy, vd. `dashboard,fe`) |
+| `RESCUE_DEDUP_RETENTION_DAYS` | `30` | Giữ bản ghi chống trùng của `/sync/messages` bao nhiêu ngày |
 | `RESCUE_SESSION_HOURS` | `12` | Thời hạn phiên đăng nhập |
 | `RESCUE_COOKIE_SECURE` | tắt | Đặt `1` khi chạy sau HTTPS |
 | `RESCUE_ALLOW_WIPE` | tắt | Đặt `1` để bật "Xóa toàn bộ dữ liệu" (chỉ demo) |
@@ -169,5 +177,6 @@ Unit test (chạy trên DB tạm, không đụng dữ liệu mẫu):
 
 ## 6. Nơi Lưu Trữ Dữ Liệu
 
-- **Ảnh đính kèm**: Lưu tại thư mục [`be/uploads/`](uploads/) và có thể truy cập qua URL `http://localhost:8000/uploads/<tên_ảnh>`.
+- **Ảnh đính kèm**: Lưu tại thư mục [`be/uploads/`](uploads/) và có thể truy cập qua URL `http://localhost:8000/uploads/<tên_ảnh>` (cần đăng nhập).
+- **Sao lưu**: bật `RESCUE_BACKUP_INTERVAL_MIN` để chụp DB định kỳ vào `RESCUE_BACKUP_DIR` (giữ `RESCUE_BACKUP_KEEP` bản) và chép thêm ảnh mới vào `RESCUE_BACKUP_DIR/uploads/`. Quản trị viên tải bản ZIP (CSDL + ảnh) ở menu "Xuất dữ liệu". Khôi phục: dừng server, chép file `.db` thành `RESCUE_DB_FILE` và thư mục `uploads/` thành `RESCUE_UPLOADS_DIR`.
 - **Dữ liệu báo cáo**: SQLite tại [`be/data/rescue_reports.db`](data/rescue_reports.db) (dữ liệu mẫu đã commit). Đặt `RESCUE_DB_FILE` / `RESCUE_UPLOADS_DIR` để chạy trên DB riêng (`data/reports.json` là file cũ, không còn dùng).

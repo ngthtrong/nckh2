@@ -37,3 +37,7 @@ const bool kPreferTextWhenConfident = true;
 /// Tham số nén thích ứng cho chế độ mạng trung bình / yếu.
 const int kCompressQualityMedium = 60;
 const int kCompressMaxSideMedium = 1024;
+
+/// Chuyển ảnh định dạng server không nhận (vd. HEIC) sang JPEG khi gửi ảnh gốc.
+const int kConvertJpegQuality = 90;
+const int kConvertMaxSide = 4096;

@@ -60,7 +60,7 @@ flowchart LR
 | Mô hình AI | PyTorch → ONNX / ExecuTorch `.pte` | `fe/model/`, `fe/tools/` |
 | Máy chủ | Python, FastAPI, SQLite | `be/main.py`, `be/storage.py` |
 | Thuật toán phân cụm, ưu tiên | NumPy, NetworkX, python-louvain | `be/rescue_core/`, `be/cluster_service.py` |
-| Website điều phối | HTML/CSS/ES module tĩnh + Leaflet (đóng gói sẵn, không CDN), phục vụ bởi FastAPI hoặc nginx; đăng nhập một mật khẩu chung | `be/templates/dashboard.html`, `be/static/`, `be/auth.py`, `be/dashboard_service.py` |
+| Website điều phối | HTML/CSS/ES module tĩnh + Leaflet (đóng gói sẵn, không CDN), phục vụ bởi FastAPI hoặc nginx; đăng nhập bằng tài khoản riêng từng điều phối viên (vai trò admin/operator) | `be/templates/dashboard.html`, `be/static/`, `be/auth.py`, `be/accounts.py`, `be/dashboard_service.py` |
 
 ## 2. Luồng dữ liệu giữa Mobile và Server
 
@@ -269,8 +269,9 @@ RESCUE_DB_FILE=data/demo.db .venv/bin/python main.py                # http://loc
 .venv/bin/python -m unittest test_contract test_cluster_service test_dashboard_api -v
 ```
 
-Dashboard yêu cầu đăng nhập: tên điều phối viên bất kỳ + mật khẩu `RESCUE_DASHBOARD_PASSWORD`
-(mặc định `cuuho2026`).
+Dashboard yêu cầu đăng nhập bằng tài khoản riêng. Lần đầu dùng tài khoản quản trị `admin` /
+`cuuho2026` (hoặc `RESCUE_ADMIN_USERNAME` / `RESCUE_ADMIN_PASSWORD`), rồi tạo tài khoản cho từng
+điều phối viên ở mục "Tài khoản".
 
 Dữ liệu nạp bởi `seed_demo.py` là bán tổng hợp (xem `src/data/README.md`); dashboard hiển
 thị nhãn "Dữ liệu mô phỏng" khi có loại dữ liệu này.

@@ -1,8 +1,9 @@
 import 'dart:convert';
-import 'dart:typed_data';
 
 import 'package:dio/dio.dart';
+import 'package:flutter/foundation.dart';
 
+import '../../config.dart';
 import '../../domain/entities/rescue_record.dart';
 import '../../domain/entities/rescue_status.dart';
 import '../../domain/entities/send_mode.dart';
@@ -208,14 +209,40 @@ class RescueRepositoryImpl implements RescueRepository {
         return false; // chưa tới được server, thử lại lần đồng bộ sau
       case SendMode.compressedImage:
         final compressed = await senderDataSource.compress(imageBytes);
-        return (await senderDataSource.upload(
+        return _deliverImage(
           record,
           compressed ?? imageBytes,
-        )).ok;
+          allowShrink: false,
+        );
       case SendMode.fullImage:
-        return (await senderDataSource.upload(record, imageBytes)).ok;
+        var bytes = imageBytes;
+        if (!isServerSupportedImage(bytes)) {
+          // HEIC hoặc định dạng server không nhận: chuyển sang JPEG, giữ độ phân giải.
+          bytes =
+              await senderDataSource.compress(
+                bytes,
+                quality: kConvertJpegQuality,
+                maxSide: kConvertMaxSide,
+              ) ??
+              bytes;
+        }
+        return _deliverImage(record, bytes);
     }
   }
+
+  Future<bool> _deliverImage(
+    RescueRecord record,
+    Uint8List bytes, {
+    bool allowShrink = true,
+  }) => deliverImage(
+    bytes,
+    upload: (data) => senderDataSource.upload(record, data),
+    shrink: (data) => senderDataSource.compress(data),
+    allowShrink: allowShrink,
+    onGiveUp: (status) => debugPrint(
+      'Server từ chối ảnh của ${record.id} (HTTP $status); bỏ ảnh, báo cáo vẫn đã gửi.',
+    ),
+  );
 
   int _requestSize(List<SyncMessageModel> messages) => utf8
       .encode(

@@ -9,7 +9,65 @@ import 'package:permission_handler/permission_handler.dart';
 import '../../config.dart';
 import '../../domain/entities/rescue_record.dart';
 
-typedef UploadResult = ({bool ok, int bytesSent, int durationMs});
+/// Kết quả gửi ảnh. `status` là mã HTTP khi server trả lời; `permanent` khi server
+/// từ chối vĩnh viễn (gửi lại y hệt cũng vô ích, xem [isPermanentUploadFailure]).
+typedef UploadResult = ({
+  bool ok,
+  int bytesSent,
+  int durationMs,
+  int? status,
+  bool permanent,
+});
+
+/// Định dạng ảnh server nhận (JPEG, PNG, WebP), xác định theo byte đầu file như server.
+bool isServerSupportedImage(Uint8List bytes) {
+  bool startsWith(List<int> prefix, [int offset = 0]) {
+    if (bytes.length < offset + prefix.length) return false;
+    for (var i = 0; i < prefix.length; i++) {
+      if (bytes[offset + i] != prefix[i]) return false;
+    }
+    return true;
+  }
+
+  return startsWith(const [0xFF, 0xD8, 0xFF]) ||
+      startsWith(const [0x89, 0x50, 0x4E, 0x47, 0x0D, 0x0A, 0x1A, 0x0A]) ||
+      (startsWith(const [0x52, 0x49, 0x46, 0x46]) &&
+          startsWith(const [0x57, 0x45, 0x42, 0x50], 8));
+}
+
+/// Lỗi 4xx là vĩnh viễn, trừ 408/429 (tạm thời) và `IMAGE_HASH_MISMATCH` (dữ liệu
+/// hỏng trên đường truyền, gửi lại có thể thành công). Lỗi mạng và 5xx luôn thử lại.
+bool isPermanentUploadFailure(int? status, Object? body) {
+  if (status == null || status < 400 || status >= 500) return false;
+  if (status == 408 || status == 429) return false;
+  if (body is Map && body['detail'] == 'IMAGE_HASH_MISMATCH') return false;
+  return true;
+}
+
+/// Gửi ảnh cho báo cáo đã có metadata trên server. Trả về `true` khi xong phần ảnh
+/// (đã gửi, hoặc server từ chối vĩnh viễn nên bỏ ảnh để bản ghi không kẹt mãi), `false`
+/// khi cần thử lại ở lần đồng bộ sau. Ảnh quá lớn (413) được nén rồi gửi lại một lần.
+Future<bool> deliverImage(
+  Uint8List bytes, {
+  required Future<UploadResult> Function(Uint8List bytes) upload,
+  required Future<Uint8List?> Function(Uint8List bytes) shrink,
+  bool allowShrink = true,
+  void Function(int? status)? onGiveUp,
+}) async {
+  var result = await upload(bytes);
+  if (result.ok) return true;
+  if (!result.permanent) return false;
+  if (allowShrink && result.status == 413) {
+    final smaller = await shrink(bytes);
+    if (smaller != null) {
+      result = await upload(smaller);
+      if (result.ok) return true;
+      if (!result.permanent) return false;
+    }
+  }
+  onGiveUp?.call(result.status);
+  return true;
+}
 
 class SenderRemoteDataSource {
   static const _smsChannel = MethodChannel('rescue/sms');
@@ -59,10 +117,28 @@ class SenderRemoteDataSource {
         ok: true,
         bytesSent: jpeg != null ? bytesSent + jpeg.length : bytesSent,
         durationMs: sw.elapsedMilliseconds,
+        status: 201,
+        permanent: false,
+      );
+    } on DioException catch (error) {
+      sw.stop();
+      final status = error.response?.statusCode;
+      return (
+        ok: false,
+        bytesSent: 0,
+        durationMs: sw.elapsedMilliseconds,
+        status: status,
+        permanent: isPermanentUploadFailure(status, error.response?.data),
       );
     } catch (_) {
       sw.stop();
-      return (ok: false, bytesSent: 0, durationMs: sw.elapsedMilliseconds);
+      return (
+        ok: false,
+        bytesSent: 0,
+        durationMs: sw.elapsedMilliseconds,
+        status: null,
+        permanent: false,
+      );
     }
   }
 

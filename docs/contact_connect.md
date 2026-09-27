@@ -245,8 +245,11 @@ Quy tắc gửi:
    `/sync/messages`.
 2. App chỉ upload JPEG qua `/api/reports` sau khi metadata nhận `accepted` hoặc
    `duplicate`; nhờ vậy thông tin cứu hộ nhỏ được ưu tiên khi mạng yếu.
-3. Nếu upload ảnh thất bại, bản ghi cục bộ vẫn ở trạng thái chưa đồng bộ hoàn
-   tất và app retry ảnh sau bằng cùng `meta.id`.
+3. Nếu upload ảnh thất bại do mạng, `5xx`, `408`, `429` hoặc `IMAGE_HASH_MISMATCH`,
+   bản ghi cục bộ vẫn ở trạng thái chưa đồng bộ hoàn tất và app retry ảnh sau bằng
+   cùng `meta.id`. Lỗi `4xx` khác là vĩnh viễn: `413` thì app nén ảnh và gửi lại một
+   lần; còn lại app bỏ ảnh (metadata đã có ACK) để bản ghi không kẹt trong hàng đợi.
+   Ảnh định dạng server không nhận (vd. HEIC) được app chuyển sang JPEG trước khi gửi.
 4. Báo cáo không có ảnh hoàn tất ngay sau ACK metadata.
 5. Gửi lại cùng `meta.id` không được tạo báo cáo mới; server gắn ảnh nếu báo cáo
    chưa có ảnh (ảnh đầu tiên được giữ) và trả lại cùng ID.
@@ -284,12 +287,25 @@ của app và không cần header `X-Message-Contract-Version`. **Tất cả c�
 `/sync/messages`, `POST /api/reports`, `GET /api/reports/status`) không cần đăng nhập
 (riêng `UPDATE_RESCUE_STATUS` qua `/sync/messages` cần phiên, xem trên).
 
-Đăng nhập đơn giản: một mật khẩu chung cho điều phối viên (`RESCUE_DASHBOARD_PASSWORD`)
-kèm tên người thao tác để ghi nhật ký.
+Mỗi điều phối viên có **tài khoản riêng** (bảng `operators`): tên đăng nhập, tên hiển
+thị (ghi vào nhật ký thao tác), mật khẩu băm PBKDF2-SHA256 và vai trò `admin` hoặc
+`operator`. Khi DB chưa có tài khoản, server tạo tài khoản quản trị từ
+`RESCUE_ADMIN_USERNAME` / `RESCUE_ADMIN_PASSWORD` (mặc định `admin` / `cuuho2026`; biến cũ
+`RESCUE_DASHBOARD_PASSWORD` vẫn được dùng làm mật khẩu mặc định). Tài khoản do quản trị
+viên tạo hoặc đặt lại mật khẩu có `mustChangePassword: true`: dashboard buộc đổi mật khẩu
+trước khi dùng. Chỉ `admin` được quản lý tài khoản, tải sao lưu và xóa dữ liệu demo
+(`403 FORBIDDEN` với `operator`). Khóa tài khoản hoặc đặt lại mật khẩu làm mọi phiên của
+người đó mất hiệu lực.
+
+Chặn dò mật khẩu: sai 5 lần cho một tên đăng nhập, hoặc 20 lần từ một IP, trong 5 phút
+thì `429 TOO_MANY_ATTEMPTS`. IP lấy từ kết nối TCP; `X-Forwarded-For` chỉ được đọc khi
+kết nối đến từ proxy khai báo trong `RESCUE_TRUSTED_PROXIES` (docker compose: `dashboard,fe`).
 
 | Endpoint | Mục đích |
 |---|---|
-| `POST /api/auth/login` `{"operator", "password"}` | Tạo phiên; đặt cookie HttpOnly `rescue_session` và trả `token` (dùng `Authorization: Bearer` cho script). Sai 5 lần/5 phút/IP → `429` |
+| `POST /api/auth/login` `{"username", "password"}` | Tạo phiên; đặt cookie HttpOnly `rescue_session` và trả `token` (dùng `Authorization: Bearer` cho script) kèm `operator` (tên hiển thị), `username`, `role`, `operatorId`, `mustChangePassword`. Sai → `401 INVALID_CREDENTIALS` |
+| `POST /api/auth/password` `{"currentPassword", "newPassword"}` | Đổi mật khẩu của mình (≥ 8 ký tự); đăng xuất các phiên khác của tài khoản |
+| `GET/POST /api/operators`, `PATCH /api/operators/{id}` `{"displayName"?, "role"?, "active"?, "password"?}` | Quản trị viên xem, tạo, sửa, khóa tài khoản hoặc đặt lại mật khẩu. Mã lỗi: `OPERATOR_TAKEN` (409), `OPERATOR_NOT_FOUND` (404), `LAST_ADMIN` (409, phải còn một quản trị viên hoạt động) |
 | `POST /api/auth/logout`, `GET /api/auth/me` | Hủy phiên; phiên hiện tại (`{"authenticated": false}` khi chưa đăng nhập) và cấu hình dashboard |
 | `GET /api/reports` | Lọc `status`, `q`, `since`/`until`, `hasLocation`, `teamId`, `sendMode`, `label`, `vulnerable`, `source` (`app`/`sms`/`hotline`/`synthetic`), `ids`; `sort`; phân trang `page`/`pageSize` (`limit` là tên cũ). Không giới hạn tổng số báo cáo |
 | `POST /api/reports/manual` `{"description", "contactPhone"?, "lat"?, "lng"?, "trappedCount"?, "injuredCount"?, "vulnerableGroups"?}` | Điều phối viên nhập báo cáo nhận qua điện thoại/tổng đài: id `hotline-<ms>-<6 hex>`, `sendMode: "hotline"`, `payload.source: "hotline"`, vị trí (nếu có) là `manual`. Trả `201` kèm báo cáo |
@@ -300,8 +316,9 @@ kèm tên người thao tác để ghi nhật ký.
 | `PUT /api/reports/{id}/team`, `POST /api/reports/{id}/notes`, `PUT /api/reports/{id}/location` | Giao đội, ghi chú nội bộ, nhập vị trí thủ công (`locationSource: "manual"`) |
 | `GET /api/reports/{id}/history` | Nhật ký thao tác (bảng `report_events`) |
 | `GET/POST /api/teams`, `PATCH /api/teams/{id}` | Quản lý đội cứu hộ |
-| `GET /api/stats`, `GET /api/export?format=csv\|geojson`, `GET /api/admin/backup` | Chỉ số vận hành, xuất dữ liệu theo bộ lọc, tải bản sao lưu SQLite |
-| `DELETE /api/reports` | Xóa toàn bộ báo cáo và nhật ký; chỉ khi `RESCUE_ALLOW_WIPE=1`, ngược lại `403 WIPE_DISABLED` |
+| `GET /api/stats`, `GET /api/export?format=csv\|geojson` | Chỉ số vận hành, xuất dữ liệu theo bộ lọc |
+| `GET /api/admin/backup[?images=1]` | (admin) Tải bản sao lưu SQLite nhất quán; `images=1` trả ZIP gồm `data/<db>` và `uploads/` |
+| `DELETE /api/reports` | (admin) Xóa toàn bộ báo cáo và nhật ký; chỉ khi `RESCUE_ALLOW_WIPE=1`, ngược lại `403 WIPE_DISABLED` |
 
 Mã lỗi đổi trạng thái giữ nguyên (`INVALID_PAYLOAD` → 400, `REPORT_NOT_FOUND` → 404,
 `INVALID_STATUS_VERSION`/`INVALID_STATUS_TRANSITION` → 409). Mã riêng của dashboard:
@@ -367,7 +384,10 @@ GET /api/reports/status?ids=post-1790472931479,sos-1790472922834
   dừng, đồng bộ khi mạng trở lại và Workmanager chạy định kỳ 15 phút.
 - JCS dùng package `causalontology` `4.x`; SHA-256 dùng package `crypto` `3.x`.
 - Ảnh được upload riêng sau ACK metadata, kèm `imageSha256`, `imageSizeBytes`
-  và `X-Message-Contract-Version: 1`.
+  và `X-Message-Contract-Version: 1`. Lỗi upload được phân loại
+  (`isPermanentUploadFailure`, `deliverImage` trong `sender_remote_datasource.dart`):
+  lỗi tạm thì thử lại, `413` thì nén và gửi lại một lần, `4xx` vĩnh viễn thì bỏ ảnh;
+  ảnh HEIC/định dạng lạ được chuyển sang JPEG trước khi gửi ảnh gốc.
 - Gửi thích ứng: trước khi gửi bài có ảnh, app tải `GET /probe` (64 KB) để đo
   throughput (kbit/s) rồi chọn `payload.sendMode` bằng `chooseMode`
   (`lib/domain/entities/send_mode.dart`, ngưỡng trong `lib/config.dart`):
@@ -532,3 +552,4 @@ Khi sửa cơ chế kết nối, request hoặc response:
 | 1 | 2026-09-27 | `meta.createdAt` của `/api/reports` gửi dạng UTC như `payload.createdAt`; khi upsert theo `meta.id`, server giữ `createdAt` của lần nhận đầu tiên. Không đổi wire contract. |
 | 1 | 2026-09-27 | Dashboard quản lý: thêm trạng thái kết thúc `cancelled` (kèm `reason`) cho `UPDATE_RESCUE_STATUS` và dashboard; app coi `cancelled` là trạng thái kết thúc. Endpoint dashboard cần đăng nhập; thêm lọc/phân trang, luồng thay đổi, thao tác hàng loạt, đội, ghi chú, vị trí thủ công, nhật ký, thống kê, xuất dữ liệu, sao lưu. Không đổi `/sync/messages` và `/api/reports` POST của app, không đổi phiên bản contract (app cũ bỏ qua trạng thái lạ). |
 | 1 | 2026-09-27 | Siết tiếp nhận, không tăng phiên bản (app hiện tại không bị ảnh hưởng): `UPDATE_RESCUE_STATUS` qua `/sync/messages` cần phiên điều phối (`UNAUTHENTICATED`); kiểm tra payload `CREATE_RESCUE_RECORD`/`meta` (`INVALID_PAYLOAD` thay vì `5xx`), bỏ `payload.status` khi tạo; mỗi message một transaction (`retry_later`/`SERVER_ERROR` cho riêng message lỗi); gửi lại cùng id chỉ bổ sung trường trống, giữ ảnh đầu tiên; ảnh JPEG/PNG/WebP ≤ 15 MB, tên file do server đặt; ACK `/api/reports` bỏ `imageLocalPath`. Thêm `POST /api/sms/inbound` (SMS gateway), `POST /api/reports/manual` (tổng đài), `stale`/`computedAt` cho `/api/clusters`. App sinh ID có hậu tố ngẫu nhiên. |
+| 1 | 2026-09-27 | Tài khoản riêng cho điều phối viên thay mật khẩu chung (`POST /api/auth/login` nhận `username`), vai trò `admin`/`operator`, đổi/đặt lại mật khẩu, `/api/operators`; chặn dò mật khẩu theo tài khoản và IP, chỉ tin `X-Forwarded-For` từ proxy khai báo. Sao lưu kèm ảnh (`/api/admin/backup?images=1`), `GET /healthz`. App: không retry mãi ảnh bị từ chối vĩnh viễn (`4xx`), nén lại khi `413`, chuyển HEIC sang JPEG. Không đổi wire contract `/sync/messages`. |
