@@ -1,8 +1,8 @@
-import 'dart:io';
 import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
 
 import '../../domain/entities/rescue_record.dart';
+import '../../core/platform/local_file.dart';
 import 'status_badge.dart';
 import 'tag_chip.dart';
 
@@ -48,7 +48,11 @@ class PostCard extends StatelessWidget {
             const SizedBox(height: 8),
             Row(
               children: [
-                const Icon(Icons.access_time, size: 14, color: Color(0xFF9CA3AF)),
+                const Icon(
+                  Icons.access_time,
+                  size: 14,
+                  color: Color(0xFF9CA3AF),
+                ),
                 const SizedBox(width: 4),
                 Text(
                   timeStr,
@@ -63,7 +67,11 @@ class PostCard extends StatelessWidget {
             const SizedBox(height: 6),
             Row(
               children: [
-                const Icon(Icons.location_on, size: 14, color: Color(0xFFDC2626)),
+                const Icon(
+                  Icons.location_on,
+                  size: 14,
+                  color: Color(0xFFDC2626),
+                ),
                 const SizedBox(width: 4),
                 Text(
                   '${record.lat.toStringAsFixed(4)}, ${record.lng.toStringAsFixed(4)}',
@@ -132,12 +140,12 @@ class PostCard extends StatelessWidget {
               ),
             ],
             if (record.imagePath != null &&
-                File(record.imagePath!).existsSync()) ...[
+                localFileExists(record.imagePath!)) ...[
               const SizedBox(height: 12),
               ClipRRect(
                 borderRadius: BorderRadius.circular(12),
-                child: Image.file(
-                  File(record.imagePath!),
+                child: Image(
+                  image: localImageProvider(record.imagePath!),
                   height: 160,
                   width: double.infinity,
                   fit: BoxFit.cover,
@@ -149,7 +157,9 @@ class PostCard extends StatelessWidget {
               Wrap(
                 spacing: 6,
                 runSpacing: 6,
-                children: record.aiTags.map((tag) => TagChip(tag: tag, isSmall: true)).toList(),
+                children: record.aiTags
+                    .map((tag) => TagChip(tag: tag, isSmall: true))
+                    .toList(),
               ),
             ],
           ],
