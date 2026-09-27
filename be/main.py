@@ -10,9 +10,11 @@ from fastapi.middleware.cors import CORSMiddleware
 from fastapi.responses import HTMLResponse, JSONResponse, Response
 from fastapi.staticfiles import StaticFiles
 from fastapi.templating import Jinja2Templates
+from pydantic import BaseModel
 
 from config import HOST, PORT, PROBE_SIZE_BYTES, TEMPLATES_DIR, UPLOADS_DIR
 from canonical import compute_bytes_sha256
+from cluster_service import ClusterCache
 import storage
 
 # Cấu hình logging
@@ -47,6 +49,10 @@ app.mount("/uploads", StaticFiles(directory=str(UPLOADS_DIR)), name="uploads")
 
 # Khởi tạo template engine cho Dashboard
 templates = Jinja2Templates(directory=str(TEMPLATES_DIR))
+
+# Số báo cáo tối đa đưa vào phân cụm mỗi lần
+CLUSTER_REPORT_LIMIT = 5000
+_cluster_cache = ClusterCache()
 
 # Buffer 64KB cho endpoint /probe
 _PROBE_DATA = b"X" * PROBE_SIZE_BYTES
@@ -209,9 +215,38 @@ async def sync_messages(
 
 
 @app.get("/api/reports", summary="Lấy danh sách tất cả các báo cáo đã nhận")
-async def list_reports():
-    reports = storage.get_reports()
+async def list_reports(limit: int = 100):
+    reports = storage.get_reports(limit=max(1, min(limit, CLUSTER_REPORT_LIMIT)))
     return JSONResponse(content={"total": len(reports), "reports": reports})
+
+
+@app.get("/api/clusters", summary="Phân cụm sự kiện và xếp hạng ưu tiên (product C_ij + Louvain)")
+def list_clusters():
+    """Chạy lõi thuật toán của bài báo trên các báo cáo chưa giải quyết.
+
+    Kết quả được cache và chỉ tính lại khi có báo cáo mới hoặc đổi trạng thái.
+    Hàm đồng bộ (không async) để FastAPI chạy trong threadpool, không chặn các
+    request tiếp nhận báo cáo khi phân cụm lô lớn.
+    """
+    reports = storage.get_reports(limit=CLUSTER_REPORT_LIMIT)
+    return JSONResponse(content=_cluster_cache.get(reports))
+
+
+class StatusUpdate(BaseModel):
+    status: str
+    statusVersion: int
+
+
+@app.patch("/api/reports/{report_id}/status", summary="Điều phối viên cập nhật trạng thái cứu hộ")
+async def patch_report_status(report_id: str, body: StatusUpdate):
+    try:
+        result = storage.update_report_status(report_id, body.status, body.statusVersion)
+    except storage.StatusUpdateError as err:
+        http_status = status.HTTP_404_NOT_FOUND if err.code == "REPORT_NOT_FOUND" else status.HTTP_409_CONFLICT
+        if err.code == "INVALID_PAYLOAD":
+            http_status = status.HTTP_400_BAD_REQUEST
+        raise HTTPException(status_code=http_status, detail={"code": err.code, "error": err.message})
+    return JSONResponse(content=result)
 
 
 @app.get("/api/reports/{report_id}", summary="Xem chi tiết một báo cáo theo ID")
@@ -231,12 +266,8 @@ async def clear_all_reports():
 
 @app.get("/", response_class=HTMLResponse, summary="Web Dashboard trực quan")
 async def dashboard(request: Request):
-    reports = storage.get_reports()
-    return templates.TemplateResponse(
-        request=request,
-        name="dashboard.html",
-        context={"reports": reports},
-    )
+    # Dashboard tự tải dữ liệu qua /api/reports và /api/clusters.
+    return templates.TemplateResponse(request=request, name="dashboard.html", context={})
 
 
 if __name__ == "__main__":
