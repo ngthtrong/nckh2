@@ -250,7 +250,8 @@ def save_report(
         ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, 1, ?, ?, ?, ?, ?, ?)
         ON CONFLICT(id) DO UPDATE SET
             server_received_at=excluded.server_received_at,
-            created_at=excluded.created_at,
+            -- Giữ createdAt lần đầu nhận: upload ảnh (meta.id đã có) không được dời thời điểm sự kiện.
+            created_at=CASE WHEN COALESCE(reports.created_at, '') = '' THEN excluded.created_at ELSE reports.created_at END,
             lat=COALESCE(excluded.lat, reports.lat),
             lng=COALESCE(excluded.lng, reports.lng),
             trapped_count=COALESCE(excluded.trapped_count, reports.trapped_count),
@@ -321,6 +322,26 @@ def get_report_by_id(report_id: str) -> Optional[Dict[str, Any]]:
         row = cursor.fetchone()
         logger.info(f"[CRUD][SELECT] Tìm báo cáo ID={report_id} -> {'Tìm thấy' if row else 'Không tồn tại'}")
         return _row_to_dict(row) if row else None
+
+
+STATUS_QUERY_LIMIT = 100
+
+
+def get_report_statuses(report_ids: List[str]) -> List[Dict[str, Any]]:
+    """Trạng thái điều phối của nhiều báo cáo; id không tồn tại bị bỏ qua."""
+    ids = list(dict.fromkeys(i for i in report_ids if i))[:STATUS_QUERY_LIMIT]
+    if not ids:
+        return []
+    placeholders = ",".join("?" * len(ids))
+    with get_db_connection() as conn:
+        rows = conn.execute(
+            f"SELECT id, status, status_version FROM reports WHERE id IN ({placeholders})",
+            ids,
+        ).fetchall()
+    return [
+        {"id": row["id"], "status": row["status"], "statusVersion": row["status_version"]}
+        for row in rows
+    ]
 
 
 def clear_reports() -> int:

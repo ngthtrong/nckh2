@@ -6,6 +6,8 @@
 - **Server API**: nhận báo cáo multipart và cung cấp file probe để đo throughput.
 - **Model training**: notebook MobileNetV3 Large trong `model/1706.ipynb`.
 
+> Hướng dẫn chạy demo đầy đủ (server + app + model, script một lệnh): [`docs/huong_dan_chay_demo.md`](../docs/huong_dan_chay_demo.md). Server URL hiện truyền bằng `--dart-define=SERVER_URL=...` (mặc định `http://localhost:8000`).
+
 ## Cấu trúc chính
 
 ```text

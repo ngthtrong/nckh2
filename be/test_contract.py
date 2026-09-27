@@ -54,6 +54,45 @@ class ContractTest(unittest.TestCase):
             finally:
                 storage.DB_FILE = old_db_file
 
+    def test_image_upload_keeps_first_created_at(self):
+        with tempfile.TemporaryDirectory() as temp_dir:
+            old_db_file = storage.DB_FILE
+            storage.DB_FILE = Path(temp_dir) / "reports.db"
+            try:
+                storage.init_db()
+                storage.save_report({"id": "r1", "createdAt": "2026-09-27T01:00:00Z", "lat": 16.0, "lng": 108.0})
+                # Upload ảnh cho cùng meta.id với giờ địa phương không kèm múi giờ (app bản cũ).
+                saved = storage.save_report(
+                    {"id": "r1", "createdAt": "2026-09-27T08:00:00", "lat": 16.0, "lng": 108.0},
+                    image_url="/uploads/r1.jpg",
+                )
+                self.assertEqual(saved["createdAt"], "2026-09-27T01:00:00Z")
+                self.assertEqual(saved["imageUrl"], "/uploads/r1.jpg")
+            finally:
+                storage.DB_FILE = old_db_file
+
+    def test_report_statuses_for_app_polling(self):
+        with tempfile.TemporaryDirectory() as temp_dir:
+            old_db_file = storage.DB_FILE
+            storage.DB_FILE = Path(temp_dir) / "reports.db"
+            try:
+                storage.init_db()
+                storage.save_report({"id": "a", "createdAt": "2026-09-27T01:00:00Z"})
+                storage.save_report({"id": "b", "createdAt": "2026-09-27T01:00:00Z"})
+                storage.update_report_status("b", "dispatched", 2)
+                rows = {r["id"]: r for r in storage.get_report_statuses(["a", "b", "missing", "", "a"])}
+                self.assertEqual(set(rows), {"a", "b"})
+                self.assertEqual((rows["b"]["status"], rows["b"]["statusVersion"]), ("dispatched", 2))
+                self.assertEqual(storage.get_report_statuses([]), [])
+            finally:
+                storage.DB_FILE = old_db_file
+
+    def test_status_route_precedes_report_id_route(self):
+        import main
+
+        paths = [route.path for route in main.app.routes]
+        self.assertLess(paths.index("/api/reports/status"), paths.index("/api/reports/{report_id}"))
+
     def test_create_message_is_idempotent(self):
         with tempfile.TemporaryDirectory() as temp_dir:
             old_db_file = storage.DB_FILE

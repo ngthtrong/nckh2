@@ -1,0 +1,61 @@
+# Hệ thống demo cứu hộ lũ: backend + dashboard điều phối + app Flutter bản web.
+#
+#   docker compose up -d --build          # build và chạy
+#   docker compose ps                     # trạng thái + healthcheck
+#   docker compose down                   # dừng (giữ dữ liệu trong volume be-data)
+#   docker compose down -v                # dừng và xóa dữ liệu
+#
+# Mặc định nạp 316 báo cáo BÁN TỔNG HỢP (run_001) khi DB còn trống; đặt SEED_RUN= để bỏ.
+# Điện thoại Android thật / emulator trỏ SERVER_URL tới cổng BE_PORT của máy chạy Docker.
+name: flood-rescue
+
+services:
+  be:
+    build:
+      context: .
+      dockerfile: docker/be/Dockerfile
+    image: flood-rescue/be:local
+    environment:
+      SEED_RUN: ${SEED_RUN-1}
+      SEED_RESET: ${SEED_RESET:-0}
+    volumes:
+      - be-data:/var/lib/rescue
+    ports:
+      - "${BE_PORT:-8000}:8000"
+    restart: unless-stopped
+
+  dashboard:
+    build:
+      context: .
+      dockerfile: docker/dashboard/Dockerfile
+    image: flood-rescue/dashboard:local
+    environment:
+      BACKEND_URL: http://be:8000
+    depends_on:
+      be:
+        condition: service_healthy
+    ports:
+      - "${DASHBOARD_PORT:-8080}:80"
+    restart: unless-stopped
+
+  fe:
+    build:
+      context: .
+      dockerfile: docker/fe/Dockerfile
+      # runtime: build Flutter trong Docker; prebuilt: dùng fe/app/build/web đã build sẵn.
+      target: ${FE_BUILD_TARGET:-runtime}
+      args:
+        FLUTTER_VERSION: ${FLUTTER_VERSION:-3.47.5}
+        SERVER_URL: ${FE_SERVER_URL:-}
+    image: flood-rescue/fe:local
+    environment:
+      BACKEND_URL: http://be:8000
+    depends_on:
+      be:
+        condition: service_healthy
+    ports:
+      - "${FE_PORT:-8081}:80"
+    restart: unless-stopped
+
+volumes:
+  be-data:

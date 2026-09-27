@@ -9,8 +9,16 @@ const String kServerBaseUrl = String.fromEnvironment(
   defaultValue: 'http://localhost:8000',
 );
 
-/// Số tổng đài nhận SMS fallback — BẮT BUỘC thay bằng số thật.
-const String kEmergencyPhone = '+840000000000';
+/// Số tổng đài nhận SMS fallback. Đặt lúc build/run:
+/// `--dart-define=EMERGENCY_PHONE=+84xxxxxxxxx`. Còn là số giả thì app không gửi SMS.
+const String kEmergencyPhone = String.fromEnvironment(
+  'EMERGENCY_PHONE',
+  defaultValue: kPlaceholderEmergencyPhone,
+);
+const String kPlaceholderEmergencyPhone = '+840000000000';
+
+/// Chu kỳ app hỏi server trạng thái điều phối của các báo cáo đã gửi.
+const Duration kStatusPollInterval = Duration(seconds: 15);
 
 /// Probe throughput: server cần phục vụ 1 file tĩnh ~64KB tại đường dẫn này.
 const String kProbeUrl = '$kServerBaseUrl/probe';

@@ -1,6 +1,8 @@
-# Chép từ demo/v2/clustering.py tại commit a6be3e9 (chỉ phần run_graph_clustering);
-# bỏ baseline HDBSCAN/ST-DBSCAN và metric benchmark, không sửa công thức.
-"""Fair paired graph clustering, direct baselines, and operational endpoints."""
+# Dựa trên demo/v2/clustering.py tại commit a6be3e9 (chỉ phần run_graph_clustering; bỏ
+# baseline HDBSCAN/ST-DBSCAN và metric benchmark). Đã chỉnh cho khớp Algorithm 1 của bài
+# báo ISDS 2026 và notebook Benchmark_Cij (commit 6ac75c2): G, T, C tính trên toàn bộ ma
+# trận cặp đủ điều kiện thay cho candidate pool BallTree; công thức trọng số giữ nguyên.
+"""Graph clustering of graph-eligible reports (Algorithm 1)."""
 from __future__ import annotations
 
 import math
@@ -10,22 +12,12 @@ from typing import Literal, Sequence
 import networkx as nx
 import numpy as np
 from community import community_louvain
-from sklearn.neighbors import BallTree
 
 from .contracts import ReportV2, validate_unique_report_ids
-from .similarity import SimilarityParamsV2, context_similarity, geographic_similarity, temporal_similarity
 
 
 CompositionOperator = Literal["product", "additive"]
 EARTH_RADIUS_M = 6_371_000.0
-CANDIDATE_POOL_MIN_NEIGHBORS_V2 = 64
-CANDIDATE_POOL_K_MULTIPLIER_V2 = 4
-CANDIDATE_POOL_RULE_V2 = (
-    "per eligible report retain min(n-1,max(64,4*k)) spatial neighbors; "
-    "query every BallTree distance tie at the boundary, canonical-sort by "
-    "(distance_rad,report_id), truncate to the declared count, then union "
-    "the directed neighborhoods into undirected candidate pairs"
-)
 
 
 @dataclass(frozen=True, slots=True)
@@ -74,159 +66,56 @@ def _eligible_indices(reports: Sequence[ReportV2]) -> tuple[list[int], list[int]
     return eligible, review
 
 
-def candidate_pool_neighbor_count_v2(*, n_eligible: int, graph_k: int) -> int:
-    """Return the frozen per-report spatial candidate count."""
-
-    if isinstance(n_eligible, bool) or not isinstance(n_eligible, int) or n_eligible < 0:
-        raise ValueError("n_eligible must be a non-negative integer")
-    if isinstance(graph_k, bool) or not isinstance(graph_k, int) or graph_k < 1:
-        raise ValueError("graph_k must be a positive integer")
-    return min(
-        max(0, n_eligible - 1),
-        max(CANDIDATE_POOL_MIN_NEIGHBORS_V2, CANDIDATE_POOL_K_MULTIPLIER_V2 * graph_k),
-    )
-
-
-def _canonical_balltree_neighbors(
+def _pair_weight_matrix(
     reports: Sequence[ReportV2],
     eligible: Sequence[int],
-    coordinates: np.ndarray,
-    tree: BallTree,
-    *,
-    local_left: int,
-    neighbor_count: int,
-) -> tuple[int, ...]:
-    """Query through the kth-distance tie, then choose canonically.
+    config: GraphConfigV2,
+) -> np.ndarray:
+    """Eq. (2)-(3) on the full eligible pair matrix, with a zero diagonal.
 
-    ``BallTree.query(k=...)`` may return an arbitrary subset when more than k
-    points have the boundary distance.  The initial query identifies that
-    distance; a radius query retrieves the full tie before the stable
-    ``(distance, report_id)`` ordering and truncation.
+    Vectorized form of ``similarity.geographic/temporal/context_similarity``:
+    missing F or E contributes nothing and discounts C by m_ij / 2.
     """
 
-    if neighbor_count == 0:
-        return ()
-    initial_k = min(len(eligible), neighbor_count + 1)
-    initial_distances, initial_indices = tree.query(
-        coordinates[local_left : local_left + 1],
-        k=initial_k,
-        return_distance=True,
-        sort_results=True,
+    rows = [reports[index] for index in eligible]
+    lat = np.radians(np.asarray([row.L[0] for row in rows], dtype=float))
+    lng = np.radians(np.asarray([row.L[1] for row in rows], dtype=float))
+    dlat = lat[:, None] - lat[None, :]
+    dlng = lng[:, None] - lng[None, :]
+    hav = (
+        np.sin(dlat / 2.0) ** 2
+        + np.cos(lat)[:, None] * np.cos(lat)[None, :] * np.sin(dlng / 2.0) ** 2
     )
-    non_self_distances = sorted(
-        float(distance)
-        for distance, raw_index in zip(
-            initial_distances[0], initial_indices[0], strict=True
-        )
-        if int(raw_index) != local_left
-    )
-    if len(non_self_distances) < neighbor_count:
-        # This can occur only if a backend omits the query point from a tied
-        # initial result.  A full query is still bounded by the eligible batch
-        # and determines the same canonical boundary.
-        all_distances, all_indices = tree.query(
-            coordinates[local_left : local_left + 1],
-            k=len(eligible),
-            return_distance=True,
-            sort_results=True,
-        )
-        non_self_distances = sorted(
-            float(distance)
-            for distance, raw_index in zip(
-                all_distances[0], all_indices[0], strict=True
-            )
-            if int(raw_index) != local_left
-        )
-    boundary_distance = non_self_distances[neighbor_count - 1]
-    inclusive_radius = math.nextafter(boundary_distance, math.inf)
-    radius_indices, radius_distances = tree.query_radius(
-        coordinates[local_left : local_left + 1],
-        r=inclusive_radius,
-        return_distance=True,
-        sort_results=False,
-    )
-    ranked = sorted(
-        (
-            float(distance),
-            reports[eligible[int(raw_index)]].report_id,
-            int(raw_index),
-        )
-        for raw_index, distance in zip(
-            radius_indices[0], radius_distances[0], strict=True
-        )
-        if int(raw_index) != local_left
-    )
-    if len(ranked) < neighbor_count:
-        # Some BallTree backends round the query-radius comparison one ulp
-        # below the distance returned by ``query``.  Fall back to an all-point
-        # query, then apply the same canonical ordering.  This is exceptional
-        # (not the normal candidate search) and preserves the exact declared
-        # neighbor set instead of dropping a boundary point or failing a seed.
-        all_distances, all_indices = tree.query(
-            coordinates[local_left : local_left + 1],
-            k=len(eligible),
-            return_distance=True,
-            sort_results=False,
-        )
-        ranked = sorted(
-            (
-                float(distance),
-                reports[eligible[int(raw_index)]].report_id,
-                int(raw_index),
-            )
-            for raw_index, distance in zip(
-                all_indices[0], all_distances[0], strict=True
-            )
-            if int(raw_index) != local_left
-        )
-    if len(ranked) < neighbor_count:
-        raise RuntimeError("BallTree returned an incomplete eligible point set")
-    return tuple(local_index for _, _, local_index in ranked[:neighbor_count])
+    distance = 2.0 * EARTH_RADIUS_M * np.arcsin(np.sqrt(np.clip(hav, 0.0, 1.0)))
+    t0 = rows[0].T
+    minute = np.asarray([(row.T - t0).total_seconds() / 60.0 for row in rows], dtype=float)
+    delta_min = np.abs(minute[:, None] - minute[None, :])
 
+    def observed(field: str) -> tuple[np.ndarray, np.ndarray]:
+        values = [getattr(row, field) for row in rows]
+        mask = np.asarray([value is not None for value in values], dtype=bool)
+        numbers = np.asarray([0.0 if value is None else float(value) for value in values])
+        return mask, numbers
 
-def _spatial_candidate_pairs(
-    reports: Sequence[ReportV2],
-    eligible: Sequence[int],
-    candidate_k: int,
-) -> list[tuple[int, int]]:
-    if len(eligible) < 2:
-        return []
-    coordinates = np.radians(np.asarray([reports[index].L for index in eligible], dtype=float))
-    tree = BallTree(coordinates, metric="haversine")
-    neighbor_count = min(len(eligible) - 1, candidate_k)
-    pairs: set[tuple[int, int]] = set()
-    for local_left in range(len(eligible)):
-        left = eligible[local_left]
-        local_neighbors = _canonical_balltree_neighbors(
-            reports,
-            eligible,
-            coordinates,
-            tree,
-            local_left=local_left,
-            neighbor_count=neighbor_count,
-        )
-        for local_right in local_neighbors:
-            right = eligible[local_right]
-            pairs.add((min(left, right), max(left, right)))
-    return sorted(pairs)
-
-
-def _weight(first: ReportV2, second: ReportV2, config: GraphConfigV2) -> float:
-    params = SimilarityParamsV2(
-        sigma_geo_m=config.sigma_geo_m,
-        tau_t=config.tau_t,
-        tau_F=config.tau_F,
-        tau_E=config.tau_E,
-        beta=config.beta,
-        gamma=config.gamma,
-        theta=0.0,
+    obs_f, flood = observed("F")
+    obs_e, urgency = observed("E")
+    i_f = (obs_f[:, None] & obs_f[None, :]).astype(float)
+    i_e = (obs_e[:, None] & obs_e[None, :]).astype(float)
+    shared = i_f + i_e
+    context = (shared / 2.0) * np.exp(
+        -i_f * np.abs(flood[:, None] - flood[None, :]) / config.tau_F
+        - i_e * np.abs(urgency[:, None] - urgency[None, :]) / config.tau_E
     )
-    geographic = geographic_similarity(first, second, params)
-    temporal = temporal_similarity(first, second, params)
-    context = context_similarity(first, second, params)
+    context[shared == 0.0] = 0.0
+
+    geographic = np.exp(-(distance**2) / (2.0 * config.sigma_geo_m**2))
+    temporal = np.exp(-delta_min / config.tau_t)
     if config.composition_operator == "product":
-        return geographic * (config.beta * temporal + config.gamma * context)
-    return config.alpha * geographic + config.beta * temporal + config.gamma * context
+        weight = geographic * (config.beta * temporal + config.gamma * context)
+    else:
+        weight = config.alpha * geographic + config.beta * temporal + config.gamma * context
+    np.fill_diagonal(weight, 0.0)
+    return weight
 
 
 def run_graph_clustering(
@@ -235,12 +124,12 @@ def run_graph_clustering(
     *,
     random_state: int = 42,
 ) -> ClusterRunV2:
-    """Run one paired config on an identical sparse spatial candidate universe.
+    """Algorithm 1: threshold, union top-k and Louvain on the eligible pairs.
 
-    Product and additive runs differ only in ``composition_operator``.  The
-    quantile is computed on the shared spatial candidate pool; a union-kNN
-    sparsifier then keeps an above-threshold edge if either endpoint selects
-    it.  This convention is frozen in the protocol and avoids a dense matrix.
+    Weights are computed on the full eligible pair matrix.  theta is the
+    ``threshold_quantile`` of the nonzero pair weights; each report keeps its
+    top-k neighbours above theta (ties broken by report_id) and the union of
+    the directed selections forms the undirected graph.  Memory is O(n^2).
     """
 
     validate_unique_report_ids(reports)
@@ -248,36 +137,33 @@ def run_graph_clustering(
     labels = [-1] * len(reports)
     if not eligible:
         return ClusterRunV2(config.composition_operator, tuple(labels), tuple(reports[index].report_id for index in review), None, 0, 0)
-    candidate_k = candidate_pool_neighbor_count_v2(
-        n_eligible=len(eligible),
-        graph_k=config.k,
-    )
-    pairs = _spatial_candidate_pairs(reports, eligible, candidate_k)
-    weighted = [(left, right, _weight(reports[left], reports[right], config)) for left, right in pairs]
-    positive = np.asarray([weight for _, _, weight in weighted if weight > 0.0], dtype=float)
+    n_eligible = len(eligible)
+    weights = _pair_weight_matrix(reports, eligible, config)
+    upper = weights[np.triu_indices(n_eligible, 1)]
+    positive = upper[upper > 0.0]
     threshold = float(np.quantile(positive, config.threshold_quantile)) if positive.size else math.inf
-    above = [(left, right, weight) for left, right, weight in weighted if weight > threshold]
-    per_node: dict[int, list[tuple[float, int, int]]] = {index: [] for index in eligible}
-    for left, right, weight in above:
-        per_node[left].append((weight, left, right))
-        per_node[right].append((weight, left, right))
+    above = weights > threshold
     report_id_by_index = {index: reports[index].report_id for index in eligible}
+    # Rank of each report id, used to break weight ties deterministically.
+    id_rank = np.empty(n_eligible, dtype=np.int64)
+    id_rank[np.argsort([reports[index].report_id for index in eligible], kind="stable")] = np.arange(n_eligible)
     selected: set[tuple[int, int]] = set()
-    for node in eligible:
-        ranked = sorted(
-            per_node[node],
-            key=lambda row: (
-                -row[0],
-                report_id_by_index[row[2] if row[1] == node else row[1]],
-                min(report_id_by_index[row[1]], report_id_by_index[row[2]]),
-                max(report_id_by_index[row[1]], report_id_by_index[row[2]]),
-            ),
-        )
-        selected.update((left, right) for _, left, right in ranked[: config.k])
+    for local in range(n_eligible):
+        neighbours = np.nonzero(above[local])[0]
+        if neighbours.size == 0:
+            continue
+        order = np.lexsort((id_rank[neighbours], -weights[local, neighbours]))
+        for other in neighbours[order[: config.k]]:
+            left, right = sorted((local, int(other)))
+            selected.add((eligible[left], eligible[right]))
+    local_by_index = {index: local for local, index in enumerate(eligible)}
+    weight_lookup = {
+        (left, right): float(weights[local_by_index[left], local_by_index[right]])
+        for left, right in selected
+    }
     graph = nx.Graph()
     index_by_report_id = {identifier: index for index, identifier in report_id_by_index.items()}
     graph.add_nodes_from(sorted(index_by_report_id))
-    weight_lookup = {(left, right): weight for left, right, weight in above}
     for left, right in sorted(
         selected,
         key=lambda edge: tuple(sorted((report_id_by_index[edge[0]], report_id_by_index[edge[1]]))),
@@ -317,17 +203,13 @@ def run_graph_clustering(
         labels=tuple(labels),
         review_report_ids=tuple(reports[index].report_id for index in review),
         threshold_weight=None if not math.isfinite(threshold) else threshold,
-        candidate_pairs=len(pairs),
+        candidate_pairs=n_eligible * (n_eligible - 1) // 2,
         retained_edges=len(selected),
     )
 
 
 __all__ = [
-    "CANDIDATE_POOL_K_MULTIPLIER_V2",
-    "CANDIDATE_POOL_MIN_NEIGHBORS_V2",
-    "CANDIDATE_POOL_RULE_V2",
     "ClusterRunV2",
     "GraphConfigV2",
-    "candidate_pool_neighbor_count_v2",
     "run_graph_clustering",
 ]

@@ -5,6 +5,7 @@
 #   scripts/demo/run_app.sh -d emulator-5554             # emulator Android → tự dùng http://10.0.2.2:8000
 #   scripts/demo/run_app.sh -d R58M... --server-url http://192.168.1.20:8000   # điện thoại thật
 #   scripts/demo/run_app.sh -d linux
+#   scripts/demo/run_app.sh -d R58M... --emergency-phone +84912345678   # số tổng đài nhận SMS dự phòng
 #
 # Server URL truyền qua --dart-define=SERVER_URL (xem fe/app/lib/config.dart), không cần sửa code.
 set -euo pipefail
@@ -16,12 +17,14 @@ DEVICE=""
 SERVER_URL=""
 PORT="8000"
 MODE="--debug"
+EMERGENCY_PHONE="${EMERGENCY_PHONE:-}"
 
 while [[ $# -gt 0 ]]; do
   case "$1" in
     -d|--device) DEVICE="$2"; shift ;;
     --server-url) SERVER_URL="$2"; shift ;;
     --port) PORT="$2"; shift ;;
+    --emergency-phone) EMERGENCY_PHONE="$2"; shift ;;
     --release) MODE="--release" ;;
     --profile) MODE="--profile" ;;
     -h|--help) sed -n '2,9p' "${BASH_SOURCE[0]}" | sed 's/^# \{0,1\}//'; exit 0 ;;
@@ -53,6 +56,11 @@ cd "$APP"
 flutter pub get
 
 ARGS=(run "$MODE" "--dart-define=SERVER_URL=$SERVER_URL")
+if [[ -n "$EMERGENCY_PHONE" ]]; then
+  ARGS+=("--dart-define=EMERGENCY_PHONE=$EMERGENCY_PHONE")
+else
+  echo "!! Chưa đặt --emergency-phone: SMS dự phòng sẽ không gửi (app chỉ xếp hàng khi mất mạng)."
+fi
 [[ -n "$DEVICE" ]] && ARGS+=(-d "$DEVICE")
 echo ">> flutter ${ARGS[*]}"
 exec flutter "${ARGS[@]}"

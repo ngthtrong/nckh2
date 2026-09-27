@@ -1,7 +1,13 @@
 /// Quyết định chế độ gửi — hàm thuần, không phụ thuộc plugin, dễ unit test.
 library;
 
-enum SendMode { fullImage, compressedImage, textOnly, smsFallback, queuedOffline }
+enum SendMode {
+  fullImage,
+  compressedImage,
+  textOnly,
+  smsFallback,
+  queuedOffline,
+}
 
 /// Logic:
 /// - Không data → thử SMS fallback (thất bại sẽ rơi vào queue ở tầng gọi).
@@ -35,5 +41,19 @@ SendMode chooseMode({
 /// Nhãn hiển thị của queue khi không gửi được gì cả.
 SendMode resolveOfflineMode(SendMode attempted, bool smsOk) =>
     (attempted == SendMode.smsFallback && smsOk)
-        ? SendMode.smsFallback
-        : SendMode.queuedOffline;
+    ? SendMode.smsFallback
+    : SendMode.queuedOffline;
+
+extension SendModeLabel on SendMode {
+  /// Mô tả tiếng Việt để hiển thị cho người dùng.
+  String get label => switch (this) {
+    SendMode.fullImage => 'Ảnh gốc + thông tin',
+    SendMode.compressedImage => 'Ảnh nén + thông tin',
+    SendMode.textOnly => 'Chỉ thông tin (không gửi ảnh)',
+    SendMode.smsFallback => 'SMS tới tổng đài, đồng bộ khi có mạng',
+    SendMode.queuedOffline => 'Lưu hàng đợi, gửi khi có mạng',
+  };
+}
+
+/// Chế độ gửi đọc từ `RescueRecord.sendMode`; null với giá trị cũ ('direct') hoặc lạ.
+SendMode? sendModeFromName(String? name) => SendMode.values.asNameMap()[name];

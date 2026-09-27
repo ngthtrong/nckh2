@@ -1,8 +1,10 @@
 import 'dart:convert';
 import 'package:crypto/crypto.dart';
 import 'package:dio/dio.dart';
+import 'package:flutter/foundation.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_image_compress/flutter_image_compress.dart';
+import 'package:permission_handler/permission_handler.dart';
 
 import '../../config.dart';
 import '../../domain/entities/rescue_record.dart';
@@ -23,7 +25,8 @@ class SenderRemoteDataSource {
   Future<UploadResult> upload(RescueRecord rec, Uint8List? jpeg) async {
     final meta = jsonEncode({
       'id': rec.id,
-      'createdAt': rec.createdAt.toIso8601String(),
+      // meta chính là payload CREATE_RESCUE_RECORD: thời gian UTC ISO 8601 (contact_connect.md).
+      'createdAt': rec.createdAt.toUtc().toIso8601String(),
       'lat': rec.lat,
       'lng': rec.lng,
       'trappedCount': rec.trappedCount,
@@ -81,15 +84,38 @@ class SenderRemoteDataSource {
     }
   }
 
-  Future<void> sendSms(String to, String body) async {
-    await _smsChannel.invokeMethod<bool>('sendSms', {'to': to, 'body': body});
+  /// SMS dự phòng tới tổng đài khi không có data. Chỉ Android có kênh
+  /// `rescue/sms`; web/desktop, số tổng đài chưa cấu hình hoặc bị từ chối quyền
+  /// thì trả false để báo cáo nằm lại hàng đợi.
+  Future<bool> sendSms(RescueRecord record) async {
+    if (kIsWeb || defaultTargetPlatform != TargetPlatform.android) return false;
+    if (kEmergencyPhone == kPlaceholderEmergencyPhone) {
+      debugPrint('SMS fallback bỏ qua: chưa đặt EMERGENCY_PHONE.');
+      return false;
+    }
+    try {
+      if (!await Permission.sms.request().isGranted) return false;
+      final ok = await _smsChannel.invokeMethod<bool>('sendSms', {
+        'to': kEmergencyPhone,
+        'body': smsBody(record),
+      });
+      return ok ?? false;
+    } catch (e) {
+      debugPrint('SMS fallback lỗi: $e');
+      return false;
+    }
   }
+}
 
-  String smsBody(RescueRecord r) {
-    final pos = '${r.lat.toStringAsFixed(5)},${r.lng.toStringAsFixed(5)}';
-    final vulnerable = r.vulnerableGroups.join(',');
-    return 'SOS|pos:$pos|trapped:${r.trappedCount}|injured:${r.injuredCount}'
-        '${vulnerable.isNotEmpty ? '|vuln:$vulnerable' : ''}'
-        '${r.description.isNotEmpty ? '|note:${r.description}' : ''}';
-  }
+/// Nội dung SMS: gọn, đủ để tổng đài điều phối; `id` để khớp với bản ghi đồng
+/// bộ sau này khi có mạng.
+String smsBody(RescueRecord r) {
+  final lat = r.lat, lng = r.lng;
+  final pos = lat != null && lng != null
+      ? '${lat.toStringAsFixed(5)},${lng.toStringAsFixed(5)}'
+      : 'unknown';
+  final vulnerable = r.vulnerableGroups.join(',');
+  return 'SOS|id:${r.id}|pos:$pos|trapped:${r.trappedCount}|injured:${r.injuredCount}'
+      '${vulnerable.isNotEmpty ? '|vuln:$vulnerable' : ''}'
+      '${r.description.isNotEmpty ? '|note:${r.description}' : ''}';
 }
