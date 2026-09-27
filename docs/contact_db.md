@@ -93,11 +93,25 @@ CREATE TABLE IF NOT EXISTS teams (          -- Đội cứu hộ
     created_at  TEXT NOT NULL
 );
 
+-- Tài khoản điều phối viên (be/accounts.py).
+CREATE TABLE IF NOT EXISTS operators (
+    id                    INTEGER PRIMARY KEY AUTOINCREMENT,
+    username              TEXT NOT NULL UNIQUE COLLATE NOCASE,   -- [a-z0-9][a-z0-9._-]{2,31}
+    display_name          TEXT NOT NULL UNIQUE COLLATE NOCASE,   -- Ghi vào report_events.actor
+    password_hash         TEXT NOT NULL,         -- "pbkdf2_sha256$<vòng>$<salt hex>$<hash hex>"
+    role                  TEXT NOT NULL DEFAULT 'operator',       -- 'admin' | 'operator'
+    active                INTEGER NOT NULL DEFAULT 1,
+    must_change_password  INTEGER NOT NULL DEFAULT 0,             -- 1 khi dùng mật khẩu tạm do admin cấp
+    created_at            TEXT NOT NULL,
+    last_login_at         TEXT
+);
+
 CREATE TABLE IF NOT EXISTS sessions (       -- Phiên đăng nhập dashboard
     token_hash  TEXT PRIMARY KEY,           -- SHA-256 của token, không lưu token gốc
-    operator    TEXT NOT NULL,
+    operator    TEXT NOT NULL,              -- Tên hiển thị lúc đăng nhập (tham khảo)
     created_at  TEXT NOT NULL,
-    expires_at  TEXT NOT NULL
+    expires_at  TEXT NOT NULL,
+    operator_id INTEGER                     -- operators.id; phiên của tài khoản bị khóa không còn hiệu lực
 );
 
 -- 'seq': bộ đếm thay đổi không bao giờ giảm; 'epoch': đổi khi xóa toàn bộ dữ liệu;
@@ -108,6 +122,13 @@ CREATE TABLE IF NOT EXISTS server_meta (key TEXT PRIMARY KEY, value TEXT NOT NUL
 `init_db()` tự thêm các cột/bảng này cho DB cũ và bù `first_received_at`
 (= `server_received_at`), `location_source = 'device'` (khi có tọa độ), `updated_seq`.
 `DELETE /api/reports` xóa `reports`, `messages_dedup`, `report_events`, giữ `teams`.
+Khi nâng cấp từ bản mật khẩu chung, phiên cũ (không có `operator_id`) bị xóa; tài khoản
+quản trị đầu tiên được tạo từ `RESCUE_ADMIN_USERNAME`/`RESCUE_ADMIN_PASSWORD`.
+
+Dọn dữ liệu (mỗi giờ, `storage.cleanup`): xóa phiên hết hạn và bản ghi `messages_dedup`
+cũ hơn `RESCUE_DEDUP_RETENTION_DAYS` ngày (mặc định 30) mà message đã hết hạn hoặc không
+có `expires_at`. Message bị dọn nếu được gửi lại vẫn an toàn: báo cáo gộp theo id, đổi
+trạng thái cũ bị chặn bởi `statusVersion`.
 
 ### 1.2 Bảng `messages_dedup` (Nhật ký chống trùng & Outbox Store-and-Forward)
 
