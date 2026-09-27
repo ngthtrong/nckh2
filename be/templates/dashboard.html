@@ -5,405 +5,276 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Điều phối cứu hộ</title>
     <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'%3E%3Ccircle cx='16' cy='16' r='15' fill='%23b91c1c'/%3E%3Cpath d='M16 7v18M7 16h18' stroke='white' stroke-width='5'/%3E%3C/svg%3E">
-    <script src="https://cdn.tailwindcss.com"></script>
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.9.4/leaflet.min.css">
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.9.4/leaflet.min.js"></script>
-    <link rel="preconnect" href="https://fonts.googleapis.com">
-    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
-    <style>
-        body { font-family: 'Inter', sans-serif; }
-        code, pre, .mono { font-family: 'JetBrains Mono', monospace; }
-        .glass-card { background: rgba(255,255,255,0.95); border: 1px solid rgba(226,232,240,0.8); }
-        #map { height: 560px; }
-        @media (max-width: 1023px) { #map { height: 380px; } }
-        .rank-label { background: #0f172a; color: #fff; border-radius: 9999px; font: 700 11px 'Inter', sans-serif;
-                      padding: 2px 7px; border: 2px solid #fff; box-shadow: 0 1px 3px rgba(0,0,0,.4); white-space: nowrap; }
-        .cluster-row.active { background: #fff1f2; box-shadow: inset 3px 0 0 #e11d48; }
-    </style>
+    <!-- Trang tĩnh, không dùng CDN: phục vụ bởi FastAPI (/static) hoặc nginx của container dashboard. -->
+    <link rel="stylesheet" href="static/vendor/leaflet/leaflet.css">
+    <link rel="stylesheet" href="static/css/dashboard.css">
+    <script src="static/vendor/leaflet/leaflet.js"></script>
+    <script src="static/vendor/leaflet-heat.js"></script>
+    <script type="module" src="static/js/main.js"></script>
 </head>
-<body class="bg-slate-50 text-slate-800 min-h-screen">
-    <header class="bg-gradient-to-r from-red-700 via-rose-700 to-red-800 text-white shadow-md sticky top-0 z-[1000]">
-        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-3.5 flex flex-wrap items-center justify-between gap-4">
-            <div>
-                <h1 class="text-xl font-bold tracking-tight flex items-center gap-2">
-                    Điều phối cứu hộ bão lũ
-                    <span id="live-badge" class="text-xs font-semibold px-2 py-0.5 rounded-full bg-emerald-500/20 text-emerald-200 border border-emerald-400/30 flex items-center gap-1">
-                        <span class="w-1.5 h-1.5 rounded-full bg-emerald-400 animate-ping"></span>
-                        Tự cập nhật 5 s
-                    </span>
-                </h1>
-                <p class="text-xs text-rose-100/80">Bản đồ báo cáo, phân cụm sự kiện và xếp hạng ưu tiên (product C<sub>ij</sub> + Louvain)</p>
+<body>
+    <!-- Đăng nhập -->
+    <section id="login-view" class="login-view" hidden>
+        <form id="login-form" class="login-card" autocomplete="on">
+            <div class="login-brand">
+                <span class="brand-mark" aria-hidden="true"></span>
+                <div>
+                    <h1>Điều phối cứu hộ bão lũ</h1>
+                    <p class="muted">Dành cho điều phối viên</p>
+                </div>
             </div>
-            <div class="flex items-center gap-2.5">
-                <a href="/docs" target="_blank" class="text-xs font-medium bg-white/10 hover:bg-white/20 border border-white/20 px-3 py-1.5 rounded-lg transition">API Docs</a>
-                <button onclick="refresh()" class="text-xs font-semibold bg-white text-red-700 hover:bg-rose-50 px-3 py-1.5 rounded-lg shadow-sm transition">Làm mới</button>
-            </div>
-        </div>
-    </header>
+            <label class="field">
+                <span>Tên đăng nhập</span>
+                <input id="login-username" name="username" autocomplete="username" required maxlength="64" autocapitalize="none" spellcheck="false">
+            </label>
+            <label class="field">
+                <span>Mật khẩu</span>
+                <input id="login-password" name="password" type="password" autocomplete="current-password" required>
+            </label>
+            <p id="login-error" class="form-error" role="alert" hidden></p>
+            <button type="submit" class="btn btn-primary btn-block">Đăng nhập</button>
+            <p class="muted small">Mỗi điều phối viên dùng tài khoản riêng do quản trị viên cấp; tên hiển thị được ghi vào nhật ký thao tác.</p>
+        </form>
+    </section>
 
-    <div id="synthetic-banner" class="hidden bg-amber-100 border-b border-amber-300 text-amber-900 text-sm">
-        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-2">
+    <!-- Ứng dụng -->
+    <div id="app-view" hidden>
+        <header class="topbar">
+            <div class="topbar-inner">
+                <div class="topbar-title">
+                    <span class="brand-mark" aria-hidden="true"></span>
+                    <div>
+                        <h1>Điều phối cứu hộ bão lũ</h1>
+                        <p id="live-status" class="live-status" aria-live="polite"><span class="dot"></span><span class="text">Đang kết nối…</span></p>
+                    </div>
+                </div>
+                <nav class="topbar-actions">
+                    <button id="new-reports" class="btn btn-alert" hidden></button>
+                    <button id="btn-new-report" class="btn btn-primary" title="Nhập báo cáo nhận qua điện thoại, tổng đài">+ Báo cáo mới</button>
+                    <button id="btn-teams" class="btn btn-ghost">Đội cứu hộ</button>
+                    <button id="btn-operators" class="btn btn-ghost" hidden>Tài khoản</button>
+                    <div class="menu">
+                        <button id="btn-export" class="btn btn-ghost" aria-haspopup="true" aria-expanded="false">Xuất dữ liệu</button>
+                        <div id="export-menu" class="menu-list" hidden>
+                            <button data-format="csv">CSV (Excel) theo bộ lọc</button>
+                            <button data-format="geojson">GeoJSON (bản đồ GIS) theo bộ lọc</button>
+                            <button data-action="backup" data-admin-only hidden>Tải bản sao lưu CSDL</button>
+                            <button data-action="backup-images" data-admin-only hidden>Tải sao lưu CSDL kèm ảnh (.zip)</button>
+                        </div>
+                    </div>
+                    <button id="btn-sound" class="btn btn-ghost" aria-pressed="false" title="Âm báo khi có báo cáo mới">Âm báo: tắt</button>
+                    <button id="operator-name" class="btn btn-ghost operator" title="Đổi mật khẩu"></button>
+                    <button id="btn-logout" class="btn btn-ghost">Đăng xuất</button>
+                </nav>
+            </div>
+        </header>
+
+        <div id="synthetic-banner" class="banner banner-warning" hidden>
             <b>Dữ liệu mô phỏng:</b> <span id="synthetic-count"></span> báo cáo bán tổng hợp (neo theo bối cảnh EMSR848), không phải báo cáo thật.
         </div>
-    </div>
 
-    <main class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-6 space-y-6">
-        <div class="grid grid-cols-2 lg:grid-cols-5 gap-4">
-            <div class="glass-card rounded-2xl p-4 shadow-sm">
-                <div class="text-xs font-semibold uppercase tracking-wider text-slate-400 mb-1">Báo cáo chưa giải quyết</div>
-                <div class="text-3xl font-extrabold text-slate-800" id="stat-active">–</div>
-            </div>
-            <div class="glass-card rounded-2xl p-4 shadow-sm">
-                <div class="text-xs font-semibold uppercase tracking-wider text-slate-400 mb-1">Cụm sự kiện</div>
-                <div class="text-3xl font-extrabold text-rose-600" id="stat-clusters">–</div>
-            </div>
-            <div class="glass-card rounded-2xl p-4 shadow-sm">
-                <div class="text-xs font-semibold uppercase tracking-wider text-slate-400 mb-1">Đã điều phối</div>
-                <div class="text-3xl font-extrabold text-amber-600" id="stat-dispatched">–</div>
-            </div>
-            <div class="glass-card rounded-2xl p-4 shadow-sm">
-                <div class="text-xs font-semibold uppercase tracking-wider text-slate-400 mb-1">Đã giải quyết</div>
-                <div class="text-3xl font-extrabold text-emerald-600" id="stat-resolved">–</div>
-            </div>
-            <div class="glass-card rounded-2xl p-4 shadow-sm col-span-2 lg:col-span-1">
-                <div class="text-xs font-semibold uppercase tracking-wider text-slate-400 mb-1">Cần xem xét thủ công</div>
-                <div class="text-3xl font-extrabold text-slate-500" id="stat-review">–</div>
-                <div class="text-[11px] text-slate-400 mt-1">Thiếu vị trí hoặc thời gian</div>
-            </div>
-        </div>
+        <main class="page">
+            <section class="kpis" aria-label="Tổng quan">
+                <button class="kpi" data-status-filter="processing"><span class="kpi-label">Chờ xử lý</span><span class="kpi-value tone-critical" id="kpi-processing">–</span></button>
+                <button class="kpi" data-status-filter="dispatched"><span class="kpi-label">Đã điều phối</span><span class="kpi-value tone-warning" id="kpi-dispatched">–</span></button>
+                <button class="kpi" data-status-filter="resolved"><span class="kpi-label">Đã giải quyết</span><span class="kpi-value tone-good" id="kpi-resolved">–</span></button>
+                <button class="kpi" data-status-filter="cancelled"><span class="kpi-label">Đã đóng</span><span class="kpi-value" id="kpi-cancelled">–</span></button>
+                <button class="kpi" data-tab-target="review"><span class="kpi-label">Cần xem xét</span><span class="kpi-value" id="kpi-review">–</span><span class="kpi-hint">Thiếu vị trí / thời gian</span></button>
+                <button class="kpi" data-tab-target="clusters"><span class="kpi-label">Cụm sự kiện</span><span class="kpi-value tone-accent" id="kpi-clusters">–</span></button>
+                <button class="kpi" data-tab-target="stats"><span class="kpi-label">Tiếp nhận → điều phối</span><span class="kpi-value" id="kpi-response">–</span><span class="kpi-hint" id="kpi-response-hint">trung vị</span></button>
+            </section>
 
-        <div class="grid grid-cols-1 lg:grid-cols-5 gap-6">
-            <div class="lg:col-span-3 glass-card rounded-2xl shadow-sm overflow-hidden">
-                <div id="map"></div>
-                <div class="px-4 py-2 text-[11px] text-slate-500 border-t border-slate-200 flex flex-wrap gap-x-4 gap-y-1">
-                    <span>Màu điểm = cụm; kích thước = số người cần cứu</span>
-                    <span>Nhãn đen = hạng ưu tiên tại trọng tâm cụm</span>
-                    <span><span class="inline-block w-2 h-2 rounded-full bg-slate-400 align-middle"></span> điểm lẻ / chưa vào cụm</span>
-                </div>
-            </div>
-
-            <div class="lg:col-span-2 glass-card rounded-2xl shadow-sm overflow-hidden flex flex-col">
-                <div class="px-4 py-3 border-b border-slate-200 bg-slate-50/50">
-                    <h2 class="text-sm font-bold text-slate-800">Xếp hạng ưu tiên cụm</h2>
-                    <p class="text-[11px] text-slate-500">P = (0.34·E + 0.33·F + 0.33·N) × (1 + tanh(V/10)); P ∈ [0; 2] (Eq. 4, bài ISDS 2026). Bấm một cụm để xem trên bản đồ.</p>
-                </div>
-                <div id="cluster-list" class="overflow-y-auto divide-y divide-slate-100" style="max-height: 560px;"></div>
-            </div>
-        </div>
-
-        <div class="glass-card rounded-2xl shadow-sm overflow-hidden">
-            <div class="px-5 py-4 border-b border-slate-200 flex flex-wrap items-center justify-between gap-3 bg-slate-50/50">
-                <div>
-                    <h2 class="text-base font-bold text-slate-800" id="table-title">Tất cả báo cáo</h2>
-                    <p class="text-xs text-slate-500" id="table-subtitle">Chọn một cụm để lọc.</p>
-                </div>
-                <div class="flex flex-wrap items-center gap-2">
-                    <select id="status-filter" onchange="renderTable()" class="text-xs border border-slate-300 rounded-lg px-2 py-1.5 bg-white">
-                        <option value="">Mọi trạng thái</option>
-                        <option value="processing">Đang xử lý</option>
-                        <option value="dispatched">Đã điều phối</option>
-                        <option value="resolved">Đã giải quyết</option>
-                    </select>
-                    <button id="dispatch-cluster" onclick="advanceCluster('dispatched')" class="hidden text-xs bg-amber-500 hover:bg-amber-600 text-white px-3 py-1.5 rounded-lg font-semibold transition">Điều phối cả cụm</button>
-                    <button id="resolve-cluster" onclick="advanceCluster('resolved')" class="hidden text-xs bg-emerald-600 hover:bg-emerald-700 text-white px-3 py-1.5 rounded-lg font-semibold transition">Hoàn tất cả cụm</button>
-                    <button id="clear-selection" onclick="selectCluster(null)" class="hidden text-xs bg-slate-100 hover:bg-slate-200 text-slate-700 px-3 py-1.5 rounded-lg font-medium transition">Bỏ chọn cụm</button>
-                    <button onclick="clearReports()" class="text-xs text-rose-600 hover:bg-rose-50 px-2.5 py-1.5 rounded-lg border border-rose-200 font-semibold transition">Xóa tất cả</button>
-                </div>
-            </div>
-            <div class="overflow-x-auto">
-                <table class="w-full text-left text-xs">
-                    <thead class="bg-slate-100/70 text-slate-600 uppercase font-semibold text-[11px] border-b border-slate-200">
-                        <tr>
-                            <th class="py-3 px-4">Thời điểm</th>
-                            <th class="py-3 px-4">ID</th>
-                            <th class="py-3 px-4">Cụm</th>
-                            <th class="py-3 px-4">Người cần cứu</th>
-                            <th class="py-3 px-4">Mô tả / nhãn AI</th>
-                            <th class="py-3 px-4">Ảnh</th>
-                            <th class="py-3 px-4">Trạng thái</th>
-                            <th class="py-3 px-4 text-right">Thao tác</th>
-                        </tr>
-                    </thead>
-                    <tbody id="report-rows" class="divide-y divide-slate-200/70"></tbody>
-                </table>
-            </div>
-            <div id="empty-state" class="hidden p-12 text-center text-sm text-slate-500">
-                Chưa có báo cáo. Chạy app Flutter, <code class="bg-slate-100 px-1 rounded">python test_client.py</code>
-                hoặc <code class="bg-slate-100 px-1 rounded">python seed_demo.py</code> để nạp dữ liệu mô phỏng.
-            </div>
-        </div>
-    </main>
-
-    <div id="json-modal" class="fixed inset-0 bg-slate-900/50 backdrop-blur-sm z-[2000] hidden flex items-center justify-center p-4">
-        <div class="bg-white rounded-2xl max-w-2xl w-full max-h-[85vh] flex flex-col shadow-2xl overflow-hidden">
-            <div class="px-5 py-4 border-b border-slate-200 flex items-center justify-between bg-slate-50">
-                <h3 class="text-sm font-bold text-slate-800" id="modal-title">Chi tiết báo cáo</h3>
-                <button onclick="closeModal()" class="text-slate-400 hover:text-slate-600 text-lg leading-none">&times;</button>
-            </div>
-            <div class="p-4 overflow-y-auto flex-1 space-y-3">
-                <img id="modal-image" class="hidden max-h-72 rounded-xl border border-slate-200 mx-auto" alt="Ảnh hiện trường">
-                <pre id="modal-content" class="text-xs bg-slate-900 text-emerald-400 p-4 rounded-xl overflow-x-auto"></pre>
-            </div>
-        </div>
-    </div>
-
-    <script>
-        const POLL_MS = 5000;
-        const PRIORITY_MAX = 2.0; // mu = 2 (Eq. 4)
-        // Cách app gửi báo cáo (gửi thích ứng theo mạng, contact_connect.md).
-        const SEND_MODE_LABEL = {
-            fullImage: 'ảnh gốc', compressedImage: 'ảnh nén', textOnly: 'chỉ thông tin',
-            smsFallback: 'đã SMS, gửi muộn', queuedOffline: 'gửi muộn (offline)',
-        };
-        const PALETTE = ['#e11d48', '#2563eb', '#16a34a', '#d97706', '#7c3aed', '#0891b2', '#db2777',
-                         '#65a30d', '#ea580c', '#4f46e5', '#0d9488', '#b91c1c', '#9333ea', '#ca8a04'];
-        const STATUS_LABEL = { processing: 'Đang xử lý', dispatched: 'Đã điều phối', resolved: 'Đã giải quyết' };
-        const STATUS_STYLE = {
-            processing: 'bg-rose-100 text-rose-700 border-rose-200',
-            dispatched: 'bg-amber-100 text-amber-800 border-amber-200',
-            resolved: 'bg-emerald-100 text-emerald-700 border-emerald-200',
-        };
-
-        let reports = [];
-        let clusterData = { clusters: [], review: [] };
-        let clusterOf = {};         // reportId -> cluster object
-        let selectedClusterId = null;
-        let fittedOnce = false;
-
-        const map = L.map('map', { preferCanvas: true }).setView([16.05, 108.2], 11);
-        L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
-            maxZoom: 19, attribution: '&copy; OpenStreetMap contributors',
-        }).addTo(map);
-        const pointLayer = L.layerGroup().addTo(map);
-        const labelLayer = L.layerGroup().addTo(map);
-
-        function esc(value) {
-            return String(value ?? '').replace(/[&<>"']/g, ch => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[ch]));
-        }
-        function colorFor(cluster) {
-            return cluster && cluster.size > 1 ? PALETTE[(cluster.rank - 1) % PALETTE.length] : '#94a3b8';
-        }
-        function people(r) {
-            const p = r.payload || {};
-            if (p.n_trapped !== undefined && p.n_trapped !== null) return Number(p.n_trapped);
-            return (r.trappedCount || 0) + (r.injuredCount || 0);
-        }
-        function fmtTime(r) {
-            const raw = r.createdAt || r.serverReceivedAt || '';
-            const d = new Date(/^\d+$/.test(raw) ? Number(raw) : raw);
-            return isNaN(d) ? esc(raw) : d.toLocaleString('vi-VN');
-        }
-        function aiText(r) {
-            const tags = r.aiTags || [];
-            if (tags.length) return tags.map(t => `${esc(t.label)} (${Math.round((t.confidence || 0) * 100)}%)`).join(', ');
-            const p = r.payload || {};
-            if (p.flood !== undefined && p.flood !== null) return `mức ngập ${Number(p.flood).toFixed(2)}`;
-            return '';
-        }
-
-        async function refresh() {
-            try {
-                const [repRes, cluRes] = await Promise.all([
-                    fetch('/api/reports?limit=5000'), fetch('/api/clusters'),
-                ]);
-                reports = (await repRes.json()).reports || [];
-                clusterData = await cluRes.json();
-                clusterOf = {};
-                for (const c of clusterData.clusters) for (const id of c.reportIds) clusterOf[id] = c;
-                if (selectedClusterId !== null && !clusterData.clusters.some(c => c.clusterId === selectedClusterId)) {
-                    selectedClusterId = null;
-                }
-                document.getElementById('live-badge').classList.remove('opacity-50');
-                renderStats();
-                renderMap();
-                renderClusters();
-                renderTable();
-            } catch (err) {
-                console.error(err);
-                document.getElementById('live-badge').classList.add('opacity-50');
-            }
-        }
-
-        function renderStats() {
-            const count = s => reports.filter(r => r.status === s).length;
-            document.getElementById('stat-active').textContent = reports.length - count('resolved');
-            document.getElementById('stat-clusters').textContent = clusterData.clusters.filter(c => c.size > 1).length;
-            document.getElementById('stat-dispatched').textContent = count('dispatched');
-            document.getElementById('stat-resolved').textContent = count('resolved');
-            document.getElementById('stat-review').textContent = (clusterData.review || []).length;
-            const synthetic = reports.filter(r => (r.payload || {}).source === 'synthetic').length;
-            document.getElementById('synthetic-banner').classList.toggle('hidden', synthetic === 0);
-            document.getElementById('synthetic-count').textContent = synthetic;
-        }
-
-        function renderMap() {
-            pointLayer.clearLayers();
-            labelLayer.clearLayers();
-            const bounds = [];
-            for (const r of reports) {
-                if (r.lat === null || r.lng === null || r.status === 'resolved') continue;
-                const c = clusterOf[r.id];
-                const dimmed = selectedClusterId !== null && (!c || c.clusterId !== selectedClusterId);
-                const marker = L.circleMarker([r.lat, r.lng], {
-                    radius: 4 + Math.min(10, Math.sqrt(people(r))),
-                    color: '#fff', weight: 1,
-                    fillColor: colorFor(c), fillOpacity: dimmed ? 0.15 : 0.85,
-                    opacity: dimmed ? 0.3 : 1,
-                });
-                marker.bindPopup(
-                    `<b>${esc(r.id)}</b><br>${fmtTime(r)}<br>` +
-                    `Cụm: ${c ? '#' + c.rank : '–'} · ${people(r)} người · ${esc(STATUS_LABEL[r.status] || r.status)}<br>` +
-                    `${esc(r.description || '')}<br><a href="#" data-id="${esc(r.id)}" onclick="showDetails(this.dataset.id);return false;">Xem chi tiết</a>`
-                );
-                marker.on('click', () => { if (c) selectCluster(c.clusterId, false); });
-                marker.addTo(pointLayer);
-                bounds.push([r.lat, r.lng]);
-            }
-            for (const c of clusterData.clusters) {
-                if (c.size < 2 || !c.centroid) continue;
-                L.marker([c.centroid.lat, c.centroid.lng], {
-                    icon: L.divIcon({ className: '', html: `<span class="rank-label">#${c.rank}</span>`, iconSize: null }),
-                    zIndexOffset: 1000 - c.rank,
-                }).on('click', () => selectCluster(c.clusterId)).addTo(labelLayer);
-            }
-            if (!fittedOnce && bounds.length) {
-                map.fitBounds(bounds, { padding: [20, 20] });
-                fittedOnce = true;
-            }
-        }
-
-        function renderClusters() {
-            const box = document.getElementById('cluster-list');
-            const rows = clusterData.clusters;
-            if (!rows.length) {
-                box.innerHTML = '<div class="p-6 text-sm text-slate-400 text-center">Chưa có cụm nào.</div>';
-                return;
-            }
-            box.innerHTML = rows.map(c => {
-                const pct = Math.min(100, 100 * c.priority / PRIORITY_MAX);
-                const k = c.components;
-                const members = c.reportIds.map(id => reports.find(r => r.id === id)).filter(Boolean);
-                const dispatched = members.filter(r => r.status === 'dispatched').length;
-                return `<button class="cluster-row w-full text-left px-4 py-3 hover:bg-slate-50 transition ${c.clusterId === selectedClusterId ? 'active' : ''}"
-                                onclick="selectCluster(${c.clusterId})">
-                    <div class="flex items-center justify-between gap-2">
-                        <div class="flex items-center gap-2">
-                            <span class="w-3 h-3 rounded-full" style="background:${colorFor(c)}"></span>
-                            <span class="font-bold text-sm">#${c.rank}</span>
-                            <span class="text-xs text-slate-500">${c.size} báo cáo${dispatched ? ` · ${dispatched} đã điều phối` : ''}</span>
+            <section class="workspace">
+                <div class="card map-card">
+                    <div class="map-toolbar">
+                        <div class="segmented" role="group" aria-label="Tô màu điểm">
+                            <button data-color-mode="cluster" aria-pressed="true">Theo cụm</button>
+                            <button data-color-mode="status" aria-pressed="false">Theo trạng thái</button>
                         </div>
-                        <span class="mono text-sm font-semibold">${c.priority.toFixed(3)}</span>
+                        <label class="check"><input type="checkbox" id="toggle-closed"> Hiện báo cáo đã kết thúc</label>
+                        <label class="check"><input type="checkbox" id="toggle-heat"> Bản đồ nhiệt</label>
+                        <button id="btn-fit" class="btn btn-small">Vừa khung</button>
                     </div>
-                    <div class="h-1.5 bg-slate-100 rounded mt-2"><div class="h-1.5 rounded bg-rose-500" style="width:${pct}%"></div></div>
-                    <div class="mono text-[10px] text-slate-500 mt-1.5">
-                        E ${k.E.toFixed(2)} · F ${k.F.toFixed(2)} · N ${k.N.toFixed(2)} · V ${k.V.toFixed(2)} · tin cậy ${k.provenance.toFixed(2)}
+                    <div id="pick-banner" class="pick-banner" hidden></div>
+                    <div id="map"></div>
+                    <div id="map-legend" class="map-legend"></div>
+                </div>
+
+                <div class="card side-card">
+                    <div class="tabs" role="tablist">
+                        <button role="tab" data-tab="clusters" aria-selected="true">Cụm ưu tiên <span class="count" id="tab-count-clusters"></span></button>
+                        <button role="tab" data-tab="review" aria-selected="false">Cần xem xét <span class="count" id="tab-count-review"></span></button>
+                        <button role="tab" data-tab="stats" aria-selected="false">Thống kê</button>
                     </div>
-                </button>`;
-            }).join('');
-        }
+                    <div class="tab-panel" data-panel="clusters">
+                        <p class="panel-note">P = (0.34·E + 0.33·F + 0.33·N) × (1 + tanh(V/10)), P ∈ [0; 2] (Eq. 4, ISDS 2026). Bấm một cụm để lọc bảng và xem trên bản đồ.</p>
+                        <div id="cluster-list" class="list"></div>
+                    </div>
+                    <div class="tab-panel" data-panel="review" hidden>
+                        <p class="panel-note">Báo cáo thiếu vị trí hoặc thời gian không được phân cụm. Xác minh (gọi lại, hỏi địa phương) rồi nhập vị trí để đưa vào điều phối.</p>
+                        <div id="review-list" class="list"></div>
+                    </div>
+                    <div class="tab-panel" data-panel="stats" hidden>
+                        <div id="stats-panel"></div>
+                    </div>
+                </div>
+            </section>
 
-        function selectCluster(clusterId, pan = true) {
-            selectedClusterId = clusterId;
-            const c = clusterData.clusters.find(x => x.clusterId === clusterId);
-            if (c && pan) {
-                const pts = c.reportIds.map(id => reports.find(r => r.id === id))
-                    .filter(r => r && r.lat !== null).map(r => [r.lat, r.lng]);
-                if (pts.length) map.fitBounds(pts, { padding: [60, 60], maxZoom: 16 });
-            }
-            renderMap();
-            renderClusters();
-            renderTable();
-        }
+            <section class="card table-card">
+                <div class="table-head">
+                    <div>
+                        <h2 id="table-title">Tất cả báo cáo</h2>
+                        <p id="table-subtitle" class="muted small"></p>
+                    </div>
+                    <div id="cluster-actions" class="row-actions" hidden>
+                        <button class="btn btn-warning" data-cluster-action="dispatched">Điều phối cả cụm</button>
+                        <button class="btn btn-good" data-cluster-action="resolved">Hoàn tất cả cụm</button>
+                        <button class="btn" id="btn-clear-cluster">Bỏ chọn cụm</button>
+                    </div>
+                </div>
 
-        function renderTable() {
-            const filter = document.getElementById('status-filter').value;
-            const c = clusterData.clusters.find(x => x.clusterId === selectedClusterId);
-            let rows = c ? c.reportIds.map(id => reports.find(r => r.id === id)).filter(Boolean) : reports;
-            if (filter) rows = rows.filter(r => r.status === filter);
-            if (!c) {
-                // Không chọn cụm: báo cáo thuộc cụm hạng cao lên trước, rồi theo thời điểm mới nhất.
-                const rankOf = r => (clusterOf[r.id] ? clusterOf[r.id].rank : Infinity);
-                rows = [...rows].sort((a, b) => rankOf(a) - rankOf(b)
-                    || String(b.createdAt || '').localeCompare(String(a.createdAt || '')));
-            }
+                <div class="filters">
+                    <input id="f-q" type="search" placeholder="Tìm theo ID hoặc mô tả…" aria-label="Tìm kiếm">
+                    <div class="chips" role="group" aria-label="Lọc trạng thái">
+                        <button class="chip" data-status="processing" aria-pressed="false">Chờ xử lý</button>
+                        <button class="chip" data-status="dispatched" aria-pressed="false">Đã điều phối</button>
+                        <button class="chip" data-status="resolved" aria-pressed="false">Đã giải quyết</button>
+                        <button class="chip" data-status="cancelled" aria-pressed="false">Đã đóng</button>
+                    </div>
+                    <select id="f-time" aria-label="Khoảng thời gian">
+                        <option value="">Mọi thời điểm</option>
+                        <option value="1">1 giờ qua</option>
+                        <option value="6">6 giờ qua</option>
+                        <option value="24">24 giờ qua</option>
+                        <option value="72">3 ngày qua</option>
+                        <option value="custom">Tùy chọn…</option>
+                    </select>
+                    <span id="f-custom-time" class="custom-time" hidden>
+                        <input id="f-since" type="datetime-local" aria-label="Từ"> – <input id="f-until" type="datetime-local" aria-label="Đến">
+                    </span>
+                    <select id="f-team" aria-label="Đội"><option value="">Mọi đội</option><option value="none">Chưa giao đội</option></select>
+                    <select id="f-location" aria-label="Vị trí">
+                        <option value="">Có hoặc không vị trí</option>
+                        <option value="true">Có vị trí</option>
+                        <option value="false">Thiếu vị trí</option>
+                    </select>
+                    <select id="f-vulnerable" aria-label="Nhóm yếu thế">
+                        <option value="">Mọi nhóm</option>
+                        <option value="any">Có nhóm yếu thế</option>
+                        <option value="elderly">Người già</option>
+                        <option value="children">Trẻ em</option>
+                        <option value="pregnant">Phụ nữ mang thai</option>
+                        <option value="disabled">Người khuyết tật</option>
+                    </select>
+                    <select id="f-label" aria-label="Nhãn AI">
+                        <option value="">Mọi nhãn AI</option>
+                        <option value="high">Ngập cao</option>
+                        <option value="medium">Ngập trung bình</option>
+                        <option value="low">Ngập thấp</option>
+                        <option value="non_flood">Không ngập</option>
+                    </select>
+                    <select id="f-sendmode" aria-label="Cách gửi">
+                        <option value="">Mọi cách gửi</option>
+                        <option value="fullImage">Ảnh gốc</option>
+                        <option value="compressedImage">Ảnh nén</option>
+                        <option value="textOnly">Chỉ thông tin</option>
+                        <option value="smsFallback">SMS, gửi muộn</option>
+                        <option value="queuedOffline">Gửi muộn (offline)</option>
+                        <option value="hotline">Tổng đài nhập</option>
+                    </select>
+                    <button id="f-reset" class="btn btn-small">Xóa lọc</button>
+                </div>
 
-            document.getElementById('table-title').textContent = c ? `Cụm #${c.rank} — ${c.size} báo cáo` : 'Tất cả báo cáo';
-            document.getElementById('table-subtitle').textContent = c
-                ? `Điểm ưu tiên ${c.priority.toFixed(3)}; đã gộp ${c.exactDuplicatesRemoved} bản trùng khớp và ${c.nearDuplicatesCoalesced} bản gần trùng.`
-                : 'Chọn một cụm để lọc.';
-            for (const id of ['dispatch-cluster', 'resolve-cluster', 'clear-selection']) {
-                document.getElementById(id).classList.toggle('hidden', !c);
-            }
-            document.getElementById('empty-state').classList.toggle('hidden', reports.length > 0);
+                <div id="bulk-bar" class="bulk-bar" hidden>
+                    <span id="bulk-count"></span>
+                    <button class="btn btn-warning btn-small" data-bulk="dispatched">Điều phối</button>
+                    <button class="btn btn-good btn-small" data-bulk="resolved">Hoàn tất</button>
+                    <button class="btn btn-small" data-bulk="cancelled">Đóng báo cáo</button>
+                    <button class="btn btn-small" data-bulk="team">Giao đội</button>
+                    <button class="btn btn-ghost-dark btn-small" data-bulk="clear">Bỏ chọn</button>
+                </div>
 
-            document.getElementById('report-rows').innerHTML = rows.slice(0, 500).map(r => {
-                const rc = clusterOf[r.id];
-                const next = r.status === 'processing' ? 'dispatched' : r.status === 'dispatched' ? 'resolved' : null;
-                return `<tr class="hover:bg-slate-50">
-                    <td class="py-2.5 px-4 text-slate-500 whitespace-nowrap">${fmtTime(r)}</td>
-                    <td class="py-2.5 px-4 mono font-medium">${esc(r.id)}</td>
-                    <td class="py-2.5 px-4 whitespace-nowrap">${rc ? `<span class="inline-flex items-center gap-1"><span class="w-2 h-2 rounded-full" style="background:${colorFor(rc)}"></span>#${rc.rank}</span>` : '<span class="text-slate-400">–</span>'}</td>
-                    <td class="py-2.5 px-4">${people(r)}</td>
-                    <td class="py-2.5 px-4 max-w-md"><div class="truncate" title="${esc(r.description)}">${esc(r.description || '')}</div><div class="text-[10px] text-indigo-700">${aiText(r)}</div></td>
-                    <td class="py-2.5 px-4">${r.imageUrl ? `<a href="${esc(r.imageUrl)}" target="_blank"><img src="${esc(r.imageUrl)}" class="w-10 h-10 object-cover rounded border border-slate-200" alt=""></a>` : '<span class="text-slate-400">–</span>'}${SEND_MODE_LABEL[r.sendMode] ? `<div class="text-[10px] text-slate-500 whitespace-nowrap">${SEND_MODE_LABEL[r.sendMode]}</div>` : ''}</td>
-                    <td class="py-2.5 px-4"><span class="px-2 py-0.5 rounded border text-[11px] font-semibold ${STATUS_STYLE[r.status] || ''}">${esc(STATUS_LABEL[r.status] || r.status)}</span></td>
-                    <td class="py-2.5 px-4 text-right whitespace-nowrap">
-                        ${next ? `<button data-id="${esc(r.id)}" onclick="advance(this.dataset.id,'${next}')" class="text-[11px] bg-slate-800 hover:bg-slate-700 text-white px-2 py-1 rounded">${next === 'dispatched' ? 'Điều phối' : 'Hoàn tất'}</button>` : ''}
-                        <button data-id="${esc(r.id)}" onclick="showDetails(this.dataset.id)" class="text-[11px] bg-slate-100 hover:bg-slate-200 px-2 py-1 rounded">Chi tiết</button>
-                    </td>
-                </tr>`;
-            }).join('');
-        }
+                <div class="table-wrap">
+                    <table class="reports">
+                        <thead>
+                            <tr>
+                                <th class="col-check"><input type="checkbox" id="check-all" aria-label="Chọn tất cả trên trang"></th>
+                                <th><button class="sort" data-sort="createdAt">Thời điểm</button></th>
+                                <th>ID</th>
+                                <th><button class="sort" data-sort="priority">Cụm</button></th>
+                                <th><button class="sort" data-sort="people">Người</button></th>
+                                <th>Mô tả / nhãn AI</th>
+                                <th>Ảnh</th>
+                                <th>Đội</th>
+                                <th><button class="sort" data-sort="status">Trạng thái</button></th>
+                                <th class="col-actions"></th>
+                            </tr>
+                        </thead>
+                        <tbody id="report-rows"></tbody>
+                    </table>
+                </div>
+                <div id="empty-state" class="empty" hidden></div>
+                <div class="pager">
+                    <span id="pager-info" class="muted small"></span>
+                    <div class="pager-buttons">
+                        <select id="page-size" aria-label="Số dòng mỗi trang">
+                            <option value="25">25 / trang</option>
+                            <option value="50" selected>50 / trang</option>
+                            <option value="100">100 / trang</option>
+                            <option value="200">200 / trang</option>
+                        </select>
+                        <button id="page-prev" class="btn btn-small">‹ Trước</button>
+                        <span id="page-label" class="small"></span>
+                        <button id="page-next" class="btn btn-small">Sau ›</button>
+                    </div>
+                </div>
+            </section>
+        </main>
 
-        async function patchStatus(r, status) {
-            const res = await fetch(`/api/reports/${encodeURIComponent(r.id)}/status`, {
-                method: 'PATCH',
-                headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({ status, statusVersion: (r.statusVersion || 1) + 1 }),
-            });
-            if (!res.ok) {
-                const body = await res.json().catch(() => ({}));
-                throw new Error((body.detail && (body.detail.error || body.detail.code)) || res.statusText);
-            }
-        }
-        async function advance(id, status) {
-            const r = reports.find(x => x.id === id);
-            try { await patchStatus(r, status); } catch (err) { alert('Không cập nhật được: ' + err.message); }
-            refresh();
-        }
-        async function advanceCluster(status) {
-            const c = clusterData.clusters.find(x => x.clusterId === selectedClusterId);
-            if (!c) return;
-            const rank = { processing: 1, dispatched: 2, resolved: 3 };
-            const targets = c.reportIds.map(id => reports.find(r => r.id === id))
-                .filter(r => r && rank[r.status] < rank[status]);
-            for (const r of targets) {
-                try { await patchStatus(r, status); } catch (err) { console.warn(r.id, err); }
-            }
-            if (status === 'resolved') selectedClusterId = null;
-            refresh();
-        }
+        <!-- Chi tiết báo cáo -->
+        <aside id="drawer" class="drawer" hidden aria-labelledby="drawer-title">
+            <div class="drawer-head">
+                <div>
+                    <h2 id="drawer-title"></h2>
+                    <div id="drawer-sub" class="muted small"></div>
+                </div>
+                <button class="icon-btn" id="drawer-close" aria-label="Đóng">×</button>
+            </div>
+            <div id="drawer-body" class="drawer-body"></div>
+        </aside>
 
-        function showDetails(id) {
-            const r = reports.find(x => x.id === id);
-            if (!r) return;
-            document.getElementById('modal-title').textContent = 'Chi tiết: ' + r.id;
-            document.getElementById('modal-content').textContent = JSON.stringify(r, null, 2);
-            const img = document.getElementById('modal-image');
-            img.classList.toggle('hidden', !r.imageUrl);
-            if (r.imageUrl) img.src = r.imageUrl;
-            document.getElementById('json-modal').classList.remove('hidden');
-        }
-        function closeModal() { document.getElementById('json-modal').classList.add('hidden'); }
-        async function clearReports() {
-            if (!confirm('Xóa toàn bộ báo cáo và lịch sử chống trùng?')) return;
-            const res = await fetch('/api/reports', { method: 'DELETE' });
-            if (res.ok) { selectedClusterId = null; fittedOnce = false; refresh(); }
-        }
+        <!-- Hộp thoại dùng chung -->
+        <dialog id="dialog" class="dialog">
+            <form id="dialog-form" method="dialog">
+                <h3 id="dialog-title"></h3>
+                <div id="dialog-body"></div>
+                <p id="dialog-error" class="form-error" role="alert" hidden></p>
+                <div class="dialog-actions">
+                    <button type="button" class="btn" id="dialog-cancel">Hủy</button>
+                    <button type="submit" class="btn btn-primary" id="dialog-ok">Xác nhận</button>
+                </div>
+            </form>
+        </dialog>
 
-        refresh();
-        setInterval(refresh, POLL_MS);
-    </script>
+        <!-- Quản lý đội -->
+        <dialog id="teams-dialog" class="dialog dialog-wide">
+            <div class="dialog-headline">
+                <h3>Đội cứu hộ</h3>
+                <button class="icon-btn" id="teams-close" aria-label="Đóng">×</button>
+            </div>
+            <div id="teams-body"></div>
+        </dialog>
+
+        <!-- Tài khoản (quản trị viên) -->
+        <dialog id="operators-dialog" class="dialog dialog-wide">
+            <div class="dialog-headline">
+                <h3>Tài khoản điều phối viên</h3>
+                <button class="icon-btn" id="operators-close" aria-label="Đóng">×</button>
+            </div>
+            <div id="operators-body"></div>
+        </dialog>
+
+        <div id="toasts" class="toasts" aria-live="polite"></div>
+    </div>
 </body>
 </html>

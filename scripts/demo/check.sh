@@ -23,7 +23,7 @@ if [[ ! -x "$PY" ]]; then
   echo "Chưa có be/.venv — chạy scripts/demo/run_server.sh một lần để tạo." >&2
   record "BE unit test" "SKIP (chưa có venv)"
 else
-  if (cd "$BE" && "$PY" -m unittest test_contract test_cluster_service); then
+  if (cd "$BE" && "$PY" -m unittest test_contract test_cluster_service test_dashboard_api); then
     record "BE unit test" "PASS"
   else
     record "BE unit test" "FAIL"
@@ -65,13 +65,19 @@ if [[ $SMOKE -eq 1 && -x "$PY" ]]; then
     (cd "$BE" && RESCUE_DB_FILE=$SMOKE_DB RESCUE_UPLOADS_DIR=$SMOKE_UP \
       exec "$PY" -m uvicorn main:app --host 127.0.0.1 --port 8000 >/dev/null 2>&1) &
     SPID=$!
-    for _ in $(seq 1 60); do curl -sf -o /dev/null http://127.0.0.1:8000/probe && break; sleep 0.5; done
+    for _ in $(seq 1 60); do curl -sf -o /dev/null http://127.0.0.1:8000/healthz && break; sleep 0.5; done
     ok=1
     (cd "$BE" && "$PY" test_client.py) || ok=0
     (cd "$BE" && RESCUE_DB_FILE=$SMOKE_DB RESCUE_UPLOADS_DIR=$SMOKE_UP "$PY" seed_demo.py --reset) || ok=0
-    curl -sf http://127.0.0.1:8000/api/clusters | "$PY" -c \
+    # API dashboard cần đăng nhập (tài khoản quản trị tạo lần đầu, mật khẩu mặc định khi chưa đặt).
+    ADMIN_PASS="${RESCUE_ADMIN_PASSWORD:-${RESCUE_DASHBOARD_PASSWORD:-cuuho2026}}"
+    TOKEN=$(curl -sf -H 'Content-Type: application/json' \
+      -d "{\"username\":\"${RESCUE_ADMIN_USERNAME:-admin}\",\"password\":\"$ADMIN_PASS\"}" \
+      http://127.0.0.1:8000/api/auth/login | "$PY" -c 'import json,sys; print(json.load(sys.stdin)["token"])') || ok=0
+    curl -sf -H "Authorization: Bearer $TOKEN" http://127.0.0.1:8000/api/clusters | "$PY" -c \
       'import json,sys; d=json.load(sys.stdin); print("clusters:", len(d["clusters"]), "reports:", d["totalReports"])' || ok=0
     curl -sf -o /dev/null http://127.0.0.1:8000/ || ok=0
+    curl -sf -o /dev/null http://127.0.0.1:8000/static/js/main.js || ok=0
     kill "$SPID" 2>/dev/null; wait "$SPID" 2>/dev/null
     rm -rf "$BE/$SMOKE_DB" "$BE/$SMOKE_UP"
     if [[ $ok -eq 1 ]]; then record "Smoke test" "PASS"; else record "Smoke test" "FAIL"; fi

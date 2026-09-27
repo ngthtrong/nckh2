@@ -8,6 +8,34 @@ class StatusTracker extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    if (currentStatus == 'cancelled') {
+      // Điều phối viên đóng báo cáo (trùng, không xác minh được...): không hiện tiến trình.
+      return Container(
+        padding: const EdgeInsets.all(12),
+        decoration: BoxDecoration(
+          color: AppColors.statusCancelledBg,
+          borderRadius: BorderRadius.circular(12),
+          border: Border.all(color: AppColors.statusCancelledBorder),
+        ),
+        child: const Row(
+          children: [
+            Icon(Icons.info_outline, color: AppColors.statusCancelledText, size: 20),
+            SizedBox(width: 8),
+            Expanded(
+              child: Text(
+                'Điều phối viên đã đóng báo cáo này. Nếu vẫn cần cứu, hãy gửi báo cáo mới hoặc bấm SOS.',
+                style: TextStyle(
+                  color: AppColors.statusCancelledText,
+                  fontSize: 12,
+                  fontWeight: FontWeight.w600,
+                ),
+              ),
+            ),
+          ],
+        ),
+      );
+    }
+
     final steps = [
       ('processing', 'Đã nhận'),
       ('dispatched', 'Đang đến'),

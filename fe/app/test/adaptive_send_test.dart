@@ -140,6 +140,16 @@ void main() {
     expect(advancedStatus('processing', 'received'), isNull);
   });
 
+  test('cancelled là trạng thái kết thúc, không đi tiếp', () {
+    expect(advancedStatus('processing', 'cancelled'), 'cancelled');
+    expect(advancedStatus('dispatched', 'cancelled'), 'cancelled');
+    expect(advancedStatus('resolved', 'cancelled'), isNull);
+    expect(advancedStatus('cancelled', 'resolved'), isNull);
+    expect(advancedStatus('cancelled', 'cancelled'), isNull);
+    expect(isFinalStatus('cancelled'), isTrue);
+    expect(isFinalStatus('dispatched'), isFalse);
+  });
+
   test('SMS chứa id, vị trí và số người; thiếu GPS ghi unknown', () {
     expect(
       smsBody(_record()),

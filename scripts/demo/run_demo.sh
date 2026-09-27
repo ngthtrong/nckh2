@@ -61,5 +61,6 @@ for _ in $(seq 1 120); do
 done
 curl -sf -o /dev/null "http://127.0.0.1:$PORT/probe" || { echo "Server không phản hồi sau 120 s." >&2; exit 1; }
 echo ">> Server sẵn sàng — dashboard: http://localhost:$PORT/"
+echo "   Đăng nhập dashboard: tài khoản ${RESCUE_ADMIN_USERNAME:-admin} / mật khẩu ${RESCUE_ADMIN_PASSWORD:-${RESCUE_DASHBOARD_PASSWORD:-cuuho2026}} (lần đầu; tạo tài khoản điều phối viên ở mục \"Tài khoản\")"
 
 "$HERE/run_app.sh" "${APP_ARGS[@]}"

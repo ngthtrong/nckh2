@@ -55,6 +55,9 @@ $lanIp = (Get-NetIPAddress -AddressFamily IPv4 -ErrorAction SilentlyContinue |
 Write-Host "================================================="
 Write-Host " Flood Rescue Mock Server"
 Write-Host "  Dashboard : http://localhost:$Port/"
+$dashUser = if ($env:RESCUE_ADMIN_USERNAME) { $env:RESCUE_ADMIN_USERNAME } else { "admin" }
+$dashPass = if ($env:RESCUE_ADMIN_PASSWORD) { $env:RESCUE_ADMIN_PASSWORD } elseif ($env:RESCUE_DASHBOARD_PASSWORD) { $env:RESCUE_DASHBOARD_PASSWORD } else { "cuuho2026" }
+Write-Host "  Dang nhap : tai khoan $dashUser / mat khau $dashPass (lan dau; dat RESCUE_ADMIN_PASSWORD de doi)"
 Write-Host "  Swagger   : http://localhost:$Port/docs"
 if ($lanIp) { Write-Host "  LAN       : http://${lanIp}:$Port  (dien thoai that; mo firewall cong $Port)" }
 Write-Host "  Emulator  : http://10.0.2.2:$Port"

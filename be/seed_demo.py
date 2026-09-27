@@ -60,7 +60,7 @@ def main() -> None:
     rows = load_run(args.run)
     with storage.get_db_connection() as conn:
         for row in rows:
-            storage.save_report(to_meta(row, args.run), connection=conn)
+            storage.save_report(to_meta(row, args.run), connection=conn, source="seed")
         conn.commit()
     print(f"Đã nạp {len(rows)} báo cáo mô phỏng từ run_{args.run:03d} vào {storage.DB_FILE}")
 

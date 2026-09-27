@@ -10,5 +10,6 @@ if [ -n "${SEED_RUN:-}" ]; then
   fi
 fi
 
-exec python -m uvicorn main:app --host 0.0.0.0 --port "${PORT:-8000}" \
-  --proxy-headers --forwarded-allow-ips='*'
+# IP client cho chống dò mật khẩu do app tự lấy (auth.client_ip): chỉ tin X-Forwarded-For
+# từ proxy khai báo trong RESCUE_TRUSTED_PROXIES, nên tắt proxy-headers của uvicorn.
+exec python -m uvicorn main:app --host 0.0.0.0 --port "${PORT:-8000}" --no-proxy-headers

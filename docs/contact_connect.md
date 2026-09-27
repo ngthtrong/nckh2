@@ -37,6 +37,18 @@ multipart `/api/reports`. Endpoint `/api/reports` là transport chuyên biệt c
 `CREATE_RESCUE_RECORD`: field `meta` chính là `payload` của operation và
 `meta.id` là khóa idempotency. Endpoint này không nhận `UPDATE_RESCUE_STATUS`.
 
+Quy tắc của `/api/reports` (server kiểm tra trước khi ghi):
+
+- `meta` phải là JSON object hợp lệ theo [quy tắc payload](#quy-tắc-payload-create_rescue_record);
+  thiếu `id` hoặc sai kiểu trả `400` với `detail: {"code": "INVALID_PAYLOAD", "error": "..."}`.
+- Ảnh tối đa `15 MB` (`RESCUE_MAX_IMAGE_MB`), vượt thì `413 IMAGE_TOO_LARGE`. Định dạng
+  xác định theo byte đầu file, không theo tên file hay `Content-Type`: JPEG (khuyến
+  nghị), PNG hoặc WebP; khác thì `415 UNSUPPORTED_IMAGE`.
+- Tên file ảnh do server đặt (`<id>_<12 hex SHA-256>.<ext>`); tên file client gửi bị bỏ qua.
+- Gửi lại cùng `meta.id` **không ghi đè** báo cáo: server chỉ điền trường còn trống và
+  chỉ gắn ảnh khi báo cáo chưa có ảnh (ảnh đầu tiên được giữ, response trả `imageUrl`
+  của ảnh đó). Chi tiết quy tắc gộp: `docs/contact_db.md` mục 1.1.
+
 ### ACK hiện tại của `/api/reports`
 
 Mock server trong `be/` đã triển khai endpoint này. Khi lưu thành công, server
@@ -47,14 +59,16 @@ trả HTTP `201 Created` với response:
   "status": "ok",
   "message": "Báo cáo cứu hộ đã được tiếp nhận thành công",
   "id": "rescue-10492",
-  "imageUrl": "/uploads/rescue-10492_photo.jpg",
-  "imageLocalPath": "đường dẫn cục bộ trên mock server",
-  "receivedAt": "2026-09-22T08:30:15.123456"
+  "imageUrl": "/uploads/rescue-10492_3f9a0c1d2e4b.jpg",
+  "receivedAt": "2026-09-22T08:30:15Z"
 }
 ```
 
 - HTTP `201` và `status: "ok"` là ACK cho toàn bộ request.
-- `imageUrl` khác `null` nghĩa là mock server đã lưu ảnh.
+- `imageUrl` khác `null` nghĩa là báo cáo đã có ảnh trên server (có thể là ảnh
+  của lần gửi trước với cùng `meta.id`).
+- `receivedAt` là lần đầu server nhận báo cáo này. Response không còn trả
+  `imageLocalPath` (đường dẫn trên máy chủ).
 - `imageUrl: null` nghĩa là server chỉ nhận metadata.
 - App không chờ field `imageStatus` vì mock server hiện không trả field này.
 
@@ -147,6 +161,26 @@ phải chuyển message đã quá timeout về `pending` để gửi lại.
 | `payload_hash` | Có | `sha256:` + SHA-256 dạng hex chữ thường của payload canonical theo RFC 8785 |
 | `payload` | Có | Dữ liệu của operation, phải là JSON object |
 
+Message thiếu field bắt buộc, sai kiểu, hoặc không phải JSON object bị `rejected`
+`INVALID_PAYLOAD` riêng lẻ; các message khác trong batch vẫn được xử lý.
+
+### Quy tắc payload `CREATE_RESCUE_RECORD`
+
+Áp dụng cho `payload` của `/sync/messages` và `meta` của `/api/reports`. Vi phạm bị
+từ chối `INVALID_PAYLOAD` (không retry) thay vì gây lỗi `5xx` làm app gửi lại mãi.
+
+| Field | Quy tắc |
+|---|---|
+| `id` | Bắt buộc; chuỗi 1-128 ký tự `[A-Za-z0-9][A-Za-z0-9._:-]*` |
+| `lat`, `lng` | Cùng là `null`/vắng, hoặc cùng là số hữu hạn trong `[-90, 90]` / `[-180, 180]` |
+| `trappedCount`, `injuredCount` | Số nguyên `0`-`10000` hoặc vắng |
+| `vulnerableGroups` | Mảng tối đa 20 chuỗi (mỗi chuỗi ≤ 50 ký tự) |
+| `description` | Chuỗi ≤ 2000 ký tự |
+| `aiTags` | Mảng tối đa 20 object `{label?: chuỗi, confidence?: số}` |
+| `createdAt` | Chuỗi ISO 8601 (≤ 64 ký tự) hoặc epoch ms (số nguyên) |
+| `sendMode`, `imageSha256` | Chuỗi ngắn |
+| `status` | Bị bỏ qua: báo cáo mới luôn bắt đầu ở `processing` |
+
 Giới hạn ban đầu:
 
 - Tối đa `50` message trong một request.
@@ -160,7 +194,14 @@ Contract phiên bản `1` chỉ định nghĩa hai operation:
 | `operation_type` | Chiều | Mục đích |
 |---|---|---|
 | `CREATE_RESCUE_RECORD` | App đến server | Tạo hoặc gửi lại một báo cáo cứu hộ; `payload.id` là ID báo cáo duy nhất |
-| `UPDATE_RESCUE_STATUS` | Server hoặc client điều phối đã được xác thực | Cập nhật trạng thái nghiệp vụ của báo cáo |
+| `UPDATE_RESCUE_STATUS` | Điều phối viên đã đăng nhập dashboard | Cập nhật trạng thái nghiệp vụ của báo cáo |
+
+`UPDATE_RESCUE_STATUS` qua `/sync/messages` chỉ được xử lý khi request mang phiên
+đăng nhập dashboard (cookie `rescue_session` hoặc `Authorization: Bearer <token>`);
+người thao tác ghi vào nhật ký là tên điều phối viên của phiên. Không có phiên thì
+message bị `rejected` với `code: "UNAUTHENTICATED"`, `retryable: false`, và không
+được ghi vào bảng chống trùng (gửi lại sau khi đăng nhập vẫn được xử lý). App
+không gửi operation này.
 
 Payload tối thiểu của `UPDATE_RESCUE_STATUS`:
 
@@ -173,8 +214,21 @@ Payload tối thiểu của `UPDATE_RESCUE_STATUS`:
 }
 ```
 
-Trạng thái cứu hộ chỉ gồm `processing`, `dispatched`, `resolved` và chỉ được
-tiến về phía trước. `statusVersion` phải lớn hơn phiên bản server đang lưu.
+Trạng thái cứu hộ gồm `processing`, `dispatched`, `resolved` và `cancelled`, chỉ
+được tiến về phía trước:
+
+```text
+processing -> dispatched -> resolved
+     \              \
+      +--------------+--> cancelled   (điều phối viên đóng báo cáo)
+```
+
+- `resolved` và `cancelled` là **trạng thái kết thúc**: không chuyển sang trạng
+  thái nào khác, kể cả giữa hai trạng thái này.
+- `cancelled` kèm `reason` (tùy chọn qua `/sync/messages`, bắt buộc từ dashboard):
+  `duplicate`, `false_alarm`, `self_rescued`, `no_contact`, `other`. Lý do lạ bị từ
+  chối `INVALID_PAYLOAD`.
+- `statusVersion` phải lớn hơn phiên bản server đang lưu.
 
 Trạng thái chuyển phát cục bộ như `pending`, `in_flight`, `acked`, `sent`,
 `sms_sent` và `dead_letter` không phải trạng thái cứu hộ và không được ghi vào
@@ -194,8 +248,8 @@ Quy tắc gửi:
 3. Nếu upload ảnh thất bại, bản ghi cục bộ vẫn ở trạng thái chưa đồng bộ hoàn
    tất và app retry ảnh sau bằng cùng `meta.id`.
 4. Báo cáo không có ảnh hoàn tất ngay sau ACK metadata.
-5. Gửi lại cùng `meta.id` không được tạo báo cáo mới; server cập nhật ảnh cho
-   báo cáo đã có và trả lại cùng ID.
+5. Gửi lại cùng `meta.id` không được tạo báo cáo mới; server gắn ảnh nếu báo cáo
+   chưa có ảnh (ảnh đầu tiên được giữ) và trả lại cùng ID.
 6. `meta` phải chứa `imageSha256` và `imageSizeBytes` nếu có ảnh. Server kiểm tra
    SHA-256 sau khi nhận đủ file và từ chối `IMAGE_HASH_MISMATCH` nếu không khớp.
 
@@ -206,10 +260,12 @@ Quy tắc gửi:
 
 `be/` hiện đã triển khai:
 
-- `/api/reports`: nhận multipart, kiểm tra `X-Message-Contract-Version`, kiểm tra
-  `imageSha256`, lưu `image_size_bytes`, upsert theo `meta.id` và trả HTTP `201`.
+- `/api/reports`: nhận multipart, kiểm tra `X-Message-Contract-Version`, `meta`,
+  định dạng/dung lượng ảnh và `imageSha256`, lưu `image_size_bytes`, gộp theo
+  `meta.id` (không ghi đè) và trả HTTP `201`.
 - `/sync/messages`: giới hạn `50` message và `256 KiB`, kiểm tra contract version,
-  canonical hash, TTL, `message_id`, `(client_id, sequence_number)` và partial ACK.
+  canonical hash, TTL, `message_id`, `(client_id, sequence_number)`, payload và
+  partial ACK; mỗi message một transaction.
 - Hai operation `CREATE_RESCUE_RECORD`, `UPDATE_RESCUE_STATUS` cùng quy tắc
   `statusVersion` và chuyển trạng thái một chiều.
 - Bảng `messages_dedup` và các cột `status_version`, `image_sha256`,
@@ -222,17 +278,62 @@ Quy tắc gửi:
 
 ### Endpoint dành cho dashboard điều phối
 
-Hai endpoint dưới đây phục vụ website quản lý, không thuộc luồng store-and-forward
-của app và không cần header `X-Message-Contract-Version`:
+Các endpoint dưới đây phục vụ website quản lý, không thuộc luồng store-and-forward
+của app và không cần header `X-Message-Contract-Version`. **Tất cả cần đăng nhập**
+(trả `401 UNAUTHENTICATED` nếu chưa đăng nhập); endpoint của app (`/probe`,
+`/sync/messages`, `POST /api/reports`, `GET /api/reports/status`) không cần đăng nhập
+(riêng `UPDATE_RESCUE_STATUS` qua `/sync/messages` cần phiên, xem trên).
 
-- `GET /api/clusters`: phân cụm các báo cáo chưa `resolved` bằng product `C_ij` +
-  Louvain (cấu hình đã chọn trong bài báo) và trả cụm theo điểm ưu tiên giảm dần,
-  kèm trọng tâm và các thành phần `E`, `F`, `N`, `V`. Báo cáo thiếu vị trí hoặc
-  thời gian nằm trong `review`.
-- `PATCH /api/reports/{id}/status` với body `{"status": ..., "statusVersion": ...}`:
-  dùng **cùng hàm kiểm tra** với `UPDATE_RESCUE_STATUS` (`storage.apply_status_update`).
-  Mã lỗi giữ nguyên (`INVALID_PAYLOAD` → 400, `REPORT_NOT_FOUND` → 404,
-  `INVALID_STATUS_VERSION`/`INVALID_STATUS_TRANSITION` → 409).
+Đăng nhập đơn giản: một mật khẩu chung cho điều phối viên (`RESCUE_DASHBOARD_PASSWORD`)
+kèm tên người thao tác để ghi nhật ký.
+
+| Endpoint | Mục đích |
+|---|---|
+| `POST /api/auth/login` `{"operator", "password"}` | Tạo phiên; đặt cookie HttpOnly `rescue_session` và trả `token` (dùng `Authorization: Bearer` cho script). Sai 5 lần/5 phút/IP → `429` |
+| `POST /api/auth/logout`, `GET /api/auth/me` | Hủy phiên; phiên hiện tại (`{"authenticated": false}` khi chưa đăng nhập) và cấu hình dashboard |
+| `GET /api/reports` | Lọc `status`, `q`, `since`/`until`, `hasLocation`, `teamId`, `sendMode`, `label`, `vulnerable`, `source` (`app`/`sms`/`hotline`/`synthetic`), `ids`; `sort`; phân trang `page`/`pageSize` (`limit` là tên cũ). Không giới hạn tổng số báo cáo |
+| `POST /api/reports/manual` `{"description", "contactPhone"?, "lat"?, "lng"?, "trappedCount"?, "injuredCount"?, "vulnerableGroups"?}` | Điều phối viên nhập báo cáo nhận qua điện thoại/tổng đài: id `hotline-<ms>-<6 hex>`, `sendMode: "hotline"`, `payload.source: "hotline"`, vị trí (nếu có) là `manual`. Trả `201` kèm báo cáo |
+| `GET /api/reports/changes?since=&epoch=` | Báo cáo thay đổi sau mốc `cursor`; `reset: true` khi dữ liệu bị xóa toàn bộ (`epoch` đổi) |
+| `GET /api/clusters` | Phân cụm các báo cáo chưa kết thúc bằng product `C_ij` + Louvain (cấu hình đã chọn trong bài báo), cụm theo điểm ưu tiên giảm dần kèm trọng tâm và `E`, `F`, `N`, `V`. `clusterKey` (id nhỏ nhất trong cụm) ổn định hơn `clusterId`. Báo cáo thiếu vị trí/thời gian nằm trong `review`. Hỗ trợ `ETag`/`If-None-Match`. Chỉ tính lại khi có báo cáo mới/gộp, đổi trạng thái hoặc vị trí; khi dữ liệu lớn làm một lần tính chậm hơn `RESCUE_CLUSTER_SYNC_BUDGET_S`, trả kết quả gần nhất kèm `"stale": true` và tính lại ở luồng nền. `computedAt` là thời điểm tính |
+| `PATCH /api/reports/{id}/status` `{"status", "statusVersion", "note"?, "reason"?, "teamId"?}` | Dùng **cùng hàm kiểm tra** với `UPDATE_RESCUE_STATUS` (`storage.apply_status_update`) |
+| `POST /api/reports/bulk-status` `{"items": [{"id", "statusVersion"}], "status", ...}` | Đổi trạng thái đúng danh sách đã xác nhận; kết quả theo từng báo cáo |
+| `PUT /api/reports/{id}/team`, `POST /api/reports/{id}/notes`, `PUT /api/reports/{id}/location` | Giao đội, ghi chú nội bộ, nhập vị trí thủ công (`locationSource: "manual"`) |
+| `GET /api/reports/{id}/history` | Nhật ký thao tác (bảng `report_events`) |
+| `GET/POST /api/teams`, `PATCH /api/teams/{id}` | Quản lý đội cứu hộ |
+| `GET /api/stats`, `GET /api/export?format=csv\|geojson`, `GET /api/admin/backup` | Chỉ số vận hành, xuất dữ liệu theo bộ lọc, tải bản sao lưu SQLite |
+| `DELETE /api/reports` | Xóa toàn bộ báo cáo và nhật ký; chỉ khi `RESCUE_ALLOW_WIPE=1`, ngược lại `403 WIPE_DISABLED` |
+
+Mã lỗi đổi trạng thái giữ nguyên (`INVALID_PAYLOAD` → 400, `REPORT_NOT_FOUND` → 404,
+`INVALID_STATUS_VERSION`/`INVALID_STATUS_TRANSITION` → 409). Mã riêng của dashboard:
+`TEAM_NOT_FOUND` (404), `TEAM_INACTIVE`, `TEAM_NAME_TAKEN`, `REPORT_CLOSED` (409).
+Ảnh trong `/uploads/` cũng cần đăng nhập và được trả kèm `X-Content-Type-Options: nosniff`
+và `Content-Security-Policy: ...; sandbox`. Báo cáo có `contactPhone` (SMS, tổng đài)
+khi trả cho dashboard.
+
+### SMS gateway
+
+App gửi SMS dự phòng dạng
+`SOS|id:<id>|pos:<lat>,<lng>|trapped:<n>|injured:<n>|vuln:<a,b>|note:<mô tả>` (`pos:unknown`
+khi không có GPS; `note` luôn đứng cuối). Một điện thoại/dịch vụ SMS gateway chuyển
+tiếp tin tới server:
+
+```http
+POST /api/sms/inbound
+X-Gateway-Token: <RESCUE_SMS_GATEWAY_TOKEN>      (hoặc ?token=...)
+Content-Type: application/json
+
+{"from": "+84900000001", "text": "SOS|id:sos-...|pos:16.05,108.2|trapped:3|injured:1|note:...", "receivedAt": "2026-09-27T08:30:00Z"}
+```
+
+- Chưa đặt `RESCUE_SMS_GATEWAY_TOKEN`: `403 SMS_GATEWAY_DISABLED`; sai token: `401`.
+- Nhận cả tên field `phoneNumber`/`sender`, `message`/`body`, dạng lồng
+  `{"payload": {...}}` và form (`From`, `Body`).
+- Tin đúng định dạng dùng **đúng id của app**: khi app có mạng và đồng bộ
+  `CREATE_RESCUE_RECORD`, hai bản gộp thành một báo cáo (điền `createdAt`, `aiTags`...).
+  Tin tự do thành báo cáo `sms-<16 hex>` không vị trí, vào hàng cần xác minh.
+- Idempotent: gateway gửi lại cùng tin không tạo báo cáo mới. Trả `201` khi tạo mới,
+  `200` khi gộp: `{"status": "ok", "id": "...", "created": true|false}`.
+- Báo cáo có `sendMode: "smsFallback"`, `payload.source: "sms"`, `contactPhone` là số gửi.
 
 ### App lấy trạng thái điều phối
 
@@ -248,9 +349,10 @@ GET /api/reports/status?ids=post-1790472931479,sos-1790472922834
   không có trong kết quả. Không cần header `X-Message-Contract-Version`.
 - App hỏi mỗi `15 s` khi đang mở, ngay khi có mạng trở lại, sau mỗi lần đồng bộ
   outbox và trong tác vụ Workmanager 15 phút; chỉ hỏi các báo cáo đã đồng bộ và
-  chưa `resolved`.
-- App chỉ nhận trạng thái **tiến lên** (`processing → dispatched → resolved`), bỏ
-  qua trạng thái lùi hoặc lạ.
+  chưa kết thúc (`resolved`/`cancelled`).
+- App chỉ nhận trạng thái **tiến lên** (`processing → dispatched → resolved`, hoặc
+  `cancelled` từ trạng thái chưa kết thúc), bỏ qua trạng thái lùi hoặc lạ. App bản
+  cũ không biết `cancelled` sẽ bỏ qua nó (giữ trạng thái đang hiển thị).
 
 ### Trạng thái triển khai của mobile
 
@@ -279,6 +381,9 @@ GET /api/reports/status?ids=post-1790472931479,sos-1790472922834
   công khi Android nhận gửi, chưa có xác nhận tin đã tới tổng đài.
 - `lat`/`lng` là `null` khi thiết bị không có GPS; server đưa báo cáo vào hàng cần
   xem xét thủ công. App không gửi tọa độ mặc định.
+- ID báo cáo dạng `sos-<epoch ms>-<12 hex ngẫu nhiên>` / `post-...`
+  (`lib/domain/entities/record_id.dart`): hai máy gửi cùng mili-giây không trùng
+  ID (server gộp theo ID), và người ngoài không đoán được ID của báo cáo khác.
 
 ## Chuẩn canonical cho `payload_hash`
 
@@ -344,8 +449,9 @@ Server trả kết quả riêng cho từng message:
 | `retry_later` | Server tạm thời chưa xử lý được | Retry theo backoff |
 
 `code` là mã lỗi máy có thể đọc được, ví dụ `INVALID_PAYLOAD`, `EXPIRED`,
-`SEQUENCE_REUSED`, `IMAGE_HASH_MISMATCH`, `ID_REUSED_WITH_DIFFERENT_PAYLOAD`
-hoặc `SERVER_BUSY`.
+`SEQUENCE_REUSED`, `IMAGE_HASH_MISMATCH`, `ID_REUSED_WITH_DIFFERENT_PAYLOAD`,
+`UNAUTHENTICATED` (đổi trạng thái không có phiên điều phối) hoặc `SERVER_ERROR`
+(lỗi bất ngờ khi xử lý riêng message đó; `status: "retry_later"`, `retryable: true`).
 
 ## Quy tắc chuyển phát
 
@@ -424,3 +530,5 @@ Khi sửa cơ chế kết nối, request hoặc response:
 | 1 | 2026-09-24 | Thêm `GET /api/clusters` và `PATCH /api/reports/{id}/status` cho dashboard; tách quy tắc chuyển trạng thái thành hàm dùng chung; không đổi wire contract của app. |
 | 1 | 2026-09-27 | Thêm `GET /api/reports/status` cho app theo dõi trạng thái điều phối; mô tả gửi thích ứng (`sendMode`), SMS dự phòng và `lat`/`lng` null trên mobile. Không đổi wire contract của `/sync/messages` và `/api/reports`. |
 | 1 | 2026-09-27 | `meta.createdAt` của `/api/reports` gửi dạng UTC như `payload.createdAt`; khi upsert theo `meta.id`, server giữ `createdAt` của lần nhận đầu tiên. Không đổi wire contract. |
+| 1 | 2026-09-27 | Dashboard quản lý: thêm trạng thái kết thúc `cancelled` (kèm `reason`) cho `UPDATE_RESCUE_STATUS` và dashboard; app coi `cancelled` là trạng thái kết thúc. Endpoint dashboard cần đăng nhập; thêm lọc/phân trang, luồng thay đổi, thao tác hàng loạt, đội, ghi chú, vị trí thủ công, nhật ký, thống kê, xuất dữ liệu, sao lưu. Không đổi `/sync/messages` và `/api/reports` POST của app, không đổi phiên bản contract (app cũ bỏ qua trạng thái lạ). |
+| 1 | 2026-09-27 | Siết tiếp nhận, không tăng phiên bản (app hiện tại không bị ảnh hưởng): `UPDATE_RESCUE_STATUS` qua `/sync/messages` cần phiên điều phối (`UNAUTHENTICATED`); kiểm tra payload `CREATE_RESCUE_RECORD`/`meta` (`INVALID_PAYLOAD` thay vì `5xx`), bỏ `payload.status` khi tạo; mỗi message một transaction (`retry_later`/`SERVER_ERROR` cho riêng message lỗi); gửi lại cùng id chỉ bổ sung trường trống, giữ ảnh đầu tiên; ảnh JPEG/PNG/WebP ≤ 15 MB, tên file do server đặt; ACK `/api/reports` bỏ `imageLocalPath`. Thêm `POST /api/sms/inbound` (SMS gateway), `POST /api/reports/manual` (tổng đài), `stale`/`computedAt` cho `/api/clusters`. App sinh ID có hậu tố ngẫu nhiên. |

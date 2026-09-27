@@ -1,3 +1,4 @@
+import '../entities/record_id.dart';
 import '../entities/rescue_record.dart';
 import '../entities/send_mode.dart';
 import '../repositories/rescue_repository.dart';
@@ -14,7 +15,7 @@ class SendSosUseCase {
     required SendMode sendMode,
   }) async {
     final record = RescueRecord(
-      id: 'sos-${DateTime.now().millisecondsSinceEpoch}',
+      id: newRecordId('sos'),
       createdAt: DateTime.now(),
       lat: lat,
       lng: lng,
