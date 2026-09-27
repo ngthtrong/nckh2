@@ -59,14 +59,15 @@ class RecordLocalDataSource {
         images = rawImages.map((e) => e.toString()).toList();
       }
 
-      final createdAtMs = (m['createdAtMs'] as num?)?.toInt() ??
+      final createdAtMs =
+          (m['createdAtMs'] as num?)?.toInt() ??
           DateTime.now().millisecondsSinceEpoch;
 
       return RescueRecord(
         id: m['id'] as String? ?? 'id-${DateTime.now().millisecondsSinceEpoch}',
         createdAt: DateTime.fromMillisecondsSinceEpoch(createdAtMs),
-        lat: (m['lat'] as num?)?.toDouble() ?? 10.7769,
-        lng: (m['lng'] as num?)?.toDouble() ?? 106.7009,
+        lat: (m['lat'] as num?)?.toDouble(),
+        lng: (m['lng'] as num?)?.toDouble(),
         imagePath: m['imagePath'] as String?,
         images: images,
         aiLabel: m['aiLabel'] as String?,

@@ -3,8 +3,10 @@ import 'ai_tag.dart';
 class RescueRecord {
   final String id;
   final DateTime createdAt;
-  final double lat;
-  final double lng;
+
+  /// Null khi không lấy được GPS: server đưa báo cáo vào hàng cần xem xét thủ công.
+  final double? lat;
+  final double? lng;
   final String? imagePath;
   final List<String> images;
   final String? aiLabel;
@@ -36,6 +38,17 @@ class RescueRecord {
     this.synced = false,
     this.status = 'processing',
   });
+
+  /// Độ tin cậy cao nhất của AI on-device; 0 khi không có nhãn AI.
+  double get maxAiConfidence => aiTags.fold(
+    aiConfidence ?? 0,
+    (best, tag) => tag.confidence > best ? tag.confidence : best,
+  );
+
+  /// Vị trí dạng hiển thị, hoặc thông báo khi báo cáo không có GPS.
+  String get locationText => lat != null && lng != null
+      ? '${lat!.toStringAsFixed(4)}, ${lng!.toStringAsFixed(4)}'
+      : 'Chưa có GPS · trung tâm sẽ xác minh';
 
   RescueRecord copyWith({
     String? id,

@@ -4,6 +4,7 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Điều phối cứu hộ</title>
+    <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'%3E%3Ccircle cx='16' cy='16' r='15' fill='%23b91c1c'/%3E%3Cpath d='M16 7v18M7 16h18' stroke='white' stroke-width='5'/%3E%3C/svg%3E">
     <script src="https://cdn.tailwindcss.com"></script>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.9.4/leaflet.min.css">
     <script src="https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.9.4/leaflet.min.js"></script>
@@ -85,7 +86,7 @@
             <div class="lg:col-span-2 glass-card rounded-2xl shadow-sm overflow-hidden flex flex-col">
                 <div class="px-4 py-3 border-b border-slate-200 bg-slate-50/50">
                     <h2 class="text-sm font-bold text-slate-800">Xếp hạng ưu tiên cụm</h2>
-                    <p class="text-[11px] text-slate-500">P = (0.40·E + 0.35·F + 0.25·N) × hệ số yếu thế; P ∈ [0; 1.75]. Bấm một cụm để xem trên bản đồ.</p>
+                    <p class="text-[11px] text-slate-500">P = (0.34·E + 0.33·F + 0.33·N) × (1 + tanh(V/10)); P ∈ [0; 2] (Eq. 4, bài ISDS 2026). Bấm một cụm để xem trên bản đồ.</p>
                 </div>
                 <div id="cluster-list" class="overflow-y-auto divide-y divide-slate-100" style="max-height: 560px;"></div>
             </div>
@@ -149,7 +150,12 @@
 
     <script>
         const POLL_MS = 5000;
-        const PRIORITY_MAX = 1.75;
+        const PRIORITY_MAX = 2.0; // mu = 2 (Eq. 4)
+        // Cách app gửi báo cáo (gửi thích ứng theo mạng, contact_connect.md).
+        const SEND_MODE_LABEL = {
+            fullImage: 'ảnh gốc', compressedImage: 'ảnh nén', textOnly: 'chỉ thông tin',
+            smsFallback: 'đã SMS, gửi muộn', queuedOffline: 'gửi muộn (offline)',
+        };
         const PALETTE = ['#e11d48', '#2563eb', '#16a34a', '#d97706', '#7c3aed', '#0891b2', '#db2777',
                          '#65a30d', '#ea580c', '#4f46e5', '#0d9488', '#b91c1c', '#9333ea', '#ca8a04'];
         const STATUS_LABEL = { processing: 'Đang xử lý', dispatched: 'Đã điều phối', resolved: 'Đã giải quyết' };
@@ -340,7 +346,7 @@
                     <td class="py-2.5 px-4 whitespace-nowrap">${rc ? `<span class="inline-flex items-center gap-1"><span class="w-2 h-2 rounded-full" style="background:${colorFor(rc)}"></span>#${rc.rank}</span>` : '<span class="text-slate-400">–</span>'}</td>
                     <td class="py-2.5 px-4">${people(r)}</td>
                     <td class="py-2.5 px-4 max-w-md"><div class="truncate" title="${esc(r.description)}">${esc(r.description || '')}</div><div class="text-[10px] text-indigo-700">${aiText(r)}</div></td>
-                    <td class="py-2.5 px-4">${r.imageUrl ? `<a href="${esc(r.imageUrl)}" target="_blank"><img src="${esc(r.imageUrl)}" class="w-10 h-10 object-cover rounded border border-slate-200" alt=""></a>` : '<span class="text-slate-400">–</span>'}</td>
+                    <td class="py-2.5 px-4">${r.imageUrl ? `<a href="${esc(r.imageUrl)}" target="_blank"><img src="${esc(r.imageUrl)}" class="w-10 h-10 object-cover rounded border border-slate-200" alt=""></a>` : '<span class="text-slate-400">–</span>'}${SEND_MODE_LABEL[r.sendMode] ? `<div class="text-[10px] text-slate-500 whitespace-nowrap">${SEND_MODE_LABEL[r.sendMode]}</div>` : ''}</td>
                     <td class="py-2.5 px-4"><span class="px-2 py-0.5 rounded border text-[11px] font-semibold ${STATUS_STYLE[r.status] || ''}">${esc(STATUS_LABEL[r.status] || r.status)}</span></td>
                     <td class="py-2.5 px-4 text-right whitespace-nowrap">
                         ${next ? `<button data-id="${esc(r.id)}" onclick="advance(this.dataset.id,'${next}')" class="text-[11px] bg-slate-800 hover:bg-slate-700 text-white px-2 py-1 rounded">${next === 'dispatched' ? 'Điều phối' : 'Hoàn tất'}</button>` : ''}

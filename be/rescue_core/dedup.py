@@ -1,4 +1,7 @@
-# Chép nguyên từ demo/v2/dedup.py tại commit a6be3e9; chỉ đổi import sang tương đối, không sửa công thức.
+# Dựa trên demo/v2/dedup.py tại commit a6be3e9 (import tương đối). Đã chỉnh cho khớp
+# bài báo ISDS 2026 (Mục 2.1, 2.3) theo bản cài đặt thực nghiệm demo/pipeline tại cùng
+# commit: gom bản gần trùng bằng thành phần liên thông (không phải complete-link),
+# ngưỡng so sánh độ tin cậy dẫn xuất Q_i, và n_corrob đếm payload quan sát phân biệt.
 """Deterministic, observable-only deduplication and corroboration for v2."""
 
 from __future__ import annotations
@@ -7,7 +10,7 @@ import hashlib
 import json
 import math
 from dataclasses import dataclass
-from typing import Literal, Sequence
+from typing import Mapping, Sequence
 
 from .contracts import ReportV2, validate_unique_report_ids
 from .similarity import haversine_m
@@ -71,6 +74,13 @@ def exact_fingerprint(report: ReportV2) -> str:
 
 @dataclass(frozen=True, slots=True)
 class NearDuplicatePolicyV2:
+    """Observable near-duplicate envelope (demo/pipeline NearDuplicatePolicy).
+
+    ``confidence_abs`` compares the derived confidence Q_i, not a raw payload
+    field.  The two ``require_same_*`` guards are v2 extensions that the paper
+    envelope does not contain, so they are disabled by default.
+    """
+
     distance_m: float = 100.0
     time_window_min: float = 10.0
     flood_abs: float = 0.10
@@ -78,9 +88,9 @@ class NearDuplicatePolicyV2:
     n_abs_floor: float = 5.0
     n_relative: float = 0.25
     vulnerability_abs: float = 2.0
-    provenance_quality_abs: float = 0.10
-    require_same_source_family: bool = True
-    require_same_image_state: bool = True
+    confidence_abs: float = 0.10
+    require_same_source_family: bool = False
+    require_same_image_state: bool = False
 
     def __post_init__(self) -> None:
         for name in (
@@ -91,7 +101,7 @@ class NearDuplicatePolicyV2:
             "n_abs_floor",
             "n_relative",
             "vulnerability_abs",
-            "provenance_quality_abs",
+            "confidence_abs",
         ):
             object.__setattr__(
                 self,
@@ -118,13 +128,15 @@ def are_near_duplicates(
     first: ReportV2,
     second: ReportV2,
     policy: NearDuplicatePolicyV2 = NearDuplicatePolicyV2(),
+    confidence: Mapping[str, float] | None = None,
 ) -> bool:
     """Pairwise observable near-duplicate predicate.
 
     Masks must match exactly; a missing observation is never silently compared
     with a real zero.  L and T are mandatory because a near relation cannot be
     established safely without both.  Source IDs are transport identities and
-    are deliberately ignored.
+    are deliberately ignored.  When ``confidence`` (report_id -> Q_i) is given,
+    the derived confidences must also agree within ``confidence_abs``.
     """
 
     if not first.graph_eligible or not second.graph_eligible:
@@ -160,10 +172,9 @@ def are_near_duplicates(
         first.V, second.V, policy.vulnerability_abs
     ):
         return False
-    if not _same_nullable_measurement(
-        first.provenance_quality,
-        second.provenance_quality,
-        policy.provenance_quality_abs,
+    if confidence is not None and (
+        abs(confidence[first.report_id] - confidence[second.report_id])
+        > policy.confidence_abs
     ):
         return False
     return True
@@ -182,7 +193,7 @@ class ExactEvidenceUnitV2:
 
 @dataclass(frozen=True, slots=True)
 class EvidenceFamilyV2:
-    """A complete-link family of exact-evidence units."""
+    """A connected component of near-duplicate exact-evidence units."""
 
     units: tuple[ExactEvidenceUnitV2, ...]
 
@@ -229,93 +240,72 @@ def collapse_exact_duplicates(
     return tuple(units)
 
 
-def _cluster_signature(
-    cluster: tuple[ExactEvidenceUnitV2, ...],
-) -> tuple[str, ...]:
-    return tuple(unit.fingerprint for unit in cluster)
-
-
-def _complete_link_compatible(
-    first: tuple[ExactEvidenceUnitV2, ...],
-    second: tuple[ExactEvidenceUnitV2, ...],
+def _near_duplicate_components(
+    units: Sequence[ExactEvidenceUnitV2],
     policy: NearDuplicatePolicyV2,
-) -> bool:
-    return all(
-        are_near_duplicates(
-            left.representative,
-            right.representative,
-            policy,
+    confidence: Mapping[str, float] | None,
+) -> tuple[EvidenceFamilyV2, ...]:
+    """Deterministic connected components under observable near similarity.
+
+    This is the transitive rule of the paper (A~B~C joins A and C even if A is
+    not near C); it is intentionally not complete linkage.  Units are ordered
+    by fingerprint, so the result does not depend on input order.
+    """
+
+    ordered = sorted(units, key=lambda item: item.fingerprint)
+    parent = list(range(len(ordered)))
+
+    def find(index: int) -> int:
+        while parent[index] != index:
+            parent[index] = parent[parent[index]]
+            index = parent[index]
+        return index
+
+    def union(first: int, second: int) -> None:
+        root_first, root_second = find(first), find(second)
+        if root_first != root_second:
+            parent[max(root_first, root_second)] = min(root_first, root_second)
+
+    for first in range(len(ordered)):
+        for second in range(first + 1, len(ordered)):
+            if are_near_duplicates(
+                ordered[first].representative,
+                ordered[second].representative,
+                policy,
+                confidence,
+            ):
+                union(first, second)
+
+    components: dict[int, list[ExactEvidenceUnitV2]] = {}
+    for index, unit in enumerate(ordered):
+        components.setdefault(find(index), []).append(unit)
+    return tuple(
+        EvidenceFamilyV2(
+            tuple(sorted(members, key=lambda unit: unit.representative.report_id))
         )
-        for left in first
-        for right in second
+        for _, members in sorted(components.items())
     )
 
 
-def _complete_link_units(
-    units: Sequence[ExactEvidenceUnitV2],
-    policy: NearDuplicatePolicyV2,
-) -> tuple[EvidenceFamilyV2, ...]:
-    """Agglomerate only when every cross-pair is near.
-
-    Candidate merges are ordered by the fingerprint signature of their union,
-    making the result invariant to input order.  The all-cross-pairs condition
-    prevents A~B~C transitive chaining whenever A is not near C.
-    """
-
-    clusters: list[tuple[ExactEvidenceUnitV2, ...]] = [
-        (unit,) for unit in sorted(units, key=lambda item: item.fingerprint)
-    ]
-    while True:
-        candidates: list[
-            tuple[tuple[str, ...], int, int, tuple[ExactEvidenceUnitV2, ...]]
-        ] = []
-        for left_index in range(len(clusters)):
-            for right_index in range(left_index + 1, len(clusters)):
-                left = clusters[left_index]
-                right = clusters[right_index]
-                if not _complete_link_compatible(left, right, policy):
-                    continue
-                merged = tuple(
-                    sorted(left + right, key=lambda item: item.fingerprint)
-                )
-                candidates.append(
-                    (
-                        _cluster_signature(merged),
-                        left_index,
-                        right_index,
-                        merged,
-                    )
-                )
-        if not candidates:
-            break
-        _, left_index, right_index, merged = min(
-            candidates, key=lambda item: item[0]
-        )
-        clusters = [
-            cluster
-            for index, cluster in enumerate(clusters)
-            if index not in (left_index, right_index)
-        ]
-        clusters.append(merged)
-        clusters.sort(key=_cluster_signature)
-    return tuple(EvidenceFamilyV2(cluster) for cluster in clusters)
-
-
-def complete_link_near_duplicate_families(
+def near_duplicate_families(
     reports: Sequence[ReportV2],
     policy: NearDuplicatePolicyV2 = NearDuplicatePolicyV2(),
+    confidence: Mapping[str, float] | None = None,
 ) -> tuple[EvidenceFamilyV2, ...]:
-    """Collapse exact copies, then form deterministic complete-link families."""
+    """Collapse exact copies, then form deterministic connected components."""
 
-    return _complete_link_units(collapse_exact_duplicates(reports), policy)
+    return _near_duplicate_components(
+        collapse_exact_duplicates(reports), policy, confidence
+    )
 
 
 def deduplicate_reports(
     reports: Sequence[ReportV2],
     policy: NearDuplicatePolicyV2 = NearDuplicatePolicyV2(),
+    confidence: Mapping[str, float] | None = None,
 ) -> DeduplicationResultV2:
     exact_units = collapse_exact_duplicates(reports)
-    families = _complete_link_units(exact_units, policy)
+    families = _near_duplicate_components(exact_units, policy, confidence)
     return DeduplicationResultV2(
         exact_units=exact_units,
         families=families,
@@ -324,83 +314,87 @@ def deduplicate_reports(
     )
 
 
-CorroborationKeyV2 = Literal["source_family", "source_id"]
-
-
 @dataclass(frozen=True, slots=True)
-class CorroborationPolicyV2:
-    radius_m: float = 400.0
-    time_window_min: float = 60.0
-    cap: int = 3
-    independence_key: CorroborationKeyV2 = "source_family"
+class ConfidencePolicyV2:
+    """Eq. (1): Q_i = sigmoid(b0 + b1*1{image} + b2*log(1 + n_corrob)).
+
+    Values follow demo/pipeline/config.py ConfidenceParams at commit a6be3e9.
+    """
+
+    b0: float = -0.2
+    b1: float = 1.4
+    b2: float = 0.9
+    corrob_radius_m: float = 400.0
+    corrob_window_min: float = 60.0
 
     def __post_init__(self) -> None:
-        for name in ("radius_m", "time_window_min"):
+        for name in ("b0", "b1", "b2"):
+            value = float(getattr(self, name))
+            if not math.isfinite(value):
+                raise ValueError(f"{name} must be finite")
+            object.__setattr__(self, name, value)
+        for name in ("corrob_radius_m", "corrob_window_min"):
             object.__setattr__(
                 self,
                 name,
                 _finite_nonnegative(getattr(self, name), name),
             )
-        if type(self.cap) is not int or self.cap < 0:
-            raise ValueError("cap must be a non-negative integer")
-        if self.independence_key not in ("source_family", "source_id"):
-            raise ValueError(
-                "independence_key must be 'source_family' or 'source_id'"
-            )
 
 
-def _source_key(
-    report: ReportV2,
-    policy: CorroborationPolicyV2,
-) -> str | None:
-    value = getattr(report, policy.independence_key)
-    if value is None:
-        return None
-    # Source IDs are namespaced by family so identical local IDs from different
-    # channels cannot be mistaken for the same independent source.
-    if policy.independence_key == "source_id":
-        return f"{report.source_family or '<unknown>'}:{value}"
-    return value
-
-
-def capped_distinct_source_corroboration(
+def distinct_payload_corroboration(
     reports: Sequence[ReportV2],
-    policy: CorroborationPolicyV2 = CorroborationPolicyV2(),
+    policy: ConfidencePolicyV2 = ConfidencePolicyV2(),
 ) -> dict[str, int]:
-    """Count nearby independent source keys, once per key and up to ``cap``.
+    """n_corrob: nearby observable payloads, counted by unique payload identity.
 
-    A target's own source key does not corroborate itself.  Reports with
-    missing L/T enter the graph review queue and receive zero corroboration.
-    Missing source keys are not counted as independent evidence.
+    Exact copies of the target's own payload are the same evidence unit and do
+    not corroborate it; repeated copies of another payload count once.  Reports
+    with missing L/T go to manual review and receive zero corroboration.
     """
 
     validate_unique_report_ids(reports)
+    fingerprints = {report.report_id: exact_fingerprint(report) for report in reports}
     result: dict[str, int] = {}
     for target in reports:
-        if not target.graph_eligible or policy.cap == 0:
+        if not target.graph_eligible:
             result[target.report_id] = 0
             continue
-        target_key = _source_key(target, policy)
+        own = fingerprints[target.report_id]
         corroborating: set[str] = set()
         for candidate in reports:
-            if candidate.report_id == target.report_id:
+            if candidate.report_id == target.report_id or not candidate.graph_eligible:
                 continue
-            if not candidate.graph_eligible:
+            fingerprint = fingerprints[candidate.report_id]
+            if fingerprint == own:
                 continue
-            candidate_key = _source_key(candidate, policy)
-            if candidate_key is None or candidate_key == target_key:
-                continue
-            if haversine_m(target.L, candidate.L) > policy.radius_m:
+            if haversine_m(target.L, candidate.L) > policy.corrob_radius_m:
                 continue
             delta_min = abs((target.T - candidate.T).total_seconds()) / 60.0
-            if delta_min > policy.time_window_min:
+            if delta_min > policy.corrob_window_min:
                 continue
-            corroborating.add(candidate_key)
-        result[target.report_id] = min(policy.cap, len(corroborating))
+            corroborating.add(fingerprint)
+        result[target.report_id] = len(corroborating)
+    return result
+
+
+def confidence_scores(
+    reports: Sequence[ReportV2],
+    policy: ConfidencePolicyV2 = ConfidencePolicyV2(),
+) -> dict[str, float]:
+    """Q_i for every report by Eq. (1); a pipeline rule, not a calibrated probability."""
+
+    corroboration = distinct_payload_corroboration(reports, policy)
+    result: dict[str, float] = {}
+    for report in reports:
+        z = (
+            policy.b0
+            + policy.b1 * (1.0 if report.has_image else 0.0)
+            + policy.b2 * math.log1p(corroboration[report.report_id])
+        )
+        result[report.report_id] = 1.0 / (1.0 + math.exp(-z))
     return result
 
 
 # Explicit compatibility names for callers that prefer the longer wording.
 observable_report_fingerprint_v2 = exact_fingerprint
 are_near_duplicate_reports_v2 = are_near_duplicates
-

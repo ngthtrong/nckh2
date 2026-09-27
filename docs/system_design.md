@@ -53,7 +53,7 @@ flowchart LR
 | Ứng dụng di động | Flutter 3, Hive, Workmanager, onnxruntime, ExecuTorch (Android) | `fe/app/` |
 | Mô hình AI | PyTorch → ONNX / ExecuTorch `.pte` | `fe/model/`, `fe/tools/` |
 | Máy chủ | Python, FastAPI, SQLite | `be/main.py`, `be/storage.py` |
-| Thuật toán phân cụm, ưu tiên | NumPy, scikit-learn (BallTree), NetworkX, python-louvain | `be/rescue_core/`, `be/cluster_service.py` |
+| Thuật toán phân cụm, ưu tiên | NumPy, NetworkX, python-louvain | `be/rescue_core/`, `be/cluster_service.py` |
 | Website điều phối | HTML + Tailwind + Leaflet, phục vụ bởi FastAPI | `be/templates/dashboard.html` |
 
 ## 2. Luồng dữ liệu giữa Mobile và Server
@@ -142,8 +142,8 @@ erDiagram
 - Trạng thái cứu hộ chỉ tiến về phía trước; quy tắc nằm trong một hàm duy nhất
   `storage.apply_status_update`, dùng chung cho app (`UPDATE_RESCUE_STATUS`) và dashboard
   (`PATCH /api/reports/{id}/status`).
-- Vị trí được lưu dạng `lat`/`lng` (WGS84); phân cụm dùng khoảng cách haversine và BallTree
-  thay cho chỉ mục không gian của CSDL. Lược đồ tương thích PostgreSQL/PostGIS khi cần mở rộng.
+- Vị trí được lưu dạng `lat`/`lng` (WGS84); phân cụm tính khoảng cách haversine trên toàn bộ
+  ma trận cặp báo cáo, không dùng chỉ mục không gian của CSDL. Lược đồ tương thích PostgreSQL/PostGIS khi cần mở rộng.
 - Biến môi trường `RESCUE_DB_FILE` cho phép chạy trên DB riêng (ví dụ DB demo), không ghi
   đè `be/data/rescue_reports.db`.
 
@@ -167,29 +167,42 @@ làm độ chính xác của mô hình.
 
 ## 5. Thuật toán phân cụm và xếp hạng ưu tiên
 
-Máy chủ dùng đúng cài đặt của bài báo ISDS 2026 (sao chép từ `demo/v2` tại commit
-`a6be3e9` vào `be/rescue_core/`), với cấu hình đã chọn `product_cij_louvain`.
+Máy chủ dùng các công thức của bài báo ISDS 2026 #6444 (`be/rescue_core/`), với cấu hình
+đã chọn `product_cij_louvain`. Khung mã lấy từ `demo/v2` (commit `a6be3e9`), đã chỉnh để khớp
+bản cài đặt thực nghiệm của bài báo: `demo/pipeline` tại cùng commit (Eq. 1, khử trùng lặp,
+hằng số Eq. 4) và notebook `Benchmark_Cij_Baselines_Colab` tại commit `6ac75c2` (Algorithm 1).
+Trên cả 80 run của `src/data/gold`, nhãn cụm trùng notebook (ARI = 1, cùng số cạnh), còn
+`Q_i` và `P_k` trùng `demo/pipeline` đến 4 chữ số thập phân.
 
 ```mermaid
 flowchart TD
-    R[Báo cáo chưa resolved] --> M[Ánh xạ sang ReportV2<br/>L, T, F, E, N, V, độ tin cậy]
+    R[Báo cáo chưa resolved] --> M[Ánh xạ sang ReportV2<br/>L, T, F, E, N, V, có ảnh]
     M --> E{Có vị trí và thời gian?}
     E -->|không| RV[Danh sách cần xem xét thủ công]
-    E -->|có| K[Ứng viên láng giềng không gian<br/>BallTree haversine]
-    K --> W["Trọng số cạnh product:<br/>C_ij = G_ij · (β·T_ij + γ·Ctx_ij)"]
+    E -->|có| K[Toàn bộ ma trận cặp<br/>khoảng cách haversine]
+    K --> W["Trọng số cạnh product:<br/>w_ij = G_ij · (β·T_ij + γ·C_ij)"]
     W --> Q[Giữ cạnh trên phân vị q = 0,9<br/>và k = 8 láng giềng mạnh nhất]
     Q --> L[Louvain, resolution 1,2, seed 42]
-    L --> D[Khử trùng lặp trong cụm<br/>trùng khớp và gần trùng]
-    D --> P["P = (0,40·E + 0,35·F + 0,25·N) × (1 + 0,75·tanh(V/20))"]
+    L --> D[Khử trùng lặp trong cụm<br/>trùng khớp + thành phần liên thông gần trùng]
+    E -->|có| QI["Q_i = sigmoid(−0,2 + 1,4·có ảnh + 0,9·log(1 + n_corrob))"]
+    QI --> D
+    D --> P["P = (0,34·Ē + 0,33·F̄ + 0,33·N̄) × (1 + tanh(V̄/10))"]
     P --> O[Cụm xếp theo P giảm dần → dashboard]
 ```
 
 - `G_ij = exp(-d²/(2σ²))` với σ = 700 m; `T_ij = exp(-Δt/τ)` với τ = 60 phút;
-  `Ctx_ij` so khớp mức ngập F và mức khẩn cấp E, trường thiếu đóng góp 0.
-- `P` bị chặn trong [0; 1,75]. Nhân bản cùng một báo cáo không làm tăng điểm vì bước
-  khử trùng lặp và phép lấy max theo họ báo cáo.
-- Kết quả được cache và chỉ tính lại khi có báo cáo mới hoặc đổi trạng thái; với 316 báo
-  cáo mô phỏng, một lần tính mất khoảng 0,3 s.
+  `C_ij` so khớp mức ngập F (τ_F = 0,25) và mức khẩn cấp E (τ_E = 0,35), trường thiếu
+  đóng góp 0. Ngưỡng θ là phân vị 0,9 của mọi trọng số cặp khác 0 (Algorithm 1).
+- `Q_i` (Eq. 1): `n_corrob` đếm số payload quan sát **phân biệt** trong bán kính 400 m và
+  60 phút; bản sao y hệt không làm tăng `Q_i`. Độ tin cậy của mô hình AI không vào `Q_i`.
+- Bản gần trùng (≤ 100 m, ≤ 10 phút, chênh F/E ≤ 0,1, N, V, `Q_i` ≤ 0,1) được gom theo
+  thành phần liên thông (có bắc cầu), đúng Mục 2.3 của bài báo.
+- `P` bị chặn trong [0; 2] (ω = (0,34; 0,33; 0,33), μ = 2, s = 10, N_ref = 500, V_cap = 50).
+  Nhân bản cùng một báo cáo không làm tăng điểm vì bước khử trùng lặp và phép lấy max theo
+  họ báo cáo.
+- Kết quả được cache và chỉ tính lại khi có báo cáo mới hoặc đổi trạng thái. Với 316 báo
+  cáo mô phỏng, một lần tính mất khoảng 0,2 s; với khoảng 1.600 báo cáo mất khoảng 4 s (bộ nhớ
+  và thời gian tăng theo bình phương số báo cáo đang hoạt động).
 
 Ánh xạ từ dữ liệu app sang ký hiệu thuật toán (`be/cluster_service.py`) là **heuristic vận
 hành**, chưa được kiểm định:
@@ -200,7 +213,8 @@ hành**, chưa được kiểm định:
 | E (khẩn cấp) | Từ khóa trong mô tả ("cứu gấp", "mắc kẹt", ...); không có mô tả thì bỏ trống |
 | N | Số người mắc kẹt + bị thương |
 | V | Số nhóm yếu thế được chọn (0–4), thay cho số người yếu thế |
-| Độ tin cậy | Độ tin cậy của mô hình AI |
+| Có ảnh | Báo cáo có ảnh đính kèm (đầu vào của `Q_i`) |
+| provenance_quality | Độ tin cậy của mô hình AI; chỉ nằm trong dấu vân tay bản trùng, không vào điểm ưu tiên |
 
 Hạn chế đã biết: ngưỡng cạnh là phân vị tương đối của lô dữ liệu, nên khi chỉ có ít báo
 cáo, một điểm nóng có thể bị tách thành vài cụm nhỏ (không trộn các điểm nóng khác nhau).

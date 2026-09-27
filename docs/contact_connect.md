@@ -234,6 +234,24 @@ của app và không cần header `X-Message-Contract-Version`:
   Mã lỗi giữ nguyên (`INVALID_PAYLOAD` → 400, `REPORT_NOT_FOUND` → 404,
   `INVALID_STATUS_VERSION`/`INVALID_STATUS_TRANSITION` → 409).
 
+### App lấy trạng thái điều phối
+
+```http
+GET /api/reports/status?ids=post-1790472931479,sos-1790472922834
+```
+
+```json
+{"reports": [{"id": "post-1790472931479", "status": "dispatched", "statusVersion": 2}]}
+```
+
+- Tối đa `100` id mỗi request (id phân tách bằng dấu phẩy); id server không biết
+  không có trong kết quả. Không cần header `X-Message-Contract-Version`.
+- App hỏi mỗi `15 s` khi đang mở, ngay khi có mạng trở lại, sau mỗi lần đồng bộ
+  outbox và trong tác vụ Workmanager 15 phút; chỉ hỏi các báo cáo đã đồng bộ và
+  chưa `resolved`.
+- App chỉ nhận trạng thái **tiến lên** (`processing → dispatched → resolved`), bỏ
+  qua trạng thái lùi hoặc lạ.
+
 ### Trạng thái triển khai của mobile
 
 `fe/app/` hiện đã triển khai:
@@ -248,6 +266,19 @@ của app và không cần header `X-Message-Contract-Version`:
 - JCS dùng package `causalontology` `4.x`; SHA-256 dùng package `crypto` `3.x`.
 - Ảnh được upload riêng sau ACK metadata, kèm `imageSha256`, `imageSizeBytes`
   và `X-Message-Contract-Version: 1`.
+- Gửi thích ứng: trước khi gửi bài có ảnh, app tải `GET /probe` (64 KB) để đo
+  throughput (kbit/s) rồi chọn `payload.sendMode` bằng `chooseMode`
+  (`lib/domain/entities/send_mode.dart`, ngưỡng trong `lib/config.dart`):
+  `fullImage` (ảnh gốc), `compressedImage` (JPEG chất lượng 60, cạnh ≤ 1024),
+  `textOnly` (không upload ảnh). Bài không có ảnh và SOS không đo, gửi `textOnly`.
+  Bản ghi xếp hàng khi offline được chọn lại chế độ ảnh theo mạng lúc đồng bộ.
+- Không có data (mất kết nối hoặc không tới được `/probe`): Android gửi SMS tới
+  `EMERGENCY_PHONE` (`--dart-define`) qua kênh `rescue/sms`, ghi
+  `sendMode: smsFallback`, và vẫn xếp bản ghi vào outbox. Web/desktop, số tổng đài
+  chưa cấu hình hoặc không có quyền SMS thì ghi `queuedOffline`. Kênh SMS trả thành
+  công khi Android nhận gửi, chưa có xác nhận tin đã tới tổng đài.
+- `lat`/`lng` là `null` khi thiết bị không có GPS; server đưa báo cáo vào hàng cần
+  xem xét thủ công. App không gửi tọa độ mặc định.
 
 ## Chuẩn canonical cho `payload_hash`
 
@@ -391,3 +422,5 @@ Khi sửa cơ chế kết nối, request hoặc response:
 | 1 | 2026-09-22 | Chốt luồng ảnh multipart, ACK thực tế của mock server, operation cứu hộ, canonical hash RFC 8785 và sequence cho phép gap. |
 | 1 | 2026-09-22 | Triển khai Hive outbox, batch/partial ACK, full-jitter retry, Workmanager, JCS trên mobile và transaction nguyên tử trên server; không đổi wire contract. |
 | 1 | 2026-09-24 | Thêm `GET /api/clusters` và `PATCH /api/reports/{id}/status` cho dashboard; tách quy tắc chuyển trạng thái thành hàm dùng chung; không đổi wire contract của app. |
+| 1 | 2026-09-27 | Thêm `GET /api/reports/status` cho app theo dõi trạng thái điều phối; mô tả gửi thích ứng (`sendMode`), SMS dự phòng và `lat`/`lng` null trên mobile. Không đổi wire contract của `/sync/messages` và `/api/reports`. |
+| 1 | 2026-09-27 | `meta.createdAt` của `/api/reports` gửi dạng UTC như `payload.createdAt`; khi upsert theo `meta.id`, server giữ `createdAt` của lần nhận đầu tiên. Không đổi wire contract. |

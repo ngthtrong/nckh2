@@ -44,7 +44,8 @@ cleanup() {
   wait "$SERVER_PID" 2>/dev/null || true
   echo ">> Đã tắt server."
 }
-trap cleanup EXIT INT TERM
+trap cleanup EXIT
+trap 'exit 130' INT TERM
 
 echo ">> Đang khởi động server (log: be/server_demo.log) ..."
 for _ in $(seq 1 120); do

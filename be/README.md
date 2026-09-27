@@ -2,6 +2,8 @@
 
 Server giả lập (Mock Server) viết bằng Python (FastAPI) phục vụ tiếp nhận dữ liệu báo cáo cứu hộ từ ứng dụng Frontend Flutter ([`fe/app`](../fe/app/)).
 
+> Chạy nhanh cả server + app (Linux/WSL/Windows) và dữ liệu demo: xem [`docs/huong_dan_chay_demo.md`](../docs/huong_dan_chay_demo.md) và [`scripts/demo/`](../scripts/demo/).
+
 ---
 
 ## 1. Khởi Động Server
@@ -108,4 +110,4 @@ cd be
 ## 6. Nơi Lưu Trữ Dữ Liệu
 
 - **Ảnh đính kèm**: Lưu tại thư mục [`be/uploads/`](uploads/) và có thể truy cập qua URL `http://localhost:8000/uploads/<tên_ảnh>`.
-- **Dữ liệu JSON**: Lưu tại [`be/data/reports.json`](data/reports.json).
+- **Dữ liệu báo cáo**: SQLite tại [`be/data/rescue_reports.db`](data/rescue_reports.db) (dữ liệu mẫu đã commit). Đặt `RESCUE_DB_FILE` / `RESCUE_UPLOADS_DIR` để chạy trên DB riêng (`data/reports.json` là file cũ, không còn dùng).

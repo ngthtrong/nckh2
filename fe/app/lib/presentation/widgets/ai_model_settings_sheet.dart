@@ -105,7 +105,7 @@ class AiModelSettingsSheet extends StatelessWidget {
                             Text(
                               ready
                                   ? '${controller.currentModel.name} · letterbox 224×224'
-                                  : 'Đang nạp model on-device...',
+                                  : controller.modelStatusHint,
                               style: const TextStyle(
                                 fontSize: 12,
                                 color: Color(0xFF6B7280),

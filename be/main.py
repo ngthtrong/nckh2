@@ -220,6 +220,15 @@ async def list_reports(limit: int = 100):
     return JSONResponse(content={"total": len(reports), "reports": reports})
 
 
+@app.get("/api/reports/status", summary="App lấy trạng thái điều phối của các báo cáo đã gửi")
+async def report_statuses(ids: str = ""):
+    """`ids` phân tách bằng dấu phẩy, tối đa 100; id server không biết không có trong kết quả.
+
+    Khai báo trước `/api/reports/{report_id}` để "status" không bị hiểu là một id.
+    """
+    return JSONResponse(content={"reports": storage.get_report_statuses(ids.split(","))})
+
+
 @app.get("/api/clusters", summary="Phân cụm sự kiện và xếp hạng ưu tiên (product C_ij + Louvain)")
 def list_clusters():
     """Chạy lõi thuật toán của bài báo trên các báo cáo chưa giải quyết.

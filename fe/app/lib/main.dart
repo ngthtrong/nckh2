@@ -9,6 +9,7 @@ import 'data/datasources/sender_remote_datasource.dart';
 import 'data/repositories/inference_repository_impl.dart';
 import 'data/repositories/network_repository_impl.dart';
 import 'data/repositories/rescue_repository_impl.dart';
+import 'domain/services/adaptive_send_policy.dart';
 import 'presentation/controllers/app_controller.dart';
 import 'presentation/screens/splash_screen.dart';
 
@@ -20,9 +21,17 @@ void callbackDispatcher() {
     final rescueRepo = RescueRepositoryImpl(
       localDataSource: recordLocalDS,
       senderDataSource: senderRemoteDS,
+      sendPolicy: AdaptiveSendPolicy(
+        NetworkRepositoryImpl(NetworkRemoteDataSource()),
+      ),
     );
     await rescueRepo.init();
     await rescueRepo.syncPendingRecords();
+    try {
+      await rescueRepo.refreshStatuses();
+    } catch (_) {
+      // Mất mạng giữa chừng: lần chạy sau (15 phút) sẽ thử lại.
+    }
     return true;
   });
 }
@@ -46,12 +55,13 @@ Future<void> main() async {
   final inferenceLocalDS = InferenceLocalDataSource();
   final networkRemoteDS = NetworkRemoteDataSource();
 
+  final networkRepository = NetworkRepositoryImpl(networkRemoteDS);
   final rescueRepository = RescueRepositoryImpl(
     localDataSource: recordLocalDS,
     senderDataSource: senderRemoteDS,
+    sendPolicy: AdaptiveSendPolicy(networkRepository),
   );
   final inferenceRepository = InferenceRepositoryImpl(inferenceLocalDS);
-  final networkRepository = NetworkRepositoryImpl(networkRemoteDS);
 
   final controller = AppController(
     rescueRepository: rescueRepository,

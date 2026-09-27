@@ -9,7 +9,9 @@ dưới đây là heuristic vận hành, không phải kết quả đã được
 - E (khẩn cấp, [0,1]): theo từ khóa trong mô tả; không có mô tả thì để trống.
 - N: số người mắc kẹt + bị thương.
 - V: số nhóm yếu thế được chọn (0-4), là đại lượng thay thế cho số người yếu thế.
-- provenance_quality: độ tin cậy của mô hình AI.
+- provenance_quality: độ tin cậy của mô hình AI. Chỉ là một trường của payload
+  (vào dấu vân tay bản trùng); điểm tin cậy Q_i dùng để xếp hạng được tính theo
+  Eq. (1) của bài báo từ việc có ảnh và số báo cáo củng cố lân cận.
 
 Nếu payload đã có sẵn trường của thuật toán (flood, urgency, vulnerability,
 confidence, n_trapped — như bộ dữ liệu mô phỏng) thì dùng trực tiếp.
