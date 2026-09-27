@@ -20,6 +20,7 @@ import json
 import os
 import sys
 import time
+import urllib.error
 import urllib.request
 from datetime import datetime, timezone
 from pathlib import Path
@@ -35,6 +36,10 @@ parser.add_argument("--api", default="http://localhost:8000")
 parser.add_argument("--dashboard", default="http://localhost:8080")
 parser.add_argument("--chrome", default=os.environ.get("CHROME_PATH"), help="Chromium dùng thay bản của Playwright")
 parser.add_argument("--screenshots", default=None, help="thư mục lưu ảnh chụp màn hình")
+parser.add_argument("--username", default=os.environ.get("RESCUE_ADMIN_USERNAME", "admin"),
+                    help="tài khoản dashboard (mặc định tài khoản quản trị tạo lần đầu)")
+parser.add_argument("--password", default=os.environ.get("RESCUE_ADMIN_PASSWORD") or os.environ.get("RESCUE_DASHBOARD_PASSWORD", "cuuho2026"),
+                    help="mật khẩu tài khoản dashboard (RESCUE_ADMIN_PASSWORD của container be)")
 args = parser.parse_args()
 
 results: list[tuple[str, str]] = []
@@ -47,11 +52,40 @@ def check(cond: object, label: str, *, gap: bool = False) -> bool:
     return bool(cond)
 
 
+_token: list[str] = []
+
+
+def auth_headers() -> dict:
+    """API dashboard (danh sách, phân cụm, đổi trạng thái, ảnh) cần đăng nhập; đăng nhập một lần."""
+    if not _token:
+        req = urllib.request.Request(
+            args.api + "/api/auth/login", method="POST",
+            data=json.dumps({"username": args.username, "password": args.password}).encode(),
+            headers={"Content-Type": "application/json"},
+        )
+        with urllib.request.urlopen(req, timeout=15) as resp:
+            _token.append(json.load(resp)["token"])
+    return {"Authorization": f"Bearer {_token[0]}"}
+
+
 def api(path: str, method: str = "GET", body: dict | None = None):
     data = None if body is None else json.dumps(body).encode()
-    req = urllib.request.Request(args.api + path, method=method, data=data, headers={"Content-Type": "application/json"})
+    req = urllib.request.Request(args.api + path, method=method, data=data,
+                                 headers={"Content-Type": "application/json", **auth_headers()})
     with urllib.request.urlopen(req, timeout=15) as resp:
         return json.load(resp)
+
+
+def fetch(url: str) -> bytes:
+    req = urllib.request.Request(url, headers=auth_headers())
+    return urllib.request.urlopen(req, timeout=15).read()
+
+
+def status_without_login(url: str) -> int:
+    try:
+        return urllib.request.urlopen(url, timeout=15).status
+    except urllib.error.HTTPError as err:
+        return err.code
 
 
 def report_ids() -> set[str]:
@@ -127,7 +161,7 @@ def wait_report(rid: str, predicate, timeout: float = 30) -> dict:
 
 
 def image_size(url: str) -> int:
-    return len(urllib.request.urlopen(args.api + url, timeout=15).read())
+    return len(fetch(args.api + url))
 
 
 IMAGE = sorted(glob.glob(str(ROOT / "fe/model/Dataset_Flood/high/*.jp*g")))[0]
@@ -142,34 +176,52 @@ def shot(page, name: str) -> None:
 
 def test_dashboard(browser) -> None:
     print("\n== Dashboard (container dashboard)")
+    check(status_without_login(args.api + "/api/clusters") == 401, "API dashboard từ chối khi chưa đăng nhập")
+    check(status_without_login(args.api + "/api/reports/status?ids=x") == 200, "API trạng thái cho app không cần đăng nhập")
     page = browser.new_page(viewport={"width": 1400, "height": 1000})
     errors: list[str] = []
     page.on("pageerror", lambda e: errors.append(str(e)))
     page.on("console", lambda m: m.type == "error" and errors.append(m.text))
     page.goto(args.dashboard + "/", wait_until="networkidle")
-    page.wait_for_function("document.querySelectorAll('#cluster-list > *').length > 0", timeout=20000)
-    dispatched = int(page.inner_text("#stat-dispatched"))
-    check(int(page.inner_text("#stat-clusters")) > 0, "hiển thị cụm sự kiện và xếp hạng ưu tiên")
+    check(page.is_visible("#login-view"), "dashboard yêu cầu đăng nhập")
+    page.fill("#login-username", args.username)
+    page.fill("#login-password", args.password)
+    page.click("#login-form button[type=submit]")
+    page.wait_for_function("document.querySelectorAll('#cluster-list .cluster-row').length > 0", timeout=20000)
+    dispatched = int(page.inner_text("#kpi-dispatched"))
+    check(int(page.inner_text("#kpi-clusters")) > 0, "hiển thị cụm sự kiện và xếp hạng ưu tiên")
     check(page.locator(".leaflet-interactive").count() > 0, "bản đồ Leaflet có điểm báo cáo")
-    if "sim-" in json.dumps(api("/api/reports?limit=5000")):
+    reports = {r["id"]: r for r in api("/api/reports?limit=5000")["reports"]}
+    if any(i.startswith("sim-") for i in reports):
         check(page.is_visible("#synthetic-banner"), "banner 'Dữ liệu mô phỏng' khi có dữ liệu bán tổng hợp")
     # Chọn cụm ưu tiên cao nhất còn báo cáo chưa điều phối (test chạy lại nhiều lần).
-    rank = page.evaluate(
-        "clusterData.clusters.find(c => c.reportIds.some(id => reports.find(r => r.id === id)?.status === 'processing'))?.rank"
-    )
-    page.locator("#cluster-list > *").nth((rank or 1) - 1).click()
-    page.wait_for_selector("#dispatch-cluster:not(.hidden)")
-    check(page.locator("#report-rows tr").count() > 0, "chọn cụm → lọc bảng báo cáo theo cụm")
-    page.click("#dispatch-cluster")
+    cluster = next((c for c in api("/api/clusters")["clusters"]
+                    if any(reports.get(i, {}).get("status") == "processing" for i in c["reportIds"])), None)
+    if check(cluster is not None, "còn cụm có báo cáo chờ xử lý"):
+        page.click(f'#cluster-list .cluster-row[data-cluster-key="{cluster["clusterKey"]}"]')
+        page.wait_for_selector("#cluster-actions:not([hidden])")
+        check(page.locator("#report-rows tr").count() > 0, "chọn cụm → lọc bảng báo cáo theo cụm")
+        page.click("[data-cluster-action=dispatched]")
+        page.wait_for_selector("#dialog[open]")
+        check(page.locator("#dialog .id-list").count() == 1, "điều phối cả cụm hiện đúng danh sách báo cáo trước khi xác nhận")
+        page.click("#dialog-ok")
+        try:
+            page.wait_for_function(f"Number(document.getElementById('kpi-dispatched').textContent) > {dispatched}", timeout=20000)
+            check(True, "điều phối cả cụm cập nhật trạng thái")
+        except Exception:
+            check(False, "điều phối cả cụm cập nhật trạng thái")
+    page.locator("#report-rows [data-open]").first.click()
+    page.wait_for_selector("#drawer:not([hidden])")
+    check('"id"' in (page.text_content("#d-raw") or ""), "xem chi tiết báo cáo")
     try:
-        page.wait_for_function(f"Number(document.getElementById('stat-dispatched').textContent) > {dispatched}", timeout=20000)
-        check(True, "điều phối cả cụm cập nhật trạng thái")
+        page.wait_for_selector("#d-history .timeline li", timeout=10000)
+        check(True, "chi tiết có nhật ký thao tác")
     except Exception:
-        check(False, "điều phối cả cụm cập nhật trạng thái")
-    page.locator("#report-rows button", has_text="Chi tiết").first.click()
-    page.wait_for_selector("#json-modal:not(.hidden)")
-    check('"id"' in page.inner_text("#modal-content"), "xem chi tiết báo cáo")
-    page.click("#json-modal button")
+        check(False, "chi tiết có nhật ký thao tác")
+    page.click("#drawer-close")
+    page.click("[role=tab][data-tab=stats]")
+    page.wait_for_selector("#stats-panel .stat-tile", timeout=10000)
+    check(True, "tab thống kê hiển thị thời gian phản ứng")
     shot(page, "dashboard.png")
     page.goto(args.dashboard + "/docs", wait_until="networkidle")
     check(page.locator(".opblock").count() >= 8, "Swagger UI qua proxy dashboard")
@@ -201,7 +253,8 @@ def test_app(browser) -> None:
         if r.get("imageUrl"):
             full_image_bytes.append(image_size(r["imageUrl"]))
         if check(bool(r.get("imageUrl")), "ảnh được upload qua /api/reports"):
-            data = urllib.request.urlopen(args.app + r["imageUrl"], timeout=15).read()
+            data = fetch(args.app + r["imageUrl"])
+            check(status_without_login(args.app + r["imageUrl"]) == 401, "ảnh hiện trường cần đăng nhập mới xem được")
             check(r.get("imageSha256") == "sha256:" + hashlib.sha256(data).hexdigest(), "SHA-256 ảnh trên server khớp")
         check("mắc kẹt" in (r.get("description") or ""), "mô tả tiếng Việt được lưu")
         check(age_seconds(r) < 120, f"createdAt không lệch múi giờ sau khi upload ảnh ({r['createdAt']})")

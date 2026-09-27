@@ -2,6 +2,8 @@
 # baseline HDBSCAN/ST-DBSCAN và metric benchmark). Đã chỉnh cho khớp Algorithm 1 của bài
 # báo ISDS 2026 và notebook Benchmark_Cij (commit 6ac75c2): G, T, C tính trên toàn bộ ma
 # trận cặp đủ điều kiện thay cho candidate pool BallTree; công thức trọng số giữ nguyên.
+# Ma trận trọng số tính tại chỗ (cùng phép tính, cùng thứ tự) để giảm bộ nhớ; trọng số
+# và nhãn cụm trùng khớp từng bit với bản trước trên cả 80 run gold.
 """Graph clustering of graph-eligible reports (Algorithm 1)."""
 from __future__ import annotations
 
@@ -75,21 +77,17 @@ def _pair_weight_matrix(
 
     Vectorized form of ``similarity.geographic/temporal/context_similarity``:
     missing F or E contributes nothing and discounts C by m_ij / 2.
+
+    Every step runs in place with the same operations in the same order as the
+    direct expressions (bit-identical weights), so at most four n x n float
+    matrices are alive at once instead of one per intermediate.
     """
 
     rows = [reports[index] for index in eligible]
-    lat = np.radians(np.asarray([row.L[0] for row in rows], dtype=float))
-    lng = np.radians(np.asarray([row.L[1] for row in rows], dtype=float))
-    dlat = lat[:, None] - lat[None, :]
-    dlng = lng[:, None] - lng[None, :]
-    hav = (
-        np.sin(dlat / 2.0) ** 2
-        + np.cos(lat)[:, None] * np.cos(lat)[None, :] * np.sin(dlng / 2.0) ** 2
-    )
-    distance = 2.0 * EARTH_RADIUS_M * np.arcsin(np.sqrt(np.clip(hav, 0.0, 1.0)))
-    t0 = rows[0].T
-    minute = np.asarray([(row.T - t0).total_seconds() / 60.0 for row in rows], dtype=float)
-    delta_min = np.abs(minute[:, None] - minute[None, :])
+    n = len(rows)
+
+    def outer(values: np.ndarray, op) -> np.ndarray:
+        return op(values[:, None], values[None, :])
 
     def observed(field: str) -> tuple[np.ndarray, np.ndarray]:
         values = [getattr(row, field) for row in rows]
@@ -97,24 +95,77 @@ def _pair_weight_matrix(
         numbers = np.asarray([0.0 if value is None else float(value) for value in values])
         return mask, numbers
 
+    # C_ij = (m_ij / 2) * exp(-I_F |dF| / tau_F - I_E |dE| / tau_E), 0 when m_ij = 0.
     obs_f, flood = observed("F")
     obs_e, urgency = observed("E")
-    i_f = (obs_f[:, None] & obs_f[None, :]).astype(float)
-    i_e = (obs_e[:, None] & obs_e[None, :]).astype(float)
-    shared = i_f + i_e
-    context = (shared / 2.0) * np.exp(
-        -i_f * np.abs(flood[:, None] - flood[None, :]) / config.tau_F
-        - i_e * np.abs(urgency[:, None] - urgency[None, :]) / config.tau_E
-    )
-    context[shared == 0.0] = 0.0
+    context = outer(obs_f, np.logical_and).astype(float)  # i_f
+    np.negative(context, out=context)
+    work = outer(flood, np.subtract)
+    np.abs(work, out=work)
+    np.multiply(context, work, out=context)
+    np.divide(context, config.tau_F, out=context)
+    i_e = outer(obs_e, np.logical_and).astype(float)
+    np.subtract(urgency[:, None], urgency[None, :], out=work)
+    np.abs(work, out=work)
+    np.multiply(i_e, work, out=work)
+    np.divide(work, config.tau_E, out=work)
+    np.subtract(context, work, out=context)
+    np.exp(context, out=context)
+    shared = outer(obs_f, np.logical_and).astype(float)  # i_f + i_e
+    np.add(shared, i_e, out=shared)
+    del i_e
+    no_shared = shared == 0.0
+    np.divide(shared, 2.0, out=shared)
+    np.multiply(shared, context, out=context)
+    context[no_shared] = 0.0
+    del shared, no_shared
 
-    geographic = np.exp(-(distance**2) / (2.0 * config.sigma_geo_m**2))
-    temporal = np.exp(-delta_min / config.tau_t)
+    # Haversine distance, then G_ij = exp(-d^2 / (2 sigma^2)).
+    lat = np.radians(np.asarray([row.L[0] for row in rows], dtype=float))
+    lng = np.radians(np.asarray([row.L[1] for row in rows], dtype=float))
+    geographic = outer(lat, np.subtract)
+    np.divide(geographic, 2.0, out=geographic)
+    np.sin(geographic, out=geographic)
+    np.square(geographic, out=geographic)
+    np.subtract(lng[:, None], lng[None, :], out=work)
+    np.divide(work, 2.0, out=work)
+    np.sin(work, out=work)
+    np.square(work, out=work)
+    cos_lat = np.cos(lat)
+    cos_product = outer(cos_lat, np.multiply)
+    np.multiply(cos_product, work, out=work)
+    del cos_product
+    np.add(geographic, work, out=geographic)
+    np.clip(geographic, 0.0, 1.0, out=geographic)
+    np.sqrt(geographic, out=geographic)
+    np.arcsin(geographic, out=geographic)
+    np.multiply(2.0 * EARTH_RADIUS_M, geographic, out=geographic)
+    np.square(geographic, out=geographic)
+    np.negative(geographic, out=geographic)
+    np.divide(geographic, 2.0 * config.sigma_geo_m**2, out=geographic)
+    np.exp(geographic, out=geographic)
+
+    # T_ij = exp(-|dt| / tau_t) in minutes.
+    t0 = rows[0].T
+    minute = np.asarray([(row.T - t0).total_seconds() / 60.0 for row in rows], dtype=float)
+    temporal = work
+    np.subtract(minute[:, None], minute[None, :], out=temporal)
+    np.abs(temporal, out=temporal)
+    np.negative(temporal, out=temporal)
+    np.divide(temporal, config.tau_t, out=temporal)
+    np.exp(temporal, out=temporal)
+
+    np.multiply(config.beta, temporal, out=temporal)
+    np.multiply(config.gamma, context, out=context)
     if config.composition_operator == "product":
-        weight = geographic * (config.beta * temporal + config.gamma * context)
+        np.add(temporal, context, out=temporal)
+        weight = np.multiply(geographic, temporal, out=geographic)
     else:
-        weight = config.alpha * geographic + config.beta * temporal + config.gamma * context
+        np.multiply(config.alpha, geographic, out=geographic)
+        np.add(geographic, temporal, out=geographic)
+        weight = np.add(geographic, context, out=geographic)
     np.fill_diagonal(weight, 0.0)
+    assert weight.shape == (n, n)
     return weight
 
 
@@ -139,7 +190,8 @@ def run_graph_clustering(
         return ClusterRunV2(config.composition_operator, tuple(labels), tuple(reports[index].report_id for index in review), None, 0, 0)
     n_eligible = len(eligible)
     weights = _pair_weight_matrix(reports, eligible, config)
-    upper = weights[np.triu_indices(n_eligible, 1)]
+    # Mask thay cho np.triu_indices: cùng các phần tử, không cần hai mảng chỉ số cỡ n^2.
+    upper = weights[np.triu(np.ones((n_eligible, n_eligible), dtype=bool), 1)]
     positive = upper[upper > 0.0]
     threshold = float(np.quantile(positive, config.threshold_quantile)) if positive.size else math.inf
     above = weights > threshold

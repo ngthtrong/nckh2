@@ -18,6 +18,18 @@ services:
     environment:
       SEED_RUN: ${SEED_RUN-1}
       SEED_RESET: ${SEED_RESET:-0}
+      # Tài khoản quản trị tạo lần đầu khi DB chưa có tài khoản (đổi mật khẩu khi triển khai thật);
+      # các điều phối viên khác do quản trị viên tạo trên dashboard.
+      RESCUE_ADMIN_USERNAME: ${RESCUE_ADMIN_USERNAME:-admin}
+      RESCUE_ADMIN_PASSWORD: ${RESCUE_ADMIN_PASSWORD:-${RESCUE_DASHBOARD_PASSWORD:-cuuho2026}}
+      # nginx của dashboard và web app: chỉ tin X-Forwarded-For từ hai container này.
+      RESCUE_TRUSTED_PROXIES: ${RESCUE_TRUSTED_PROXIES:-dashboard,fe}
+      # Nút "Xóa toàn bộ dữ liệu" chỉ dành cho demo; mặc định tắt.
+      RESCUE_ALLOW_WIPE: ${RESCUE_ALLOW_WIPE:-0}
+      # Sao lưu DB định kỳ vào volume be-data (/var/lib/rescue/backups); 0 = tắt.
+      RESCUE_BACKUP_INTERVAL_MIN: ${RESCUE_BACKUP_INTERVAL_MIN:-60}
+      # SMS gateway chuyển tiếp tin SOS tới POST /api/sms/inbound; để trống thì tắt.
+      RESCUE_SMS_GATEWAY_TOKEN: ${RESCUE_SMS_GATEWAY_TOKEN:-}
     volumes:
       - be-data:/var/lib/rescue
     ports:

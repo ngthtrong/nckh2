@@ -25,8 +25,11 @@ Các script nằm trong [`scripts/demo/`](../scripts/demo/). Mọi lệnh chạy
 
 Sau khi server chạy:
 
-- Dashboard điều phối: <http://localhost:8000/>
-- Swagger API: <http://localhost:8000/docs>
+- Dashboard điều phối: <http://localhost:8000/>. Lần đầu đăng nhập bằng tài khoản quản trị
+  `admin` / `cuuho2026` (đặt `RESCUE_ADMIN_USERNAME`, `RESCUE_ADMIN_PASSWORD` trước lần chạy
+  đầu để đổi). Quản trị viên tạo tài khoản riêng cho từng điều phối viên ở mục "Tài khoản";
+  tên hiển thị của tài khoản được ghi vào nhật ký thao tác. **Đổi mật khẩu mặc định khi triển khai thật.**
+- Swagger API: <http://localhost:8000/docs> (API dashboard cần đăng nhập trên dashboard trước, cùng trình duyệt)
 - Probe đo mạng: <http://localhost:8000/probe>
 
 Mỗi script đều có `--help` (bash). Các script bash cần quyền thực thi; nếu mất quyền sau khi clone trên Windows thì chạy `chmod +x scripts/demo/*.sh`.
@@ -62,6 +65,10 @@ Biến môi trường (đặt trước lệnh hoặc trong file `.env` ở gốc
 | `BE_PORT`, `DASHBOARD_PORT`, `FE_PORT` | `8000`, `8080`, `8081` | Cổng trên máy host |
 | `FE_BUILD_TARGET` | `runtime` | `prebuilt` = dùng `fe/app/build/web` có sẵn |
 | `FE_SERVER_URL` | trống | Trống = app web gọi API cùng origin qua nginx |
+| `RESCUE_ADMIN_USERNAME`, `RESCUE_ADMIN_PASSWORD` | `admin`, `cuuho2026` | Tài khoản quản trị tạo lần đầu (khi DB chưa có tài khoản nào) |
+| `RESCUE_TRUSTED_PROXIES` | `dashboard,fe` | Proxy được tin `X-Forwarded-For` khi chặn dò mật khẩu theo IP |
+| `RESCUE_ALLOW_WIPE` | `0` | `1` = bật nút/endpoint xóa toàn bộ dữ liệu (chỉ demo) |
+| `RESCUE_BACKUP_INTERVAL_MIN` | `60` | Sao lưu DB định kỳ vào volume `be-data` (`/var/lib/rescue/backups`, giữ 24 bản); `0` = tắt |
 
 Bản web của app **không có** AI on-device (onnxruntime cần `dart:ffi`) và SMS; màn hình chính ghi rõ điều này. Để demo đủ tính năng AI, chạy app Android bằng `scripts/demo/run_app.sh -d <device> --server-url http://<IP-máy-chạy-Docker>:8000`.
 
@@ -241,12 +248,13 @@ scripts/demo/stage_model.sh
 ## 5. Kịch bản demo gợi ý
 
 1. `scripts/demo/run_demo.sh --server-only` (hoặc `run_server.ps1 -Demo -Seed`) rồi mở dashboard. Bản đồ hiện 316 báo cáo mô phỏng gom thành khoảng 50 cụm, sắp theo mức ưu tiên, kèm banner "Dữ liệu mô phỏng".
-2. Trên dashboard, đổi trạng thái một báo cáo `processing → dispatched → resolved`. Server không cho đi lùi trạng thái.
-3. Chạy app trên emulator/điện thoại (`run_app.sh -d ...`). Tạo báo cáo có ảnh; báo cáo hiện trên dashboard trong vòng khoảng 5 giây (dashboard poll mỗi 5 giây).
+2. Đăng nhập dashboard. Bấm cụm #1 → "Điều phối cả cụm": hộp thoại liệt kê đúng các báo cáo sẽ đổi, chọn đội (thêm đội ở mục "Đội cứu hộ"), ghi chú rồi xác nhận. Mở một báo cáo để xem ảnh, thông tin và nhật ký; "Hoàn tất" hoặc "Đóng báo cáo" (bắt buộc chọn lý do). Server không cho đi lùi trạng thái; `resolved`/`cancelled` là trạng thái kết thúc.
+   Tab "Cần xem xét" liệt kê báo cáo không có GPS: bấm "Đặt vị trí" rồi bấm lên bản đồ để đưa báo cáo vào phân cụm. Tab "Thống kê" hiện thời gian tiếp nhận → điều phối → hoàn tất; "Xuất dữ liệu" tải CSV/GeoJSON theo bộ lọc hoặc bản sao lưu CSDL.
+3. Chạy app trên emulator/điện thoại (`run_app.sh -d ...`). Tạo báo cáo có ảnh; báo cáo hiện trên dashboard trong vòng khoảng 5 giây (dashboard poll mỗi 5 giây) với nhãn "MỚI" và nút "n báo cáo mới" trên thanh trên (bật "Âm báo" để có tiếng).
 4. **Offline/store-and-forward**: tắt server hoặc bật chế độ máy bay, tạo báo cáo, và báo cáo nằm trong outbox. Bật lại, app đồng bộ, và server chống trùng theo `message_id` + `payload_hash`.
 5. **Gửi thích ứng**: app đo `/probe` (64 KB) rồi chọn gửi text / ảnh nén / ảnh gốc. Mạng yếu có thể mô phỏng bằng `be/experiments/weak_network.py` (proxy giới hạn băng thông 2G/3G/4G; xem `be/README.md`).
 
-Reset DB demo: `scripts/demo/run_server.sh --seed` (nạp lại), hoặc `curl -X DELETE http://localhost:8000/api/reports` (xóa sạch DB đang chạy).
+Reset DB demo: `scripts/demo/run_server.sh --seed` (nạp lại). Xóa sạch DB đang chạy qua `DELETE /api/reports` chỉ được khi server chạy với `RESCUE_ALLOW_WIPE=1` và đã đăng nhập.
 
 ---
 
@@ -280,4 +288,5 @@ cd ..\..\be;  .\.venv\Scripts\python.exe test_client.py
 | `Building with plugins requires symlink support` (Windows) | Bật Developer Mode: `start ms-settings:developers`. |
 | `.ps1 cannot be loaded because running scripts is disabled` | `Set-ExecutionPolicy -Scope CurrentUser RemoteSigned`. |
 | Dashboard trống | Đang dùng DB mẫu hoặc DB demo rỗng. Chạy với `--seed`. |
+| Dashboard báo "Sai tên đăng nhập hoặc mật khẩu" / "Sai mật khẩu quá nhiều lần" | Tài khoản quản trị đầu tiên là `admin` / `cuuho2026` (hoặc `RESCUE_ADMIN_*` lúc tạo DB). Sai 5 lần một tài khoản (hoặc 20 lần từ một IP) trong 5 phút thì chờ 5 phút. Quên mật khẩu: quản trị viên đặt lại ở mục "Tài khoản". |
 | SMS fallback không tới ai | Chưa đặt số tổng đài: chạy app với `--emergency-phone +84...` (§3.2). App cũng cần quyền SMS (Android hỏi lần đầu). |

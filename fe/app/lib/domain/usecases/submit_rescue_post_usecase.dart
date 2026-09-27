@@ -1,4 +1,5 @@
 import '../entities/ai_tag.dart';
+import '../entities/record_id.dart';
 import '../entities/rescue_record.dart';
 import '../entities/send_mode.dart';
 import '../repositories/rescue_repository.dart';
@@ -22,7 +23,7 @@ class SubmitRescuePostUseCase {
     required SendMode sendMode,
   }) async {
     final record = RescueRecord(
-      id: 'post-${DateTime.now().millisecondsSinceEpoch}',
+      id: newRecordId('post'),
       createdAt: DateTime.now(),
       lat: lat,
       lng: lng,

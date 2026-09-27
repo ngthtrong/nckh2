@@ -1,11 +1,17 @@
+import os
 import sqlite3
 import tempfile
 import unittest
 from contextlib import closing
 from pathlib import Path
 
-import storage
-from canonical import canonicalize, compute_payload_hash
+# `import main` chạy init_db(): dùng DB tạm để không migrate be/data/rescue_reports.db (dữ liệu mẫu).
+_TMP = tempfile.TemporaryDirectory()
+os.environ.setdefault("RESCUE_DB_FILE", str(Path(_TMP.name) / "contract.db"))
+os.environ.setdefault("RESCUE_UPLOADS_DIR", str(Path(_TMP.name) / "uploads"))
+
+import storage  # noqa: E402
+from canonical import canonicalize, compute_payload_hash  # noqa: E402
 
 
 class ContractTest(unittest.TestCase):
@@ -51,6 +57,12 @@ class ContractTest(unittest.TestCase):
                     self.assertEqual(columns["status"]["dflt_value"], "'processing'")
                     self.assertEqual(conn.execute("SELECT status FROM reports WHERE id = 'legacy'").fetchone()[0], "processing")
                     self.assertIsNotNone(conn.execute("SELECT name FROM sqlite_master WHERE name = 'messages_dedup'").fetchone())
+                    # Cột/bảng của dashboard quản lý được thêm và bù dữ liệu cho DB cũ.
+                    legacy = conn.execute("SELECT first_received_at, updated_seq FROM reports WHERE id = 'legacy'").fetchone()
+                    self.assertEqual(legacy["first_received_at"], "2026-09-22T00:00:00Z")
+                    self.assertGreater(legacy["updated_seq"], 0)
+                    for table in ("report_events", "teams", "sessions", "server_meta"):
+                        self.assertIsNotNone(conn.execute("SELECT name FROM sqlite_master WHERE name = ?", (table,)).fetchone())
             finally:
                 storage.DB_FILE = old_db_file
 
@@ -151,8 +163,9 @@ class ContractTest(unittest.TestCase):
                     "payload": payload,
                 }
 
-                with self.assertRaises(sqlite3.IntegrityError):
-                    storage.process_sync_messages([message])
+                # Lỗi bất ngờ chỉ rollback message đó và trả retry_later, không làm hỏng cả batch.
+                result = storage.process_sync_messages([message])
+                self.assertEqual((result[0]["status"], result[0]["retryable"]), ("retry_later", True))
 
                 with storage.get_db_connection() as conn:
                     self.assertEqual(conn.execute("SELECT COUNT(*) FROM reports").fetchone()[0], 0)
@@ -192,7 +205,7 @@ class ContractTest(unittest.TestCase):
                     "created_at": "2026-09-22T00:00:00Z",
                     "payload_hash": compute_payload_hash(payload),
                     "payload": payload,
-                }])
+                }], operator="Điều phối A")
                 self.assertEqual(rejected[0]["code"], "INVALID_STATUS_TRANSITION")
                 self.assertEqual(storage.get_report_by_id("r1")["status"], "dispatched")
             finally:

@@ -2,12 +2,22 @@
 
 import io
 import json
+import os
 import time
 import requests
 
 from canonical import compute_bytes_sha256, compute_payload_hash
 
 BASE_URL = "http://localhost:8000"
+ADMIN_USERNAME = os.environ.get("RESCUE_ADMIN_USERNAME") or "admin"
+ADMIN_PASSWORD = os.environ.get("RESCUE_ADMIN_PASSWORD") or os.environ.get("RESCUE_DASHBOARD_PASSWORD") or "cuuho2026"
+
+
+def dashboard_token() -> str:
+    resp = requests.post(f"{BASE_URL}/api/auth/login",
+                         json={"username": ADMIN_USERNAME, "password": ADMIN_PASSWORD}, timeout=10)
+    assert resp.status_code == 200, f"Đăng nhập dashboard thất bại: {resp.status_code} - {resp.text}"
+    return resp.json()["token"]
 
 
 def test_probe():
@@ -157,6 +167,13 @@ def test_sync_messages():
         "payload_hash": compute_payload_hash(payload_status),
         "payload": payload_status,
     }
+    # UPDATE_RESCUE_STATUS cần phiên đăng nhập điều phối; message bị từ chối không được ghi
+    # vào bảng chống trùng nên gửi lại cùng message sau khi đăng nhập vẫn được xử lý.
+    resp_anon = requests.post(f"{BASE_URL}/sync/messages", json={"messages": [msg_status]}, headers=headers, timeout=10)
+    res_anon = resp_anon.json()["results"][0]
+    assert res_anon["status"] == "rejected" and res_anon["code"] == "UNAUTHENTICATED", res_anon
+    print("✓ UPDATE_RESCUE_STATUS không đăng nhập: UNAUTHENTICATED")
+    headers = {**headers, "Authorization": f"Bearer {dashboard_token()}"}
     resp5 = requests.post(f"{BASE_URL}/sync/messages", json={"messages": [msg_status]}, headers=headers, timeout=10)
     res5 = resp5.json()["results"][0]
     assert res5["status"] == "accepted" and res5["result"]["status"] == "dispatched"

@@ -13,18 +13,18 @@ Kiểm thử đã chạy ngày 27/09/2026 (Ubuntu 24.04 trên WSL2, Docker 29.8,
 
 | Kiểm thử | Kết quả | Lệnh |
 |---|---|---|
-| Unit test backend (hợp đồng đồng bộ, migration, RFC 8785, phân cụm theo bài báo) | 24/24 | `be/.venv/bin/python -m unittest test_contract test_cluster_service` |
-| Unit test app (chọn chế độ gửi, gửi thích ứng, SMS, trạng thái, hash) | 25/25 | `cd fe/app && flutter test` |
+| Unit test backend (hợp đồng đồng bộ, migration, RFC 8785, phân cụm theo bài báo, API dashboard quản lý) | 44/44 | `be/.venv/bin/python -m unittest test_contract test_cluster_service test_dashboard_api` |
+| Unit test app (chọn chế độ gửi, gửi thích ứng, SMS, trạng thái, hash) | 26/26 | `cd fe/app && flutter test` |
 | Hợp đồng app ↔ server trên container | Đạt hết | `be/test_client.py` |
-| End-to-end hệ thống Docker (app web → backend → dashboard, Chromium headless) | 38/38 | `scripts/demo/e2e/e2e_system.py` |
+| End-to-end hệ thống Docker (app web → backend → dashboard có đăng nhập, Chromium headless) | 46/46 | `scripts/demo/e2e/e2e_system.py` |
 | Build APK Android (debug) | APK_BUILD | `flutter build apk --debug` |
 
 ## 1. Sản phẩm đăng ký (mục 17)
 
 | Mục | Sản phẩm | Trạng thái | Bằng chứng | Ghi chú |
 |---|---|---|---|---|
-| 3.1 | Ứng dụng di động tích hợp AI, gửi thông tin cầu cứu về trung tâm | **Một phần** | `fe/app/` (Flutter); 25/25 unit test; E2E 38/38 trên bản web | **Đã kiểm chứng (bản web):** SOS 1 chạm, gửi bài kèm ảnh, gửi thích ứng theo mạng (đo `/probe` → ảnh gốc / ảnh nén / chỉ thông tin), hàng đợi offline tự đồng bộ khi có mạng, theo dõi trạng thái điều phối từ trung tâm, báo cáo thiếu GPS vào hàng xem xét. **Chưa kiểm chứng trên điện thoại Android:** AI on-device (repo thiếu `model.onnx` và `model_manifest.json`, xem mục 3), SMS dự phòng (cần số tổng đài thật qua `EMERGENCY_PHONE`), camera, Workmanager |
-| 3.2 | Website có bản đồ vị trí kêu cứu và phân cụm sự kiện theo thời gian thực | **Đạt** | `be/templates/dashboard.html`, `GET /api/clusters`, container `dashboard`; E2E; ảnh chụp [dashboard.png](dashboard.png) | Bản đồ Leaflet/OSM, cụm cập nhật mỗi 5 s, xếp hạng ưu tiên theo Eq. 4 của bài báo, điều phối từng báo cáo hoặc cả cụm, hiển thị cách app đã gửi (ảnh gốc/nén/chỉ thông tin/SMS) |
+| 3.1 | Ứng dụng di động tích hợp AI, gửi thông tin cầu cứu về trung tâm | **Một phần** | `fe/app/` (Flutter); 26/26 unit test; E2E 46/46 trên bản web | **Đã kiểm chứng (bản web):** SOS 1 chạm, gửi bài kèm ảnh, gửi thích ứng theo mạng (đo `/probe` → ảnh gốc / ảnh nén / chỉ thông tin), hàng đợi offline tự đồng bộ khi có mạng, theo dõi trạng thái điều phối từ trung tâm, báo cáo thiếu GPS vào hàng xem xét. **Chưa kiểm chứng trên điện thoại Android:** AI on-device (repo thiếu `model.onnx` và `model_manifest.json`, xem mục 3), SMS dự phòng (cần số tổng đài thật qua `EMERGENCY_PHONE`), camera, Workmanager |
+| 3.2 | Website có bản đồ vị trí kêu cứu và phân cụm sự kiện theo thời gian thực | **Đạt** | `be/templates/dashboard.html`, `GET /api/clusters`, container `dashboard`; E2E; ảnh chụp [dashboard.png](dashboard.png) | Bản đồ Leaflet/OSM (tô theo cụm hoặc trạng thái, bản đồ nhiệt), cụm cập nhật mỗi 5 s, xếp hạng ưu tiên theo Eq. 4 của bài báo, điều phối từng báo cáo, nhiều báo cáo hoặc cả cụm (xác nhận đúng danh sách), đóng báo cáo kèm lý do, giao đội cứu hộ, ghi chú và nhật ký thao tác, nhập vị trí cho báo cáo thiếu GPS, thống kê thời gian phản ứng, xuất CSV/GeoJSON, sao lưu CSDL, đăng nhập điều phối viên; hiển thị cách app đã gửi (ảnh gốc/nén/chỉ thông tin/SMS) |
 | 3.3 | Bộ mô hình AI đa phương thức, đã nén cho thiết bị di động | **Một phần** | `fe/model/1706.ipynb`, `fe/model/Edge Ai/flood_mobilenetv3_large.pte` | Chỉ có mô hình **ảnh**, chưa có mô hình văn bản. Chưa có kết quả nén (INT8) trong repo; bản `.pte` là FP32. Xem mục 3 |
 | 4.1 | Bản tin | **Bản nháp** | [ban_tin.md](ban_tin.md) (Việt + Anh) | Cần chép vào mẫu Word của ĐHCT, bổ sung mã đề tài và email GVHD |
 | 4.2 | Báo cáo tóm tắt | Ngoài phạm vi đợt này | – | Nhóm tự soạn |

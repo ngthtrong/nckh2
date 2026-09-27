@@ -83,7 +83,7 @@ class RescueRepositoryImpl implements RescueRepository {
   @override
   Future<List<RescueRecord>> refreshStatuses() async {
     final tracked = getAllRecords()
-        .where((r) => r.synced && r.status != rescueStatusOrder.last)
+        .where((r) => r.synced && !isFinalStatus(r.status))
         .toList();
     if (tracked.isEmpty) return [];
     final changed = <RescueRecord>[];

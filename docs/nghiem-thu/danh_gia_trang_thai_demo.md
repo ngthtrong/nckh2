@@ -9,7 +9,7 @@ Hướng dẫn chạy: [../huong_dan_chay_demo.md](../huong_dan_chay_demo.md).
 > hiện hành nằm ở [doi_chieu_thuyet_minh.md](doi_chieu_thuyet_minh.md).
 >
 > - Hệ thống chạy được bằng Docker (`docker compose up -d --build`: `be`, `dashboard`, app bản web
->   `fe`); kiểm thử end-to-end `scripts/demo/e2e/e2e_system.py` đạt 38/38.
+>   `fe`); kiểm thử end-to-end `scripts/demo/e2e/e2e_system.py` đạt 46/46 (sau khi nâng cấp dashboard quản lý).
 > - App đã nối **gửi thích ứng** (đo `/probe` → ảnh gốc / ảnh nén / chỉ thông tin), **SMS dự phòng**
 >   (Android, số tổng đài qua `--emergency-phone`) và **theo dõi trạng thái điều phối** từ dashboard.
 >   Trước đó các phần này có mã nhưng code đang chạy không gọi tới.
