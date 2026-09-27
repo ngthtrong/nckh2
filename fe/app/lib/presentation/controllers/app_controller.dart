@@ -218,6 +218,8 @@ class AppController extends ChangeNotifier {
     required int trappedCount,
     required int injuredCount,
     required List<String> vulnerableGroups,
+    required bool cannotMove,
+    required List<String> severeSigns,
     required String description,
     required String? imagePath,
     required List<AiTag> aiTags,
@@ -236,6 +238,8 @@ class AppController extends ChangeNotifier {
         trappedCount: trappedCount,
         injuredCount: injuredCount,
         vulnerableGroups: vulnerableGroups,
+        cannotMove: cannotMove,
+        severeSigns: severeSigns,
         description: description,
         sendMode: networkLabel == 'none' ? 'queuedOffline' : 'direct',
       );

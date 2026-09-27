@@ -13,6 +13,8 @@ class RescueRecord {
   final int trappedCount;
   final int injuredCount;
   final List<String> vulnerableGroups;
+  final bool cannotMove;
+  final List<String> severeSigns;
   final String description;
   final String sendMode;
   final bool synced;
@@ -31,6 +33,8 @@ class RescueRecord {
     this.trappedCount = 0,
     this.injuredCount = 0,
     this.vulnerableGroups = const [],
+    this.cannotMove = false,
+    this.severeSigns = const [],
     this.description = '',
     required this.sendMode,
     this.synced = false,
@@ -50,6 +54,8 @@ class RescueRecord {
     int? trappedCount,
     int? injuredCount,
     List<String>? vulnerableGroups,
+    bool? cannotMove,
+    List<String>? severeSigns,
     String? description,
     String? sendMode,
     bool? synced,
@@ -68,10 +74,14 @@ class RescueRecord {
       trappedCount: trappedCount ?? this.trappedCount,
       injuredCount: injuredCount ?? this.injuredCount,
       vulnerableGroups: vulnerableGroups ?? this.vulnerableGroups,
+      cannotMove: cannotMove ?? this.cannotMove,
+      severeSigns: severeSigns ?? this.severeSigns,
       description: description ?? this.description,
       sendMode: sendMode ?? this.sendMode,
       synced: synced ?? this.synced,
       status: status ?? this.status,
     );
   }
+
+  bool get severeCondition => severeSigns.isNotEmpty;
 }

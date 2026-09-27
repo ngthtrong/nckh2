@@ -6,6 +6,7 @@ import 'package:flutter_image_compress/flutter_image_compress.dart';
 
 import '../../config.dart';
 import '../../domain/entities/rescue_record.dart';
+import '../models/rescue_record_payload.dart';
 
 typedef UploadResult = ({bool ok, int bytesSent, int durationMs});
 
@@ -22,16 +23,7 @@ class SenderRemoteDataSource {
 
   Future<UploadResult> upload(RescueRecord rec, Uint8List? jpeg) async {
     final meta = jsonEncode({
-      'id': rec.id,
-      'createdAt': rec.createdAt.toIso8601String(),
-      'lat': rec.lat,
-      'lng': rec.lng,
-      'trappedCount': rec.trappedCount,
-      'injuredCount': rec.injuredCount,
-      'vulnerableGroups': rec.vulnerableGroups,
-      'description': rec.description,
-      'aiTags': rec.aiTags.map((e) => e.toJson()).toList(),
-      'sendMode': rec.sendMode,
+      ...rescueRecordPayload(rec),
       if (jpeg != null) 'imageSha256': 'sha256:${sha256.convert(jpeg)}',
       if (jpeg != null) 'imageSizeBytes': jpeg.length,
     });

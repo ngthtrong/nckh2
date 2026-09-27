@@ -27,6 +27,8 @@ class RecordLocalDataSource {
       'trappedCount': record.trappedCount,
       'injuredCount': record.injuredCount,
       'vulnerableGroups': record.vulnerableGroups,
+      'cannotMove': record.cannotMove,
+      'severeSigns': record.severeSigns,
       'description': record.description,
       'sendMode': record.sendMode,
       'synced': record.synced,
@@ -59,7 +61,14 @@ class RecordLocalDataSource {
         images = rawImages.map((e) => e.toString()).toList();
       }
 
-      final createdAtMs = (m['createdAtMs'] as num?)?.toInt() ??
+      final severeSigns =
+          (m['severeSigns'] as List?)
+              ?.map((value) => value.toString())
+              .toList() ??
+          [];
+
+      final createdAtMs =
+          (m['createdAtMs'] as num?)?.toInt() ??
           DateTime.now().millisecondsSinceEpoch;
 
       return RescueRecord(
@@ -75,6 +84,8 @@ class RecordLocalDataSource {
         trappedCount: (m['trappedCount'] as num?)?.toInt() ?? 0,
         injuredCount: (m['injuredCount'] as num?)?.toInt() ?? 0,
         vulnerableGroups: vulnerable,
+        cannotMove: m['cannotMove'] as bool? ?? false,
+        severeSigns: severeSigns,
         description: m['description'] as String? ?? m['note'] as String? ?? '',
         sendMode: m['sendMode'] as String? ?? m['mode'] as String? ?? 'direct',
         synced: m['synced'] as bool? ?? (m['status'] == 'sent'),
