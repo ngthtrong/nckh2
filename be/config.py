@@ -1,9 +1,13 @@
+import os
 from pathlib import Path
 
 BASE_DIR = Path(__file__).resolve().parent
-UPLOADS_DIR = BASE_DIR / "uploads"
+# RESCUE_UPLOADS_DIR / RESCUE_DB_FILE cho phép chạy demo, thực nghiệm trên dữ liệu riêng,
+# không ghi vào be/uploads/ và be/data/rescue_reports.db (đang được commit làm dữ liệu mẫu).
+UPLOADS_DIR = BASE_DIR / os.environ.get("RESCUE_UPLOADS_DIR", "uploads")
 DATA_DIR = BASE_DIR / "data"
-DB_FILE = DATA_DIR / "rescue_reports.db"
+_db_override = os.environ.get("RESCUE_DB_FILE")
+DB_FILE = BASE_DIR / _db_override if _db_override else DATA_DIR / "rescue_reports.db"
 TEMPLATES_DIR = BASE_DIR / "templates"
 
 HOST = "0.0.0.0"

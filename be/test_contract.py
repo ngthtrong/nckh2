@@ -121,6 +121,44 @@ class ContractTest(unittest.TestCase):
             finally:
                 storage.DB_FILE = old_db_file
 
+    def test_dashboard_and_sync_share_status_rules(self):
+        with tempfile.TemporaryDirectory() as temp_dir:
+            old_db_file = storage.DB_FILE
+            storage.DB_FILE = Path(temp_dir) / "reports.db"
+            try:
+                storage.init_db()
+                storage.save_report({"id": "r1", "lat": 16.0, "lng": 108.0})
+
+                result = storage.update_report_status("r1", "dispatched", 2)
+                self.assertEqual(result, {"id": "r1", "status": "dispatched", "statusVersion": 2})
+
+                for status, version, code in (
+                    ("resolved", 2, "INVALID_STATUS_VERSION"),
+                    ("processing", 3, "INVALID_STATUS_TRANSITION"),
+                    ("unknown", 3, "INVALID_PAYLOAD"),
+                ):
+                    with self.assertRaises(storage.StatusUpdateError) as ctx:
+                        storage.update_report_status("r1", status, version)
+                    self.assertEqual(ctx.exception.code, code)
+                with self.assertRaises(storage.StatusUpdateError) as ctx:
+                    storage.update_report_status("missing", "resolved", 2)
+                self.assertEqual(ctx.exception.code, "REPORT_NOT_FOUND")
+
+                payload = {"id": "r1", "status": "processing", "statusVersion": 3}
+                rejected = storage.process_sync_messages([{
+                    "message_id": "status-1",
+                    "client_id": "client-1",
+                    "sequence_number": 1,
+                    "operation_type": "UPDATE_RESCUE_STATUS",
+                    "created_at": "2026-09-22T00:00:00Z",
+                    "payload_hash": compute_payload_hash(payload),
+                    "payload": payload,
+                }])
+                self.assertEqual(rejected[0]["code"], "INVALID_STATUS_TRANSITION")
+                self.assertEqual(storage.get_report_by_id("r1")["status"], "dispatched")
+            finally:
+                storage.DB_FILE = old_db_file
+
 
 if __name__ == "__main__":
     unittest.main()
