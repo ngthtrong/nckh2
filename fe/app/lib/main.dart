@@ -1,5 +1,3 @@
-import 'dart:io';
-
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:workmanager/workmanager.dart';
@@ -31,7 +29,9 @@ void callbackDispatcher() {
 
 Future<void> main() async {
   WidgetsFlutterBinding.ensureInitialized();
-  if (!kIsWeb && (Platform.isAndroid || Platform.isIOS)) {
+  if (!kIsWeb &&
+      (defaultTargetPlatform == TargetPlatform.android ||
+          defaultTargetPlatform == TargetPlatform.iOS)) {
     await Workmanager().initialize(callbackDispatcher);
     await Workmanager().registerPeriodicTask(
       'rescue-outbox-sync',
