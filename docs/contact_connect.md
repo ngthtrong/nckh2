@@ -243,6 +243,20 @@ Quy tắc gửi:
 `/api/reports` trả ACK chung `status: "ok"`, không phân biệt `accepted` với
 `duplicate`. App dựa vào HTTP `2xx` để xác nhận phần upload ảnh thành công.
 
+### Endpoint dành cho dashboard điều phối
+
+Hai endpoint dưới đây phục vụ website quản lý, không thuộc luồng store-and-forward
+của app và không cần header `X-Message-Contract-Version`:
+
+- `GET /api/clusters`: phân cụm các báo cáo chưa `resolved` bằng product `C_ij` +
+  Louvain (cấu hình đã chọn trong bài báo) và trả cụm theo điểm ưu tiên giảm dần,
+  kèm trọng tâm và các thành phần `E`, `F`, `N`, `V`. Báo cáo thiếu vị trí hoặc
+  thời gian nằm trong `review`.
+- `PATCH /api/reports/{id}/status` với body `{"status": ..., "statusVersion": ...}`:
+  dùng **cùng hàm kiểm tra** với `UPDATE_RESCUE_STATUS` (`storage.apply_status_update`).
+  Mã lỗi giữ nguyên (`INVALID_PAYLOAD` → 400, `REPORT_NOT_FOUND` → 404,
+  `INVALID_STATUS_VERSION`/`INVALID_STATUS_TRANSITION` → 409).
+
 ### Trạng thái triển khai của mobile
 
 `fe/app/` hiện đã triển khai:
@@ -399,4 +413,5 @@ Khi sửa cơ chế kết nối, request hoặc response:
 |---|---|---|
 | 1 | 2026-09-22 | Chốt luồng ảnh multipart, ACK thực tế của mock server, operation cứu hộ, canonical hash RFC 8785 và sequence cho phép gap. |
 | 1 | 2026-09-22 | Triển khai Hive outbox, batch/partial ACK, full-jitter retry, Workmanager, JCS trên mobile và transaction nguyên tử trên server; không đổi wire contract. |
+| 1 | 2026-09-24 | Thêm `GET /api/clusters` và `PATCH /api/reports/{id}/status` cho dashboard; tách quy tắc chuyển trạng thái thành hàm dùng chung; không đổi wire contract của app. |
 | 1 | 2026-09-27 | Bổ sung `urgency_features` và các alias payload nghiên cứu cho tình trạng khẩn cấp; thay đổi tương thích ngược. |
