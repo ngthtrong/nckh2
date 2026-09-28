@@ -175,7 +175,7 @@ class _GuideScreenState extends State<GuideScreen> {
               ],
             ),
           );
-        }).toList(),
+        }),
         Container(
           width: double.infinity,
           padding: const EdgeInsets.all(16),
