@@ -55,6 +55,7 @@ void main() {
         vulnerableGroups: const ['Trẻ em'],
         cannotMove: true,
         severeSigns: const ['unresponsive', 'heavy_bleeding'],
+        urgencyScore: 0.75,
         description: 'Nước đang dâng',
         sendMode: 'direct',
       ),
@@ -63,11 +64,32 @@ void main() {
     expect(payload['L_i'], {'lat': 10.0405, 'lon': 105.7606});
     expect(payload['N_i'], 2);
     expect(payload['injury_count'], 1);
+    expect(payload['E_i'], 0.75);
     expect(payload['urgency_features'], {
       'cannot_move': true,
       'severe_condition': true,
       'severe_signs': ['unresponsive', 'heavy_bleeding'],
     });
     expect(payload['image_attached'], false);
+  });
+
+  test('payload đổi mã dấu hiệu cũ sang mã dataset v5', () {
+    final payload = rescueRecordPayload(
+      RescueRecord(
+        id: 'rescue-old',
+        createdAt: DateTime.utc(2026, 9, 27),
+        lat: null,
+        lng: null,
+        severeSigns: const ['respiratory_distress', 'seizure', 'major_trauma'],
+        sendMode: 'direct',
+      ),
+    );
+
+    expect(payload['urgency_features']['severe_signs'], [
+      'respiratory_distress_or_cyanosis',
+      'active_convulsions',
+      'high_risk_trauma',
+    ]);
+    expect(payload['E_i'], isNull);
   });
 }

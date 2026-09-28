@@ -1,10 +1,14 @@
 import 'dart:convert';
-import 'dart:typed_data';
 
 import 'package:dio/dio.dart';
+import 'package:flutter/foundation.dart';
 
+import '../../config.dart';
 import '../../domain/entities/rescue_record.dart';
+import '../../domain/entities/rescue_status.dart';
+import '../../domain/entities/send_mode.dart';
 import '../../domain/repositories/rescue_repository.dart';
+import '../../domain/services/adaptive_send_policy.dart';
 import '../../core/platform/local_file.dart';
 import '../datasources/outbox_local_datasource.dart';
 import '../datasources/record_local_datasource.dart';
@@ -19,11 +23,16 @@ class RescueRepositoryImpl implements RescueRepository {
   final OutboxLocalDataSource outboxDataSource;
   final SyncRemoteDataSource syncDataSource;
 
+  /// Chọn cách gửi ảnh cho bản ghi đồng bộ muộn (xếp hàng khi offline).
+  /// Null thì gửi ảnh gốc như trước.
+  final AdaptiveSendPolicy? sendPolicy;
+
   RescueRepositoryImpl({
     required this.localDataSource,
     required this.senderDataSource,
     OutboxLocalDataSource? outboxDataSource,
     SyncRemoteDataSource? syncDataSource,
+    this.sendPolicy,
   }) : outboxDataSource = outboxDataSource ?? OutboxLocalDataSource(),
        syncDataSource = syncDataSource ?? SyncRemoteDataSource();
 
@@ -37,6 +46,14 @@ class RescueRepositoryImpl implements RescueRepository {
   List<RescueRecord> getAllRecords() {
     return localDataSource.getAllRecords();
   }
+
+  @override
+  List<RescueRecord> getRecordsPage({required int offset, required int limit}) {
+    return localDataSource.getRecordsPage(offset: offset, limit: limit);
+  }
+
+  @override
+  int get recordCount => localDataSource.recordCount;
 
   @override
   int getPendingCount() {
@@ -67,6 +84,33 @@ class RescueRepositoryImpl implements RescueRepository {
         await saveRecord(record.copyWith(synced: true));
       }
     }
+  }
+
+  @override
+  Future<bool> sendSmsFallback(RescueRecord record) =>
+      senderDataSource.sendSms(record);
+
+  @override
+  Future<List<RescueRecord>> refreshStatuses() async {
+    final tracked = getAllRecords()
+        .where((r) => r.synced && !isFinalStatus(r.status))
+        .toList();
+    if (tracked.isEmpty) return [];
+    final changed = <RescueRecord>[];
+    for (var i = 0; i < tracked.length; i += 100) {
+      final chunk = tracked.sublist(i, (i + 100).clamp(0, tracked.length));
+      final statuses = await syncDataSource.fetchStatuses([
+        for (final record in chunk) record.id,
+      ]);
+      for (final record in chunk) {
+        final next = advancedStatus(record.status, statuses[record.id]);
+        if (next == null) continue;
+        final updated = record.copyWith(status: next);
+        await saveRecord(updated);
+        changed.add(updated);
+      }
+    }
+    return changed;
   }
 
   Future<void> _enqueue(RescueRecord record) =>
@@ -153,8 +197,61 @@ class RescueRepositoryImpl implements RescueRepository {
       return true;
     }
     if (imageBytes.isEmpty) return true;
-    return (await senderDataSource.upload(record, imageBytes)).ok;
+
+    // Chế độ đã chọn lúc gửi; bản ghi xếp hàng khi offline (hoặc bản cũ) thì
+    // quyết định lại theo mạng hiện tại.
+    var mode = sendModeFromName(record.sendMode);
+    if (mode == null ||
+        mode == SendMode.queuedOffline ||
+        mode == SendMode.smsFallback) {
+      mode = sendPolicy == null
+          ? SendMode.fullImage
+          : (await sendPolicy!.decide(
+              hasImage: true,
+              confidence: record.maxAiConfidence,
+            )).mode;
+    }
+    switch (mode) {
+      case SendMode.textOnly:
+        return true; // metadata đã có ACK; bỏ ảnh để tiết kiệm băng thông
+      case SendMode.smsFallback || SendMode.queuedOffline:
+        return false; // chưa tới được server, thử lại lần đồng bộ sau
+      case SendMode.compressedImage:
+        final compressed = await senderDataSource.compress(imageBytes);
+        return _deliverImage(
+          record,
+          compressed ?? imageBytes,
+          allowShrink: false,
+        );
+      case SendMode.fullImage:
+        var bytes = imageBytes;
+        if (!isServerSupportedImage(bytes)) {
+          // HEIC hoặc định dạng server không nhận: chuyển sang JPEG, giữ độ phân giải.
+          bytes =
+              await senderDataSource.compress(
+                bytes,
+                quality: kConvertJpegQuality,
+                maxSide: kConvertMaxSide,
+              ) ??
+              bytes;
+        }
+        return _deliverImage(record, bytes);
+    }
   }
+
+  Future<bool> _deliverImage(
+    RescueRecord record,
+    Uint8List bytes, {
+    bool allowShrink = true,
+  }) => deliverImage(
+    bytes,
+    upload: (data) => senderDataSource.upload(record, data),
+    shrink: (data) => senderDataSource.compress(data),
+    allowShrink: allowShrink,
+    onGiveUp: (status) => debugPrint(
+      'Server từ chối ảnh của ${record.id} (HTTP $status); bỏ ảnh, báo cáo vẫn đã gửi.',
+    ),
+  );
 
   int _requestSize(List<SyncMessageModel> messages) => utf8
       .encode(

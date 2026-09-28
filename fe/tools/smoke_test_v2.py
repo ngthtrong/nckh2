@@ -10,11 +10,9 @@ from torchvision import models, transforms
 
 
 ROOT = Path(__file__).resolve().parents[1]
-V2_DIR = ROOT / "model" / "models" / "md1709"
-if not V2_DIR.exists():
-    V2_DIR = ROOT / "model" / "models" / "mobilenetv3_large_relabel_v2"
+V2_DIR = ROOT / "model" / "models" / "mobilenetv3_large_2809"
 
-V2_CHECKPOINT = V2_DIR / "flood_mobilenetv3_large_relabel_v2_best.pth"
+V2_CHECKPOINT = V2_DIR / "flood_mobilenetv3_large_best.pth"
 if not V2_CHECKPOINT.exists():
     V2_CHECKPOINT = ROOT / "app" / "model.pth"
 
@@ -22,7 +20,7 @@ V1_CHECKPOINT = (
     ROOT / "model" / "models" / "md1509"
     / "flood_mobilenetv3_large_relabel_best.pth"
 )
-SPLIT_CSV = V2_DIR / "split_train_val_test_mobilenetv3_large_v2.csv"
+SPLIT_CSV = V2_DIR / "split_train_val_test_mobilenetv3_large.csv"
 
 
 def build_model(num_classes: int, dropout: float) -> nn.Module:
@@ -47,7 +45,7 @@ def main() -> None:
     transform = transforms.Compose([
         transforms.Lambda(lambda image: ImageOps.pad(
             image,
-            (224, 224),
+            (256, 256),
             method=Image.Resampling.BICUBIC,
             color=(124, 116, 104),
         )),

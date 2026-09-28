@@ -5,10 +5,13 @@ import '../../core/constants/app_colors.dart';
 class EmergencyConditionSelector extends StatelessWidget {
   static const options = [
     (key: 'unresponsive', label: 'Bất tỉnh / không phản ứng'),
-    (key: 'respiratory_distress', label: 'Khó thở nghiêm trọng / tím tái'),
+    (
+      key: 'respiratory_distress_or_cyanosis',
+      label: 'Khó thở nghiêm trọng / tím tái',
+    ),
     (key: 'heavy_bleeding', label: 'Chảy máu nhiều'),
-    (key: 'seizure', label: 'Co giật'),
-    (key: 'major_trauma', label: 'Chấn thương nặng rõ ràng'),
+    (key: 'active_convulsions', label: 'Co giật'),
+    (key: 'high_risk_trauma', label: 'Chấn thương nặng rõ ràng'),
   ];
 
   final bool cannotMove;
@@ -83,7 +86,7 @@ class EmergencyConditionSelector extends StatelessWidget {
             child: _OptionTile(
               selected: selected,
               title: option.label,
-              subtitle: option.key == 'major_trauma'
+              subtitle: option.key == 'high_risk_trauma'
                   ? 'Ví dụ: chấn thương đầu/ngực nặng, biến dạng chi rõ, tai nạn lực mạnh...'
                   : null,
               onTap: () => _toggle(option.key),

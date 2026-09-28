@@ -31,4 +31,20 @@ class SyncRemoteDataSource {
         .map((item) => Map<String, dynamic>.from(item as Map))
         .toList();
   }
+
+  /// Trạng thái điều phối hiện tại của các báo cáo (`GET /api/reports/status`).
+  /// Id server không biết sẽ không có trong kết quả.
+  Future<Map<String, String>> fetchStatuses(List<String> ids) async {
+    if (ids.isEmpty) return {};
+    final response = await _dio.get<Map<String, dynamic>>(
+      '$kServerBaseUrl/api/reports/status',
+      queryParameters: {'ids': ids.join(',')},
+    );
+    final reports = response.data?['reports'];
+    if (reports is! List) throw const FormatException('Response thiếu reports');
+    return {
+      for (final item in reports.cast<Map>())
+        item['id'] as String: item['status'] as String,
+    };
+  }
 }

@@ -15,4 +15,7 @@ class NetworkRepositoryImpl implements NetworkRepository {
   Future<String> getCurrentNetworkType() {
     return dataSource.currentTypeName();
   }
+
+  @override
+  Future<int?> probeThroughputKbps() => dataSource.probeThroughputKbps();
 }

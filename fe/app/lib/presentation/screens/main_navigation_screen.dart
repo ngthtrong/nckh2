@@ -102,7 +102,10 @@ class _MainNavigationScreenState extends State<MainNavigationScreen> {
               controller: widget.controller,
               onComposePressed: () => setState(() => _viewMode = AppViewMode.compose),
             ),
-            HistoryScreen(controller: widget.controller),
+            HistoryScreen(
+              controller: widget.controller,
+              active: _currentTab == 1,
+            ),
             const GuideScreen(),
             SettingsScreen(
               controller: widget.controller,

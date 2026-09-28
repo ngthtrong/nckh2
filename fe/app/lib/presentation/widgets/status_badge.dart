@@ -26,6 +26,12 @@ class StatusBadge extends StatelessWidget {
         border = AppColors.statusResolvedBorder;
         label = 'Hoàn thành';
         break;
+      case 'cancelled':
+        bg = AppColors.statusCancelledBg;
+        text = AppColors.statusCancelledText;
+        border = AppColors.statusCancelledBorder;
+        label = 'Đã đóng';
+        break;
       case 'processing':
       default:
         bg = AppColors.statusProcessingBg;

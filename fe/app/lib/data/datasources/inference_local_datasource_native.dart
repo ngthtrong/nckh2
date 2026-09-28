@@ -14,7 +14,7 @@ import '../../domain/entities/ai_tag.dart';
 import '../../domain/repositories/inference_repository.dart';
 
 class InferenceLocalDataSource {
-  static const int _inputSize = 224;
+  static const int _inputSize = 256;
   static const _mean = [0.485, 0.456, 0.406];
   static const _std = [0.229, 0.224, 0.225];
   static const _pteChannel = MethodChannel('rescue/executorch');

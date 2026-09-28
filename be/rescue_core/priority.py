@@ -1,4 +1,6 @@
-# Chép nguyên từ demo/v2/priority.py tại commit a6be3e9; chỉ đổi import sang tương đối, không sửa công thức.
+# Dựa trên demo/v2/priority.py tại commit a6be3e9 (import tương đối). Đã chỉnh cho khớp
+# bài báo ISDS 2026 theo demo/pipeline/{config,attributes,priority}.py tại cùng commit:
+# Q_i theo Eq. (1) và hằng số Eq. (4) omega=(.34,.33,.33), mu=2, s=10, N_ref=500, V_cap=50.
 """Bounded, duplicate-aware ranking and simple comparators for protocol v2."""
 from __future__ import annotations
 
@@ -9,25 +11,25 @@ from typing import Mapping, Sequence
 
 from .contracts import ReportV2
 from .dedup import (
-    CorroborationPolicyV2,
+    ConfidencePolicyV2,
     NearDuplicatePolicyV2,
-    capped_distinct_source_corroboration,
+    confidence_scores,
     deduplicate_reports,
 )
 
 
 @dataclass(frozen=True, slots=True)
 class PriorityPolicyV2:
-    weight_E: float = 0.40
-    weight_F: float = 0.35
-    weight_N: float = 0.25
+    weight_E: float = 0.34
+    weight_F: float = 0.33
+    weight_N: float = 0.33
     n_ref: float = 500.0
     n_claim_cap: float = 500.0
     v_claim_cap: float = 50.0
-    vulnerability_mu: float = 1.75
-    vulnerability_scale: float = 20.0
+    vulnerability_mu: float = 2.0
+    vulnerability_scale: float = 10.0
     near_duplicate: NearDuplicatePolicyV2 = NearDuplicatePolicyV2()
-    corroboration: CorroborationPolicyV2 = CorroborationPolicyV2()
+    confidence: ConfidencePolicyV2 = ConfidencePolicyV2()
 
     def __post_init__(self) -> None:
         weights = (self.weight_E, self.weight_F, self.weight_N)
@@ -84,22 +86,13 @@ def report_provenance_scores(
     reports: Sequence[ReportV2],
     policy: PriorityPolicyV2 = PriorityPolicyV2(),
 ) -> dict[str, float]:
-    """Combine direct provenance with capped distinct-source corroboration.
+    """Q_i of Eq. (1) from image presence and distinct-payload corroboration.
 
-    Nearby report multiplicity alone contributes nothing: the corroboration
-    term counts distinct source keys, excludes the report's own key, and is
-    capped by ``CorroborationPolicyV2``.
+    Exact copies share one payload identity, so repeating a report raises
+    neither its own Q_i nor that of its neighbours.
     """
 
-    corroboration = capped_distinct_source_corroboration(reports, policy.corroboration)
-    cap = max(1, policy.corroboration.cap)
-    result: dict[str, float] = {}
-    for report in reports:
-        direct = report.provenance_quality if report.provenance_quality is not None else 0.25
-        image = 1.0 if report.has_image else 0.0
-        cross_source = corroboration[report.report_id] / cap
-        result[report.report_id] = _clip(0.72 * direct + 0.10 * image + 0.18 * cross_source, 0.0, 1.0)
-    return result
+    return confidence_scores(reports, policy.confidence)
 
 
 def _measurement_max(
@@ -136,7 +129,7 @@ def score_cluster(
         raise ValueError("provenance map does not cover the cluster")
     if any(report.report_id not in provenance for report in reports):
         raise ValueError("provenance map must cover every cluster report")
-    dedup = deduplicate_reports(reports, policy.near_duplicate)
+    dedup = deduplicate_reports(reports, policy.near_duplicate, provenance)
     family_representatives = [family.representatives for family in dedup.families]
 
     e_numerator = 0.0
