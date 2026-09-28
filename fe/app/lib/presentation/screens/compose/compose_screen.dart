@@ -526,7 +526,7 @@ class _ComposeScreenState extends State<ComposeScreen> {
       'severe_condition': _severeSigns.isNotEmpty,
       'severe_signs': _severeSigns,
     },
-    'E_i': null,
+    'E_i': widget.controller.urgencyScore(_severeSigns),
     'vulnerability_flags': _vulnerableGroups,
     'V_i': _vulnerableGroups.length,
     'note': _descController.text.trim().isEmpty

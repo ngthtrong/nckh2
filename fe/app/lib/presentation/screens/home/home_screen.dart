@@ -7,6 +7,7 @@ import '../../widgets/ai_model_settings_sheet.dart';
 import '../../widgets/app_header.dart';
 import '../../widgets/compose_cta_card.dart';
 import '../../widgets/sos_button.dart';
+import '../../../domain/entities/send_mode.dart';
 
 class HomeScreen extends StatefulWidget {
   final AppController controller;
@@ -54,9 +55,23 @@ class _HomeScreenState extends State<HomeScreen> {
     if (_sosState != SosState.idle) return;
     setState(() => _sosState = SosState.pressed);
 
-    await widget.controller.sendSos();
+    final record = await widget.controller.sendSos();
 
     if (mounted) {
+      final mode = sendModeFromName(record?.sendMode);
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+          content: Text(
+            record == null
+                ? 'Không gửi được SOS, hãy gọi 112.'
+                : record.synced
+                ? 'Đã gửi SOS tới trung tâm cứu hộ.'
+                : mode == SendMode.smsFallback
+                ? 'Không có mạng: đã gửi SMS tới tổng đài, sẽ đồng bộ khi có mạng.'
+                : 'Không có mạng: SOS nằm trong hàng đợi, tự gửi khi có mạng.',
+          ),
+        ),
+      );
       setState(() => _sosState = SosState.sent);
       Future.delayed(const Duration(seconds: 3), () {
         if (mounted) {
@@ -206,11 +221,11 @@ class _HomeScreenState extends State<HomeScreen> {
               _statusRow(
                 icon: Icons.memory,
                 label: 'Mô hình AI offline',
-                value: c.isModelReady ? c.currentModel.badgeText : 'Đang nạp',
+                value: c.isModelReady
+                    ? c.currentModel.badgeText
+                    : (c.isModelLoading ? 'Đang nạp' : 'Không khả dụng'),
                 isGreen: c.isModelReady,
-                actionLabel: c.isModelReady
-                    ? 'Chạm để đổi ONNX/PTE và benchmark'
-                    : 'Đang tải model on-device...',
+                actionLabel: c.modelStatusHint,
                 onTap: () => AiModelSettingsSheet.show(context, c),
               ),
               const Divider(height: 24, color: Color(0xFFF3F4F6)),

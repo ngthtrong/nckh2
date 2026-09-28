@@ -4,6 +4,16 @@ import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 
 void main() {
+  test('mã trên app trùng thứ tự feature của dataset v5', () {
+    expect(EmergencyConditionSelector.options.map((option) => option.key), [
+      'unresponsive',
+      'respiratory_distress_or_cyanosis',
+      'heavy_bleeding',
+      'active_convulsions',
+      'high_risk_trauma',
+    ]);
+  });
+
   testWidgets('tình trạng khẩn cấp dùng được ở màn hình mobile hẹp', (
     tester,
   ) async {
