@@ -83,6 +83,9 @@ class EmergencyConditionSelector extends StatelessWidget {
             child: _OptionTile(
               selected: selected,
               title: option.label,
+              subtitle: option.key == 'major_trauma'
+                  ? 'Ví dụ: chấn thương đầu/ngực nặng, biến dạng chi rõ, tai nạn lực mạnh...'
+                  : null,
               onTap: () => _toggle(option.key),
             ),
           );

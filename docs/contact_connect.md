@@ -170,6 +170,50 @@ App đồng thời gửi các alias nghiên cứu `L_i`, `T_i`, `N_i`, `injury_c
 bổ sung, server lưu nguyên trạng trong `raw_payload`; các field nghiệp vụ hiện
 có (`lat`, `lng`, `trappedCount`, ...) vẫn là nguồn dùng để ghi các cột chuẩn.
 
+### Mô hình Logistic Regression cho `E_i`
+
+`E_i` là **urgency evidence score** trong khoảng `[0, 1]`, không phải xác suất
+tử vong và không thay thế quyết định cứu hộ của con người. Baseline gồm hai mô
+hình Logistic Regression:
+
+- `compact`: `injured_count`, `cannot_move`, `severe_condition`.
+- `detailed`: `injured_count`, `cannot_move`, `unresponsive`,
+  `respiratory_distress`, `heavy_bleeding`, `seizure`, `major_trauma`.
+
+```text
+E_i = sigmoid(intercept
+    + coefficient[injured_count] * injured_count
+    + coefficient[cannot_move] * cannot_move
+    + coefficient[severe_condition] * severe_condition)
+```
+
+`severe_condition` là field dẫn xuất, bắt buộc bằng phép OR của năm dấu hiệu
+chi tiết. Dataset chính thức gồm các cột:
+
+```text
+scenario_id,injured_count,cannot_move,unresponsive,respiratory_distress,
+heavy_bleeding,seizure,major_trauma,severe_condition,urgency_label,
+labeled_by,labeled_at,label_note
+```
+
+`urgency_label` phải là nhãn độc lập do chuyên gia xác nhận. `scenario_id` được
+phép lặp khi một tình huống có nhiều observation, nhưng toàn bộ các dòng cùng
+`scenario_id` phải ở chung một tập train, validation hoặc test.
+
+Mục tiêu ban đầu là `200-500` scenario có nhãn để xây dựng baseline; kích thước
+cuối cùng phụ thuộc phân bố feature, tỷ lệ hai lớp và độ ổn định của metrics.
+`injured_count` dùng giá trị raw trong baseline đầu tiên. Sau khi có phân bố dữ
+liệu, cần so sánh với `log1p(injured_count)` hoặc clipping; không tự đặt ngưỡng
+clip trước khi quan sát dataset.
+
+Script `fe/model/train_urgency_logistic.py` huấn luyện cả hai baseline và xuất
+`fe/app/assets/models/urgency_logistic.json`. Ngưỡng phát triển mặc định là
+`0.5`; ngưỡng vận hành được chọn trên validation set theo F1, còn test set chỉ
+dùng để đánh giá cuối. Artifact chứa hệ số, ngưỡng, metrics, kích thước model,
+độ trễ tham khảo trên Python, hash dataset và thông tin split. Không được gửi
+`E_i` khác `null` trước khi app nạp thành công artifact huấn luyện từ dataset
+có nhãn hợp lệ.
+
 Giới hạn ban đầu:
 
 - Tối đa `50` message trong một request.
@@ -415,3 +459,5 @@ Khi sửa cơ chế kết nối, request hoặc response:
 | 1 | 2026-09-22 | Triển khai Hive outbox, batch/partial ACK, full-jitter retry, Workmanager, JCS trên mobile và transaction nguyên tử trên server; không đổi wire contract. |
 | 1 | 2026-09-24 | Thêm `GET /api/clusters` và `PATCH /api/reports/{id}/status` cho dashboard; tách quy tắc chuyển trạng thái thành hàm dùng chung; không đổi wire contract của app. |
 | 1 | 2026-09-27 | Bổ sung `urgency_features` và các alias payload nghiên cứu cho tình trạng khẩn cấp; thay đổi tương thích ngược. |
+| 1 | 2026-09-27 | Chốt schema dataset và artifact Logistic Regression dùng để tính `E_i`; chưa thay đổi wire contract. |
+| 1 | 2026-09-27 | Mở rộng dataset với năm dấu hiệu, thêm compact/detailed baseline và chia train/validation/test theo `scenario_id`. |

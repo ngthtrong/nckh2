@@ -10,10 +10,16 @@ from torchvision import models, transforms
 
 
 ROOT = Path(__file__).resolve().parents[1]
-V2_DIR = ROOT / "model" / "models" / "mobilenetv3_large_relabel_v2"
+V2_DIR = ROOT / "model" / "models" / "md1709"
+if not V2_DIR.exists():
+    V2_DIR = ROOT / "model" / "models" / "mobilenetv3_large_relabel_v2"
+
 V2_CHECKPOINT = V2_DIR / "flood_mobilenetv3_large_relabel_v2_best.pth"
+if not V2_CHECKPOINT.exists():
+    V2_CHECKPOINT = ROOT / "app" / "model.pth"
+
 V1_CHECKPOINT = (
-    ROOT / "model" / "models" / "mobilenetv3_large_relabel"
+    ROOT / "model" / "models" / "md1509"
     / "flood_mobilenetv3_large_relabel_best.pth"
 )
 SPLIT_CSV = V2_DIR / "split_train_val_test_mobilenetv3_large_v2.csv"
@@ -53,12 +59,20 @@ def main() -> None:
     samples = split_df[split_df["split"] == "test"].groupby("label", sort=False).head(1).head(3)
     with torch.no_grad():
         for row in samples.itertuples(index=False):
-            with Image.open(row.path) as image:
+            img_path = Path(row.path)
+            if not img_path.exists():
+                candidate = ROOT / "model" / "Dataset_Flood" / row.label / img_path.name
+                if candidate.exists():
+                    img_path = candidate
+                else:
+                    print(f"Skipping missing image: {img_path.name}")
+                    continue
+            with Image.open(img_path) as image:
                 tensor = transform(image.convert("RGB")).unsqueeze(0)
             probabilities = torch.softmax(model(tensor), dim=1)[0]
             prediction = int(probabilities.argmax())
             print(
-                f"{Path(row.path).name}: true={row.label}, "
+                f"{img_path.name}: true={row.label}, "
                 f"pred={class_order[prediction]}, confidence={probabilities[prediction]:.4f}, "
                 f"input={tuple(tensor.shape)}"
             )

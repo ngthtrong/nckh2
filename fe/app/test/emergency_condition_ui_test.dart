@@ -49,6 +49,12 @@ void main() {
     await tester.tap(find.text('Chảy máu nhiều'));
     await tester.pump();
     expect(selected, ['heavy_bleeding']);
+    expect(
+      find.text(
+        'Ví dụ: chấn thương đầu/ngực nặng, biến dạng chi rõ, tai nạn lực mạnh...',
+      ),
+      findsOneWidget,
+    );
 
     await tester.ensureVisible(
       find.text('Xem payload demo (dành cho phát triển)'),
