@@ -1,4 +1,5 @@
 import 'dart:async';
+import 'dart:convert';
 
 import 'package:connectivity_plus/connectivity_plus.dart';
 import 'package:flutter/foundation.dart';
@@ -15,6 +16,7 @@ import '../../domain/entities/ai_tag.dart';
 import '../../domain/entities/rescue_record.dart';
 import '../../domain/entities/send_mode.dart';
 import '../../domain/services/adaptive_send_policy.dart';
+import '../../domain/services/urgency_logistic_model.dart';
 import '../../domain/entities/user.dart';
 import '../../domain/usecases/analyze_image_usecase.dart';
 import '../../domain/usecases/get_rescue_records_usecase.dart';
@@ -37,6 +39,8 @@ class AppController extends ChangeNotifier {
   late final AnalyzeImageUseCase _analyzeImageUseCase;
   late final SyncPendingRecordsUseCase _syncPendingRecordsUseCase;
   late final AdaptiveSendPolicy _sendPolicy;
+  Future<UrgencyLogisticModel?>? _urgencyModelFuture;
+  UrgencyLogisticModel? _urgencyModel;
 
   final ImagePicker _picker = ImagePicker();
   StreamSubscription<List<ConnectivityResult>>? _connSub;
@@ -130,6 +134,11 @@ class AppController extends ChangeNotifier {
   }
 
   List<RescueRecord> get records => _getRescueRecordsUseCase();
+  List<RescueRecord> getRecordsPage({
+    required int offset,
+    required int limit,
+  }) => rescueRepository.getRecordsPage(offset: offset, limit: limit);
+  int get recordCount => rescueRepository.recordCount;
   int get pendingCount => rescueRepository.getPendingCount();
 
   AiModelType get currentModel => inferenceRepository.currentModel;
@@ -137,6 +146,29 @@ class AppController extends ChangeNotifier {
   bool get isDualComparison => inferenceRepository.isDualComparison;
   ModelBenchmarkComparison? get latestComparison =>
       inferenceRepository.latestComparison;
+
+  double? urgencyScore(Iterable<String> severeSigns) =>
+      _urgencyModel?.score(severeSigns);
+
+  Future<UrgencyLogisticModel?> _loadUrgencyModel() =>
+      _urgencyModelFuture ??= _readUrgencyModel();
+
+  Future<UrgencyLogisticModel?> _readUrgencyModel() async {
+    try {
+      final raw = await rootBundle.loadString(
+        'assets/models/urgency_logistic.json',
+      );
+      final model = UrgencyLogisticModel.fromJson(
+        jsonDecode(raw) as Map<String, dynamic>,
+      );
+      _urgencyModel = model;
+      if (hasListeners) notifyListeners();
+      return model;
+    } catch (error) {
+      debugPrint('Không tải được urgency logistic model: $error');
+      return null;
+    }
+  }
 
   void switchAiModel(AiModelType model) {
     inferenceRepository.setModel(model);
@@ -152,6 +184,7 @@ class AppController extends ChangeNotifier {
     await rescueRepository.init();
     await userLocalDataSource.init();
     currentUser = userLocalDataSource.getUser();
+    unawaited(_loadUrgencyModel());
     unawaited(
       inferenceRepository
           .loadModel()
@@ -307,6 +340,8 @@ class AppController extends ChangeNotifier {
     required int trappedCount,
     required int injuredCount,
     required List<String> vulnerableGroups,
+    required bool cannotMove,
+    required List<String> severeSigns,
     required String description,
     required String? imagePath,
     required List<AiTag> aiTags,
@@ -319,6 +354,7 @@ class AppController extends ChangeNotifier {
       if (currentLat == null) {
         await refreshLocation(timeLimit: const Duration(seconds: 3));
       }
+      final urgencyModel = await _loadUrgencyModel();
       final record = await _submitRescuePostUseCase(
         lat: currentLat,
         lng: currentLng,
@@ -328,6 +364,9 @@ class AppController extends ChangeNotifier {
         trappedCount: trappedCount,
         injuredCount: injuredCount,
         vulnerableGroups: vulnerableGroups,
+        cannotMove: cannotMove,
+        severeSigns: severeSigns,
+        urgencyScore: urgencyModel?.score(severeSigns),
         description: description,
         sendMode: await _decideSendMode(
           hasImage: imagePath != null,

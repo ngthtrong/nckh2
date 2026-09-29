@@ -140,6 +140,11 @@ phải chuyển message đã quá timeout về `pending` để gửi lại.
         "aiTags": [
           {"label": "high", "confidence": 0.94}
         ],
+        "urgency_features": {
+          "cannot_move": true,
+          "severe_condition": true,
+          "severe_signs": ["unresponsive", "heavy_bleeding"]
+        },
         "sendMode": "queuedOffline",
         "status": "processing"
       }
@@ -160,6 +165,45 @@ phải chuyển message đã quá timeout về `pending` để gửi lại.
 | `expires_at` | Không | Thời gian UTC theo ISO 8601; bỏ field nếu message không hết hạn |
 | `payload_hash` | Có | `sha256:` + SHA-256 dạng hex chữ thường của payload canonical theo RFC 8785 |
 | `payload` | Có | Dữ liệu của operation, phải là JSON object |
+
+### Field tình trạng khẩn cấp
+
+`CREATE_RESCUE_RECORD.payload` có thể chứa `urgency_features`:
+
+| Field | Kiểu | Quy tắc |
+|---|---|---|
+| `cannot_move` | Boolean | Có người không thể tự di chuyển |
+| `severe_condition` | Boolean | `true` khi `severe_signs` có ít nhất một phần tử |
+| `severe_signs` | Array String | Danh sách mã dấu hiệu nghiêm trọng |
+
+Mã `severe_signs` app hiện dùng trùng với cột dataset:
+`unresponsive`, `respiratory_distress_or_cyanosis`, `heavy_bleeding`,
+`active_convulsions`, `high_risk_trauma`. Bản ghi cũ có các mã
+`respiratory_distress`, `seizure`, `major_trauma` vẫn được app đọc và đổi sang
+mã mới trước khi gửi; message đã nằm trong outbox cũ có thể vẫn chứa mã cũ.
+
+App đồng thời gửi các alias nghiên cứu `L_i`, `T_i`, `N_i`, `injury_count`,
+`E_i`, `vulnerability_flags`, `V_i`, `note` và `image_attached`. Đây là field
+bổ sung, server lưu nguyên trạng trong `raw_payload`; các field nghiệp vụ hiện
+có (`lat`, `lng`, `trappedCount`, ...) vẫn là nguồn dùng để ghi các cột chuẩn.
+
+### Mô hình Logistic Regression cho `E_i`
+
+Gói baseline v5 tại `fe/model/urgency_ei/` dùng đúng năm mã `severe_signs` nêu
+trên. `cannot_move` và `injured_count` chỉ là thông tin ngữ cảnh, không phải
+feature của model này. `severe_condition` là field dẫn xuất, bằng phép OR của
+năm dấu hiệu.
+
+`data/urgency_training_SOURCE_FINAL.csv` gồm 32 tổ hợp nhị phân; nhãn
+`urgency_label` bằng 1 nếu có ít nhất một dấu hiệu. Script
+`scripts/train_urgency_logistic.py` xuất
+`model/urgency_logistic_SOURCE_FINAL.json` với thứ tự feature, intercept, hệ số,
+ngưỡng `0.5` và hash dataset. Đây là dữ liệu tổng hợp theo quy tắc, chưa có nhãn
+ca thực tế do chuyên gia xác nhận; độ khớp trên 32 dòng train không phải test
+accuracy độc lập. `E_i` là điểm bằng chứng tham khảo, không phải xác suất tử vong
+hay quyết định cứu hộ. App nạp `assets/models/urgency_logistic.json`, tính
+`E_i` từ năm dấu hiệu và lưu điểm cùng bản ghi để đồng bộ offline; nếu asset
+không nạp được thì gửi `E_i: null`.
 
 Message thiếu field bắt buộc, sai kiểu, hoặc không phải JSON object bị `rejected`
 `INVALID_PAYLOAD` riêng lẻ; các message khác trong batch vẫn được xử lý.
@@ -548,6 +592,9 @@ Khi sửa cơ chế kết nối, request hoặc response:
 | 1 | 2026-09-22 | Chốt luồng ảnh multipart, ACK thực tế của mock server, operation cứu hộ, canonical hash RFC 8785 và sequence cho phép gap. |
 | 1 | 2026-09-22 | Triển khai Hive outbox, batch/partial ACK, full-jitter retry, Workmanager, JCS trên mobile và transaction nguyên tử trên server; không đổi wire contract. |
 | 1 | 2026-09-24 | Thêm `GET /api/clusters` và `PATCH /api/reports/{id}/status` cho dashboard; tách quy tắc chuyển trạng thái thành hàm dùng chung; không đổi wire contract của app. |
+| 1 | 2026-09-27 | Bổ sung `urgency_features` và các alias payload nghiên cứu cho tình trạng khẩn cấp; thay đổi tương thích ngược. |
+| 1 | 2026-09-27 | Chốt schema dataset và artifact Logistic Regression dùng để tính `E_i`; chưa thay đổi wire contract. |
+| 1 | 2026-09-27 | Mở rộng dataset với năm dấu hiệu, thêm compact/detailed baseline và chia train/validation/test theo `scenario_id`. |
 | 1 | 2026-09-27 | Thêm `GET /api/reports/status` cho app theo dõi trạng thái điều phối; mô tả gửi thích ứng (`sendMode`), SMS dự phòng và `lat`/`lng` null trên mobile. Không đổi wire contract của `/sync/messages` và `/api/reports`. |
 | 1 | 2026-09-27 | `meta.createdAt` của `/api/reports` gửi dạng UTC như `payload.createdAt`; khi upsert theo `meta.id`, server giữ `createdAt` của lần nhận đầu tiên. Không đổi wire contract. |
 | 1 | 2026-09-27 | Dashboard quản lý: thêm trạng thái kết thúc `cancelled` (kèm `reason`) cho `UPDATE_RESCUE_STATUS` và dashboard; app coi `cancelled` là trạng thái kết thúc. Endpoint dashboard cần đăng nhập; thêm lọc/phân trang, luồng thay đổi, thao tác hàng loạt, đội, ghi chú, vị trí thủ công, nhật ký, thống kê, xuất dữ liệu, sao lưu. Không đổi `/sync/messages` và `/api/reports` POST của app, không đổi phiên bản contract (app cũ bỏ qua trạng thái lạ). |

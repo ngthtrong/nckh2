@@ -75,7 +75,7 @@ class _SosButtonSectionState extends State<SosButtonSection>
                       height: 100 + (value * 30),
                       decoration: BoxDecoration(
                         shape: BoxShape.circle,
-                        color: AppColors.primaryRed.withOpacity(0.25 * (1 - value)),
+                        color: AppColors.primaryRed.withValues(alpha: 0.25 * (1 - value)),
                       ),
                     );
                   },

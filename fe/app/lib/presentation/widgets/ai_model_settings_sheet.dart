@@ -104,7 +104,7 @@ class AiModelSettingsSheet extends StatelessWidget {
                             ),
                             Text(
                               ready
-                                  ? '${controller.currentModel.name} · letterbox 224×224'
+                                  ? '${controller.currentModel.name} · letterbox 256×256'
                                   : controller.modelStatusHint,
                               style: const TextStyle(
                                 fontSize: 12,

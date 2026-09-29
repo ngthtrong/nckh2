@@ -8,6 +8,7 @@ import 'package:permission_handler/permission_handler.dart';
 
 import '../../config.dart';
 import '../../domain/entities/rescue_record.dart';
+import '../models/rescue_record_payload.dart';
 
 /// Kết quả gửi ảnh. `status` là mã HTTP khi server trả lời; `permanent` khi server
 /// từ chối vĩnh viễn (gửi lại y hệt cũng vô ích, xem [isPermanentUploadFailure]).
@@ -82,17 +83,7 @@ class SenderRemoteDataSource {
 
   Future<UploadResult> upload(RescueRecord rec, Uint8List? jpeg) async {
     final meta = jsonEncode({
-      'id': rec.id,
-      // meta chính là payload CREATE_RESCUE_RECORD: thời gian UTC ISO 8601 (contact_connect.md).
-      'createdAt': rec.createdAt.toUtc().toIso8601String(),
-      'lat': rec.lat,
-      'lng': rec.lng,
-      'trappedCount': rec.trappedCount,
-      'injuredCount': rec.injuredCount,
-      'vulnerableGroups': rec.vulnerableGroups,
-      'description': rec.description,
-      'aiTags': rec.aiTags.map((e) => e.toJson()).toList(),
-      'sendMode': rec.sendMode,
+      ...rescueRecordPayload(rec),
       if (jpeg != null) 'imageSha256': 'sha256:${sha256.convert(jpeg)}',
       if (jpeg != null) 'imageSizeBytes': jpeg.length,
     });

@@ -3,6 +3,8 @@ import '../entities/rescue_record.dart';
 abstract class RescueRepository {
   Future<void> init();
   List<RescueRecord> getAllRecords();
+  List<RescueRecord> getRecordsPage({required int offset, required int limit});
+  int get recordCount;
   int getPendingCount();
   Future<void> saveRecord(RescueRecord record);
   Future<void> syncPendingRecords();

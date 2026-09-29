@@ -26,11 +26,11 @@ DEFAULT_CHECKPOINT = (
     ROOT
     / "model"
     / "models"
-    / "mobilenetv3_large_relabel_v2"
-    / "flood_mobilenetv3_large_relabel_v2_best.pth"
+    / "mobilenetv3_large_2809"
+    / "flood_mobilenetv3_large_best.pth"
 )
 DEFAULT_CONFIG = (
-    ROOT / "model" / "models" / "mobilenetv3_large_relabel_v2" / "config_mobilenetv3_large_v2.json"
+    ROOT / "model" / "models" / "mobilenetv3_large_2809" / "config_mobilenetv3_large.json"
 )
 DEFAULT_OUTPUT_DIR = ROOT / "model" / "Edge Ai"
 DEFAULT_OUTPUT = DEFAULT_OUTPUT_DIR / "flood_mobilenetv3_large.onnx"
@@ -107,7 +107,7 @@ def update_manifest(
     manifest.update({
         "checkpoint_sha256": checkpoint_sha,
         "onnx_sha256": onnx_sha,
-        "input_size": int(config.get("image_size", 224)),
+        "input_size": int(config.get("image_size", 256)),
         "preprocess": "letterbox_rgb_124_116_104",
         "letterbox_fill": list(config.get("letterbox_fill", [124, 116, 104])),
         "class_order": config["class_order"],
@@ -161,7 +161,8 @@ def main() -> None:
         )
 
     export_model = ProbabilityModel(model.eval())
-    sample = torch.zeros(1, 3, int(config.get("image_size", 224)), int(config.get("image_size", 224)))
+    image_size = int(config.get("image_size", 256))
+    sample = torch.zeros(1, 3, image_size, image_size)
     args.output.parent.mkdir(parents=True, exist_ok=True)
     torch.onnx.export(
         export_model,

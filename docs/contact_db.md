@@ -47,6 +47,11 @@ CREATE INDEX IF NOT EXISTS idx_reports_first_received ON reports (first_received
 CREATE INDEX IF NOT EXISTS idx_reports_status ON reports (status);
 ```
 
+`raw_payload` lưu cả `urgency_features` và các alias nghiên cứu `L_i`, `T_i`,
+`N_i`, `injury_count`, `E_i`, `vulnerability_flags`, `V_i`, `note`,
+`image_attached`. Các field này chưa tách thành cột riêng; payload cũ không có
+chúng vẫn hợp lệ và được hiểu với giá trị mặc định `false`/mảng rỗng ở mobile.
+
 Báo cáo mới luôn bắt đầu ở `status = 'processing'` (trạng thái client gửi bị bỏ qua).
 Khi cùng `id` được gửi lại (upload ảnh sau metadata, SMS rồi app đồng bộ, gửi lại do
 mất ACK), server **gộp**, không ghi đè:
