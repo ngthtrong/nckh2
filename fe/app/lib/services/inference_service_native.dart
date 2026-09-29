@@ -10,10 +10,10 @@ typedef ClassifyResult = ({String label, double confidence, int durationMs});
 
 /// Chạy model ONNX ngay trên thiết bị — hoạt động offline hoàn toàn.
 ///
-/// Preprocessing phải KHỚP với lúc train: resize 224x224 + normalize
+/// Legacy inference path: resize 256x256 + normalize.
 /// ImageNet mean/std. Nếu bạn train với mean/std khác, sửa [mean]/[std].
 class InferenceService {
-  static const int _inputSize = 224;
+  static const int _inputSize = 256;
   static const _mean = [0.485, 0.456, 0.406];
   static const _std = [0.229, 0.224, 0.225];
 

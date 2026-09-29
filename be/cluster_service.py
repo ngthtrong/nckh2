@@ -9,19 +9,24 @@ dưới đây là heuristic vận hành, không phải kết quả đã được
 - E (khẩn cấp, [0,1]): theo từ khóa trong mô tả; không có mô tả thì để trống.
 - N: số người mắc kẹt + bị thương.
 - V: số nhóm yếu thế được chọn (0-4), là đại lượng thay thế cho số người yếu thế.
-- provenance_quality: độ tin cậy của mô hình AI.
+- provenance_quality: độ tin cậy của mô hình AI. Chỉ là một trường của payload
+  (vào dấu vân tay bản trùng); điểm tin cậy Q_i dùng để xếp hạng được tính theo
+  Eq. (1) của bài báo từ việc có ảnh và số báo cáo củng cố lân cận.
 
 Nếu payload đã có sẵn trường của thuật toán (flood, urgency, vulnerability,
 confidence, n_trapped — như bộ dữ liệu mô phỏng) thì dùng trực tiếp.
 """
 from __future__ import annotations
 
+import hashlib
 import logging
 import math
 import re
 import threading
+import time
+from dataclasses import dataclass
 from datetime import datetime, timezone
-from typing import Any, Dict, List, Optional, Sequence, Tuple
+from typing import Any, Callable, Dict, List, Optional, Sequence, Tuple
 
 from rescue_core import GraphConfigV2, ReportV2, run_graph_clustering, score_clusters
 
@@ -167,14 +172,21 @@ def _centroid(reports: Sequence[ReportV2]) -> Optional[Dict[str, float]]:
     }
 
 
+# Báo cáo đã kết thúc không còn tham gia phân cụm / xếp hạng.
+CLOSED_STATUSES = frozenset({"resolved", "cancelled"})
+
+
 def compute_clusters(reports: Sequence[Dict[str, Any]]) -> Dict[str, Any]:
-    """Phân cụm và xếp hạng ưu tiên các báo cáo chưa được giải quyết.
+    """Phân cụm và xếp hạng ưu tiên các báo cáo chưa kết thúc.
 
     Trả về cụm đã sắp xếp theo điểm ưu tiên giảm dần. Báo cáo thiếu vị trí hoặc
     thời gian được đưa vào ``review`` (cần người xem xét), đúng như thiết kế
     fail-closed của thuật toán.
+
+    ``clusterId`` là nhãn của một lần chạy và có thể đổi khi tập báo cáo đổi;
+    dashboard dùng ``clusterKey`` (id nhỏ nhất trong cụm) để giữ cụm đang chọn.
     """
-    active = [r for r in reports if r.get("status") != "resolved"]
+    active = [r for r in reports if r.get("status") not in CLOSED_STATUSES]
     converted: List[ReportV2] = []
     invalid: List[Dict[str, str]] = []
     for report in active:
@@ -201,6 +213,7 @@ def compute_clusters(reports: Sequence[Dict[str, Any]]) -> Dict[str, Any]:
         members = [by_id[report_id] for report_id in priority.report_ids]
         clusters.append({
             "clusterId": cluster_id,
+            "clusterKey": min(priority.report_ids),
             "reportIds": list(priority.report_ids),
             "size": len(priority.report_ids),
             "centroid": _centroid(members),
@@ -243,28 +256,89 @@ def _config_dict() -> Dict[str, Any]:
     }
 
 
-class ClusterCache:
-    """Chỉ tính lại khi tập báo cáo (id, trạng thái, thời điểm nhận) thay đổi."""
+@dataclass(frozen=True)
+class ClusterSnapshot:
+    data: Dict[str, Any]
+    version: str
+    etag: str
+    computed_at: str
+    duration_s: float
 
-    def __init__(self) -> None:
+
+class ClusterService:
+    """Kết quả phân cụm theo phiên bản dữ liệu, không để request chờ lâu.
+
+    - ``load_version`` (``storage.get_cluster_version``) chỉ đổi khi đầu vào của thuật toán
+      đổi (báo cáo mới/bổ sung, trạng thái, vị trí), nên kiểm tra cache chỉ đọc một dòng
+      thay vì toàn bảng; giao đội hay ghi chú không làm tính lại.
+    - Chỉ một lần tính tại một thời điểm, kể cả khi nhiều dashboard cùng hỏi.
+    - Lần tính trước nhanh (<= ``sync_budget_s``): tính luôn trong request. Chậm hơn
+      (nhiều báo cáo): trả kết quả gần nhất kèm ``stale`` và tính lại ở luồng nền, tối đa
+      một lần mỗi ``min_interval_s``.
+    """
+
+    def __init__(
+        self,
+        load_version: Callable[[], str],
+        load_reports: Callable[[], Sequence[Dict[str, Any]]],
+        *,
+        sync_budget_s: float = 1.0,
+        min_interval_s: float = 10.0,
+    ) -> None:
+        self._load_version = load_version
+        self._load_reports = load_reports
+        self.sync_budget_s = sync_budget_s
+        self.min_interval_s = min_interval_s
         self._lock = threading.Lock()
-        self._key: Optional[Tuple[Any, ...]] = None
-        self._value: Optional[Dict[str, Any]] = None
+        self._compute_lock = threading.Lock()
+        self._snapshot: Optional[ClusterSnapshot] = None
+        self._refreshing = False
+        self._last_refresh = -math.inf
 
-    @staticmethod
-    def _key_for(reports: Sequence[Dict[str, Any]]) -> Tuple[Any, ...]:
-        return tuple(sorted(
-            (str(r.get("id")), r.get("status"), r.get("statusVersion"), r.get("serverReceivedAt"))
-            for r in reports
-        ))
+    def get(self) -> Tuple[ClusterSnapshot, bool]:
+        """Trả về (kết quả, stale). ``stale`` là True khi dữ liệu đã đổi và đang tính nền."""
+        version = self._load_version()
+        with self._lock:
+            snapshot = self._snapshot
+            if snapshot and snapshot.version == version:
+                return snapshot, False
+            if snapshot and snapshot.duration_s > self.sync_budget_s:
+                now = time.monotonic()
+                if not self._refreshing and now - self._last_refresh >= self.min_interval_s:
+                    self._refreshing, self._last_refresh = True, now
+                    threading.Thread(target=self._refresh, name="cluster-refresh", daemon=True).start()
+                return snapshot, True
+        return self._compute_latest(), False
 
-    def get(self, reports: Sequence[Dict[str, Any]]) -> Dict[str, Any]:
-        key = self._key_for(reports)
-        with self._lock:
-            if key == self._key and self._value is not None:
-                return self._value
-        value = compute_clusters(reports)
-        with self._lock:
-            self._key, self._value = key, value
-        logger.info(f"[CLUSTER] Tính lại: {len(value['clusters'])} cụm từ {value['totalReports']} báo cáo")
-        return value
+    def _refresh(self) -> None:
+        try:
+            self._compute_latest()
+        except Exception:
+            logger.exception("[CLUSTER] Lỗi khi tính lại phân cụm nền")
+        finally:
+            with self._lock:
+                self._refreshing = False
+
+    def _compute_latest(self) -> ClusterSnapshot:
+        with self._compute_lock:
+            # Đọc phiên bản trước khi đọc dữ liệu: thay đổi xen giữa sẽ làm lần hỏi sau tính lại.
+            version = self._load_version()
+            snapshot = self._snapshot
+            if snapshot and snapshot.version == version:
+                return snapshot
+            started = time.perf_counter()
+            data = compute_clusters(self._load_reports())
+            snapshot = ClusterSnapshot(
+                data=data,
+                version=version,
+                etag='"' + hashlib.sha256(version.encode("utf-8")).hexdigest()[:20] + '"',
+                computed_at=datetime.now(timezone.utc).isoformat(timespec="seconds").replace("+00:00", "Z"),
+                duration_s=time.perf_counter() - started,
+            )
+            with self._lock:
+                self._snapshot = snapshot
+        logger.info(
+            f"[CLUSTER] Tính lại: {len(data['clusters'])} cụm từ {data['totalReports']} báo cáo "
+            f"trong {snapshot.duration_s:.2f} s"
+        )
+        return snapshot

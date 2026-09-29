@@ -74,7 +74,7 @@ class PostCard extends StatelessWidget {
                 ),
                 const SizedBox(width: 4),
                 Text(
-                  '${record.lat.toStringAsFixed(4)}, ${record.lng.toStringAsFixed(4)}',
+                  record.locationText,
                   style: const TextStyle(
                     color: Color(0xFF374151),
                     fontSize: 12,

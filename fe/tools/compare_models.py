@@ -47,16 +47,16 @@ CHECKPOINT_A = (
     ROOT
     / "model"
     / "models"
-    / "mobilenetv3_large_relabel_v2"
-    / "flood_mobilenetv3_large_relabel_v2_best.pth"
+    / "mobilenetv3_large_2809"
+    / "flood_mobilenetv3_large_best.pth"
 )
 CHECKPOINT_ONNX = ROOT / "app" / "assets" / "models" / "model.onnx"
 CONFIG_JSON = (
-    ROOT / "model" / "models" / "mobilenetv3_large_relabel_v2" / "config_mobilenetv3_large_v2.json"
+    ROOT / "model" / "models" / "mobilenetv3_large_2809" / "config_mobilenetv3_large.json"
 )
 SPLIT_CSV = (
-    ROOT / "model" / "models" / "mobilenetv3_large_relabel_v2"
-    / "split_train_val_test_mobilenetv3_large_v2.csv"
+    ROOT / "model" / "models" / "mobilenetv3_large_2809"
+    / "split_train_val_test_mobilenetv3_large.csv"
 )
 DATASET_DIR = ROOT / "model" / "Dataset_Flood"
 REPORTS_DIR = ROOT / "reports" / "model_comparison_v2"
@@ -167,7 +167,7 @@ def main() -> None:
     class_to_idx = {c: i for i, c in enumerate(class_order)}
     num_classes = len(class_order)
     dropout = float(config.get("dropout", 0.35))
-    image_size = int(config.get("image_size", 224))
+    image_size = int(config.get("image_size", 256))
     letterbox_fill = tuple(config.get("letterbox_fill", [124, 116, 104]))
     device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
 
