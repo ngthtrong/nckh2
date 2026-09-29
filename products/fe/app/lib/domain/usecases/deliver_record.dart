@@ -19,9 +19,5 @@ Future<RescueRecord> deliverRecord(
     current = current.copyWith(sendMode: resolveOfflineMode(mode, smsOk).name);
   }
   await repository.saveRecord(current);
-  if (await repository.sendRecord(current)) {
-    current = current.copyWith(synced: true);
-    await repository.saveRecord(current);
-  }
-  return current;
+  return repository.sendRecord(current);
 }

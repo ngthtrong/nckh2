@@ -41,13 +41,19 @@ class SubmittedScreen extends StatelessWidget {
                     Container(
                       width: 80,
                       height: 80,
-                      decoration: const BoxDecoration(
-                        color: Color(0xFFDCFCE7),
+                      decoration: BoxDecoration(
+                        color: record.syncError != null
+                            ? const Color(0xFFFEE2E2)
+                            : const Color(0xFFDCFCE7),
                         shape: BoxShape.circle,
                       ),
-                      child: const Icon(
-                        Icons.check_circle_rounded,
-                        color: Color(0xFF16A34A),
+                      child: Icon(
+                        record.syncError != null
+                            ? Icons.error_rounded
+                            : Icons.check_circle_rounded,
+                        color: record.syncError != null
+                            ? const Color(0xFFDC2626)
+                            : const Color(0xFF16A34A),
                         size: 56,
                       ),
                     ),
@@ -55,6 +61,8 @@ class SubmittedScreen extends StatelessWidget {
                     Text(
                       record.synced
                           ? 'Đã gửi thành công!'
+                          : record.syncError != null
+                          ? 'Máy chủ không nhận báo cáo'
                           : 'Đã lưu, chờ gửi lên trung tâm',
                       style: TextStyle(
                         color: Color(0xFF1F2937),
@@ -66,6 +74,8 @@ class SubmittedScreen extends StatelessWidget {
                     Text(
                       record.synced
                           ? 'Đội cứu hộ đã nhận bài và đang xử lý. Trạng thái bên dưới tự cập nhật khi trung tâm điều phối.'
+                          : record.syncError != null
+                          ? 'Báo cáo bị từ chối (${record.syncError}), app sẽ không gửi lại. Hãy gọi 112 hoặc tổng đài cứu hộ.'
                           : 'Chưa tới được máy chủ. Bài nằm trong hàng đợi và tự gửi khi có mạng.',
                       textAlign: TextAlign.center,
                       style: TextStyle(

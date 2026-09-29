@@ -6,6 +6,15 @@ import 'package:uuid/uuid.dart';
 import '../../core/sync/payload_hash.dart';
 import '../models/sync_message_model.dart';
 
+/// Dead-letter không do nội dung báo cáo mà do message/vận chuyển (trùng số thứ tự
+/// khi hai tiến trình cùng ghi outbox, message hỏng, request cả batch bị từ chối):
+/// tạo message mới (message_id và sequence_number mới) là gửi được. Các mã khác
+/// (`INVALID_PAYLOAD`, `EXPIRED`, `REPORT_ID_CONFLICT`...) là từ chối vĩnh viễn.
+bool isRecoverableDeadLetter(String? code) =>
+    code == 'SEQUENCE_REUSED' ||
+    code == 'ID_REUSED_WITH_DIFFERENT_PAYLOAD' ||
+    (code != null && code.startsWith('HTTP_'));
+
 class OutboxLocalDataSource {
   static const boxName = 'sync_outbox';
   static const _clientIdKey = '_meta:client_id';
@@ -19,8 +28,9 @@ class OutboxLocalDataSource {
     : _uuid = uuid ?? const Uuid(),
       _random = random ?? Random.secure();
 
-  Future<void> init() async {
-    await Hive.initFlutter();
+  /// [hivePath] chỉ dùng trong test (thư mục tạm, không cần plugin path_provider).
+  Future<void> init({String? hivePath}) async {
+    hivePath == null ? await Hive.initFlutter() : Hive.init(hivePath);
     _box = await Hive.openBox<dynamic>(boxName);
     if (_box!.get(_clientIdKey) == null) {
       await _box!.put(_clientIdKey, _uuid.v4());
@@ -30,7 +40,13 @@ class OutboxLocalDataSource {
 
   Future<SyncMessageModel> enqueueCreate(Map<String, dynamic> payload) async {
     final existing = messageForRecord(payload['id'] as String);
-    if (existing != null) return existing;
+    if (existing != null) {
+      if (existing.deliveryStatus != 'dead_letter' ||
+          !isRecoverableDeadLetter(existing.lastError)) {
+        return existing;
+      }
+      await _box!.delete(existing.messageId);
+    }
 
     final sequence = ((_box!.get(_sequenceKey) as num?)?.toInt() ?? 0) + 1;
     final now = DateTime.now().toUtc();
@@ -50,6 +66,9 @@ class OutboxLocalDataSource {
     });
     return message;
   }
+
+  /// ID thiết bị gửi kèm mọi message; server dùng làm chủ báo cáo.
+  String get clientId => _box!.get(_clientIdKey) as String;
 
   List<SyncMessageModel> readyMessages({int limit = 50}) {
     final now = DateTime.now().toUtc();
@@ -73,6 +92,29 @@ class OutboxLocalDataSource {
       }
     }
     return null;
+  }
+
+  /// Có mạng trở lại: message đang chờ backoff được gửi ngay (giữ số lần thử).
+  Future<void> makePendingReady() async {
+    final now = DateTime.now().toUtc();
+    final updates = {
+      for (final m in _messages())
+        if (m.deliveryStatus == 'pending' && m.nextAttemptAt.isAfter(now))
+          m.messageId: m.copyWith(nextAttemptAt: now).toStorageJson(),
+    };
+    if (updates.isNotEmpty) await _box!.putAll(updates);
+  }
+
+  /// Thời điểm message `pending` sớm nhất đến hạn gửi; null nếu không có.
+  DateTime? get nextAttemptAt {
+    DateTime? earliest;
+    for (final m in _messages()) {
+      if (m.deliveryStatus != 'pending') continue;
+      if (earliest == null || m.nextAttemptAt.isBefore(earliest)) {
+        earliest = m.nextAttemptAt;
+      }
+    }
+    return earliest;
   }
 
   Future<void> markInFlight(Iterable<SyncMessageModel> messages) async {

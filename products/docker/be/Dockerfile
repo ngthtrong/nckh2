@@ -1,5 +1,5 @@
-# Backend FastAPI + SQLite (be/). Build từ gốc repo:
-#   docker build -f docker/be/Dockerfile -t flood-rescue/be .
+# Backend FastAPI + SQLite (products/be/). Build từ gốc repo:
+#   docker build -f products/docker/be/Dockerfile -t flood-rescue/be .
 FROM python:3.12-slim
 
 ENV PYTHONDONTWRITEBYTECODE=1 \
@@ -8,16 +8,17 @@ ENV PYTHONDONTWRITEBYTECODE=1 \
     PIP_DISABLE_PIP_VERSION_CHECK=1 \
     RESCUE_DB_FILE=/var/lib/rescue/rescue_reports.db \
     RESCUE_UPLOADS_DIR=/var/lib/rescue/uploads \
-    RESCUE_BACKUP_DIR=/var/lib/rescue/backups
+    RESCUE_BACKUP_DIR=/var/lib/rescue/backups \
+    RESCUE_GOLD_DIR=/app/gold
 
 WORKDIR /app/be
-COPY be/requirements.txt ./
+COPY products/be/requirements.txt ./
 RUN pip install -r requirements.txt
 
-COPY be/ ./
-# Chỉ algorithm_input.json của từng run được phép làm đầu vào suy luận (src/data/README.md).
-COPY src/data/gold/ /app/src/data/gold/
-COPY --chmod=755 docker/be/entrypoint.sh /usr/local/bin/entrypoint.sh
+COPY products/be/ ./
+# Chỉ algorithm_input.json của từng run được phép làm đầu vào suy luận (thucnghiem/data/README.md).
+COPY thucnghiem/data/gold/ /app/gold/
+COPY --chmod=755 products/docker/be/entrypoint.sh /usr/local/bin/entrypoint.sh
 
 RUN useradd --system --uid 10001 --home-dir /app app \
     && mkdir -p /var/lib/rescue/uploads \

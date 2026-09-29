@@ -99,7 +99,10 @@ def save_sms(sender: str, text: str, received_at: Any = None) -> Tuple[Dict[str,
 
     with storage.get_db_connection() as conn:
         existing = conn.execute("SELECT raw_payload FROM reports WHERE id = ?", (meta["id"],)).fetchone()
-        report = storage.save_report(meta, connection=conn, source="sms")
+        # Gateway có token là nguồn tin cậy. Tin SOS của app để trống chủ: thiết bị gửi tin
+        # nhận làm chủ khi đồng bộ; tin tự do thuộc về SMS, không thiết bị nào nhận được.
+        report = storage.save_report(meta, connection=conn, source="sms", trusted=True,
+                                     client_id=None if parsed and parsed.get("id") else storage.OWNER_SMS)
         if existing and '"contactPhone"' not in (existing["raw_payload"] or ""):
             # App đã đồng bộ trước: ghi lại để điều phối viên biết có số liên hệ.
             storage._add_event(conn, meta["id"], "sms", source="sms", note=f"Nhận thêm SMS từ {sender or 'không rõ số'}")
@@ -129,7 +132,8 @@ def create_manual_report(fields: Dict[str, Any], *, actor: str) -> Dict[str, Any
         raise storage.StatusUpdateError("INVALID_PAYLOAD", "Nhập mô tả tình huống")
     storage.validate_report_payload(meta)
     with storage.get_db_connection() as conn:
-        storage.save_report(meta, connection=conn, source="dashboard", actor=actor)
+        storage.save_report(meta, connection=conn, source="dashboard", actor=actor,
+                            client_id=storage.OWNER_DASHBOARD, trusted=True)
         if meta["lat"] is not None:
             conn.execute("UPDATE reports SET location_source = 'manual' WHERE id = ?", (meta["id"],))
         conn.commit()

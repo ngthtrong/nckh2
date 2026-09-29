@@ -25,7 +25,7 @@ usage() {
 Tùy chọn:
   --demo            dùng DB/thư mục ảnh demo riêng (data/demo.db, uploads_demo/)
   --seed            nạp dữ liệu bán tổng hợp vào DB demo trước khi chạy (ngụ ý --demo, xóa DB demo cũ)
-  --run N           run số N trong src/data/gold khi --seed (mặc định 1)
+  --run N           run số N trong thucnghiem/data/gold khi --seed (mặc định 1)
   --host HOST       địa chỉ lắng nghe (mặc định 0.0.0.0 để điện thoại trong LAN truy cập được)
   --port PORT       cổng (mặc định 8000)
   --no-reload       tắt auto-reload khi sửa code

@@ -38,9 +38,9 @@ class _FakeRepo implements RescueRepository {
   @override
   Future<void> saveRecord(RescueRecord record) async => saved.add(record);
   @override
-  Future<bool> sendRecord(RescueRecord record) async {
+  Future<RescueRecord> sendRecord(RescueRecord record) async {
     sent.add(record);
-    return sendOk;
+    return sendOk ? record.copyWith(synced: true) : record;
   }
 
   @override

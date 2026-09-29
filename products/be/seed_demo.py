@@ -1,8 +1,8 @@
-"""Nạp một run dữ liệu BÁN TỔNG HỢP (src/data/gold) vào DB để demo dashboard.
+"""Nạp một run dữ liệu BÁN TỔNG HỢP (thucnghiem/data/gold) vào DB để demo dashboard.
 
 Dữ liệu được neo theo bối cảnh EMSR848 nhưng báo cáo là mô phỏng; mỗi bản ghi
 được gắn ``source: "synthetic"`` để dashboard hiển thị nhãn "Dữ liệu mô phỏng".
-Không dùng làm bằng chứng dữ liệu thật (xem src/data/README.md).
+Không dùng làm bằng chứng dữ liệu thật (xem thucnghiem/data/README.md).
 
 Ví dụ:
     python seed_demo.py              # nạp run_001
@@ -12,11 +12,14 @@ from __future__ import annotations
 
 import argparse
 import json
+import os
+from pathlib import Path
 
 import storage
 from config import BASE_DIR
 
-GOLD_DIR = BASE_DIR.parent / "src" / "data" / "gold"
+# products/be -> gốc repo -> thucnghiem/data/gold; image Docker đặt RESCUE_GOLD_DIR.
+GOLD_DIR = Path(os.getenv("RESCUE_GOLD_DIR") or BASE_DIR.parents[1] / "thucnghiem" / "data" / "gold")
 
 
 def load_run(run: int) -> list[dict]:
@@ -50,7 +53,7 @@ def to_meta(row: dict, run: int) -> dict:
 
 def main() -> None:
     parser = argparse.ArgumentParser(description=__doc__, formatter_class=argparse.RawDescriptionHelpFormatter)
-    parser.add_argument("--run", type=int, default=1, help="số run trong src/data/gold (1-80)")
+    parser.add_argument("--run", type=int, default=1, help="số run trong thucnghiem/data/gold (1-80)")
     parser.add_argument("--reset", action="store_true", help="xóa toàn bộ báo cáo trước khi nạp")
     args = parser.parse_args()
 
@@ -60,7 +63,8 @@ def main() -> None:
     rows = load_run(args.run)
     with storage.get_db_connection() as conn:
         for row in rows:
-            storage.save_report(to_meta(row, args.run), connection=conn, source="seed")
+            storage.save_report(to_meta(row, args.run), connection=conn, source="seed",
+                                client_id=storage.OWNER_SEED, trusted=True)
         conn.commit()
     print(f"Đã nạp {len(rows)} báo cáo mô phỏng từ run_{args.run:03d} vào {storage.DB_FILE}")
 

@@ -2,6 +2,8 @@ import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:workmanager/workmanager.dart';
 
+import 'core/platform/sync_isolate_guard.dart';
+
 import 'data/datasources/inference_local_datasource.dart';
 import 'data/datasources/network_remote_datasource.dart';
 import 'data/datasources/record_local_datasource.dart';
@@ -16,24 +18,30 @@ import 'presentation/screens/splash_screen.dart';
 @pragma('vm:entry-point')
 void callbackDispatcher() {
   Workmanager().executeTask((task, inputData) async {
-    final recordLocalDS = RecordLocalDataSource();
-    final senderRemoteDS = SenderRemoteDataSource();
-    final rescueRepo = RescueRepositoryImpl(
-      localDataSource: recordLocalDS,
-      senderDataSource: senderRemoteDS,
-      sendPolicy: AdaptiveSendPolicy(
-        NetworkRepositoryImpl(NetworkRemoteDataSource()),
-      ),
-    );
-    await rescueRepo.init();
-    await rescueRepo.syncPendingRecords();
-    try {
-      await rescueRepo.refreshStatuses();
-    } catch (_) {
-      // Mất mạng giữa chừng: lần chạy sau (15 phút) sẽ thử lại.
-    }
+    // App đang mở: để isolate UI đồng bộ, không mở Hive song song (docs/contact_connect.md).
+    if (await delegateSyncToForeground()) return true;
+    await runBackgroundSync(_syncInBackground);
     return true;
   });
+}
+
+Future<void> _syncInBackground() async {
+  final recordLocalDS = RecordLocalDataSource();
+  final senderRemoteDS = SenderRemoteDataSource();
+  final rescueRepo = RescueRepositoryImpl(
+    localDataSource: recordLocalDS,
+    senderDataSource: senderRemoteDS,
+    sendPolicy: AdaptiveSendPolicy(
+      NetworkRepositoryImpl(NetworkRemoteDataSource()),
+    ),
+  );
+  await rescueRepo.init();
+  await rescueRepo.syncPendingRecords();
+  try {
+    await rescueRepo.refreshStatuses();
+  } catch (_) {
+    // Mất mạng giữa chừng: lần chạy sau (15 phút) sẽ thử lại.
+  }
 }
 
 Future<void> main() async {
@@ -69,6 +77,7 @@ Future<void> main() async {
     networkRepository: networkRepository,
   );
 
+  registerForegroundSync(controller.syncPending);
   runApp(RescueApp(controller: controller));
 }
 

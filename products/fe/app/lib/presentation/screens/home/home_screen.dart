@@ -66,6 +66,8 @@ class _HomeScreenState extends State<HomeScreen> {
                 ? 'Không gửi được SOS, hãy gọi 112.'
                 : record.synced
                 ? 'Đã gửi SOS tới trung tâm cứu hộ.'
+                : record.syncError != null
+                ? 'Máy chủ từ chối SOS (${record.syncError}), hãy gọi 112.'
                 : mode == SendMode.smsFallback
                 ? 'Không có mạng: đã gửi SMS tới tổng đài, sẽ đồng bộ khi có mạng.'
                 : 'Không có mạng: SOS nằm trong hàng đợi, tự gửi khi có mạng.',

@@ -65,25 +65,70 @@ class RescueRepositoryImpl implements RescueRepository {
     await localDataSource.saveRecord(record);
   }
 
-  @override
-  Future<bool> sendRecord(RescueRecord record) async {
-    await _enqueue(record);
-    await _flushOutbox();
-    return _finishAttachment(record);
+  /// Gửi, đồng bộ và cập nhật trạng thái cùng đọc-ghi outbox và bản ghi: chạy lần
+  /// lượt để hai luồng (người dùng bấm gửi, có mạng trở lại, hẹn giờ 15 s) không
+  /// gửi trùng message hay ghi đè bản ghi của nhau.
+  Future<void> _lock = Future.value();
+
+  Future<T> _serial<T>(Future<T> Function() action) {
+    final result = _lock.then((_) => action());
+    _lock = result.then<void>((_) {}, onError: (_) {});
+    return result;
   }
 
   @override
-  Future<void> syncPendingRecords() async {
-    final pending = getAllRecords().where((record) => !record.synced).toList();
+  Future<RescueRecord> sendRecord(RescueRecord record) => _serial(() async {
+    // Dead-letter do vận chuyển (vd. SEQUENCE_REUSED) được tạo message mới và gửi lại ngay một lần.
+    for (var attempt = 0; attempt < 2; attempt++) {
+      await _enqueue(record);
+      await _flushOutbox();
+      if (!_hasRecoverableDeadLetter(record)) break;
+    }
+    return _settle(record);
+  });
+
+  @override
+  DateTime? get nextRetryAt => outboxDataSource.nextAttemptAt;
+
+  @override
+  Future<void> syncPendingRecords({bool immediate = true}) => _serial(() async {
+    if (immediate) await outboxDataSource.makePendingReady();
+    final pending = getAllRecords().where((r) => r.awaitingSync).toList();
     for (final record in pending) {
       await _enqueue(record);
     }
     await _flushOutbox();
     for (final record in pending) {
-      if (await _finishAttachment(record)) {
-        await saveRecord(record.copyWith(synced: true));
-      }
+      await _settle(record);
     }
+  });
+
+  bool _hasRecoverableDeadLetter(RescueRecord record) {
+    final message = outboxDataSource.messageForRecord(record.id);
+    return message != null &&
+        message.deliveryStatus == 'dead_letter' &&
+        isRecoverableDeadLetter(message.lastError);
+  }
+
+  /// Chốt kết quả gửi: server từ chối vĩnh viễn → ghi `syncError` để bản ghi không
+  /// nằm mãi trong "chờ gửi"; metadata đã ACK và xong ảnh → `synced`.
+  Future<RescueRecord> _settle(RescueRecord record) async {
+    final message = outboxDataSource.messageForRecord(record.id);
+    if (message != null &&
+        message.deliveryStatus == 'dead_letter' &&
+        !isRecoverableDeadLetter(message.lastError)) {
+      final failed = record.copyWith(
+        syncError: message.lastError ?? 'REJECTED',
+      );
+      await saveRecord(failed);
+      return failed;
+    }
+    if (await _finishAttachment(record)) {
+      final done = record.copyWith(synced: true);
+      await saveRecord(done);
+      return done;
+    }
+    return record;
   }
 
   @override
@@ -91,9 +136,16 @@ class RescueRepositoryImpl implements RescueRepository {
       senderDataSource.sendSms(record);
 
   @override
-  Future<List<RescueRecord>> refreshStatuses() async {
+  Future<List<RescueRecord>> refreshStatuses() => _serial(() async {
+    // Hỏi cả báo cáo đã có metadata trên server (hết message trong outbox) nhưng
+    // ảnh còn chờ gửi: điều phối viên đã thấy và có thể đã điều đội.
     final tracked = getAllRecords()
-        .where((r) => r.synced && !isFinalStatus(r.status))
+        .where(
+          (r) =>
+              !isFinalStatus(r.status) &&
+              r.syncError == null &&
+              (r.synced || outboxDataSource.messageForRecord(r.id) == null),
+        )
         .toList();
     if (tracked.isEmpty) return [];
     final changed = <RescueRecord>[];
@@ -111,7 +163,7 @@ class RescueRepositoryImpl implements RescueRepository {
       }
     }
     return changed;
-  }
+  });
 
   Future<void> _enqueue(RescueRecord record) =>
       outboxDataSource.enqueueCreate(rescueRecordPayload(record));
@@ -245,7 +297,11 @@ class RescueRepositoryImpl implements RescueRepository {
     bool allowShrink = true,
   }) => deliverImage(
     bytes,
-    upload: (data) => senderDataSource.upload(record, data),
+    upload: (data) => senderDataSource.upload(
+      record,
+      data,
+      clientId: outboxDataSource.clientId,
+    ),
     shrink: (data) => senderDataSource.compress(data),
     allowShrink: allowShrink,
     onGiveUp: (status) => debugPrint(

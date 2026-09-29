@@ -13,7 +13,7 @@ services:
   be:
     build:
       context: .
-      dockerfile: docker/be/Dockerfile
+      dockerfile: products/docker/be/Dockerfile
     image: flood-rescue/be:local
     environment:
       SEED_RUN: ${SEED_RUN-1}
@@ -39,7 +39,7 @@ services:
   dashboard:
     build:
       context: .
-      dockerfile: docker/dashboard/Dockerfile
+      dockerfile: products/docker/dashboard/Dockerfile
     image: flood-rescue/dashboard:local
     environment:
       BACKEND_URL: http://be:8000
@@ -53,8 +53,8 @@ services:
   fe:
     build:
       context: .
-      dockerfile: docker/fe/Dockerfile
-      # runtime: build Flutter trong Docker; prebuilt: dùng fe/app/build/web đã build sẵn.
+      dockerfile: products/docker/fe/Dockerfile
+      # runtime: build Flutter trong Docker; prebuilt: dùng products/fe/app/build/web đã build sẵn.
       target: ${FE_BUILD_TARGET:-runtime}
       args:
         FLUTTER_VERSION: ${FLUTTER_VERSION:-3.47.5}
