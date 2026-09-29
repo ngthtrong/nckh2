@@ -29,12 +29,12 @@ CHECKPOINT_PTH = (
     ROOT
     / "model"
     / "models"
-    / "mobilenetv3_large_relabel_v2"
-    / "flood_mobilenetv3_large_relabel_v2_best.pth"
+    / "mobilenetv3_large_2809"
+    / "flood_mobilenetv3_large_best.pth"
 )
 CHECKPOINT_ONNX = ROOT / "app" / "assets" / "models" / "model.onnx"
 CONFIG_JSON = (
-    ROOT / "model" / "models" / "mobilenetv3_large_relabel_v2" / "config_mobilenetv3_large_v2.json"
+    ROOT / "model" / "models" / "mobilenetv3_large_2809" / "config_mobilenetv3_large.json"
 )
 LABELS_JSON = ROOT / "app" / "assets" / "labels.json"
 
@@ -80,14 +80,14 @@ def run_verification() -> None:
     # --------------------------------------------------------------------------
     print("\n[1] BÀO CHẾ TIỀN XỬ LÝ (PREPROCESSING VERIFICATION)")
     print("--------------------------------------------------------------------------")
-    image_size = int(config.get("image_size", 224))
+    image_size = int(config.get("image_size", 256))
     mean = [0.485, 0.456, 0.406]
     std = [0.229, 0.224, 0.225]
     letterbox_fill = tuple(config.get("letterbox_fill", [124, 116, 104]))
 
     print(f"  • Kích thước ảnh đầu vào: {image_size}x{image_size}")
     print(f"  • Thứ tự Kênh Màu: RGB (Khớp giữa PyTorch PIL và Flutter RGBA filter)")
-    print(f"  • Layout Tensor: NCHW [Batch=1, Channels=3, Height=224, Width=224]")
+    print(f"  • Layout Tensor: NCHW [Batch=1, Channels=3, Height={image_size}, Width={image_size}]")
     print(f"  • Chuẩn hóa ImageNet: Mean={mean}, Std={std}")
 
     # Tạo sample image ngẫu nhiên để test pipeline
@@ -102,7 +102,7 @@ def run_verification() -> None:
         transforms.ToTensor(),
         transforms.Normalize(mean=mean, std=std),
     ])
-    tensor_py = py_transform(dummy_img).unsqueeze(0) # [1, 3, 224, 224]
+    tensor_py = py_transform(dummy_img).unsqueeze(0) # [1, 3, image_size, image_size]
 
     # Mô phỏng Flutter Preprocessing (Raw RGBA -> RGB NCHW)
     img_resized = ImageOps.pad(

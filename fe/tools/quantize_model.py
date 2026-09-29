@@ -37,7 +37,7 @@ DATASET_DIR = ROOT / "model" / "Dataset_Flood"
 REPORT_DIR = ROOT / "reports" / "quantization"
 
 CLASS_ORDER = ["low", "medium", "high", "non_flood"]
-IMAGE_SIZE = 224
+IMAGE_SIZE = 256
 LETTERBOX_FILL = (124, 116, 104)
 MEAN = np.array([0.485, 0.456, 0.406], dtype=np.float32)
 STD = np.array([0.229, 0.224, 0.225], dtype=np.float32)
@@ -45,7 +45,7 @@ SEED = 42
 
 
 def preprocess(path: Path) -> np.ndarray:
-    """Letterbox 224×224 (bilinear, nền 124/116/104) + chuẩn hóa ImageNet, NCHW.
+    """Letterbox 256×256 (bilinear, nền 124/116/104) + chuẩn hóa ImageNet, NCHW.
 
     Giống hệt notebook huấn luyện: không xoay ảnh theo EXIF.
     """

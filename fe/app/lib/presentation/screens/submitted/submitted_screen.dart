@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
 
 import '../../../domain/entities/rescue_record.dart';
+import '../../../domain/entities/send_mode.dart';
 import '../../widgets/quick_call_panel.dart';
 import '../../widgets/status_tracker.dart';
 import '../../widgets/tag_chip.dart';
@@ -30,7 +31,10 @@ class SubmittedScreen extends StatelessWidget {
           children: [
             Expanded(
               child: SingleChildScrollView(
-                padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 24),
+                padding: const EdgeInsets.symmetric(
+                  horizontal: 20,
+                  vertical: 24,
+                ),
                 physics: const BouncingScrollPhysics(),
                 child: Column(
                   children: [
@@ -48,8 +52,10 @@ class SubmittedScreen extends StatelessWidget {
                       ),
                     ),
                     const SizedBox(height: 16),
-                    const Text(
-                      'Đã gửi thành công!',
+                    Text(
+                      record.synced
+                          ? 'Đã gửi thành công!'
+                          : 'Đã lưu, chờ gửi lên trung tâm',
                       style: TextStyle(
                         color: Color(0xFF1F2937),
                         fontSize: 22,
@@ -57,8 +63,10 @@ class SubmittedScreen extends StatelessWidget {
                       ),
                     ),
                     const SizedBox(height: 6),
-                    const Text(
-                      'Đội cứu hộ đã nhận bài và đang xử lý. Vui lòng giữ điện thoại để nhận phản hồi.',
+                    Text(
+                      record.synced
+                          ? 'Đội cứu hộ đã nhận bài và đang xử lý. Trạng thái bên dưới tự cập nhật khi trung tâm điều phối.'
+                          : 'Chưa tới được máy chủ. Bài nằm trong hàng đợi và tự gửi khi có mạng.',
                       textAlign: TextAlign.center,
                       style: TextStyle(
                         color: Color(0xFF6B7280),
@@ -86,9 +94,12 @@ class SubmittedScreen extends StatelessWidget {
                           _summaryRow('Thời gian', timeStr),
                           const Divider(height: 20),
                           _summaryRow(
-                            'Vị trí GPS',
-                            '${record.lat.toStringAsFixed(4)}, ${record.lng.toStringAsFixed(4)}',
+                            'Cách gửi',
+                            sendModeFromName(record.sendMode)?.label ??
+                                record.sendMode,
                           ),
+                          const Divider(height: 20),
+                          _summaryRow('Vị trí GPS', record.locationText),
                           if (record.trappedCount > 0 ||
                               record.injuredCount > 0 ||
                               record.vulnerableGroups.isNotEmpty) ...[
@@ -166,10 +177,7 @@ class SubmittedScreen extends StatelessWidget {
                   ),
                   child: const Text(
                     'Về trang chủ',
-                    style: TextStyle(
-                      fontWeight: FontWeight.w800,
-                      fontSize: 15,
-                    ),
+                    style: TextStyle(fontWeight: FontWeight.w800, fontSize: 15),
                   ),
                 ),
               ),

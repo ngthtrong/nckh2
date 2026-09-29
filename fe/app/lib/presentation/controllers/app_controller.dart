@@ -1,4 +1,5 @@
 import 'dart:async';
+import 'dart:convert';
 
 import 'package:connectivity_plus/connectivity_plus.dart';
 import 'package:flutter/foundation.dart';
@@ -7,11 +8,15 @@ import 'package:geolocator/geolocator.dart';
 import 'package:image_picker/image_picker.dart';
 import 'package:permission_handler/permission_handler.dart';
 
+import '../../config.dart';
 import '../../data/datasources/user_local_datasource.dart';
 import '../../core/platform/local_file.dart';
 import '../../domain/entities/ai_model_type.dart';
 import '../../domain/entities/ai_tag.dart';
 import '../../domain/entities/rescue_record.dart';
+import '../../domain/entities/send_mode.dart';
+import '../../domain/services/adaptive_send_policy.dart';
+import '../../domain/services/urgency_logistic_model.dart';
 import '../../domain/entities/user.dart';
 import '../../domain/usecases/analyze_image_usecase.dart';
 import '../../domain/usecases/get_rescue_records_usecase.dart';
@@ -33,19 +38,29 @@ class AppController extends ChangeNotifier {
   late final GetRescueRecordsUseCase _getRescueRecordsUseCase;
   late final AnalyzeImageUseCase _analyzeImageUseCase;
   late final SyncPendingRecordsUseCase _syncPendingRecordsUseCase;
+  late final AdaptiveSendPolicy _sendPolicy;
+  Future<UrgencyLogisticModel?>? _urgencyModelFuture;
+  UrgencyLogisticModel? _urgencyModel;
 
   final ImagePicker _picker = ImagePicker();
   StreamSubscription<List<ConnectivityResult>>? _connSub;
+  Timer? _statusTimer;
+  bool _refreshingStatuses = false;
 
   bool isBusy = false;
   String networkLabel = 'WiFi';
   bool isModelReady = false;
   bool isBenchmarking = false;
-  String locationLabel = 'GPS tự động · TP. Hồ Chí Minh';
-  double currentLat = 10.7769;
-  double currentLng = 106.7009;
+  bool isModelLoading = true;
+  String locationLabel = 'Đang lấy vị trí GPS...';
+  // Không có tọa độ mặc định: gửi tọa độ giả sẽ dẫn đội cứu hộ tới sai chỗ.
+  double? currentLat;
+  double? currentLng;
 
   RescueRecord? lastSubmittedPost;
+
+  /// Throughput đo qua /probe ở lần gửi gần nhất (kbit/s), null nếu không đo.
+  int? lastThroughputKbps;
   User? currentUser;
   bool isGuest = false;
 
@@ -62,6 +77,7 @@ class AppController extends ChangeNotifier {
     _getRescueRecordsUseCase = GetRescueRecordsUseCase(rescueRepository);
     _analyzeImageUseCase = AnalyzeImageUseCase(inferenceRepository);
     _syncPendingRecordsUseCase = SyncPendingRecordsUseCase(rescueRepository);
+    _sendPolicy = AdaptiveSendPolicy(networkRepository);
   }
 
   Future<bool> login(String username, String password) async {
@@ -118,6 +134,11 @@ class AppController extends ChangeNotifier {
   }
 
   List<RescueRecord> get records => _getRescueRecordsUseCase();
+  List<RescueRecord> getRecordsPage({
+    required int offset,
+    required int limit,
+  }) => rescueRepository.getRecordsPage(offset: offset, limit: limit);
+  int get recordCount => rescueRepository.recordCount;
   int get pendingCount => rescueRepository.getPendingCount();
 
   AiModelType get currentModel => inferenceRepository.currentModel;
@@ -125,6 +146,29 @@ class AppController extends ChangeNotifier {
   bool get isDualComparison => inferenceRepository.isDualComparison;
   ModelBenchmarkComparison? get latestComparison =>
       inferenceRepository.latestComparison;
+
+  double? urgencyScore(Iterable<String> severeSigns) =>
+      _urgencyModel?.score(severeSigns);
+
+  Future<UrgencyLogisticModel?> _loadUrgencyModel() =>
+      _urgencyModelFuture ??= _readUrgencyModel();
+
+  Future<UrgencyLogisticModel?> _readUrgencyModel() async {
+    try {
+      final raw = await rootBundle.loadString(
+        'assets/models/urgency_logistic.json',
+      );
+      final model = UrgencyLogisticModel.fromJson(
+        jsonDecode(raw) as Map<String, dynamic>,
+      );
+      _urgencyModel = model;
+      if (hasListeners) notifyListeners();
+      return model;
+    } catch (error) {
+      debugPrint('Không tải được urgency logistic model: $error');
+      return null;
+    }
+  }
 
   void switchAiModel(AiModelType model) {
     inferenceRepository.setModel(model);
@@ -140,56 +184,131 @@ class AppController extends ChangeNotifier {
     await rescueRepository.init();
     await userLocalDataSource.init();
     currentUser = userLocalDataSource.getUser();
+    unawaited(_loadUrgencyModel());
     unawaited(
       inferenceRepository
           .loadModel()
           .then((_) {
             isModelReady = inferenceRepository.ready;
+            isModelLoading = false;
             notifyListeners();
           })
           .catchError((e) {
             debugPrint('Notice loading AI model: $e');
             isModelReady = inferenceRepository.ready;
+            isModelLoading = false;
             notifyListeners();
           }),
     );
 
-    unawaited(
-      Permission.locationWhenInUse.request().then((_) async {
-        try {
-          final pos = await Geolocator.getCurrentPosition(
-            locationSettings: const LocationSettings(
-              accuracy: LocationAccuracy.high,
-              timeLimit: Duration(seconds: 5),
-            ),
-          );
-          currentLat = pos.latitude;
-          currentLng = pos.longitude;
-          locationLabel =
-              '${currentLat.toStringAsFixed(4)}° N, ${currentLng.toStringAsFixed(4)}° E · TP. Hồ Chí Minh';
-          notifyListeners();
-        } catch (_) {}
-      }),
-    );
+    unawaited(refreshLocation(requestPermission: true));
 
     _connSub = networkRepository.networkChanges.listen((results) async {
       networkLabel = await networkRepository.getCurrentNetworkType();
       notifyListeners();
       final hasNet = results.any(
-        (e) => e == ConnectivityResult.wifi || e == ConnectivityResult.mobile,
+        (e) =>
+            e == ConnectivityResult.wifi ||
+            e == ConnectivityResult.mobile ||
+            e == ConnectivityResult.ethernet,
       );
-      if (hasNet && pendingCount > 0) {
-        await syncPending();
+      if (hasNet) {
+        if (pendingCount > 0) await syncPending();
+        await refreshStatuses();
       }
     });
 
     networkLabel = await networkRepository.getCurrentNetworkType();
+    notifyListeners();
+
+    // Người gửi thấy được khi trung tâm điều phối / hoàn thành báo cáo của mình.
+    unawaited(refreshStatuses());
+    _statusTimer = Timer.periodic(
+      kStatusPollInterval,
+      (_) => unawaited(refreshStatuses()),
+    );
+  }
+
+  /// Hỏi server trạng thái điều phối của các báo cáo đã gửi (chỉ cập nhật tiến).
+  Future<void> refreshStatuses() async {
+    if (_refreshingStatuses) return;
+    _refreshingStatuses = true;
+    try {
+      final changed = await rescueRepository.refreshStatuses();
+      if (changed.isEmpty) return;
+      final last = lastSubmittedPost;
+      if (last != null) {
+        for (final record in changed) {
+          if (record.id == last.id) lastSubmittedPost = record;
+        }
+      }
+      notifyListeners();
+    } catch (e) {
+      debugPrint('Không lấy được trạng thái điều phối: $e');
+    } finally {
+      _refreshingStatuses = false;
+    }
+  }
+
+  /// Chọn cách gửi theo mạng hiện tại (đo /probe khi có ảnh).
+  Future<SendMode> _decideSendMode({
+    required bool hasImage,
+    required double confidence,
+  }) async {
+    final decision = await _sendPolicy.decide(
+      hasImage: hasImage,
+      confidence: confidence,
+    );
+    lastThroughputKbps = decision.throughputKbps;
+    return decision.mode;
+  }
+
+  /// Trạng thái mô hình AI để hiển thị: đang nạp, sẵn sàng hoặc lý do không khả dụng.
+  String get modelStatusHint {
+    if (isModelReady) return 'Chạm để đổi ONNX/PTE và benchmark';
+    if (isModelLoading) return 'Đang tải model on-device...';
+    if (kIsWeb) return 'Bản web không chạy AI on-device';
+    return 'Thiếu file model trong assets/models';
+  }
+
+  /// Lấy vị trí GPS hiện tại. Thất bại thì giữ vị trí trống (không dùng tọa độ
+  /// giả); server đưa báo cáo thiếu vị trí vào hàng cần xem xét thủ công.
+  Future<void> refreshLocation({
+    bool requestPermission = false,
+    Duration timeLimit = const Duration(seconds: 5),
+  }) async {
+    if (requestPermission) {
+      try {
+        await Permission.locationWhenInUse.request();
+      } catch (e) {
+        // permission_handler không hỗ trợ web/desktop; Geolocator tự xin quyền ở đó.
+        debugPrint('Bỏ qua permission_handler cho vị trí: $e');
+      }
+    }
+    try {
+      final pos = await Geolocator.getCurrentPosition(
+        locationSettings: LocationSettings(
+          accuracy: LocationAccuracy.high,
+          timeLimit: timeLimit,
+        ),
+      );
+      currentLat = pos.latitude;
+      currentLng = pos.longitude;
+      locationLabel =
+          '${pos.latitude.toStringAsFixed(4)}° N, ${pos.longitude.toStringAsFixed(4)}° E · GPS';
+    } catch (e) {
+      debugPrint('Không lấy được GPS: $e');
+      if (currentLat == null) {
+        locationLabel = 'Chưa có GPS · trung tâm sẽ xác minh vị trí';
+      }
+    }
     notifyListeners();
   }
 
   @override
   void dispose() {
     _connSub?.cancel();
+    _statusTimer?.cancel();
     super.dispose();
   }
 
@@ -199,10 +318,13 @@ class AppController extends ChangeNotifier {
     notifyListeners();
 
     try {
+      if (currentLat == null) {
+        await refreshLocation(timeLimit: const Duration(seconds: 3));
+      }
       final record = await _sendSosUseCase(
         lat: currentLat,
         lng: currentLng,
-        sendMode: networkLabel == 'none' ? 'queuedOffline' : 'direct',
+        sendMode: await _decideSendMode(hasImage: false, confidence: 0),
       );
       isBusy = false;
       notifyListeners();
@@ -218,6 +340,8 @@ class AppController extends ChangeNotifier {
     required int trappedCount,
     required int injuredCount,
     required List<String> vulnerableGroups,
+    required bool cannotMove,
+    required List<String> severeSigns,
     required String description,
     required String? imagePath,
     required List<AiTag> aiTags,
@@ -227,6 +351,10 @@ class AppController extends ChangeNotifier {
     notifyListeners();
 
     try {
+      if (currentLat == null) {
+        await refreshLocation(timeLimit: const Duration(seconds: 3));
+      }
+      final urgencyModel = await _loadUrgencyModel();
       final record = await _submitRescuePostUseCase(
         lat: currentLat,
         lng: currentLng,
@@ -236,8 +364,17 @@ class AppController extends ChangeNotifier {
         trappedCount: trappedCount,
         injuredCount: injuredCount,
         vulnerableGroups: vulnerableGroups,
+        cannotMove: cannotMove,
+        severeSigns: severeSigns,
+        urgencyScore: urgencyModel?.score(severeSigns),
         description: description,
-        sendMode: networkLabel == 'none' ? 'queuedOffline' : 'direct',
+        sendMode: await _decideSendMode(
+          hasImage: imagePath != null,
+          confidence: aiTags.fold(
+            0.0,
+            (best, tag) => tag.confidence > best ? tag.confidence : best,
+          ),
+        ),
       );
       lastSubmittedPost = record;
       isBusy = false;
@@ -299,5 +436,6 @@ class AppController extends ChangeNotifier {
   Future<void> syncPending() async {
     await _syncPendingRecordsUseCase();
     notifyListeners();
+    await refreshStatuses();
   }
 }

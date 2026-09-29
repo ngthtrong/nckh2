@@ -22,6 +22,10 @@ class AppColors {
   static const Color statusResolvedText = Color(0xFF15803D);
   static const Color statusResolvedBorder = Color(0xFFBBF7D0);
 
+  static const Color statusCancelledBg = Color(0xFFF3F4F6);
+  static const Color statusCancelledText = Color(0xFF4B5563);
+  static const Color statusCancelledBorder = Color(0xFFE5E7EB);
+
   // Text colors
   static const Color textDark = Color(0xFF1F2937);
   static const Color textMuted = Color(0xFF6B7280);

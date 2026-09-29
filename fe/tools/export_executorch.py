@@ -20,15 +20,15 @@ DEFAULT_CHECKPOINT = (
     ROOT
     / "model"
     / "models"
-    / "mobilenetv3_large_relabel_v2"
-    / "flood_mobilenetv3_large_relabel_v2_best.pth"
+    / "mobilenetv3_large_2809"
+    / "flood_mobilenetv3_large_best.pth"
 )
 DEFAULT_CONFIG = (
     ROOT
     / "model"
     / "models"
-    / "mobilenetv3_large_relabel_v2"
-    / "config_mobilenetv3_large_v2.json"
+    / "mobilenetv3_large_2809"
+    / "config_mobilenetv3_large.json"
 )
 DEFAULT_OUTPUT_DIR = ROOT / "model" / "Edge Ai"
 DEFAULT_MANIFEST = DEFAULT_OUTPUT_DIR / "model_manifest.json"
@@ -102,7 +102,7 @@ def update_manifest(
         "checkpoint_sha256": checkpoint_sha,
         "pte_sha256": pte_sha,
         "executorch_runtime": executorch_version,
-        "input_size": int(config.get("image_size", 224)),
+        "input_size": int(config.get("image_size", 256)),
         "preprocess": "letterbox_rgb_124_116_104",
         "letterbox_fill": list(config.get("letterbox_fill", [124, 116, 104])),
         "class_order": config["class_order"],
@@ -136,7 +136,7 @@ def export_executorch(
 
     config = json.loads(config_path.read_text(encoding="utf-8"))
     class_order = config["class_order"]
-    image_size = int(config.get("image_size", 224))
+    image_size = int(config.get("image_size", 256))
     dropout = float(config.get("dropout", 0.35))
 
     state_dict, checkpoint = load_checkpoint(checkpoint_path)
