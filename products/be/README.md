@@ -2,7 +2,7 @@
 
 Server giả lập (Mock Server) viết bằng Python (FastAPI) phục vụ tiếp nhận dữ liệu báo cáo cứu hộ từ ứng dụng Frontend Flutter ([`fe/app`](../fe/app/)).
 
-> Chạy nhanh cả server + app (Linux/WSL/Windows) và dữ liệu demo: xem [`docs/huong_dan_chay_demo.md`](../docs/huong_dan_chay_demo.md) và [`scripts/demo/`](../scripts/demo/).
+> Chạy nhanh cả server + app (Linux/WSL/Windows) và dữ liệu demo: xem [`products/README.md`](../README.md), [`docs/huong_dan_chay_demo.md`](../../docs/huong_dan_chay_demo.md) và [`products/scripts/demo/`](../scripts/demo/).
 
 ---
 
