@@ -7,8 +7,9 @@ class RecordLocalDataSource {
   Box<Map>? _box;
   List<String>? _orderedIds;
 
-  Future<void> init() async {
-    await Hive.initFlutter();
+  /// [hivePath] chỉ dùng trong test (thư mục tạm, không cần plugin path_provider).
+  Future<void> init({String? hivePath}) async {
+    hivePath == null ? await Hive.initFlutter() : Hive.init(hivePath);
     _box = await Hive.openBox<Map>(boxName);
   }
 
@@ -35,6 +36,7 @@ class RecordLocalDataSource {
       'sendMode': record.sendMode,
       'synced': record.synced,
       'status': record.status,
+      'syncError': record.syncError,
     };
     await _box?.put(record.id, map);
     _orderedIds = null;
@@ -120,10 +122,11 @@ class RecordLocalDataSource {
       sendMode: m['sendMode'] as String? ?? m['mode'] as String? ?? 'direct',
       synced: m['synced'] as bool? ?? (m['status'] == 'sent'),
       status: m['status'] as String? ?? 'processing',
+      syncError: m['syncError'] as String?,
     );
   }
 
   int getPendingCount() {
-    return getAllRecords().where((r) => !r.synced).length;
+    return getAllRecords().where((r) => r.awaitingSync).length;
   }
 }

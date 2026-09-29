@@ -210,6 +210,7 @@ def send(base: str, mode: str, image_bytes: bytes | None, client_id: str, seq: i
     payload["sendMode"] = mode
     payload["imageSha256"] = "sha256:" + hashlib.sha256(image_bytes).hexdigest()
     payload["imageSizeBytes"] = len(image_bytes)
+    payload["clientId"] = client_id  # như app: chủ báo cáo (docs/contact_connect.md)
     response = requests.post(
         f"{base}/api/reports",
         data={"meta": json.dumps(payload, ensure_ascii=False)},

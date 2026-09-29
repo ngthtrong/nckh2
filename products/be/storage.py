@@ -86,7 +86,8 @@ def _create_reports_table(conn: sqlite3.Connection, table_name: str = "reports")
             assigned_team_id INTEGER,
             location_source TEXT,
             close_reason TEXT,
-            status_updated_at TEXT
+            status_updated_at TEXT,
+            owner_client_id TEXT
         );
     """)
 
@@ -102,6 +103,7 @@ _ADDED_REPORT_COLUMNS = {
     "location_source": "TEXT",
     "close_reason": "TEXT",
     "status_updated_at": "TEXT",
+    "owner_client_id": "TEXT",
 }
 
 
@@ -405,7 +407,36 @@ def _report_columns(meta: Dict[str, Any]) -> Dict[str, Any]:
 
 
 def _is_blank(value: Any) -> bool:
-    return value is None or value in ("", "[]", "unknown", 0)
+    return value is None or value in ("", "[]", "unknown")
+
+
+# Chủ báo cáo đặc biệt: báo cáo tạo từ nguồn không phải app, không thiết bị nào nhận làm của mình.
+OWNER_DASHBOARD = "@dashboard"
+OWNER_SMS = "@sms"
+OWNER_SEED = "@seed"
+CLIENT_ID_MAX_LENGTH = 128
+
+
+def merge_allowed(owner: Optional[str], client_id: Optional[str], trusted: bool = False) -> bool:
+    """Ai được bổ sung báo cáo đã có cùng id (docs/contact_connect.md, mục chủ báo cáo).
+
+    Chỉ thiết bị đã tạo báo cáo (``client_id`` trùng chủ) hoặc nguồn tin cậy (SMS gateway có
+    token, dashboard) mới được điền trường trống/gắn ảnh. Báo cáo chưa có chủ (tin SMS định
+    dạng SOS của app, dữ liệu cũ) được thiết bị đầu tiên gửi kèm ``client_id`` nhận làm chủ.
+    Nhờ vậy người ngoài biết id (vd. id đi trong SMS) không sửa được vị trí, số người, ảnh.
+    """
+    if trusted:
+        return True
+    if not client_id:
+        return False
+    return owner is None or owner == client_id
+
+
+def report_owner(report_id: str) -> Tuple[bool, Optional[str]]:
+    """(báo cáo đã tồn tại?, chủ báo cáo)."""
+    with get_db_connection() as conn:
+        row = conn.execute("SELECT owner_client_id FROM reports WHERE id = ?", (report_id,)).fetchone()
+    return (row is not None, row["owner_client_id"] if row else None)
 
 
 def save_report(
@@ -418,14 +449,18 @@ def save_report(
     connection: Optional[sqlite3.Connection] = None,
     source: str = "app",
     actor: Optional[str] = None,
+    client_id: Optional[str] = None,
+    trusted: bool = False,
 ) -> Dict[str, Any]:
     """Tạo báo cáo theo ``meta.id``, hoặc bổ sung cho báo cáo đã có.
 
-    Báo cáo mới luôn bắt đầu ở ``processing`` (trạng thái do client gửi bị bỏ qua).
-    Khi ``meta.id`` đã tồn tại (upload ảnh sau metadata, SMS rồi app đồng bộ, gửi lại):
-    dữ liệu đã lưu được giữ nguyên, chỉ điền các trường còn trống; ảnh chỉ gắn khi báo
-    cáo chưa có ảnh; GPS của thiết bị thay vị trí điều phối viên nhập tay. Nhờ vậy
-    request trùng id không ghi đè được nội dung báo cáo.
+    Báo cáo mới luôn bắt đầu ở ``processing`` (trạng thái do client gửi bị bỏ qua) và có
+    chủ là ``client_id``. Khi ``meta.id`` đã tồn tại (upload ảnh sau metadata, SMS rồi app
+    đồng bộ, gửi lại): chỉ chủ báo cáo hoặc nguồn ``trusted`` được bổ sung (xem
+    ``merge_allowed``), người khác nhận ``REPORT_ID_CONFLICT``. Dữ liệu đã lưu được giữ
+    nguyên, chỉ điền các trường còn trống (số người chỉ điền khi lần trước không gửi field
+    đó, vì ``0`` là giá trị thật); ảnh chỉ gắn khi báo cáo chưa có ảnh; GPS của thiết bị
+    thay vị trí điều phối viên nhập tay.
     """
     if connection is None:
         with get_db_connection() as conn:
@@ -439,6 +474,8 @@ def save_report(
                 connection=conn,
                 source=source,
                 actor=actor,
+                client_id=client_id,
+                trusted=trusted,
             )
 
     conn = connection
@@ -464,6 +501,7 @@ def save_report(
             "status": "processing",
             "status_version": 1,
             "raw_payload": json.dumps(meta, ensure_ascii=False),
+            "owner_client_id": client_id,
             **columns,
             **image,
             "updated_seq": _next_seq(conn),
@@ -476,20 +514,30 @@ def save_report(
         _bump_cluster_rev(conn)
         action = "INSERT"
     else:
+        owner = existing["owner_client_id"]
+        if not merge_allowed(owner, client_id, trusted):
+            logger.warning(f"[CRUD][CONFLICT] Report ID={rec_id}: client khác chủ báo cáo, không bổ sung")
+            raise StatusUpdateError("REPORT_ID_CONFLICT", "id báo cáo đã thuộc về thiết bị/nguồn khác")
+        try:
+            stored_payload = json.loads(existing["raw_payload"] or "{}")
+        except ValueError:
+            stored_payload = {}
+        if not isinstance(stored_payload, dict):
+            stored_payload = {}
         updates: Dict[str, Any] = {}
-        for column in ("created_at", "trapped_count", "injured_count", "vulnerable_groups",
-                       "description", "ai_tags", "send_mode"):
+        if owner is None and client_id and not trusted:
+            updates["owner_client_id"] = client_id
+        for column in ("created_at", "vulnerable_groups", "description", "ai_tags", "send_mode"):
             if _is_blank(existing[column]) and not _is_blank(columns[column]):
+                updates[column] = columns[column]
+        for column, key in (("trapped_count", "trappedCount"), ("injured_count", "injuredCount")):
+            if key not in stored_payload and key in meta:
                 updates[column] = columns[column]
         if columns["lat"] is not None and (existing["lat"] is None or existing["location_source"] == "manual"):
             updates.update(lat=columns["lat"], lng=columns["lng"], location_source="device")
         if image_url and not existing["image_url"]:
             updates.update(image)
             _add_event(conn, rec_id, "image", source=source, note=f"{image_size_bytes or 0} bytes")
-        try:
-            stored_payload = json.loads(existing["raw_payload"] or "{}")
-        except ValueError:
-            stored_payload = {}
         merged_payload = {**meta, **stored_payload}
         if merged_payload != stored_payload:
             updates["raw_payload"] = json.dumps(merged_payload, ensure_ascii=False)
@@ -656,7 +704,7 @@ def validate_report_payload(meta: Any) -> None:
     created = meta.get("createdAt")
     if created is not None and not (_short_text(created, 64) or (_is_number(created) and not isinstance(created, float))):
         invalid("createdAt phải là chuỗi ISO 8601 hoặc epoch ms")
-    for name, limit in (("sendMode", 32), ("imageSha256", 80), ("label", 50)):
+    for name, limit in (("sendMode", 32), ("imageSha256", 80), ("label", 50), ("clientId", CLIENT_ID_MAX_LENGTH)):
         if meta.get(name) is not None and not _short_text(meta[name], limit):
             invalid(f"{name} không hợp lệ")
     if meta.get("confidence") is not None and not _is_number(meta["confidence"]):
@@ -1138,7 +1186,7 @@ def _process_message(
     payload = msg.get("payload")
 
     if not (
-        isinstance(msg_id, str) and msg_id and isinstance(client_id, str) and client_id
+        isinstance(msg_id, str) and msg_id and isinstance(client_id, str) and 0 < len(client_id) <= CLIENT_ID_MAX_LENGTH
         and isinstance(seq_num, int) and not isinstance(seq_num, bool)
         and isinstance(op_type, str) and msg.get("created_at") and isinstance(sent_hash, str)
         and isinstance(payload, dict)
@@ -1193,7 +1241,11 @@ def _process_message(
         except StatusUpdateError as err:
             logger.warning(f"[SYNC][REJECTED] msg={msg_id} code=INVALID_PAYLOAD ({err.message})")
             return _ack(msg_id, "rejected", err.code, {"error": err.message})
-        rec_res = save_report(payload, connection=conn, source="sync")
+        try:
+            rec_res = save_report(payload, connection=conn, source="sync", client_id=client_id)
+        except StatusUpdateError as err:
+            logger.warning(f"[SYNC][REJECTED] msg={msg_id} code={err.code}")
+            return _ack(msg_id, "rejected", err.code, {"error": err.message})
         res_data = {"record_id": rec_res["id"], "serverReceivedAt": rec_res["serverReceivedAt"]}
         _record_dedup(conn, msg, res_data)
         logger.info(f"[SYNC][ACCEPTED] msg={msg_id} op=CREATE_RESCUE_RECORD record={res_data['record_id']}")

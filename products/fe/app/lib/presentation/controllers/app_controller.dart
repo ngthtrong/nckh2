@@ -11,6 +11,7 @@ import 'package:permission_handler/permission_handler.dart';
 import '../../config.dart';
 import '../../data/datasources/user_local_datasource.dart';
 import '../../core/platform/local_file.dart';
+import '../../core/platform/sync_isolate_guard.dart';
 import '../../domain/entities/ai_model_type.dart';
 import '../../domain/entities/ai_tag.dart';
 import '../../domain/entities/rescue_record.dart';
@@ -45,6 +46,9 @@ class AppController extends ChangeNotifier {
   final ImagePicker _picker = ImagePicker();
   StreamSubscription<List<ConnectivityResult>>? _connSub;
   Timer? _statusTimer;
+
+  /// Hẹn giờ gửi lại message đang chờ backoff (retry scheduler của contract).
+  Timer? _retryTimer;
   bool _refreshingStatuses = false;
 
   bool isBusy = false;
@@ -181,6 +185,8 @@ class AppController extends ChangeNotifier {
   }
 
   Future<void> init() async {
+    // Tác vụ Workmanager đang ghi outbox ở isolate khác: chờ xong mới mở Hive.
+    await waitForBackgroundSync();
     await rescueRepository.init();
     await userLocalDataSource.init();
     currentUser = userLocalDataSource.getUser();
@@ -227,6 +233,7 @@ class AppController extends ChangeNotifier {
       kStatusPollInterval,
       (_) => unawaited(refreshStatuses()),
     );
+    _scheduleRetry(); // message còn chờ từ lần chạy trước
   }
 
   /// Hỏi server trạng thái điều phối của các báo cáo đã gửi (chỉ cập nhật tiến).
@@ -309,6 +316,7 @@ class AppController extends ChangeNotifier {
   void dispose() {
     _connSub?.cancel();
     _statusTimer?.cancel();
+    _retryTimer?.cancel();
     super.dispose();
   }
 
@@ -328,6 +336,7 @@ class AppController extends ChangeNotifier {
       );
       isBusy = false;
       notifyListeners();
+      _scheduleRetry();
       return record;
     } catch (_) {
       isBusy = false;
@@ -377,6 +386,7 @@ class AppController extends ChangeNotifier {
         ),
       );
       lastSubmittedPost = record;
+      _scheduleRetry();
       isBusy = false;
       notifyListeners();
       return record;
@@ -433,9 +443,27 @@ class AppController extends ChangeNotifier {
     }
   }
 
-  Future<void> syncPending() async {
-    await _syncPendingRecordsUseCase();
+  Future<void> syncPending({bool immediate = true}) async {
+    try {
+      await _syncPendingRecordsUseCase(immediate: immediate);
+    } finally {
+      _scheduleRetry();
+    }
     notifyListeners();
     await refreshStatuses();
+  }
+
+  /// Hẹn lần gửi lại tại thời điểm message sớm nhất hết backoff. Không có hẹn này,
+  /// message lỗi tạm (mất mạng giữa chừng, 5xx) nằm chờ tới lần có mạng lại, lần gửi
+  /// bài kế tiếp hoặc Workmanager (15 phút).
+  void _scheduleRetry() {
+    _retryTimer?.cancel();
+    final due = rescueRepository.nextRetryAt;
+    if (due == null) return;
+    final wait = due.difference(DateTime.now().toUtc());
+    _retryTimer = Timer(
+      wait.isNegative ? Duration.zero : wait + const Duration(milliseconds: 50),
+      () => unawaited(syncPending(immediate: false)),
+    );
   }
 }

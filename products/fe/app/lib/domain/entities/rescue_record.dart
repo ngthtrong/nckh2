@@ -30,6 +30,10 @@ class RescueRecord {
   final bool synced;
   final String status;
 
+  /// Mã lỗi khi server từ chối vĩnh viễn báo cáo (vd. `INVALID_PAYLOAD`): báo cáo
+  /// không còn chờ gửi, người dùng cần gọi tổng đài. Null khi chưa bị từ chối.
+  final String? syncError;
+
   const RescueRecord({
     required this.id,
     required this.createdAt,
@@ -50,7 +54,11 @@ class RescueRecord {
     required this.sendMode,
     this.synced = false,
     this.status = 'processing',
+    this.syncError,
   });
+
+  /// Còn chờ gửi lên server (chưa xong và chưa bị từ chối vĩnh viễn).
+  bool get awaitingSync => !synced && syncError == null;
 
   /// Độ tin cậy cao nhất của AI on-device; 0 khi không có nhãn AI.
   double get maxAiConfidence => aiTags.fold(
@@ -83,6 +91,7 @@ class RescueRecord {
     String? sendMode,
     bool? synced,
     String? status,
+    String? syncError,
   }) {
     return RescueRecord(
       id: id ?? this.id,
@@ -104,6 +113,7 @@ class RescueRecord {
       sendMode: sendMode ?? this.sendMode,
       synced: synced ?? this.synced,
       status: status ?? this.status,
+      syncError: syncError ?? this.syncError,
     );
   }
 

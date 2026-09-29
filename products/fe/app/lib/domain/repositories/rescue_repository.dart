@@ -7,8 +7,18 @@ abstract class RescueRepository {
   int get recordCount;
   int getPendingCount();
   Future<void> saveRecord(RescueRecord record);
-  Future<void> syncPendingRecords();
-  Future<bool> sendRecord(RescueRecord record);
+
+  /// Gửi các bản ghi còn chờ. [immediate] (có mạng trở lại, Workmanager, người dùng
+  /// yêu cầu) gửi ngay cả message đang chờ backoff; false chỉ gửi message đã đến hạn.
+  Future<void> syncPendingRecords({bool immediate = true});
+
+  /// Thời điểm message sớm nhất đang chờ backoff đến hạn gửi lại; null nếu không có.
+  DateTime? get nextRetryAt;
+
+  /// Gửi [record] (qua outbox) và trả về bản ghi sau lần gửi, đã lưu cục bộ:
+  /// `synced` khi xong, `syncError` khi server từ chối vĩnh viễn, nguyên trạng khi
+  /// cần thử lại sau.
+  Future<RescueRecord> sendRecord(RescueRecord record);
 
   /// Gửi SMS dự phòng tới tổng đài; false nếu nền tảng/cấu hình không cho phép.
   Future<bool> sendSmsFallback(RescueRecord record);

@@ -1,8 +1,8 @@
 #!/usr/bin/env bash
 # Build app Flutter bản web trên máy (không cần Docker tải Flutter SDK), cho target
-# "prebuilt" của docker/fe/Dockerfile:
+# "prebuilt" của products/docker/fe/Dockerfile:
 #
-#   scripts/demo/build_web.sh && FE_BUILD_TARGET=prebuilt docker compose up -d --build
+#   products/scripts/demo/build_web.sh && FE_BUILD_TARGET=prebuilt docker compose up -d --build
 #
 # SERVER_URL để trống = app gọi API cùng origin qua nginx của container fe.
 set -euo pipefail

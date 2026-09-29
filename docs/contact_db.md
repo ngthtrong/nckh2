@@ -37,7 +37,9 @@ CREATE TABLE IF NOT EXISTS reports (
     assigned_team_id    INTEGER,                       -- Đội phụ trách (teams.id), nullable
     location_source     TEXT,                          -- 'device' (GPS của app) | 'manual' (điều phối viên nhập) | NULL
     close_reason        TEXT,                          -- Lý do khi status = 'cancelled' (xem Enum CloseReason)
-    status_updated_at   TEXT                           -- Lần đổi trạng thái gần nhất (ISO 8601 UTC)
+    status_updated_at   TEXT,                          -- Lần đổi trạng thái gần nhất (ISO 8601 UTC)
+    owner_client_id     TEXT                           -- Chủ báo cáo: client_id thiết bị tạo báo cáo; '@dashboard' (tổng đài),
+                                                       -- '@sms' (tin tự do), '@seed' (dữ liệu mô phỏng); NULL = chưa có chủ
 );
 
 CREATE INDEX IF NOT EXISTS idx_reports_received_at 
@@ -54,10 +56,17 @@ chúng vẫn hợp lệ và được hiểu với giá trị mặc định `fals
 
 Báo cáo mới luôn bắt đầu ở `status = 'processing'` (trạng thái client gửi bị bỏ qua).
 Khi cùng `id` được gửi lại (upload ảnh sau metadata, SMS rồi app đồng bộ, gửi lại do
-mất ACK), server **gộp**, không ghi đè:
+mất ACK), server **gộp**, không ghi đè. Chỉ **chủ báo cáo** được gộp:
 
-- Giữ nguyên dữ liệu đã lưu; chỉ điền cột còn trống (`created_at`, số người khi đang
-  là 0, `vulnerable_groups`, `description`, `ai_tags`, `send_mode` khi `unknown`).
+- `owner_client_id` là `client_id` của message `/sync/messages` tạo báo cáo, hoặc
+  `meta.clientId` của `/api/reports` (server không lưu `clientId` vào `raw_payload`).
+- Gộp được khi `client_id` gửi lên trùng chủ, hoặc báo cáo chưa có chủ (tin SMS định
+  dạng SOS của app, dữ liệu cũ): thiết bị đầu tiên gửi kèm `client_id` trở thành chủ.
+  SMS gateway (có token) và dashboard là nguồn tin cậy, luôn gộp được.
+- Người khác (thiếu hoặc sai `client_id`) nhận `REPORT_ID_CONFLICT`, báo cáo không đổi.
+- Giữ nguyên dữ liệu đã lưu; chỉ điền cột còn trống (`created_at`, `vulnerable_groups`,
+  `description`, `ai_tags`, `send_mode` khi `unknown`). Số người (`trappedCount`,
+  `injuredCount`) chỉ điền khi lần trước không gửi field đó: `0` là giá trị thật.
 - Ảnh chỉ gắn khi báo cáo chưa có ảnh (ảnh đầu tiên được giữ), ghi sự kiện `image`.
 - Tọa độ chỉ điền khi đang trống; vị trí điều phối viên nhập tay
   (`location_source = 'manual'`) được thay khi thiết bị gửi GPS thật.
@@ -243,7 +252,8 @@ Quy định trong trường `code` khi status là `rejected`:
 | `INVALID_STATUS_VERSION` | `UPDATE_RESCUE_STATUS` có `statusVersion <= version_hien_tai`. | `false` |
 | `INVALID_STATUS_TRANSITION` | Thử lùi trạng thái cứu hộ (ví dụ: `dispatched` -> `processing`) hoặc đổi trạng thái đã kết thúc. | `false` |
 | `REPORT_NOT_FOUND` | `UPDATE_RESCUE_STATUS` trỏ tới `id` không tồn tại. | `false` |
-| `IMAGE_HASH_MISMATCH` | Ảnh upload qua `/api/reports` có SHA-256 khác `meta.imageSha256`. | `false` |
+| `IMAGE_HASH_MISMATCH` | Ảnh upload qua `/api/reports` có SHA-256 hoặc số byte khác `meta.imageSha256`/`meta.imageSizeBytes` (ảnh hỏng trên đường truyền; app gửi lại ảnh). | `true` |
+| `REPORT_ID_CONFLICT` | Cùng `id` báo cáo nhưng không phải chủ báo cáo (xem 1.1). `/api/reports` trả HTTP `409`. | `false` |
 | `UNSUPPORTED_OPERATION` | `operation_type` không nằm trong danh sách định nghĩa. | `false` |
 | `SERVER_BUSY` | Lỗi tạm thời phía máy chủ. | `true` |
 
@@ -294,7 +304,7 @@ Quy định trong trường `code` khi status là `rejected`:
   - Đã có đầy đủ các cột: `status_version`, `image_sha256`, `image_size_bytes`.
   - Dashboard quản lý: bảng `report_events`, `teams`, `sessions`, `server_meta` và
     các cột `first_received_at`, `updated_seq`, `assigned_team_id`, `location_source`,
-    `close_reason`, `status_updated_at`; kiểm thử tại `be/test_dashboard_api.py`.
+    `close_reason`, `status_updated_at`, `owner_client_id`; kiểm thử tại `be/test_dashboard_api.py`.
   - Bảng `messages_dedup` và index `idx_client_seq` đã hoạt động.
   - Mobile đã có Hive box `sync_outbox`, partial ACK, retry metadata và retry ảnh.
   - Contract test tự động nằm tại `be/test_contract.py` và

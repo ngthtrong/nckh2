@@ -56,6 +56,8 @@ def test_api_reports_with_sha256():
         "sendMode": "compressedImage",
         "imageSha256": img_sha,
         "imageSizeBytes": len(fake_jpeg),
+        # Như app: chủ báo cáo, để lần gửi lại cùng id được server xét (không bị 409).
+        "clientId": f"smoke-{rec_id}",
     }
 
     headers = {"X-Message-Contract-Version": "1"}

@@ -72,11 +72,12 @@ class ContractTest(unittest.TestCase):
             storage.DB_FILE = Path(temp_dir) / "reports.db"
             try:
                 storage.init_db()
-                storage.save_report({"id": "r1", "createdAt": "2026-09-27T01:00:00Z", "lat": 16.0, "lng": 108.0})
+                storage.save_report({"id": "r1", "createdAt": "2026-09-27T01:00:00Z", "lat": 16.0, "lng": 108.0},
+                                    client_id="dev-1")
                 # Upload ảnh cho cùng meta.id với giờ địa phương không kèm múi giờ (app bản cũ).
                 saved = storage.save_report(
                     {"id": "r1", "createdAt": "2026-09-27T08:00:00", "lat": 16.0, "lng": 108.0},
-                    image_url="/uploads/r1.jpg",
+                    image_url="/uploads/r1.jpg", client_id="dev-1",
                 )
                 self.assertEqual(saved["createdAt"], "2026-09-27T01:00:00Z")
                 self.assertEqual(saved["imageUrl"], "/uploads/r1.jpg")

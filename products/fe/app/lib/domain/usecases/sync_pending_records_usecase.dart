@@ -5,7 +5,7 @@ class SyncPendingRecordsUseCase {
 
   SyncPendingRecordsUseCase(this.repository);
 
-  Future<void> call() async {
-    await repository.syncPendingRecords();
+  Future<void> call({bool immediate = true}) async {
+    await repository.syncPendingRecords(immediate: immediate);
   }
 }

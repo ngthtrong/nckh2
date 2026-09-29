@@ -31,6 +31,15 @@ from canonical import compute_payload_hash  # noqa: E402
 
 
 JPEG = b"\xff\xd8\xff\xe0" + b"\0" * 64
+V1 = {"X-Message-Contract-Version": "1"}
+
+
+def _with_image(meta, image, client_id="device-1"):
+    """meta của app khi upload ảnh: kèm clientId (chủ báo cáo), imageSha256, imageSizeBytes."""
+    meta = {**meta, "clientId": client_id} if client_id else dict(meta)
+    if image is not None:
+        meta.update(imageSha256="sha256:" + hashlib.sha256(image).hexdigest(), imageSizeBytes=len(image))
+    return meta
 
 
 def _message(seq, operation, payload, message_id=None):
@@ -132,8 +141,8 @@ class DashboardApiTest(unittest.TestCase):
     def test_uploaded_image_name_is_chosen_by_server(self):
         res = self.client.post(
             "/api/reports",
-            data={"meta": json.dumps({"id": "sos-1", "lat": 16.0, "lng": 108.0})},
-            files={"image": ("../../x.html", JPEG, "text/html")},
+            data={"meta": json.dumps(_with_image({"id": "sos-1", "lat": 16.0, "lng": 108.0}, JPEG))},
+            files={"image": ("../../x.html", JPEG, "text/html")}, headers=V1,
         )
         self.assertEqual(res.status_code, 201, res.text)
         url = res.json()["imageUrl"]
@@ -316,33 +325,96 @@ class DashboardApiTest(unittest.TestCase):
         self.sync(_message(1, "CREATE_RESCUE_RECORD", _report("r1", lat=None, lng=None, description="")))
         first = storage.get_report_by_id("r1")
         # Upload ảnh sau metadata: bổ sung vị trí, mô tả còn trống và gắn ảnh.
-        res = self.client.post("/api/reports", data={"meta": json.dumps(_report("r1", description="Nhà ngập"))},
-                               files={"image": ("r1.jpg", JPEG, "image/jpeg")})
+        res = self.client.post("/api/reports", data={"meta": json.dumps(_with_image(_report("r1", description="Nhà ngập"), JPEG))},
+                               files={"image": ("r1.jpg", JPEG, "image/jpeg")}, headers=V1)
         self.assertEqual(res.status_code, 201, res.text)
         merged = storage.get_report_by_id("r1")
         self.assertEqual((merged["lat"], merged["description"]), (16.05, "Nhà ngập"))
         self.assertEqual(merged["serverReceivedAt"], first["serverReceivedAt"])
         # Request sau với cùng id không đổi được nội dung hay ảnh đã có.
-        res = self.client.post("/api/reports", data={"meta": json.dumps(_report("r1", lat=0.0, lng=0.0, description="sửa"))},
-                               files={"image": ("r1.jpg", JPEG + b"khac", "image/jpeg")})
+        res = self.client.post("/api/reports", data={"meta": json.dumps(_with_image(_report("r1", lat=0.0, lng=0.0, description="sửa"), JPEG + b"khac"))},
+                               files={"image": ("r1.jpg", JPEG + b"khac", "image/jpeg")}, headers=V1)
         self.assertEqual(res.json()["imageUrl"], merged["imageUrl"])
         again = storage.get_report_by_id("r1")
         self.assertEqual((again["lat"], again["description"], again["imageUrl"]), (16.05, "Nhà ngập", merged["imageUrl"]))
         kinds = [e["kind"] for e in storage.get_report_events("r1")]
         self.assertEqual(kinds, ["received", "image"])
 
+    def test_only_report_owner_can_fill_blanks(self):
+        # Báo cáo thiếu GPS, 0 người mắc kẹt, tạo từ thiết bị device-1.
+        self.sync(_message(1, "CREATE_RESCUE_RECORD", _report("r1", lat=None, lng=None, trappedCount=0, description="")))
+        # Người ngoài biết id (không clientId / clientId khác) không bổ sung được vị trí, số người, SĐT.
+        forged = {**_report("r1", lat=21.0, lng=105.8, trappedCount=50, description="bịa"), "contactPhone": "+84999"}
+        for client_id in (None, "attacker"):
+            res = self.client.post("/api/reports", data={"meta": json.dumps(_with_image(forged, None, client_id))}, headers=V1)
+            self.assertEqual((res.status_code, res.json()["detail"]["code"]), (409, "REPORT_ID_CONFLICT"))
+        other = _message(2, "CREATE_RESCUE_RECORD", forged, message_id="m-attacker")
+        other["client_id"] = "attacker"
+        result = self.sync(other)[0]
+        self.assertEqual((result["status"], result["code"], result["retryable"]), ("rejected", "REPORT_ID_CONFLICT", False))
+        report = storage.get_report_by_id("r1")
+        self.assertEqual((report["lat"], report["trappedCount"], report["description"], report["contactPhone"]),
+                         (None, 0, "", None))
+        self.assertNotIn("clientId", report["payload"])
+        # Chủ báo cáo gửi ảnh: được gắn ảnh và điền mô tả trống, nhưng 0 người là giá trị thật, không bị thay.
+        res = self.client.post("/api/reports", headers=V1, files={"image": ("r1.jpg", JPEG, "image/jpeg")},
+                               data={"meta": json.dumps(_with_image(_report("r1", trappedCount=7, description="Nhà ngập"), JPEG))})
+        self.assertEqual(res.status_code, 201, res.text)
+        report = storage.get_report_by_id("r1")
+        self.assertEqual((report["trappedCount"], report["description"]), (0, "Nhà ngập"))
+        self.assertIsNotNone(report["imageUrl"])
+
+    def test_sms_report_is_claimed_by_first_app_client_only(self):
+        main.SMS_GATEWAY_TOKEN = "gw-secret"
+        rid = "sos-1790000000002-00000000000a"
+        self.sms({"from": "0900", "text": f"SOS|id:{rid}|pos:unknown|trapped:2|injured:1"})
+        self.sync(_message(1, "CREATE_RESCUE_RECORD", _report(rid)))  # device-1 nhận làm chủ
+        self.assertEqual(storage.report_owner(rid), (True, "device-1"))
+        res = self.client.post("/api/reports", data={"meta": json.dumps(_with_image(_report(rid), None, "attacker"))}, headers=V1)
+        self.assertEqual(res.status_code, 409)
+        # Báo cáo tổng đài và tin SMS tự do không thiết bị nào nhận làm chủ được.
+        self.login()
+        hotline = self.client.post("/api/reports/manual", json={"description": "Gọi 114", "lat": 16.0, "lng": 108.0}).json()
+        free = self.sms({"from": "0911", "text": "cuu voi"}).json()["id"]
+        for report_id in (hotline["id"], free):
+            res = self.client.post("/api/reports", headers=V1,
+                                   data={"meta": json.dumps(_with_image(_report(report_id, lat=1.0, lng=1.0), None))})
+            self.assertEqual(res.status_code, 409, report_id)
+        self.assertEqual(storage.get_report_by_id(hotline["id"])["locationSource"], "manual")
+
+    def test_sync_rejects_duplicate_keys_and_uses_error_codes(self):
+        body = ('{"messages": [], "messages": []}').encode()
+        res = self.client.post("/sync/messages", headers={**V1, "content-type": "application/json"}, content=body)
+        self.assertEqual((res.status_code, res.json()["detail"]["code"]), (400, "INVALID_JSON"))
+        res = self.client.post("/sync/messages", json={"messages": []})
+        self.assertEqual(res.json()["detail"]["code"], "UNSUPPORTED_CONTRACT_VERSION")
+        res = self.client.post("/sync/messages", headers=V1, json={"messages": [{}] * 51})
+        self.assertEqual(res.json()["detail"]["code"], "TOO_MANY_MESSAGES")
+
     def test_upload_rejects_bad_meta_and_non_images(self):
-        def post(meta, image=None):
+        def post(meta, image=None, headers=V1):
             files = {"image": ("a.jpg", image, "image/jpeg")} if image is not None else None
             return self.client.post("/api/reports", data={"meta": json.dumps(meta) if not isinstance(meta, str) else meta},
-                                    files=files)
+                                    files=files, headers=headers)
 
-        self.assertEqual(post({"lat": 1, "lng": 1}).json()["detail"]["code"], "INVALID_PAYLOAD")
+        def code(res):
+            return res.json()["detail"]["code"]
+
+        self.assertEqual(code(post({"lat": 1, "lng": 1})), "INVALID_PAYLOAD")
         self.assertEqual(post({"id": "../../evil"}).status_code, 400)
         self.assertEqual(post("{không phải json").status_code, 400)
-        self.assertEqual(post({"id": "x1"}, b"<script>alert(1)</script>").status_code, 415)
-        self.assertEqual(post({"id": "x2", "imageSha256": "sha256:00"}, JPEG).json()["detail"], "IMAGE_HASH_MISMATCH")
+        self.assertEqual(code(post('{"id": "d1", "id": "d2"}')), "INVALID_PAYLOAD")  # key trùng (RFC 8785)
+        self.assertEqual(code(post({"id": "big", "x": "a" * 70_000})), "INVALID_PAYLOAD")  # meta > 64 KiB
+        self.assertEqual(post(_with_image({"id": "x1"}, b"<script>alert(1)</script>"), b"<script>alert(1)</script>").status_code, 415)
+        # Dạng lỗi thống nhất {code, error}; app dựa vào mã này để gửi lại ảnh.
+        mismatch = post({"id": "x2", "imageSha256": "sha256:00"}, JPEG)
+        self.assertEqual((mismatch.status_code, code(mismatch)), (400, "IMAGE_HASH_MISMATCH"))
+        short = post({**_with_image({"id": "x3"}, JPEG), "imageSizeBytes": len(JPEG) + 1}, JPEG)
+        self.assertEqual(code(short), "IMAGE_HASH_MISMATCH")
+        self.assertEqual(code(post({"id": "x4"}, JPEG)), "INVALID_PAYLOAD")  # ảnh thiếu imageSha256
+        self.assertEqual(code(post({"id": "x5"}, headers={})), "UNSUPPORTED_CONTRACT_VERSION")
         self.assertIsNone(storage.get_report_by_id("x1"))
+        self.assertIsNone(storage.get_report_by_id("x5"))
 
     # ------------------------------------------------------------ SMS và tổng đài
     def sms(self, body, token="gw-secret", **kwargs):
@@ -487,7 +559,7 @@ class DashboardApiTest(unittest.TestCase):
         self.assertIsNone(self.client.put("/api/reports/r1/team", json={"teamId": None}).json()["assignedTeamId"])
 
     def test_note_and_manual_location_for_review_report(self):
-        storage.save_report(_report("nogps", lat=None, lng=None))
+        storage.save_report(_report("nogps", lat=None, lng=None), client_id="device-1")
         self.login()
         self.assertIn("nogps", self.client.get("/api/clusters").json()["review"])
         self.assertEqual(self.client.post("/api/reports/nogps/notes", json={"text": "  "}).status_code, 400)
@@ -500,7 +572,7 @@ class DashboardApiTest(unittest.TestCase):
         kinds = [e["kind"] for e in self.client.get("/api/reports/nogps/history").json()["events"]]
         self.assertEqual(kinds, ["received", "note", "location"])
         # App gửi lại cùng id không có GPS: giữ vị trí điều phối viên đã nhập.
-        storage.save_report(_report("nogps", lat=None, lng=None), image_url="/uploads/nogps.jpg")
+        storage.save_report(_report("nogps", lat=None, lng=None), image_url="/uploads/nogps.jpg", client_id="device-1")
         report = storage.get_report_by_id("nogps")
         self.assertEqual((report["lat"], report["locationSource"]), (16.06, "manual"))
 

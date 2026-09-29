@@ -8,7 +8,7 @@ import tempfile
 from contextlib import asynccontextmanager
 from datetime import datetime, timezone
 from pathlib import Path
-from typing import Any, Dict, List, Optional
+from typing import Any, Dict, List, Optional, Tuple
 
 import uvicorn
 from fastapi import Depends, FastAPI, File, Form, Header, HTTPException, Request, UploadFile, status
@@ -211,6 +211,29 @@ def _contract_error(code: str, message: str, http_status: int = status.HTTP_400_
     return HTTPException(status_code=http_status, detail={"code": code, "error": message})
 
 
+# meta của app chỉ vài KB; chặn meta khổng lồ làm phình raw_payload.
+META_MAX_BYTES = 64 * 1024
+
+
+def _reject_duplicate_keys(pairs: List[Tuple[str, Any]]) -> Dict[str, Any]:
+    # RFC 8785 / I-JSON: object có key trùng là JSON không hợp lệ (json.loads mặc định lấy key cuối).
+    obj: Dict[str, Any] = {}
+    for key, value in pairs:
+        if key in obj:
+            raise ValueError(f"key trùng: {key!r}")
+        obj[key] = value
+    return obj
+
+
+def _loads_strict(raw: Any) -> Any:
+    return json.loads(raw, object_pairs_hook=_reject_duplicate_keys)
+
+
+def _require_contract_version(value: Optional[str]) -> None:
+    if value != "1":
+        raise _contract_error("UNSUPPORTED_CONTRACT_VERSION", "Cần header X-Message-Contract-Version: 1")
+
+
 @app.post("/api/reports", status_code=201, summary="Tiếp nhận báo cáo cứu hộ kèm ảnh (Multipart)")
 async def receive_report(
     request: Request,
@@ -223,21 +246,28 @@ async def receive_report(
     ``meta.id`` là khóa idempotency: báo cáo đã có chỉ được bổ sung trường còn trống và
     gắn ảnh nếu chưa có ảnh (ảnh đầu tiên được giữ), không bị ghi đè nội dung.
     """
-    if x_message_contract_version is not None and x_message_contract_version != "1":
-        raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail="UNSUPPORTED_CONTRACT_VERSION")
+    _require_contract_version(x_message_contract_version)
     declared = request.headers.get("content-length")
     if declared and declared.isdigit() and int(declared) > MAX_IMAGE_BYTES + 512 * 1024:
         raise _contract_error("IMAGE_TOO_LARGE", f"Request vượt {MAX_IMAGE_BYTES // (1024 * 1024)} MB",
                               status.HTTP_413_REQUEST_ENTITY_TOO_LARGE)
 
+    if len(meta.encode("utf-8")) > META_MAX_BYTES:
+        raise _contract_error("INVALID_PAYLOAD", f"Trường 'meta' vượt {META_MAX_BYTES // 1024} KiB")
     try:
-        meta_dict = json.loads(meta)
+        meta_dict = _loads_strict(meta)
         storage.validate_report_payload(meta_dict)
     except ValueError as e:
         raise _contract_error("INVALID_PAYLOAD", f"Trường 'meta' không phải JSON hợp lệ: {e}")
     except storage.StatusUpdateError as err:
         raise _contract_error(err.code, err.message)
     rec_id = meta_dict["id"]
+    # clientId chỉ dùng xác định chủ báo cáo, không lưu vào raw_payload (dashboard không cần thấy).
+    client_id = meta_dict.pop("clientId", None)
+    exists, owner = await asyncio.to_thread(storage.report_owner, rec_id)
+    if exists and not storage.merge_allowed(owner, client_id):
+        raise _contract_error("REPORT_ID_CONFLICT", "id báo cáo đã thuộc về thiết bị/nguồn khác",
+                              status.HTTP_409_CONFLICT)
     logger.info(f"==> [POST /api/reports] {rec_id} | lat={meta_dict.get('lat')}, lng={meta_dict.get('lng')}")
 
     image_fields: Dict[str, Any] = {}
@@ -248,9 +278,16 @@ async def receive_report(
                                   status.HTTP_413_REQUEST_ENTITY_TOO_LARGE)
         computed_sha = compute_bytes_sha256(content)
         expected_sha = meta_dict.get("imageSha256")
-        if expected_sha and expected_sha.lower() != computed_sha.lower():
-            logger.error(f"Image SHA-256 không khớp! Client: {expected_sha}, Thực tế: {computed_sha}")
-            raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail="IMAGE_HASH_MISMATCH")
+        if not expected_sha:
+            raise _contract_error("INVALID_PAYLOAD", "meta phải có imageSha256 khi gửi kèm ảnh")
+        expected_size = meta_dict.get("imageSizeBytes")
+        # Ảnh hỏng/cụt trên đường truyền: lỗi tạm, app gửi lại cùng meta.id.
+        if expected_sha.lower() != computed_sha.lower() or (
+            isinstance(expected_size, int) and expected_size != len(content)
+        ):
+            logger.error(f"Ảnh không khớp meta! Client: {expected_sha} ({expected_size} B), "
+                         f"thực tế: {computed_sha} ({len(content)} B)")
+            raise _contract_error("IMAGE_HASH_MISMATCH", "imageSha256/imageSizeBytes không khớp ảnh nhận được")
         ext = _image_extension(content)
         if ext is None:
             raise _contract_error("UNSUPPORTED_IMAGE", "Ảnh phải là JPEG, PNG hoặc WebP",
@@ -268,7 +305,10 @@ async def receive_report(
                 "image_sha256": computed_sha, "image_size_bytes": len(content),
             }
 
-    saved = await asyncio.to_thread(storage.save_report, meta_dict, **image_fields)
+    try:
+        saved = await asyncio.to_thread(storage.save_report, meta_dict, client_id=client_id, **image_fields)
+    except storage.StatusUpdateError as err:  # chủ báo cáo đổi giữa lúc kiểm tra và lúc ghi
+        raise _contract_error(err.code, err.message, status.HTTP_409_CONFLICT)
     return {
         "status": "ok",
         "message": "Báo cáo cứu hộ đã được tiếp nhận thành công",
@@ -290,41 +330,29 @@ async def sync_messages(
     - Xử lý idempotency, payload canonical hash và deduplication
     - ``UPDATE_RESCUE_STATUS`` cần phiên đăng nhập dashboard (cookie hoặc Bearer)
     """
-    if x_message_contract_version != "1":
-        raise HTTPException(
-            status_code=status.HTTP_400_BAD_REQUEST,
-            detail="UNSUPPORTED_CONTRACT_VERSION",
-        )
+    _require_contract_version(x_message_contract_version)
 
+    too_large = _contract_error("REQUEST_TOO_LARGE", "Tổng request vượt quá giới hạn 256 KiB", 413)
     declared = request.headers.get("content-length")
     if declared and declared.isdigit() and int(declared) > SYNC_MAX_BYTES:
-        raise HTTPException(status_code=413, detail="Tổng request vượt quá giới hạn 256 KiB")
+        raise too_large
     raw_body = bytearray()
     async for chunk in request.stream():
         raw_body += chunk
         if len(raw_body) > SYNC_MAX_BYTES:
-            raise HTTPException(status_code=413, detail="Tổng request vượt quá giới hạn 256 KiB")
+            raise too_large
 
     try:
-        body = json.loads(raw_body)
+        body = _loads_strict(raw_body)
     except ValueError as e:
-        raise HTTPException(
-            status_code=status.HTTP_400_BAD_REQUEST,
-            detail=f"JSON không hợp lệ: {e}",
-        )
+        raise _contract_error("INVALID_JSON", f"JSON không hợp lệ: {e}")
 
     messages = body.get("messages") if isinstance(body, dict) else None
     if not isinstance(messages, list):
-        raise HTTPException(
-            status_code=status.HTTP_400_BAD_REQUEST,
-            detail="Trường 'messages' phải là một mảng",
-        )
+        raise _contract_error("INVALID_REQUEST", "Trường 'messages' phải là một mảng")
 
     if len(messages) > 50:
-        raise HTTPException(
-            status_code=status.HTTP_400_BAD_REQUEST,
-            detail="Số lượng message vượt quá giới hạn tối đa 50",
-        )
+        raise _contract_error("TOO_MANY_MESSAGES", "Số lượng message vượt quá giới hạn tối đa 50")
 
     logger.info(f"==> [POST /sync/messages] Nhận batch {len(messages)} messages ({len(raw_body)} bytes)")
     session = await asyncio.to_thread(auth.session_for, request)

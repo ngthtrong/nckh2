@@ -8,7 +8,11 @@ trạng thái, retry hoặc cách chống trùng phải cập nhật file này t
 
 - Phiên bản hiện tại: `1`
 - App gửi phiên bản qua header: `X-Message-Contract-Version: 1`
-- Server trả `400 UNSUPPORTED_CONTRACT_VERSION` nếu không hỗ trợ phiên bản này.
+- Server trả `400 UNSUPPORTED_CONTRACT_VERSION` nếu thiếu header hoặc không hỗ trợ phiên
+  bản này (cả `/sync/messages` và `POST /api/reports`).
+- Lỗi mức request của hai endpoint này có dạng
+  `{"detail": {"code": "<MÃ>", "error": "<mô tả>"}}`. Server bản cũ trả một số mã dạng
+  chuỗi `{"detail": "<MÃ>"}`; app đọc được cả hai dạng.
 - Thay đổi không tương thích phải tăng phiên bản; nếu chỉ bổ sung field không bắt
   buộc thì không cần tăng phiên bản.
 
@@ -27,8 +31,9 @@ Endpoint multipart hiện có tiếp tục dùng cho báo cáo có ảnh:
 ```http
 POST /api/reports
 Content-Type: multipart/form-data
+X-Message-Contract-Version: 1
 
-meta: JSON của RescueRecord
+meta: JSON của RescueRecord (kèm clientId)
 image: file JPEG tùy chọn
 ```
 
@@ -39,8 +44,14 @@ multipart `/api/reports`. Endpoint `/api/reports` là transport chuyên biệt c
 
 Quy tắc của `/api/reports` (server kiểm tra trước khi ghi):
 
-- `meta` phải là JSON object hợp lệ theo [quy tắc payload](#quy-tắc-payload-create_rescue_record);
-  thiếu `id` hoặc sai kiểu trả `400` với `detail: {"code": "INVALID_PAYLOAD", "error": "..."}`.
+- `meta` phải là JSON object hợp lệ theo [quy tắc payload](#quy-tắc-payload-create_rescue_record),
+  tối đa `64 KiB`, không có key trùng; thiếu `id` hoặc sai kiểu trả `400` với
+  `detail: {"code": "INVALID_PAYLOAD", "error": "..."}`.
+- `meta.clientId` là `client_id` của thiết bị (cùng giá trị gửi trong `/sync/messages`).
+  Server chỉ cho **chủ báo cáo** gộp vào báo cáo đã có (xem [Chủ báo cáo](#chủ-báo-cáo)),
+  người khác nhận `409 REPORT_ID_CONFLICT`. Server không lưu `clientId` vào `raw_payload`.
+- Có ảnh thì `meta.imageSha256` là bắt buộc (thiếu → `400 INVALID_PAYLOAD`); SHA-256
+  hoặc `meta.imageSizeBytes` không khớp ảnh nhận được → `400 IMAGE_HASH_MISMATCH`.
 - Ảnh tối đa `15 MB` (`RESCUE_MAX_IMAGE_MB`), vượt thì `413 IMAGE_TOO_LARGE`. Định dạng
   xác định theo byte đầu file, không theo tên file hay `Content-Type`: JPEG (khuyến
   nghị), PNG hoặc WebP; khác thì `415 UNSUPPORTED_IMAGE`.
@@ -227,8 +238,10 @@ từ chối `INVALID_PAYLOAD` (không retry) thay vì gây lỗi `5xx` làm app 
 
 Giới hạn ban đầu:
 
-- Tối đa `50` message trong một request.
-- Tổng request tối đa `256 KiB`.
+- Tối đa `50` message trong một request (vượt → `400 TOO_MANY_MESSAGES`).
+- Tổng request tối đa `256 KiB` (vượt → `413 REQUEST_TOO_LARGE`).
+- Body phải là JSON hợp lệ, không có key trùng trong cùng object (RFC 8785/I-JSON;
+  vi phạm → `400 INVALID_JSON`); `messages` phải là mảng (`400 INVALID_REQUEST`).
 - Server không được phụ thuộc vào thứ tự các phần tử trong mảng `messages`.
 
 ## Operation cứu hộ
@@ -299,6 +312,24 @@ Quy tắc gửi:
    chưa có ảnh (ảnh đầu tiên được giữ) và trả lại cùng ID.
 6. `meta` phải chứa `imageSha256` và `imageSizeBytes` nếu có ảnh. Server kiểm tra
    SHA-256 sau khi nhận đủ file và từ chối `IMAGE_HASH_MISMATCH` nếu không khớp.
+
+### Chủ báo cáo
+
+Báo cáo thuộc về thiết bị đã tạo ra nó: `client_id` của message `CREATE_RESCUE_RECORD`
+đầu tiên, hoặc `meta.clientId` nếu báo cáo được tạo qua `/api/reports`. Khi cùng `id`
+được gửi lại, server chỉ gộp (điền trường trống, gắn ảnh, thay vị trí nhập tay bằng GPS
+thiết bị) nếu:
+
+- `client_id`/`meta.clientId` trùng chủ báo cáo; hoặc
+- báo cáo chưa có chủ (tin SMS định dạng `SOS|id:...` của app, dữ liệu trước thay đổi
+  này): thiết bị đầu tiên gửi kèm `client_id` trở thành chủ; hoặc
+- nguồn tin cậy: SMS gateway có token, dashboard đã đăng nhập.
+
+Báo cáo tổng đài (`hotline-...`) và tin SMS tự do (`sms-...`) không thiết bị nào nhận
+làm chủ được. Vi phạm: `/sync/messages` trả `rejected` `REPORT_ID_CONFLICT`
+(`retryable: false`), `/api/reports` trả `409 REPORT_ID_CONFLICT`; báo cáo không đổi.
+Nhờ vậy người ngoài biết `id` (vd. đọc được SMS) không sửa được vị trí, số người,
+số liên hệ hay ảnh của báo cáo. `id` vẫn nên khó đoán (`record_id.dart`).
 
 `payload_hash` chỉ bao phủ JSON `payload`, không bao phủ byte của ảnh. Ảnh dùng
 `imageSha256` riêng; khóa chống trùng nghiệp vụ của multipart vẫn là `meta.id`.
@@ -424,11 +455,26 @@ GET /api/reports/status?ids=post-1790472931479,sos-1790472922834
 - Batch tối đa `50` message và tự giảm batch để request không vượt `256 KiB`.
 - Partial ACK: xóa khi `accepted`/`duplicate`, retry khi lỗi tạm thời, giữ
   `dead_letter` khi bị từ chối vĩnh viễn.
+- Dead-letter do message/vận chuyển (`SEQUENCE_REUSED`, `ID_REUSED_WITH_DIFFERENT_PAYLOAD`,
+  lỗi HTTP cả batch `HTTP_4xx`) được thay bằng message mới (`message_id` và
+  `sequence_number` mới, cùng payload) ở lần gửi/đồng bộ kế tiếp; khi bấm gửi, app thử
+  lại ngay một lần. Dead-letter do nội dung (`INVALID_PAYLOAD`, `EXPIRED`,
+  `REPORT_ID_CONFLICT`...) ghi `syncError` vào bản ghi: báo cáo không còn tính là "chờ
+  gửi", màn hình báo bị từ chối và nhắc gọi 112 (`isRecoverableDeadLetter`,
+  `RescueRepositoryImpl._settle`).
+- Gửi, đồng bộ và hỏi trạng thái chạy lần lượt trong app. Tác vụ Workmanager không mở
+  Hive khi app đang mở mà nhờ app đồng bộ; app mở lên khi tác vụ nền đang chạy thì chờ
+  tối đa 10 s (`core/platform/sync_isolate_guard*.dart`). Nhờ vậy hai isolate không cấp
+  trùng `sequence_number` hay ghi đè bản ghi của nhau.
+- App hỏi trạng thái cả báo cáo đã có ACK metadata nhưng ảnh còn chờ gửi.
 - Exponential backoff full jitter, phục hồi message `in_flight` sau khi app bị
   dừng, đồng bộ khi mạng trở lại và Workmanager chạy định kỳ 15 phút.
+- Khi app đang mở, hẹn giờ gửi lại đúng `next_attempt_at` của message sớm nhất
+  (retry scheduler trong flowchart). Có mạng trở lại, Workmanager hoặc người dùng yêu
+  cầu đồng bộ thì gửi ngay, bỏ qua thời gian chờ backoff (giữ `attempt_count`).
 - JCS dùng package `causalontology` `4.x`; SHA-256 dùng package `crypto` `3.x`.
-- Ảnh được upload riêng sau ACK metadata, kèm `imageSha256`, `imageSizeBytes`
-  và `X-Message-Contract-Version: 1`. Lỗi upload được phân loại
+- Ảnh được upload riêng sau ACK metadata, kèm `imageSha256`, `imageSizeBytes`,
+  `clientId` và `X-Message-Contract-Version: 1`. Lỗi upload được phân loại
   (`isPermanentUploadFailure`, `deliverImage` trong `sender_remote_datasource.dart`):
   lỗi tạm thì thử lại, `413` thì nén và gửi lại một lần, `4xx` vĩnh viễn thì bỏ ảnh;
   ảnh HEIC/định dạng lạ được chuyển sang JPEG trước khi gửi ảnh gốc.
@@ -514,6 +560,7 @@ Server trả kết quả riêng cho từng message:
 
 `code` là mã lỗi máy có thể đọc được, ví dụ `INVALID_PAYLOAD`, `EXPIRED`,
 `SEQUENCE_REUSED`, `IMAGE_HASH_MISMATCH`, `ID_REUSED_WITH_DIFFERENT_PAYLOAD`,
+`REPORT_ID_CONFLICT` (không phải chủ báo cáo),
 `UNAUTHENTICATED` (đổi trạng thái không có phiên điều phối) hoặc `SERVER_ERROR`
 (lỗi bất ngờ khi xử lý riêng message đó; `status: "retry_later"`, `retryable: true`).
 
@@ -600,3 +647,4 @@ Khi sửa cơ chế kết nối, request hoặc response:
 | 1 | 2026-09-27 | Dashboard quản lý: thêm trạng thái kết thúc `cancelled` (kèm `reason`) cho `UPDATE_RESCUE_STATUS` và dashboard; app coi `cancelled` là trạng thái kết thúc. Endpoint dashboard cần đăng nhập; thêm lọc/phân trang, luồng thay đổi, thao tác hàng loạt, đội, ghi chú, vị trí thủ công, nhật ký, thống kê, xuất dữ liệu, sao lưu. Không đổi `/sync/messages` và `/api/reports` POST của app, không đổi phiên bản contract (app cũ bỏ qua trạng thái lạ). |
 | 1 | 2026-09-27 | Siết tiếp nhận, không tăng phiên bản (app hiện tại không bị ảnh hưởng): `UPDATE_RESCUE_STATUS` qua `/sync/messages` cần phiên điều phối (`UNAUTHENTICATED`); kiểm tra payload `CREATE_RESCUE_RECORD`/`meta` (`INVALID_PAYLOAD` thay vì `5xx`), bỏ `payload.status` khi tạo; mỗi message một transaction (`retry_later`/`SERVER_ERROR` cho riêng message lỗi); gửi lại cùng id chỉ bổ sung trường trống, giữ ảnh đầu tiên; ảnh JPEG/PNG/WebP ≤ 15 MB, tên file do server đặt; ACK `/api/reports` bỏ `imageLocalPath`. Thêm `POST /api/sms/inbound` (SMS gateway), `POST /api/reports/manual` (tổng đài), `stale`/`computedAt` cho `/api/clusters`. App sinh ID có hậu tố ngẫu nhiên. |
 | 1 | 2026-09-27 | Tài khoản riêng cho điều phối viên thay mật khẩu chung (`POST /api/auth/login` nhận `username`), vai trò `admin`/`operator`, đổi/đặt lại mật khẩu, `/api/operators`; chặn dò mật khẩu theo tài khoản và IP, chỉ tin `X-Forwarded-For` từ proxy khai báo. Sao lưu kèm ảnh (`/api/admin/backup?images=1`), `GET /healthz`. App: không retry mãi ảnh bị từ chối vĩnh viễn (`4xx`), nén lại khi `413`, chuyển HEIC sang JPEG. Không đổi wire contract `/sync/messages`. |
+| 1 | 2026-09-29 | Chủ báo cáo: chỉ thiết bị tạo báo cáo (`client_id`, `meta.clientId`) hoặc nguồn tin cậy (SMS gateway, dashboard) được gộp vào báo cáo cùng `id`, người khác nhận `REPORT_ID_CONFLICT`; `0` người là giá trị thật, không bị điền đè. `/api/reports` bắt buộc header phiên bản và `imageSha256` khi có ảnh, kiểm tra `imageSizeBytes`, giới hạn `meta` 64 KiB. Cả hai endpoint từ chối JSON có key trùng; lỗi mức request thống nhất dạng `{"detail": {"code", "error"}}` (`INVALID_JSON`, `INVALID_REQUEST`, `TOO_MANY_MESSAGES`, `REQUEST_TOO_LARGE`). App: gửi `clientId`, đọc cả hai dạng lỗi, tạo lại message cho dead-letter do vận chuyển, ghi `syncError` cho báo cáo bị từ chối vĩnh viễn, tuần tự hóa đồng bộ và phối hợp với Workmanager, hẹn giờ gửi lại theo `next_attempt_at` và bỏ backoff khi có mạng trở lại. Không tăng phiên bản: app hiện tại đã gửi header/`imageSha256`; app cũ không gửi `clientId` sẽ không gắn được ảnh vào báo cáo đã có chủ (`409`, app bỏ ảnh, metadata vẫn đã tới). |

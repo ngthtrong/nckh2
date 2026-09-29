@@ -28,17 +28,23 @@ class _HistoryScreenState extends State<HistoryScreen> {
   void initState() {
     super.initState();
     _scrollController.addListener(_onScroll);
+    widget.controller.addListener(_onControllerChanged);
     if (widget.active) unawaited(_reload());
   }
 
   @override
   void didUpdateWidget(covariant HistoryScreen oldWidget) {
     super.didUpdateWidget(oldWidget);
+    if (oldWidget.controller != widget.controller) {
+      oldWidget.controller.removeListener(_onControllerChanged);
+      widget.controller.addListener(_onControllerChanged);
+    }
     if (widget.active && !oldWidget.active) unawaited(_reload());
   }
 
   @override
   void dispose() {
+    widget.controller.removeListener(_onControllerChanged);
     _scrollController
       ..removeListener(_onScroll)
       ..dispose();
@@ -53,6 +59,23 @@ class _HistoryScreenState extends State<HistoryScreen> {
     });
     if (_scrollController.hasClients) _scrollController.jumpTo(0);
     await _loadNextPage();
+  }
+
+  /// Trạng thái điều phối mới, bản ghi vừa đồng bộ/bị từ chối: đọc lại các trang đã
+  /// hiển thị (giữ vị trí cuộn) để thẻ bài cập nhật mà không cần mở lại tab.
+  void _onControllerChanged() {
+    if (!mounted || !widget.active || _loading || _records.isEmpty) return;
+    final fresh = widget.controller.getRecordsPage(
+      offset: 0,
+      limit: _records.length,
+    );
+    final count = widget.controller.recordCount;
+    setState(() {
+      _records
+        ..clear()
+        ..addAll(fresh);
+      _hasMore = _records.length < count;
+    });
   }
 
   void _onScroll() {

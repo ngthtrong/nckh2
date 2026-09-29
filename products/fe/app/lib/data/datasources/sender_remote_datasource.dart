@@ -41,8 +41,15 @@ bool isServerSupportedImage(Uint8List bytes) {
 bool isPermanentUploadFailure(int? status, Object? body) {
   if (status == null || status < 400 || status >= 500) return false;
   if (status == 408 || status == 429) return false;
-  if (body is Map && body['detail'] == 'IMAGE_HASH_MISMATCH') return false;
+  if (uploadErrorCode(body) == 'IMAGE_HASH_MISMATCH') return false;
   return true;
+}
+
+/// Mã lỗi server: `{"detail": {"code": ...}}`; server bản cũ trả `{"detail": "..."}`.
+String? uploadErrorCode(Object? body) {
+  final detail = body is Map ? body['detail'] : null;
+  final code = detail is Map ? detail['code'] : detail;
+  return code is String ? code : null;
 }
 
 /// Gửi ảnh cho báo cáo đã có metadata trên server. Trả về `true` khi xong phần ảnh
@@ -81,9 +88,15 @@ class SenderRemoteDataSource {
     ),
   );
 
-  Future<UploadResult> upload(RescueRecord rec, Uint8List? jpeg) async {
+  /// [clientId] là ID thiết bị trong outbox: server chỉ cho chủ báo cáo gắn ảnh.
+  Future<UploadResult> upload(
+    RescueRecord rec,
+    Uint8List? jpeg, {
+    required String clientId,
+  }) async {
     final meta = jsonEncode({
       ...rescueRecordPayload(rec),
+      'clientId': clientId,
       if (jpeg != null) 'imageSha256': 'sha256:${sha256.convert(jpeg)}',
       if (jpeg != null) 'imageSizeBytes': jpeg.length,
     });
@@ -93,7 +106,8 @@ class SenderRemoteDataSource {
       if (jpeg != null)
         'image': MultipartFile.fromBytes(jpeg, filename: '${rec.id}.jpg'),
     });
-    var bytesSent = meta.length;
+    // form.length đã gồm cả ảnh; ước lượng khi không tính được.
+    var bytesSent = utf8.encode(meta).length + (jpeg?.length ?? 0);
     try {
       bytesSent = form.length;
     } catch (_) {}
@@ -106,7 +120,7 @@ class SenderRemoteDataSource {
       sw.stop();
       return (
         ok: true,
-        bytesSent: jpeg != null ? bytesSent + jpeg.length : bytesSent,
+        bytesSent: bytesSent,
         durationMs: sw.elapsedMilliseconds,
         status: 201,
         permanent: false,

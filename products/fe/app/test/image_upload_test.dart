@@ -47,6 +47,19 @@ void main() {
       isPermanentUploadFailure(400, {'detail': 'IMAGE_HASH_MISMATCH'}),
       isFalse,
     );
+    // Server hiện tại trả {code, error}; ảnh hỏng trên đường truyền vẫn gửi lại.
+    expect(
+      isPermanentUploadFailure(400, {
+        'detail': {'code': 'IMAGE_HASH_MISMATCH', 'error': '...'},
+      }),
+      isFalse,
+    );
+    expect(
+      isPermanentUploadFailure(409, {
+        'detail': {'code': 'REPORT_ID_CONFLICT'},
+      }),
+      isTrue,
+    );
     expect(
       isPermanentUploadFailure(415, {
         'detail': {'code': 'UNSUPPORTED_IMAGE'},
