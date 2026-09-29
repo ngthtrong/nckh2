@@ -691,7 +691,7 @@ class _HomeScreenState extends State<HomeScreen> {
 
   List<Widget> _guideContent() {
     if (_guideTab == 'Số điện thoại') return [_guideNumbers()];
-    if (_guideTab == 'Sơ cứu')
+    if (_guideTab == 'Sơ cứu') {
       return [
         _guideTip(
           'Lũ lụt / Ngập nước',
@@ -709,6 +709,7 @@ class _HomeScreenState extends State<HomeScreen> {
           Icons.medical_services,
         ),
       ];
+    }
     return [
       for (final item in const [
         ('1', 'Mở ứng dụng', 'GPS tự động xác định vị trí của bạn.'),

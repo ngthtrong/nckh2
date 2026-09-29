@@ -68,8 +68,8 @@ class MainActivity : FlutterActivity() {
                     "forward" -> {
                         val input = call.argument<FloatArray>("input")
                         val module = pteModule
-                        if (input == null || input.size != 1 * 3 * 224 * 224) {
-                            result.error("invalid_input", "Expected Float32[1,3,224,224]", null)
+                        if (input == null || input.size != 1 * 3 * 256 * 256) {
+                            result.error("invalid_input", "Expected Float32[1,3,256,256]", null)
                             return@setMethodCallHandler
                         }
                         if (module == null) {
@@ -80,7 +80,7 @@ class MainActivity : FlutterActivity() {
                             try {
                                 val tensor = Tensor.fromBlob(
                                     input,
-                                    longArrayOf(1, 3, 224, 224),
+                                    longArrayOf(1, 3, 256, 256),
                                 )
                                 val output = module.forward(EValue.from(tensor))[0]
                                     .toTensor()

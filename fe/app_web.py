@@ -26,8 +26,8 @@ CHECKPOINT_PTH = (
     ROOT
     / "model"
     / "models"
-    / "mobilenetv3_large_relabel_v2"
-    / "flood_mobilenetv3_large_relabel_v2_best.pth"
+    / "mobilenetv3_large_2809"
+    / "flood_mobilenetv3_large_best.pth"
 )
 if not CHECKPOINT_PTH.exists():
     CHECKPOINT_PTH = ROOT / "app" / "model.pth"
@@ -36,7 +36,7 @@ CHECKPOINT_ONNX = ROOT / "app" / "assets" / "models" / "model.onnx"
 CHECKPOINT_PTE = ROOT / "model" / "Edge Ai" / "flood_mobilenetv3_large.pte"
 
 DEFAULT_CONFIG = (
-    ROOT / "model" / "models" / "mobilenetv3_large_relabel_v2" / "config_mobilenetv3_large_v2.json"
+    ROOT / "model" / "models" / "mobilenetv3_large_2809" / "config_mobilenetv3_large.json"
 )
 
 # 1. Khởi tạo PyTorch
@@ -46,12 +46,12 @@ if DEFAULT_CONFIG.exists():
     config = json.loads(DEFAULT_CONFIG.read_text(encoding="utf-8"))
     class_order = config.get("class_order", ["low", "medium", "high", "non_flood"])
     dropout = float(config.get("dropout", 0.35))
-    image_size = int(config.get("image_size", 224))
+    image_size = int(config.get("image_size", 256))
     letterbox_fill = tuple(config.get("letterbox_fill", [124, 116, 104]))
 else:
     class_order = ["low", "medium", "high", "non_flood"]
     dropout = 0.35
-    image_size = 224
+    image_size = 256
     letterbox_fill = (124, 116, 104)
 
 
