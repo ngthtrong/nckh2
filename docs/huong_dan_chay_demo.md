@@ -7,6 +7,7 @@ Tài liệu này hướng dẫn dựng và chạy hệ thống hỗ trợ cứu 
 
 Đánh giá trạng thái hiện tại (cái gì chạy được, cái gì còn thiếu): [nghiem-thu/danh_gia_trang_thai_demo.md](nghiem-thu/danh_gia_trang_thai_demo.md).
 Hợp đồng dữ liệu app ↔ server: [contact_connect.md](contact_connect.md). Schema DB: [contact_db.md](contact_db.md).
+Bản tóm tắt cách khởi chạy: [products/README.md](../products/README.md).
 
 ---
 
