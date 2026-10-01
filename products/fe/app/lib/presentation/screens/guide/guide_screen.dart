@@ -53,9 +53,9 @@ class _GuideScreenState extends State<GuideScreen> {
           color: Colors.white,
           child: Row(
             children: [
-              _buildTabButton('Dùng app', 0),
+              _buildTabButton('Dùng ứng dụng', 0),
               _buildTabButton('Sơ cứu', 1),
-              _buildTabButton('Số điện thoại', 2),
+              _buildTabButton('Số khẩn cấp', 2),
             ],
           ),
         ),
@@ -92,7 +92,9 @@ class _GuideScreenState extends State<GuideScreen> {
             label,
             textAlign: TextAlign.center,
             style: TextStyle(
-              color: isSelected ? AppColors.primaryRed : const Color(0xFF9CA3AF),
+              color: isSelected
+                  ? AppColors.primaryRed
+                  : const Color(0xFF9CA3AF),
               fontSize: 13,
               fontWeight: FontWeight.w800,
             ),
@@ -336,10 +338,7 @@ class _GuideScreenState extends State<GuideScreen> {
               ),
               itemCount: region.numbers.length,
               itemBuilder: (context, idx) {
-                return PhoneLinkCard(
-                  item: region.numbers[idx],
-                  compact: true,
-                );
+                return PhoneLinkCard(item: region.numbers[idx], compact: true);
               },
             ),
             if (region.guides.isNotEmpty) ...[
@@ -360,10 +359,13 @@ class _GuideScreenState extends State<GuideScreen> {
                       child: Row(
                         crossAxisAlignment: CrossAxisAlignment.start,
                         children: [
-                          const Text('• ',
-                              style: TextStyle(
-                                  color: Color(0xFFD97706),
-                                  fontWeight: FontWeight.bold)),
+                          const Text(
+                            '• ',
+                            style: TextStyle(
+                              color: Color(0xFFD97706),
+                              fontWeight: FontWeight.bold,
+                            ),
+                          ),
                           Expanded(
                             child: Text(
                               g,

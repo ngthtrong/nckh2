@@ -1,9 +1,9 @@
 import 'package:flutter/material.dart';
 
 import '../../../core/constants/app_colors.dart';
-import '../../../domain/entities/ai_model_type.dart';
 import '../../../domain/entities/user.dart';
 import '../../controllers/app_controller.dart';
+import '../../widgets/ai_model_runtime_card.dart';
 
 class SettingsScreen extends StatefulWidget {
   final AppController controller;
@@ -46,7 +46,7 @@ class _SettingsScreenState extends State<SettingsScreen> {
                   children: [
                     Center(
                       child: Container(
-                        width: 40,
+                        width: 20,
                         height: 4,
                         decoration: BoxDecoration(
                           color: const Color(0xFFE5E7EB),
@@ -675,55 +675,12 @@ class _SettingsScreenState extends State<SettingsScreen> {
                       // Section: MÔ HÌNH AI ON-DEVICE (EDGE AI)
                       _buildSectionLabel('MÔ HÌNH AI ON-DEVICE (EDGE AI)'),
                       const SizedBox(height: 8),
-                      Container(
-                        decoration: BoxDecoration(
-                          color: const Color(0xFFF9FAFB),
-                          borderRadius: BorderRadius.circular(20),
-                          border: Border.all(color: const Color(0xFFE5E7EB)),
-                        ),
-                        padding: const EdgeInsets.all(16),
-                        child: Column(
-                          crossAxisAlignment: CrossAxisAlignment.start,
-                          children: [
-                            ...AiModelType.values.map((model) {
-                              final available =
-                                  model == AiModelType.onnx || c.isPteReady;
-                              final selected = c.currentModel == model;
-                              return ListTile(
-                                contentPadding: EdgeInsets.zero,
-                                onTap: available
-                                    ? () => c.switchAiModel(model)
-                                    : null,
-                                title: Text(model.name),
-                                subtitle: Text(
-                                  available
-                                      ? model.description
-                                      : 'Runtime chưa sẵn sàng trên thiết bị này',
-                                ),
-                                trailing: Icon(
-                                  selected
-                                      ? Icons.radio_button_checked
-                                      : Icons.radio_button_off,
-                                  color: selected
-                                      ? AppColors.primaryRed
-                                      : const Color(0xFF9CA3AF),
-                                ),
-                              );
-                            }),
-                            const Divider(height: 16),
-                            SwitchListTile.adaptive(
-                              contentPadding: EdgeInsets.zero,
-                              title: const Text('So sánh ONNX và PTE thật'),
-                              subtitle: const Text(
-                                'Chạy cả hai runtime trên cùng tensor đầu vào',
-                              ),
-                              value: c.isDualComparison,
-                              onChanged: c.isPteReady
-                                  ? c.toggleDualComparison
-                                  : null,
-                            ),
-                          ],
-                        ),
+                      AiModelRuntimeCard(
+                        currentModel: c.currentModel,
+                        isPteReady: c.isPteReady,
+                        isDualComparison: c.isDualComparison,
+                        onModelChanged: c.switchAiModel,
+                        onDualComparisonChanged: c.toggleDualComparison,
                       ),
 
                       const SizedBox(height: 20),

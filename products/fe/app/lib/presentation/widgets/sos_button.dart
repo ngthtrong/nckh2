@@ -84,8 +84,8 @@ class _SosButtonSectionState extends State<SosButtonSection>
                 onTap: widget.onPressed,
                 child: AnimatedContainer(
                   duration: const Duration(milliseconds: 200),
-                  width: 100,
-                  height: 100,
+                  width: 120,
+                  height: 120,
                   decoration: BoxDecoration(
                     shape: BoxShape.circle,
                     color: widget.state == SosState.sent
@@ -111,7 +111,7 @@ class _SosButtonSectionState extends State<SosButtonSection>
                           'Đã gửi!',
                           style: TextStyle(
                             color: Colors.white,
-                            fontSize: 10,
+                            fontSize: 12,
                             fontWeight: FontWeight.w800,
                           ),
                         ),
@@ -130,7 +130,7 @@ class _SosButtonSectionState extends State<SosButtonSection>
                           'Nhấn để gọi',
                           style: TextStyle(
                             color: Colors.white70,
-                            fontSize: 10,
+                            fontSize: 12,
                             fontWeight: FontWeight.w600,
                           ),
                         ),
