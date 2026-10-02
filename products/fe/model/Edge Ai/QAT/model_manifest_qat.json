@@ -1,0 +1,51 @@
+{
+  "checkpoint_sha256": "87b03930d160382fd99c89dde1170a0f2437bd0bbe58fd00f88d80fd2b9c5780",
+  "qat_checkpoint_sha256": "bbbaf9453cb9578c4c025d8269e3c0f91f66c01b9e7dfd60326d8b7806594ed4",
+  "source_onnx_sha256": "065574521cf47fa53b16f4dc5c581ca81669897843dd3ec0afa367d297f180c9",
+  "onnx_sha256": "eb0f192898d32a5a65b2841f786f87686865d7677ae41a808376e85d10bee481",
+  "split_csv_sha256": "f7b52cd25411d4d1df2f7f80745a2cf430819773854345798cf7e093e3bcba45",
+  "config_sha256": "a509ab6e22f47b2e53f2300275bb850017c50713453d5a86299d6b7594a7359e",
+  "input_size": 256,
+  "preprocess": "letterbox_rgb_124_116_104",
+  "letterbox_fill": [
+    124,
+    116,
+    104
+  ],
+  "class_order": [
+    "low",
+    "medium",
+    "high",
+    "non_flood"
+  ],
+  "precision": "int8_qat",
+  "quantization": "QDQ_QAT_fbgemm",
+  "qat_qconfig_exclusions": [
+    "AdaptiveAvgPool2d"
+  ],
+  "qat_epochs_requested": 10,
+  "qat_epochs_completed": 10,
+  "qat_best_epoch": 8,
+  "validation_metrics": {
+    "accuracy": 0.5642023346303502,
+    "macro_f1": 0.5366485281489763,
+    "critical_error_count": 40,
+    "critical_error_rate": 0.1556420233463035
+  },
+  "artifacts_complete": true,
+  "export_smoke": {
+    "scope": "train_subset_not_accuracy",
+    "samples": 3,
+    "weight_tensors_int8": 64,
+    "bias_channels_protected": 72,
+    "max_abs_diff": 0.2503388524055481,
+    "top1_agreement": 0.3333333333333333,
+    "probabilities_close": false,
+    "reference_max_abs_diff": 0.22389629483222961,
+    "reference_probabilities_close": false,
+    "reference_optimization": "ORT_DISABLE_ALL",
+    "runtime_optimization": "ORT_ENABLE_ALL",
+    "atol": 1e-05,
+    "rtol": 0.0001
+  }
+}
