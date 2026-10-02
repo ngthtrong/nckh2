@@ -9,16 +9,19 @@ APK để xử lý trên thiết bị.
 Chạy tại thư mục gốc `nckh2`:
 
 ```powershell
-docker compose up -d be
+docker compose up -d --build be
 docker compose ps be
 ```
 
 Backend được mở ra laptop ở cổng `8000`. Điện thoại và laptop phải cùng mạng Wi-Fi.
-IP Wi-Fi dùng cho bản APK hiện tại: `192.168.6.143`.
+App Android tự tìm backend trong cùng mạng `/24` qua `GET /healthz` và nhớ mã
+database của server. Nếu IP laptop đổi, app xác minh server ở IP mới trước khi
+gửi báo cáo đang chờ. Nếu không tìm thấy đúng server, báo cáo tiếp tục nằm trong
+hàng đợi; vào Cài đặt > Máy chủ cứu hộ để xem IP hiện tại hoặc bấm tìm lại.
 
-Trên trình duyệt điện thoại, mở `http://192.168.6.143:8000/healthz` trước khi dùng
-app. Nếu không truy cập được, kiểm tra Docker, IP laptop, Windows Firewall và việc
-router có chặn kết nối giữa các thiết bị hay không. Không dùng `localhost`,
+Trên trình duyệt điện thoại, mở `http://IP_LAPTOP:8000/healthz` trước khi dùng
+app. Nếu không truy cập được, kiểm tra Docker, Windows Firewall và việc router
+có chặn kết nối giữa các thiết bị hay không. Không dùng `localhost`,
 `10.0.2.2` hoặc tên container `be` làm địa chỉ server trên điện thoại thật.
 
 ## Build APK Release
@@ -29,15 +32,15 @@ Chạy trong thư mục có file `pubspec.yaml` này:
 flutter pub get
 flutter analyze
 flutter test
-flutter build apk --release --dart-define=SERVER_URL=http://192.168.6.143:8000
+flutter build apk --release
 ```
 
 Kết quả: `build/app/outputs/flutter-apk/app-release.apk`.
 
-URL server được gắn vào APK lúc build. Nếu đổi IP hoặc chuyển mạng Wi-Fi, cập nhật
-`SERVER_URL` trong lệnh build và domain LAN trong
-`android/app/src/main/res/xml/network_security_config.xml`, rồi cài lại APK. Các
-địa chỉ ngoài danh sách HTTP này phải dùng HTTPS.
+Không cần sửa APK khi IP laptop đổi trong cùng mạng `/24`. Có thể truyền
+`--dart-define=SERVER_URL=http://IP_LAPTOP:8000` để app thử địa chỉ đó trước.
+Mã database được giữ trong volume Docker; nếu xóa toàn bộ dữ liệu/volume và tạo
+server mới, app sẽ không tự gửi hàng đợi cũ sang server khác.
 
 Bản release nội bộ dùng signing debug sẵn có trong Gradle để cài thử trực tiếp;
 chưa phải bản ký phát hành trên Play Store.

@@ -728,6 +728,26 @@ class _SettingsScreenState extends State<SettingsScreen> {
 
                       const SizedBox(height: 20),
 
+                      _buildSectionLabel('KẾT NỐI SERVER'),
+                      ListTile(
+                        contentPadding: const EdgeInsets.symmetric(
+                          horizontal: 4,
+                        ),
+                        leading: const Icon(Icons.dns_outlined),
+                        title: const Text('Máy chủ cứu hộ'),
+                        subtitle: Text(
+                          c.connectedServerUrl ?? 'Đang tìm trên mạng Wi-Fi',
+                          maxLines: 1,
+                          overflow: TextOverflow.ellipsis,
+                        ),
+                        trailing: IconButton(
+                          tooltip: 'Tìm lại server',
+                          icon: const Icon(Icons.refresh),
+                          onPressed: c.reconnectServer,
+                        ),
+                      ),
+                      const SizedBox(height: 20),
+
                       // Section: KHÁC
                       _buildSectionLabel('KHÁC'),
                       const SizedBox(height: 8),

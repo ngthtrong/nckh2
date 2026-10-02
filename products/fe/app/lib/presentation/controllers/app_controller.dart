@@ -144,6 +144,13 @@ class AppController extends ChangeNotifier {
   }) => rescueRepository.getRecordsPage(offset: offset, limit: limit);
   int get recordCount => rescueRepository.recordCount;
   int get pendingCount => rescueRepository.getPendingCount();
+  String? get connectedServerUrl => rescueRepository.connectedServerUrl;
+
+  Future<void> reconnectServer() async {
+    final connected = await rescueRepository.reconnectServer();
+    notifyListeners();
+    if (connected && pendingCount > 0) await syncPending();
+  }
 
   AiModelType get currentModel => inferenceRepository.currentModel;
   bool get isPteReady => inferenceRepository.pteReady;
@@ -219,7 +226,7 @@ class AppController extends ChangeNotifier {
             e == ConnectivityResult.ethernet,
       );
       if (hasNet) {
-        if (pendingCount > 0) await syncPending();
+        await reconnectServer();
         await refreshStatuses();
       }
     });
@@ -262,6 +269,7 @@ class AppController extends ChangeNotifier {
     required bool hasImage,
     required double confidence,
   }) async {
+    await rescueRepository.reconnectServer();
     final decision = await _sendPolicy.decide(
       hasImage: hasImage,
       confidence: confidence,
