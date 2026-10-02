@@ -242,6 +242,22 @@ curl http://localhost:8000/probe -Method GET
 
 Notebook đã thiết kế để lưu metadata của split, transform và class order. Không nên chỉ đổi tên `.pth` thành `.onnx`; cần thực hiện export thật bằng PyTorch/ONNX và kiểm tra output trước khi đưa vào app.
 
+### So sánh ONNX FP32, PTQ và QAT
+
+Trong `tools/`, `quantize_model.py` tạo bản PTQ INT8; `qat_finetune.py` fine-tune checkpoint FP32 với fake quant và xuất QAT ONNX QDQ. Cả hai dùng chung train/validation/test split đã lưu; test chỉ được dùng ở bước đánh giá cuối.
+
+```powershell
+cd tools
+python quantize_model.py --onnx "../model/Edge Ai/Export/flood_mobilenetv3_large.onnx" --config "../model/Edge Ai/config_mobilenetv3_large.json" --split-csv "../model/Edge Ai/split_train_val_test_mobilenetv3_large.csv"
+python qat_finetune.py --check-export-only --verbose
+python qat_finetune.py
+python compare_fp32_ptq_qat.py
+```
+
+`qat_finetune.py` không ghi đè model FP32 hay PTQ; mặc định lưu vào `model/Edge Ai/QAT/`. Báo cáo ba model nằm trong `reports/fp32_ptq_qat/`. Chỉ dùng kết quả chạy không có `--limit` làm đánh giá trên toàn bộ test split.
+
+`--check-export-only` chỉ calibration tạm bằng 3 ảnh train rồi kiểm tra export, không fine-tune hay lưu model; log vẫn được ghi. QAT dùng cấu hình native tách observer trước/sau `AdaptiveAvgPool2d`, giữ quantizer trọng số Conv/Linear. Log và `export_smoke` trong manifest tách parity tham chiếu (không fusion) khỏi runtime INT8 tối ưu; giữ `atol=1e-5`, `rtol=1e-4` và ghi `false` nếu không đạt, không coi sai số FP32 làm tròn qua Q/DQ là tự động PASS. Graph thiếu Q/DQ, tràn bias làm đổi trọng số, hoặc output sai/NaN sẽ bị từ chối trước khi thay ONNX cũ. Kiểm tra này không thay thế đánh giá accuracy/Macro-F1/critical errors trên full test sau QAT hay kiểm thử mobile.
+
 ## 5. Kiểm tra nhanh
 
 Chạy unit test Dart:
