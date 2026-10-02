@@ -1101,12 +1101,15 @@ def cleanup(dedup_retention_days: float) -> Dict[str, int]:
 
 # ---------------------------------------------------------------- Sao lưu
 
-def ping() -> None:
-    """Ném lỗi nếu DB không đọc được hoặc thư mục ảnh không tồn tại (dùng cho /healthz)."""
+def ping() -> str:
+    """Kiểm tra DB/ảnh và trả mã DB ổn định để app tìm lại server trong LAN."""
     with get_db_connection() as conn:
-        conn.execute("SELECT value FROM server_meta WHERE key = 'epoch'").fetchone()
+        row = conn.execute("SELECT value FROM server_meta WHERE key = 'epoch'").fetchone()
+    if row is None:
+        raise RuntimeError("Database chưa có mã nhận diện")
     if not UPLOADS_DIR.is_dir():
         raise RuntimeError(f"Không thấy thư mục ảnh {UPLOADS_DIR}")
+    return row[0]
 
 
 def mirror_uploads(dest_dir: Path) -> int:

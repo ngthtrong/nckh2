@@ -8,6 +8,7 @@ import 'data/datasources/inference_local_datasource.dart';
 import 'data/datasources/network_remote_datasource.dart';
 import 'data/datasources/record_local_datasource.dart';
 import 'data/datasources/sender_remote_datasource.dart';
+import 'data/datasources/server_locator.dart';
 import 'data/repositories/inference_repository_impl.dart';
 import 'data/repositories/network_repository_impl.dart';
 import 'data/repositories/rescue_repository_impl.dart';
@@ -31,6 +32,9 @@ Future<void> _syncInBackground() async {
   final rescueRepo = RescueRepositoryImpl(
     localDataSource: recordLocalDS,
     senderDataSource: senderRemoteDS,
+    serverLocator: !kIsWeb && defaultTargetPlatform == TargetPlatform.android
+        ? ServerLocator()
+        : null,
     sendPolicy: AdaptiveSendPolicy(
       NetworkRepositoryImpl(NetworkRemoteDataSource()),
     ),
@@ -67,6 +71,9 @@ Future<void> main() async {
   final rescueRepository = RescueRepositoryImpl(
     localDataSource: recordLocalDS,
     senderDataSource: senderRemoteDS,
+    serverLocator: !kIsWeb && defaultTargetPlatform == TargetPlatform.android
+        ? ServerLocator()
+        : null,
     sendPolicy: AdaptiveSendPolicy(networkRepository),
   );
   final inferenceRepository = InferenceRepositoryImpl(inferenceLocalDS);

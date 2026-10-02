@@ -12,6 +12,7 @@ import '../../domain/services/adaptive_send_policy.dart';
 import '../../core/platform/local_file.dart';
 import '../datasources/outbox_local_datasource.dart';
 import '../datasources/record_local_datasource.dart';
+import '../datasources/server_locator.dart';
 import '../datasources/sender_remote_datasource.dart';
 import '../datasources/sync_remote_datasource.dart';
 import '../models/sync_message_model.dart';
@@ -22,6 +23,7 @@ class RescueRepositoryImpl implements RescueRepository {
   final SenderRemoteDataSource senderDataSource;
   final OutboxLocalDataSource outboxDataSource;
   final SyncRemoteDataSource syncDataSource;
+  final ServerLocator? serverLocator;
 
   /// Chọn cách gửi ảnh cho bản ghi đồng bộ muộn (xếp hàng khi offline).
   /// Null thì gửi ảnh gốc như trước.
@@ -32,6 +34,7 @@ class RescueRepositoryImpl implements RescueRepository {
     required this.senderDataSource,
     OutboxLocalDataSource? outboxDataSource,
     SyncRemoteDataSource? syncDataSource,
+    this.serverLocator,
     this.sendPolicy,
   }) : outboxDataSource = outboxDataSource ?? OutboxLocalDataSource(),
        syncDataSource = syncDataSource ?? SyncRemoteDataSource();
@@ -40,7 +43,18 @@ class RescueRepositoryImpl implements RescueRepository {
   Future<void> init() async {
     await localDataSource.init();
     await outboxDataSource.init();
+    if (serverLocator != null) await serverLocator!.init(outboxDataSource);
   }
+
+  @override
+  String? get connectedServerUrl =>
+      serverLocator?.connectedUrl ??
+      (serverLocator == null ? kServerBaseUrl : null);
+
+  @override
+  Future<bool> reconnectServer() => _serial(
+    () => serverLocator?.ensureConnected(force: true) ?? Future.value(true),
+  );
 
   @override
   List<RescueRecord> getAllRecords() {
@@ -148,6 +162,9 @@ class RescueRepositoryImpl implements RescueRepository {
         )
         .toList();
     if (tracked.isEmpty) return [];
+    if (serverLocator != null && !await serverLocator!.ensureConnected()) {
+      return [];
+    }
     final changed = <RescueRecord>[];
     for (var i = 0; i < tracked.length; i += 100) {
       final chunk = tracked.sublist(i, (i + 100).clamp(0, tracked.length));
@@ -171,6 +188,9 @@ class RescueRepositoryImpl implements RescueRepository {
   Future<void> _flushOutbox() async {
     var batch = outboxDataSource.readyMessages();
     if (batch.isEmpty) return;
+    if (serverLocator != null && !await serverLocator!.ensureConnected()) {
+      return;
+    }
 
     while (batch.length > 1 && _requestSize(batch) > 256 * 1024) {
       batch = batch.sublist(0, batch.length - 1);
@@ -242,6 +262,9 @@ class RescueRepositoryImpl implements RescueRepository {
     if (outboxDataSource.messageForRecord(record.id) != null) return false;
     final path = record.imagePath;
     if (path == null || path.isEmpty) return true;
+    if (serverLocator != null && !await serverLocator!.ensureConnected()) {
+      return false;
+    }
     late final Uint8List imageBytes;
     try {
       imageBytes = await readLocalFile(path);
