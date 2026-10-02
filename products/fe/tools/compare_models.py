@@ -1,603 +1,450 @@
-"""Kiểm thử & So sánh Chi tiết Model A (best.pth) vs Model B (ONNX Mobile - model.onnx)
-Theo quy trình chuẩn NCKH / USENIX 2023 Framework.
+"""So sánh PTH / ONNX / ExecuTorch PTE trên cùng test split, không train/export.
 
-Tạo báo cáo toàn diện tại: reports/model_comparison/
-  - summary.json
-  - summary.md
-  - all_predictions.csv
-  - model_disagreement.csv
-  - confusion_model_a.png
-  - confusion_model_b.png
-  - calibration_model_a.png
-  - calibration_model_b.png
+Đo sai số probabilities sau softmax (không phải raw logits).
+Chạy runtime thật trên CPU máy tính, không giả lập kết quả Android.
+Thời gian: mean/median/P95/min/max/tổng inference; CSV lưu latency từng ảnh.
 
-Run:
-    .venv\\Scripts\\python.exe tools/compare_models.py
+Chạy từ tools/: python compare_models.py
+Log terminal + reports/pth_onnx_pte/compare.log (ghi mới mỗi lần chạy).
+Chi tiết từng model/ảnh: python compare_models.py --verbose
+Smoke test: python compare_models.py --limit 3 --skip-pte --no-plots
+Thiếu PTE/runtime sẽ báo lỗi; chỉ bỏ PTE khi chọn --skip-pte.
+FP32 vs INT8 dùng compare_fp32_int8.py riêng.
+Báo cáo mặc định: products/fe/reports/pth_onnx_pte/.
 """
-
 from __future__ import annotations
 
+import argparse
+import csv
+import importlib.metadata
+import itertools
 import json
-import math
-import os
-import sys
+import logging
 import time
 from pathlib import Path
 
-import matplotlib.pyplot as plt
 import numpy as np
-import onnxruntime as ort
-import pandas as pd
-import seaborn as sns
-from scipy.spatial.distance import jensenshannon
-from sklearn.metrics import (
-    accuracy_score,
-    balanced_accuracy_score,
-    confusion_matrix,
-    f1_score,
-    precision_recall_fscore_support,
-)
-import torch
-from torch import nn
-from torchvision import models, transforms
-from PIL import Image, ImageOps, ImageStat
 
-ROOT = Path(__file__).resolve().parents[1]
-CHECKPOINT_A = (
-    ROOT
-    / "model"
-    / "models"
-    / "mobilenetv3_large_2809"
-    / "flood_mobilenetv3_large_best.pth"
-)
-CHECKPOINT_ONNX = ROOT / "app" / "assets" / "models" / "model.onnx"
-CONFIG_JSON = (
-    ROOT / "model" / "models" / "mobilenetv3_large_2809" / "config_mobilenetv3_large.json"
-)
-SPLIT_CSV = (
-    ROOT / "model" / "models" / "mobilenetv3_large_2809"
-    / "split_train_val_test_mobilenetv3_large.csv"
-)
-DATASET_DIR = ROOT / "model" / "Dataset_Flood"
-REPORTS_DIR = ROOT / "reports" / "model_comparison_v2"
+from quantize_model import (DATASET_DIR, ROOT, load_splits, preprocess, quantized_probability_sum_atol,
+                            session, sha256, validate_input_shape, validate_probabilities)
 
-REPORTS_DIR.mkdir(parents=True, exist_ok=True)
+EDGE_DIR = ROOT / "model" / "Edge Ai"
+CONFIG_JSON = EDGE_DIR / "config_mobilenetv3_large.json"
+SPLIT_CSV = EDGE_DIR / "split_train_val_test_mobilenetv3_large.csv"
+EXPORT_DIR = EDGE_DIR / "Export"
+REPORTS_DIR = ROOT / "reports"
+LOGGER = logging.getLogger(__name__)
 
 
-def build_model(num_classes: int, dropout: float) -> nn.Module:
-    model = models.mobilenet_v3_large(weights=None)
-    classifier = list(model.classifier.children())[:-1]
-    in_features = model.classifier[-1].in_features
-    model.classifier = nn.Sequential(
-        *classifier,
-        nn.Sequential(
-            nn.Dropout(p=dropout),
-            nn.Linear(in_features, num_classes),
-        ),
-    )
-    return model
+def check_hash(path: Path, expected: str | None) -> None:
+    LOGGER.debug("Checking SHA256: %s", path)
+    if not path.is_file():
+        raise FileNotFoundError(f"Thiếu file: {path}")
+    if not expected or sha256(path) != expected:
+        raise ValueError(f"Hash không khớp manifest: {path}")
 
 
-def load_checkpoint(path: Path) -> tuple[dict[str, torch.Tensor], dict]:
-    checkpoint = torch.load(path, map_location="cpu", weights_only=False)
-    if isinstance(checkpoint, dict):
-        for key in ("model_state_dict", "state_dict", "model"):
-            state_dict = checkpoint.get(key)
-            if isinstance(state_dict, dict):
-                return state_dict, checkpoint
-        if all(isinstance(value, torch.Tensor) for value in checkpoint.values()):
-            return checkpoint, checkpoint
-    raise ValueError(f"Unsupported checkpoint format: {path}")
+def check_manifest(manifest: dict, config: dict) -> None:
+    expected = "letterbox_rgb_" + "_".join(map(str, config["letterbox_fill"]))
+    if (config.get("preprocess") != "letterbox"
+            or manifest.get("preprocess") != expected
+            or manifest.get("input_size") != config["image_size"]
+            or manifest.get("letterbox_fill") != config["letterbox_fill"]
+            or manifest.get("class_order") != config["class_order"]):
+        raise ValueError("Config preprocessing/class_order không khớp manifest.")
 
 
-def cosine_similarity(a: np.ndarray, b: np.ndarray) -> float:
-    denom = np.linalg.norm(a) * np.linalg.norm(b)
-    if denom == 0:
-        return 1.0
-    return float(np.dot(a, b) / denom)
+def pth_runner(path: Path, config: dict):
+    LOGGER.info("Loading PTH: %s", path)
+    started = time.perf_counter()
+    import torch
+    from convert_model import build_model, load_checkpoint, remove_module_prefix
+
+    torch.set_num_threads(1)
+    state, checkpoint = load_checkpoint(path)
+    state = remove_module_prefix(state)
+    classes = checkpoint.get("class_names")
+    if classes is not None and list(classes) != config["class_order"]:
+        raise ValueError("class_names trong checkpoint không khớp config.")
+    model = build_model(len(config["class_order"]), config["dropout"],
+                        nested_classifier="classifier.3.1.weight" in state)
+    model.load_state_dict(state, strict=True)
+    model.eval()
+    LOGGER.info("PTH ready (torch %s, CPU/1 thread, %.2fs)", torch.__version__, time.perf_counter() - started)
+
+    def predict(array):
+        with torch.inference_mode():
+            return torch.softmax(model(torch.from_numpy(array)), dim=1).numpy()
+
+    return predict
+
+
+def onnx_runner(path: Path, config: dict):
+    LOGGER.info("Loading ONNX: %s", path)
+    started = time.perf_counter()
+    runtime = session(path)  # CPUExecutionProvider, 1 luồng.
+    if len(runtime.get_inputs()) != 1 or len(runtime.get_outputs()) != 1:
+        raise ValueError("Cần graph có một input và một output.")
+    info = runtime.get_inputs()[0]
+    size = config["image_size"]
+    # Exporter cho phép batch động; chỉ spatial dimensions phải cố định.
+    validate_input_shape(info.shape, size)
+    if info.type != "tensor(float)" or runtime.get_outputs()[0].type != "tensor(float)":
+        raise ValueError(f"Input/output ONNX không khớp FP32 NCHW config: {info.shape}")
+    LOGGER.info("ONNX ready (input=%s, CPU/1 thread, %.2fs)", info.shape, time.perf_counter() - started)
+    return lambda array: runtime.run(None, {info.name: array})[0]
+
+
+def pte_runner(path: Path, expected_version: str | None):
+    LOGGER.info("Loading PTE: %s", path)
+    started = time.perf_counter()
+    import torch
+
+    try:
+        version = importlib.metadata.version("executorch")
+    except importlib.metadata.PackageNotFoundError as error:
+        raise RuntimeError("Thiếu ExecuTorch. Cài đúng version trong manifest hoặc dùng --skip-pte.") from error
+    if not expected_version or version != expected_version:
+        raise ValueError(f"ExecuTorch runtime không khớp manifest: {version} != {expected_version}")
+    LOGGER.info("ExecuTorch %s: importing runtime and loading forward", version)
+    from executorch.runtime import Runtime
+
+    program = Runtime.get().load_program(path)
+    forward = program.load_method("forward")
+    LOGGER.info("PTE ready (%.2fs)", time.perf_counter() - started)
+
+    def predict(array, _program=program):
+        # Giữ program sống cùng method; tuyệt đối không lấy lại output ONNX.
+        output = forward.execute((torch.from_numpy(array),))
+        if len(output) != 1 or not isinstance(output[0], torch.Tensor):
+            raise ValueError("PTE cần trả một tensor probabilities.")
+        return output[0].detach().cpu().numpy().copy()
+
+    return predict
 
 
 def compute_ece(probs: np.ndarray, labels: np.ndarray, n_bins: int = 10) -> float:
-    confidences = np.max(probs, axis=1)
-    predictions = np.argmax(probs, axis=1)
-    accuracies = predictions == labels
-
-    bin_boundaries = np.linspace(0, 1, n_bins + 1)
+    confidence, correct = probs.max(axis=1), probs.argmax(axis=1) == labels
+    bounds = np.linspace(0, 1, n_bins + 1)
     ece = 0.0
-
-    for i in range(n_bins):
-        bin_lower = bin_boundaries[i]
-        bin_upper = bin_boundaries[i + 1]
-
-        in_bin = (confidences > bin_lower) & (confidences <= bin_upper)
-        prop_in_bin = np.mean(in_bin)
-
-        if prop_in_bin > 0:
-            accuracy_in_bin = np.mean(accuracies[in_bin])
-            avg_confidence_in_bin = np.mean(confidences[in_bin])
-            ece += np.abs(accuracy_in_bin - avg_confidence_in_bin) * prop_in_bin
-
+    for lower, upper in zip(bounds[:-1], bounds[1:]):
+        mask = (confidence > lower) & (confidence <= upper)
+        if mask.any():
+            ece += abs(correct[mask].mean() - confidence[mask].mean()) * mask.mean()
     return float(ece)
 
 
-def compute_brier_score(probs: np.ndarray, labels: np.ndarray, num_classes: int) -> float:
-    one_hot = np.zeros((len(labels), num_classes))
-    for i, l in enumerate(labels):
-        one_hot[i, l] = 1.0
-    return float(np.mean(np.sum((probs - one_hot) ** 2, axis=1)))
+def classification_metrics(probs: np.ndarray, labels: np.ndarray, class_order: list[str],
+                           critical_distance: int = 2) -> dict:
+    from sklearn.metrics import accuracy_score, balanced_accuracy_score, confusion_matrix
+    from sklearn.metrics import f1_score, precision_recall_fscore_support
 
-
-def extract_image_stats(img: Image.Image) -> dict:
-    img_rgb = img.convert("RGB")
-    w, h = img_rgb.size
-    aspect_ratio = float(w) / float(h)
-
-    gray = img_rgb.convert("L")
-    stat = ImageStat.Stat(gray)
-    brightness = stat.mean[0]
-    contrast = stat.stddev[0]
-
-    hsv = img_rgb.convert("HSV")
-    s_stat = ImageStat.Stat(hsv)
-    saturation = s_stat.mean[1]
-
-    arr = np.array(gray, dtype=np.float32)
-    gy, gx = np.gradient(arr)
-    sharpness = float(np.mean(gx**2 + gy**2))
-
-    return {
-        "width": w,
-        "height": h,
-        "aspect_ratio": aspect_ratio,
-        "brightness": brightness,
-        "contrast": contrast,
-        "saturation": saturation,
-        "sharpness": sharpness,
+    predictions = probs.argmax(axis=1)
+    classes = list(range(len(class_order)))
+    precision, recall, f1, support = precision_recall_fscore_support(
+        labels, predictions, labels=classes, zero_division=0)
+    result = {
+        "accuracy": float(accuracy_score(labels, predictions)),
+        "balanced_accuracy": float(balanced_accuracy_score(labels, predictions)),
+        "macro_f1": float(f1_score(labels, predictions, labels=classes, average="macro", zero_division=0)),
+        "ece": compute_ece(probs, labels),
+        "brier_score": float(np.square(probs - np.eye(len(classes))[labels]).sum(axis=1).mean()),
+        "confusion_matrix": confusion_matrix(labels, predictions, labels=classes).tolist(),
+        "per_class": {name: dict(precision=float(precision[i]), recall=float(recall[i]),
+                                 f1=float(f1[i]), support=int(support[i]))
+                      for i, name in enumerate(class_order)},
     }
+    severity_rank = {"non_flood": 0, "low": 1, "medium": 2, "high": 3}
+    if all(name in severity_rank for name in class_order):
+        distances = np.abs(np.asarray([severity_rank[name] for name in class_order])[labels]
+                           - np.asarray([severity_rank[name] for name in class_order])[predictions])
+        result.update(
+            critical_error_count=int((distances >= critical_distance).sum()),
+            critical_error_rate=float((distances >= critical_distance).mean()),
+            mean_severity_distance=float(distances.mean()),
+        )
+    return result
+
+
+def pairwise_metrics(a: np.ndarray, b: np.ndarray, atol: float, rtol: float) -> dict:
+    from scipy.special import rel_entr
+
+    difference = np.abs(a - b)
+    cosine = (a * b).sum(axis=1) / (np.linalg.norm(a, axis=1) * np.linalg.norm(b, axis=1))
+    p, q = a.astype(np.float64), b.astype(np.float64)
+    p, q = p / p.sum(axis=1, keepdims=True), q / q.sum(axis=1, keepdims=True)
+    midpoint = (p + q) / 2
+    # JS >= 0; clamp roundoff trước khi báo cáo, tránh NaN khi hai vector rất gần.
+    js = np.maximum((rel_entr(p, midpoint).sum(axis=1) + rel_entr(q, midpoint).sum(axis=1)) / 2, 0)
+    return {
+        "top1_agreement": float((a.argmax(axis=1) == b.argmax(axis=1)).mean()),
+        "max_abs_diff": float(difference.max()),
+        "mean_abs_diff": float(difference.mean()),
+        "rmse": float(np.sqrt(np.square(difference.astype(np.float64)).mean())),
+        "l1_mean": float(difference.sum(axis=1).mean()),
+        "l2_mean": float(np.linalg.norm(a - b, axis=1).mean()),
+        "cosine_similarity_mean": float(cosine.mean()),
+        "js_divergence_mean": float(js.mean()),
+        "probabilities_close": bool(np.allclose(a, b, atol=atol, rtol=rtol)),
+        "atol": atol, "rtol": rtol,
+    }
+
+
+def evaluate_models(runners: dict, items: list, config: dict) -> tuple[dict, dict, list]:
+    if not items:
+        raise ValueError("Test không được rỗng.")
+    num_classes = len(config["class_order"])
+    probabilities = {name: [] for name in runners}
+    latencies = {name: [] for name in runners}
+    rows = []
+    LOGGER.info("Preparing warmup image: %s", items[0][0].name)
+    sample = np.ascontiguousarray(preprocess(items[0][0], config["image_size"], config["letterbox_fill"]))
+    for name, predict in runners.items():
+        for step in range(1, 4):
+            LOGGER.info("Warmup %s %d/3 starting", name, step)
+            try:
+                tolerance = quantized_probability_sum_atol(num_classes) if "int8" in name else 1e-4
+                validate_probabilities(predict(sample.copy()), num_classes, sum_atol=tolerance)
+            except Exception:
+                LOGGER.error("Warmup failed: model=%s, step=%d/3", name, step)
+                raise
+            LOGGER.info("Warmup %s %d/3 done", name, step)
+    started = time.perf_counter()
+    LOGGER.info("Evaluating %d test images; models=%s", len(items), ", ".join(runners))
+    for index, (path, label) in enumerate(items, 1):
+        LOGGER.info("[%d/%d] Processing %s", index, len(items), path.name)
+        tensor = np.ascontiguousarray(preprocess(path, config["image_size"], config["letterbox_fill"]))
+        outputs, timings = {}, {}
+        for name, predict in runners.items():
+            x = tensor.copy()  # Không chia sẻ input có thể bị runtime sửa.
+            LOGGER.debug("[%d/%d] Inference %s starting", index, len(items), name)
+            try:
+                start = time.perf_counter()
+                output = predict(x)
+                timings[name] = (time.perf_counter() - start) * 1000
+                tolerance = quantized_probability_sum_atol(num_classes) if "int8" in name else 1e-4
+                outputs[name] = validate_probabilities(output, num_classes, sum_atol=tolerance)
+            except Exception:
+                LOGGER.error("Inference failed: model=%s, image=%s (%d/%d)", name, path.name, index, len(items))
+                raise
+            LOGGER.debug("[%d/%d] Inference %s done: %.2fms", index, len(items), name, timings[name])
+        # Chỉ ghi nhận sau khi TẤT CẢ model thành công; không skip ảnh lỗi.
+        row = {"image_path": str(path), "ground_truth": config["class_order"][label], "gt_idx": label}
+        for name, prob in outputs.items():
+            probabilities[name].append(prob)
+            latencies[name].append(timings[name])
+            order = np.argsort(prob)[::-1]
+            row.update({f"pred_{name}": config["class_order"][int(order[0])],
+                        f"confidence_{name}": float(prob[order[0]]),
+                        f"latency_ms_{name}": timings[name],
+                        f"margin_{name}": float(prob[order[0]] - prob[order[1]]),
+                        f"probabilities_{name}": json.dumps(prob.tolist())})
+        rows.append(row)
+        elapsed = time.perf_counter() - started
+        predictions = "; ".join(f"{name}={row[f'pred_{name}']} ({row[f'confidence_{name}']:.3f}, {timings[name]:.2f}ms)"
+                                for name in runners)
+        LOGGER.info("[%d/%d] Done | %s | elapsed=%.1fs | ETA=%.1fs", index, len(items), predictions,
+                    elapsed, elapsed / index * (len(items) - index))
+    return {name: np.stack(values) for name, values in probabilities.items()}, latencies, rows
+
+
+def write_plots(report_dir: Path, probabilities: dict, metrics: dict, labels, class_order):
+    import matplotlib
+    matplotlib.use("Agg")
+    import matplotlib.pyplot as plt
+
+    for name, probs in probabilities.items():
+        cm = np.array(metrics[name]["confusion_matrix"])
+        fig, ax = plt.subplots(figsize=(6, 5))
+        ax.imshow(cm, cmap="Blues")
+        ax.set(xticks=range(len(class_order)), yticks=range(len(class_order)),
+               xticklabels=class_order, yticklabels=class_order,
+               xlabel="Predicted", ylabel="Ground truth", title=f"Confusion matrix: {name}")
+        for i, j in np.ndindex(cm.shape):
+            ax.text(j, i, str(cm[i, j]), ha="center", va="center")
+        fig.tight_layout()
+        fig.savefig(report_dir / f"confusion_{name}.png", dpi=160)
+        plt.close(fig)
+        confidence, correct = probs.max(axis=1), probs.argmax(axis=1) == labels
+        bin_confidence, bin_accuracy = [], []
+        bounds = np.linspace(0, 1, 11)
+        for lower, upper in zip(bounds[:-1], bounds[1:]):
+            mask = (confidence > lower) & (confidence <= upper)
+            if mask.any():
+                bin_confidence.append(confidence[mask].mean())
+                bin_accuracy.append(correct[mask].mean())
+        fig, ax = plt.subplots(figsize=(5, 5))
+        ax.plot([0, 1], [0, 1], "k--")
+        ax.plot(bin_confidence, bin_accuracy, "o-")
+        ax.set(xlim=(0, 1), ylim=(0, 1), xlabel="Confidence", ylabel="Accuracy",
+               title=f"{name}: ECE={metrics[name]['ece']:.4f}")
+        fig.tight_layout()
+        fig.savefig(report_dir / f"calibration_{name}.png", dpi=160)
+        plt.close(fig)
+
+
+def write_comparison(runners, items, config, artifacts, metadata, report_dir,
+                     no_plots=False, atol=1e-5, rtol=1e-4) -> dict:
+    started = time.perf_counter()
+    probabilities, timings, rows = evaluate_models(runners, items, config)
+    LOGGER.info("Computing classification and pairwise metrics")
+    labels = np.array([label for _, label in items])
+    metrics = {name: {**classification_metrics(prob, labels, config["class_order"],
+                                               config.get("critical_distance", 2)),
+                      "latency_ms_mean": float(np.mean(timings[name])),
+                      "latency_ms_median": float(np.median(timings[name])),
+                      "latency_ms_p95": float(np.percentile(timings[name], 95)),
+                      "latency_ms_min": float(np.min(timings[name])),
+                      "latency_ms_max": float(np.max(timings[name])),
+                      "latency_ms_total": float(np.sum(timings[name])),
+                      **artifacts[name]} for name, prob in probabilities.items()}
+    pairs = {f"{a}_vs_{b}": pairwise_metrics(probabilities[a], probabilities[b], atol, rtol)
+             for a, b in itertools.combinations(runners, 2)}
+    result = {"metadata": {**metadata, "evaluation_split": "test", "n_images": len(items),
+                            "class_order": config["class_order"], "input_size": config["image_size"],
+                            "output_type": "probabilities",
+                            "preprocess": "EXIF -> RGB -> letterbox BILINEAR -> ImageNet NCHW",
+                            "timing": "CPU máy tính; batch=1; 3 warmup/model không tính vào latency; "
+                                      "không gồm load model, preprocessing, validation, logging; "
+                                      "tổng là tổng thời gian gọi predict, không phải wall-clock toàn pipeline; "
+                                      "không phải latency mobile"},
+              "classification_metrics": metrics, "pairwise_comparison": pairs}
+    result["metadata"]["critical_distance"] = config.get("critical_distance", 2)
+    LOGGER.info("Writing JSON/CSV/Markdown reports: %s", report_dir.resolve())
+    report_dir.mkdir(parents=True, exist_ok=True)
+    (report_dir / "summary.json").write_text(json.dumps(result, indent=2, ensure_ascii=False, allow_nan=False), encoding="utf-8")
+    with (report_dir / "all_predictions.csv").open("w", encoding="utf-8-sig", newline="") as stream:
+        writer = csv.DictWriter(stream, fieldnames=rows[0].keys())
+        writer.writeheader()
+        writer.writerows(rows)
+    disagreement = [row for row in rows if len({row[f"pred_{name}"] for name in runners}) > 1]
+    if disagreement:
+        with (report_dir / "model_disagreement.csv").open("w", encoding="utf-8-sig", newline="") as stream:
+            writer = csv.DictWriter(stream, fieldnames=rows[0].keys())
+            writer.writeheader()
+            writer.writerows(disagreement)
+    else:
+        (report_dir / "model_disagreement.csv").unlink(missing_ok=True)
+    lines = ["# So sánh model trên test split", "", f"Scope: {metadata['evaluation_scope']}; số ảnh: {len(items)}.",
+             f"Critical error: khoảng cách severity >= {config.get('critical_distance', 2)}.",
+             "CPU máy tính, không phải benchmark mobile. PTH/ONNX: 1 luồng; PTE theo runtime.", "",
+             "| Model | Accuracy | Macro-F1 | Balanced acc | Critical errors | ECE | Brier | Median ms | MB |",
+             "|---|---:|---:|---:|---:|---:|---:|---:|---:|"]
+    if "pte_status" in metadata:
+        lines.insert(3, f"PTE status: {metadata['pte_status']}.")
+    for name, values in metrics.items():
+        critical = (f"{values['critical_error_count']} ({values['critical_error_rate']:.2%})"
+                    if "critical_error_count" in values else "-")
+        lines.append(f"| {name} | {values['accuracy']:.2%} | {values['macro_f1']:.2%} | {values['balanced_accuracy']:.2%} | "
+                     f"{critical} | {values['ece']:.5f} | {values['brier_score']:.5f} | {values['latency_ms_median']:.2f} | {values['bytes']/1024**2:.2f} |")
+    lines += ["", "## Thời gian suy luận", "",
+              "Batch=1; 3 warmup/model không tính vào thống kê. Không gồm load model, preprocessing, validation hay logging.",
+              "P95: khoảng 95% lượt chạy có latency không vượt mức này. Tổng chỉ cộng thời gian gọi predict, không phải toàn pipeline.", "",
+              "| Model | Mean ms | Median ms | P95 ms | Min ms | Max ms | Tổng inference s |",
+              "|---|---:|---:|---:|---:|---:|---:|"]
+    for name, values in metrics.items():
+        lines.append(f"| {name} | {values['latency_ms_mean']:.2f} | {values['latency_ms_median']:.2f} | "
+                     f"{values['latency_ms_p95']:.2f} | {values['latency_ms_min']:.2f} | {values['latency_ms_max']:.2f} | "
+                     f"{values['latency_ms_total']/1000:.3f} |")
+    lines += ["", "Sai số trên probabilities sau softmax; không phải raw logits hay kết quả Android.", "",
+              "| Cặp | Top-1 agreement | Max abs diff | MAE | RMSE | Cosine mean | Probabilities close |",
+              "|---|---:|---:|---:|---:|---:|---|"]
+    for name, values in pairs.items():
+        lines.append(f"| {name} | {values['top1_agreement']:.2%} | {values['max_abs_diff']:.8g} | "
+                     f"{values['mean_abs_diff']:.8g} | {values['rmse']:.8g} | {values['cosine_similarity_mean']:.10f} | "
+                     f"{values['probabilities_close']} |")
+    lines += ["", f"Tolerance: atol={atol}, rtol={rtol}. Agreement không đồng nghĩa xác suất giống hệt hoặc accuracy 100%.",
+              "Smoke subset không thay thế metric full test."]
+    report = "\n".join(lines) + "\n"
+    (report_dir / "summary.md").write_text(report, encoding="utf-8")
+    if not no_plots:
+        LOGGER.info("Writing confusion/calibration plots")
+        write_plots(report_dir, probabilities, metrics, labels, config["class_order"])
+    LOGGER.info("Comparison complete: %d images, %.2fs; reports=%s", len(items),
+                time.perf_counter() - started, report_dir.resolve())
+    print(report)
+    print(f"Reports: {report_dir.resolve()}")
+    return result
+
+
+def artifact(path: Path) -> dict:
+    return {"file": str(path.resolve()), "sha256": sha256(path), "bytes": path.stat().st_size}
+
+
+def prepare_test(config_path: Path, split_csv: Path, dataset_dir: Path, limit: int | None):
+    LOGGER.info("Reading config: %s", config_path)
+    if limit is not None and limit <= 0:
+        raise ValueError("--limit phải > 0.")
+    config = json.loads(config_path.read_text(encoding="utf-8"))
+    if len(config["class_order"]) < 2 or len(set(config["class_order"])) != len(config["class_order"]):
+        raise ValueError("class_order cần ít nhất hai lớp, không trùng.")
+    LOGGER.info("Auditing saved train/val/test split (paths, hashes, leakage): %s", split_csv)
+    test = load_splits(split_csv, dataset_dir, config["class_order"])["test"]
+    items = test if limit is None else test[:limit]
+    metadata = {"config": str(config_path.resolve()), "config_sha256": sha256(config_path),
+                "split_csv": str(split_csv.resolve()), "split_csv_sha256": sha256(split_csv),
+                "dataset_dir": str(dataset_dir.resolve()), "full_test_count": len(test), "seed": config.get("seed"),
+                "evaluation_scope": "full_test" if len(items) == len(test) else "test_subset_smoke"}
+    LOGGER.info("Split audit passed; selected %d/%d test images; scope=%s; input=1x3x%dx%d",
+                len(items), len(test), metadata["evaluation_scope"], config["image_size"], config["image_size"])
+    return config, items, metadata
 
 
 def main() -> None:
-    print("=" * 80)
-    print("🔬 SO SÁNH MODEL A (BEST.PTH) VS MODEL B (ONNX MOBILE - MODEL.ONNX)")
-    print("=" * 80)
-
-    # 1. Load Config & Devices
-    config = json.loads(CONFIG_JSON.read_text(encoding="utf-8"))
-    class_order = config["class_order"]
-    class_to_idx = {c: i for i, c in enumerate(class_order)}
-    num_classes = len(class_order)
-    dropout = float(config.get("dropout", 0.35))
-    image_size = int(config.get("image_size", 256))
-    letterbox_fill = tuple(config.get("letterbox_fill", [124, 116, 104]))
-    device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
-
-    print(f"• Classes ({num_classes}): {class_order}")
-    print(f"• PyTorch Device: {device}")
-    print(f"• ONNX File: {CHECKPOINT_ONNX.name}")
-
-    # 2. Build Model A (PyTorch best.pth) & Load Model B (ONNX Mobile)
-    model_a = build_model(num_classes, dropout)
-    state_a, _ = load_checkpoint(CHECKPOINT_A)
-    model_a.load_state_dict({k.removeprefix("module."): v for k, v in state_a.items()}, strict=False)
-    model_a.to(device).eval()
-
-    onnx_session = ort.InferenceSession(str(CHECKPOINT_ONNX))
-    onnx_input_name = onnx_session.get_inputs()[0].name
-
-    transform = transforms.Compose([
-        transforms.Lambda(lambda image: ImageOps.pad(
-            image,
-            (image_size, image_size),
-            method=Image.Resampling.BICUBIC,
-            color=letterbox_fill,
-        )),
-        transforms.ToTensor(),
-        transforms.Normalize(mean=[0.485, 0.456, 0.406], std=[0.229, 0.224, 0.225]),
-    ])
-
-    # 3. Collect Dataset Images
-    split_df = pd.read_csv(SPLIT_CSV)
-    test_df = split_df[split_df["split"] == "test"].copy()
-    all_image_paths = [Path(path) for path in test_df["path"]]
-    all_gt_labels = test_df["label"].tolist()
-    all_gt_indices = [class_to_idx[label] for label in all_gt_labels]
-
-    missing = [str(path) for path in all_image_paths if not path.is_file()]
-    if missing:
-        raise FileNotFoundError(f"Test split contains {len(missing)} missing files; first={missing[0]}")
-
-    total_images = len(all_image_paths)
-    print(f"✓ Chỉ đánh giá {total_images} ảnh thuộc test split độc lập\n")
-
-    # 4. Evaluation Loop
-    results = []
-    probs_a_list = []
-    probs_b_list = []
-    image_stats_list = []
-
-    with torch.no_grad():
-        for i, (img_path, gt_label, gt_idx) in enumerate(zip(all_image_paths, all_gt_labels, all_gt_indices)):
-            try:
-                raw_img = Image.open(img_path).convert("RGB")
-                stats = extract_image_stats(raw_img)
-                image_stats_list.append(stats)
-
-                tensor_input = transform(raw_img).unsqueeze(0)
-
-                # Model A (PyTorch best.pth)
-                out_a = model_a(tensor_input.to(device))
-                prob_a = torch.softmax(out_a, dim=1)[0].cpu().numpy()
-                sorted_indices_a = np.argsort(prob_a)[::-1]
-                pred_a_idx = int(sorted_indices_a[0])
-                top2_a_idx = int(sorted_indices_a[1])
-                conf_a = float(prob_a[pred_a_idx])
-                top2_conf_a = float(prob_a[top2_a_idx])
-                margin_a = conf_a - top2_conf_a
-
-                # Model B (ONNX Mobile)
-                onnx_out = onnx_session.run(None, {onnx_input_name: tensor_input.numpy()})[0][0]
-                prob_b = onnx_out
-                sorted_indices_b = np.argsort(prob_b)[::-1]
-                pred_b_idx = int(sorted_indices_b[0])
-                top2_b_idx = int(sorted_indices_b[1])
-                conf_b = float(prob_b[pred_b_idx])
-                top2_conf_b = float(prob_b[top2_b_idx])
-                margin_b = conf_b - top2_conf_b
-
-                probs_a_list.append(prob_a)
-                probs_b_list.append(prob_b)
-
-                # Pairwise distribution metrics
-                cos_sim = cosine_similarity(prob_a, prob_b)
-                l1_dist = float(np.sum(np.abs(prob_a - prob_b)))
-                l2_dist = float(np.sqrt(np.sum((prob_a - prob_b) ** 2)))
-                max_abs_diff = float(np.max(np.abs(prob_a - prob_b)))
-                js_div = float(jensenshannon(prob_a, prob_b) ** 2)
-
-                is_agree = pred_a_idx == pred_b_idx
-                a_correct = pred_a_idx == gt_idx
-                b_correct = pred_b_idx == gt_idx
-
-                results.append({
-                    "image_path": str(img_path.relative_to(ROOT)),
-                    "ground_truth": gt_label,
-                    "gt_idx": gt_idx,
-                    "pred_model_a": class_order[pred_a_idx],
-                    "pred_a_idx": pred_a_idx,
-                    "confidence_model_a": conf_a,
-                    "top2_model_a": class_order[top2_a_idx],
-                    "margin_model_a": margin_a,
-                    "pred_model_b": class_order[pred_b_idx],
-                    "pred_b_idx": pred_b_idx,
-                    "confidence_model_b": conf_b,
-                    "top2_model_b": class_order[top2_b_idx],
-                    "margin_model_b": margin_b,
-                    "a_correct": a_correct,
-                    "b_correct": b_correct,
-                    "is_agree": is_agree,
-                    "cosine_similarity": cos_sim,
-                    "l1_distance": l1_dist,
-                    "l2_distance": l2_dist,
-                    "max_abs_diff": max_abs_diff,
-                    "js_divergence": js_div,
-                    "prob_a_raw": prob_a.tolist(),
-                    "prob_b_raw": prob_b.tolist(),
-                })
-
-            except Exception as e:
-                print(f"Error processing {img_path}: {e}")
-
-    df_all = pd.DataFrame(results)
-    probs_a_arr = np.array(probs_a_list)
-    probs_b_arr = np.array(probs_b_list)
-    gt_arr = df_all["gt_idx"].values
-
-    # Export all_predictions.csv
-    df_all.to_csv(REPORTS_DIR / "all_predictions.csv", index=False)
-
-    # --------------------------------------------------------------------------
-    # 1. PREDICTION AGREEMENT
-    # --------------------------------------------------------------------------
-    agree_count = int(df_all["is_agree"].sum())
-    disagree_count = total_images - agree_count
-    agree_rate = agree_count / total_images
-    disagree_rate = disagree_count / total_images
-
-    # --------------------------------------------------------------------------
-    # 2. DISAGREEMENT ANALYSIS
-    # --------------------------------------------------------------------------
-    df_disagree = df_all[~df_all["is_agree"]].copy()
-    df_disagree.to_csv(REPORTS_DIR / "model_disagreement.csv", index=False)
-
-    a_correct_b_wrong = int((df_disagree["a_correct"] & ~df_disagree["b_correct"]).sum())
-    a_wrong_b_correct = int((~df_disagree["a_correct"] & df_disagree["b_correct"]).sum())
-    both_wrong_diff = int((~df_disagree["a_correct"] & ~df_disagree["b_correct"]).sum())
-
-    # --------------------------------------------------------------------------
-    # 3. CONFIDENCE & MARGIN ANALYSIS
-    # --------------------------------------------------------------------------
-    conf_a_mean = float(df_all["confidence_model_a"].mean())
-    conf_a_median = float(df_all["confidence_model_a"].median())
-    conf_b_mean = float(df_all["confidence_model_b"].mean())
-    conf_b_median = float(df_all["confidence_model_b"].median())
-
-    margin_a_mean = float(df_all["margin_model_a"].mean())
-    margin_a_median = float(df_all["margin_model_a"].median())
-    margin_b_mean = float(df_all["margin_model_b"].mean())
-    margin_b_median = float(df_all["margin_model_b"].median())
-
-    margin_a_005 = int((df_all["margin_model_a"] < 0.05).sum())
-    margin_a_010 = int((df_all["margin_model_a"] < 0.10).sum())
-    margin_b_005 = int((df_all["margin_model_b"] < 0.05).sum())
-    margin_b_010 = int((df_all["margin_model_b"] < 0.10).sum())
-
-    # Disagreement subset confidence & margin
-    if not df_disagree.empty:
-        dis_conf_a_mean = float(df_disagree["confidence_model_a"].mean())
-        dis_conf_b_mean = float(df_disagree["confidence_model_b"].mean())
-        dis_margin_a_mean = float(df_disagree["margin_model_a"].mean())
-        dis_margin_b_mean = float(df_disagree["margin_model_b"].mean())
-    else:
-        dis_conf_a_mean = dis_conf_b_mean = dis_margin_a_mean = dis_margin_b_mean = 0.0
-
-    # --------------------------------------------------------------------------
-    # 4. PROBABILITY DISTRIBUTION COMPARISON
-    # --------------------------------------------------------------------------
-    dist_metrics = {}
-    for metric_col in ["cosine_similarity", "l1_distance", "l2_distance", "max_abs_diff", "js_divergence"]:
-        dist_metrics[metric_col] = {
-            "mean": float(df_all[metric_col].mean()),
-            "median": float(df_all[metric_col].median()),
-            "p95": float(np.percentile(df_all[metric_col], 95)),
-            "max": float(df_all[metric_col].max()),
-        }
-
-    # --------------------------------------------------------------------------
-    # 5. CLASSIFICATION METRICS
-    # --------------------------------------------------------------------------
-    preds_a = df_all["pred_a_idx"].values
-    preds_b = df_all["pred_b_idx"].values
-
-    acc_a = float(accuracy_score(gt_arr, preds_a))
-    acc_b = float(accuracy_score(gt_arr, preds_b))
-
-    bal_acc_a = float(balanced_accuracy_score(gt_arr, preds_a))
-    bal_acc_b = float(balanced_accuracy_score(gt_arr, preds_b))
-
-    macro_f1_a = float(f1_score(gt_arr, preds_a, average="macro"))
-    macro_f1_b = float(f1_score(gt_arr, preds_b, average="macro"))
-
-    p_a, r_a, f1_a, _ = precision_recall_fscore_support(gt_arr, preds_a, labels=list(range(num_classes)))
-    p_b, r_b, f1_b, _ = precision_recall_fscore_support(gt_arr, preds_b, labels=list(range(num_classes)))
-
-    per_class_metrics = {}
-    for idx, cls in enumerate(class_order):
-        per_class_metrics[cls] = {
-            "precision_a": float(p_a[idx]),
-            "precision_b": float(p_b[idx]),
-            "recall_a": float(r_a[idx]),
-            "recall_b": float(r_b[idx]),
-            "f1_a": float(f1_a[idx]),
-            "f1_b": float(f1_b[idx]),
-            "diff_recall": float(r_b[idx] - r_a[idx]),
-        }
-
-    cm_a = confusion_matrix(gt_arr, preds_a, labels=list(range(num_classes)))
-    cm_b = confusion_matrix(gt_arr, preds_b, labels=list(range(num_classes)))
-
-    # Save Confusion Matrix Plots
-    fig, ax = plt.subplots(figsize=(7, 6))
-    sns.heatmap(cm_a, annot=True, fmt="d", cmap="Reds", xticklabels=class_order, yticklabels=class_order, ax=ax)
-    ax.set_title("Confusion Matrix - Model A (PyTorch Best.pth)")
-    ax.set_xlabel("Predicted")
-    ax.set_ylabel("Ground Truth")
-    plt.tight_layout()
-    plt.savefig(REPORTS_DIR / "confusion_model_a.png", dpi=200)
-    plt.close()
-
-    fig, ax = plt.subplots(figsize=(7, 6))
-    sns.heatmap(cm_b, annot=True, fmt="d", cmap="Blues", xticklabels=class_order, yticklabels=class_order, ax=ax)
-    ax.set_title("Confusion Matrix - Model B (ONNX Mobile)")
-    ax.set_xlabel("Predicted")
-    ax.set_ylabel("Ground Truth")
-    plt.tight_layout()
-    plt.savefig(REPORTS_DIR / "confusion_model_b.png", dpi=200)
-    plt.close()
-
-    # --------------------------------------------------------------------------
-    # 8. IMAGE STATISTICAL DISTRIBUTION
-    # --------------------------------------------------------------------------
-    df_stats = pd.DataFrame(image_stats_list)
-    image_dist_stats = {}
-    for col in ["brightness", "contrast", "sharpness", "saturation", "aspect_ratio"]:
-        image_dist_stats[col] = {
-            "mean": float(df_stats[col].mean()),
-            "std": float(df_stats[col].std()),
-            "median": float(df_stats[col].median()),
-            "p5": float(np.percentile(df_stats[col], 5)),
-            "p95": float(np.percentile(df_stats[col], 95)),
-        }
-
-    # --------------------------------------------------------------------------
-    # 9. CALIBRATION (ECE & Brier Score)
-    # --------------------------------------------------------------------------
-    ece_a = compute_ece(probs_a_arr, gt_arr)
-    ece_b = compute_ece(probs_b_arr, gt_arr)
-
-    brier_a = compute_brier_score(probs_a_arr, gt_arr, num_classes)
-    brier_b = compute_brier_score(probs_b_arr, gt_arr, num_classes)
-
-    # Plot Calibration Reliability Diagrams
-    fig, ax = plt.subplots(figsize=(6, 6))
-    conf_a_max = np.max(probs_a_arr, axis=1)
-    acc_a_corr = (preds_a == gt_arr).astype(float)
-    bin_bounds = np.linspace(0, 1, 11)
-    bin_accs_a = []
-    bin_confs_a = []
-    for b in range(10):
-        mask = (conf_a_max > bin_bounds[b]) & (conf_a_max <= bin_bounds[b+1])
-        if np.sum(mask) > 0:
-            bin_accs_a.append(np.mean(acc_a_corr[mask]))
-            bin_confs_a.append(np.mean(conf_a_max[mask]))
-        else:
-            bin_accs_a.append(0)
-            bin_confs_a.append((bin_bounds[b] + bin_bounds[b+1])/2)
-    ax.plot([0, 1], [0, 1], "k--", label="Perfect Calibration")
-    ax.plot(bin_confs_a, bin_accs_a, "s-", color="red", label=f"Model A PyTorch (ECE={ece_a:.4f})")
-    ax.set_title("Reliability Diagram - Model A (PyTorch Best.pth)")
-    ax.set_xlabel("Confidence")
-    ax.set_ylabel("Accuracy")
-    ax.legend()
-    plt.tight_layout()
-    plt.savefig(REPORTS_DIR / "calibration_model_a.png", dpi=200)
-    plt.close()
-
-    fig, ax = plt.subplots(figsize=(6, 6))
-    conf_b_max = np.max(probs_b_arr, axis=1)
-    acc_b_corr = (preds_b == gt_arr).astype(float)
-    bin_accs_b = []
-    bin_confs_b = []
-    for b in range(10):
-        mask = (conf_b_max > bin_bounds[b]) & (conf_b_max <= bin_bounds[b+1])
-        if np.sum(mask) > 0:
-            bin_accs_b.append(np.mean(acc_b_corr[mask]))
-            bin_confs_b.append(np.mean(conf_b_max[mask]))
-        else:
-            bin_accs_b.append(0)
-            bin_confs_b.append((bin_bounds[b] + bin_bounds[b+1])/2)
-    ax.plot([0, 1], [0, 1], "k--", label="Perfect Calibration")
-    ax.plot(bin_confs_b, bin_accs_b, "o-", color="blue", label=f"Model B ONNX (ECE={ece_b:.4f})")
-    ax.set_title("Reliability Diagram - Model B (ONNX Mobile)")
-    ax.set_xlabel("Confidence")
-    ax.set_ylabel("Accuracy")
-    ax.legend()
-    plt.tight_layout()
-    plt.savefig(REPORTS_DIR / "calibration_model_b.png", dpi=200)
-    plt.close()
-
-    # --------------------------------------------------------------------------
-    # 13. CASE CLASSIFICATION DECISION
-    # --------------------------------------------------------------------------
-    if agree_rate >= 0.999 and abs(acc_a - acc_b) < 0.001:
-        case_decision = "CASE A — Hai model thực sự tương đương 100% (High Agreement & Identical Distribution)"
-    elif agree_rate < 0.98:
-        case_decision = "CASE B — Decision Behavior có sự khác biệt (Disagreement Detected)"
-    else:
-        case_decision = "CASE A — Tương đương cao"
-
-    # Save Summary
-    summary_data = {
-        "metadata": {
-            "checkpoint_model_a": str(CHECKPOINT_A),
-            "checkpoint_model_b_onnx": str(CHECKPOINT_ONNX),
-            "dataset_path": str(DATASET_DIR),
-            "total_samples": total_images,
-            "class_ordering": class_order,
-            "pytorch_version": torch.__version__,
-            "device": str(device),
-        },
-        "agreement": {
-            "total_images": total_images,
-            "agree_count": agree_count,
-            "disagree_count": disagree_count,
-            "agree_rate": agree_rate,
-            "disagree_rate": disagree_rate,
-        },
-        "disagreement_breakdown": {
-            "a_correct_b_wrong": a_correct_b_wrong,
-            "a_wrong_b_correct": a_wrong_b_correct,
-            "both_wrong_diff_class": both_wrong_diff,
-        },
-        "confidence_margin": {
-            "model_a_pytorch": {
-                "conf_mean": conf_a_mean,
-                "conf_median": conf_a_median,
-                "margin_mean": margin_a_mean,
-                "margin_median": margin_a_median,
-            },
-            "model_b_onnx": {
-                "conf_mean": conf_b_mean,
-                "conf_median": conf_b_median,
-                "margin_mean": margin_b_mean,
-                "margin_median": margin_b_median,
-            },
-        },
-        "probability_distribution_metrics": dist_metrics,
-        "classification_metrics": {
-            "model_a_pytorch": {"accuracy": acc_a, "balanced_accuracy": bal_acc_a, "macro_f1": macro_f1_a, "ece": ece_a, "brier_score": brier_a},
-            "model_b_onnx": {"accuracy": acc_b, "balanced_accuracy": bal_acc_b, "macro_f1": macro_f1_b, "ece": ece_b, "brier_score": brier_b},
-            "per_class": per_class_metrics,
-        },
-        "image_distribution_stats": image_dist_stats,
-        "case_decision": case_decision,
-    }
-
-    with open(REPORTS_DIR / "summary.json", "w", encoding="utf-8") as f:
-        json.dump(summary_data, f, indent=2, ensure_ascii=False)
-
-    summary_md = f"""# Báo Cáo So Sánh Chi Tiết Model A (PyTorch Best.pth) vs Model B (ONNX Mobile)
-
-## 📌 Kết Luận Phân Loại Trường Hợp (Case Decision)
-> **{case_decision}**
-
----
-
-## 1. Prediction Agreement
-- **Tổng số ảnh kiểm thử:** {total_images}
-- **Số ảnh đồng thuận (Agreement count):** {agree_count}
-- **Số ảnh bất đồng (Disagreement count):** {disagree_count}
-- **Tỷ lệ đồng thuận (Agreement rate):** **{agree_rate * 100:.4f}%**
-- **Tỷ lệ bất đồng (Disagreement rate):** **{disagree_rate * 100:.4f}%**
-
----
-
-## 2. Phân Tích Bất Đồng (Disagreement Breakdown)
-- **Model A (PyTorch) đúng, Model B (ONNX) sai:** {a_correct_b_wrong} ảnh
-- **Model A (PyTorch) sai, Model B (ONNX) đúng:** {a_wrong_b_correct} ảnh
-- **Cả hai cùng sai (khác class):** {both_wrong_diff} ảnh
-
----
-
-## 3. So Sánh Metric Phân Loại (Classification Metrics)
-
-| Chỉ số (Metric) | Model A (PyTorch Best.pth) | Model B (ONNX Mobile) | Chênh lệch (ONNX - PyTorch) |
-| :--- | :---: | :---: | :---: |
-| **Accuracy** | {acc_a * 100:.2f}% | {acc_b * 100:.2f}% | {(acc_b - acc_a) * 100:+.2f}% |
-| **Balanced Accuracy** | {bal_acc_a * 100:.2f}% | {bal_acc_b * 100:.2f}% | {(bal_acc_b - bal_acc_a) * 100:+.2f}% |
-| **Macro F1 Score** | {macro_f1_a * 100:.2f}% | {macro_f1_b * 100:.2f}% | {(macro_f1_b - macro_f1_a) * 100:+.2f}% |
-| **ECE (Calibration Error)** | {ece_a:.4f} | {ece_b:.4f} | {ece_b - ece_a:+.4f} |
-| **Brier Score** | {brier_a:.4f} | {brier_b:.4f} | {brier_b - brier_a:+.4f} |
-
----
-
-## 4. Bảng Chỉ Số Phân Bố Xác Suất (Distribution Comparison)
-
-- **Cosine Similarity (Mean):** **{dist_metrics['cosine_similarity']['mean']:.8f}**
-- **L1 Distance (Mean):** {dist_metrics['l1_distance']['mean']:.8f}
-- **Max Absolute Difference (Mean):** {dist_metrics['max_abs_diff']['mean']:.8f}
-- **Jensen-Shannon Divergence (Mean):** {dist_metrics['js_divergence']['mean']:.8f}
-
----
-
-## 📁 Tệp Báo Cáo Đã Xuất:
-- `reports/model_comparison/summary.json`
-- `reports/model_comparison/summary.md`
-- `reports/model_comparison/all_predictions.csv`
-- `reports/model_comparison/model_disagreement.csv`
-- `reports/model_comparison/confusion_model_a.png`
-- `reports/model_comparison/confusion_model_b.png`
-- `reports/model_comparison/calibration_model_a.png`
-- `reports/model_comparison/calibration_model_b.png`
-"""
-
-    with open(REPORTS_DIR / "summary.md", "w", encoding="utf-8") as f:
-        f.write(summary_md)
-
-    print("=" * 80)
-    print("✅ HOÀN THÀNH SO SÁNH MODEL A (PyTorch) VS MODEL B (ONNX Mobile)!")
-    print(f"👉 Kết luận: {case_decision}")
-    print("=" * 80 + "\n")
+    parser = argparse.ArgumentParser(description=__doc__, formatter_class=argparse.RawDescriptionHelpFormatter)
+    parser.add_argument("--checkpoint", type=Path, default=EDGE_DIR / "flood_mobilenetv3_large_best.pth")
+    parser.add_argument("--onnx", type=Path, default=EXPORT_DIR / "flood_mobilenetv3_large.onnx")
+    parser.add_argument("--pte", type=Path, default=EXPORT_DIR / "flood_mobilenetv3_large.pte")
+    parser.add_argument("--manifest", type=Path, default=EXPORT_DIR / "model_manifest.json")
+    parser.add_argument("--config", type=Path, default=CONFIG_JSON)
+    parser.add_argument("--split-csv", type=Path, default=SPLIT_CSV)
+    parser.add_argument("--dataset-dir", type=Path, default=DATASET_DIR)
+    parser.add_argument("--report-dir", type=Path, default=REPORTS_DIR / "pth_onnx_pte")
+    parser.add_argument("--skip-pte", action="store_true", help="chỉ PTH/ONNX; báo cáo ghi rõ PTE không chạy")
+    parser.add_argument("--limit", type=int, help="smoke test vài ảnh, không phải full test")
+    parser.add_argument("--no-plots", action="store_true")
+    parser.add_argument("--verbose", action="store_true", help="log chi tiết từng model/ảnh")
+    args = parser.parse_args()
+    args.report_dir.mkdir(parents=True, exist_ok=True)
+    log_path = args.report_dir / "compare.log"
+    logging.basicConfig(level=logging.INFO, format="%(asctime)s [%(levelname)s] %(name)s: %(message)s",
+                        datefmt="%Y-%m-%d %H:%M:%S", force=True,
+                        handlers=[logging.StreamHandler(), logging.FileHandler(log_path, mode="w", encoding="utf-8")])
+    LOGGER.setLevel(logging.DEBUG if args.verbose else logging.INFO)
+    LOGGER.info("Starting comparison; log=%s", log_path.resolve())
+    config, items, metadata = prepare_test(args.config, args.split_csv, args.dataset_dir, args.limit)
+    LOGGER.info("Checking manifest and model hashes: %s", args.manifest)
+    manifest = json.loads(args.manifest.read_text(encoding="utf-8"))
+    check_manifest(manifest, config)
+    check_hash(args.checkpoint, manifest.get("checkpoint_sha256"))
+    check_hash(args.onnx, manifest.get("onnx_sha256"))
+    if not args.skip_pte:
+        if not args.pte.is_file():
+            raise FileNotFoundError(f"Chưa có PTE: {args.pte}. Export PTE trước, hoặc chọn --skip-pte.")
+        check_hash(args.pte, manifest.get("pte_sha256"))
+    LOGGER.info("Manifest/model hashes passed")
+    if args.skip_pte:
+        LOGGER.warning("PTE skipped by user (--skip-pte)")
+    runners = {"pth": pth_runner(args.checkpoint, config), "onnx": onnx_runner(args.onnx, config)}
+    files = {"pth": args.checkpoint, "onnx": args.onnx}
+    if not args.skip_pte:
+        runners["pte"] = pte_runner(args.pte, manifest.get("executorch_runtime"))
+        files["pte"] = args.pte
+    metadata.update(manifest=str(args.manifest.resolve()), manifest_sha256=sha256(args.manifest),
+                    pte_status="skipped_by_user" if args.skip_pte else "executed",
+                    pytorch_version=importlib.metadata.version("torch"),
+                    onnxruntime_version=importlib.metadata.version("onnxruntime"),
+                    executorch_runtime=manifest.get("executorch_runtime") if not args.skip_pte else None)
+    write_comparison(runners, items, config, {name: artifact(path) for name, path in files.items()},
+                     metadata, args.report_dir, args.no_plots)
 
 
 if __name__ == "__main__":
-    main()
+    try:
+        main()
+    except KeyboardInterrupt:
+        LOGGER.warning("Comparison interrupted by user; reports may be incomplete")
+        raise SystemExit(130)
+    except Exception:
+        LOGGER.exception("Comparison failed; reports may be incomplete")
+        raise SystemExit(1)

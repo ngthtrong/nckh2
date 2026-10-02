@@ -1,209 +1,236 @@
-"""Script Kiểm Thử & Kiểm Chứng Hệ Thống Theo 5 Tiêu Chí NCKH (USENIX Framework):
+"""Xác minh kỹ thuật PTH/ONNX FP32 trên ảnh test thật, không train/export.
 
-1. Preprocessing (RGB/BGR, Normalization, NCHW vs NHWC, Resize).
-2. Datatype / Precision (float32, float16, INT8/uint8, Quantization errors).
-3. Execution Provider (CPU, XNNPACK, NNAPI, CUDA).
-4. Graph Optimization / Operator Implementation (Conv, Softmax dim, HardSwish).
-5. Postprocessing & Label Mapping (Argmax, Class order 1-to-1).
-
-Run:
-    .venv\\Scripts\\python.exe tools/verify_pipeline.py
+Từ tools/: python verify_pipeline.py (mặc định 3 ảnh).
+Chẩn đoán không có ONNX Runtime: python verify_pipeline.py --onnx-engine reference
+Full test: python verify_pipeline.py --full-test
+Báo cáo: products/fe/reports/verification/. Exit: 0=pass_local, 1=fail, 2=incomplete.
+Không chứng nhận Flutter, partition hay latency mobile. PTE/INT8 dùng script compare riêng.
 """
-
 from __future__ import annotations
 
+import argparse
+from collections import Counter
+import importlib.metadata
 import json
-import time
 from pathlib import Path
 
 import numpy as np
-import onnx
-import onnxruntime as ort
-import torch
-from torch import nn
-from torchvision import models, transforms
-from PIL import Image, ImageOps
 
-ROOT = Path(__file__).resolve().parents[1]
-CHECKPOINT_PTH = (
-    ROOT
-    / "model"
-    / "models"
-    / "mobilenetv3_large_2809"
-    / "flood_mobilenetv3_large_best.pth"
-)
-CHECKPOINT_ONNX = ROOT / "app" / "assets" / "models" / "model.onnx"
-CONFIG_JSON = (
-    ROOT / "model" / "models" / "mobilenetv3_large_2809" / "config_mobilenetv3_large.json"
-)
-LABELS_JSON = ROOT / "app" / "assets" / "labels.json"
+from compare_models import (CONFIG_JSON, DATASET_DIR, EDGE_DIR, EXPORT_DIR, REPORTS_DIR,
+                            ROOT, SPLIT_CSV, check_hash, check_manifest, evaluate_models,
+                            pairwise_metrics, prepare_test, preprocess, pth_runner, sha256)
+from quantize_model import MEAN, STD, session, validate_input_shape
+
+CHECKS = ("preprocessing", "precision", "execution_provider", "graph_parity", "label_mapping")
 
 
-def build_model(num_classes: int, dropout: float) -> nn.Module:
-    model = models.mobilenet_v3_large(weights=None)
-    classifier = list(model.classifier.children())[:-1]
-    in_features = model.classifier[-1].in_features
-    model.classifier = nn.Sequential(
-        *classifier,
-        nn.Sequential(
-            nn.Dropout(p=dropout),
-            nn.Linear(in_features, num_classes),
-        ),
-    )
-    return model
+def inspect_graph(path: Path, config: dict):
+    import onnx
+
+    graph = onnx.load(str(path))
+    onnx.checker.check_model(graph, full_check=True)
+    if len(graph.graph.input) != 1 or len(graph.graph.output) != 1:
+        raise ValueError("Cần graph có một input và một output.")
+    input_info, output_info = graph.graph.input[0], graph.graph.output[0]
+    input_shape = [dim.dim_param or dim.dim_value or None
+                   for dim in input_info.type.tensor_type.shape.dim]
+    output_shape = [dim.dim_param or dim.dim_value or None
+                    for dim in output_info.type.tensor_type.shape.dim]
+    validate_input_shape(input_shape, config["image_size"])
+    if len(output_shape) != 2 or output_shape[1] != len(config["class_order"]):
+        raise ValueError(f"Output shape không khớp class_order: {output_shape}")
+    if (input_info.type.tensor_type.elem_type != onnx.TensorProto.FLOAT
+            or output_info.type.tensor_type.elem_type != onnx.TensorProto.FLOAT):
+        raise ValueError("Input/output phải là float32.")
+    operators = Counter(node.op_type for node in graph.graph.node)
+    quantized = {name: count for name, count in operators.items() if "Quant" in name or "Integer" in name}
+    initializer_types = Counter(onnx.TensorProto.DataType.Name(value.data_type)
+                                for value in graph.graph.initializer)
+    if quantized or any(name in initializer_types for name in ("FLOAT16", "BFLOAT16", "DOUBLE", "INT8", "UINT8")):
+        raise ValueError("Graph không phải FP32 thuần; INT8 dùng compare_fp32_int8.py.")
+    return graph, {"input_shape": input_shape, "output_shape": output_shape,
+                   "input_dtype": "float32", "output_dtype": "float32",
+                   "initializer_types": dict(initializer_types), "quantized_nodes": quantized,
+                   "node_count": len(graph.graph.node), "operators": dict(operators)}
 
 
-def load_checkpoint(path: Path) -> tuple[dict[str, torch.Tensor], dict]:
-    checkpoint = torch.load(path, map_location="cpu", weights_only=False)
-    if isinstance(checkpoint, dict):
-        for key in ("model_state_dict", "state_dict", "model"):
-            state_dict = checkpoint.get(key)
-            if isinstance(state_dict, dict):
-                return state_dict, checkpoint
-        if all(isinstance(value, torch.Tensor) for value in checkpoint.values()):
-            return checkpoint, checkpoint
-    raise ValueError(f"Unsupported checkpoint format: {path}")
+def check_softmax(graph) -> dict:
+    output = graph.graph.output[0].name
+    producer = next((node for node in graph.graph.node if output in node.output), None)
+    if producer is None or producer.op_type != "Softmax":
+        raise ValueError("Graph output không được tạo trực tiếp bởi Softmax.")
+    opset = next(item.version for item in graph.opset_import if item.domain in ("", "ai.onnx"))
+    axis = next((attribute.i for attribute in producer.attribute if attribute.name == "axis"),
+                -1 if opset >= 13 else 1)
+    if axis not in (1, -1):  # Output [batch, classes], softmax phải theo classes.
+        raise ValueError(f"Softmax axis không theo classes: {axis}")
+    return {"softmax_axis": axis, "opset": opset}
 
 
-def run_verification() -> None:
-    print("=" * 80)
-    print("🔬 BÁO CÁO KIỂM THỬ KỸ THUẬT DÂY CHUYỀN INFERENCE (USENIX 2023 FRAMEWORK)")
-    print("=" * 80)
+def finalize(result: dict) -> dict:
+    statuses = [value["status"] for value in result["checks"].values()]
+    result["passed_checks"] = statuses.count("pass")
+    result["failed_checks"] = statuses.count("fail")
+    result["not_tested_checks"] = statuses.count("not_tested")
+    if result["preflight"]["status"] == "fail" or "fail" in statuses:
+        result["status"], result["exit_code"] = "fail", 1
+    elif "not_tested" in statuses:
+        result["status"], result["exit_code"] = "incomplete", 2
+    else:
+        result["status"], result["exit_code"] = "pass_local", 0
+    return result
 
-    # Nạp Config & Labels
-    config = json.loads(CONFIG_JSON.read_text(encoding="utf-8"))
-    class_order = config["class_order"]
-    labels_app = json.loads(LABELS_JSON.read_text(encoding="utf-8"))
 
-    # --------------------------------------------------------------------------
-    # tiêu chí 1: PREPROCESSING (RGB/BGR, NCHW vs NHWC, Normalization)
-    # --------------------------------------------------------------------------
-    print("\n[1] BÀO CHẾ TIỀN XỬ LÝ (PREPROCESSING VERIFICATION)")
-    print("--------------------------------------------------------------------------")
-    image_size = int(config.get("image_size", 256))
-    mean = [0.485, 0.456, 0.406]
-    std = [0.229, 0.224, 0.225]
-    letterbox_fill = tuple(config.get("letterbox_fill", [124, 116, 104]))
+def run_verification(args) -> dict:
+    result = {
+        "scope": "local_PTH_ONNX_FP32",
+        "metadata": {"checkpoint": str(args.checkpoint.resolve()), "onnx": str(args.onnx.resolve()),
+                     "onnx_engine": args.onnx_engine, "atol": args.atol, "rtol": args.rtol},
+        "preflight": {"status": "not_tested"},
+        "checks": {name: {"status": "not_tested", "reason": "Chưa chạy."} for name in CHECKS},
+        "mobile": {"status": "not_tested",
+                   "reason": "Không chạy Flutter/device; chưa kiểm tra pixel preprocessing, partition hoặc latency mobile."},
+    }
+    try:
+        if not np.isfinite([args.atol, args.rtol]).all() or min(args.atol, args.rtol) < 0:
+            raise ValueError("Tolerance phải hữu hạn và >= 0.")
+        config, items, metadata = prepare_test(
+            args.config, args.split_csv, args.dataset_dir, None if args.full_test else args.limit)
+        manifest = json.loads(args.manifest.read_text(encoding="utf-8"))
+        check_manifest(manifest, config)
+        check_hash(args.checkpoint, manifest.get("checkpoint_sha256"))
+        check_hash(args.onnx, manifest.get("onnx_sha256"))
+        result["metadata"].update(metadata, n_images=len(items), class_order=config["class_order"],
+                                  input_size=config["image_size"], manifest=str(args.manifest.resolve()),
+                                  manifest_sha256=sha256(args.manifest),
+                                  checkpoint_sha256=manifest["checkpoint_sha256"], onnx_sha256=manifest["onnx_sha256"])
+        result["preflight"] = {"status": "pass", "reason": "Config/hash/split độc lập khớp; không tự chia lại dataset."}
+    except Exception as error:
+        result["preflight"] = {"status": "fail", "error": str(error)}
+        return finalize(result)
 
-    print(f"  • Kích thước ảnh đầu vào: {image_size}x{image_size}")
-    print(f"  • Thứ tự Kênh Màu: RGB (Khớp giữa PyTorch PIL và Flutter RGBA filter)")
-    print(f"  • Layout Tensor: NCHW [Batch=1, Channels=3, Height={image_size}, Width={image_size}]")
-    print(f"  • Chuẩn hóa ImageNet: Mean={mean}, Std={std}")
+    state = {}
 
-    # Tạo sample image ngẫu nhiên để test pipeline
-    dummy_img = Image.new("RGB", (320, 180), color=(128, 150, 200))
-    py_transform = transforms.Compose([
-        transforms.Lambda(lambda image: ImageOps.pad(
-            image,
-            (image_size, image_size),
-            method=Image.Resampling.BICUBIC,
-            color=letterbox_fill,
-        )),
-        transforms.ToTensor(),
-        transforms.Normalize(mean=mean, std=std),
-    ])
-    tensor_py = py_transform(dummy_img).unsqueeze(0) # [1, 3, image_size, image_size]
+    def check(name, function):
+        try:
+            result["checks"][name] = {"status": "pass", **function()}
+        except Exception as error:
+            result["checks"][name] = {"status": "fail", "error": str(error)}
 
-    # Mô phỏng Flutter Preprocessing (Raw RGBA -> RGB NCHW)
-    img_resized = ImageOps.pad(
-        dummy_img,
-        (image_size, image_size),
-        method=Image.Resampling.BICUBIC,
-        color=letterbox_fill,
-    )
-    rgba_bytes = img_resized.convert("RGBA").tobytes()
-    px_count = image_size * image_size
-    data_flutter = np.zeros((1, 3, image_size, image_size), dtype=np.float32)
+    def preprocessing_check():
+        for path, _ in items:
+            tensor = preprocess(path, config["image_size"], config["letterbox_fill"])
+            if (tensor.shape != (1, 3, config["image_size"], config["image_size"])
+                    or tensor.dtype != np.float32 or not np.isfinite(tensor).all()):
+                raise ValueError(f"Tensor ảnh không đúng NCHW/FP32: {path}")
+        return {"n_images": len(items), "pipeline": "EXIF -> RGB -> letterbox BILINEAR -> ImageNet NCHW",
+                "mean": MEAN.tolist(), "std": STD.tolist(), "flutter_pixel_parity": "not_tested"}
 
-    for i in range(px_count):
-        r = rgba_bytes[i * 4] / 255.0
-        g = rgba_bytes[i * 4 + 1] / 255.0
-        b = rgba_bytes[i * 4 + 2] / 255.0
-        data_flutter[0, 0, i // image_size, i % image_size] = (r - mean[0]) / std[0]
-        data_flutter[0, 1, i // image_size, i % image_size] = (g - mean[1]) / std[1]
-        data_flutter[0, 2, i // image_size, i % image_size] = (b - mean[2]) / std[2]
+    def precision_check():
+        graph, details = inspect_graph(args.onnx, config)
+        state["graph"] = graph
+        return details
 
-    diff_prep = np.max(np.abs(tensor_py.numpy() - data_flutter))
-    print(f"  ✓ Độ chênh lệch giữa PyTorch Preprocessing & Flutter Preprocessing: {diff_prep:.8f}")
-    if diff_prep < 1e-4:
-        print("  => KẾT LUẬN [1]: Preprocessing MATCH 100% (Không có lỗi RGB/BGR hay NCHW)!")
+    def runtime_check():
+        if "graph" not in state:
+            return {"status": "not_tested", "reason": "Graph chưa qua kiểm tra precision/shape."}
+        if args.onnx_engine == "reference":
+            from onnx.reference import ReferenceEvaluator
+            state["runtime"] = ReferenceEvaluator(state["graph"])
+            return {"status": "not_tested", "engine": "onnx.reference.ReferenceEvaluator",
+                    "reason": "Chỉ kiểm tra số học; không xác nhận ONNX Runtime hay execution provider mobile."}
+        runtime = session(args.onnx)
+        state["runtime"] = runtime
+        return {"engine": "onnxruntime", "version": importlib.metadata.version("onnxruntime"),
+                "providers": runtime.get_providers(), "scope": "CPU desktop, 1 luồng",
+                "mobile_partition": "not_tested"}
 
-    # --------------------------------------------------------------------------
-    # tiêu chí 2: DATATYPE / PRECISION (float32 vs quantization)
-    # --------------------------------------------------------------------------
-    print("\n[2] KIỂU DỮ LIỆU & ĐỘ CHÍNH XÁC (DATATYPE & PRECISION)")
-    print("--------------------------------------------------------------------------")
-    onnx_model = onnx.load(str(CHECKPOINT_ONNX))
-    in_type = onnx_model.graph.input[0].type.tensor_type.elem_type
-    out_type = onnx_model.graph.output[0].type.tensor_type.elem_type
-    quant_nodes = [node.op_type for node in onnx_model.graph.node if "Quant" in node.op_type or "Integer" in node.op_type]
+    def graph_parity_check():
+        if "runtime" not in state:
+            return {"status": "not_tested", "reason": "Không có runtime để chạy graph."}
+        details = check_softmax(state["graph"])
+        input_name = state["graph"].graph.input[0].name
+        runners = {"pth": pth_runner(args.checkpoint, config),
+                   "onnx": lambda tensor: state["runtime"].run(None, {input_name: tensor})[0]}
+        probabilities, _, rows = evaluate_models(runners, items, config)
+        state["probabilities"] = probabilities
+        state["predictions"] = [{"image_path": row["image_path"], "ground_truth": row["ground_truth"],
+                                 "pred_pth": row["pred_pth"], "pred_onnx": row["pred_onnx"]}
+                                for row in rows]
+        pair = pairwise_metrics(probabilities["pth"], probabilities["onnx"], args.atol, args.rtol)
+        return {"status": "pass" if pair["probabilities_close"] else "fail",
+                **details, **pair, "checkpoint_loading": "strict=True",
+                "reason": "Sai số đo thực tế trên test, không phải accuracy hay chứng nhận toàn bộ dữ liệu."}
 
-    type_map = {1: "float32 (FLOAT)", 10: "float16", 2: "uint8", 3: "int8"}
-    print(f"  • Kiểu dữ liệu Input:  {type_map.get(in_type, in_type)}")
-    print(f"  • Kiểu dữ liệu Output: {type_map.get(out_type, out_type)}")
-    print(f"  • Số lượng Quantized Nodes (uint8/int8): {len(quant_nodes)}")
+    def labels_check():
+        labels = json.loads(args.labels.read_text(encoding="utf-8"))
+        if labels != config["class_order"] or labels != manifest["class_order"]:
+            raise ValueError(f"Thứ tự nhãn app/config/manifest không khớp: {labels}")
+        if "probabilities" not in state:
+            return {"status": "not_tested", "class_order": labels,
+                    "reason": "Nhãn khớp nhưng chưa chạy output để xác minh argmax."}
+        probabilities = state["probabilities"]
+        agreement = float((probabilities["pth"].argmax(axis=1) == probabilities["onnx"].argmax(axis=1)).mean())
+        return {"status": "pass" if agreement == 1 else "fail",
+                "class_order": labels, "top1_agreement": agreement,
+                "reason": "Đồng thuận trên ảnh đã kiểm tra; không đồng nghĩa accuracy 100%."}
 
-    if len(quant_nodes) == 0 and in_type == 1:
-        print("  => KẾT LUẬN [2]: Model chạy ở chuẩn Float32 (FP32). KHÔNG BỊ LỖI DATATYPE CONVERSION (USENIX 2023)!")
+    check("preprocessing", preprocessing_check)
+    check("precision", precision_check)
+    check("execution_provider", runtime_check)
+    if result["checks"]["preprocessing"]["status"] == "pass":
+        check("graph_parity", graph_parity_check)
+    check("label_mapping", labels_check)
+    if "predictions" in state:
+        result["predictions"] = state["predictions"]
+    return finalize(result)
 
-    # --------------------------------------------------------------------------
-    # tiêu chí 3: EXECUTION PROVIDER (CPU, XNNPACK, CUDA)
-    # --------------------------------------------------------------------------
-    print("\n[3] TRÌNH THỰC THI (EXECUTION PROVIDER)")
-    print("--------------------------------------------------------------------------")
-    ort_session = ort.InferenceSession(str(CHECKPOINT_ONNX))
-    providers = ort_session.get_providers()
-    print(f"  • ORT Providers khả dụng: {providers}")
-    print(f"  • Trạng thái Partition Đồ thị: Single Partition (Tất cả 118 toán tử được CPU/XNNPACK hỗ trợ 100%)")
-    print("  => KẾT LUẬN [3]: Không bị ngắt/chia đoạn đồ thị (Graph Partitioning) trên Mobile!")
 
-    # --------------------------------------------------------------------------
-    # tiêu chí 4: GRAPH OPTIMIZATION & OPERATORS (Softmax dim, Conv, Reshape)
-    # --------------------------------------------------------------------------
-    print("\n[4] TỐI ƯU ĐỒ THỊ & TOÁN TỬ (GRAPH OPTIMIZATION)")
-    print("--------------------------------------------------------------------------")
-    softmax_nodes = [node for node in onnx_model.graph.node if node.op_type == "Softmax"]
-    print(f"  • Số lượng nút Softmax tích hợp sẵn trong ONNX: {len(softmax_nodes)}")
-    if softmax_nodes:
-        axis_attr = [a.i for a in softmax_nodes[0].attribute if a.name == "axis"]
-        axis_val = axis_attr[0] if axis_attr else 1
-        print(f"  • Chiều Softmax (axis): {axis_val} (Tương ứng dim=1 trên PyTorch)")
-    print("  => KẾT LUẬN [4]: Nút Softmax được bọc chuẩn xác trong đồ thị ONNX, trả trực tiếp Xác suất [0->1]!")
+def write_report(result: dict, report_dir: Path) -> None:
+    report_dir.mkdir(parents=True, exist_ok=True)
+    (report_dir / "verification.json").write_text(
+        json.dumps(result, ensure_ascii=False, indent=2, allow_nan=False), encoding="utf-8")
+    lines = ["# Xác minh pipeline PTH/ONNX FP32", "", f"Local status: {result['status']} (exit {result['exit_code']}).",
+             f"PASS: {result['passed_checks']}; FAIL: {result['failed_checks']}; NOT TESTED: {result['not_tested_checks']}.",
+             f"Scope: {result['metadata'].get('evaluation_scope', 'preflight_only')}; "
+             f"ảnh: {result['metadata'].get('n_images', 0)}; engine: {result['metadata']['onnx_engine']}.", "",
+             f"Preflight: {result['preflight']['status']}.",
+             result["preflight"].get("error", result["preflight"].get("reason", "")), "",
+             "| Check | Status | Chi tiết |", "|---|---|---|"]
+    for name, value in result["checks"].items():
+        detail = value.get("error", value.get("reason", "Xem thông số trong verification.json."))
+        lines.append(f"| {name} | {value['status']} | {detail.replace('|', '/').replace(chr(10), ' ')} |")
+    lines += ["", "Mobile: NOT TESTED. " + result["mobile"]["reason"],
+              "Đây là kiểm tra kỹ thuật cục bộ, không phải full-test accuracy hay nghiệm thu trên điện thoại."]
+    report = "\n".join(lines) + "\n"
+    (report_dir / "verification.md").write_text(report, encoding="utf-8")
+    print(report)
+    print(f"Reports: {report_dir.resolve()}")
 
-    # --------------------------------------------------------------------------
-    # tiêu chí 5: POSTPROCESSING & LABEL MAPPING
-    # --------------------------------------------------------------------------
-    print("\n[5] HẬU XỬ LÝ & ÁNH XẠ NHÃN (POSTPROCESSING & LABEL MAPPING)")
-    print("--------------------------------------------------------------------------")
-    print(f"  • Thứ tự nhãn trong Config Checkpoint: {class_order}")
-    print(f"  • Thứ tự nhãn trong App labels.json:  {labels_app}")
-    is_label_match = class_order == labels_app
-    print(f"  • Khớp nhãn 1-1: {is_label_match}")
 
-    # Chạy so sánh thực tế PyTorch vs ONNX
-    state_dict, _ = load_checkpoint(CHECKPOINT_PTH)
-    state_dict = {k.removeprefix("module."): v for k, v in state_dict.items()}
-    pt_model = build_model(len(class_order), float(config.get("dropout", 0.35)))
-    pt_model.load_state_dict(state_dict, strict=False)
-    pt_model.eval()
-
-    with torch.no_grad():
-        pt_out = torch.softmax(pt_model(tensor_py), dim=1).numpy()[0]
-
-    onnx_out = ort_session.run(None, {ort_session.get_inputs()[0].name: tensor_py.numpy()})[0][0]
-
-    diff_output = np.max(np.abs(pt_out - onnx_out))
-    print(f"  • Đầu ra PyTorch: {pt_out}")
-    print(f"  • Đầu ra ONNX:    {onnx_out}")
-    print(f"  ✓ Sai số kết quả lớn nhất (Max Diff): {diff_output:.8f}")
-
-    if is_label_match and diff_output < 1e-5:
-        print("  => KẾT LUẬN [5]: Postprocessing & Label Mapping KHỚP TUYỆT ĐỐI (Sai số = 0.0000002)!")
-
-    print("\n" + "=" * 80)
-    print("🎉 TỔNG KẾT: HỆ THỐNG ĐẠT CHUẨN 5/5 TIÊU CHÍ KĨ THUẬT NCKH! KHÔNG CÓ LỖI CHUYỂN ĐỔI.")
-    print("=" * 80 + "\n")
+def main(argv=None) -> int:
+    parser = argparse.ArgumentParser(description=__doc__, formatter_class=argparse.RawDescriptionHelpFormatter)
+    parser.add_argument("--checkpoint", type=Path, default=EDGE_DIR / "flood_mobilenetv3_large_best.pth")
+    parser.add_argument("--onnx", type=Path, default=EXPORT_DIR / "flood_mobilenetv3_large.onnx")
+    parser.add_argument("--manifest", type=Path, default=EXPORT_DIR / "model_manifest.json")
+    parser.add_argument("--config", type=Path, default=CONFIG_JSON)
+    parser.add_argument("--split-csv", type=Path, default=SPLIT_CSV)
+    parser.add_argument("--dataset-dir", type=Path, default=DATASET_DIR)
+    parser.add_argument("--labels", type=Path, default=ROOT / "app" / "assets" / "labels.json")
+    parser.add_argument("--report-dir", type=Path, default=REPORTS_DIR / "verification")
+    scope = parser.add_mutually_exclusive_group()
+    scope.add_argument("--limit", type=int, default=3)
+    scope.add_argument("--full-test", action="store_true")
+    parser.add_argument("--onnx-engine", choices=("ort", "reference"), default="ort")
+    parser.add_argument("--atol", type=float, default=1e-5)
+    parser.add_argument("--rtol", type=float, default=1e-4)
+    args = parser.parse_args(argv)
+    if not np.isfinite([args.atol, args.rtol]).all() or min(args.atol, args.rtol) < 0:
+        parser.error("--atol/--rtol phải hữu hạn và >= 0.")
+    result = run_verification(args)
+    write_report(result, args.report_dir)
+    return result["exit_code"]
 
 
 if __name__ == "__main__":
-    run_verification()
+    raise SystemExit(main())

@@ -1,0 +1,47 @@
+{
+  "model_version": "mobilenetv3_large",
+  "seed": 42,
+  "class_order": [
+    "low",
+    "medium",
+    "high",
+    "non_flood"
+  ],
+  "model_name": "mobilenetv3_large",
+  "pretrained": true,
+  "image_size": 256,
+  "preprocess": "letterbox",
+  "letterbox_fill": [
+    124,
+    116,
+    104
+  ],
+  "dropout": 0.25,
+  "batch_size": 32,
+  "num_epochs": 35,
+  "backbone_lr": 1e-05,
+  "head_lr": 0.0002,
+  "weight_decay": 0.0005,
+  "label_smoothing": 0.05,
+  "severity_loss_weight": 0.1,
+  "critical_distance": 2,
+  "accuracy_tie_tolerance": 0.005,
+  "patience": 7,
+  "freeze_backbone_epochs": 3,
+  "num_workers": 0,
+  "use_amp": true,
+  "val_size": 0.15,
+  "test_size": 0.15,
+  "perceptual_hash_distance": 3,
+  "perceptual_mean_l1": 30,
+  "use_weighted_sampler": false,
+  "use_class_weight_loss": false,
+  "class_weight_power": 0.5,
+  "extra_class_multiplier": {
+    "low": 1.0,
+    "medium": 1.0,
+    "high": 1.15,
+    "non_flood": 1.0
+  },
+  "best_metric": "acc"
+}
