@@ -1,0 +1,152 @@
+{
+  "scope": "local_PTH_ONNX_FP32",
+  "metadata": {
+    "checkpoint": "E:\\RHNA\\1Visual\\NCKH\\nckh2\\products\\fe\\model\\Edge Ai\\flood_mobilenetv3_large_best.pth",
+    "onnx": "E:\\RHNA\\1Visual\\NCKH\\nckh2\\products\\fe\\model\\Edge Ai\\Export\\flood_mobilenetv3_large.onnx",
+    "onnx_engine": "ort",
+    "atol": 1e-05,
+    "rtol": 0.0001,
+    "config": "E:\\RHNA\\1Visual\\NCKH\\nckh2\\products\\fe\\model\\Edge Ai\\config_mobilenetv3_large.json",
+    "config_sha256": "a509ab6e22f47b2e53f2300275bb850017c50713453d5a86299d6b7594a7359e",
+    "split_csv": "E:\\RHNA\\1Visual\\NCKH\\nckh2\\products\\fe\\model\\Edge Ai\\split_train_val_test_mobilenetv3_large.csv",
+    "split_csv_sha256": "f7b52cd25411d4d1df2f7f80745a2cf430819773854345798cf7e093e3bcba45",
+    "dataset_dir": "E:\\RHNA\\1Visual\\NCKH\\nckh2\\products\\fe\\model\\Dataset_Flood",
+    "full_test_count": 256,
+    "seed": 42,
+    "evaluation_scope": "test_subset_smoke",
+    "n_images": 3,
+    "class_order": [
+      "low",
+      "medium",
+      "high",
+      "non_flood"
+    ],
+    "input_size": 256,
+    "manifest": "E:\\RHNA\\1Visual\\NCKH\\nckh2\\products\\fe\\model\\Edge Ai\\Export\\model_manifest.json",
+    "manifest_sha256": "75b2d736a0bf8aa6df6a81d7b38558466cd39069dccbb951917db0d5c3bfb42c",
+    "checkpoint_sha256": "87b03930d160382fd99c89dde1170a0f2437bd0bbe58fd00f88d80fd2b9c5780",
+    "onnx_sha256": "065574521cf47fa53b16f4dc5c581ca81669897843dd3ec0afa367d297f180c9"
+  },
+  "preflight": {
+    "status": "pass",
+    "reason": "Config/hash/split độc lập khớp; không tự chia lại dataset."
+  },
+  "checks": {
+    "preprocessing": {
+      "status": "pass",
+      "n_images": 3,
+      "pipeline": "EXIF -> RGB -> letterbox BILINEAR -> ImageNet NCHW",
+      "mean": [
+        0.48500001430511475,
+        0.4560000002384186,
+        0.4059999883174896
+      ],
+      "std": [
+        0.2290000021457672,
+        0.2240000069141388,
+        0.22499999403953552
+      ],
+      "flutter_pixel_parity": "not_tested"
+    },
+    "precision": {
+      "status": "pass",
+      "input_shape": [
+        "batch",
+        3,
+        256,
+        256
+      ],
+      "output_shape": [
+        "batch",
+        4
+      ],
+      "input_dtype": "float32",
+      "output_dtype": "float32",
+      "initializer_types": {
+        "FLOAT": 128
+      },
+      "quantized_nodes": {},
+      "node_count": 141,
+      "operators": {
+        "Conv": 62,
+        "HardSwish": 21,
+        "Relu": 19,
+        "Add": 10,
+        "GlobalAveragePool": 9,
+        "HardSigmoid": 8,
+        "Mul": 8,
+        "Flatten": 1,
+        "Gemm": 2,
+        "Softmax": 1
+      }
+    },
+    "execution_provider": {
+      "status": "pass",
+      "engine": "onnxruntime",
+      "version": "1.30.0",
+      "providers": [
+        "CPUExecutionProvider"
+      ],
+      "scope": "CPU desktop, 1 luồng",
+      "mobile_partition": "not_tested"
+    },
+    "graph_parity": {
+      "status": "pass",
+      "softmax_axis": 1,
+      "opset": 17,
+      "top1_agreement": 1.0,
+      "max_abs_diff": 1.9669532775878906e-06,
+      "mean_abs_diff": 6.351619958877563e-07,
+      "rmse": 9.226569707297635e-07,
+      "l1_mean": 2.5406479835510254e-06,
+      "l2_mean": 1.5842788343434222e-06,
+      "cosine_similarity_mean": 1.0,
+      "js_divergence_mean": 1.502267585827775e-12,
+      "probabilities_close": true,
+      "atol": 1e-05,
+      "rtol": 0.0001,
+      "checkpoint_loading": "strict=True",
+      "reason": "Sai số đo thực tế trên test, không phải accuracy hay chứng nhận toàn bộ dữ liệu."
+    },
+    "label_mapping": {
+      "status": "pass",
+      "class_order": [
+        "low",
+        "medium",
+        "high",
+        "non_flood"
+      ],
+      "top1_agreement": 1.0,
+      "reason": "Đồng thuận trên ảnh đã kiểm tra; không đồng nghĩa accuracy 100%."
+    }
+  },
+  "mobile": {
+    "status": "not_tested",
+    "reason": "Không chạy Flutter/device; chưa kiểm tra pixel preprocessing, partition hoặc latency mobile."
+  },
+  "predictions": [
+    {
+      "image_path": "E:\\RHNA\\1Visual\\NCKH\\nckh2\\products\\fe\\model\\Dataset_Flood\\low\\images - 2025-01-28T163251.007.jpg",
+      "ground_truth": "low",
+      "pred_pth": "low",
+      "pred_onnx": "low"
+    },
+    {
+      "image_path": "E:\\RHNA\\1Visual\\NCKH\\nckh2\\products\\fe\\model\\Dataset_Flood\\low\\다운로드 (54).jpg",
+      "ground_truth": "low",
+      "pred_pth": "low",
+      "pred_onnx": "low"
+    },
+    {
+      "image_path": "E:\\RHNA\\1Visual\\NCKH\\nckh2\\products\\fe\\model\\Dataset_Flood\\low\\808137151_1065873222862956_2369990287917085533_n.jpg",
+      "ground_truth": "low",
+      "pred_pth": "medium",
+      "pred_onnx": "medium"
+    }
+  ],
+  "passed_checks": 5,
+  "failed_checks": 0,
+  "not_tested_checks": 0,
+  "status": "pass_local",
+  "exit_code": 0
+}
