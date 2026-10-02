@@ -258,6 +258,8 @@ python compare_fp32_ptq_qat.py
 
 `--check-export-only` chỉ calibration tạm bằng 3 ảnh train rồi kiểm tra export, không fine-tune hay lưu model; log vẫn được ghi. QAT dùng cấu hình native tách observer trước/sau `AdaptiveAvgPool2d`, giữ quantizer trọng số Conv/Linear. Log và `export_smoke` trong manifest tách parity tham chiếu (không fusion) khỏi runtime INT8 tối ưu; giữ `atol=1e-5`, `rtol=1e-4` và ghi `false` nếu không đạt, không coi sai số FP32 làm tròn qua Q/DQ là tự động PASS. Graph thiếu Q/DQ, tràn bias làm đổi trọng số, hoặc output sai/NaN sẽ bị từ chối trước khi thay ONNX cũ. Kiểm tra này không thay thế đánh giá accuracy/Macro-F1/critical errors trên full test sau QAT hay kiểm thử mobile.
 
+`benchmark_pruning.py` là bước screen pruning không fine-tune, chỉ chọn sparsity dựa trên validation; test split không dùng. Script dùng `torch.nn.utils.prune` có sẵn, nên tạo zero weights nhưng giữ nguyên kích thước Conv/Linear. Số đo dense CPU và số byte tensor không chứng minh app nhỏ hơn hoặc chạy nhanh hơn; cần pruning cấu trúc kênh và export lại để đo lợi ích trên điện thoại.
+
 ## 5. Kiểm tra nhanh
 
 Chạy unit test Dart:
