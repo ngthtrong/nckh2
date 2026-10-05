@@ -45,6 +45,13 @@ server mới, app sẽ không tự gửi hàng đợi cũ sang server khác.
 Bản release nội bộ dùng signing debug sẵn có trong Gradle để cài thử trực tiếp;
 chưa phải bản ký phát hành trên Play Store.
 
+`android/app/proguard-rules.pro` giữ các lớp `com.facebook.jni` mà ExecuTorch
+gọi từ native code. Flutter tự áp dụng file này khi build release. Không bỏ quy
+tắc này: R8 có thể xóa lớp xử lý lỗi/`HybridData`, làm app crash lúc nạp PTE
+(`SIGABRT` trong `libfbjni`). Sau khi sửa, cài APK cập nhật đè lên bản cũ và
+kiểm tra mở app, chọn ExecuTorch (.pte), chạy "Benchmark model trên thiết bị".
+Đây là kiểm tra nạp/chạy model bằng ảnh logo, không phải đánh giá accuracy/F1.
+
 ## Cài Và Kiểm Tra Trên Điện Thoại
 
 Chuyển APK sang điện thoại và mở file để cài, hoặc bật USB debugging rồi chạy:
@@ -66,5 +73,10 @@ SMS dự phòng chỉ hoạt động khi build với số tổng đài thật b�
 `--dart-define=EMERGENCY_PHONE=...` và đã cấp quyền SMS. Khi chưa cấu hình số này,
 báo cáo offline vẫn được giữ để đồng bộ qua data sau.
 
-Nút benchmark hiện chỉ kiểm tra một lượt inference; benchmark lặp nhiều lần và
-xuất thống kê sẽ được bổ sung ở giai đoạn sau.
+Benchmark tập test được tải theo yêu cầu, không nằm trong APK. Trong Cài đặt,
+đăng nhập server bằng tài khoản `rhna`, sau đó bấm **Tải gói benchmark**; server
+chỉ cấp gói cho username này. Gói lưu trong bộ nhớ riêng của app, có thể xóa ở
+mục benchmark. Benchmark chạy offline sau khi tải.
+
+Gói server được tạo bằng `python products/be/build_benchmark_package.py` từ CSV
+và ảnh thuộc test split, rồi được đóng gói cùng backend Docker image.
