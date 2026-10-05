@@ -19,6 +19,8 @@ class OutboxLocalDataSource {
   static const boxName = 'sync_outbox';
   static const _clientIdKey = '_meta:client_id';
   static const _sequenceKey = '_meta:sequence_number';
+  static const _serverIdKey = '_meta:server_id';
+  static const _serverUrlKey = '_meta:server_url';
 
   final Uuid _uuid;
   final Random _random;
@@ -69,6 +71,12 @@ class OutboxLocalDataSource {
 
   /// ID thiết bị gửi kèm mọi message; server dùng làm chủ báo cáo.
   String get clientId => _box!.get(_clientIdKey) as String;
+
+  String? get serverId => _box!.get(_serverIdKey) as String?;
+  String? get serverUrl => _box!.get(_serverUrlKey) as String?;
+
+  Future<void> saveServer(String id, String url) =>
+      _box!.putAll({_serverIdKey: id, _serverUrlKey: url});
 
   List<SyncMessageModel> readyMessages({int limit = 50}) {
     final now = DateTime.now().toUtc();

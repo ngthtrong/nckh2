@@ -265,7 +265,10 @@ class DashboardApiTest(unittest.TestCase):
 
     def test_healthz(self):
         res = self.client.get("/healthz")
-        self.assertEqual((res.status_code, res.json()), (200, {"status": "ok"}))
+        self.assertEqual(res.status_code, 200)
+        self.assertEqual(res.json()["status"], "ok")
+        self.assertRegex(res.json()["serverId"], r"^[0-9a-f]{16}$")
+        self.assertEqual(self.client.get("/healthz").json()["serverId"], res.json()["serverId"])
 
     def test_backup_includes_images(self):
         (storage.UPLOADS_DIR / "r1_abc.jpg").write_bytes(JPEG)

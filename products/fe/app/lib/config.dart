@@ -1,13 +1,17 @@
 /// Cấu hình tập trung — sửa tại đây khi deploy thật.
 library;
 
-/// Base URL server. `10.0.2.2` = loopback của máy tính khi chạy emulator Android.
-/// Đổi thành IP LAN/VPN thật khi test trên máy vật lý hoặc deploy.
-/// Ghi đè lúc build/run: `flutter run --dart-define=SERVER_URL=http://10.0.2.2:8000`.
-const String kServerBaseUrl = String.fromEnvironment(
+/// Địa chỉ build-time là gợi ý đầu tiên; Android sẽ xác minh và tìm lại server.
+const String kConfiguredServerUrl = String.fromEnvironment(
   'SERVER_URL',
   defaultValue: 'http://localhost:8000',
 );
+String _serverBaseUrl = kConfiguredServerUrl;
+String get kServerBaseUrl => _serverBaseUrl;
+
+/// Không gửi dữ liệu đến địa chỉ cũ khi chưa xác minh được server.
+void setServerBaseUrl(String? url) =>
+    _serverBaseUrl = url ?? 'http://127.0.0.1:1';
 
 /// Số tổng đài nhận SMS fallback. Đặt lúc build/run:
 /// `--dart-define=EMERGENCY_PHONE=+84xxxxxxxxx`. Còn là số giả thì app không gửi SMS.
@@ -21,7 +25,7 @@ const String kPlaceholderEmergencyPhone = '+840000000000';
 const Duration kStatusPollInterval = Duration(seconds: 15);
 
 /// Probe throughput: server cần phục vụ 1 file tĩnh ~64KB tại đường dẫn này.
-const String kProbeUrl = '$kServerBaseUrl/probe';
+String get kProbeUrl => '$kServerBaseUrl/probe';
 
 /// Ngưỡng mạng (kbps).
 const int kStrongKbps = 1000; // >= ~1 Mbps coi là mạnh
