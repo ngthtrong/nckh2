@@ -1,0 +1,32 @@
+{
+  "checkpoint_sha256": "d88cce75bfe8ba0dc255a06829f2327131291c3b89c0579ec9c75acc3a99c904",
+  "input_size": 256,
+  "preprocess": "letterbox_rgb_124_116_104",
+  "letterbox_fill": [
+    124,
+    116,
+    104
+  ],
+  "class_order": [
+    "low",
+    "medium",
+    "high",
+    "non_flood"
+  ],
+  "onnx_sha256": "107dc2e4e01ee650d9109db98a244f5e470f782146967898051d1b348b6c7e0d",
+  "version": "mobilenetv3-mobilenetv3_large-1c78d34949fa-107dc2e4e01e-231cf56be8c7",
+  "artifacts_complete": true,
+  "model_type": "structured_pruned",
+  "source_checkpoint_sha256": "87b03930d160382fd99c89dde1170a0f2437bd0bbe58fd00f88d80fd2b9c5780",
+  "pruning": {
+    "method": "global_group_magnitude_channel",
+    "target_ratio": 0.01,
+    "round_to": null,
+    "parameter_count_before": 4207156,
+    "parameter_count_after": 4145694
+  },
+  "best_epoch": 15,
+  "parameter_count": 4145694,
+  "pte_sha256": "231cf56be8c74a530c2e91bc923f86e76761bf1bbb6b81cbd11bca8c5d769cfd",
+  "executorch_runtime": "1.4.1"
+}
