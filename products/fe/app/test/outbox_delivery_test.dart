@@ -1,8 +1,11 @@
 import 'dart:io';
+import 'dart:typed_data';
 
+import 'package:app/config.dart';
 import 'package:app/data/datasources/outbox_local_datasource.dart';
 import 'package:app/data/datasources/record_local_datasource.dart';
 import 'package:app/data/datasources/sender_remote_datasource.dart';
+import 'package:app/data/datasources/server_locator.dart';
 import 'package:app/data/datasources/sync_remote_datasource.dart';
 import 'package:app/data/models/sync_message_model.dart';
 import 'package:app/data/repositories/rescue_repository_impl.dart';
@@ -13,8 +16,9 @@ import 'package:hive_ce_flutter/hive_flutter.dart';
 /// Server giả: trả kết quả theo hàng đợi [replies] (mỗi lần gửi lấy một mã), ghi
 /// lại các batch và phát hiện hai request chạy chồng nhau.
 class _FakeSync extends SyncRemoteDataSource {
-  _FakeSync(this.replies);
+  _FakeSync(this.replies, {this.afterReply});
   final List<String> replies;
+  final void Function()? afterReply;
   var offline = false;
   final batches = <List<SyncMessageModel>>[];
   final statusQueries = <List<String>>[];
@@ -30,6 +34,7 @@ class _FakeSync extends SyncRemoteDataSource {
     batches.add(messages);
     await Future<void>.delayed(const Duration(milliseconds: 20));
     inFlight--;
+    afterReply?.call();
     return [
       for (final m in messages)
         {
@@ -47,6 +52,26 @@ class _FakeSync extends SyncRemoteDataSource {
   Future<Map<String, String>> fetchStatuses(List<String> ids) async {
     statusQueries.add(ids);
     return {for (final id in ids) id: 'dispatched'};
+  }
+}
+
+class _FakeSender extends SenderRemoteDataSource {
+  var uploads = 0;
+
+  @override
+  Future<UploadResult> upload(
+    RescueRecord rec,
+    Uint8List? image, {
+    required String clientId,
+  }) async {
+    uploads++;
+    return (
+      ok: true,
+      bytesSent: image?.length ?? 0,
+      durationMs: 1,
+      status: 201,
+      permanent: false,
+    );
   }
 }
 
@@ -73,6 +98,7 @@ void main() {
   });
 
   tearDown(() async {
+    setServerBaseUrl(kConfiguredServerUrl);
     await Hive.deleteFromDisk();
     await dir.delete(recursive: true);
   });
@@ -83,6 +109,82 @@ void main() {
     outboxDataSource: outbox,
     syncDataSource: sync,
   );
+
+  test('mất IP server: giữ message chờ rồi gửi khi tìm được IP mới', () async {
+    const url = 'http://192.168.6.20:8000';
+    var serverUp = false;
+    final locator = ServerLocator(
+      candidates: (_) async => [url],
+      probe: (candidate) async =>
+          serverUp && candidate == url ? 'abcdef0123456789' : null,
+    );
+    await locator.init(outbox);
+    final sync = _FakeSync([]);
+    final r = RescueRepositoryImpl(
+      localDataSource: records,
+      senderDataSource: SenderRemoteDataSource(),
+      outboxDataSource: outbox,
+      syncDataSource: sync,
+      serverLocator: locator,
+    );
+    await r.saveRecord(_record('ip-change'));
+    final pending = await r.sendRecord(_record('ip-change'));
+    expect(pending.synced, isFalse);
+    expect(r.getPendingCount(), 1);
+    expect(sync.batches, isEmpty);
+
+    serverUp = true;
+    expect(await r.reconnectServer(), isTrue);
+    await r.syncPendingRecords();
+    expect(r.getPendingCount(), 0);
+    expect(sync.batches, hasLength(1));
+    expect(kServerBaseUrl, url);
+  });
+
+  test('metadata đã ACK nhưng ảnh chỉ gửi sau khi xác minh IP mới', () async {
+    const oldUrl = 'http://192.168.6.10:8000';
+    const newUrl = 'http://192.168.6.20:8000';
+    var currentUrl = oldUrl;
+    var dropAfterAck = true;
+    final locator = ServerLocator(
+      candidates: (_) async => [oldUrl, newUrl],
+      probe: (url) async => url == currentUrl ? 'abcdef0123456789' : null,
+    );
+    await locator.init(outbox);
+    final sync = _FakeSync(
+      [],
+      afterReply: () {
+        if (dropAfterAck) {
+          currentUrl = '';
+          dropAfterAck = false;
+        }
+      },
+    );
+    final sender = _FakeSender();
+    final r = RescueRepositoryImpl(
+      localDataSource: records,
+      senderDataSource: sender,
+      outboxDataSource: outbox,
+      syncDataSource: sync,
+      serverLocator: locator,
+    );
+    final image = File('${dir.path}/image.jpg');
+    await image.writeAsBytes([0xFF, 0xD8, 0xFF]);
+    final record = _record(
+      'ip-image',
+      imagePath: image.path,
+    ).copyWith(sendMode: 'fullImage');
+    await r.saveRecord(record);
+    final pending = await r.sendRecord(record);
+    expect(pending.synced, isFalse);
+    expect(sender.uploads, 0);
+
+    currentUrl = newUrl;
+    expect(await r.reconnectServer(), isTrue);
+    await r.syncPendingRecords();
+    expect(sender.uploads, 1);
+    expect(r.getPendingCount(), 0);
+  });
 
   test('bị từ chối vĩnh viễn: ghi syncError, không còn chờ gửi', () async {
     final sync = _FakeSync(['INVALID_PAYLOAD']);

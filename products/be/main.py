@@ -821,11 +821,11 @@ def download_backup(images: bool = False, session: Dict[str, Any] = Admin):
 @app.get("/healthz", summary="Kiểm tra sống (cho Docker/giám sát): DB đọc được, thư mục ảnh tồn tại")
 def healthz():
     try:
-        storage.ping()
+        server_id = storage.ping()
     except Exception as exc:
         logger.error(f"[HEALTH] Lỗi: {exc}")
         return JSONResponse(status_code=503, content={"status": "error", "error": str(exc)})
-    return {"status": "ok"}
+    return {"status": "ok", "serverId": server_id}
 
 
 @app.get("/", response_class=HTMLResponse, summary="Web Dashboard điều phối")
