@@ -8,10 +8,12 @@
 \input{generated/values}
 \hypersetup{pdftitle={\ProjectTitle},pdfauthor={\PrincipalName}}
 \begin{document}
-\pagestyle{empty}
+\pagestyle{empty}\hypersetup{pageanchor=false}
 \input{frontmatter/cover}
 \input{frontmatter/title-page}
 \clearpage\pagenumbering{roman}\pagestyle{scrheadings}
+\hypersetup{pageanchor=true}
+\renewcommand{\theHtable}{front.\thepage.\arabic{table}}
 \input{frontmatter/participants}
 \tableofcontents
 \listoftables
@@ -21,6 +23,7 @@
 \input{frontmatter/research-info-en}
 \input{frontmatter/principal-investigator}
 \clearpage\pagenumbering{arabic}
+\renewcommand{\theHtable}{\theHchapter.\arabic{table}}
 \ReportMetric{body-start}{\thepage}
 \include{chapters/introduction}
 \include{chapters/01-foundations/chapter}

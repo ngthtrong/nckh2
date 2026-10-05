@@ -60,6 +60,15 @@ def main():
     # Also find grouped bbl files in the isolated output directory.
     env['TEXINPUTS'] = str(out) + os.pathsep + env.get('TEXINPUTS', '') + os.pathsep
     env['BIBINPUTS'] = str(ROOT) + os.pathsep + env.get('BIBINPUTS', '') + os.pathsep
+    backend = 'biblatex' if use_biber else 'bibtex'
+    marker = out / '.bibliography-backend'
+    previous_aux = out / f'{job}.aux'
+    incompatible_aux = previous_aux.exists() and ('\\abx@aux' in previous_aux.read_text(errors='replace')) != use_biber
+    if incompatible_aux or (marker.exists() and marker.read_text().strip() != backend):
+        for pattern in ['*.aux', '*.bbl', '*.blg', '*.bcf', '*.run.xml', '*.toc', '*.lof', '*.lot', '*.out']:
+            for artifact in out.rglob(pattern):
+                artifact.unlink()
+    marker.write_text(backend + '\n')
     print(f'Building {args.target}: {"biblatex/biber" if use_biber else "BibTeX/natbib"}', flush=True)
     run(cmd, env)
     if report:

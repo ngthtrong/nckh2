@@ -1,5 +1,9 @@
 # Run from report/. Makefile also supports environments without latexmk.
 $pdf_mode = 5;
 $xelatex = 'xelatex -interaction=nonstopmode -halt-on-error -file-line-error %O %S';
-$out_dir = 'build/content';
+$out_dir = 'build/latexmk';
 $bibtex_use = 2;
+
+# XeLaTeX cannot create nested directories for \include auxiliaries.
+use File::Path qw(make_path);
+make_path(map { "$out_dir/$_" } qw(chapters chapters/01-foundations chapters/02-data-methods chapters/03-system chapters/04-evaluation appendices));

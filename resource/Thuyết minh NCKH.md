@@ -1,15 +1,5 @@
 <div align="center">
 
-BỘ GIÁO DỤC VÀ ĐÀO TẠO
-
-**ĐẠI HỌC CẦN THƠ**
-
----
-
-# THUYẾT MINH ĐỀ TÀI NGHIÊN CỨU KHOA HỌC CỦA SINH VIÊN
-
-</div>
-
 ---
 
 ## 1. TÊN ĐỀ TÀI
@@ -20,38 +10,38 @@ BỘ GIÁO DỤC VÀ ĐÀO TẠO
 
 ## 2. MÃ SỐ ĐỀ TÀI
 
-*(Để trống)*
+THS2026-68
 
 ## 3. LĨNH VỰC ƯU TIÊN
 
-| # | Lĩnh vực | Đánh dấu |
-|---|---|:---:|
-| 1 | Khoa học cơ bản |  |
-| 2 | Công nghệ cao trong nông nghiệp, thủy sản và phát triển bền vững |  |
-| 3 | Môi trường, tài nguyên thiên nhiên và biến đổi khí hậu |  |
-| 4 | Công nghệ, công nghệ thông tin và chuyển đổi số | **X** |
-| 5 | Khoa học giáo dục, luật và xã hội nhân văn |  |
-| 6 | Phát triển kinh tế, thị trường và nông thôn |  |
-| 7 | Công nghệ sinh học và thực phẩm |  |
+| # | Lĩnh vực                                                                  | Đánh dấu |
+| - | --------------------------------------------------------------------------- | :---------: |
+| 1 | Khoa học cơ bản                                                          |            |
+| 2 | Công nghệ cao trong nông nghiệp, thủy sản và phát triển bền vững |            |
+| 3 | Môi trường, tài nguyên thiên nhiên và biến đổi khí hậu         |            |
+| 4 | Công nghệ, công nghệ thông tin và chuyển đổi số                   | **X** |
+| 5 | Khoa học giáo dục, luật và xã hội nhân văn                         |            |
+| 6 | Phát triển kinh tế, thị trường và nông thôn                        |            |
+| 7 | Công nghệ sinh học và thực phẩm                                       |            |
 
 ## 4. LĨNH VỰC NGHIÊN CỨU
 
-| Lĩnh vực | Đánh dấu |
-|---|:---:|
-| Khoa học Tự nhiên |  |
+| Lĩnh vực                           | Đánh dấu |
+| ------------------------------------ | :---------: |
+| Khoa học Tự nhiên                 |            |
 | Khoa học Kỹ thuật và Công nghệ | **X** |
-| Khoa học Y, dược |  |
-| Khoa học Nông nghiệp |  |
-| Khoa học Xã hội |  |
-| Khoa học Nhân văn |  |
+| Khoa học Y, dược                  |            |
+| Khoa học Nông nghiệp              |            |
+| Khoa học Xã hội                   |            |
+| Khoa học Nhân văn                 |            |
 
 ## 5. LOẠI HÌNH NGHIÊN CỨU
 
 | Loại hình | Đánh dấu |
-|---|:---:|
-| Cơ bản |  |
-| Ứng dụng | **X** |
-| Triển khai |  |
+| ----------- | :---------: |
+| Cơ bản    |            |
+| Ứng dụng  | **X** |
+| Triển khai |            |
 
 ## 6. THỜI GIAN THỰC HIỆN
 
@@ -77,25 +67,25 @@ BỘ GIÁO DỤC VÀ ĐÀO TẠO
 
 ## 9. NHỮNG THÀNH VIÊN THAM GIA NGHIÊN CỨU ĐỀ TÀI
 
-| TT | Họ và tên | MSSV - Lớp - Khóa | Nội dung nghiên cứu cụ thể được giao |
-|:---:|---|---|---|
-| 1 | Lê Thị Ngọc Ảnh | B2303861 - DI2396F1 - Khóa 49 | - Nghiên cứu tổng quan về các phương pháp trích xuất đặc trưng đa phương thức và kỹ thuật tính toán biên. <br> - Xây dựng bộ dữ liệu huấn luyện đặc thù cho bài toán cứu hộ tại Việt Nam bao gồm thu thập, làm sạch và gán nhãn. <br> - Huấn luyện và tinh chỉnh các mô hình phân loại hình ảnh và văn bản. <br> - Xây dựng hệ thống Backend và Dashboard bản đồ trực quan hóa dữ liệu cứu hộ. <br> - Viết báo cáo tổng kết và công bố kết quả nghiên cứu. |
-| 2 | Nguyễn Như Quỳnh | B2303777 - DI2396F1 - Khóa 49 | - Nghiên cứu tổng quan về các phương pháp trích xuất đặc trưng đa phương thức và kỹ thuật tính toán biên. <br> - Huấn luyện và tinh chỉnh các mô hình phân loại hình ảnh và văn bản. <br> - Thiết kế và xây dựng hệ thống Backend và Dashboard bản đồ trực quan hóa dữ liệu cứu hộ. <br> - Thực nghiệm đánh giá hiệu năng hệ thống trong điều kiện giả lập mạng yếu. <br> - Viết báo cáo tổng kết và công bố kết quả nghiên cứu. |
-| 3 | Nguyễn Thanh Trọng | B2305615 - DI2396F1 - Khóa 49 | - Thiết kế kiến trúc hệ thống và xây dựng cơ sở dữ liệu. <br> - Nghiên cứu và cài đặt thuật toán phân cụm sự kiện dựa trên vị trí địa lý. <br> - Xây dựng ứng dụng di động cho người dùng cuối. <br> - Thực nghiệm đánh giá hiệu năng hệ thống trong điều kiện giả lập mạng yếu. |
-| 4 | Ngô Hưng Thịnh | B2303904 - DI2396F2 - Khóa 49 | - Xây dựng bộ dữ liệu huấn luyện đặc thù cho bài toán cứu hộ tại Việt Nam bao gồm thu thập, làm sạch và gán nhãn. <br> - Nghiên cứu kỹ thuật nén và tối ưu hóa mô hình cho thiết bị di động. <br> - Nghiên cứu và cài đặt thuật toán phân cụm sự kiện dựa trên vị trí địa lý. |
-| 5 | Cao Tường Hưng | B2303873 - DI2396F1 - Khóa 49 | - Thiết kế kiến trúc hệ thống và xây dựng cơ sở dữ liệu. <br> - Nghiên cứu kỹ thuật nén và tối ưu hóa mô hình cho thiết bị di động. <br> - Xây dựng ứng dụng di động cho người dùng cuối. |
+| TT | Họ và tên         | MSSV - Lớp - Khóa            | Nội dung nghiên cứu cụ thể được giao                                                                                                                                                                                                                                                                                                                                                                                                                                                                                    |
+| :-: | -------------------- | ------------------------------ | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| 1 | Lê Thị Ngọc Ảnh  | B2303861 - DI2396F1 - Khóa 49 | - Nghiên cứu tổng quan về các phương pháp trích xuất đặc trưng đa phương thức và kỹ thuật tính toán biên. - Xây dựng bộ dữ liệu huấn luyện đặc thù cho bài toán cứu hộ tại Việt Nam bao gồm thu thập, làm sạch và gán nhãn.  - Huấn luyện và tinh chỉnh các mô hình phân loại hình ảnh và văn bản.  - Xây dựng hệ thống Backend và Dashboard bản đồ trực quan hóa dữ liệu cứu hộ.  - Viết báo cáo tổng kết và công bố kết quả nghiên cứu. |
+| 2 | Nguyễn Như Quỳnh  | B2303777 - DI2396F1 - Khóa 49 | - Nghiên cứu tổng quan về các phương pháp trích xuất đặc trưng đa phương thức và kỹ thuật tính toán biên. - Huấn luyện và tinh chỉnh các mô hình phân loại hình ảnh và văn bản.  - Thiết kế và xây dựng hệ thống Backend và Dashboard bản đồ trực quan hóa dữ liệu cứu hộ.  - Thực nghiệm đánh giá hiệu năng hệ thống trong điều kiện giả lập mạng yếu.  - Viết báo cáo tổng kết và công bố kết quả nghiên cứu.                               |
+| 3 | Nguyễn Thanh Trọng | B2305615 - DI2396F1 - Khóa 49 | - Thiết kế kiến trúc hệ thống và xây dựng cơ sở dữ liệu. - Nghiên cứu và cài đặt thuật toán phân cụm sự kiện dựa trên vị trí địa lý.  - Xây dựng ứng dụng di động cho người dùng cuối.  - Thực nghiệm đánh giá hiệu năng hệ thống trong điều kiện giả lập mạng yếu.                                                                                                                                                                                                   |
+| 4 | Ngô Hưng Thịnh    | B2303904 - DI2396F2 - Khóa 49 | - Xây dựng bộ dữ liệu huấn luyện đặc thù cho bài toán cứu hộ tại Việt Nam bao gồm thu thập, làm sạch và gán nhãn. - Nghiên cứu kỹ thuật nén và tối ưu hóa mô hình cho thiết bị di động.  - Nghiên cứu và cài đặt thuật toán phân cụm sự kiện dựa trên vị trí địa lý.                                                                                                                                                                                                   |
+| 5 | Cao Tường Hưng    | B2303873 - DI2396F1 - Khóa 49 | - Thiết kế kiến trúc hệ thống và xây dựng cơ sở dữ liệu. - Nghiên cứu kỹ thuật nén và tối ưu hóa mô hình cho thiết bị di động.  - Xây dựng ứng dụng di động cho người dùng cuối.                                                                                                                                                                                                                                                                                                          |
 
 ### Cán bộ hướng dẫn sinh viên thực hiện đề tài
 
-| Họ và tên, MSCB | Đơn vị công tác và lĩnh vực chuyên môn | Nhiệm vụ |
-|---|---|---|
+| Họ và tên, MSCB                  | Đơn vị công tác và lĩnh vực chuyên môn                                                                                                                | Nhiệm vụ                                                                           |
+| ----------------------------------- | --------------------------------------------------------------------------------------------------------------------------------------------------------------- | ------------------------------------------------------------------------------------ |
 | TS. Nguyễn Thanh Khoa (MSCB: 2995) | Trường Công nghệ thông tin và truyền thông. Lĩnh vực chuyên môn: Xử lý hình ảnh, Thị giác máy tính, Mạng phức hợp, Trí tuệ nhân tạo. | Hướng dẫn nội dung khoa học và Hướng dẫn lập dự toán kinh phí đề tài |
 
 ## 10. ĐƠN VỊ PHỐI HỢP CHÍNH
 
 | Tên đơn vị | Nội dung phối hợp nghiên cứu | Họ và tên người đại diện đơn vị |
-|---|---|---|
-| Không | Không | Không |
+| -------------- | --------------------------------- | ------------------------------------------ |
+| Không         | Không                            | Không                                     |
 
 ---
 
@@ -215,15 +205,18 @@ Nhằm giải quyết thực trạng đó, đề tài hướng tới việc sử
 **Phân tích yêu cầu:** Xác định các yêu cầu phi chức năng như độ trễ thấp, tiết kiệm pin và chức năng như nhận diện mức độ ngập, phân loại tin nhắn khẩn cấp thông qua việc phân tích đặc thù của hạ tầng mạng trong bão lũ.
 
 **Thiết kế hệ thống:** Xây dựng tài liệu thiết kế kiến trúc hệ thống lai, bao gồm:
+
 - Sơ đồ luồng dữ liệu giữa Mobile và Server
 - Thiết kế cơ sở dữ liệu không gian
 - Thiết kế kiến trúc các mô hình AI
 
 **Machine Learning và Tối ưu hóa:** Sử dụng phương pháp so sánh thực nghiệm để chọn lựa model cơ sở.
+
 - Áp dụng kỹ thuật Transfer Learning để huấn luyện các mô hình nhẹ như MobileNetV3 cho ảnh, DistilBERT cho văn bản.
 - Sử dụng kỹ thuật Model Quantization để nén mô hình, đảm bảo khả năng vận hành mượt mà trên thiết bị di động.
 
 **Phát triển phần mềm:**
+
 - *Mobile App:* Xây dựng ứng dụng trên nền tảng Flutter, tích hợp nhân xử lý AI để chạy suy luận offline.
 - *Backend:* Phát triển Server sử dụng Python để xử lý các thuật toán phân cụm không gian – thời gian và hiển thị dữ liệu lên bản đồ số.
 
@@ -254,35 +247,35 @@ Từ mục tiêu đặt ra là xây dựng hệ thống hỗ trợ cứu hộ th
 
 ### 16.2. Tiến độ thực hiện
 
-| STT | Các nội dung, công việc thực hiện | Sản phẩm | Thời gian | Người thực hiện |
-|:---:|---|---|---|---|
-| 1 | Nghiên cứu tổng quan về các phương pháp trích xuất đặc trưng đa phương thức và kỹ thuật tính toán biên. | Bảng thuyết minh đề tài. Nghiên cứu khoa học liên quan. | 3/2026 - 4/2026 | Lê Thị Ngọc Ảnh (2 tháng), Nguyễn Như Quỳnh (2 tháng) |
-| 2 | Xây dựng bộ dữ liệu huấn luyện đặc thù cho bài toán cứu hộ tại Việt Nam bao gồm thu thập, làm sạch và gán nhãn. | Bộ dữ liệu đã chuẩn hóa. | 3/2026 - 4/2026 | Lê Thị Ngọc Ảnh (2 tháng), Ngô Hưng Thịnh (2 tháng) |
-| 3 | Thiết kế kiến trúc hệ thống và xây dựng cơ sở dữ liệu. | Tài liệu thiết kế hệ thống. Sơ đồ thiết kế CSDL. | 3/2026 | Nguyễn Thanh Trọng (1 tuần), Cao Tường Hưng (1 tuần) |
-| 4 | Huấn luyện và tinh chỉnh các mô hình phân loại hình ảnh và văn bản. | Các file mô hình. | 4/2026 - 7/2026 | Lê Thị Ngọc Ảnh (4 tháng), Nguyễn Như Quỳnh (4 tháng) |
-| 5 | Nghiên cứu kỹ thuật nén và tối ưu hóa mô hình cho thiết bị di động. | Mô hình AI bản nhẹ. | 4/2026 - 7/2026 | Ngô Hưng Thịnh (4 tháng), Cao Tường Hưng (4 tháng) |
-| 6 | Nghiên cứu và cài đặt thuật toán phân cụm sự kiện dựa trên vị trí địa lý. | Mã nguồn thuật toán. | 4/2026 - 7/2026 | Nguyễn Thanh Trọng (4 tháng), Ngô Hưng Thịnh (4 tháng) |
-| 7 | Xây dựng ứng dụng di động cho người dùng cuối. | Ứng dụng di động hỗ trợ cứu hộ thiên tai. | 6/2026 - 7/2026 | Nguyễn Thanh Trọng (2 tháng), Cao Tường Hưng (2 tháng) |
-| 8 | Xây dựng hệ thống Backend và Dashboard bản đồ trực quan hóa dữ liệu cứu hộ. | Website quản lý thông tin cứu hộ. | 6/2026 - 7/2026 | Lê Thị Ngọc Ảnh (2 tháng), Nguyễn Như Quỳnh (2 tháng) |
-| 9 | Thực nghiệm đánh giá hiệu năng hệ thống trong điều kiện giả lập mạng yếu. | Bảng kết quả thực nghiệm độ trễ, độ chính xác. | 8/2026 | Nguyễn Thanh Trọng (1 tháng), Nguyễn Như Quỳnh (1 tháng) |
-| 10 | Viết báo cáo tổng kết và công bố kết quả nghiên cứu. | Quyển báo cáo hoàn chỉnh và bài báo cáo. | 8/2026 | Lê Thị Ngọc Ảnh (1 tháng), Nguyễn Như Quỳnh (1 tháng) |
+| STT | Các nội dung, công việc thực hiện                                                                                                | Sản phẩm                                                       | Thời gian      | Người thực hiện                                             |
+| :-: | -------------------------------------------------------------------------------------------------------------------------------------- | ---------------------------------------------------------------- | --------------- | --------------------------------------------------------------- |
+|  1  | Nghiên cứu tổng quan về các phương pháp trích xuất đặc trưng đa phương thức và kỹ thuật tính toán biên.         | Bảng thuyết minh đề tài. Nghiên cứu khoa học liên quan. | 3/2026 - 4/2026 | Lê Thị Ngọc Ảnh (2 tháng), Nguyễn Như Quỳnh (2 tháng)  |
+|  2  | Xây dựng bộ dữ liệu huấn luyện đặc thù cho bài toán cứu hộ tại Việt Nam bao gồm thu thập, làm sạch và gán nhãn. | Bộ dữ liệu đã chuẩn hóa.                                  | 3/2026 - 4/2026 | Lê Thị Ngọc Ảnh (2 tháng), Ngô Hưng Thịnh (2 tháng)    |
+|  3  | Thiết kế kiến trúc hệ thống và xây dựng cơ sở dữ liệu.                                                                    | Tài liệu thiết kế hệ thống. Sơ đồ thiết kế CSDL.      | 3/2026          | Nguyễn Thanh Trọng (1 tuần), Cao Tường Hưng (1 tuần)     |
+|  4  | Huấn luyện và tinh chỉnh các mô hình phân loại hình ảnh và văn bản.                                                      | Các file mô hình.                                             | 4/2026 - 7/2026 | Lê Thị Ngọc Ảnh (4 tháng), Nguyễn Như Quỳnh (4 tháng)  |
+|  5  | Nghiên cứu kỹ thuật nén và tối ưu hóa mô hình cho thiết bị di động.                                                     | Mô hình AI bản nhẹ.                                          | 4/2026 - 7/2026 | Ngô Hưng Thịnh (4 tháng), Cao Tường Hưng (4 tháng)      |
+|  6  | Nghiên cứu và cài đặt thuật toán phân cụm sự kiện dựa trên vị trí địa lý.                                           | Mã nguồn thuật toán.                                         | 4/2026 - 7/2026 | Nguyễn Thanh Trọng (4 tháng), Ngô Hưng Thịnh (4 tháng)   |
+|  7  | Xây dựng ứng dụng di động cho người dùng cuối.                                                                               | Ứng dụng di động hỗ trợ cứu hộ thiên tai.               | 6/2026 - 7/2026 | Nguyễn Thanh Trọng (2 tháng), Cao Tường Hưng (2 tháng)   |
+|  8  | Xây dựng hệ thống Backend và Dashboard bản đồ trực quan hóa dữ liệu cứu hộ.                                              | Website quản lý thông tin cứu hộ.                           | 6/2026 - 7/2026 | Lê Thị Ngọc Ảnh (2 tháng), Nguyễn Như Quỳnh (2 tháng)  |
+|  9  | Thực nghiệm đánh giá hiệu năng hệ thống trong điều kiện giả lập mạng yếu.                                              | Bảng kết quả thực nghiệm độ trễ, độ chính xác.       | 8/2026          | Nguyễn Thanh Trọng (1 tháng), Nguyễn Như Quỳnh (1 tháng) |
+| 10 | Viết báo cáo tổng kết và công bố kết quả nghiên cứu.                                                                       | Quyển báo cáo hoàn chỉnh và bài báo cáo.                | 8/2026          | Lê Thị Ngọc Ảnh (1 tháng), Nguyễn Như Quỳnh (1 tháng)  |
 
 ---
 
 ## 17. SẢN PHẨM
 
-| STT | Tên sản phẩm | Số lượng | Yêu cầu chất lượng sản phẩm |
-|:---:|---|:---:|---|
-| **I** | **Xuất bản phẩm** (Các công trình khoa học sẽ được công bố: sách, bài báo khoa học...): Không |  |  |
-| **II** | **Sản phẩm đào tạo** (Luận văn tốt nghiệp đại học): Không |  |  |
-| **III** | **Sản phẩm khoa học và công nghệ:** |  |  |
-| 3.1 | Ứng dụng di động hỗ trợ cứu hộ thiên tai | 01 | Ứng dụng di động tích hợp mô hình AI và gửi thông tin cầu cứu về trung tâm. |
-| 3.2 | Website quản lý thông tin cứu hộ | 01 | Website có bản đồ hiển thị trực quan vị trí kêu cứu, và phân cụm sự kiện theo thời gian thực. |
-| 3.3 | Bộ mô hình AI đã huấn luyện | 01 | Bộ mô hình đa phương thức đã được huấn luyện, tinh chỉnh và tối ưu hóa bằng kỹ thuật nén mô hình để phù hợp với nền tảng thiết bị di động và nhúng giúp phân loại chính xác mức độ khẩn cấp và nhận diện sự kiện thiên tai. |
-| **IV** | **Sản phẩm theo quy định của Đại học Cần Thơ** |  |  |
-| 4.1 | Bản tin | 01 | Theo đúng quy định của Đại học Cần Thơ |
-| 4.2 | Báo cáo tóm tắt | 01 | Theo đúng quy định của Đại học Cần Thơ |
-| 4.3 | Video clips demo | 01 | Tối đa 02 phút. Đầy đủ thông tin trọng tâm của đề tài. |
+|      STT      | Tên sản phẩm                                                                                                       | Số lượng | Yêu cầu chất lượng sản phẩm                                                                                                                                                                                                                                                |
+| :-----------: | --------------------------------------------------------------------------------------------------------------------- | :---------: | --------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+|  **I**  | **Xuất bản phẩm** (Các công trình khoa học sẽ được công bố: sách, bài báo khoa học...): Không |            |                                                                                                                                                                                                                                                                                   |
+| **II** | **Sản phẩm đào tạo** (Luận văn tốt nghiệp đại học): Không                                          |            |                                                                                                                                                                                                                                                                                   |
+| **III** | **Sản phẩm khoa học và công nghệ:**                                                                       |            |                                                                                                                                                                                                                                                                                   |
+|      3.1      | Ứng dụng di động hỗ trợ cứu hộ thiên tai                                                                     |     01     | Ứng dụng di động tích hợp mô hình AI và gửi thông tin cầu cứu về trung tâm.                                                                                                                                                                                        |
+|      3.2      | Website quản lý thông tin cứu hộ                                                                                 |     01     | Website có bản đồ hiển thị trực quan vị trí kêu cứu, và phân cụm sự kiện theo thời gian thực.                                                                                                                                                                   |
+|      3.3      | Bộ mô hình AI đã huấn luyện                                                                                    |     01     | Bộ mô hình đa phương thức đã được huấn luyện, tinh chỉnh và tối ưu hóa bằng kỹ thuật nén mô hình để phù hợp với nền tảng thiết bị di động và nhúng giúp phân loại chính xác mức độ khẩn cấp và nhận diện sự kiện thiên tai. |
+| **IV** | **Sản phẩm theo quy định của Đại học Cần Thơ**                                                        |            |                                                                                                                                                                                                                                                                                   |
+|      4.1      | Bản tin                                                                                                              |     01     | Theo đúng quy định của Đại học Cần Thơ                                                                                                                                                                                                                                  |
+|      4.2      | Báo cáo tóm tắt                                                                                                   |     01     | Theo đúng quy định của Đại học Cần Thơ                                                                                                                                                                                                                                  |
+|      4.3      | Video clips demo                                                                                                      |     01     | Tối đa 02 phút. Đầy đủ thông tin trọng tâm của đề tài.                                                                                                                                                                                                              |
 
 ---
 
@@ -332,26 +325,14 @@ Hệ thống có khả năng triển khai linh hoạt phù hợp với điều k
 
 *(Đơn vị tính: đồng)*
 
-| STT | Khoản chi, nội dung chi | Tổng kinh phí | Kinh phí ĐHCT cấp | Các nguồn khác |
-|:---:|---|---:|---:|---:|
-| 1 | Chi tiền thù lao tham gia thực hiện đề tài | 12.100.000 | 12.100.000 | 0 |
-| 2 | Chi mua vật tư, nguyên, nhiên vật liệu | 0 | 0 | 0 |
-| 3 | Chi văn phòng phẩm, in ấn | 175.000 | 175.000 | 0 |
-| 4 | Chi họp hội đồng đánh giá, nghiệm thu | 2.725.000 | 2.725.000 | 0 |
-|  | **Tổng cộng** | **15.000.000** | **15.000.000** | **0** |
+| STT | Khoản chi, nội dung chi                         |      Tổng kinh phí | Kinh phí ĐHCT cấp | Các nguồn khác |
+| :-: | ------------------------------------------------- | -------------------: | -------------------: | ----------------: |
+|  1  | Chi tiền thù lao tham gia thực hiện đề tài |           12.100.000 |           12.100.000 |                 0 |
+|  2  | Chi mua vật tư, nguyên, nhiên vật liệu      |                    0 |                    0 |                 0 |
+|  3  | Chi văn phòng phẩm, in ấn                     |              175.000 |              175.000 |                 0 |
+|  4  | Chi họp hội đồng đánh giá, nghiệm thu     |            2.725.000 |            2.725.000 |                 0 |
+|    | **Tổng cộng**                             | **15.000.000** | **15.000.000** |       **0** |
 
 ---
 
 <div align="center">
-
-*Ngày 25 tháng 12 năm 2025*
-
-| TRƯỜNG CNTT-TT | CÁN BỘ HƯỚNG DẪN | CHỦ NHIỆM ĐỀ TÀI |
-|:---:|:---:|:---:|
-|  |  |  |
-
-**TL. HIỆU TRƯỞNG**
-**TRƯỞNG PHÒNG KHOA HỌC, CÔNG NGHỆ**
-**VÀ ĐỔI MỚI SÁNG TẠO**
-
-</div>
