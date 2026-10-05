@@ -169,6 +169,7 @@ Danh sách đầy đủ và mã lỗi: [`docs/contact_connect.md`](../docs/conta
 | `GET /api/stats` | Số lượng theo trạng thái, thời gian phản ứng, lưu lượng 24 giờ |
 | `GET /api/export?format=csv\|geojson` | Xuất theo bộ lọc (CSV có BOM cho Excel) |
 | `POST /api/auth/password` | Đổi mật khẩu của mình |
+| `GET /api/benchmark/package` | Tải tập benchmark on-device (chỉ username `rhna`) |
 | `GET/POST /api/operators`, `PATCH /api/operators/{id}` | (admin) Tài khoản: tạo, sửa, khóa, đặt lại mật khẩu |
 | `GET /api/admin/backup[?images=1]` | (admin) Bản sao lưu SQLite; `images=1` là ZIP kèm thư mục ảnh |
 | `DELETE /api/reports` | (admin) Xóa toàn bộ dữ liệu, chỉ khi `RESCUE_ALLOW_WIPE=1` |
