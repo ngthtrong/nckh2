@@ -28,6 +28,11 @@ def main():
         print('  ' + note)
     if args.release and notes:
         errors.append('Cần hoàn tất thông tin hành chính, nội dung và các biểu mẫu trước khi xuất bản đầy đủ.')
+    entries = sum(len(re.findall(r'@\s*(?!comment\b|preamble\b|string\b)\w+\s*[{(]', f.read_text(), re.I))
+                  for f in (ROOT / 'bibliography').glob('*.bib'))
+    print(f'Tài liệu tham khảo trong nguồn: {entries}')
+    if args.release and entries == 0:
+        errors.append('Chưa có tài liệu tham khảo thực sự trong bibliography/.')
     out = ROOT / args.build_dir
     metrics = next(iter(sorted(out.glob('*.metrics'))), None)
     if metrics:

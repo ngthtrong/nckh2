@@ -1,5 +1,8 @@
-% Draft builds use BibTeX unless the build command enables biblatex + biber.
+% Default to biblatex when installed; Makefile forces BibTeX if biber is unavailable.
 \newif\ifReportBiblatex
+\newif\ifHasLegalBib
+\newif\ifHasBooksBib
+\newif\ifHasArticlesBib
 \ifdefined\UseBibtex
   \ReportBiblatexfalse
 \else
@@ -13,9 +16,6 @@
   \addbibresource{bibliography/articles.bib}
   \addbibresource{bibliography/references.bib}
   \DeclareLanguageMapping{vietnamese}{english}
-  \newif\ifHasLegalBib
-  \newif\ifHasBooksBib
-  \newif\ifHasArticlesBib
   \AtDataInput{\ifkeyword{legal}{\global\HasLegalBibtrue}{}%
     \ifkeyword{books}{\global\HasBooksBibtrue}{}%
     \ifkeyword{articles}{\global\HasArticlesBibtrue}{}}

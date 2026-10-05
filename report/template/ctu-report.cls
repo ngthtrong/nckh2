@@ -11,7 +11,6 @@
 \PassOptionsToPackage{usegeometry,DIV=12}{typearea}
 \ifdefined\TwoSidedReport
   \PassOptionsToClass{twoside}{scrreprt}
-  \PassOptionsToPackage{asymmetric}{geometry}
 \else
   \PassOptionsToClass{oneside}{scrreprt}
 \fi
@@ -19,6 +18,10 @@
   listof=totoc,bibliography=totoc,numbers=noenddot]{scrreprt}
 \RequirePackage[reset,a4paper,left=3cm,right=2cm,top=2cm,bottom=2cm,
   headheight=22bp,footskip=10mm]{geometry}
+\ifdefined\TwoSidedReport
+  \geometry{reset,a4paper,left=3cm,right=2cm,top=2cm,bottom=2cm,
+    asymmetric,headheight=22bp,footskip=10mm}
+\fi
 \addtokomafont{disposition}{\rmfamily}
 \setkomafont{chapter}{\normalfont\bfseries\fontsize{16bp}{20bp}\selectfont}
 \setkomafont{section}{\normalfont\bfseries\fontsize{14bp}{18bp}\selectfont}
