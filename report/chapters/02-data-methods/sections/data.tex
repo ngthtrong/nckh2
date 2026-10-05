@@ -1,2 +1,58 @@
 \section{Dữ liệu và tiền xử lý}\label{sec:02-data-methods-data}
-\DraftNote{Mô tả dữ liệu ảnh và báo cáo bán tổng hợp; nguồn, cách chia tập và giới hạn.}
+\subsection{Các nguồn dữ liệu và vai trò}
+Báo cáo sử dụng bốn nhóm dữ liệu có mục đích khác nhau: bộ ảnh để huấn luyện và đánh giá phân loại; bảng trạng thái Boolean để xây dựng điểm khẩn cấp có cấu trúc; bộ báo cáo Generator 3.0 để đánh giá phân cụm; và bộ Candidate 4.1 để khảo sát xếp hạng/điều phối. Không gộp số mẫu của các nhóm thành một bộ đa phương thức chung, vì không có quan hệ ghép hàng ảnh--tin nhắn--sự kiện được xác lập giữa chúng.
+
+Thông tin đề tài lấy từ \RepoPath{resource/infoGroup.md} và thuyết minh. Tài liệu thiết kế mô tả ý định triển khai; mã nguồn xác định cơ chế hiện tại; tệp split và artifact là căn cứ kết quả. Bản đối chiếu nghiệm thu ngày 27/09/2026 hữu ích cho lịch sử kiểm thử, nhưng một số kết luận về thiếu split, ONNX và lượng tử hóa đã được artifact hiện tại bổ sung. Báo cáo không dùng những kết luận cũ đó để phủ nhận tệp đang có trong repo.
+
+\subsection{Bộ ảnh mức ngập hiện tại}
+\texttt{Dataset\_Flood} hiện có \ImageTotal{} ảnh trong bốn thư mục lớp. Tệp chia tập đã lưu có \ImageTrain{} ảnh train, \ImageVal{} ảnh validation và \ImageTest{} ảnh test. Thứ tự đầu ra là \texttt{low}, \texttt{medium}, \texttt{high}, \texttt{non\_flood}. Thứ tự này phải giữ thống nhất trong checkpoint, cấu hình, manifest, nhãn app và tính các thước đo.
+\input{generated/tables/image-split}
+
+Tiêu chí gán nhãn trong tài liệu dữ liệu và notebook dựa trên dấu hiệu thị giác tương đối. Lớp \texttt{non\_flood} biểu diễn ảnh không có ngập rõ; \texttt{low} có ngập thấp so với người hoặc phương tiện; \texttt{medium} có mức trung gian; \texttt{high} có ngập sâu. Các mốc người, xe hoặc nhà cung cấp tham chiếu trong ảnh, nhưng nhãn không phải phép đo mực nước tuyệt đối theo mét. Góc chụp, vật tham chiếu và vùng bị che có thể làm ranh giới lớp khó xác định.
+
+README dữ liệu ghi một snapshot cũ gồm 1.621 ảnh; notebook cũ ghi lần chạy 1.625 ảnh và 244 ảnh test. Bản hiện tại có split và cấu hình đầu vào $256\times256$ đi cùng kết quả 256 ảnh test. Vì vậy, số \ImageAccuracy\% trong báo cáo này thuộc phiên bản hiện tại, không được đặt cạnh 73,77\% của phiên bản cũ để kết luận tăng chính xác khi chưa có phép so sánh cùng split.
+
+\subsection{Làm sạch, nhóm ảnh và kiểm soát chia tập}
+Notebook và tệp split thể hiện việc dùng hash nội dung để nhận diện ảnh trùng và perceptual hash để gom ảnh gần giống. Việc chia theo nhóm giúp giảm nguy cơ một biến thể của cùng ảnh xuất hiện ở cả train và test. Mỗi hàng split lưu đường dẫn tương đối, lớp, MD5, dHash, perceptual group, split group và tên tập; đường dẫn tương đối cho phép ánh xạ lại dữ liệu khi chuyển môi trường.
+
+Trong lần tổng hợp báo cáo, script \RepoPath{report/scripts/export_results.py} đã kiểm tra toàn bộ \ImageTotal{} đường dẫn tương đối và MD5 với tệp hiện có. Số ảnh thiếu và số MD5 không khớp đều bằng không. Không có nhóm MD5, perceptual group hoặc split group xuất hiện ở nhiều tập. Đây là kiểm tra tính nhất quán với split đã lưu; nó không chứng minh ảnh từ các nguồn khác nhau hoàn toàn độc lập về cảnh chụp hoặc sự kiện.
+
+Cột \texttt{source\_group} trong split không cung cấp một hồ sơ nguồn đầy đủ cho từng ảnh. Repo chưa có bảng đối chiếu URL, tác giả, quyền sử dụng, thời gian và sự kiện cho toàn bộ ảnh. Vì vậy, bộ ảnh phù hợp với đánh giá kỹ thuật ở phạm vi đã mô tả, nhưng chưa đủ căn cứ để kết luận tính đại diện cho mọi vùng ngập hay tự động phân phối lại dữ liệu.
+
+\subsection{Tiền xử lý ảnh và cấu hình hiện tại}
+Pipeline đánh giá hiện tại khai báo: xử lý EXIF, chuyển RGB, letterbox bằng nội suy BILINEAR, chuẩn hóa ImageNet và bố trí tensor NCHW. Kích thước đầu vào là $256\times256$; phần đệm letterbox có RGB $(124,116,104)$. Letterbox duy trì tỷ lệ khung hình bằng đệm, giảm biến dạng hình học so với kéo giãn toàn ảnh.
+
+Tiền xử lý là một phần của mô hình thực thi. Thay đổi EXIF, nội suy, kích thước hoặc thứ tự kênh có thể thay đổi đầu ra dù trọng số không đổi. Tài liệu cũ mô tả đầu vào 224 và không chuyển EXIF cho checkpoint trước. Hai mô tả này không được dùng thay thế nhau. Manifest và config tương ứng checkpoint phải là nguồn xác định pipeline.
+
+Cấu hình hiện tại ghi seed 42, dropout 0,25, batch size 32, tối đa 35 epoch, learning rate backbone $10^{-5}$ và head $2\times10^{-4}$, weight decay $5\times10^{-4}$, label smoothing 0,05, đóng băng backbone trong 3 epoch đầu và patience 7. Đây là thông số trong tệp cấu hình đã lưu; báo cáo không khẳng định đã chạy lại huấn luyện bằng chúng trong lần biên soạn.
+\SourceNote{\RepoPath{products/fe/model/Edge Ai/config_mobilenetv3_large.json}; các báo cáo hiện tại ghi hash config và split để đối chiếu.}
+
+\subsection{Dữ liệu khẩn cấp có cấu trúc}
+Gói \texttt{urgency\_ei}, phiên bản SOURCE FINAL v5.0.0, xây dựng bảng tham chiếu tổng hợp xác định từ toàn bộ $2^5=32$ trạng thái của năm đặc trưng Boolean. Đặc trưng gồm \texttt{unresponsive}, \texttt{respiratory\_distress\_or\_cyanosis}, \texttt{heavy\_bleeding}, \texttt{active\_convulsions} và \texttt{high\_risk\_trauma}. Tên và ánh xạ được ghi trong registry nguồn của gói.
+
+Bảng được tạo bằng duyệt tổ hợp, không lấy mẫu ngẫu nhiên và không sinh tình huống bằng mô hình ngôn ngữ. Nhãn thay thế là OR của năm cờ: có ít nhất một cờ thì nhãn bằng một, toàn bộ cờ bằng không thì nhãn bằng không. Như vậy, bảng có 31 trạng thái dương và một trạng thái âm. Bảng không phải dữ liệu bệnh nhân, không có nhãn chuyên gia và không thể dùng độ khớp trên bảng để suy ra độ chính xác lâm sàng.
+
+Nguồn IITT được dùng để tham chiếu dấu hiệu và phạm vi thuật ngữ \citep{whoIITT}. IITT được thiết kế cho phân loại tại cơ sở cấp cứu; việc rút gọn thành năm cờ ở ứng dụng cứu hộ là một ánh xạ của nhóm. Báo cáo gọi mục tiêu của bảng là \emph{nhãn thay thế mức nguy cấp cao được ánh xạ từ hướng dẫn}; $E_i$ là \emph{điểm bằng chứng khẩn cấp dựa trên hướng dẫn}, không phải xác suất tử vong hoặc xác suất cần điều phối. Không có cờ được chọn cũng không đủ để kết luận một người an toàn.
+
+Gói gồm CSV huấn luyện, bảng master với cơ sở nhãn/nguồn/semantics, script sinh dữ liệu, script huấn luyện, JSON mô hình, audit ba tầng và bảng so sánh quy tắc. Trường \texttt{cannot\_move} và số người bị thương còn là ngữ cảnh trong ứng dụng nhưng không thuộc năm đặc trưng huấn luyện v5. Đây là dữ liệu có cấu trúc, khác với tập tin nhắn tiếng Việt và mô hình NLP dự kiến trong thuyết minh.
+
+\subsection{Generator 3.0 cho RQ1}
+Bộ RQ1 có 80 run với seed 1--80, mỗi run 16 sự kiện tiềm ẩn. Tổng cộng có 26.288 báo cáo: 17.901 báo cáo genuine, 3.587 duplicate và 4.800 báo cáo coordinated fake. Mỗi run có 288--370 báo cáo. Run 1--20 dùng phát triển, 21--40 dùng hiệu chỉnh và 41--80 dùng test giữ lại.
+
+Bối cảnh địa lý được neo vào activation Copernicus EMSR848 cùng các nguồn tham chiếu OSM và WorldPop \citep{copernicusEMSR848,worldpop2025vietnam}. Sự kiện, liên kết báo cáo, bản sao, nhu cầu, yếu thế và chiến dịch giả vẫn là thành phần được sinh. Dân số tham chiếu không phải số người mắc kẹt thật. Repo chưa đóng gói snapshot nguồn và lineage từng hàng đủ để kiểm chứng mọi anchor.
+
+Mỗi run có năm tệp: \texttt{algorithm\_input.json}, \texttt{observable\_reports.json}, \texttt{ground\_truth.json}, \texttt{latent\_incidents.json} và \texttt{run\_manifest.json}. Chỉ tệp đầu tiên được đưa vào thuật toán. Bảng truth chứa nhãn cụm, fake/duplicate và lineage; manifest chứa seed, phiên bản generator và tham số. Quan hệ này cho phép kiểm tra đầu ra trước khi nối nhãn, giảm nguy cơ dùng thông tin tương lai hoặc truth trong suy luận.
+
+README ghi các quality finding cần giữ: thiếu receipt time/source family độc lập; suffix định danh phân tách các lớp sinh thành block; nhãn exact của generator chưa khớp fingerprint v2; một phần near không khớp envelope; \texttt{V\_reference} trong anchor parquet null toàn bộ. Những điểm này giới hạn phạm vi diễn giải và không được sửa dữ liệu âm thầm để làm kết quả đẹp hơn.
+
+\subsection{Candidate 4.1 cho RQ2/RQ3}
+Bộ Candidate 4.1 được sinh riêng, có 80 dataset, mỗi dataset 16 sự kiện, tổng 30.229 báo cáo; mỗi dataset có 339--424 báo cáo. Các seed phát triển là 1000--1019, hiệu chỉnh là 2000--2019 và test là 3000--3039. Bộ này không được mô tả là neo EMSR848.
+
+Toàn bộ các split có 1.554 báo cáo giả và 2.560 duplicate được gán nhãn, gồm 1.280 exact và 1.280 near. Mỗi dataset cơ sở có một chiến dịch năm báo cáo phối hợp confidence cao và bốn loại báo cáo tấn công confidence thấp. Bộ sinh còn cung cấp lợi ích, deadline, khả năng phục vụ, điều kiện tiếp cận và harm phục vụ evaluator. Các đại lượng này độc lập với trường mà scheduler được phép quan sát theo hợp đồng nghiên cứu.
+
+RQ2 dùng điều kiện nhóm oracle để kiểm tra riêng điểm ưu tiên. RQ3 dùng cụm dự đoán để khảo sát truyền lỗi sang lập lịch. Vì khác bộ sinh và cấu hình, không dùng ARI của RQ1 như giá trị chất lượng phân hoạch của RQ3. Kết quả từng bộ được ghi đúng nguồn và split trong Chương~\ref{chap:04-evaluation}.
+
+\subsection{Quy tắc quản lý artifact}
+Artifact gốc được giữ nguyên. Các bảng báo cáo được xuất vào \RepoPath{report/generated/tables/}; hash đầu vào và commit nguồn ghi ở \RepoPath{report/generated/provenance.json}. Các lần đo runtime khác nhau không được gộp trung vị thành một giá trị. Kết quả \texttt{rq1\_results} là nguồn stress chính; \texttt{rq1\_results\_v2} là lần chạy độc lập không gộp.
+
+Các tệp \RepoPath{paper/short_results.tex} và \RepoPath{paper/generated/revision_results.tex} thuộc workflow khác với bản thảo dài hiện tại; báo cáo không lấy các số ID/OOD của chúng ghép vào RQ1--RQ3 đang trình bày. Việc có một tệp được đánh dấu ``generated'' không tự xác lập nó là nguồn thích hợp; cần đối chiếu manuscript, protocol và bundle trước.

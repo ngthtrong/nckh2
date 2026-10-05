@@ -1,2 +1,46 @@
 \chapter{Kết quả và tư liệu bổ sung}\label{chap:supplementary}
-\DraftNote{Đặt bảng chi tiết, log và hình bổ trợ; phân biệt với hồ sơ minh chứng hành chính.}
+\section{Sổ đối chiếu nguồn số liệu}
+\begin{longtable}{P{.24\textwidth}P{.42\textwidth}P{.23\textwidth}}
+\caption{Nguồn được dùng và phạm vi}\label{tab:source-register}\\
+\toprule Nội dung & Nguồn trong repo & Phạm vi \\\midrule\endfirsthead
+\toprule Nội dung & Nguồn trong repo & Phạm vi \\\midrule\endhead
+Nhóm, mã đề tài & \RepoPath{resource/infoGroup.md} & Nguồn ưu tiên thông tin nhóm \\
+Mục tiêu, tiến độ, sản phẩm & \RepoPath{resource/Thuyết minh NCKH.md} & Văn bản trong repo, chưa thay bản ký \\
+Số lượng/chia ảnh & Split CSV trong \RepoPath{products/fe/model/Edge Ai/} & Snapshot 1.702 ảnh \\
+Metric/runtime FP32 & \RepoPath{products/fe/reports/pth_onnx_pte/summary.json} & 256 ảnh test, CPU \\
+Nén/cắt tỉa & \RepoPath{products/fe/reports/fp32_ptq_qat/}; \RepoPath{products/fe/reports/pruning_st/} & Cùng test; khác phiên timing \\
+LR khẩn cấp & \RepoPath{products/fe/model/urgency_ei/} & SOURCE FINAL v5, tổng hợp \\
+RQ1 benchmark & \RepoPath{thucnghiem/results/cij_baseline_benchmark_results/} & Generator 3.0, 40 test run \\
+RQ1 stress & \RepoPath{thucnghiem/results/rq1_results/} & Nguồn chính, 1.400 fit \\
+RQ2/RQ3 & \RepoPath{thucnghiem/results/rq2_results/}; \RepoPath{thucnghiem/results/rq3_results/} & Candidate 4.1, 40 seed \\
+Hợp đồng/DB & \RepoPath{docs/contact_connect.md}; \RepoPath{docs/contact_db.md} & Đối chiếu cùng mã hiện tại \\
+Test lịch sử & \RepoPath{docs/nghiem-thu/doi_chieu_thuyet_minh.md} & Ngày 27/09/2026 \\
+\bottomrule
+\end{longtable}
+
+\section{Những khác biệt phiên bản cần giữ khi rà soát}
+\begin{longtable}{P{.29\textwidth}P{.30\textwidth}P{.30\textwidth}}
+\caption{Đối chiếu tài liệu cũ với artifact hiện tại}\label{tab:version-findings}\\
+\toprule Hạng mục & Thông tin cũ & Thông tin dùng trong bản sơ bộ \\\midrule\endfirsthead
+\toprule Hạng mục & Thông tin cũ & Thông tin dùng trong bản sơ bộ \\\midrule\endhead
+Ảnh & README 1.621; lần chạy cũ 1.625 & Split hiện tại 1.702; MD5 khớp đủ \\
+Test & 244 ảnh; 73,77\% accuracy & 256 ảnh; 76,17\% accuracy; khác split \\
+Đầu vào ảnh & 224, preprocessing cũ & 256, EXIF--RGB--letterbox--NCHW theo artifact hiện tại \\
+Asset & Tài liệu 27/09 ghi thiếu ONNX/manifest & Có export trong Edge Ai; app vẫn cần stage \\
+Tối ưu & Tài liệu cũ ghi chưa có INT8 & Có PTQ/QAT/pruning và kết quả âm \\
+Khẩn cấp & Quy tắc từ khóa ở backend & LR cấu trúc ở app; adapter vẫn dùng từ khóa/urgency \\
+SMS & Tài liệu cũ ghi chưa có server intake & Có gateway endpoint; chưa có log viễn thông thật \\
+RQ3 & 120 hàng seed--điều kiện & Suy luận chính 40 cặp seed \\
+Renderer khác & Có bảng short ID/OOD & Không dùng ghép vào protocol bản thảo dài \\
+\bottomrule
+\end{longtable}
+
+\section{Checklist bằng chứng cho đợt thử thiết bị tiếp theo}
+Để kiểm chứng luồng thiết bị, một phiên thử cần ghi mã thiết bị, hệ điều hành, APK/commit, hash asset và URL backend. Các tình huống gồm tạo khi offline, đóng/mở lại app, khôi phục kết nối, gửi lại khi mất ACK, ảnh có/không EXIF, thiếu GPS, trạng thái đi tiến, SMS qua gateway và đồng bộ nền. Với mỗi ca, ghi kỳ vọng, hành vi quan sát, log thiết bị/server và thời gian thực tế.
+
+Phép đo hiệu năng cần tách tải model, tiền xử lý, suy luận, tạo payload, chờ mạng và ACK. Phép đo mạng cần nhiều lượt cho mỗi profile/ảnh, ghi kích thước thực, tỷ lệ thành công và hàng đợi còn lại. Những mục này là kế hoạch bổ sung minh chứng, chưa phải kết quả đã đạt trong báo cáo.
+
+\section{Nội dung hành chính còn chờ xác nhận}
+Một số trường như giới tính, dân tộc, ngành, năm học và số năm đào tạo của chủ nhiệm chưa có nguồn xác nhận trực tiếp trong tệp thông tin nhóm/thuyết minh, nên metadata vẫn giữ dấu cần điền. Mẫu thông tin kết quả và thông tin chủ nhiệm mới ở cấu trúc tạm. Thuyết minh Markdown không thay bản phê duyệt có chữ ký/dấu.
+
+Manifest hồ sơ giữ cờ xác nhận false cho các minh chứng chưa được cung cấp. Nội dung sơ bộ của bản tin/tóm tắt Việt--Anh đã soạn có thể dùng để điền mẫu chính thức, nhưng không xác nhận thủ tục nộp. Video chưa được tạo trong công việc này. Bản đầy đủ cần đối chiếu danh sách cam kết, mẫu, bản phê duyệt và từng minh chứng thật.

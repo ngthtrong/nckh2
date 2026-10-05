@@ -1,88 +1,57 @@
-# Khung báo cáo tổng kết NCKH sinh viên
+# Báo cáo tổng kết NCKH sinh viên — bản nội dung sơ bộ
 
-Khung dựa trên [lựa chọn LaTeX](lua-chon-khung-latex.md), [tổng hợp hướng dẫn](tong-hop-huong-dan.md) và mẫu trong `guideline/`. Đây là dự án để viết báo cáo, chưa phải báo cáo hoàn chỉnh hoặc hồ sơ đủ điều kiện nộp.
+Đề tài **THS2026-68: Hệ thống phân tích đa phương thức và phân cụm sự kiện cứu hộ bão lũ dựa trên Edge AI**. Chủ nhiệm Lê Thị Ngọc Ảnh; giảng viên hướng dẫn TS. Nguyễn Thanh Khoa; thành viên theo `resource/infoGroup.md`.
+
+Bản sơ bộ đã có Mở đầu đủ sáu mục, bốn chương khoa học, Kết luận/kiến nghị, hai phụ lục, thông tin kết quả Việt–Anh và bản tin/tóm tắt Việt–Anh. Nội dung dựa trên thuyết minh, mã nguồn và artifact trong repo hiện tại. Đây chưa phải hồ sơ nghiệm thu đủ điều kiện nộp.
 
 ## Biên dịch
 
-Chạy từ thư mục `report/`:
+Từ thư mục gốc repo:
 
 ```bash
-make doctor              # Kiểm tra công cụ và phông
-make content             # Bản nháp nội dung
-make content-twoside     # Bản nháp in hai mặt
-make smoke               # Bản thử bìa dài, tiếng Việt, bảng dài, công thức, PDF
-make deliverables        # Bốn PDF riêng: bản tin và báo cáo tóm tắt Việt/Anh
-make check               # Liệt kê placeholder, số trang thân bài và cảnh báo
-make check-release       # Kiểm tra điều kiện bản đầy đủ; ban đầu sẽ thất bại
-make full                # Biên dịch lại nội dung, kiểm tra, rồi chèn hồ sơ
-make full-twoside        # Bản đầy đủ in hai mặt
-make clean               # Xóa riêng thư mục đầu ra build/
+make -C report doctor
+make -C report results             # Xuất bảng và audit nguồn; không chạy huấn luyện
+make -C report content             # Nội dung sơ bộ; tự xuất bảng trước
+make -C report content-twoside
+make -C report deliverables        # Bản tin/tóm tắt Việt–Anh, bốn PDF riêng
+make -C report check
+make -C report check-release       # Còn chặn vì metadata/mẫu/minh chứng chưa đủ
+make -C report full                # Chỉ ghép khi mọi điều kiện hồ sơ được đáp ứng
+make -C report full-twoside
+make -C report smoke
 ```
 
-PDF nằm trong `build/<chế-độ>/`, ví dụ `build/content/content.pdf`, `build/smoke/smoke.pdf`, `build/summary-en/summary-en.pdf`. Chế độ hai mặt dùng thư mục có hậu tố `-twoside`; tên PDF giữ nguyên. `build/` được bỏ qua bởi Git.
+PDF chính: `build/content/content.pdf`. Bốn sản phẩm riêng ở `build/bulletin-vi/`, `build/bulletin-en/`, `build/summary-vi/`, `build/summary-en/`. `build/` được Git bỏ qua. `make clean` chỉ xóa đầu ra build.
 
-`Makefile` gọi Python chuẩn và XeLaTeX nhiều lượt, chạy biber/BibTeX ở giữa và biên dịch thêm nếu tham chiếu còn cần cập nhật. Không phụ thuộc `latexmk`. Khi đã có `biblatex`, `biber`, `latexmk`, có thể chạy `latexmk -r latexmkrc -xelatex main.tex` để rà soát riêng; đầu ra ở `build/latexmk/main.pdf`. Dùng `make full` để thực hiện đầy đủ kiểm tra và ghép hồ sơ.
+Yêu cầu XeLaTeX, KOMA-Script, các gói trong `template/packages.tex`, Python 3.9+ và Times New Roman đủ bốn kiểu. Build tự chọn biblatex/biber khi có, nếu không dùng BibTeX/natbib; có thể chỉ định `BIBLIOGRAPHY=biblatex` hoặc `BIBLIOGRAPHY=bibtex`. `xurl` được dùng khi có để ngắt đường dẫn dài. Không cần latexmk; bộ build chạy đủ lượt để giải quyết tham chiếu.
 
-Yêu cầu lõi: XeLaTeX, KOMA-Script, fontspec, polyglossia, unicode-math, geometry, setspace, scrlayer-scrpage, graphicx, booktabs, longtable, tabularx, TikZ, pdfpages, hyperref, bookmark; Python 3.9+; phông Times New Roman đủ bốn kiểu.
+## Nội dung và căn cứ
 
-Phông được tìm bằng fontconfig hoặc `/mnt/c/Windows/Fonts/`. Máy khác cần cài Times New Roman hợp lệ và chạy `fc-cache`; build dừng nếu không tìm được phông. Không đưa các tệp phông vào repository. Gói `texlive-science` dành cho thuật toán/đơn vị khi cần; bật các gói tương ứng trong `template/packages.tex` sau khi đã cài.
+- `config/metadata.tex`: nguồn thông tin hành chính dùng khi biên dịch, đồng bộ với `resource/infoGroup.md`. Người dùng đã xác nhận ngày 06/10/2026: chủ nhiệm nữ, dân tộc Kinh, ngành Kỹ thuật phần mềm CLC, khóa 49, năm thứ 4, chương trình 4,5 năm và các thông tin hành chính còn lại. Các trường đã có trước đó lấy từ thuyết minh và email GVHD từ bản thảo. Bìa báo cáo ghi tháng 10/2026.
+- `chapters/`: bài toán, yêu cầu, dữ liệu, công thức, kiến trúc, triển khai, thực nghiệm và đối chiếu mục tiêu. Phân biệt LR khẩn cấp có cấu trúc với NLP, demo với scheduler nghiên cứu, mô phỏng với dữ liệu thực địa.
+- `generated/`: 13 bảng và macro xuất bằng `scripts/export_results.py`, cùng hash nguồn/audit. Xem [quy trình số liệu](generated/README.md).
+- `frontmatter/`: đủ năm thành viên và các nội dung sơ bộ; những mẫu và thông tin chưa biết còn đánh dấu rõ.
+- `appendices/`: nguồn, snapshot lịch sử, tái lập, khác biệt phiên bản và kế hoạch bổ sung kiểm chứng.
+- `deliverables/content/`: bản tin/tóm tắt Việt–Anh, dùng lại trong bản đầy đủ.
+- `bibliography/articles.bib`: 14 nguồn thực sự trích dẫn. Không tạo văn bản pháp quy hoặc tài liệu mẫu để lấp nhóm trống.
+- `evidence/`: manifest ánh xạ ba sản phẩm nhóm III theo mục 17; các cờ xác nhận giữ false và chưa có PDF minh chứng. Nhóm I/II không đăng ký; bản thảo là sản phẩm bổ sung.
 
-## Cấu trúc và bắt đầu viết
+Các số liệu chính dùng snapshot ảnh **1.702 mẫu, test 256 ảnh, đầu vào 256**, khác README/notebook cũ (1.621/1.625 mẫu, test 244, đầu vào 224). Accuracy FP32 hiện tại 76,17% không được so với 73,77% của split cũ để kết luận cải thiện. Các kết luận cũ thiếu split/INT8/ONNX được cập nhật theo file đang tồn tại.
 
-- `main.tex`: giữ thứ tự các khối của quyển báo cáo; chỉnh nội dung ở các tệp được gọi.
-- `template/`: lớp KOMA `scrreprt`, phông, gói, lệnh ngữ nghĩa và tài liệu tham khảo.
-- `config/metadata.tex`: nguồn duy nhất cho thông tin hành chính. Tên đề tài hiện lấy từ bản nháp bản tin, cần xác nhận bằng thuyết minh đã duyệt; các trường chưa biết có `TODO`.
-- `frontmatter/`: hai bìa, thành viên, từ viết tắt, ba trang thông tin. Mục lục và danh mục bảng/hình sinh tự động.
-- `chapters/`: Mở đầu, bốn chương theo đề xuất và Kết luận/kiến nghị. Mỗi chương có `chapter.tex` và `sections/`.
-- `bibliography/`: nguồn trích dẫn; `appendices/`: phụ lục khoa học.
-- `assets/`: hình và nguồn sơ đồ; `generated/`: bảng/số liệu sinh từ artifact có nguồn gốc.
-- `evidence/`: bản thuyết minh đã duyệt và minh chứng sản phẩm; tách khỏi phụ lục khoa học.
-- `deliverables/`: bốn điểm vào PDF riêng; `content/` được dùng lại nguyên tệp ở cuối bản đầy đủ.
-- `word/`: hướng dẫn chuẩn bị Word song song; `scripts/`: build và kiểm tra.
+**Điểm cần rà soát số liệu:** PTQ/QAT summary chưa khớp hoàn toàn CSV dự đoán. QAT summary ghi Accuracy 52,34%, CSV tính ra 51,17%. Báo cáo giữ cả hai nguồn và bảng đối chiếu, chưa xem metric nén là số liệu đã chốt. FP32/pruning khớp CSV; ảnh khớp MD5/split. Mã backend chưa đọc `E_i` mà app gửi khi chuyển sang thuật toán; điều này được ghi như khoảng trống tích hợp, không sửa sản phẩm trong công việc soạn báo cáo.
 
-Bước viết đầu tiên là điền metadata, danh sách thành viên và thay ba biểu mẫu đầu quyển bằng mẫu chính thức. Sau đó thay từng `\DraftNote{...}` bằng nội dung đã kiểm chứng. Mở đầu giữ đủ sáu mục; Kết luận và kiến nghị giữ cả hai phần.
+## Hình thức và hồ sơ
 
-Ba biểu mẫu đầu quyển và bốn sản phẩm riêng hiện chỉ có khung tạm. Nguồn không cung cấp đủ mẫu chính thức; không gọi các khung này là đúng mẫu. Đã dành vùng nhận xét và hai chữ ký chủ nhiệm, một chữ ký GVHD tại các vị trí HD yêu cầu. Chưa tạo `reference.docx`, PDF phê duyệt, chữ ký hoặc số liệu nghiên cứu.
+Thân bài A4, Times New Roman 13 bp, giãn dòng 1,3; lề trái 30 mm, phải/trên/dưới 20 mm. Hai bìa dùng khung đôi, nội dung căn giữa riêng. Phần đầu đánh La Mã; Mở đầu bắt đầu số Ả Rập. Các chương không ép mở ở trang lẻ; hai mặt giữ lề vật lý quy định. Hình/bảng/công thức dùng nhãn và tham chiếu, có ghi nguồn.
 
-## Quy ước hình thức
+`make check` cho phép bản sơ bộ và liệt kê thiếu sót. Bộ kiểm tra bản đầy đủ giữ điều kiện 50 trang thân bài theo guideline, không giới hạn tối đa; đủ số trang không thay thế nội dung/hồ sơ. Các trường giới tính, dân tộc, ngành, năm học và số năm đào tạo đã được cập nhật theo xác nhận của người dùng. Ba mẫu đầu quyển và bốn sản phẩm riêng cần đối chiếu biểu mẫu chính thức. Không có chữ ký/dấu hoặc phê duyệt được tạo giả.
 
-Thân bài: A4, Times New Roman 13 **bp** (point 1/72 inch), giãn dòng `1.3`, lề vật lý trái 30 mm, phải/trên/dưới 20 mm. Toán dùng Latin Modern Math. Bìa dùng khung đôi và vùng nội dung căn giữa riêng (lề 25 mm), đối chiếu với mẫu B; khôi phục lề quy định ở phần nội dung.
+Sau phụ lục khoa học, bản đầy đủ ghép thuyết minh đã phê duyệt, minh chứng đăng ký nhóm I–III và bốn sản phẩm Việt–Anh; video nộp riêng. Đường dẫn minh chứng trong manifest là nơi dành cho hồ sơ sẽ cung cấp, không phải PDF đã tồn tại. Xem [quy ước hồ sơ](evidence/README.md) và [quy trình Word](word/README.md).
 
-Phần đầu đánh số La Mã sau hai bìa; từ Mở đầu dùng số Ả Rập. Không chèn trang trắng để mở chương ở trang lẻ. Hai mặt giữ lề vật lý trái/phải, không tự đổi lề đóng gáy. Tiêu đề serif có tiền tố “Chương”; hình, bảng và công thức đánh số theo chương. Tiêu đề 16/14/13 bp, vị trí số trang giữa chân trang, thụt đầu dòng 1 cm là quy ước của dự án, không phải các yêu cầu bổ sung của guideline.
+Bản sơ bộ tổng hợp kết quả runtime/Colab/test lịch sử; không tuyên bố chạy lại huấn luyện, notebook, E2E hoặc Android khi viết báo cáo. Kiểm tra mới là ảnh/hash/split, CSV–metric, sinh bảng và biên dịch PDF. Các hạn chế thiết bị, mạng thật, nguồn ảnh và xác nhận chuyên gia được trình bày trong nội dung.
 
-Dùng nhãn `chap:`, `sec:`, `fig:`, `tab:`, `eq:` và `\label`/`\ref`, không nhập số thủ công. `\SourceNote{...}` ghi nguồn, `\DraftNote{...}` đánh dấu phần cần hoàn tất. Không lấy số liệu mẫu kiểm tra làm kết quả nghiên cứu.
+## Kiểm tra bản sơ bộ ngày 06/10/2026
 
-Giãn dòng đã thiết lập trong khoảng cho phép; vẫn cần đối chiếu bằng một trang Word cùng nội dung trước khi nộp. Bản kiểm tra PDF không thay thế rà soát trực quan hoặc kiểm tra sao chép/tìm kiếm tiếng Việt trong trình đọc PDF thông dụng.
+Đã biên dịch bản nội dung 75 trang (50 trang từ Mở đầu tới hết Kết luận/kiến nghị), bản tin Việt/Anh mỗi bản 2 trang, tóm tắt Việt 2 trang và Anh 3 trang. Năm log cuối không có tràn khung, tham chiếu/trích dẫn chưa giải quyết, nhãn lặp hoặc cảnh báo phông thay thế. PDF chính A4, các phông được nhúng; đã xem các trang sơ đồ và bảng đối chiếu metric. `git diff --check` và `make check` đạt kiểm tra bản sơ bộ.
 
-## Tài liệu tham khảo
-
-Build tự chọn **biblatex + biber** khi cả hai có sẵn, dùng author–year, `sorting=nyt`, locale `vi_VN`, in ba nhóm theo thứ tự:
-
-1. `legal`: văn bản pháp quy, tệp `legal.bib`.
-2. `books`: sách, báo, tạp chí, tệp `books.bib`.
-3. `articles`: bài viết của tác giả, tệp `articles.bib`.
-
-Gắn đúng một keyword tương ứng, ví dụ `keywords = {articles}`. Chỉ đưa tài liệu thực sự dùng vào danh mục; `\citep{key}` trích dẫn trong ngoặc, `\citet{key}` trích dẫn tác giả trong câu. `references.bib` dành cho các mục bổ sung hoặc nhập từ nguồn khác, vẫn phải gắn nhóm. Cần thống nhất ranh giới nhóm và kiểm tra thứ tự tên Việt/Anh bằng tay.
-
-Có thể chọn rõ backend:
-
-```bash
-make content BIBLIOGRAPHY=biblatex
-make smoke BIBLIOGRAPHY=bibtex
-```
-
-Phương án dự phòng là BibTeX + natbib, ba tệp `.bib` và ba danh mục riêng, `plainnat` sắp xếp theo tác giả. Phương án này in toàn bộ mục trong ba tệp nhóm, nên chỉ để tài liệu đã dùng và không sử dụng `references.bib`. BibTeX không đảm bảo thứ tự chữ cái tiếng Việt; phải kiểm tra thủ công. Mục Knuth minh họa chỉ nằm trong `template/smoke.bib`, không xuất hiện trong báo cáo chính.
-
-## Bản đầy đủ và hồ sơ
-
-Chỉnh `evidence/manifest.yaml` theo [quy ước hồ sơ](evidence/README.md): xác nhận danh sách cam kết, mẫu chính thức, bản phê duyệt và từng minh chứng. Tệp dùng cú pháp JSON hợp lệ trong YAML 1.2; Python đọc được mà không cần PyYAML. `products` có các mục thuộc nhóm I–III đúng cam kết, được xếp I → II → III. Nhóm không đăng ký không cần hồ sơ giả để lấp chỗ.
-
-`make full` luôn biên dịch lại nội dung hiện tại trước khi kiểm tra: không còn placeholder trong các tệp nội dung/metadata, đủ 50 trang từ Mở đầu tới hết Kết luận và kiến nghị, không có lỗi tham chiếu hoặc tràn khung, đã xác nhận mẫu và có đủ PDF đã kiểm tra. Ban đầu các điều kiện này chưa đạt, nên bản đầy đủ bị chặn chủ động. `make check` cho phép bản nháp ngắn và liệt kê phần còn thiếu; `make check-release` kiểm tra bản `build/content/` đã biên dịch gần nhất.
-
-Sau phụ lục khoa học: thuyết minh đã phê duyệt → minh chứng I–III → bản tin Việt/Anh → báo cáo tóm tắt Việt/Anh. Video nộp riêng. Trang scan giữ khổ gốc, không phủ số trang lên dấu/chữ ký; đánh số hiển thị của báo cáo dừng ở trước scan, scan giữ số trang gốc. LaTeX vẫn tính trang logic cho mục lục/bookmark; phần sản phẩm nhóm IV tiếp tục số trang logic sau scan. Cần kiểm tra trang đầu mỗi bookmark, hướng trang và khả năng đọc trong PDF cuối.
-
-Kiểm tra tự động chỉ xác nhận tệp tồn tại/header PDF và các cờ do người soạn xác nhận; không tự xác minh chữ ký/dấu, chất lượng nghiên cứu hoặc tính đầy đủ thực tế của cam kết. Bản đầy đủ vẫn cần xem và đối chiếu hồ sơ thật trước khi bàn giao. Word chưa tự xuất; xem [quy trình Word](word/README.md).
-
-## Kiểm tra kỹ thuật đã thực hiện
-
-Ngày 06/10/2026: biên dịch bản nội dung, bản hai mặt, bốn PDF riêng và bản thử kỹ thuật. Kiểm tra A4, phông nhúng Times New Roman/Latin Modern Math, thân bài 13 bp, lề trái 30 mm và lề phải 20 mm; xem hai bìa với tên dài; bảng nhiều trang, công thức, tham chiếu và PDF mẫu được chèn. Khung chính có 6 trang thân bài mẫu, chưa đáp ứng yêu cầu 50 trang. Bộ kiểm tra bản đầy đủ từ chối placeholder và PDF minh chứng còn thiếu.
+Sau khi cập nhật thông tin hành chính, `make check-release` còn chặn ở 7 ghi chú chờ mẫu chính thức và PDF/cờ xác nhận minh chứng. Phần metadata và chương/phụ lục khoa học không còn placeholder. Dù nội dung đủ 50 trang, trạng thái này chưa xác nhận hồ sơ đủ điều kiện nộp. Hai mặt, Word, huấn luyện, benchmark và kiểm thử thiết bị không được chạy lại trong đợt viết nội dung này.

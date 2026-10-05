@@ -1,2 +1,153 @@
 \section{Mô hình và phương pháp}\label{sec:02-data-methods-methods}
-\DraftNote{Trình bày mô hình, đồ thị, xếp hạng và thiết kế thực nghiệm; dùng nhãn cho công thức.}
+\subsection{Phân loại ảnh và đánh giá tối ưu hóa}
+Ảnh đầu vào được chuyển thành tensor theo cấu hình ở Mục~\ref{sec:02-data-methods-data}, qua MobileNetV3-Large và head bốn lớp. Với logit $z_c$, xác suất biểu diễn của lớp $c$ được tính bằng
+\begin{equation}
+ p_c=\frac{\exp(z_c)}{\sum_{j=1}^{4}\exp(z_j)},\qquad \widehat y=\arg\max_c p_c.
+ \label{eq:softmax}
+\end{equation}
+Xác suất softmax được dùng làm confidence trong ứng dụng. Giá trị này là đầu ra mô hình phân loại, cần được kiểm tra calibration trước khi diễn giải như xác suất đúng. Nó không phải điểm $Q_i$ của công thức xếp hạng.
+
+Các thước đo gồm Accuracy, macro-F1, balanced accuracy, ma trận nhầm lẫn và lỗi nặng. Với $C=4$ lớp, macro-F1 là trung bình F1 lớp, giúp quan sát chất lượng các lớp dù phân bố không bằng nhau:
+\begin{equation}
+ \operatorname{Acc}=\frac{1}{n}\sum_{i=1}^{n}\mathbf{1}\{\widehat y_i=y_i\},\qquad
+ \operatorname{F1}_{\mathrm{macro}}=\frac{1}{C}\sum_{c=1}^{C}\frac{2\operatorname{Prec}_c\operatorname{Rec}_c}{\operatorname{Prec}_c+\operatorname{Rec}_c}.
+ \label{eq:image-metrics}
+\end{equation}
+Theo script so sánh, mức severity có thứ tự \texttt{non\_flood}=0, \texttt{low}=1, \texttt{medium}=2, \texttt{high}=3. Lỗi nặng là chênh lệch severity ít nhất hai mức. Severity khác thứ tự index đầu ra; dùng trực tiếp khoảng cách index sẽ tính sai lỗi này.
+
+Ba định dạng FP32 được chạy trên cùng tập test để kiểm tra chuyển đổi. PTQ sử dụng lượng tử hóa QDQ với trọng số INT8 per-channel và activation UINT8; calibration dùng 200 ảnh train phân tầng, seed 42. QAT là một nhánh riêng có artifact và validation riêng. Cắt tỉa có cấu trúc dùng cấu hình đã lưu trong báo cáo \texttt{pruning\_st}. Các phép so sánh giữ split test nhưng không suy ra tốc độ điện thoại từ CPU.
+
+\subsection{Mô hình khẩn cấp Logistic Regression}
+Với vector cờ $\symbf{x}\in\{0,1\}^{5}$, mô hình v5 có dạng
+\begin{equation}
+ E_i^{\mathrm{LR}}=\operatorname{sigmoid}\!\left(b+\sum_{j=1}^{5}w_jx_j\right),
+ \qquad \operatorname{sigmoid}(z)=\frac{1}{1+e^{-z}}.
+ \label{eq:urgency-lr}
+\end{equation}
+JSON lưu $b=-1{,}0580446217$ và cả năm hệ số $w_j=1{,}1087792041$. Threshold kỹ thuật là 0,5 và \texttt{class\_weight=balanced}. Hệ số bằng nhau khiến đầu ra phụ thuộc số cờ được chọn trong không gian rút gọn. Đây không phải bằng chứng rằng năm dấu hiệu có trọng lượng y khoa như nhau; cấu trúc này phản ánh bảng huấn luyện đối xứng và nhãn OR của nhóm.
+
+Trên toàn bộ 32 profile, nhãn ở threshold 0,5 khớp quy tắc OR. Khi không có cờ, điểm bằng khoảng 0,2577; với một cờ, điểm nhỏ nhất của trạng thái dương khoảng 0,5127. Quy tắc OR trực tiếp là baseline chính xác cho định nghĩa nhãn này. Độ khớp toàn bảng và sanity test không chứng minh Logistic Regression tốt hơn quy tắc hoặc có hiệu quả lâm sàng.
+
+Trong app, score được tính từ các lựa chọn có cấu trúc và lưu ở trường \texttt{E\_i}. Mã backend hiện tại chưa dùng trường này khi chuyển sang \texttt{ReportV2}: adapter đọc \texttt{urgency} nếu có, nếu không thì dùng từ khóa mô tả. Vì vậy, báo cáo phân biệt $E_i^{\mathrm{LR}}$ tại app với $E_i$ đang thực sự đi vào phân cụm demo. Không áp kết quả RQ2/RQ3 thành kết quả đánh giá mô hình LR.
+
+\subsection{Biểu diễn báo cáo và điều kiện tiếp nhận}
+Bản thảo nghiên cứu định nghĩa
+\begin{equation}
+ r_i=(L_i,T_i,F_i,E_i,N_i,V_i,Q_i),
+ \label{eq:report-tuple}
+\end{equation}
+trong đó $L_i$ là vị trí GPS, $T_i$ là thời gian báo cáo quan sát, $F_i,E_i\in[0,1]$ là bằng chứng ngập và khẩn cấp, $N_i\geq0$ là số người được khai báo, $V_i\geq0$ là bằng chứng yếu thế và $Q_i$ là heuristic confidence/provenance. Ảnh hiện diện, loại nguồn và các cờ thiếu còn được dùng để xây fingerprint và confidence, nhưng không phải nhãn sự kiện.
+
+Điều kiện vào đồ thị là $a_i=\mathbf{1}\{L_i,T_i\text{ được quan sát}\}$. Nếu $a_i=0$, báo cáo chuyển tới hàng xem xét. Việc chuyển hàng này giữ khả năng xử lý của con người thay vì tạo cạnh bằng một khoảng cách không xác định. Artifact RQ1 hiện tại có đầy đủ vị trí/thời gian và hai trường ngữ cảnh; nhánh thiếu dữ liệu là thiết kế và kiểm tra đơn vị, chưa có thực nghiệm thiếu dữ liệu trên chính bộ benchmark đó.
+
+\subsection{Confidence từ dữ liệu quan sát}
+Confidence dùng cho xếp hạng được tính bởi
+\begin{equation}
+ Q_i=\operatorname{sigmoid}\!\left(-0{,}2+1{,}4\,\mathbf{1}\{\text{có ảnh}_i\}
+               +0{,}9\log(1+n_i^{\mathrm{corrob}})\right).
+ \label{eq:confidence-report}
+\end{equation}
+$n_i^{\mathrm{corrob}}$ là số payload quan sát khác nhau củng cố lân cận, đếm theo định danh nội dung. Bản sao nguyên vẹn cùng payload không tự tạo thêm củng cố. Tuy nhiên, nhiều payload khác nhau được phối hợp có thể làm tăng confidence; cơ chế không chứng minh nguồn tin thật hoặc nguồn độc lập.
+
+Confidence softmax của ảnh, confidence/provenance trong payload và $Q_i$ có vai trò khác nhau. Trong adapter, confidence ảnh có thể được lưu làm provenance/fingerprint; điểm xếp hạng vẫn tính lại $Q_i$ theo Công thức~\ref{eq:confidence-report}. Nhầm hai loại confidence sẽ làm báo cáo giải thích sai nguyên nhân thay đổi ưu tiên.
+
+\subsection{Độ tương đồng có xử lý thiếu ngữ cảnh}
+Gọi $I_F(i,j)$ và $I_E(i,j)$ bằng một khi cả hai báo cáo có trường tương ứng, và $m_{ij}=I_F+I_E$. Độ tương đồng ngữ cảnh là
+\begin{equation}
+ C_{ij}=\frac{m_{ij}}{2}\exp\!\left[-I_F\frac{|F_i-F_j|}{\tau_F}
+                                  -I_E\frac{|E_i-E_j|}{\tau_E}\right],
+ \qquad C_{ij}=0\text{ nếu }m_{ij}=0.
+ \label{eq:context-report}
+\end{equation}
+Với hai trường, mức tối đa bằng một; chỉ một trường thì mức tối đa giảm còn một nửa. Cách này tránh xem ``cùng thiếu'' như đồng thuận hoàn toàn. $\tau_F,\tau_E>0$ điều khiển mức suy giảm theo chênh lệch ngữ cảnh.
+
+Với khoảng cách Haversine $d_{ij}$ theo mét và chênh lệch thời gian $\Delta t_{ij}$ theo phút,
+\begin{equation}
+ G_{ij}=\exp[-d_{ij}^{2}/(2\sigma^2)],\qquad
+ T_{ij}^{\mathrm{sim}}=\exp[-\Delta t_{ij}/\tau_t].
+ \label{eq:geo-time}
+\end{equation}
+Ký hiệu $T_{ij}^{\mathrm{sim}}$ phân biệt độ tương đồng thời gian với timestamp $T_i$. Hai cách hợp thành là
+\begin{align}
+ w_{ij}^{\times}&=a_ia_jG_{ij}(\beta T_{ij}^{\mathrm{sim}}+\gamma C_{ij}),\label{eq:product-graph}\\
+ w_{ij}^{+}&=a_ia_j(\alpha G_{ij}+\beta T_{ij}^{\mathrm{sim}}+\gamma C_{ij}).\label{eq:additive-graph}
+\end{align}
+Dạng tích dùng không gian như cổng: dù thời gian/ngữ cảnh phù hợp, cạnh vẫn giảm nếu hai báo cáo xa nhau. Dạng cộng cho phép mỗi thành phần đóng góp độc lập. Động cơ cổng tích có liên hệ với cấu trúc spatial--range của bộ lọc bilateral \citep{tomasi1998bilateral}; toàn bộ công thức và lựa chọn tham số ở đây là định nghĩa của nghiên cứu nhóm, không phải một công thức cứu hộ chuẩn.
+
+\subsection{Làm thưa đồ thị và phát hiện cộng đồng}
+Pipeline tính ma trận cặp đủ điều kiện, xác định ngưỡng $\theta$ bằng quantile $q$ trên trọng số khác không, bỏ cạnh có $w\leq\theta$, chọn top-$k$ láng giềng còn lại theo từng đầu mút, rồi đối xứng bằng hợp các cạnh có hướng. Louvain hoặc Leiden được chạy trên đồ thị cuối với resolution đã khóa.
+
+Top-$k$ ở mỗi đầu mút không bảo đảm bậc vô hướng của nút tối đa bằng $k$. Nếu nhiều nút khác chọn một nút, bậc của nó có thể lớn hơn $k$. Quantile cũng là đại lượng phụ thuộc toàn bộ ma trận trọng số. Khi thêm bản sao, phân bố cạnh và tập cạnh cạnh tranh có thể đổi dù từng bản sao có cùng nội dung. Đây là lý do cần kiểm tra riêng tính ổn định của phân cụm dưới multiplicity.
+
+Cấu hình Product chọn ở RQ1 có $\sigma=700$ m, $\tau_t=60$ phút, $q=0{,}90$, $k=8$, resolution 1,2; $\tau_F=0{,}25$, $\tau_E=0{,}35$, $\beta=\gamma=0{,}5$. Additive chọn $\alpha=1$ và $q=0{,}95$ với các thông số tương ứng. Hai cấu hình được hiệu chỉnh độc lập nên phép so sánh chính là giữa hai pipeline được chọn, không phải tác động nhân quả của chỉ riêng phép tích/cộng.
+
+\subsection{Chặn khoảng cách cạnh và giới hạn của bảo đảm}
+Đặt $B=\beta+\gamma>0$. Vì $a_ia_j\leq1$ và $T_{ij}^{\mathrm{sim}},C_{ij}\leq1$,
+\begin{equation}
+ w_{ij}^{\times}\leq B\exp[-d_{ij}^2/(2\sigma^2)].
+ \label{eq:edge-upper}
+\end{equation}
+Nếu cạnh được giữ với $0<\theta<B$, kết hợp $\theta<w_{ij}^{\times}$ và lấy log cho
+\begin{equation}
+ d_{ij}<r_{\theta}^{\times}=\sigma\sqrt{2\log(B/\theta)}.
+ \label{eq:edge-radius}
+\end{equation}
+Khi $\theta\geq B$, tập giữ theo bất đẳng thức nghiêm là rỗng; khi $\theta\leq0$, ngưỡng này không cho chặn khoảng cách hữu hạn.
+
+Chặn trên chỉ áp dụng từng cạnh. Một chuỗi nhiều cạnh ngắn vẫn có thể tạo thành phần rộng. Nếu thành phần không đơn có đường kính theo số bước $h$, bất đẳng thức tam giác cho đường kính địa lý $D<hr_{\theta}^{\times}$. Đây là chặn có điều kiện sau khi quan sát $h$, vì thuật toán không áp một chặn trước cho $h$.
+
+Với dạng cộng và $\alpha>0$, chặn hữu hạn từ threshold chỉ có khi $B<\theta<B+\alpha$:
+\begin{equation}
+ d_{ij}<\sigma\sqrt{2\log\!\left(\frac{\alpha}{\theta-B}\right)}.
+ \label{eq:additive-bound}
+\end{equation}
+Các thuộc tính này làm rõ cấu trúc đồ thị, nhưng không chứng minh Product có ARI cao hơn hoặc lịch điều phối tốt hơn. Kết quả thực nghiệm được đánh giá độc lập với bảo đảm toán học.
+
+\subsection{Họ bằng chứng và tổng hợp có chặn}
+Trong một cụm dự đoán $C_k$, bản sao exact dùng fingerprint chuẩn tắc; bản gần trùng được liên kết bằng thành phần liên thông trong envelope quan sát. Phương pháp gần trùng có tính bắc cầu, không phải complete linkage. Ký hiệu $\mathcal F_k$ là tập họ bằng chứng trong cụm. Đặt $\widetilde N_i=\min(N_i,N_{\mathrm{ref}})$ và $\widetilde V_i=\min(V_i,V_{\mathrm{cap}})$.
+\begin{align}
+ \bar E_k&=\frac{\sum_{g\in\mathcal F_k}\max_{i\in g}Q_iE_i}
+                    {\max(1,\sum_{g\in\mathcal F_k}\max_{i\in g}Q_i)},\label{eq:aggregate-e}\\
+ \bar F_k&=\max_{g\in\mathcal F_k}\max_{i\in g}Q_iF_i,\label{eq:aggregate-f}\\
+ \bar N_k&=\min\!\left(1,\frac{\log(1+\max_{g\in\mathcal F_k}\max_{i\in g}Q_i\widetilde N_i)}{\log(1+N_{\mathrm{ref}})}\right),\label{eq:aggregate-n}\\
+ \bar V_k&=\max_{g\in\mathcal F_k}\max_{i\in g}Q_i\widetilde V_i.\label{eq:aggregate-v}
+\end{align}
+Cực đại theo họ hạn chế việc coi nhiều bản tin chồng lặp là những nhóm người rời nhau. Log nén miền số người, clipping giới hạn một khai báo và confidence điều tiết đóng góp. Tuy nhiên, cực đại có thể bị chi phối bởi khai báo cao không đúng; đây là một giả định phương pháp cần kiểm tra.
+
+Điểm ưu tiên là
+\begin{equation}
+ P_k=\left[1+(\mu-1)\tanh(\bar V_k/s)\right]
+       (\omega_E\bar E_k+\omega_F\bar F_k+\omega_N\bar N_k).
+ \label{eq:priority-report}
+\end{equation}
+Nguồn Candidate 4.1 và lõi demo dùng $\omega=(0{,}34;0{,}33;0{,}33)$, $\mu=2$, $s=10$, $N_{\mathrm{ref}}=500$ và $V_{\mathrm{cap}}=50$. Với trọng số không âm có tổng một, $\bar E_k,\bar F_k,\bar N_k\in[0,1]$ và $\bar V_k\geq0$, suy ra $0\leq P_k\leq\mu$. Các hằng số chưa được xem là trọng số chính sách đã có xác nhận chuyên gia.
+
+Nếu họ bằng chứng và các đầu vào đã khóa, thêm bản sao exact không đổi cực đại trong họ, không tạo payload củng cố mới và không đổi $Q_i$. Vì vậy, các đại lượng tổng hợp và $P_k$ không đổi. Điều kiện này cần được giữ trong phát biểu: thay đổi phân hoạch hoặc họ bằng chứng có thể phá vỡ tính bất biến của toàn pipeline.
+
+\subsection{Thiết kế đánh giá xếp hạng và điều phối}
+RQ2 đánh giá thứ tự cụm bằng NDCG@5, Spearman và tỷ lệ overlap top-5 so với lợi ích do evaluator sinh. NDCG chú trọng các vị trí đầu; Spearman kiểm tra sự phù hợp thứ tự toàn danh sách. Drift đo thay đổi điểm/thứ hạng sau perturbation, còn churn đo thay đổi thành viên top-5. Điểm ổn định nhưng sắp sai mục tiêu vẫn có drift thấp; do đó phải xem đồng thời alignment và robustness.
+
+RQ3 tạo lịch từ cụm dự đoán và điểm ưu tiên, sau đó evaluator nối truth để tính harm, trễ deadline, thời gian đến, điều phối trùng, điểm đến giả và số sự kiện chưa được phục vụ. Các chính sách so sánh gồm legacy, chỉ khẩn cấp, chỉ số người, tuyến tính, ngẫu nhiên và gần nhất trước. Oracle là điều kiện chẩn đoán, không phải một lựa chọn dùng được trong vận hành thật.
+
+\subsection{Suy luận thống kê và đơn vị độc lập}
+Với mỗi seed, hai phương pháp được đánh giá trên cùng dữ liệu để tạo hiệu ghép cặp. Bootstrap lấy mẫu lại theo run/seed thay vì theo từng báo cáo có tương quan. RQ1 dùng 10.000 resample cho so sánh chính; RQ2/RQ3 dùng 5.000. Kiểm định Wilcoxon và hiệu chỉnh Holm theo các họ giả thuyết đã xuất giúp kiểm soát việc xét nhiều chỉ số/đối chứng.
+
+Trong RQ3, ba điều kiện nguồn lực thuộc cùng một seed được lấy trung bình trước, giữ 40 cặp seed. Bảng cũ có $40\times3=120$ hàng điều kiện chỉ phục vụ chẩn đoán; coi tất cả là mẫu độc lập sẽ sai đơn vị suy luận. Khoảng tin cậy bootstrap chưa hiệu chỉnh và kiểm định Wilcoxon có Holm là hai thủ tục khác nhau, nên một CI không chứa không không tự cho phép bỏ qua kết luận kiểm định đã hiệu chỉnh.
+
+Các phép kiểm tra stress RQ1 báo cáo thay đổi trong từng phương pháp so với chính đối chứng của nó. Chúng không phải kiểm định ưu thế giữa các phương pháp. Giữ những ranh giới này giúp trình bày đầy đủ kết quả âm và tránh diễn giải chọn lọc.
+
+\subsection{Quy trình suy luận và kiểm tra có thể tái lập}
+Quy trình nghiên cứu được mô tả theo thứ tự thao tác để làm rõ nơi sử dụng dữ liệu. Trước hết, đọc hợp đồng/schema và chỉ nạp tệp đầu vào quan sát. Kiểm tra miền số, timestamp và tọa độ; đưa báo cáo không đủ vị trí/thời gian vào review. Từ các báo cáo đủ trường, xác định định danh payload, số củng cố và $Q_i$. Sau đó tính từng thành phần tương đồng, ngưỡng quantile và cạnh top-$k$, rồi gọi bộ phát hiện cộng đồng.
+
+Với mỗi cụm dự đoán, xây họ bằng chứng từ fingerprint/envelope và tính các tổng hợp ở Công thức~\ref{eq:aggregate-e}--\ref{eq:aggregate-v}. Điểm $P_k$ đi cùng cụm vào scheduler nghiên cứu hoặc danh sách hỗ trợ điều phối. Chỉ sau khi lưu đầu ra và cấu hình, evaluator mới nối nhãn để tính chỉ số. Hàng review cần được giữ trong output; loại bỏ khỏi bảng kết quả sẽ che mất khối lượng mà con người phải xử lý.
+
+Đối với score-invariance test, grouping phải được giữ cố định trước và sau perturbation. Đối với end-to-end test, grouping được dự đoán lại và có thể thay đổi. Cần ghi rõ hai phép kiểm tra khác nhau thay vì dùng đầu ra của phép thứ nhất làm bằng chứng phép thứ hai. Trong RQ1 stress, multiplicity có thể thay đổi đồ thị trước khi score được tính; trong RQ2, oracle grouping được khóa để chẩn đoán riêng score.
+
+Đầu ra một lần chạy nên chứa định danh dữ liệu, seed, config canonical JSON, commit, checksum, danh sách báo cáo được nhận/từ chối/review, nhãn dự đoán và thời gian. Bảng tổng hợp chỉ được sinh từ các lần chạy có cùng protocol. Nếu một lần thất bại, cần giữ trạng thái lỗi và mẫu số thay vì bỏ hàng rồi tính trên những run còn lại. Đây là điều kiện để kết quả âm, timeout hoặc từ chối dữ liệu vẫn quan sát được.
+
+\subsection{Định nghĩa drift, overlap và hướng cải thiện}
+Drift điểm là độ thay đổi tuyệt đối đã chuẩn hóa giữa score sau perturbation và score nền. Drift thứ hạng phản ánh thay đổi vị trí trung bình trên danh sách đã chuẩn hóa; nó không đo sự đúng với lợi ích. Top-five overlap đo tỷ lệ thành viên chung giữa danh sách dự đoán và danh sách mục tiêu, còn churn đo thay đổi thành viên do perturbation. Một mô hình có danh sách sai nhưng không thay đổi có thể có churn bằng không.
+
+NDCG@5 dùng mức lợi ích evaluator ở năm vị trí đầu và chuẩn hóa theo thứ tự lý tưởng trong cùng mẫu. Vì lợi ích được sinh theo generator, NDCG chỉ đo phù hợp với mục tiêu đó. Spearman gần không có thể cùng tồn tại với NDCG dương, do hai metric chú trọng vùng thứ hạng khác nhau. Không lấy sự tồn tại của một NDCG dương làm bằng chứng tốt hơn ngẫu nhiên; phải dùng đối chứng và tương phản ghép cặp.
+
+Trong RQ3, ``cải thiện'' ở bảng ghép cặp được tính theo hướng tốt của từng metric. Khi harm thấp hơn là tốt hơn, $\Delta$ bằng harm đối chứng trừ harm candidate. Khi một tỷ lệ phục vụ cao hơn là tốt hơn, hướng trừ đổi lại. CSV còn giữ cột candidate-minus-comparator, nên người đọc cần xem metric direction trước khi dùng dấu hiệu. Báo cáo dùng điểm phần trăm cho chênh lệch tỷ lệ để tránh nhầm với phần trăm thay đổi tương đối.

@@ -1,2 +1,48 @@
 \section{Thiết lập thực nghiệm}\label{sec:04-evaluation-setup}
-\DraftNote{Ghi dữ liệu, cấu hình, đối chứng, thước đo và nguồn artifact.}
+\subsection{Phạm vi các phép đo}
+Chương này tổng hợp kết quả đã lưu trong repo. Các bảng được xuất từ JSON/CSV, giữ số mẫu, split, cấu hình và đơn vị thống kê. Đối chiếu mới còn cho thấy summary PTQ/QAT chưa khớp hoàn toàn với CSV dự đoán; các số nén được giữ dưới nhãn summary và công bố khác biệt ở phần kết quả. Không có phép đo mới về điện thoại, mạng viễn thông hoặc người dùng trong lần biên soạn. Kiểm tra bổ sung của báo cáo là kiểm tra tệp ảnh/hash/split và tính nhất quán bảng số liệu.
+
+\begin{longtable}{P{.18\textwidth}P{.31\textwidth}P{.40\textwidth}}
+\caption{Thiết lập và nguồn kết quả theo nhóm thực nghiệm}\label{tab:experiment-map}\\
+\toprule Nhóm & Dữ liệu và đơn vị & Nguồn kết quả chính \\\midrule\endfirsthead
+\toprule Nhóm & Dữ liệu và đơn vị & Nguồn kết quả chính \\\midrule\endhead
+Ảnh FP32 & 256 ảnh test, split seed 42 & \RepoPath{products/fe/reports/pth_onnx_pte/summary.json} \\
+PTQ/QAT & Cùng 256 ảnh test & \RepoPath{products/fe/reports/fp32_ptq_qat/summary.json} \\
+Cắt tỉa & Cùng 256 ảnh test, đối chiếu theo runtime & \RepoPath{products/fe/reports/pruning_st/summary.json} \\
+Khẩn cấp LR & 32 profile trạng thái; sanity giữ profile dương & \RepoPath{products/fe/model/urgency_ei/model/urgency_logistic_SOURCE_FINAL.json} và audits \\
+RQ1 cơ sở & 40 run test Generator 3.0 & \RepoPath{thucnghiem/results/cij_baseline_benchmark_results/} \\
+RQ1 stress & 40 run, 7 điều kiện, 5 phương pháp & \RepoPath{thucnghiem/results/rq1_results/aggregate/} \\
+RQ2 & 40 seed test Candidate 4.1 & \RepoPath{thucnghiem/results/rq2_results/} \\
+RQ3 & 40 seed; trung bình 3 điều kiện trong seed & \RepoPath{thucnghiem/results/rq3_results/rq3_paired_comparisons_seed.csv} \\
+Phần mềm & Ca test lịch sử ngày 27/09/2026 & \RepoPath{docs/nghiem-thu/doi_chieu_thuyet_minh.md} \\
+\bottomrule
+\end{longtable}
+
+\subsection{Runtime ảnh và phạm vi thời gian}
+Artifact ảnh ghi PyTorch 2.14.1, ONNX Runtime 1.30.0 và ExecuTorch runtime 1.4.1. Đây là phiên bản ghi trong metadata lần chạy; không phải môi trường đã được cài và chạy lại để viết báo cáo. PTH/ONNX dùng CPU một luồng theo script; PTE theo runtime tương ứng. Batch bằng một, ba lượt warmup/model không tính vào latency.
+
+Latency chỉ tính lời gọi suy luận, không bao gồm đọc ảnh, tiền xử lý, nạp model, validation hoặc logging. Các artifact so sánh FP32, lượng tử hóa và cắt tỉa có phiên đo khác nhau, nên thời gian baseline giữa các bảng có thể khác. Đánh giá tốc độ phải dùng cặp trong cùng bảng, cùng runtime, thay vì lấy baseline nhanh nhất ở một bảng so với candidate ở bảng khác.
+
+Đơn vị kích thước trong bảng sinh là MiB, tính byte chia $1024^2$. Nhãn MB trong các bản summary Markdown cũ được chuẩn hóa ở đây để mô tả phép biến đổi rõ ràng. Kích thước checkpoint có thể gồm trạng thái không cần suy luận, nên chỉ dùng dung lượng file không đủ để suy ra số phép tính.
+
+\subsection{Cấu hình và đối chứng RQ1}
+Các phương pháp được chọn qua grid trên 20 run calibration; tập 40 run test chưa dùng để chọn tham số. Đối chứng gồm Additive Louvain, Convex Louvain, Product Leiden, Additive khớp mật độ, K-means tọa độ, gom cụm phân cấp không gian và các phương pháp mật độ. ARI tính trên báo cáo có liên kết sự kiện; các diagnostic khác kiểm tra toàn bộ payload và điểm đến.
+
+Stress cố định có bảy điều kiện: đối chứng, nhiễu tọa độ Gaussian 100/300 m theo mỗi trục cục bộ, nhiễu timestamp Gaussian 15/60 phút, bản sao exact với tổng multiplicity hai hoặc năm. Cùng perturbation được áp cho các phương pháp trong một run, không tinh chỉnh lại theo điều kiện. Tổng số fit là $40\times7\times5=1.400$.
+
+ARI và pairwise F1 ở stress dùng báo cáo gốc có liên kết sự kiện để các mức sao chép có chung đơn vị đánh giá. Chẩn đoán toàn payload được giữ riêng. Các mức nhiễu là điều kiện thử có kiểm soát, không phải ước lượng sai số GPS hoặc tỷ lệ bản trùng ngoài thực địa.
+
+\subsection{Thiết lập RQ2}
+RQ2 dùng nhóm oracle để tách ảnh hưởng của điểm xếp hạng khỏi lỗi phân cụm. Đối chứng gồm legacy raw, chỉ khẩn cấp, chỉ số người, tuyến tính và ngẫu nhiên. Các stress gồm sao chép exact 2/5/10 lần, gần trùng, mâu thuẫn $F/E$, missingness/zero-imputation, tăng các trường dưới confidence thấp và chiến dịch phối hợp confidence cao.
+
+Số hàng perturbation không bằng số seed độc lập. Một số kịch bản có nhiều đích hoặc biến thể trong một seed; bảng mô tả có thể có 320 hoặc 628 hàng, nhưng suy luận ghép cặp vẫn tuân theo mẫu số seed của artifact. Điều kiện missingness ở RQ2 là phép perturbation score riêng, không được dùng làm bằng chứng RQ1 đã kiểm tra nhánh thiếu dữ liệu.
+
+\subsection{Thiết lập RQ3}
+RQ3 dùng cụm dự đoán và mô hình dispatch đã khóa. Có ba điều kiện nguồn lực trong một seed, gồm các điều kiện nominal, constrained và surge như tên trong artifact. Phân tích chính lấy trung bình ba điều kiện trước khi so sánh theo 40 seed. Hình theo từng điều kiện chỉ mô tả, không tăng cỡ mẫu suy luận lên 120.
+
+Metric có chiều tốt được định nghĩa rõ. Với harm/trễ hạn, thấp hơn là tốt hơn; trong bảng effect, $\Delta$ được đổi hướng để dương nghĩa là candidate tốt hơn đối chứng. Deadline-miss rate trong CSV là tỷ lệ; khi đưa vào bảng chênh lệch, nhân 100 để thành điểm phần trăm. Không gọi biến harm là số người chết hoặc thiệt hại thực tế.
+
+\subsection{Bảo toàn kết quả và phiên bản}
+Nguồn RQ1 stress chính được lấy từ \texttt{rq1\_results}. Lần chạy lại \texttt{rq1\_results\_v2} được giữ riêng và không lựa chọn theo kết quả thuận lợi. Các phiên bản bài báo/renderer khác được ghi trong phụ lục, tránh nhập chung những số ID/OOD không thuộc protocol bản thảo dài hiện tại.
+
+Đối với mô hình ảnh, hash config và split của ba bảng hiện tại khớp file đang có. Metadata một số phiên đo ghi hash manifest khác nhau; thay đổi đóng gói manifest phải được xem cùng hash model và pipeline, không thể tuyên bố manifest hiện tại trùng mọi snapshot đo. Báo cáo giữ hash nguồn trong provenance để có thể kiểm tra sự khác biệt này.

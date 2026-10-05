@@ -1,2 +1,45 @@
 \section{Đối chiếu mục tiêu và hạn chế}\label{sec:04-evaluation-limitations}
-\DraftNote{Đối chiếu sản phẩm đăng ký; không suy mô phỏng thành đánh giá thực địa.}
+\subsection{Đối chiếu nội dung đăng ký}
+\begin{longtable}{P{.25\textwidth}P{.35\textwidth}P{.29\textwidth}}
+\caption{Mức hoàn thành sơ bộ theo bằng chứng trong repo hiện tại}\label{tab:goal-status}\\
+\toprule Nội dung & Kết quả có căn cứ & Phần còn cần bổ sung \\\midrule\endfirsthead
+\toprule Nội dung & Kết quả có căn cứ & Phần còn cần bổ sung \\\midrule\endhead
+Tổng quan & Thuyết minh, nghiên cứu liên quan và bản thảo & Cập nhật tổng quan trong nước theo nguồn gốc từng công trình \\
+Dữ liệu ảnh & 1.702 ảnh, split/hash, tiêu chí lớp & Lineage/giấy phép từng ảnh, mẫu thực địa độc lập \\
+Dữ liệu văn bản & Mô tả trong payload, quy tắc từ khóa & Corpus tin nhắn và nhãn khẩn cấp tiếng Việt \\
+Mô hình ảnh & FP32 test 256 ảnh; ONNX/PTE & Pixel parity và độ trễ/độ tin cậy trên Android thật \\
+Mô hình khẩn cấp & LR v5 từ 32 trạng thái tổng hợp & Không thay thế NLP; chưa kiểm định lâm sàng/field; còn khoảng trống adapter \\
+Nén/tối ưu & PTQ, QAT, cắt tỉa có artifact & QAT hiện giảm chất lượng; đo thiết bị và chọn trade-off \\
+Phân cụm & Lõi đồ thị, benchmark và stress & Dữ liệu thật, missingness benchmark, xử lý multiplicity tốt hơn \\
+Ứng dụng & Flutter, outbox, gửi thích ứng, trạng thái & Chạy điện thoại, camera, GPS, đồng bộ nền và SMS với log \\
+Backend/dashboard & API, CSDL, bản đồ, tài khoản, nhật ký & Đánh giá tải, khả dụng và vận hành với trung tâm \\
+Mạng yếu & Script proxy và test chức năng web & Bộ độ trễ lặp, tỷ lệ nhận tin và pin trên máy thật \\
+Báo cáo/sản phẩm & Bản sơ bộ này và bản thảo nghiên cứu & Biểu mẫu chính thức, minh chứng ký/dấu và video \\
+\bottomrule
+\end{longtable}
+
+Nhóm III đăng ký một ứng dụng di động, một website và một bộ mô hình AI đa phương thức đã tối ưu. Website và ứng dụng có thành phần chạy được; bộ mô hình có ảnh và LR có cấu trúc, nhưng chưa hoàn thành mô hình văn bản tiếng Việt như dự kiến. Có artifact nén hiện tại nên phát biểu cũ ``chưa có lượng tử hóa'' không còn đúng; mức phù hợp với mobile vẫn cần đo riêng.
+
+Nhóm I và II trong thuyết minh ghi không đăng ký. Bản thảo ISDS 2026 mã 6444 là sản phẩm nghiên cứu bổ sung trong repo, không tự biến thành cam kết đăng ký nhóm I. Việc có bản camera-ready không thay thế minh chứng xuất bản/chấp nhận chính thức trong hồ sơ. Nhóm IV cần bản tin, báo cáo tóm tắt và video tối đa hai phút; bản tin/tóm tắt của báo cáo này có nội dung sơ bộ, còn mẫu chính thức và video cần hoàn tất.
+
+\subsection{Giới hạn giá trị nội tại}
+Pipeline nghiên cứu có ranh giới truth rõ, nhưng generator chứa những quy luật riêng và thiếu một số trường nguồn độc lập. Hằng số confidence/score là heuristic, chưa được chuyên gia xác nhận. Nhãn exact của Generator 3.0 và fingerprint đánh giá không luôn trùng định nghĩa. Những yếu tố này hạn chế việc diễn giải khả năng chống giả hoặc đối chiếu mọi dạng duplicate.
+
+Ngoài ra, artifact PTQ/QAT có chênh lệch giữa summary và CSV dự đoán. QAT summary ghi 52,34\% Accuracy, còn CSV tính ra 51,17\%; cần tái sinh bộ metric/CSV cùng phiên trước khi chốt kết quả nén. Báo cáo công bố chênh lệch và không sửa nguồn gốc.
+
+Trong ảnh, split và MD5 khớp giảm một nguy cơ rò rỉ do bản trùng được ghi nhận, nhưng chưa chứng minh độc lập nguồn/sự kiện hoàn toàn. Nhiều nhánh tối ưu dùng cùng test; các kết quả là so sánh kỹ thuật đã lưu, chưa có protocol xác nhận độc lập để đánh giá một model được chọn sau khi xem nhiều kết quả. Không nên trình bày nhánh có số tốt nhất như một xác nhận cuối cùng không có lựa chọn hậu nghiệm.
+
+\subsection{Giới hạn giá trị ngoại tại}
+RQ1 là kiểm tra trong cùng generator; RQ2/RQ3 dùng generator tổng hợp riêng. Dữ liệu neo địa lý không biến báo cáo và harm thành quan sát thực địa, và hai bundle không tạo bằng chứng chuyển miền OOD. Ảnh web đã nén có thể khác ảnh camera về góc chụp, ánh sáng, kích thước và chất lượng. Các metric không thể tự ngoại suy sang vùng thiên tai và thiết bị khác.
+
+LR rút gọn dấu hiệu tham chiếu không triển khai toàn bộ IITT. Không có dữ liệu bệnh nhân hoặc nhãn chuyên gia cho gói này; không có cờ được chọn có thể do người dùng không biết hoặc không nhập. Đầu ra phải được giữ như thông tin hỗ trợ xác minh, và báo cáo không phát biểu hiệu quả y khoa từ bảng tổng hợp.
+
+\subsection{Giới hạn tích hợp và phép đo}
+Adapter backend chưa đọc \texttt{E\_i} mà app gửi, còn dùng \texttt{urgency}/từ khóa; điều này cần được giải quyết bằng một thay đổi hợp đồng và kiểm thử ở công việc tiếp theo. Phép cộng số mắc kẹt/bị thương, đếm nhóm yếu thế và dùng receipt time khi thiếu created time cũng cần xác nhận ngữ nghĩa. Việc lõi khớp công thức không bảo đảm các heuristic đầu vào khớp thực tế.
+
+Độ trễ đã đo là CPU và không gồm toàn pipeline. Không có log benchmark mobile, pin, tỷ lệ giao SMS hoặc thực nghiệm người dùng. Script weak-network chưa có bộ results được lưu trong repo. Các test lịch sử đủ mô tả ca đã kiểm tra, chưa bảo đảm mọi tính năng mới trên commit hiện tại đã được chạy lại.
+
+\subsection{Hướng xử lý từ kết quả âm}
+Đối với phân cụm, cần thử canonicalize transport copy trước tạo đồ thị và kiểm tra lại quantile/top-$k$ dưới multiplicity, đồng thời giữ baseline mật độ khớp. Đối với score, cần kiểm tra nguồn củng cố độc lập, chống campaign và xác định mục tiêu phù hợp với chuyên gia. Đối với scheduler, cần đưa chi phí đi lại, năng lực đội và bất định vào thiết kế mục tiêu.
+
+Đối với ảnh, PTQ cần được chọn theo trade-off dung lượng/recall/lỗi nặng thay vì chỉ kích thước; nhánh QAT cần phân tích lỗi trước triển khai. Với phần mềm, ưu tiên đóng khoảng trống ngữ nghĩa field và kiểm thử Android end-to-end. Các hướng này xuất phát từ kết quả đã quan sát, chưa được trình bày như cải thiện đã đạt.
