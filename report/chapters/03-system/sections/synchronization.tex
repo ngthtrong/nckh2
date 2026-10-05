@@ -1,0 +1,77 @@
+\section{Thiết kế đồng bộ và truy vết báo cáo}\label{sec:synchronization-design}
+\subsection{Ba định danh và hai loại trạng thái}
+Một ca cứu hộ cần giữ định danh ổn định ngay khi được tạo cục bộ. Trong hợp đồng hiện tại, \texttt{payload.id} định danh báo cáo; \texttt{message\_id} định danh thao tác; cặp \texttt{client\_id/sequence\_number} kiểm soát việc tái sử dụng chuỗi thao tác của một client. Retry cùng thao tác phải giữ nguyên message và hash. Nếu bổ sung nội dung bằng một thao tác mới, message mới vẫn tham chiếu báo cáo cũ. Nhờ vậy, một ca có thể có nhiều thao tác nhưng không bị biến thành nhiều ca chỉ vì mất kết nối.
+
+Trạng thái outbox mô tả việc truyền: \texttt{pending}, \texttt{in\_flight}, ACK và dead-letter. Trạng thái báo cáo mô tả nghiệp vụ: \texttt{processing}, \texttt{dispatched}, \texttt{resolved}, \texttt{cancelled}. Backend đã nhận dữ liệu chỉ xác nhận đồng bộ. Việc đội cứu hộ đã được cử đi hoặc ca đã hoàn tất phải được cập nhật bằng thao tác nghiệp vụ có quyền. Giao diện cần giúp người dùng đọc được cả hai thông tin này.
+
+\subsection{Mất ACK sau commit và xử lý idempotency}
+Hình~\ref{fig:sync-sequence} mô tả ca mà server đã ghi dữ liệu nhưng ACK bị mất. Đây là một trường hợp khiến hệ thống chỉ ``gửi lại khi lỗi'' dễ tạo trùng nếu không giữ định danh. Theo hợp đồng, ghi nghiệp vụ và ghi chống trùng nằm trong transaction của cùng message; gửi lại đúng message/hash trả kết quả duplicate. Khả năng retry kết hợp với kiểm tra định danh giữ tính nhất quán cho thao tác đã được server ghi.
+
+\begin{figure}[htbp]\centering
+\begin{tikzpicture}[>=Stealth,font=\footnotesize]
+\node[draw,minimum width=26mm,minimum height=9mm] at (0,0) (app) {Ứng dụng};
+\node[draw,minimum width=26mm,minimum height=9mm] at (4.6,0) (outbox) {Outbox};
+\node[draw,minimum width=26mm,minimum height=9mm] at (9.5,0) (server) {Backend/SQLite};
+\draw[dashed] (0,-.5)--(0,-10.3);
+\draw[dashed] (4.6,-.5)--(4.6,-10.3);
+\draw[dashed] (9.5,-.5)--(9.5,-10.3);
+\draw[->] (0,-1.4)--node[above]{Lưu report và thao tác}(4.6,-1.4);
+\draw[->] (4.6,-2.8)--node[above]{Gửi ID/hash cố định}(9.5,-2.8);
+\node[align=center,anchor=east] at (9.3,-3.8) {Commit nghiệp vụ\\và bản ghi chống trùng};
+\draw[dashed,->] (9.5,-5.1)--node[above]{ACK bị mất}(5.4,-5.1);
+\node at (5.05,-5.1) {$\times$};
+\node[align=center] at (4.6,-6.2) {Timeout: giữ thao tác\\chờ retry/backoff};
+\draw[->] (4.6,-7.4)--node[above]{Retry cùng ID/hash}(9.5,-7.4);
+\draw[->] (9.5,-8.6)--node[above,align=center,text width=43mm]{duplicate và kết quả đã lưu}(4.6,-8.6);
+\draw[->] (4.6,-9.8)--node[above,align=center,text width=42mm]{Hoàn tất thao tác;\\giữ ca cứu hộ}(0,-9.8);
+\end{tikzpicture}
+\caption{Trình tự gửi lại message khi mất ACK sau khi server đã commit}
+\label{fig:sync-sequence}
+\SourceNote{Dựng từ \RepoPath{docs/contact_connect.md}; sơ đồ cho endpoint JSON, không mô tả multipart như một message JSON.}
+\end{figure}
+
+Hash payload là SHA-256 sau chuẩn tắc hóa JSON theo hợp đồng RFC 8785 \citep{rfc8785}. Hash hỗ trợ phát hiện cùng ID được dùng cho nội dung khác; không xác minh danh tính người tạo tin. Ảnh multipart có hash riêng và kiểm tra byte/định dạng ở server. Hai loại hash phục vụ toàn vẹn của dữ liệu, không phải đánh giá độ thật của hiện trường.
+
+\subsection{Phân loại phản hồi và giới hạn retry}
+\begin{table}[htbp]\centering\small
+\caption{Xử lý phản hồi của đường đồng bộ JSON}\label{tab:sync-outcomes}
+\begin{tabularx}{\textwidth}{P{.24\textwidth}P{.30\textwidth}X}
+\toprule Phản hồi/tình huống & Ý nghĩa & Hành động client theo hợp đồng \\\midrule
+accepted & Thao tác đã được commit & Hoàn tất message khỏi outbox \\
+duplicate cùng hash & Server đã có thao tác & Dùng ACK/kết quả cũ; hoàn tất message \\
+retry\_later & Lỗi tạm thời theo message & Giữ pending, đặt lịch retry \\
+Timeout, 408, 429, 5xx & Chưa đủ thông tin để kết luận thất bại vĩnh viễn & Giữ ID/hash và exponential backoff có jitter \\
+rejected không retry & Vi phạm payload/TTL/quyền hoặc xung đột định danh & Chuyển dead-letter để truy vết \\
+\bottomrule\end{tabularx}
+\SourceNote{\RepoPath{docs/contact_connect.md}; phản hồi theo message và lỗi mức request có phạm vi khác nhau.}
+\end{table}
+
+Trong batch, ACK phải được nối bằng message ID thay vì vị trí trong mảng. Một message hợp lệ có thể đã thành công trong khi message khác bị từ chối. Retry toàn bộ mà tạo lại ID sẽ phá khả năng chống trùng. Dead-letter giúp giữ nguyên lỗi và payload để rà soát; nếu chỉ xóa message bị từ chối, số ca người dùng tưởng đã gửi có thể khác số ca trung tâm nhận được mà không còn dấu vết giải thích.
+
+\subsection{Bổ sung ảnh sau metadata và đường SMS}
+Đường JSON không mang ảnh nhị phân; đường multipart nhận meta và ảnh tùy chọn. Khi metadata đến trước, bổ sung ảnh cùng report ID có thể gộp vào ca hiện có theo quyền chủ báo cáo. Backend giữ ảnh đầu tiên và chỉ điền trường còn trống theo quy tắc gộp, nên một request gửi lại không có nghĩa toàn bộ payload ghi đè dữ liệu cũ. Cần kiểm tra nội dung ACK và \texttt{imageUrl} để biết server đã có ảnh.
+
+SMS là một lần thử gửi tối giản độc lập với data. Trong thiết kế hiện tại, bản ghi có thể tiếp tục chờ trong outbox để HTTP bổ sung dữ liệu khi kết nối trở lại. Luồng SMS--gateway--backend và HTTP phải giữ report ID nếu muốn gộp một ca. Log cần phân biệt hệ điều hành chấp nhận gửi, gateway nhận và backend commit. Một sự kiện ở bước đầu không tự chứng minh hai bước sau đã xảy ra.
+
+\subsection{Luồng sử dụng từ khai báo đến xác minh}
+Người gửi chọn ảnh nếu có, khai báo vị trí hoặc để thiếu, nhập số người và tình trạng, rồi tạo báo cáo được lưu trước khi gửi. Ở trung tâm, điều phối viên xem chi tiết từng báo cáo, cụm đang hoạt động, vị trí và mức ưu tiên. Báo cáo thiếu vị trí đi vào danh sách xem xét để bổ sung; thông tin mô hình và lời khai được giữ để đối chiếu. Sau khi xác minh, người điều phối giao đội và chuyển trạng thái. Nhật ký actor/thời gian cho phép kiểm tra lại quyết định.
+
+\begin{figure}[htbp]\centering
+\begin{tikzpicture}[>=Stealth,node distance=7mm,
+ box/.style={draw,align=center,text width=62mm,minimum height=14mm,font=\small}]
+\node[box] (create) {Người gửi: ảnh, mô tả, vị trí\\và khai báo tình trạng};
+\node[box,right=8mm of create] (review) {Trung tâm: xem chi tiết\\và xác minh thông tin};
+\node[box,below=of create] (queue) {Ứng dụng: lưu cục bộ\\gửi thích ứng và chờ ACK};
+\node[box,below=of review] (dispatch) {Điều phối viên: chọn đội\\và cập nhật trạng thái};
+\node[box,below=of queue] (receive) {Backend: tiếp nhận/gộp\\phân cụm hoặc hàng xem xét};
+\node[box,below=of dispatch] (feedback) {App/dashboard: phản hồi\\và nhật ký xử lý};
+\draw[->] (create)--(queue);\draw[->] (queue)--(receive);
+\draw[->] (receive.east)--++(4mm,0)|-(review.west);
+\draw[->] (review)--(dispatch);\draw[->] (dispatch)--(feedback);
+\end{tikzpicture}
+\caption{Luồng nghiệp vụ từ khai báo tới xác minh và phản hồi}
+\label{fig:user-workflow}
+\SourceNote{Tổng hợp từ ứng dụng, dashboard và hợp đồng hiện tại; đây là sơ đồ nghiệp vụ, không phải ảnh chụp phiên cứu hộ thực tế.}
+\end{figure}
+
+Luồng trên cho thấy phân cụm và xếp hạng là thông tin hỗ trợ trong một chuỗi quyết định có người điều phối. Một ca được xếp hạng cao vẫn có thể cần kiểm tra địa điểm hoặc nguồn tin. Khóa cụm không phải định danh ca bền vững; thao tác nghiệp vụ cần gắn với report ID và danh sách thành viên hiện tại. Đây là lý do hệ thống giữ cả dữ liệu từng báo cáo và nhật ký thay vì chỉ lưu cụm tổng hợp.

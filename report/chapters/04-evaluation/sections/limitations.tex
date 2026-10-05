@@ -4,10 +4,10 @@
 \caption{Mức hoàn thành sơ bộ theo bằng chứng trong repo hiện tại}\label{tab:goal-status}\\
 \toprule Nội dung & Kết quả có căn cứ & Phần còn cần bổ sung \\\midrule\endfirsthead
 \toprule Nội dung & Kết quả có căn cứ & Phần còn cần bổ sung \\\midrule\endhead
-Tổng quan & Thuyết minh, nghiên cứu liên quan và bản thảo & Cập nhật tổng quan trong nước theo nguồn gốc từng công trình \\
+Tổng quan & Nguồn gốc công trình trong/ngoài nước, bảng so sánh & Tiếp tục mở rộng khi có nhiệm vụ hoặc corpus mới \\
 Dữ liệu ảnh & 1.702 ảnh, split/hash, tiêu chí lớp & Lineage/giấy phép từng ảnh, mẫu thực địa độc lập \\
 Dữ liệu văn bản & Mô tả trong payload, quy tắc từ khóa & Corpus tin nhắn và nhãn khẩn cấp tiếng Việt \\
-Mô hình ảnh & FP32 test 256 ảnh; ONNX/PTE & Pixel parity và độ trễ/độ tin cậy trên Android thật \\
+Mô hình ảnh & FP32 test 256 ảnh; benchmark app 256 ảnh/runtime & Pixel parity, hash asset và đo lặp trên nhiều thiết bị \\
 Mô hình khẩn cấp & LR v5 từ 32 trạng thái tổng hợp & Không thay thế NLP; chưa kiểm định lâm sàng/field; còn khoảng trống adapter \\
 Nén/tối ưu & PTQ, QAT, cắt tỉa có artifact & QAT hiện giảm chất lượng; đo thiết bị và chọn trade-off \\
 Phân cụm & Lõi đồ thị, benchmark và stress & Dữ liệu thật, missingness benchmark, xử lý multiplicity tốt hơn \\
@@ -37,7 +37,7 @@ LR rút gọn dấu hiệu tham chiếu không triển khai toàn bộ IITT. Kh�
 \subsection{Giới hạn tích hợp và phép đo}
 Adapter backend chưa đọc \texttt{E\_i} mà app gửi, còn dùng \texttt{urgency}/từ khóa; điều này cần được giải quyết bằng một thay đổi hợp đồng và kiểm thử ở công việc tiếp theo. Phép cộng số mắc kẹt/bị thương, đếm nhóm yếu thế và dùng receipt time khi thiếu created time cũng cần xác nhận ngữ nghĩa. Việc lõi khớp công thức không bảo đảm các heuristic đầu vào khớp thực tế.
 
-Độ trễ đã đo là CPU và không gồm toàn pipeline. Không có log benchmark mobile, pin, tỷ lệ giao SMS hoặc thực nghiệm người dùng. Script weak-network chưa có bộ results được lưu trong repo. Các test lịch sử đủ mô tả ca đã kiểm tra, chưa bảo đảm mọi tính năng mới trên commit hiện tại đã được chạy lại.
+Các phiên CPU đo predict; nguồn benchmark app đo classifyImage và có metric được kiểm tra lại trên 256 ảnh/runtime. Nguồn app thiếu metadata thiết bị, APK/asset, thời điểm và phiên đo lặp, nên chưa xác lập kết quả cho một build hoặc nhiều thiết bị. Không có bộ đo pin, tỷ lệ giao SMS hoặc thực nghiệm người dùng. Script weak-network chưa có bộ results được lưu trong repo. Các test lịch sử đủ mô tả ca đã kiểm tra, chưa bảo đảm mọi tính năng mới trên commit hiện tại đã được chạy lại.
 
 \subsection{Hướng xử lý từ kết quả âm}
 Đối với phân cụm, cần thử canonicalize transport copy trước tạo đồ thị và kiểm tra lại quantile/top-$k$ dưới multiplicity, đồng thời giữ baseline mật độ khớp. Đối với score, cần kiểm tra nguồn củng cố độc lập, chống campaign và xác định mục tiêu phù hợp với chuyên gia. Đối với scheduler, cần đưa chi phí đi lại, năng lực đội và bất định vào thiết kế mục tiêu.

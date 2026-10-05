@@ -4,11 +4,40 @@ Trên \ImageTest{} ảnh test, MobileNetV3-Large hiện tại đạt Accuracy \I
 \input{generated/tables/confusion}
 \input{generated/tables/image-classes}
 
+\begin{figure}[htbp]\centering
+\includegraphics[width=.86\textwidth]{image-confusion.pdf}
+\caption{Ma trận nhầm lẫn FP32 chuẩn hóa theo từng lớp thật; mỗi ô giữ số ảnh và tỷ lệ}
+\label{fig:image-confusion}
+\SourceNote{Sinh từ summary FP32 đã khớp CSV dự đoán; mỗi hàng có mẫu số riêng theo Bảng~\ref{tab:image-classes}.}
+\end{figure}
+
 Lớp \texttt{non\_flood} có recall 91,86\%, cao hơn các lớp ngập. Recall \texttt{high} là 66,67\%; trong 54 ảnh high, 14 ảnh bị dự đoán medium và 3 ảnh bị dự đoán low. Ranh giới giữa các mức ngập là hạn chế đáng chú ý, vì nhầm xuống mức thấp có thể làm metadata giảm mức ngập nếu không có kiểm chứng bổ sung.
 
 Có 5 lỗi cách ít nhất hai mức severity, chiếm 1,95\% tập test. Đây là chỉ số do nhóm định nghĩa theo thứ tự mức ngập, không trực tiếp đo hệ quả cứu hộ. Số lượng test mỗi lớp còn nhỏ, nên chênh lệch vài ảnh làm tỷ lệ thay đổi đáng kể. Báo cáo chưa có khoảng tin cậy ghép cặp theo dữ liệu độc lập ngoài nguồn ảnh hiện tại để kết luận khác biệt nhỏ giữa các mô hình.
 
 ECE của FP32 khoảng 0,06350 và Brier khoảng 0,34483 theo artifact. Các chỉ số này cung cấp thêm thông tin về confidence. Không dùng Accuracy tổng thể để chứng minh mọi dự đoán có confidence trên 0,90 đủ tin cậy cho quyết định không gửi ảnh; cần kiểm tra riêng nhóm quyết định đó và các ảnh ngoài phân bố.
+
+\begin{figure}[htbp]\centering
+\includegraphics[width=\textwidth]{image-examples.pdf}
+\caption{Ví dụ dự đoán đúng (hàng trên) và sai (hàng dưới) trong bốn lớp test}
+\label{fig:image-examples}
+\SourceNote{Ảnh trong Dataset\_Flood; chọn đường dẫn đầu tiên theo thứ tự trong từng lớp/nhóm đúng--sai từ CSV FP32. Hình là ví dụ minh họa, không phải mẫu đại diện ngẫu nhiên; danh sách và hash ở figure-provenance.json.}
+\end{figure}
+
+Hình~\ref{fig:image-examples} giữ đồng thời nhãn thật, nhãn dự đoán và confidence để người đọc kiểm tra cách model xử lý cảnh cụ thể. Các trường hợp này cho phép quan sát dấu hiệu thị giác, nhưng chưa có phép gán nhãn nguyên nhân lỗi. Vì vậy, không quy mỗi lỗi cho che khuất, góc chụp hoặc sai nhãn chỉ từ một ảnh; cần một quy trình rà soát thống nhất trên tập lỗi và nguồn dữ liệu.
+
+\subsection{Confidence và chính sách gửi metadata}
+Hình~\ref{fig:confidence-calibration} được tính từ dự đoán FP32 trên 256 ảnh test với bin rộng 0,1. Đường reliability so sánh confidence trung bình với tỷ lệ đúng trong mỗi bin; biểu đồ số mẫu cho biết một điểm trên đường có bao nhiêu quan sát. Đây là phép mô tả trên split hiện tại, không phải kết quả đã hiệu chuẩn lại mô hình. Giá trị ECE nêu trên được lấy theo cấu hình artifact gốc, không tính lại ECE từ các bin minh họa này.
+\begin{figure}[htbp]\centering
+\includegraphics[width=\textwidth]{confidence-calibration.pdf}
+\caption{Reliability và số mẫu theo confidence của mô hình FP32 trên tập test}
+\label{fig:confidence-calibration}
+\SourceNote{\RepoPath{products/fe/reports/pth_onnx_pte/all_predictions.csv}; dùng confidence/dự đoán PyTorch, không trộn ba runtime thành 768 quan sát.}
+\end{figure}
+
+Ở ngưỡng $p\geq0{,}90$, CSV hiện tại có 52/256 ảnh (20,31\%) và cả 52 dự đoán đều đúng. Kết quả hẹp này bổ sung thông tin cho chính sách gửi metadata; nó không bảo đảm mọi ảnh camera mới có confidence cao đều đúng. Ngưỡng 0,90 là cấu hình ứng dụng đang có, không được chọn lại từ phân tích này. Nếu dùng tập test để chỉnh ngưỡng, cần tập xác nhận mới để đánh giá quyết định sau điều chỉnh.
+
+Nghiên cứu calibration phân biệt confidence của mạng với khả năng đúng quan sát được và khảo sát temperature scaling trên các bài toán phân loại \citep{guo2017calibration}. Đối với đề tài, một bước tiếp theo là fit phép hiệu chuẩn trên validation rồi đo trên tập camera độc lập. Đồng thời, cần đánh giá cả lượng dữ liệu tiết kiệm và số ca quan trọng bị thiếu ảnh tại trung tâm, bởi tỷ lệ phân loại đúng chưa đủ đo chất lượng quyết định truyền tải.
 
 \subsection{Tương đương PyTorch, ONNX và ExecuTorch}
 \input{generated/tables/pth_onnx_pte}
@@ -17,6 +46,25 @@ Cả ba định dạng có cùng nhãn top-1 trên 256 ảnh và cùng chỉ s�
 Trong phiên này, trung vị lời gọi suy luận PTH là 65,87 ms, ONNX 25,93 ms và PTE 45,31 ms. File checkpoint PTH khoảng 48,51 MiB, ONNX 16,04 MiB và PTE 16,06 MiB. Đây là đối chiếu trên máy tính, không đủ để chọn runtime nhanh nhất trên mọi điện thoại. Kích thước PTH lớn hơn không có nghĩa toàn bộ phần chênh lệch là tham số tính toán cần cắt tỉa.
 
 Smoke verification trên ba ảnh ghi năm kiểm tra local pass gồm tiền xử lý, precision, provider, parity và label mapping; phần mobile ghi chưa thử. Kết quả smoke hỗ trợ kiểm tra đường thực thi nhỏ, còn kết quả full test hỗ trợ thống kê phân loại. Hai mức kiểm tra bổ sung nhau và không thay thế phép đo pixel/runtime native trên điện thoại.
+
+\subsection{Benchmark tại ứng dụng và đối chiếu với CPU}\label{sec:mobile-results}
+Repo còn có \RepoPath{products/fe/reports/mobile/samsung21se.json}, chứa hai object JSON nối tiếp cho ONNX và PTE. Mỗi object ghi complete, 256/256 ảnh xử lý, không lỗi suy luận, năm warmup và không lỗi warmup. Script báo cáo đọc riêng hai khối, nối sample ID với SHA-1 rút gọn của đường dẫn tương đối theo script đóng gói benchmark, kiểm tra đủ ID/nhãn test và tính lại ma trận, accuracy, macro-F1, mean/P50/P95. Toàn bộ các kiểm tra này khớp nội dung đã lưu.
+\input{generated/tables/mobile-runtime}
+
+Hai runtime cùng có 192/256 dự đoán đúng, Accuracy 75,00\% và macro-F1 73,31\%. Top-1 ONNX--PTE đồng thuận 256/256. So với nhãn CPU FP32, mỗi runtime đồng thuận 249/256 (97,27\%); có bảy ảnh đổi nhãn, trong đó năm ảnh từ đúng thành sai và hai ảnh từ sai thành đúng. Accuracy giảm 1,17 điểm phần trăm so với 76,17\% trên CPU, nhưng chưa có thí nghiệm cô lập nguyên nhân. Vì hai runtime tại app cùng cho một bộ nhãn, cần đối chiếu tiền xử lý chung và hash asset trước khi kết luận sự khác biệt do engine.
+
+\begin{figure}[htbp]\centering
+\includegraphics[width=.9\textwidth]{mobile-latency.pdf}
+\caption{Phân bố thời gian classifyImage của hai benchmark ứng dụng đã lưu}
+\label{fig:mobile-latency}
+\SourceNote{256 thời gian/runtime từ samsung21se.json; boxplot thể hiện trung vị, quartile, whisker 1,5 IQR và điểm ngoài whisker. Các lượt không phải nhiều phiên thiết bị độc lập.}
+\end{figure}
+
+Theo \RepoPath{products/fe/app/lib/domain/services/model_benchmark.dart}, đồng hồ cho từng ảnh bắt đầu sau khi đọc bytes và bao quanh lời gọi repository \texttt{classifyImage}. Datasource native thực hiện giải mã/letterbox, chuẩn hóa tensor và gọi runtime trong lời gọi này. Vì vậy, phạm vi timing rộng hơn predict CPU, nhưng không bao gồm tải ảnh benchmark từ package hay nạp model ban đầu. P50/P95 được mã app tính bằng nearest-rank; báo cáo giữ cách tính đó thay vì dùng median nội suy khác.
+
+Trong artifact, P50 PTE là 29,487 ms và ONNX là 54,500 ms; P95 tương ứng 85,890 và 112,139 ms. Kết quả mô tả phiên đã lưu, không chứng minh PTE luôn nhanh hơn trên nhiều điện thoại. Tên file gợi ý thiết bị nhưng object không có model máy, SoC, phiên bản Android, APK/commit, hash model, số luồng, nhiệt độ hoặc ngày đo. Báo cáo gọi đây là \emph{benchmark ứng dụng đã lưu, thiếu metadata thiết bị}; không tự xác nhận cấu hình điện thoại từ tên tệp.
+
+Tệp verification CPU ghi mobile NOT TESTED ở thời điểm của tệp đó; checkpoint Android ngày 04/10 ghi còn chờ thao tác người dùng. Hai tài liệu lịch sử được giữ đúng phạm vi, còn benchmark ứng dụng là bằng chứng riêng mới được tìm thấy khi rà soát. Vì thiếu ngày/asset/commit trong benchmark, chưa thể dùng nó để khẳng định APK release của checkpoint đã được xác nhận hết lỗi JNI. Tuy vậy, phát biểu chung rằng repo không có benchmark tại ứng dụng cần được cập nhật.
 
 \subsection{Lượng tử hóa: số liệu đã lưu và đối chiếu chưa khớp}
 Bảng lượng tử hóa dưới đây giữ số từ \texttt{summary.json} để truy nguyên artifact, chưa xem là metric nén được xác nhận cuối cùng. Khi tính lại từ \texttt{all\_predictions.csv} cùng thư mục, PTQ có một khác biệt ở ma trận nhầm lẫn và QAT có ba dự đoán đúng ít hơn summary. Bảng~\ref{tab:image-metric-audit} công bố cả hai nguồn; nguyên nhân cần được rà soát ở quy trình sinh artifact.
@@ -36,6 +84,13 @@ Cùng Accuracy không có nghĩa cùng dự đoán: đồng thuận giữa mô h
 
 Về tốc độ trong cùng phiên, PTH cắt tỉa có trung vị thấp hơn PTH gốc (28,91 so với 33,16 ms), nhưng ONNX cắt tỉa cao hơn (20,32 so với 12,71 ms) và PTE cắt tỉa cao hơn (32,43 so với 25,62 ms). Ít tham số hơn không bảo đảm runtime nhanh hơn, vì kernel, bố trí graph và backend có thể khác. Chưa có nhiều lần đo độc lập hoặc kết quả mobile để khẳng định ưu thế hiệu năng tổng quát.
 
+\begin{figure}[htbp]\centering
+\includegraphics[width=\textwidth]{compression-tradeoffs.pdf}
+\caption{Đánh đổi dung lượng--accuracy theo summary nén và độ trễ trước/sau cắt tỉa}
+\label{fig:compression-tradeoffs}
+\SourceNote{Summary FP32/PTQ/QAT ở panel trái, pruning\_st ở panel phải. Metric nén còn khác CSV như Bảng~\ref{tab:image-metric-audit}; timing chỉ so sánh cặp trong cùng phiên/runtime, chưa có benchmark các bản nén tại app.}
+\end{figure}
+
 \subsection{Khẩn cấp LR: độ khớp nhãn thay thế}
 JSON v5 ghi fidelity trên 32 trạng thái tại threshold 0,5 bằng 1,0. Bảng so sánh với quy tắc cho thấy tất cả profile khớp nhãn OR. Các audit dataset/final gate ghi kiểm tra integrity; audit nguồn giữ các trạng thái có điều kiện và thay đổi sau rà soát, không chuyển mọi hạng mục thành một phát biểu ``pass'' vô điều kiện.
 
@@ -45,6 +100,12 @@ Phần app đã có loader và score từ cờ có cấu trúc, nhưng backend v
 
 \subsection{RQ1: chất lượng phân cụm cơ sở}
 \input{generated/tables/rq1-benchmark}
+\begin{figure}[htbp]\centering
+\includegraphics[width=\textwidth]{rq1-graph-baselines.pdf}
+\caption{ARI và CI 95\% của năm biến thể đồ thị trên 40 run test RQ1}
+\label{fig:rq1-baselines}
+\SourceNote{benchmark\_summary.csv; hình giữ riêng các pipeline đồ thị để đọc chênh lệch nhỏ. CI từng phương pháp không thay kiểm định ghép cặp và hiệu chỉnh Holm.}
+\end{figure}
 Additive Louvain có ARI trung bình 0,9191, cao nhất bảng; Product Louvain là 0,9072. Product trừ Additive được chọn độc lập có hiệu trung bình $-0{,}01184$, CI bootstrap 95\% chưa hiệu chỉnh $[-0{,}02257;-0{,}00240]$, với 9 run thắng, 19 hòa và 12 thua. Wilcoxon raw $p=0{,}0987$, sau Holm $p=0{,}2560$. Kết quả không xác lập ưu thế thành phần tích.
 
 So với Additive khớp mật độ, Product có hiệu $+0{,}00989$, CI $[-0{,}00100;0{,}02082]$ và $p_{\mathrm{Holm}}=0{,}2560$. Hai pipeline có retained-edge fraction xấp xỉ 0,03011 và 0,03021, mean degree 9,90 và 9,94. Đây là diagnostic giảm chênh lệch mật độ, không xác định tác động nhân quả của operator, vì trọng số và thành viên cạnh vẫn khác.
@@ -70,12 +131,24 @@ Lần chạy độc lập không gộp chỉ làm một số tổng hợp ở đ
 
 \subsection{RQ2: phù hợp với lợi ích mô phỏng}
 \input{generated/tables/rq2-alignment}
+\begin{figure}[htbp]\centering
+\includegraphics[width=\textwidth]{rq2-alignment.pdf}
+\caption{Mức phù hợp xếp hạng với lợi ích mô phỏng trong điều kiện oracle grouping}
+\label{fig:rq2-alignment}
+\SourceNote{rq2\_summary.csv; trục NDCG giữ miền $[0,1]$. Thanh CI mô tả từng phương pháp, không biểu diễn CI hiệu ghép cặp.}
+\end{figure}
 Điểm có chặn đạt NDCG@5 0,6669, CI 95\% $[0{,}6306;0{,}7018]$. Spearman trung bình $-0{,}0304$ với CI $[-0{,}1165;0{,}0549]$, overlap top-5 bằng 0,285 với CI $[0{,}2349;0{,}3400]$. NDCG@5 cao hơn legacy khoảng 0,0121 nhưng tương phản sau Holm không có ý nghĩa theo artifact.
 
 Ước lượng điểm của phương pháp có chặn còn thấp hơn chỉ số người (0,6709) và ngẫu nhiên (0,6763). Những chênh lệch điểm này không tự chứng minh khác biệt thống kê. Vì grouping oracle đã loại lỗi phân cụm khỏi điều kiện RQ2, sự phù hợp yếu không thể quy hoàn toàn cho phân hoạch sai.
 
 \subsection{RQ2: bất biến hẹp và thất bại dưới phối hợp}
 \input{generated/tables/rq2-robustness}
+\begin{figure}[htbp]\centering
+\includegraphics[width=\textwidth]{rq2-robustness.pdf}
+\caption{Năm điều kiện RQ2 cho thấy bất biến exact và các giới hạn trước khai báo tăng/phối hợp}
+\label{fig:rq2-robustness}
+\SourceNote{rq2\_summary.csv; chọn các điều kiện để giải thích những cơ chế khác nhau, bảng đầy đủ vẫn giữ ở Bảng~\ref{tab:rq2-robustness}.}
+\end{figure}
 Sao chép exact 2, 5 và 10 lần tạo priority drift bằng không cho score có chặn khi nhóm bằng chứng và đầu vào cố định. Legacy có drift lần lượt 0,0026; 0,0086 và 0,0148. Điều này hỗ trợ thuộc tính bất biến đã nêu, với đúng điều kiện kiểm tra.
 
 Các perturbation gần trùng, mâu thuẫn $F/E$, missingness và tăng $F$ dưới confidence thấp thường cho score có chặn drift nhỏ hơn legacy. Tuy nhiên, với tăng $N$ confidence thấp, drift có chặn là 0,0696 so với 0,0140; với tăng $V$ là 0,0758 so với 0,0074. Các kết quả này được giữ như hạn chế thay vì chỉ trình bày bản sao exact.

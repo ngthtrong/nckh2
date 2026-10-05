@@ -13,6 +13,8 @@ RQ1 dùng Generator 3.0 gồm 80 run/26.288 báo cáo bán tổng hợp, trong �
 \subsection*{Kết quả}
 Ảnh FP32 đạt Accuracy \ImageAccuracy\% và macro-F1 \ImageMacroFOne\%; ONNX/PTE có đồng thuận top-1 100\% với PyTorch trên 256 ảnh, trong khi Accuracy với nhãn thật vẫn 76,17\%. PTQ giảm file khoảng 16,04 xuống 4,51 MiB, Accuracy còn \PTQAccuracy\%. QAT đạt \QATAccuracy\% và có 38 lỗi nặng. Cắt tỉa giảm khoảng 1,46\% tham số, giữ Accuracy tổng nhưng không làm mọi runtime nhanh hơn. Timing là CPU máy tính, không gồm tiền xử lý/tải model.
 
+Benchmark app đã lưu có đủ 256 ảnh cho mỗi runtime, Accuracy 75,00\%, macro-F1 73,31\% và đồng thuận ONNX--PTE 100\%. P50 classifyImage là 54,50 ms cho ONNX và 29,49 ms cho PTE; phạm vi có tiền xử lý nên khác predict CPU. Nguồn thiếu metadata thiết bị/asset, chưa xác nhận cho một APK cụ thể.
+
 RQ1: Additive Louvain có ARI 0,9191, Product Louvain 0,9072; tương phản sau Holm không xác lập ưu thế Product. Nhiễu GPS/thời gian làm giảm ARI; năm lần bản sao làm các biến thể đồ thị giảm về gần 0,30. Product vẫn sinh điểm đến giả dù không hấp thụ tin giả vào cụm thật.
 
 RQ2: score có chặn đạt NDCG@5 0,6669, Spearman $-0{,}0304$, chưa có alignment chung tốt hơn. Exact-copy drift bằng không khi grouping/đầu vào cố định; campaign confidence cao vẫn tạo sai lệch lớn. RQ3: score mới chưa có lợi ích chung so với legacy, và kém gần nhất trước về harm/trễ hạn trong mô hình được thử. Các kết quả này là chẩn đoán tổng hợp, không chứng minh hiệu quả thực địa của bất kỳ chính sách nào.
@@ -20,6 +22,6 @@ RQ2: score có chặn đạt NDCG@5 0,6669, Spearman $-0{,}0304$, chưa có alig
 Ứng dụng Flutter có outbox, gửi thích ứng, SMS Android và nhận trạng thái; backend FastAPI/SQLite có dedup, phân quyền, cụm, gateway SMS và nhật ký; dashboard có bản đồ, giao đội và xử lý thiếu GPS. Tài liệu ngày 27/09/2026 ghi 44 backend test, 26 Flutter test, 46 E2E web pass và APK debug build; bản tóm tắt không gọi đó là lượt chạy lại trên commit hiện tại.
 Summary PTQ/QAT chưa khớp hoàn toàn CSV dự đoán: QAT có Accuracy summary 52,34\%, CSV 51,17\%. Các số nén cần được rà soát trước khi chốt.
 \subsection*{Kết luận và kiến nghị}
-Nguyên mẫu và các thực nghiệm làm rõ khả năng kỹ thuật cùng giới hạn của pipeline. Cần hoàn thiện corpus/mô hình văn bản, đóng khoảng trống field khẩn cấp, thử Android và mạng/SMS thật, xác nhận chuyên gia, và bổ sung nguồn gốc dữ liệu. DTN/data mule hiện ở mức định hướng. Bản báo cáo đầy đủ còn cần thông tin hành chính, biểu mẫu, minh chứng phê duyệt và video.
+Nguyên mẫu và các thực nghiệm làm rõ khả năng kỹ thuật cùng giới hạn của pipeline. Cần hoàn thiện corpus/mô hình văn bản, đóng khoảng trống field khẩn cấp, bổ sung metadata và thử lặp trên nhiều Android/mạng/SMS thật, xác nhận chuyên gia, và bổ sung nguồn gốc dữ liệu. DTN/data mule hiện ở mức định hướng. Bản báo cáo đầy đủ còn cần biểu mẫu, minh chứng phê duyệt và video; metadata hành chính đã được xác nhận.
 \SourceNote{Các artifact ở \RepoPath{products/fe/reports}, \RepoPath{thucnghiem/results} và \RepoPath{paper/main.tex}; số liệu xuất bởi \RepoPath{report/scripts/export_results.py}.}
 \DraftNote{Nội dung tóm tắt sơ bộ cần chuyển sang biểu mẫu chính thức trước khi nộp.}

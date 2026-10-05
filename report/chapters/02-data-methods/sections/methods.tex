@@ -103,6 +103,30 @@ Với dạng cộng và $\alpha>0$, chặn hữu hạn từ threshold chỉ có 
 \end{equation}
 Các thuộc tính này làm rõ cấu trúc đồ thị, nhưng không chứng minh Product có ARI cao hơn hoặc lịch điều phối tốt hơn. Kết quả thực nghiệm được đánh giá độc lập với bảo đảm toán học.
 
+\begin{figure}[htbp]\centering
+\begin{tikzpicture}[>=Stealth,font=\small,
+ pt/.style={circle,draw,minimum size=9mm}]
+\node[pt] (a) at (0,0) {$r_1$};
+\node[pt] (b) at (3,0) {$r_2$};
+\node[pt] (c) at (6,0) {$r_3$};
+\node[pt] (d) at (9,0) {$r_4$};
+\draw[thick] (a)--node[above]{$d<r_\theta^\times$}(b);
+\draw[thick] (b)--node[above]{$d<r_\theta^\times$}(c);
+\draw[thick] (c)--node[above]{$d<r_\theta^\times$}(d);
+\draw[<->] (0,-1)--node[below,align=center]{Hai đầu chuỗi có thể xa hơn $r_\theta^\times$\\dù mọi cạnh đều thỏa chặn}(9,-1);
+\end{tikzpicture}
+\caption{Ví dụ khái niệm: chặn chiều dài cạnh không chặn trực tiếp đường kính cộng đồng}
+\label{fig:edge-chain}
+\SourceNote{Minh họa Công thức~\ref{eq:edge-radius}; không phải phân hoạch hoặc tọa độ lấy từ thực nghiệm.}
+\end{figure}
+
+\subsection{Chi phí tạo đồ thị và tác động của multiplicity}
+Tính tương đồng đầy đủ cho $n$ báo cáo cần xét $n(n-1)/2$ cặp. Khi cài bằng ma trận dense, chi phí lưu trữ là $O(n^2)$; bước làm thưa chỉ giảm số cạnh ở đồ thị cuối, chưa loại chi phí tạo ma trận ban đầu. Hợp của các lựa chọn top-$k$ có tối đa $nk$ cạnh vô hướng trước khi bỏ cạnh trùng, nhưng bậc của từng nút vẫn có thể vượt $k$ như đã giải thích. Với bộ benchmark vài trăm báo cáo/run, thiết kế này phù hợp cho khảo sát lõi; khả năng vận hành ở quy mô lớn cần phép đo tải riêng.
+
+Nếu sao chép làm kích thước đầu vào tăng khoảng $m$ lần, số cặp trước làm thưa tăng xấp xỉ $m^2$ lần. Đồng thời, nhiều cạnh bản sao xuất hiện trong phân bố dùng chọn quantile và trong cạnh tranh top-$k$. Đây là cơ chế có thể giải thích vì sao bất biến điểm khi grouping cố định không kéo theo bất biến phân cụm. Kết quả stress chỉ cho thấy hiện tượng, chưa cô lập tỷ lệ đóng góp của threshold, top-$k$ hay bước tối ưu cộng đồng.
+
+Khử transport copy trước tạo đồ thị là một hướng giảm số nút lặp, nhưng cần giữ lineage để evaluator vẫn đánh giá trên đơn vị báo cáo gốc theo protocol. Nếu tự bỏ các hàng trùng rồi đổi mẫu số ARI, phép so sánh trước/sau sẽ đổi cả thuật toán lẫn bài toán đánh giá. Tương tự, chỉ giữ gần trùng bằng envelope có thể gộp quan sát độc lập; cần kiểm tra cả sai gộp và sai tách khi thử hướng này.
+
 \subsection{Họ bằng chứng và tổng hợp có chặn}
 Trong một cụm dự đoán $C_k$, bản sao exact dùng fingerprint chuẩn tắc; bản gần trùng được liên kết bằng thành phần liên thông trong envelope quan sát. Phương pháp gần trùng có tính bắc cầu, không phải complete linkage. Ký hiệu $\mathcal F_k$ là tập họ bằng chứng trong cụm. Đặt $\widetilde N_i=\min(N_i,N_{\mathrm{ref}})$ và $\widetilde V_i=\min(V_i,V_{\mathrm{cap}})$.
 \begin{align}
@@ -135,6 +159,31 @@ Với mỗi seed, hai phương pháp được đánh giá trên cùng dữ liệ
 Trong RQ3, ba điều kiện nguồn lực thuộc cùng một seed được lấy trung bình trước, giữ 40 cặp seed. Bảng cũ có $40\times3=120$ hàng điều kiện chỉ phục vụ chẩn đoán; coi tất cả là mẫu độc lập sẽ sai đơn vị suy luận. Khoảng tin cậy bootstrap chưa hiệu chỉnh và kiểm định Wilcoxon có Holm là hai thủ tục khác nhau, nên một CI không chứa không không tự cho phép bỏ qua kết luận kiểm định đã hiệu chỉnh.
 
 Các phép kiểm tra stress RQ1 báo cáo thay đổi trong từng phương pháp so với chính đối chứng của nó. Chúng không phải kiểm định ưu thế giữa các phương pháp. Giữ những ranh giới này giúp trình bày đầy đủ kết quả âm và tránh diễn giải chọn lọc.
+
+\subsection{Cách đọc chỉ số phân cụm và xếp hạng}
+ARI so sánh quan hệ ``cùng cụm'' của các cặp báo cáo giữa phân hoạch dự đoán và nhãn thật, có hiệu chỉnh mức khớp ngẫu nhiên. Chỉ số không phụ thuộc tên hoặc số thứ tự nhãn cụm. Gọi $n_{uv}$ là số báo cáo nằm ở cụm thật $u$ và cụm dự đoán $v$, $a_u=\sum_vn_{uv}$ và $b_v=\sum_un_{uv}$. Đặt
+\begin{align}
+S&=\sum_{u,v}\binom{n_{uv}}{2},\quad
+A=\sum_u\binom{a_u}{2},\quad B=\sum_v\binom{b_v}{2},\\
+\operatorname{ARI}&=\frac{S-AB/\binom{n}{2}}{(A+B)/2-AB/\binom{n}{2}}.
+\end{align}
+Công thức trên mô tả trường hợp mẫu số khác không; các trường hợp suy biến được xử lý theo thư viện của protocol. ARI bằng một khi phân hoạch khớp hoàn toàn trên đơn vị được đánh giá. ARI thấp hoặc âm phản ánh mức khớp kém so với hiệu chỉnh ngẫu nhiên, không có nghĩa một tỷ lệ cụ thể các ảnh hoặc ca cứu hộ đã được phân loại sai.
+
+Pairwise F1 dùng cặp báo cáo như đơn vị: TP là cặp cùng sự kiện và cùng cụm, FP là cặp khác sự kiện nhưng bị gom chung, FN là cặp cùng sự kiện nhưng bị tách. Khi các mẫu số xác định,
+\begin{equation}
+\operatorname{Prec}_{\mathrm{pair}}=\frac{\mathrm{TP}}{\mathrm{TP}+\mathrm{FP}},\quad
+\operatorname{Rec}_{\mathrm{pair}}=\frac{\mathrm{TP}}{\mathrm{TP}+\mathrm{FN}},\quad
+\operatorname{F1}_{\mathrm{pair}}=\frac{2\mathrm{TP}}{2\mathrm{TP}+\mathrm{FP}+\mathrm{FN}}.
+\end{equation}
+Đây là F1 của quan hệ cặp, khác macro-F1 bốn lớp ảnh. Một sự kiện có nhiều báo cáo tạo nhiều cặp hơn; vì vậy phải giữ định nghĩa mẫu và cách đánh giá trên báo cáo gốc khi thay multiplicity.
+
+Trong notebook RQ2, NDCG dùng \texttt{sklearn.metrics.ndcg\_score} với relevance là lợi ích evaluator và $k=5$. Với thứ tự dự đoán $\pi$ và lợi ích không âm $g_i$, biểu diễn không có tie là
+\begin{equation}
+\operatorname{DCG@5}=\sum_{r=1}^{5}\frac{g_{\pi(r)}}{\log_2(r+1)},\qquad
+\operatorname{NDCG@5}=\frac{\operatorname{DCG@5}}{\operatorname{IDCG@5}}.
+\end{equation}
+IDCG là DCG của thứ tự lợi ích lý tưởng; evaluator dùng gain tuyến tính như lời gọi thư viện, không thay bằng $2^{g_i}-1$. Việc xử lý tie tuân theo scorer của lần chạy. NDCG cần đối chứng vì một thứ tự ngẫu nhiên cũng có thể đạt giá trị dương khi nhiều sự kiện đều có lợi ích.
+\SourceNote{Cách gọi metric trong benchmark RQ1 và \RepoPath{thucnghiem/results/rq2_results/RQ2_Priority_Robustness_Colab.ipynb}; công thức chỉ giải thích metric, không chạy lại các benchmark.}
 
 \subsection{Quy trình suy luận và kiểm tra có thể tái lập}
 Quy trình nghiên cứu được mô tả theo thứ tự thao tác để làm rõ nơi sử dụng dữ liệu. Trước hết, đọc hợp đồng/schema và chỉ nạp tệp đầu vào quan sát. Kiểm tra miền số, timestamp và tọa độ; đưa báo cáo không đủ vị trí/thời gian vào review. Từ các báo cáo đủ trường, xác định định danh payload, số củng cố và $Q_i$. Sau đó tính từng thành phần tương đồng, ngưỡng quantile và cạnh top-$k$, rồi gọi bộ phát hiện cộng đồng.

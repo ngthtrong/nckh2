@@ -15,3 +15,15 @@
 \setlength{\parindent}{1cm}
 \setlength{\parskip}{0pt}
 \emergencystretch=2em
+% Keep figure/table separation consistent, including pages containing only floats.
+\setlength{\textfloatsep}{14bp plus 2bp minus 2bp}
+\setlength{\floatsep}{14bp plus 2bp minus 2bp}
+\setlength{\intextsep}{14bp plus 2bp minus 2bp}
+\renewcommand{\topfraction}{0.9}
+\renewcommand{\bottomfraction}{0.8}
+\renewcommand{\textfraction}{0.1}
+\makeatletter
+\setlength{\@fptop}{0pt}
+\setlength{\@fpsep}{18bp}
+\setlength{\@fpbot}{0pt plus 1fil}
+\makeatother

@@ -6,6 +6,7 @@ import json
 from collections import Counter, defaultdict
 from pathlib import Path
 import subprocess
+from mobile_evidence import audit_mobile
 
 ROOT = Path(__file__).resolve().parents[2]
 OUT = ROOT / 'report/generated'
@@ -136,6 +137,15 @@ def main():
           ['Lớp',r'Precision (\%)',r'Recall (\%)',r'F1 (\%)','Số ảnh'],
           [[c.replace('_',r'\_'),*[fmt(100*metrics[c][s],2) for s in ['precision','recall','f1']],metrics[c]['support']] for c in classes],
           r'\RepoPath{products/fe/reports/pth_onnx_pte/summary.json}.')
+    mobile_path = 'products/fe/reports/mobile/samsung21se.json'
+    mobile, mobile_audit = audit_mobile(read_bytes(mobile_path), split)
+    table('mobile-runtime', 'Benchmark tại ứng dụng đã lưu: cùng 256 ảnh test',
+          'tab:mobile-runtime', 'lrrrrr',
+          ['Runtime', r'Acc. (\%)', r'F1 (\%)', 'TB ms', 'P50 ms', 'P95 ms'],
+          [[name.upper(), fmt(100*b['accuracy'], 2), fmt(100*b['macroF1'], 2),
+            *[fmt(b['latency'][key], 2) for key in ['meanMs', 'medianMs', 'p95Ms']]]
+           for name, b in mobile.items()],
+          r'\RepoPath{products/fe/reports/mobile/samsung21se.json}; hai khối JSON nối tiếp, đã kiểm tra lại dự đoán và percentile nearest-rank. Timing tại lời gọi classifyImage; thiếu metadata thiết bị/asset.')
     benchmark=rows('thucnghiem/results/cij_baseline_benchmark_results/benchmark_summary.csv')
     names={'product_cij_louvain':'Product Louvain','additive_cij_louvain':'Additive Louvain',
            'convex_cij_louvain':'Convex Louvain','product_cij_leiden':'Product Leiden',
@@ -245,9 +255,10 @@ def main():
     snapshot={'source_commit':subprocess.check_output(['git','rev-parse','HEAD'],cwd=ROOT,text=True).strip(),
               'sources_sha256':SOURCES,'image_audit':{'rows':len(split),'missing':0,'md5_mismatch':0,'cross_split_groups':0},
               'prediction_audits': PREDICTION_AUDITS,
+              'mobile_audit': mobile_audit,
               'note':'Saved artifacts only; no training or mobile benchmark rerun. Source commit does not include report edits. PTQ/QAT summary discrepancies are disclosed in the report, not repaired.'}
     (OUT/'provenance.json').write_text(json.dumps(snapshot,ensure_ascii=False,indent=2)+'\n')
-    print(f'Exported 13 tables from {len(SOURCES)} source files; verified {len(split)} images; audited saved predictions with disclosed PTQ/QAT discrepancies.')
+    print(f'Exported 14 tables from {len(SOURCES)} source files; verified {len(split)} images and both mobile reports; disclosed PTQ/QAT discrepancies.')
 
 
 if __name__=='__main__':

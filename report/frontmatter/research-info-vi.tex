@@ -9,6 +9,8 @@ Nghiên cứu hệ thống thu thập, phân tích và gom nhóm thông tin cứ
 \section*{Kết quả chính và tính mới}
 Đã có nguyên mẫu Flutter--FastAPI--SQLite--dashboard với outbox, gửi thích ứng, kiểm tra trùng và phản hồi trạng thái. Mô hình ảnh FP32 đạt Accuracy \ImageAccuracy\% và macro-F1 \ImageMacroFOne\% trên \ImageTest{} ảnh test; ONNX/PTE giữ top-1 của PyTorch trên tập này. Có kết quả PTQ, QAT và cắt tỉa; LR khẩn cấp có cấu trúc dựa trên bảng tổng hợp 32 trạng thái.
 
+Benchmark ứng dụng đã lưu trên cùng 256 ảnh/runtime đạt Accuracy 75,00\%, macro-F1 73,31\% và đồng thuận top-1 ONNX--PTE 100\%. Nguồn này thiếu metadata thiết bị/asset, nên được trình bày riêng với kết quả CPU và chưa xác nhận cho một APK cụ thể.
+
 Nghiên cứu thuật toán làm rõ chặn khoảng cách cạnh và bất biến sao chép có điều kiện, đồng thời đánh giá RQ1--RQ3 với truth chỉ dùng sau dự đoán. Kết quả không xác lập ưu thế chung của Product, score có chặn hay lợi ích cứu hộ thực địa. Tính mới của công việc được thể hiện qua cấu trúc pipeline, các kiểm tra có điều kiện và audit hệ quả điều phối; không tuyên bố một chính sách cứu hộ đã được xác nhận.
 \section*{Sản phẩm và khả năng ứng dụng}
 Có mã ứng dụng, backend/dashboard, mô hình/asset, dữ liệu và artifact nghiên cứu, bản thảo ISDS 2026 trong repo. Khả năng ứng dụng hiện ở mức nguyên mẫu hỗ trợ nghiên cứu và trình diễn. Cần hoàn thiện mô hình văn bản, tích hợp trường khẩn cấp, thử Android/mạng thật, xác nhận chuyên gia và hồ sơ sản phẩm.

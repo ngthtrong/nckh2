@@ -11,6 +11,8 @@ App gọi ONNX qua datasource native và gọi ExecuTorch qua cầu nối Androi
 
 Các báo cáo CPU hiện tại xác nhận PTE đã được thực thi trong phép đo máy tính. Tệp verification chỉ xác nhận smoke subset ba ảnh với ONNX và ghi mobile NOT TESTED. Không biến chữ ``executed'' của PTE CPU thành minh chứng cho MethodChannel trên điện thoại Android.
 
+Một nguồn riêng trong \RepoPath{products/fe/reports/mobile/samsung21se.json} lưu hai benchmark ứng dụng đủ 256 ảnh cho ONNX và PTE. Bản báo cáo đã kiểm tra lại split/metric và trình bày ở Mục~\ref{sec:mobile-results}. Tệp này bổ sung bằng chứng suy luận tại app nhưng thiếu metadata để gắn với APK/asset cụ thể; trạng thái smoke verification và checkpoint JNI phải được giữ theo đúng tài liệu lịch sử.
+
 \subsection{Chọn chế độ gửi thích ứng}
 Ứng dụng đo throughput qua \texttt{/probe}, endpoint khoảng 64 KiB. Ngân sách probe ở chính sách gửi là 6 giây và có thể dùng số byte đọc một phần để ước lượng. Cấu hình hiện tại dùng ngưỡng mạng mạnh 1.000 kbit/s, mức còn phù hợp ảnh nén 50 kbit/s và confidence cao 0,90.
 
