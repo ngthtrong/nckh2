@@ -1,0 +1,44 @@
+\documentclass{template/ctu-report}
+\input{config/profiles}
+\input{config/metadata}
+\input{template/typography}
+\input{template/packages}
+\input{template/commands}
+\input{template/bibliography}
+\input{generated/values}
+\hypersetup{pdftitle={\ProjectTitle},pdfauthor={\PrincipalName}}
+\begin{document}
+\pagestyle{empty}
+\input{frontmatter/cover}
+\input{frontmatter/title-page}
+\clearpage\pagenumbering{roman}\pagestyle{scrheadings}
+\input{frontmatter/participants}
+\tableofcontents
+\listoftables
+\listoffigures
+\input{frontmatter/abbreviations}
+\input{frontmatter/research-info-vi}
+\input{frontmatter/research-info-en}
+\input{frontmatter/principal-investigator}
+\clearpage\pagenumbering{arabic}
+\ReportMetric{body-start}{\thepage}
+\include{chapters/introduction}
+\include{chapters/01-foundations/chapter}
+\include{chapters/02-data-methods/chapter}
+\include{chapters/03-system/chapter}
+\include{chapters/04-evaluation/chapter}
+\include{chapters/conclusion}
+\clearpage\ReportMetric{body-end}{\number\numexpr\value{page}-1\relax}
+\PrintReportBibliography
+\appendix
+\include{appendices/reproducibility}
+\include{appendices/supplementary-results}
+\ifReportFull
+  \input{build/evidence.tex}
+  \addchap{Minh chứng sản phẩm nhóm IV}
+  \input{deliverables/content/bulletin-vi}
+  \clearpage\input{deliverables/content/bulletin-en}
+  \clearpage\input{deliverables/content/summary-vi}
+  \clearpage\input{deliverables/content/summary-en}
+\fi
+\end{document}

@@ -1,0 +1,4 @@
+% CLI build defines these before loading main.tex; direct compilation defaults to draft.
+\newif\ifReportFull
+\ifdefined\FullReport\ReportFulltrue\else\ReportFullfalse\fi
+% TwoSidedReport is consumed by the class before typearea and geometry load.

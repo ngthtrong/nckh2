@@ -1,0 +1,34 @@
+\newcommand{\DraftNote}[1]{\par\noindent\textit{[TODO: #1]}\par}
+\newcommand{\SourceNote}[1]{\par\noindent\textit{Nguồn: #1}\par}
+\newcommand{\SignatureBlock}[1]{%
+  \par\begin{flushright}\begin{minipage}{.46\textwidth}\centering
+  \textbf{#1}\\{\itshape (Ký và ghi rõ họ tên)}\par\vspace{22mm}
+  \end{minipage}\end{flushright}}
+\newcommand{\CoverFrame}{%
+  \begin{tikzpicture}[remember picture,overlay]
+    \draw[line width=.8pt] ($(current page.north west)+(20mm,-20mm)$)
+      rectangle ($(current page.south east)+(-20mm,20mm)$);
+    \draw[line width=.4pt] ($(current page.north west)+(21mm,-21mm)$)
+      rectangle ($(current page.south east)+(-21mm,21mm)$);
+  \end{tikzpicture}}
+\newcommand{\CoverHeading}{%
+  BỘ GIÁO DỤC VÀ ĐÀO TẠO\\\textbf{ĐẠI HỌC CẦN THƠ}\par
+  \vspace{10mm}\includegraphics[width=30mm]{logo-ctu.png}\par
+  \vspace{10mm}{\fontsize{18bp}{22bp}\selectfont\bfseries BÁO CÁO TỔNG KẾT\par}
+  \medskip\textbf{ĐỀ TÀI NGHIÊN CỨU KHOA HỌC CỦA SINH VIÊN}\par}
+\newcommand{\CoverTitle}{%
+  {\fontsize{16bp}{20bp}\selectfont\bfseries\ProjectTitle\par}
+  \vspace{6mm}\textbf{Mã số đề tài: \ProjectCode}\par}
+\newcommand{\EvidencePDF}[2]{%
+  \clearpage\phantomsection\addcontentsline{toc}{chapter}{#1}
+  \includepdf[pages=-,fitpaper=true,pagecommand={}]{#2}}
+\newwrite\ReportMetricsFile
+\AtBeginDocument{\immediate\openout\ReportMetricsFile=\jobname.metrics}
+\newcommand{\ReportMetric}[2]{\immediate\write\ReportMetricsFile{#1=#2}}
+\AtEndDocument{\immediate\closeout\ReportMetricsFile}
+
+% Covers have centered content inside the double frame; body margins restored after.
+\newenvironment{reportcover}{%
+  \clearpage\newgeometry{left=25mm,right=25mm,top=25mm,bottom=25mm,headheight=22bp,footskip=10mm}%
+  \thispagestyle{empty}%
+}{\clearpage\restoregeometry}
