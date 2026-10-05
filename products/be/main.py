@@ -447,6 +447,25 @@ async def logout(request: Request):
     return response
 
 
+@app.get("/api/benchmark/package", summary="Tải gói benchmark (chỉ tài khoản rhna)")
+def download_benchmark_package(request: Request):
+    session = auth.session_for(request)
+    if not session:
+        raise HTTPException(status_code=status.HTTP_401_UNAUTHORIZED, detail="Cần đăng nhập")
+    if session["username"] != "rhna":
+        raise HTTPException(status_code=status.HTTP_403_FORBIDDEN, detail="Chỉ tài khoản rhna")
+    package = Path(__file__).with_name("benchmark_package.rhb")
+    if not package.is_file():
+        raise HTTPException(status_code=status.HTTP_503_SERVICE_UNAVAILABLE, detail="Chưa có gói benchmark")
+    logger.info("[BENCHMARK] %s tải gói benchmark", session["username"])
+    return FileResponse(
+        package,
+        media_type="application/octet-stream",
+        filename=package.name,
+        headers={"Cache-Control": "no-store", "X-Content-Type-Options": "nosniff"},
+    )
+
+
 @app.get("/api/auth/me", summary="Phiên đăng nhập hiện tại và cấu hình dashboard")
 async def me(request: Request):
     # Trả 200 cả khi chưa đăng nhập để trang không ghi lỗi 401 vào console lúc mở.

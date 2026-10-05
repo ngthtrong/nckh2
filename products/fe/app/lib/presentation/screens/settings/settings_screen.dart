@@ -4,6 +4,7 @@ import '../../../core/constants/app_colors.dart';
 import '../../../domain/entities/ai_model_type.dart';
 import '../../../domain/entities/user.dart';
 import '../../controllers/app_controller.dart';
+import '../../widgets/model_benchmark_card.dart';
 
 class SettingsScreen extends StatefulWidget {
   final AppController controller;
@@ -725,6 +726,11 @@ class _SettingsScreenState extends State<SettingsScreen> {
                           ],
                         ),
                       ),
+
+                      const SizedBox(height: 20),
+                      _buildSectionLabel('BENCHMARK TRÊN ĐIỆN THOẠI'),
+                      const SizedBox(height: 8),
+                      ModelBenchmarkCard(controller: c),
 
                       const SizedBox(height: 20),
 
