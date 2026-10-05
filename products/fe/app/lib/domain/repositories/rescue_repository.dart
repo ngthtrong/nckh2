@@ -2,6 +2,8 @@ import '../entities/rescue_record.dart';
 
 abstract class RescueRepository {
   Future<void> init();
+  String? get connectedServerUrl;
+  Future<bool> reconnectServer();
   List<RescueRecord> getAllRecords();
   List<RescueRecord> getRecordsPage({required int offset, required int limit});
   int get recordCount;
