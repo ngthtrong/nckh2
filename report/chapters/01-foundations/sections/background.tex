@@ -1,2 +1,38 @@
 \section{Nền tảng khoa học}\label{sec:01-foundations-background}
-\DraftNote{Trình bày Edge AI, dữ liệu đa phương thức, mạng yếu, phân cụm và điều phối có nguồn.}
+\subsection{Thông tin cứu hộ đa phương thức}
+Một báo cáo cứu hộ có thể chứa ảnh, mô tả, tọa độ, thời gian và các trường khai báo có cấu trúc. Mỗi phương thức có mức quan sát khác nhau: ảnh phản ánh vùng nhìn thấy, tọa độ phản ánh vị trí thiết bị hoặc vị trí được nhập, còn số người mắc kẹt là một khai báo. Kết hợp dữ liệu đòi hỏi giữ lại nguồn gốc từng trường để người điều phối biết giá trị nào được đo, được mô hình suy ra hay do người dùng nhập.
+
+Trong hệ thống hiện tại, hợp nhất chủ yếu diễn ra ở mức đặc trưng và payload. Nhãn ảnh được chuyển thành mức ngập, mô tả có thể được ánh xạ thành điểm khẩn cấp theo từ khóa, số người và nhóm yếu thế trở thành các đại lượng đầu vào cho phân cụm/xếp hạng. Đây là tích hợp dữ liệu nhiều phương thức ở hệ thống. Repo chưa chứng minh một mạng nơ-ron hợp nhất ảnh--văn bản được huấn luyện chung, cũng chưa có mô hình DistilBERT cho tin nhắn như phương án đăng ký.
+
+Báo cáo sử dụng sự phân biệt giữa \emph{quan sát}, \emph{bằng chứng} và \emph{nhãn đánh giá}. Một ảnh hiện diện là quan sát; nhãn \texttt{high} là đầu ra phân loại; điểm $F_i$ là biểu diễn bằng chứng ngập dùng cho thuật toán. Nhãn \texttt{gt\_cluster} chỉ phục vụ đánh giá và không được phép dùng để xây đồ thị. Giữ ranh giới này giúp tránh diễn giải một thông tin được sinh trong mô phỏng như dữ kiện mà hệ thống ngoài thực tế tự biết.
+
+\subsection{Edge AI và chi phí triển khai}
+Edge AI thực hiện suy luận gần nguồn dữ liệu. Với báo cáo có ảnh, thiết bị có thể tạo nhãn và độ tin cậy trước khi quyết định gửi ảnh. Lợi ích thiết kế là khả năng tạo metadata khi kết nối yếu; mức giảm truyền tải thực tế còn phụ thuộc chế độ gửi, kích thước payload, độ tin cậy của mô hình và nhu cầu xác minh ở trung tâm.
+
+MobileNetV3 sử dụng kiến trúc hướng tới CPU thiết bị di động \citep{howard2019mobilenetv3}. Trong triển khai của nhóm, mô hình Large được tinh chỉnh cho bốn lớp. Nguồn gốc kiến trúc không bảo đảm độ trễ trên mọi điện thoại; cần đo riêng tiền xử lý, tải mô hình, suy luận và tạo payload. Một phép đo chỉ bao gồm lời gọi \texttt{predict} có phạm vi hẹp hơn thời gian từ lúc người dùng chọn ảnh tới khi ứng dụng sẵn sàng gửi.
+
+Chuyển PyTorch sang ONNX hoặc ExecuTorch thay đổi biểu diễn phục vụ thực thi. File nhỏ hơn checkpoint có thể do loại bỏ trạng thái huấn luyện hoặc thay đổi đóng gói. Lượng tử hóa thay đổi biểu diễn số; cắt tỉa có cấu trúc thay đổi số kênh hoặc tham số. Các bước này cần đối chiếu nhãn, xác suất, chỉ số phân loại và độ trễ riêng. Trong dữ liệu đã lưu, đồng thuận top-1 100\% giữa các runtime FP32 là kết quả tương đương đầu ra trên tập được kiểm tra, không có nghĩa dự đoán đúng 100\% nhãn thật.
+
+\subsection{Lưu bền vững và truyền trong mạng gián đoạn}
+Luồng gửi thông thường có thể mất ACK sau khi máy chủ đã ghi báo cáo. Nếu ứng dụng gửi lại với định danh mới, một yêu cầu trở thành nhiều bản ghi. Hệ thống giải quyết bằng định danh ổn định, hàng đợi cục bộ, kiểm tra hash payload và phản hồi về từng message. Kết quả gửi phải được phân biệt với trạng thái cứu hộ: đã đồng bộ không đồng nghĩa đã điều phối hoặc đã hoàn tất.
+
+Store-and-forward trong ứng dụng là lưu bản tin tại thiết bị rồi gửi tới backend khi có kết nối. Đặc tả \RepoPath{resource/DTN_Rescue_System_Spec.md} mở rộng ý tưởng sang store-carry-forward qua các tiếp xúc cơ hội và data mule. Các chức năng như trao đổi bundle qua BLE/Wi-Fi Direct, TTL, theo dõi cửa sổ tiếp xúc và thử nghiệm UAV chưa có kết quả kiểm chứng tương ứng trong các artifact được dùng cho báo cáo. Vì vậy, DTN là hướng phát triển ở đây.
+
+SMS là một đường dự phòng khác, phụ thuộc khả năng của Android và cấu hình số tiếp nhận. Lệnh được hệ điều hành chấp nhận không tự chứng minh SMS đã tới tổng đài. Backend đã có endpoint nhận từ SMS gateway, nhưng cần một cầu nối thực tế gửi HTTP có token; endpoint không tự tạo khả năng nhận trực tiếp từ mạng viễn thông.
+
+\subsection{Phân cụm đồ thị và ý nghĩa đối với sự kiện}
+Trong biểu diễn đồ thị, một nút là báo cáo và trọng số cạnh thể hiện độ tương đồng giữa hai báo cáo. Cộng đồng là nhóm nút có cấu trúc liên kết mạnh theo mục tiêu tối ưu của thuật toán. Cộng đồng dự đoán có thể tương ứng một hiện trường, nhưng sự tương ứng này phải được đánh giá bằng nhãn sự kiện độc lập.
+
+Louvain tối ưu modularity qua quá trình gom cộng đồng \citep{blondel2008louvain}; Leiden là một lựa chọn phát hiện cộng đồng với các bảo đảm về tính liên kết được nghiên cứu trong tài liệu gốc \citep{traag2019leiden}. Trong đề tài, Product Leiden giữ đồ thị Product và thay bước phát hiện cộng đồng để tạo đối chứng. Đây là cách tách ảnh hưởng của bộ phát hiện cộng đồng khỏi cách tính cạnh, dù các điều kiện khác vẫn phải được khóa.
+
+DBSCAN dựa trên lân cận mật độ và cho phép đánh dấu nhiễu \citep{ester1996dbscan}. Một phương pháp gán mọi báo cáo vào cụm và một phương pháp từ chối báo cáo có khác biệt về khối lượng cần xem xét. Do đó, chỉ số ARI cần đi cùng tỷ lệ loại bỏ, số điểm đến giả và tỷ lệ hấp thụ tin giả. Không có báo cáo giả trong cụm thật có thể cùng tồn tại với nhiều cụm hoàn toàn giả.
+
+\subsection{Trùng dữ liệu, trùng bằng chứng và trùng sự kiện}
+Ba mức trùng có cơ chế xử lý khác nhau. Trùng message là gửi lại cùng thao tác do mạng; trùng payload là các bản sao cùng bằng chứng; cùng sự kiện là các quan sát có thể khác nhau nhưng nói về một hiện trường. Backend kiểm tra trùng message bằng \texttt{message\_id} và hash. Lõi nghiên cứu gom payload và bản gần trùng thành họ bằng chứng. Thuật toán đồ thị cố gắng gom những báo cáo có liên quan thành cụm sự kiện.
+
+Một định danh message hợp lệ không chứng minh nguồn độc lập. Hai payload khác nhau có thể đến từ một chiến dịch phối hợp. Tương tự, hai báo cáo gần nhau không chắc là bản sao. Những giới hạn này giải thích vì sao điểm confidence dựa trên số báo cáo củng cố chỉ là heuristic, cần giữ nguyên các kết quả đối kháng trong đánh giá.
+
+\subsection{Điểm ưu tiên và quyết định điều phối}
+Xếp hạng là tạo thứ tự từ những tín hiệu như mức ngập, khẩn cấp, số người và yếu thế. Điều phối còn cần vị trí đội, thời gian di chuyển, năng lực phục vụ, deadline và điều kiện tiếp cận. Nghiên cứu về logistics nhân đạo cho thấy các mục tiêu này cần được cân nhắc đồng thời \citep{gralla2014review}. Một thứ tự ưu tiên chỉ theo nhu cầu có thể khác với thứ tự tối ưu thời gian tiếp cận.
+
+Báo cáo sử dụng điểm có chặn như một đối tượng nghiên cứu, không coi đây là chính sách cứu hộ đã được chuyên gia phê chuẩn. Trên dashboard, người điều phối vẫn xem báo cáo, sửa vị trí thiếu, chọn đội và chuyển trạng thái. Mô phỏng RQ3 khảo sát một bộ giả định đã định nghĩa; harm là biến do mô hình sinh, không phải thiệt hại đo từ người thật.

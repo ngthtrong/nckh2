@@ -1,2 +1,107 @@
 \section{Triển khai và kiểm thử chức năng}\label{sec:03-system-implementation}
-\DraftNote{Phân biệt thiết kế dự kiến, thành phần đã cài đặt và đã kiểm chứng trên thiết bị thật.}
+\subsection{Cấu trúc mã nguồn và đóng gói}
+Phần sản phẩm nằm trong \RepoPath{products/}. Backend ở \texttt{be/}, ứng dụng ở \texttt{fe/app/}, mô hình và công cụ ở \texttt{fe/model/} và \texttt{fe/tools/}, Dockerfile/nginx ở \texttt{docker/}. Thư mục \texttt{scripts/demo/} có công cụ chạy demo, stage model, build web và kiểm thử tích hợp. Phần nghiên cứu nằm ở \texttt{paper/}, \texttt{thucnghiem/} và các tài liệu audit.
+
+Docker Compose có ba service: backend, dashboard và frontend web. Cổng mặc định lần lượt là 8000, 8080 và 8081. Frontend có thể được build trước để tránh tải lại SDK trong image. Database/uploads của demo được giữ ở volume; các thử nghiệm cục bộ có thể dùng đường dẫn riêng qua \texttt{RESCUE\_DB\_FILE} và \texttt{RESCUE\_UPLOADS\_DIR} để không thay đổi dữ liệu mẫu đã commit.
+
+\subsection{Nạp mô hình và kiểm tra asset}
+Mô hình ảnh hiện tại có checkpoint, ONNX, PTE và các manifest trong cây \RepoPath{products/fe/model/Edge Ai/}. Asset ứng dụng cần được stage theo quy trình demo vì thư mục model app chịu quy tắc git-ignore. Việc artifact tồn tại ở thư mục nghiên cứu không bảo đảm nó đã được bundle vào APK. Cần kiểm tra tên file, checksum, input size, class order và khả năng tải runtime trong phiên build cụ thể.
+
+App gọi ONNX qua datasource native và gọi ExecuTorch qua cầu nối Android. Model Logistic Regression được đọc từ \texttt{assets/models/urgency\_logistic.json}; parser kiểm tra schema, loại mô hình, năm đặc trưng và hệ số hữu hạn. Nếu thiếu mô hình, controller ghi nhận không sẵn sàng; hệ thống vẫn cần cho phép tạo báo cáo với thông tin do người dùng cung cấp.
+
+Các báo cáo CPU hiện tại xác nhận PTE đã được thực thi trong phép đo máy tính. Tệp verification chỉ xác nhận smoke subset ba ảnh với ONNX và ghi mobile NOT TESTED. Không biến chữ ``executed'' của PTE CPU thành minh chứng cho MethodChannel trên điện thoại Android.
+
+\subsection{Chọn chế độ gửi thích ứng}
+Ứng dụng đo throughput qua \texttt{/probe}, endpoint khoảng 64 KiB. Ngân sách probe ở chính sách gửi là 6 giây và có thể dùng số byte đọc một phần để ước lượng. Cấu hình hiện tại dùng ngưỡng mạng mạnh 1.000 kbit/s, mức còn phù hợp ảnh nén 50 kbit/s và confidence cao 0,90.
+
+\begin{table}[htbp]\centering\small
+\caption{Chính sách chọn chế độ gửi trong mã hiện tại}\label{tab:send-policy}
+\begin{tabularx}{\textwidth}{P{.36\textwidth}X}
+\toprule Điều kiện & Chế độ được chọn \\\midrule
+Không có data & Thử SMS; nếu không gửi được thì giữ hàng đợi \\
+Từ 1.000 kbit/s, confidence dưới 0,90 & Ảnh gốc và thông tin \\
+Từ 1.000 kbit/s, confidence từ 0,90 & Chỉ thông tin khi cờ ưu tiên metadata bật \\
+Từ 50 đến dưới 1.000 kbit/s & Ảnh nén và thông tin \\
+Có data nhưng dưới 50 kbit/s & Chỉ thông tin \\
+\bottomrule\end{tabularx}
+\SourceNote{\RepoPath{products/fe/app/lib/config.dart} và \RepoPath{products/fe/app/lib/domain/entities/send_mode.dart}; cấu hình hiện bật ưu tiên metadata khi confidence cao.}
+\end{table}
+
+Trong chế độ nén, cấu hình hiện khai báo quality 60 và cạnh tối đa 1.024 pixel. Ảnh định dạng không phù hợp endpoint có thể được đổi sang JPEG. Các ngưỡng là quyết định kỹ thuật của demo; chưa có khảo sát tối ưu theo nhiều điện thoại và mạng thực. Đặc biệt, confidence cao có thể làm không gửi ảnh ngay cả khi mạng mạnh; vì vậy hiệu chuẩn confidence và nhu cầu xác minh phải được xem cùng chính sách tiết kiệm truyền tải.
+
+\subsection{Trạng thái cứu hộ và phản hồi}
+Báo cáo mới ở backend luôn bắt đầu \texttt{processing}, bất kể status client gửi. Các chuyển chính là \texttt{processing} tới \texttt{dispatched}, rồi \texttt{resolved}; từ trạng thái chưa kết thúc có thể đóng \texttt{cancelled} kèm lý do. \texttt{resolved} và \texttt{cancelled} là trạng thái cuối. Version trạng thái tăng khi có cập nhật hợp lệ.
+
+\begin{figure}[htbp]\centering
+\begin{tikzpicture}[>=Stealth,node distance=15mm,
+ st/.style={draw,rounded corners,align=center,font=\small,minimum height=11mm}]
+\node[st] (p) {processing};
+\node[st,right=of p] (d) {dispatched};
+\node[st,right=of d] (r) {resolved};
+\node[st,below=of d] (c) {cancelled\\kèm lý do};
+\draw[->] (p)--(d);\draw[->] (d)--(r);
+\draw[->] (p)--(c);\draw[->] (d)--(c);
+\end{tikzpicture}
+\caption{Các chuyển trạng thái nghiệp vụ chính do backend kiểm soát}
+\label{fig:status-flow}
+\end{figure}
+
+App chỉ chấp nhận cập nhật đi tiến theo quy tắc domain, giúp phản hồi đến muộn không làm trạng thái lùi. Điều phối viên cập nhật qua API yêu cầu phiên đăng nhập; thay đổi trạng thái qua message sync cũng cần quyền dashboard. Luồng công khai tạo báo cáo không có quyền tự kết thúc ca cứu hộ.
+
+\subsection{SMS, tổng đài và bổ sung thông tin}
+Ứng dụng Android có đường gửi SMS khi mất data và có số tiếp nhận hợp lệ qua cấu hình build. Báo cáo vẫn có thể nằm trong outbox để đồng bộ đầy đủ sau đó. Backend có \texttt{POST /api/sms/inbound} cho gateway có token và \texttt{POST /api/reports/manual} cho nhập tổng đài. Cùng report ID cần được gộp để SMS trước và HTTP sau không tạo hai ca.
+
+Tài liệu nghiệm thu cũ ghi server chưa nhận SMS; mã hiện tại đã có endpoint gateway. Đây là phần đã được bổ sung về phần mềm. Repo chưa có log gửi--nhận SMS qua nhà mạng/gateway thật, nên không thể từ endpoint suy ra tỷ lệ giao SMS hoặc độ trễ thực tế. Cần lưu cả thời điểm thiết bị gửi, gateway nhận, backend ACK và định danh gộp trong thử nghiệm tiếp theo.
+
+\subsection{Xác thực và quản lý thao tác}
+Backend dùng tài khoản admin/operator, mật khẩu PBKDF2 và phiên có token; database lưu hash token phiên. Đăng nhập được giới hạn theo username và IP, và chỉ tin header proxy từ nguồn được cấu hình. Các thao tác quản trị tài khoản, sao lưu và xóa toàn bộ dữ liệu yêu cầu vai trò admin. Ảnh uploads yêu cầu phiên đăng nhập.
+
+Nhật ký actor cho phép đối chiếu ai điều phối, đóng ca hoặc thay vị trí. Tuy nhiên, trạng thái xác thực dashboard tách với kiểm chứng nguồn báo cáo public. Đánh giá giả mạo có phối hợp trong RQ2 cho thấy tín hiệu nhiều báo cáo/confidence không đủ xác minh nguồn. Đây là một giới hạn liên quan trực tiếp đến ý nghĩa của điểm ưu tiên.
+
+\subsection{Kiểm thử đã được ghi nhận}
+Tài liệu đối chiếu ngày 27/09/2026 ghi các kết quả trong Bảng~\ref{tab:historical-tests}. Những kết quả này có phạm vi và thời điểm cụ thể; bản sơ bộ dẫn lại lịch sử đã lưu, không trình bày chúng như một lượt chạy mới trên commit hiện tại.
+\begin{table}[htbp]\centering\small
+\caption{Kết quả kiểm thử được ghi trong tài liệu nghiệm thu ngày 27/09/2026}
+\label{tab:historical-tests}
+\begin{tabularx}{\textwidth}{P{.32\textwidth}P{.16\textwidth}X}
+\toprule Bộ kiểm thử & Kết quả ghi nhận & Phạm vi \\\midrule
+Backend unit test & 44/44 & Hợp đồng, migration, hash, cụm, dashboard \\
+Flutter unit test & 26/26 & Chính sách gửi, SMS, trạng thái, hash \\
+Hợp đồng trên container & Đạt các ca & App/server message và multipart \\
+E2E Chromium headless & 46/46 & App web tới backend/dashboard, mạng giả lập \\
+APK debug & Build được & Xác nhận tạo APK, chưa xác nhận chạy máy thật \\
+\bottomrule\end{tabularx}
+\SourceNote{\RepoPath{docs/nghiem-thu/doi_chieu_thuyet_minh.md}; không phải số test chạy lại trong lần viết báo cáo.}
+\end{table}
+
+Test lõi phân cụm được thiết kế so sánh với snapshot nghiên cứu trên 80 run gold. Nó kiểm tra tính khớp công thức và đường tạo đồ thị, không kiểm chứng một nguồn tin thực tế. Test web kiểm tra tạo SOS, bài kèm ảnh, offline/reconnect, không GPS, đăng nhập và cập nhật trạng thái. Cần bổ sung thử nghiệm Android cho camera, permission, tiền xử lý pixel, ONNX/ExecuTorch, Workmanager và SMS.
+
+\subsection{Kịch bản trình diễn và kịch bản nghiên cứu}
+Kịch bản demo phù hợp gồm: tạo báo cáo thiếu GPS để kiểm tra hàng xem xét; tạo báo cáo có ảnh để kiểm tra multipart; ngắt kết nối rồi khôi phục để kiểm tra retry; điều phối một báo cáo rồi kiểm tra phản hồi ở app; gửi lại cùng message để kiểm tra duplicate; và quan sát cụm của dữ liệu mô phỏng đã seed. Mỗi kịch bản cần tách trạng thái đồng bộ với trạng thái cứu hộ.
+
+Kịch bản nghiên cứu gồm split ảnh cố định, benchmark RQ1, stress RQ1, robustness/alignment RQ2 và dispatch RQ3. Chúng có seed, cấu hình và đơn vị đánh giá riêng. Không dùng hình dashboard của dữ liệu seed để thay biểu đồ thực nghiệm và không dùng thành công test UI để kết luận về ARI hoặc harm.
+
+\subsection{Ma trận kiểm thử tích hợp từ các ràng buộc nghiệp vụ}
+Bảng~\ref{tab:integration-cases} mô tả các trường hợp cần kiểm tra khi thay đổi hợp đồng hoặc adapter. Đây là ma trận theo hành vi, không phải một bảng kết quả chạy mới. Các ca này giúp phân biệt lỗi ghi dữ liệu, lỗi đồng bộ, lỗi trạng thái và lỗi suy luận; cùng một test màn hình gửi thành công chưa kiểm tra đủ bốn loại lỗi.
+\begin{longtable}{P{.27\textwidth}P{.34\textwidth}P{.28\textwidth}}
+\caption{Ca kiểm thử theo yêu cầu toàn vẹn và khả năng gửi lại}\label{tab:integration-cases}\\
+\toprule Tình huống & Kết quả cần quan sát & Bằng chứng cần lưu \\\midrule\endfirsthead
+\toprule Tình huống & Kết quả cần quan sát & Bằng chứng cần lưu \\\midrule\endhead
+Server ghi xong, client mất ACK & Retry cùng ID/hash trả duplicate; chỉ một thao tác & ACK, dedup và số bản ghi \\
+Cùng message ID, payload đổi & Từ chối xung đột; dữ liệu đầu không đổi & Mã lỗi và payload/hash hai lần \\
+Cùng client/sequence bị dùng lại & Không tạo message mới & Phản hồi SEQUENCE\_REUSED \\
+Metadata đến trước ảnh & Bổ sung ảnh cho đúng report, giữ trạng thái & ID, hash ảnh và nhật ký \\
+Người khác gộp report & Từ chối theo kiểm tra chủ bản ghi & \RepoPath{REPORT_ID_CONFLICT} và dữ liệu trước/sau \\
+Không có GPS & Không thêm tọa độ giả; hiện ở review & Payload thiếu tọa độ và API review \\
+Trạng thái phản hồi đến muộn & App không lùi trạng thái & Version/trạng thái trước và sau \\
+Chuyển trạng thái đã kết thúc & Backend giữ quy tắc trạng thái cuối & API response và log sự kiện \\
+Ảnh confidence cao nhưng phân loại sai & Vẫn quan sát trade-off chế độ gửi & Nhãn thật, confidence, sendMode \\
+App có E\_i, adapter không đọc & Xác định chính xác E dùng ở đồ thị & Payload và ReportV2 sau ánh xạ \\
+App bị đóng khi offline & Outbox còn để tiếp tục sau mở lại & Log cục bộ, ID và thời điểm retry \\
+SMS rồi HTTP cùng report & Gộp một ca và giữ các nguồn & Gateway/HTTP log và owner/client ID \\
+\bottomrule
+\end{longtable}
+
+Khi chạy lại ma trận này, cần tách database thử và ghi rõ phiên bản app/backend. Có thể dùng unit test cho các hàm thuần như hash, chọn chế độ và chuyển trạng thái; dùng test API với DB tạm cho transaction/gộp/quyền; dùng test thiết bị cho persistence, plugin và suy luận. Phân tầng kiểm thử giảm việc diễn giải một ca CPU hoặc web thành kết quả Android.
+
+Một ca quan trọng của công việc tiếp theo là kiểm tra trường khẩn cấp. Trước khi nối LR vào phân cụm, phải xác định schema và thứ tự ưu tiên giữa trường có cấu trúc, trường nghiên cứu trực tiếp và mô tả từ khóa. Không nên tự đổi adapter trong lúc viết báo cáo vì thay đổi đó sẽ thay hành vi sản phẩm và cần kết quả kiểm thử riêng. Bản sơ bộ công bố khoảng trống để nhóm có thể xử lý bằng một thay đổi cụ thể sau này.

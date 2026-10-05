@@ -1,5 +1,22 @@
 \addchap{Kết luận và kiến nghị}\label{chap:conclusion}
 \addsec{Kết luận}
-\DraftNote{Đối chiếu từng mục tiêu, đóng góp mới, mức hoàn thành và khả năng ứng dụng có căn cứ.}
+Đề tài đã xây dựng một nguyên mẫu tiếp nhận và hỗ trợ điều phối cứu hộ bão lũ với ứng dụng Flutter, backend FastAPI, SQLite và dashboard bản đồ. Luồng tạo báo cáo, lưu cục bộ, gửi thích ứng, retry, kiểm tra trùng message và phản hồi trạng thái được thể hiện trong mã nguồn và các ca kiểm thử đã lưu. Dashboard cung cấp danh sách, bản đồ, cụm, giao đội, nhật ký và xử lý thông tin thiếu vị trí, tạo cơ sở cho một quy trình xác minh do người điều phối thực hiện.
+
+Đối với ảnh, phiên bản hiện tại có \ImageTotal{} mẫu cùng split train/validation/test đã lưu và kiểm tra hash nhất quán. Mô hình FP32 đạt Accuracy \ImageAccuracy\% và macro-F1 \ImageMacroFOne\% trên \ImageTest{} ảnh test; PyTorch, ONNX và ExecuTorch có cùng top-1 trên tập này. PTQ giảm dung lượng với đánh đổi chất lượng; QAT của nhánh hiện tại giảm chất lượng rõ; cắt tỉa chỉ giảm ít tham số và không làm mọi runtime nhanh hơn. Số liệu PTQ/QAT còn có chênh lệch giữa summary và CSV dự đoán, cần rà soát trước khi chốt. Các kết quả này là CPU máy tính, chưa chứng minh chi phí trên điện thoại.
+
+Gói khẩn cấp LR v5 cung cấp bảng tham chiếu tổng hợp 32 trạng thái, mô hình có hệ số minh bạch và audit nguồn/dữ liệu. Độ khớp quy tắc trên bảng là một kiểm tra kỹ thuật. Gói này không phải mô hình hiểu tin nhắn tiếng Việt, không có nhãn chuyên gia và không có kiểm định lâm sàng. Đường app gửi \texttt{E\_i} và backend đọc \texttt{urgency} còn một khoảng trống tích hợp cần xử lý.
+
+Nghiên cứu thuật toán làm rõ chặn khoảng cách cạnh của đồ thị tích và bất biến sao chép exact của điểm tổng hợp theo họ khi grouping/đầu vào cố định. Thực nghiệm RQ1 không xác lập ưu thế chung của Product so với Additive được hiệu chỉnh độc lập; nhiễu và năm lần sao chép làm phân cụm suy giảm. RQ2 cho thấy bất biến exact không đi cùng alignment lợi ích tốt hoặc khả năng chống campaign confidence cao. RQ3 cho thấy các sai lệch ở tầng trên có hệ quả điều phối trong mô phỏng, và điểm có chặn chưa tạo lợi ích chung so với legacy.
+
+Các đóng góp có căn cứ của đề tài là nguyên mẫu phần mềm, cách phân tách dữ liệu quan sát và truth, các thuộc tính toán học có điều kiện, bộ thực nghiệm nhiều đối chứng và việc giữ kết quả không thuận lợi. Khả năng ứng dụng hiện ở mức hỗ trợ nghiên cứu và trình diễn quy trình. Mục tiêu giảm thời gian phản ứng hoặc thiệt hại thực tế vẫn cần phép đo độc lập; không suy ra các mục tiêu đó từ thành công build, parity mô hình hoặc ARI.
+
 \addsec{Kiến nghị}
-\DraftNote{Đề xuất nghiên cứu tiếp theo, biện pháp ứng dụng và kiến nghị từ kết quả, hạn chế.}
+Trước hết, cần hoàn thiện ngữ nghĩa tích hợp dữ liệu: thống nhất trường khẩn cấp app--backend, phân biệt dữ liệu thiếu với giá trị bằng không, làm rõ số người có thể chồng lặp và nguồn thời gian. Mỗi thay đổi cần cập nhật hợp đồng và có ca kiểm thử end-to-end trên đúng cây mã đang sử dụng.
+
+Đối với thiết bị, cần stage đúng asset và thử trên nhiều điện thoại Android, ghi thông tin phần cứng/runtime, kiểm tra pixel parity, thời gian tiền xử lý/suy luận/gửi, pin và độ bền outbox sau kill/reboot. SMS cần log đường giao nhận qua gateway/tổng đài thực; Workmanager cần được quan sát trong trạng thái nền. Kết quả mạng giả lập và mạng di động thật cần được báo cáo riêng.
+
+Đối với dữ liệu, cần bổ sung nguồn gốc và quyền sử dụng ảnh, tập ảnh camera độc lập và corpus tin nhắn cứu hộ tiếng Việt có tiêu chí nhãn. Nhãn sự kiện, khẩn cấp và lợi ích cần quy trình chuyên gia phù hợp với mục tiêu ứng dụng. Một tập xác nhận giữ riêng sau lựa chọn model giúp tránh dùng lặp test để chọn phương án tối ưu.
+
+Đối với thuật toán, nên kiểm tra khử transport copy trước dựng đồ thị và khảo sát quantile/top-$k$ dưới multiplicity; cải thiện nhận biết nguồn củng cố độc lập; đồng thời đưa chi phí di chuyển, năng lực phục vụ và bất định vào bài toán điều phối. Mỗi phương án mới phải giữ baseline, dữ liệu ghép cặp và kết quả âm, không mặc định lợi ích từ cấu trúc công thức.
+
+Hướng DTN qua tiếp xúc và data mule có thể tiếp tục từ đặc tả hiện có, nhưng cần tách thành nghiên cứu riêng với buffer, TTL, contact window, routing baseline và log chuyển tiếp. Chỉ nên ghi nhận kiểm chứng UAV khi có thử nghiệm phần cứng tương ứng. Cuối cùng, nhóm cần hoàn tất biểu mẫu chính thức, minh chứng ký/dấu và video để chuyển bản sơ bộ thành hồ sơ nộp.

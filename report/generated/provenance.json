@@ -1,0 +1,140 @@
+{
+  "source_commit": "e92a7a5b62c5e6ab4a50d88925f652c578a528d7",
+  "sources_sha256": {
+    "products/fe/model/Edge Ai/split_train_val_test_mobilenetv3_large.csv": "f7b52cd25411d4d1df2f7f80745a2cf430819773854345798cf7e093e3bcba45",
+    "products/fe/reports/pth_onnx_pte/summary.json": "6f33b2b2a7c77ba248ac38036dfe0c43ffbf0aed766304c41c5435308a8150d4",
+    "products/fe/reports/fp32_ptq_qat/summary.json": "082d7e97abfecb2435cf9fa8f455260fc4337ed9ac2f339bf5738d0200065b49",
+    "products/fe/reports/pruning_st/summary.json": "ba435f5af9110db851eac2c1177a683ffbfaff19caa08cb21c9c09e8c7c10492",
+    "products/fe/model/Edge Ai/config_mobilenetv3_large.json": "a509ab6e22f47b2e53f2300275bb850017c50713453d5a86299d6b7594a7359e",
+    "products/fe/reports/pth_onnx_pte/all_predictions.csv": "37852acf40d1f24c085af8309307ec43ce7926890a388c89fd8ab0cb13e649ac",
+    "products/fe/reports/fp32_ptq_qat/all_predictions.csv": "8b92641abc68e3412b3931ff8891e1cf434c74ffe6ae7fddc034fc32b96df28d",
+    "products/fe/reports/pruning_st/all_predictions.csv": "d269ee738840206395febc2cf4208592fe792c4c8ef059db29998b5e863ad68f",
+    "thucnghiem/results/cij_baseline_benchmark_results/benchmark_summary.csv": "de854e0c710b7dea3d0d2b316d927d9159572edb053e84e9cd7620240337bc0e",
+    "thucnghiem/results/rq1_results/aggregate/rq1_stress_summary.csv": "a9079c7248b889bab20a4c96948a5a7c47cff99b78331b4f7f368f568420e24a",
+    "thucnghiem/results/rq2_results/rq2_summary.csv": "e2b5d6ccdf2e53291476ea8307a73ac9876d05038f88bcc203d655813b67296b",
+    "thucnghiem/results/rq2_results/rq2_parameter_sensitivity_summary.csv": "666a9453bec358456123db50b9ab737bfc3ec7694bcc22228ce756148611d50f",
+    "thucnghiem/results/rq3_results/rq3_paired_comparisons_seed.csv": "fcefab896fbf419d9b080d2f4012676accdceb25b6971e0b695821261ce80461",
+    "paper/main.tex": "ff50cd7f3d42604ea7ef70da2d83344bd299482969d28f34111156b6a7e5cca5",
+    "thucnghiem/results/rq1_results/manifest.json": "038a89151bb6e07a3f0b753d1f5fe50e61a401cca6e01040b3fb1cf75a13cbeb",
+    "thucnghiem/results/rq2_results/rq2_artifact_sha256.json": "725061d1dc589d21d266be75ad9d532dd5e3ebfd91b83bda38ebf05bc178c98a",
+    "thucnghiem/results/rq3_results/rq3_seed_level_reanalysis_provenance.json": "dab12689cbf3bcbf7e36c63762b18be4690619dc40db74c9d125f3d1b9168489",
+    "products/fe/model/urgency_ei/model/urgency_logistic_SOURCE_FINAL.json": "fa40a463bac818eee23a297598329e331a1d4b1a1c567fb93164e78b74eb1a7d"
+  },
+  "image_audit": {
+    "rows": 1702,
+    "missing": 0,
+    "md5_mismatch": 0,
+    "cross_split_groups": 0
+  },
+  "prediction_audits": [
+    {
+      "source": "products/fe/reports/pth_onnx_pte/all_predictions.csv",
+      "model": "pth",
+      "consistent": true,
+      "summary_accuracy": 0.76171875,
+      "csv_accuracy": 0.76171875,
+      "summary_macro_f1": 0.7454325468844526,
+      "csv_macro_f1": 0.7454325468844525
+    },
+    {
+      "source": "products/fe/reports/pth_onnx_pte/all_predictions.csv",
+      "model": "onnx",
+      "consistent": true,
+      "summary_accuracy": 0.76171875,
+      "csv_accuracy": 0.76171875,
+      "summary_macro_f1": 0.7454325468844526,
+      "csv_macro_f1": 0.7454325468844525
+    },
+    {
+      "source": "products/fe/reports/pth_onnx_pte/all_predictions.csv",
+      "model": "pte",
+      "consistent": true,
+      "summary_accuracy": 0.76171875,
+      "csv_accuracy": 0.76171875,
+      "summary_macro_f1": 0.7454325468844526,
+      "csv_macro_f1": 0.7454325468844525
+    },
+    {
+      "source": "products/fe/reports/fp32_ptq_qat/all_predictions.csv",
+      "model": "onnx_fp32",
+      "consistent": true,
+      "summary_accuracy": 0.76171875,
+      "csv_accuracy": 0.76171875,
+      "summary_macro_f1": 0.7454325468844526,
+      "csv_macro_f1": 0.7454325468844525
+    },
+    {
+      "source": "products/fe/reports/fp32_ptq_qat/all_predictions.csv",
+      "model": "ptq_int8",
+      "consistent": false,
+      "summary_accuracy": 0.71875,
+      "csv_accuracy": 0.71875,
+      "summary_macro_f1": 0.7032826399707578,
+      "csv_macro_f1": 0.7034417158317989
+    },
+    {
+      "source": "products/fe/reports/fp32_ptq_qat/all_predictions.csv",
+      "model": "qat_int8",
+      "consistent": false,
+      "summary_accuracy": 0.5234375,
+      "csv_accuracy": 0.51171875,
+      "summary_macro_f1": 0.5056777154357065,
+      "csv_macro_f1": 0.491930969293174
+    },
+    {
+      "source": "products/fe/reports/pruning_st/all_predictions.csv",
+      "model": "baseline_pth",
+      "consistent": true,
+      "summary_accuracy": 0.76171875,
+      "csv_accuracy": 0.76171875,
+      "summary_macro_f1": 0.7454325468844526,
+      "csv_macro_f1": 0.7454325468844525
+    },
+    {
+      "source": "products/fe/reports/pruning_st/all_predictions.csv",
+      "model": "structured_pth",
+      "consistent": true,
+      "summary_accuracy": 0.76171875,
+      "csv_accuracy": 0.76171875,
+      "summary_macro_f1": 0.7446947885671003,
+      "csv_macro_f1": 0.7446947885671003
+    },
+    {
+      "source": "products/fe/reports/pruning_st/all_predictions.csv",
+      "model": "baseline_onnx",
+      "consistent": true,
+      "summary_accuracy": 0.76171875,
+      "csv_accuracy": 0.76171875,
+      "summary_macro_f1": 0.7454325468844526,
+      "csv_macro_f1": 0.7454325468844525
+    },
+    {
+      "source": "products/fe/reports/pruning_st/all_predictions.csv",
+      "model": "structured_onnx",
+      "consistent": true,
+      "summary_accuracy": 0.76171875,
+      "csv_accuracy": 0.76171875,
+      "summary_macro_f1": 0.7446947885671003,
+      "csv_macro_f1": 0.7446947885671003
+    },
+    {
+      "source": "products/fe/reports/pruning_st/all_predictions.csv",
+      "model": "baseline_pte",
+      "consistent": true,
+      "summary_accuracy": 0.76171875,
+      "csv_accuracy": 0.76171875,
+      "summary_macro_f1": 0.7454325468844526,
+      "csv_macro_f1": 0.7454325468844525
+    },
+    {
+      "source": "products/fe/reports/pruning_st/all_predictions.csv",
+      "model": "structured_pte",
+      "consistent": true,
+      "summary_accuracy": 0.76171875,
+      "csv_accuracy": 0.76171875,
+      "summary_macro_f1": 0.7446947885671003,
+      "csv_macro_f1": 0.7446947885671003
+    }
+  ],
+  "note": "Saved artifacts only; no training or mobile benchmark rerun. Source commit does not include report edits. PTQ/QAT summary discrepancies are disclosed in the report, not repaired."
+}

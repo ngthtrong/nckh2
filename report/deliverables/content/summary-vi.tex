@@ -1,3 +1,25 @@
 \section*{Báo cáo tóm tắt tiếng Việt}
-Tên đề tài: \ProjectTitle\\Mã số: \ProjectCode
-\DraftNote{Bổ sung mẫu chính thức và nội dung riêng: mục tiêu, phương pháp, kết quả, sản phẩm, khả năng ứng dụng.}
+\textbf{Tên đề tài:} \ProjectTitle\\\textbf{Mã số:} \ProjectCode\\
+\textbf{Chủ nhiệm:} \PrincipalName\\\textbf{Người hướng dẫn:} \SupervisorName\\
+\textbf{Thời gian đăng ký:} \ProjectPeriod
+\subsection*{Bài toán và mục tiêu}
+Báo cáo cứu hộ có thể trùng lặp, thiếu vị trí hoặc đến muộn do mạng gián đoạn. Nhóm nghiên cứu xây dựng nguyên mẫu kết hợp suy luận ảnh tại thiết bị, lưu bền vững và gửi lại, gom cụm sự kiện và hiển thị thông tin hỗ trợ điều phối. Mục tiêu ứng dụng là cải thiện tiếp nhận và ra quyết định; giảm thiệt hại thực tế cần phép đo riêng.
+\subsection*{Dữ liệu và phương pháp}
+Bộ ảnh hiện có \ImageTotal{} mẫu, chia \ImageTrain{} train, \ImageVal{} validation và \ImageTest{} test theo CSV đã lưu, seed 42. Kiểm tra biên soạn xác nhận đủ đường dẫn/MD5 và không có nhóm hash/perceptual/split vượt các tập. MobileNetV3-Large dùng đầu vào $256\times256$, EXIF--RGB--letterbox và chuẩn hóa NCHW. Các bản PTH, ONNX, PTE, PTQ/QAT và pruning được đối chiếu theo artifact cùng split.
+
+Gói khẩn cấp LR v5 có năm cờ Boolean và 32 trạng thái được sinh xác định, với nhãn OR được ánh xạ từ hướng dẫn. Nó là bảng tham chiếu tổng hợp, không phải dữ liệu bệnh nhân hay mô hình NLP. App có score \texttt{E\_i}, nhưng adapter backend hiện dùng \texttt{urgency}/từ khóa.
+
+RQ1 dùng Generator 3.0 gồm 80 run/26.288 báo cáo bán tổng hợp, trong đó 40 run test. RQ2/RQ3 dùng Candidate 4.1 riêng, 80 dataset/30.229 báo cáo và 40 seed test. Suy luận chỉ đọc trường quan sát; truth nối sau đầu ra. RQ2 dùng nhóm oracle để chẩn đoán riêng score; RQ3 dùng phân hoạch dự đoán và tổng hợp ba điều kiện nguồn lực trong từng seed.
+\subsection*{Kết quả}
+Ảnh FP32 đạt Accuracy \ImageAccuracy\% và macro-F1 \ImageMacroFOne\%; ONNX/PTE có đồng thuận top-1 100\% với PyTorch trên 256 ảnh, trong khi Accuracy với nhãn thật vẫn 76,17\%. PTQ giảm file khoảng 16,04 xuống 4,51 MiB, Accuracy còn \PTQAccuracy\%. QAT đạt \QATAccuracy\% và có 38 lỗi nặng. Cắt tỉa giảm khoảng 1,46\% tham số, giữ Accuracy tổng nhưng không làm mọi runtime nhanh hơn. Timing là CPU máy tính, không gồm tiền xử lý/tải model.
+
+RQ1: Additive Louvain có ARI 0,9191, Product Louvain 0,9072; tương phản sau Holm không xác lập ưu thế Product. Nhiễu GPS/thời gian làm giảm ARI; năm lần bản sao làm các biến thể đồ thị giảm về gần 0,30. Product vẫn sinh điểm đến giả dù không hấp thụ tin giả vào cụm thật.
+
+RQ2: score có chặn đạt NDCG@5 0,6669, Spearman $-0{,}0304$, chưa có alignment chung tốt hơn. Exact-copy drift bằng không khi grouping/đầu vào cố định; campaign confidence cao vẫn tạo sai lệch lớn. RQ3: score mới chưa có lợi ích chung so với legacy, và kém gần nhất trước về harm/trễ hạn trong mô hình được thử. Các kết quả này là chẩn đoán tổng hợp, không chứng minh hiệu quả thực địa của bất kỳ chính sách nào.
+\subsection*{Phần mềm và sản phẩm}
+Ứng dụng Flutter có outbox, gửi thích ứng, SMS Android và nhận trạng thái; backend FastAPI/SQLite có dedup, phân quyền, cụm, gateway SMS và nhật ký; dashboard có bản đồ, giao đội và xử lý thiếu GPS. Tài liệu ngày 27/09/2026 ghi 44 backend test, 26 Flutter test, 46 E2E web pass và APK debug build; bản tóm tắt không gọi đó là lượt chạy lại trên commit hiện tại.
+Summary PTQ/QAT chưa khớp hoàn toàn CSV dự đoán: QAT có Accuracy summary 52,34\%, CSV 51,17\%. Các số nén cần được rà soát trước khi chốt.
+\subsection*{Kết luận và kiến nghị}
+Nguyên mẫu và các thực nghiệm làm rõ khả năng kỹ thuật cùng giới hạn của pipeline. Cần hoàn thiện corpus/mô hình văn bản, đóng khoảng trống field khẩn cấp, thử Android và mạng/SMS thật, xác nhận chuyên gia, và bổ sung nguồn gốc dữ liệu. DTN/data mule hiện ở mức định hướng. Bản báo cáo đầy đủ còn cần thông tin hành chính, biểu mẫu, minh chứng phê duyệt và video.
+\SourceNote{Các artifact ở \RepoPath{products/fe/reports}, \RepoPath{thucnghiem/results} và \RepoPath{paper/main.tex}; số liệu xuất bởi \RepoPath{report/scripts/export_results.py}.}
+\DraftNote{Nội dung tóm tắt sơ bộ cần chuyển sang biểu mẫu chính thức trước khi nộp.}

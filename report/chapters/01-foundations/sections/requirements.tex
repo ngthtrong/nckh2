@@ -1,2 +1,53 @@
 \section{Yêu cầu và tiêu chí đánh giá}\label{sec:01-foundations-requirements}
-\DraftNote{Xác định yêu cầu bài toán và tiêu chí có thể kiểm chứng.}
+\subsection{Vai trò người dùng và luồng nghiệp vụ}
+Người gửi tạo SOS hoặc báo cáo có mô tả/ảnh, cung cấp vị trí khi có thể và nhận phản hồi trạng thái. Điều phối viên xem bản đồ, danh sách và hàng xem xét; xác minh thông tin, giao đội và ghi nhận kết quả. Quản trị viên quản lý tài khoản và dữ liệu phục vụ demo. Nhóm nghiên cứu chuẩn bị dữ liệu, cấu hình và phân tích artifact mà không đưa nhãn đánh giá vào luồng suy luận.
+
+Một luồng nghiệp vụ tối thiểu bắt đầu bằng tạo báo cáo tại thiết bị, ghi vào lưu trữ cục bộ, chọn chế độ gửi, nhận ACK, đưa báo cáo vào danh sách xử lý và cập nhật phản hồi. Khi mất mạng, báo cáo cần giữ được định danh và payload để tiếp tục ở lần gửi sau. Nếu thiếu GPS, báo cáo được chuyển vào hàng xem xét; gán một tọa độ mặc định sẽ tạo một điểm đến sai có vẻ hợp lệ.
+
+\subsection{Yêu cầu chức năng}
+\begin{longtable}{P{.10\textwidth}P{.40\textwidth}P{.39\textwidth}}
+\caption{Yêu cầu chức năng và căn cứ kiểm chứng}\label{tab:functional-requirements}\\
+\toprule Mã & Yêu cầu & Căn cứ kiểm chứng \\\midrule\endfirsthead
+\toprule Mã & Yêu cầu & Căn cứ kiểm chứng \\\midrule\endhead
+F01 & Tạo SOS và bài báo cáo; cho phép thiếu ảnh hoặc GPS & Luồng tạo bản ghi, test tích hợp, hàng xem xét của API cụm \\
+F02 & Lưu cục bộ trước khi gửi; gửi lại khi có mạng & Hive outbox, repository, test mất mạng/có mạng lại \\
+F03 & Phân loại mức ngập từ ảnh trên thiết bị khi đủ asset/runtime & Mã suy luận native; đối chiếu runtime CPU; kiểm chứng điện thoại trình bày riêng \\
+F04 & Chọn ảnh gốc, ảnh nén hoặc metadata theo mạng/confidence & Hàm chọn chế độ thuần và test chính sách gửi \\
+F05 & Chống gửi lặp, kiểm tra xung đột định danh & Hợp đồng message, hash JCS, test ACK/hash/sequence \\
+F06 & Gom cụm và xếp hạng từ trường quan sát & Lõi thuật toán, adapter và benchmark RQ1/RQ2 \\
+F07 & Điều phối và cập nhật trạng thái có nhật ký & API dashboard, bảng sự kiện, test chuyển trạng thái \\
+F08 & Xem bản đồ, lọc báo cáo, xuất dữ liệu & Dashboard Leaflet, API truy vấn và CSV/GeoJSON \\
+F09 & Tiếp nhận từ SMS gateway và nhập tổng đài & Endpoint có xác thực gateway và luồng nhập thủ công; vận hành viễn thông cần kiểm chứng riêng \\
+\bottomrule
+\end{longtable}
+
+\subsection{Yêu cầu phi chức năng}
+Tính toàn vẹn dữ liệu yêu cầu payload có cấu trúc rõ, số hữu hạn trong miền hợp lệ và transaction theo message. Tính bền vững yêu cầu tách bộ nhớ giao diện khỏi lưu trữ cục bộ và đảm bảo gửi lại sau gián đoạn. Tính nhất quán yêu cầu trạng thái chỉ đi theo các chuyển hợp lệ và version tăng. Tính giải thích yêu cầu truy được nguồn số liệu, quy tắc ánh xạ, cấu hình và phạm vi kiểm thử.
+
+Độ trễ và hiệu quả truyền tải là các yêu cầu cần đo, không phải thuộc tính được suy ra chỉ từ kiến trúc. Bảng độ trễ suy luận CPU kiểm tra một phần chi phí AI. Script proxy mạng yếu định nghĩa một phép đo truyền; hiện chưa có bộ kết quả lưu để đưa ra kết luận định lượng cho mạng di động. Tiết kiệm pin cũng chưa có phép đo. Khi chưa có artifact, báo cáo ghi nhận nhu cầu đánh giá tiếp thay vì đặt một số cải thiện giả định.
+
+Phân quyền và bảo vệ thao tác điều phối được thể hiện qua tài khoản, phiên đăng nhập, giới hạn đăng nhập và phân biệt admin/operator. Đây là cơ chế đã cài đặt trong demo; repo không cung cấp một cuộc kiểm định bảo mật độc lập hay một đánh giá hạ tầng phục vụ quy mô lớn. Khả năng tiếp nhận public của app và sự tin cậy của dữ liệu đầu vào phải được xem xét riêng với đăng nhập dashboard.
+
+\subsection{Ma trận mục tiêu--thước đo}
+\begin{longtable}{P{.29\textwidth}P{.28\textwidth}P{.32\textwidth}}
+\caption{Thước đo theo tầng và giới hạn diễn giải}\label{tab:metric-map}\\
+\toprule Tầng & Chỉ số/kiểm tra & Điều được kết luận \\\midrule\endfirsthead
+\toprule Tầng & Chỉ số/kiểm tra & Điều được kết luận \\\midrule\endhead
+Ảnh & Accuracy, macro-F1, recall lớp, ma trận nhầm lẫn & Phân loại trên đúng split đã lưu \\
+Tối ưu mô hình & Kích thước, lỗi nặng, độ trễ CPU, đồng thuận top-1 & Đánh đổi ở runtime và phiên đo tương ứng \\
+Khẩn cấp có cấu trúc & Độ khớp quy tắc trên 32 trạng thái; audit dữ liệu & Tái hiện nhãn thay thế được định nghĩa \\
+Phân cụm & ARI, pairwise F1, tỷ lệ điểm đến giả & Chất lượng phân hoạch trong generator đã kiểm tra \\
+Xếp hạng & NDCG@5, Spearman, overlap, drift & Phù hợp với lợi ích tổng hợp và độ nhạy dưới perturbation \\
+Điều phối & Harm, tỷ lệ trễ deadline; 40 cặp seed & Hệ quả trong mô hình mô phỏng đã khóa \\
+Đồng bộ & Duplicate, conflict, version, offline/reconnect & Tuân thủ các ca hợp đồng được kiểm thử \\
+Ứng dụng thực địa & Độ trễ máy thật, pin, tỷ lệ nhận tin, khả dụng & Chưa có bộ số liệu để kết luận \\
+\bottomrule
+\end{longtable}
+
+\subsection{Nguyên tắc xử lý thông tin chưa đủ}
+Thiếu dữ liệu và giá trị bằng không có ý nghĩa khác nhau. Mức ngập bằng không có thể là quan sát không ngập; thiếu nhãn ảnh nghĩa là chưa biết. Không có nhóm yếu thế được chọn cũng chưa chắc là đã khảo sát và khẳng định không có nhóm này. Lõi nghiên cứu có quy tắc thiếu dữ liệu cho tương đồng; adapter phần mềm có một số quy tắc thay thế để vận hành và cần được ghi riêng.
+
+Báo cáo tạo sau mất mạng vẫn giữ thời điểm tạo ở client, đồng thời máy chủ lưu thời điểm nhận. Trong mã adapter hiện tại, nếu không đọc được \texttt{createdAt}, thời điểm nhận có thể được dùng thay. Vì vậy, ngữ nghĩa thời gian ở demo không hoàn toàn trùng với thiết kế nghiên cứu chỉ dùng thời gian quan sát gốc. Cần đánh giá độ nhạy của cách thay thế này trước khi áp dụng kết quả benchmark vào dữ liệu đến trễ.
+
+\subsection{Tiêu chí hoàn thành bản sơ bộ}
+Bản sơ bộ cần mô tả đủ bài toán, dữ liệu, phương pháp, phần mềm, kết quả và hạn chế; số liệu phải truy về artifact và tên nhóm đúng nguồn. Các trường hành chính không có căn cứ, mẫu chính thức và minh chứng có chữ ký vẫn được đánh dấu để nhóm hoàn tất hồ sơ. Mức hoàn thành nội dung khoa học được tách với mức hoàn thành sản phẩm đăng ký và điều kiện nộp bản đầy đủ.

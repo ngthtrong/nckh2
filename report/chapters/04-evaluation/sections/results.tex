@@ -1,2 +1,110 @@
 \section{Kết quả và bàn luận}\label{sec:04-evaluation-results}
-\DraftNote{Trình bày kết quả mô hình ảnh, RQ1–RQ3, hệ thống và mạng; giữ kết quả âm.}
+\subsection{Chất lượng phân loại ảnh FP32}
+Trên \ImageTest{} ảnh test, MobileNetV3-Large hiện tại đạt Accuracy \ImageAccuracy\% và macro-F1 \ImageMacroFOne\%. Balanced accuracy là 74,07\%. Ma trận nhầm lẫn và chất lượng từng lớp được trình bày ở Bảng~\ref{tab:confusion} và \ref{tab:image-classes}.
+\input{generated/tables/confusion}
+\input{generated/tables/image-classes}
+
+Lớp \texttt{non\_flood} có recall 91,86\%, cao hơn các lớp ngập. Recall \texttt{high} là 66,67\%; trong 54 ảnh high, 14 ảnh bị dự đoán medium và 3 ảnh bị dự đoán low. Ranh giới giữa các mức ngập là hạn chế đáng chú ý, vì nhầm xuống mức thấp có thể làm metadata giảm mức ngập nếu không có kiểm chứng bổ sung.
+
+Có 5 lỗi cách ít nhất hai mức severity, chiếm 1,95\% tập test. Đây là chỉ số do nhóm định nghĩa theo thứ tự mức ngập, không trực tiếp đo hệ quả cứu hộ. Số lượng test mỗi lớp còn nhỏ, nên chênh lệch vài ảnh làm tỷ lệ thay đổi đáng kể. Báo cáo chưa có khoảng tin cậy ghép cặp theo dữ liệu độc lập ngoài nguồn ảnh hiện tại để kết luận khác biệt nhỏ giữa các mô hình.
+
+ECE của FP32 khoảng 0,06350 và Brier khoảng 0,34483 theo artifact. Các chỉ số này cung cấp thêm thông tin về confidence. Không dùng Accuracy tổng thể để chứng minh mọi dự đoán có confidence trên 0,90 đủ tin cậy cho quyết định không gửi ảnh; cần kiểm tra riêng nhóm quyết định đó và các ảnh ngoài phân bố.
+
+\subsection{Tương đương PyTorch, ONNX và ExecuTorch}
+\input{generated/tables/pth_onnx_pte}
+Cả ba định dạng có cùng nhãn top-1 trên 256 ảnh và cùng chỉ số phân loại. Sai khác xác suất tối đa PTH--ONNX khoảng $3{,}01\times10^{-6}$; PTH--PTE khoảng $5{,}01\times10^{-6}$. Kết quả cho thấy chuyển đổi FP32 giữ đầu ra tốt trên split được đo với pipeline đã khai báo.
+
+Trong phiên này, trung vị lời gọi suy luận PTH là 65,87 ms, ONNX 25,93 ms và PTE 45,31 ms. File checkpoint PTH khoảng 48,51 MiB, ONNX 16,04 MiB và PTE 16,06 MiB. Đây là đối chiếu trên máy tính, không đủ để chọn runtime nhanh nhất trên mọi điện thoại. Kích thước PTH lớn hơn không có nghĩa toàn bộ phần chênh lệch là tham số tính toán cần cắt tỉa.
+
+Smoke verification trên ba ảnh ghi năm kiểm tra local pass gồm tiền xử lý, precision, provider, parity và label mapping; phần mobile ghi chưa thử. Kết quả smoke hỗ trợ kiểm tra đường thực thi nhỏ, còn kết quả full test hỗ trợ thống kê phân loại. Hai mức kiểm tra bổ sung nhau và không thay thế phép đo pixel/runtime native trên điện thoại.
+
+\subsection{Lượng tử hóa: số liệu đã lưu và đối chiếu chưa khớp}
+Bảng lượng tử hóa dưới đây giữ số từ \texttt{summary.json} để truy nguyên artifact, chưa xem là metric nén được xác nhận cuối cùng. Khi tính lại từ \texttt{all\_predictions.csv} cùng thư mục, PTQ có một khác biệt ở ma trận nhầm lẫn và QAT có ba dự đoán đúng ít hơn summary. Bảng~\ref{tab:image-metric-audit} công bố cả hai nguồn; nguyên nhân cần được rà soát ở quy trình sinh artifact.
+\input{generated/tables/image-metric-audit}
+\input{generated/tables/fp32_ptq_qat}
+PTQ INT8 giảm file ONNX từ khoảng 16,04 xuống 4,51 MiB, xấp xỉ 71,9\% dung lượng theo byte của artifact. Accuracy giảm từ 76,17\% xuống 71,88\%, tương ứng khoảng 4,30 điểm phần trăm. Macro-F1 giảm từ 74,54\% xuống 70,33\%. Top-1 agreement với FP32 bằng 86,72\%, nên việc nén thay đổi một phần dự đoán.
+
+Trong phiên đo FP32/PTQ/QAT, trung vị PTQ 35,37 ms cao hơn FP32 31,90 ms. Artifact lượng tử hóa riêng có trung vị khác vì phiên đo khác; báo cáo không chọn số thuận lợi ở phiên khác để khẳng định INT8 luôn nhanh hơn. Kết luận có căn cứ ở đây là giảm dung lượng kèm đánh đổi chất lượng, còn lợi ích tốc độ phụ thuộc runtime/hardware.
+
+Theo summary đã lưu, QAT INT8 của nhánh hiện tại đạt Accuracy 52,34\%, macro-F1 50,57\% và 38 lỗi nặng (14,84\%). Trung vị 121,36 ms cao hơn hai đối chứng trong cùng phiên. Đây là kết quả không thuận lợi của nhánh QAT đã lưu, cần giữ trong báo cáo. Không suy ra QAT nói chung luôn kém; phép đo chỉ đặc trưng cho checkpoint và quy trình hiện tại, và chưa cô lập được nguyên nhân suy giảm.
+
+\subsection{Cắt tỉa có cấu trúc}
+\input{generated/tables/pruning_st}
+Artifact ghi số tham số giảm từ 4.207.156 xuống 4.145.694, khoảng 1,46\%. File ONNX giảm từ 16,04 xuống 15,81 MiB; PTE giảm từ 16,06 xuống 15,83 MiB. Accuracy giữ ở 76,17\%, macro-F1 thay đổi nhẹ từ 74,54\% xuống 74,47\%, và số lỗi nặng giảm từ 5 xuống 4.
+
+Cùng Accuracy không có nghĩa cùng dự đoán: đồng thuận giữa mô hình gốc và cắt tỉa chỉ 81,64\% trên tập test. Một số ảnh chuyển từ đúng sang sai, trong khi ảnh khác chuyển từ sai sang đúng. Vì vậy cần nhìn per-class và disagreement thay vì chỉ một tỷ lệ tổng.
+
+Về tốc độ trong cùng phiên, PTH cắt tỉa có trung vị thấp hơn PTH gốc (28,91 so với 33,16 ms), nhưng ONNX cắt tỉa cao hơn (20,32 so với 12,71 ms) và PTE cắt tỉa cao hơn (32,43 so với 25,62 ms). Ít tham số hơn không bảo đảm runtime nhanh hơn, vì kernel, bố trí graph và backend có thể khác. Chưa có nhiều lần đo độc lập hoặc kết quả mobile để khẳng định ưu thế hiệu năng tổng quát.
+
+\subsection{Khẩn cấp LR: độ khớp nhãn thay thế}
+JSON v5 ghi fidelity trên 32 trạng thái tại threshold 0,5 bằng 1,0. Bảng so sánh với quy tắc cho thấy tất cả profile khớp nhãn OR. Các audit dataset/final gate ghi kiểm tra integrity; audit nguồn giữ các trạng thái có điều kiện và thay đổi sau rà soát, không chuyển mọi hạng mục thành một phát biểu ``pass'' vô điều kiện.
+
+Sanity 10 vòng giữ một số profile dương để kiểm tra khả năng dự đoán trạng thái chưa có trong train của vòng đó. Có vòng recall 0,75 hoặc 0,667, nên không nên diễn giải kết quả toàn bảng là tổng quát hoàn hảo khi huấn luyện thiếu profile. Đây là kiểm tra kỹ thuật trong không gian tổng hợp hữu hạn. Mô hình không được đánh giá trên người bệnh, tin nhắn tự do hoặc dữ liệu điều phối thực.
+
+Phần app đã có loader và score từ cờ có cấu trúc, nhưng backend vẫn dùng trường \texttt{urgency}/từ khóa khi phân cụm. Vì vậy, mức hoàn thành của gói LR là có dữ liệu, mô hình, audit và đường tính tại app; chuỗi app--adapter--đồ thị dùng $E_i^{\mathrm{LR}}$ cần thêm kiểm thử tích hợp. Đây cũng là lý do không gọi hệ thống hiện tại đã hoàn tất mô hình văn bản đa phương thức.
+
+\subsection{RQ1: chất lượng phân cụm cơ sở}
+\input{generated/tables/rq1-benchmark}
+Additive Louvain có ARI trung bình 0,9191, cao nhất bảng; Product Louvain là 0,9072. Product trừ Additive được chọn độc lập có hiệu trung bình $-0{,}01184$, CI bootstrap 95\% chưa hiệu chỉnh $[-0{,}02257;-0{,}00240]$, với 9 run thắng, 19 hòa và 12 thua. Wilcoxon raw $p=0{,}0987$, sau Holm $p=0{,}2560$. Kết quả không xác lập ưu thế thành phần tích.
+
+So với Additive khớp mật độ, Product có hiệu $+0{,}00989$, CI $[-0{,}00100;0{,}02082]$ và $p_{\mathrm{Holm}}=0{,}2560$. Hai pipeline có retained-edge fraction xấp xỉ 0,03011 và 0,03021, mean degree 9,90 và 9,94. Đây là diagnostic giảm chênh lệch mật độ, không xác định tác động nhân quả của operator, vì trọng số và thành viên cạnh vẫn khác.
+
+Product Leiden có ARI 0,9165; phép so sánh với Product Louvain sau Holm có $p=0{,}1120$. Các kết quả cho thấy cần đánh giá cả cấu hình đồ thị và bộ phát hiện cộng đồng. Các baseline mật độ thấp hơn trong bundle này không chứng minh chúng kém trong mọi môi trường hoặc mọi cách chuẩn hóa đặc trưng.
+
+Một phát hiện vận hành là Product có fake absorption và fake rejection đều bằng không, nhưng false-destination rate 16,49\%. Tin giả không hòa vào điểm thật nhưng tạo điểm đến giả riêng. Vì thế, tỷ lệ hấp thụ bằng không không được gọi là chống tin giả hiệu quả. Nếu scheduler coi các cụm giả là điểm cần đi, chúng vẫn tiêu tốn nguồn lực.
+
+\subsection{RQ1: độ nhạy dưới nhiễu và bản sao}
+\input{generated/tables/rq1-stress}
+\begin{figure}[htbp]\centering
+\includegraphics[width=.97\textwidth]{../paper/figures/rq1_stress_delta_ari.pdf}
+\caption{Thay đổi ARI trong từng phương pháp so với đối chứng, 40 run test RQ1}
+\label{fig:rq1-stress-report}
+\end{figure}
+\SourceNote{\RepoPath{paper/figures/rq1_stress_delta_ari.pdf}; nguồn chính \RepoPath{thucnghiem/results/rq1_results/aggregate/}. Giá trị âm biểu diễn suy giảm; không phải kiểm định ưu thế giữa phương pháp.}
+
+Các mức nhiễu tọa độ và thời gian được thử đều làm ARI trung bình giảm. Không phương pháp nào đứng đầu ở mọi điều kiện. Bản sao hai lần làm ARI của bốn biến thể đồ thị tăng nhẹ, nhưng năm lần làm trung bình về khoảng 0,30. Geo-time DBSCAN giữ mức đối chứng thấp hơn khi chỉ thay multiplicity exact.
+
+Với Product Louvain, thay đổi năm lần là $-0{,}6108$, CI ghép cặp chưa hiệu chỉnh $[-0{,}6318;-0{,}5881]$. Hai multiplicity được thử cho thấy đáp ứng không đơn điệu, không xác định một ngưỡng sụp đổ chính xác và không chứng minh thêm bản sao có lợi. Quantile và cạnh top-$k$ là các cơ chế có thể liên quan, nhưng protocol chưa cô lập nguyên nhân.
+
+Lần chạy độc lập không gộp chỉ làm một số tổng hợp ở điều kiện hai lần khác nhẹ; kết luận GPS, timestamp và năm lần được giữ theo audit. Quan trọng hơn, thất bại ở phân cụm cùng tồn tại với bất biến sao chép của score khi grouping cố định. Hai phát biểu áp dụng hai tầng khác nhau.
+
+\subsection{RQ2: phù hợp với lợi ích mô phỏng}
+\input{generated/tables/rq2-alignment}
+Điểm có chặn đạt NDCG@5 0,6669, CI 95\% $[0{,}6306;0{,}7018]$. Spearman trung bình $-0{,}0304$ với CI $[-0{,}1165;0{,}0549]$, overlap top-5 bằng 0,285 với CI $[0{,}2349;0{,}3400]$. NDCG@5 cao hơn legacy khoảng 0,0121 nhưng tương phản sau Holm không có ý nghĩa theo artifact.
+
+Ước lượng điểm của phương pháp có chặn còn thấp hơn chỉ số người (0,6709) và ngẫu nhiên (0,6763). Những chênh lệch điểm này không tự chứng minh khác biệt thống kê. Vì grouping oracle đã loại lỗi phân cụm khỏi điều kiện RQ2, sự phù hợp yếu không thể quy hoàn toàn cho phân hoạch sai.
+
+\subsection{RQ2: bất biến hẹp và thất bại dưới phối hợp}
+\input{generated/tables/rq2-robustness}
+Sao chép exact 2, 5 và 10 lần tạo priority drift bằng không cho score có chặn khi nhóm bằng chứng và đầu vào cố định. Legacy có drift lần lượt 0,0026; 0,0086 và 0,0148. Điều này hỗ trợ thuộc tính bất biến đã nêu, với đúng điều kiện kiểm tra.
+
+Các perturbation gần trùng, mâu thuẫn $F/E$, missingness và tăng $F$ dưới confidence thấp thường cho score có chặn drift nhỏ hơn legacy. Tuy nhiên, với tăng $N$ confidence thấp, drift có chặn là 0,0696 so với 0,0140; với tăng $V$ là 0,0758 so với 0,0074. Các kết quả này được giữ như hạn chế thay vì chỉ trình bày bản sao exact.
+
+Chiến dịch phối hợp confidence cao tạo drift 0,1688 cho score có chặn, 0,0309 cho legacy và false-priority lift 0,8828. Hiệu drift khoảng 0,1379 có $p_{\mathrm{Holm}}\approx9{,}1\times10^{-12}$ theo artifact. Có chặn và chống multiplicity exact không bảo đảm nguồn tin đúng, và chính các payload phối hợp khác nhau có thể vượt qua cơ chế đếm củng cố.
+
+\input{generated/tables/rq2-sensitivity}
+Phân tích hằng số one-at-a-time có 21 cấu hình trên 40 seed (840 quan sát seed/cấu hình). Span NDCG@5 trung bình đều dưới 0,01, lớn nhất khoảng 0,00546 khi thay trọng số $\omega_F$. Ổn định cục bộ này cùng tồn tại với alignment yếu; không chứng minh các hằng số đã có giá trị chính sách hoặc kết quả giữ nguyên ngoài miền perturbation.
+
+\subsection{RQ3: hệ quả điều phối từ phân hoạch dự đoán}
+\input{generated/tables/rq3-effects}
+Trên phân hoạch Product, điểm có chặn làm harm mô phỏng tăng 14,34 so với legacy và giảm tỷ lệ trễ hạn khoảng 1,88 điểm phần trăm. Cả hai tương phản không có ý nghĩa sau Holm: $p=0{,}563$ và $p=0{,}247$. Bảng dùng chiều $\Delta$ cải thiện, nên harm tăng tương ứng hiệu âm.
+
+So với gần nhất trước, score có chặn kém hơn về harm và trễ hạn, với $p_{\mathrm{Holm}}\approx4{,}1\times10^{-5}$ và $1{,}3\times10^{-6}$. Product cũng kém hơn Additive khớp mật độ khi dùng cùng score ở harm ($p_{\mathrm{Holm}}=0{,}000168$). Sai phân hoạch có hệ quả xuống tầng lập lịch, và bảo đảm điểm hữu hạn không loại bỏ hệ quả đó.
+\begin{figure}[htbp]\centering
+\includegraphics[width=\textwidth]{../paper/figures/rq3_dispatch_conditions.pdf}
+\caption{Trung bình mô tả theo điều kiện nguồn lực trên phân hoạch Product}
+\label{fig:rq3-conditions-report}
+\end{figure}
+\SourceNote{\RepoPath{paper/figures/rq3_dispatch_conditions.pdf}; mỗi điểm tổng hợp 40 seed trong một điều kiện. Phân tích chính dùng trung bình điều kiện trong seed và 40 cặp.}
+
+Gần nhất trước có harm và trễ hạn trung bình thấp hơn trong mọi điều kiện được thử. Một diễn giải có thể là score theo nhu cầu chưa biểu diễn đủ chi phí đi lại và ràng buộc lịch; đây là giả thuyết giải thích, chưa được cô lập bằng thực nghiệm cơ chế. Kết quả không xác lập gần nhất trước là chính sách thực địa tối ưu.
+
+\subsection{Luồng hệ thống và mạng yếu}
+Lịch sử E2E ghi nhận chọn chế độ đúng khi dùng network throttling: mạng không giới hạn có ảnh gốc khoảng 53,6 KB, 300 kbit/s có ảnh nén khoảng 42,4 KB, 20 kbit/s chỉ gửi thông tin. Mất mạng/có mạng lại và báo cáo thiếu GPS cũng được kiểm tra ở luồng web. Các số kích thước này thuộc ảnh/kịch bản test cụ thể, không phải mức giảm trung bình trên một quần thể ảnh.
+
+Script proxy mạng yếu hiện có ba hồ sơ 50/400/5.000 kbit/s với RTT 600/200/50 ms, cùng timeout metadata 30 giây và upload 60 giây. Repo không có bộ kết quả độ trễ tương ứng trong thư mục results để đưa vào bảng. Vì vậy, báo cáo có thể mô tả thiết kế phép đo và hành vi chức năng, nhưng chưa kết luận hệ thống rút ngắn thời gian phản ứng trong mạng di động thực.
+
+\subsection{Bàn luận xuyên các tầng}
+Các kết quả cho thấy cần đánh giá riêng ba dạng chất lượng: đúng biểu diễn tại thiết bị, đúng liên kết sự kiện và phù hợp quyết định điều phối. FP32 có parity tốt giữa runtime nhưng vẫn nhầm lớp; score có invariance exact nhưng alignment yếu; Product có chặn cạnh nhưng nhạy multiplicity. Không có một chỉ số đơn lẻ thay thế được các tầng còn lại.
+
+Mức hoàn thành phần mềm tạo một nền tảng thử nghiệm có thể trình diễn và kiểm tra hợp đồng. Phần nghiên cứu thuật toán cung cấp các giới hạn toán học và kết quả âm có ích cho cải tiến. Khả năng ứng dụng được phát biểu ở mức nguyên mẫu hỗ trợ quyết định; hiệu quả cứu hộ ngoài thực tế còn cần dữ liệu độc lập, chuyên gia và thử nghiệm thiết bị/hạ tầng.
