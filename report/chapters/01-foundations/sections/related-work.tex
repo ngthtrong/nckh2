@@ -1,0 +1,32 @@
+\section{Đối chiếu nghiên cứu liên quan và khoảng trống}\label{sec:related-work}
+\subsection{Nghiên cứu trong nước: quan trắc ngập và thông tin cứu hộ}
+Các công trình trong nước giúp xác định rõ sự khác nhau giữa quan sát vùng ngập, ước lượng độ sâu và xử lý yêu cầu cứu hộ. Doan và Le-Thi nghiên cứu phát hiện ngập từ cặp ảnh SAR ở hai thời điểm, dùng kiến trúc Siamese và Swin-Transformer để biểu diễn thay đổi \citep{doan2025sar}. Đầu ra là vùng thay đổi trên ảnh vệ tinh. Cách tiếp cận này cung cấp thông tin không gian ở diện rộng, nhưng không trực tiếp cho biết một hộ dân đang cần được tiếp cận hay một bản tin là bản sao.
+
+Ngô Thanh Vũ và cộng sự sử dụng ảnh biển báo giao thông, YOLOv11 và quan hệ hình học với chiều cao tham chiếu để quan trắc độ sâu ngập đô thị \citep{ngo2025urban}. Công trình cho thấy vai trò của vật chuẩn khi chuyển ảnh thành đại lượng vật lý. Đối với ảnh người dân gửi, một vật chuẩn có kích thước biết trước không luôn xuất hiện. Vì vậy, bốn lớp của đề tài là nhãn thị giác tương đối; báo cáo không đổi các lớp \texttt{low/medium/high} thành một giá trị độ sâu theo centimet.
+
+Hai hướng trên có thể bổ sung bối cảnh cho hệ thống nếu sau này có nguồn dữ liệu và phép ghép không gian phù hợp. Tuy nhiên, trong repo hiện tại, chúng là tài liệu tổng quan, chưa phải dịch vụ được tích hợp hoặc dữ liệu huấn luyện của mô hình. Khoảng trống mà đề tài khảo sát nằm ở liên kết báo cáo, xử lý gửi lại khi mạng gián đoạn và kiểm tra hệ quả của thứ tự ưu tiên sau khi thông tin được tiếp nhận.
+
+\subsection{So sánh theo đầu vào, đầu ra và điều kiện áp dụng}
+Bảng~\ref{tab:related-work} so sánh các hướng ở mức bài toán, tránh đặt Accuracy phân loại cạnh F1 phân vùng như thể chúng đo cùng một nhiệm vụ. Các công trình được lựa chọn để giải thích từng thành phần của hệ thống; bảng không phải tổng quan hệ thống với tiêu chí tìm kiếm bao phủ toàn bộ ngành.
+\begin{longtable}{P{.23\textwidth}P{.31\textwidth}P{.35\textwidth}}
+\caption{Nghiên cứu liên quan và quan hệ với đề tài}\label{tab:related-work}\\
+\toprule Công trình/hướng & Đầu vào và đầu ra & Quan hệ, điều kiện và giới hạn \\\midrule\endfirsthead
+\toprule Công trình/hướng & Đầu vào và đầu ra & Quan hệ, điều kiện và giới hạn \\\midrule\endhead
+\citet{doan2025sar} & Cặp ảnh SAR; phát hiện thay đổi vùng ngập & Bối cảnh viễn thám; khác ảnh mặt đất và liên kết yêu cầu cứu hộ \\
+\citet{ngo2025urban} & Ảnh biển báo; ước lượng độ sâu nhờ tham chiếu hình học & Cần vật chuẩn và thông số; khác phân loại mức ngập tương đối \\
+CrisisMMD \citep{alam2018crisismmd} & Bài đăng ảnh--văn bản thiên tai; nhãn phục vụ phân tích nhân đạo & Cơ sở nghiên cứu đa phương thức; chưa dùng trong tập huấn luyện hiện tại \\
+FloodNet \citep{rahnemoonfar2021floodnet} & Ảnh UAV hậu thiên tai; hiểu cảnh và nhãn theo pixel & Góc nhìn trên không khác ảnh người dân; không suy ra parity dữ liệu \\
+MobileNetV3 \citep{howard2019mobilenetv3} & Ảnh; đặc trưng và phân loại với thiết kế cho thiết bị di động & Kiến trúc backbone của đề tài; vẫn cần tinh chỉnh và đo từng runtime \\
+Louvain/Leiden \citep{blondel2008louvain,traag2019leiden} & Đồ thị có trọng số; cộng đồng nút & Không tự xác minh sự kiện thật; kết quả phụ thuộc cách dựng cạnh \\
+Bundle Protocol v7 \citep{rfc9171} & Bundle trong mạng gián đoạn; lưu và chuyển tiếp qua các nút & Chuẩn tham chiếu DTN; outbox HTTP hiện tại chưa triển khai BPv7 \\
+Đề tài hiện tại & Báo cáo ảnh/mô tả/vị trí; cụm và danh sách hỗ trợ điều phối & Nguyên mẫu và thực nghiệm tổng hợp; còn cần dữ liệu/kiểm chứng vận hành \\
+\bottomrule
+\end{longtable}
+
+\subsection{Đóng góp được kiểm tra ở từng tầng}
+Đề tài kết nối bước tạo báo cáo tại biên với lưu bền vững, tiếp nhận và tổng hợp tại trung tâm. Giá trị kỹ thuật của kết nối này cần được đánh giá ở ba tầng. Thứ nhất, mô hình phải giữ hợp đồng đầu vào/đầu ra khi chuyển runtime. Thứ hai, bản sao do truyền tải phải được phân biệt với quan sát mới của cùng hiện trường. Thứ ba, một cụm và một điểm ưu tiên phải được kiểm tra bằng mục tiêu độc lập thay vì chỉ nhìn độ hợp lý của công thức.
+
+Các bảo đảm toán học của đề tài thuộc tầng cạnh và điểm: cổng không gian giới hạn khoảng cách của một cạnh được giữ; tổng hợp theo họ giữ điểm trước bản sao exact khi grouping cố định. Các RQ kiểm tra liệu những thuộc tính này có chuyển thành lợi ích phân cụm, xếp hạng hoặc điều phối hay không. Việc kết quả chưa cho thấy lợi ích chung là một kết luận nghiên cứu cần công bố, không phải lý do thay mục tiêu đánh giá sau khi đã thấy dữ liệu.
+
+\subsection{Ngữ nghĩa mạng gián đoạn theo chuẩn tham chiếu}
+RFC 9171 mô tả BPv7 như lớp phủ store-carry-forward cho môi trường kết nối gián đoạn \citep{rfc9171}. Trong ứng dụng hiện tại, điện thoại giữ dữ liệu cục bộ rồi gửi đến server bằng HTTP hoặc thử SMS dự phòng. Cơ chế này giải quyết việc chờ kết nối trở lại giữa client và server. Khả năng đưa dữ liệu qua thiết bị trung gian khi hai đầu không đồng thời kết nối còn cần bộ giao thức và log chuyển tiếp riêng. Sự phân biệt này xác định đúng phần đã triển khai và phần DTN trong hướng phát triển.

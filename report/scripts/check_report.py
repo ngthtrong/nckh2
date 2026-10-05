@@ -1,6 +1,8 @@
 #!/usr/bin/env python3
 """Check draft placeholders, body page count, build warnings and release evidence."""
 import argparse
+import hashlib
+import json
 from pathlib import Path
 import re
 import sys
@@ -27,13 +29,28 @@ def main():
     for note in notes:
         print('  ' + note)
     if args.release and notes:
-        errors.append('Cần hoàn tất thông tin hành chính, nội dung và các biểu mẫu trước khi xuất bản đầy đủ.')
+        errors.append('Cần xử lý các ghi chú còn đánh dấu và đối chiếu biểu mẫu chính thức trước khi xuất bản đầy đủ.')
     entries = sum(len(re.findall(r'@\s*(?!comment\b|preamble\b|string\b)\w+\s*[{(]', f.read_text(), re.I))
                   for f in (ROOT / 'bibliography').glob('*.bib'))
     print(f'Tài liệu tham khảo trong nguồn: {entries}')
     if args.release and entries == 0:
         errors.append('Chưa có tài liệu tham khảo thực sự trong bibliography/.')
     out = ROOT / args.build_dir
+    figure_provenance = ROOT / 'generated/figure-provenance.json'
+    if figure_provenance.exists():
+        provenance = json.loads(figure_provenance.read_text())
+        for relative, digest in provenance['sources_sha256'].items():
+            source = ROOT.parent / relative
+            if not source.is_file() or hashlib.sha256(source.read_bytes()).hexdigest() != digest:
+                errors.append('Nguồn hình đã thay đổi: ' + relative + '; chạy make figures.')
+        for name, versions in provenance['figures_sha256'].items():
+            for ext, digest in versions.items():
+                source = ROOT / 'assets/figures' / (name + '.' + ext)
+                if not source.is_file() or hashlib.sha256(source.read_bytes()).hexdigest() != digest:
+                    errors.append('Hình thiếu hoặc không khớp hash: ' + source.name)
+        print(f"Kiểm tra nguồn và hash: {len(provenance['figures_sha256'])} hình")
+    else:
+        errors.append('Thiếu figure-provenance.json; chạy make figures.')
     metrics = next(iter(sorted(out.glob('*.metrics'))), None)
     if metrics:
         values = dict(line.split('=', 1) for line in metrics.read_text().splitlines() if '=' in line)

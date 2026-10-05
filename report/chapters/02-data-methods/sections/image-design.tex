@@ -1,0 +1,71 @@
+\section{Thiết kế và huấn luyện mô hình ảnh}\label{sec:image-design}
+\subsection{Backbone và đầu phân loại bốn lớp}
+MobileNetV3 kết hợp các khối convolution hiệu quả cho thiết bị di động, gồm depthwise convolution, inverted residual, cơ chế điều tiết kênh squeeze-and-excitation và các hàm kích hoạt được chọn theo kiến trúc \citep{howard2019mobilenetv3}. Các khối này phục vụ việc trích xuất đặc trưng ảnh. Việc lựa chọn kiến trúc là một giả thuyết triển khai cần kiểm chứng bằng dữ liệu của đề tài và runtime được dùng.
+
+Hàm tạo mô hình trong notebook giữ backbone của torchvision, thay Dropout trong classifier thành 0,25 và lớp Linear cuối thành bốn đầu ra. Script xuất mô hình nhận diện layout checkpoint cũ có classifier lồng và layout hiện tại thay trực tiếp lớp cuối, rồi dựng đúng cấu trúc trước khi nạp trọng số. Việc phân biệt này tránh lỗi tên/thứ tự tensor khi chuyển một checkpoint sang ONNX hoặc PTE.
+\SourceNote{\RepoPath{products/fe/model/training_img.ipynb}; hàm tạo MobileNetV3-Large và các script export tương ứng.}
+
+\begin{figure}[htbp]\centering
+\begin{tikzpicture}[>=Stealth,node distance=6mm,
+ box/.style={draw,rounded corners=2pt,align=center,text width=105mm,minimum height=10mm,font=\small}]
+\node[box] (input) {Ảnh gốc: hướng EXIF, tỷ lệ khung hình, màu};
+\node[box,below=of input] (prep) {RGB $\rightarrow$ letterbox $256\times256$\\chuẩn hóa ImageNet $\rightarrow$ tensor $1\times3\times256\times256$};
+\node[box,below=of prep] (backbone) {MobileNetV3-Large: backbone trích xuất đặc trưng};
+\node[box,below=of backbone] (head) {Pooling và classifier\\Dropout 0,25 $\rightarrow$ Linear 4 lớp};
+\node[box,below=of head] (out) {Softmax: low, medium, high, non\_flood\\Nhãn top-1 và confidence};
+\draw[->] (input)--(prep);\draw[->] (prep)--(backbone);
+\draw[->] (backbone)--(head);\draw[->] (head)--(out);
+\end{tikzpicture}
+\caption{Hợp đồng suy luận ảnh và vị trí đầu phân loại được thay trong mô hình}
+\label{fig:image-model-design}
+\SourceNote{Sơ đồ từ config hiện tại, notebook huấn luyện và \RepoPath{products/fe/tools/convert_model.py}; không biểu diễn toàn bộ từng block convolution.}
+\end{figure}
+
+Các script export bọc mô hình bằng softmax để xuất xác suất. Vì vậy, nơi nhận cần biết output là probabilities hay logits, tránh áp softmax hai lần. Manifest là hợp đồng đi cùng asset; tên tệp giống nhau không đủ xác nhận hai runtime đang dùng cùng trọng số. Khi kiểm tra parity, phải giữ cả class order, tiền xử lý và loại output.
+
+\subsection{Tăng cường dữ liệu và hàm mục tiêu}
+Notebook mô tả tăng cường nhẹ trên train: lật ngang với xác suất 0,5; affine trong khoảng $\pm4^\circ$, dịch tối đa 3\% và scale 0,95--1,05; jitter brightness/contrast 0,12, saturation 0,08 và hue 0,02. Validation/test chỉ chuyển tensor và chuẩn hóa sau EXIF--RGB--letterbox. Các phép biến đổi không được thêm vào test khi tính metric cuối. Chúng tạo biến thể thị giác để huấn luyện, không tạo thêm hiện trường độc lập.
+
+Ngoài cross-entropy có label smoothing $\varepsilon=0{,}05$, notebook tính khoảng cách kỳ vọng giữa severity của nhãn thật và các lớp dự đoán. Với thứ tự index $(\texttt{low},\texttt{medium},\texttt{high},\texttt{non\_flood})$, vector severity là $s=(1,2,3,0)$. Đối với batch kích thước $B$, hàm mục tiêu được cài đặt là
+\begin{align}
+\widetilde y_{ic}&=(1-\varepsilon)\mathbf{1}\{y_i=c\}+\varepsilon/4,\\
+\mathcal L_{\mathrm{CE}}&=-\frac{1}{B}\sum_{i=1}^{B}\sum_{c=1}^{4}\widetilde y_{ic}\log p_{ic},\\
+\mathcal L_{\mathrm{sev}}&=\frac{1}{B}\sum_{i=1}^{B}\sum_{c=1}^{4}p_{ic}|s_c-s_{y_i}|,\\
+\mathcal L&=\mathcal L_{\mathrm{CE}}+0{,}1\mathcal L_{\mathrm{sev}}.\label{eq:training-loss}
+\end{align}
+Hệ số 0,1 có trong config đã lưu; CSV history cũng có cột CE, severity và penalty tương ứng. Thành phần severity phạt kỳ vọng sai lệch mức ngập, còn ``lỗi nặng'' ở đánh giá dùng nhãn top-1 và khoảng cách ít nhất hai mức. Hai đại lượng này không trùng nhau. Cấu hình hiện tắt weighted sampler và class-weight loss; các multiplier được khai báo trong config không có nghĩa đang được áp dụng.
+
+\subsection{Tối ưu, chọn checkpoint và khác biệt phiên bản}
+Mã notebook dùng AdamW với hai nhóm learning rate cho backbone và classifier; ReduceLROnPlateau theo validation, factor 0,5, patience 3 và learning rate tối thiểu $10^{-7}$. Ba epoch đầu khóa backbone và giữ các lớp features ở chế độ eval để không cập nhật BatchNorm của phần bị khóa. Sau đó mở backbone để tinh chỉnh. AMP chỉ được bật khi cấu hình cho phép và thiết bị là CUDA.
+
+Mã chọn checkpoint ưu tiên accuracy validation; nếu accuracy trong vùng sai số 0,005 so với cực đại đã thấy, checkpoint có tỷ lệ lỗi nặng thấp hơn có thể được chọn. Early stopping có patience 7. Do đó, checkpoint được giữ không nhất thiết là epoch có accuracy cao nhất đơn thuần. Test là bước đánh giá sau lựa chọn, không được đưa vào scheduler hoặc quy tắc chọn checkpoint.
+
+Notebook hiện trong repo đặt seed 599 cho lần thử mới, còn config và thư mục kết quả được dẫn ở báo cáo đặt seed 42. Báo cáo sử dụng config/split/artifact seed 42 làm nguồn cho số liệu, và dùng notebook để giải thích cơ chế cài đặt. Không xem chạy nguyên notebook hiện tại là tái lập trực tiếp checkpoint seed 42. Muốn tái lập đầy đủ cần khôi phục cấu hình, môi trường và snapshot mã tương ứng lần chạy đã lưu.
+
+\begin{figure}[htbp]\centering
+\includegraphics[width=\textwidth]{training-history.pdf}
+\caption{Loss và accuracy theo 11 epoch có trong CSV history seed 42}
+\label{fig:training-history}
+\SourceNote{\RepoPath{products/fe/model/Edge Ai/mobilenetv3_large_dataset_v4_seed42/history_mobilenetv3_large.csv}; không nội suy thêm epoch và không dùng đường cong để suy ra hiệu quả test.}
+\end{figure}
+
+Train loss có xu hướng giảm trong các hàng đã lưu, trong khi validation accuracy dao động. Khoảng cách train--validation ở cuối history cho thấy cần giữ quy tắc chọn trên validation và đánh giá test độc lập. Chỉ từ CSV chưa thể kết luận mọi dao động là overfitting hoặc phiên đã dừng đúng cơ chế early stopping; log và metadata checkpoint cần được đối chiếu nếu muốn xác định nguyên nhân hoặc epoch được xuất cuối.
+
+\subsection{Tiền xử lý là một phần của khả năng chuyển runtime}
+Với giá trị kênh RGB $u_c\in[0,255]$, chuẩn hóa được biểu diễn bởi
+\begin{equation}
+x_c=\frac{u_c/255-\mu_c}{\sigma_c},\quad
+\mu=(0{,}485;0{,}456;0{,}406),\quad
+\sigma=(0{,}229;0{,}224;0{,}225).
+\end{equation}
+Khi chuyển môi trường, cần kiểm tra thứ tự RGB, hướng EXIF, cách làm tròn kích thước letterbox, vị trí đệm và phép nội suy. Cùng một ảnh gốc có thể tạo tensor khác nếu thư viện giải mã/resize khác. Vì vậy, khi CPU và app có nhãn khác nhau, bước cần kiểm tra đầu tiên là parity tensor và hash asset; chưa có căn cứ quy lỗi ngay cho ONNX hay ExecuTorch.
+
+\subsection{PTQ, QAT và cắt tỉa: ba cơ chế khác nhau}
+Lượng tử hóa ánh xạ số thực $x$ sang số nguyên $q$ theo scale $s_q>0$ và zero-point $z_q$:
+\begin{equation}
+q=\operatorname{clip}\bigl(\operatorname{round}(x/s_q)+z_q\bigr),\qquad
+\widehat x=s_q(q-z_q).
+\end{equation}
+PTQ xác định các tham số sau huấn luyện từ dữ liệu calibration; QAT mô phỏng tác động lượng tử hóa trong quá trình tinh chỉnh. Tài liệu ONNX Runtime nêu rằng lượng tử hóa có thể làm giảm chất lượng và cung cấp công cụ so sánh tensor để tìm tầng sai lệch \citep{onnxQuantization}. Đây là căn cứ cho kế hoạch phân tích nhánh QAT, chưa phải chẩn đoán nguyên nhân suy giảm đã được thực hiện.
+
+Cắt tỉa có cấu trúc thay đổi kênh/nhóm tham số của mạng. Trong artifact hiện tại, phương pháp \texttt{global\_group\_magnitude\_channel} có target ratio 0,01; số tham số trước/sau là 4.207.156/4.145.694. Lợi ích được kiểm tra bằng file thực, dự đoán và timing cùng runtime. Việc giảm tham số, giảm byte và tăng tốc là ba kết quả riêng; Chương~\ref{chap:04-evaluation} giữ cả trường hợp giảm dung lượng nhưng runtime chậm hơn.

@@ -8,6 +8,7 @@ Nhóm, mã đề tài & \RepoPath{resource/infoGroup.md} & Nguồn ưu tiên th�
 Mục tiêu, tiến độ, sản phẩm & \RepoPath{resource/Thuyết minh NCKH.md} & Văn bản trong repo, chưa thay bản ký \\
 Số lượng/chia ảnh & Split CSV trong \RepoPath{products/fe/model/Edge Ai/} & Snapshot 1.702 ảnh \\
 Metric/runtime FP32 & \RepoPath{products/fe/reports/pth_onnx_pte/summary.json} & 256 ảnh test, CPU \\
+Benchmark ứng dụng & \RepoPath{products/fe/reports/mobile/samsung21se.json} & Hai object; 256 ảnh/runtime; thiếu metadata thiết bị \\
 Nén/cắt tỉa & \RepoPath{products/fe/reports/fp32_ptq_qat/}; \RepoPath{products/fe/reports/pruning_st/} & Cùng test; khác phiên timing \\
 LR khẩn cấp & \RepoPath{products/fe/model/urgency_ei/} & SOURCE FINAL v5, tổng hợp \\
 RQ1 benchmark & \RepoPath{thucnghiem/results/cij_baseline_benchmark_results/} & Generator 3.0, 40 test run \\
@@ -41,6 +42,6 @@ Renderer khác & Có bảng short ID/OOD & Không dùng ghép vào protocol bả
 Phép đo hiệu năng cần tách tải model, tiền xử lý, suy luận, tạo payload, chờ mạng và ACK. Phép đo mạng cần nhiều lượt cho mỗi profile/ảnh, ghi kích thước thực, tỷ lệ thành công và hàng đợi còn lại. Những mục này là kế hoạch bổ sung minh chứng, chưa phải kết quả đã đạt trong báo cáo.
 
 \section{Nội dung hành chính còn chờ xác nhận}
-Một số trường như giới tính, dân tộc, ngành, năm học và số năm đào tạo của chủ nhiệm chưa có nguồn xác nhận trực tiếp trong tệp thông tin nhóm/thuyết minh, nên metadata vẫn giữ dấu cần điền. Mẫu thông tin kết quả và thông tin chủ nhiệm mới ở cấu trúc tạm. Thuyết minh Markdown không thay bản phê duyệt có chữ ký/dấu.
+Các trường giới tính, dân tộc, ngành, năm học và số năm đào tạo của chủ nhiệm đã được cập nhật theo thông tin xác nhận ngày 06/10/2026 trong \RepoPath{resource/infoGroup.md} và \RepoPath{report/config/metadata.tex}; phần này không còn chờ điền metadata. Mẫu thông tin kết quả và thông tin chủ nhiệm vẫn cần đối chiếu biểu mẫu chính thức. Thuyết minh Markdown không thay bản phê duyệt có chữ ký/dấu.
 
 Manifest hồ sơ giữ cờ xác nhận false cho các minh chứng chưa được cung cấp. Nội dung sơ bộ của bản tin/tóm tắt Việt--Anh đã soạn có thể dùng để điền mẫu chính thức, nhưng không xác nhận thủ tục nộp. Video chưa được tạo trong công việc này. Bản đầy đủ cần đối chiếu danh sách cam kết, mẫu, bản phê duyệt và từng minh chứng thật.

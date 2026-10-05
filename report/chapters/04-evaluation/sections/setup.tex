@@ -9,6 +9,7 @@ Chương này tổng hợp kết quả đã lưu trong repo. Các bảng đượ
 Ảnh FP32 & 256 ảnh test, split seed 42 & \RepoPath{products/fe/reports/pth_onnx_pte/summary.json} \\
 PTQ/QAT & Cùng 256 ảnh test & \RepoPath{products/fe/reports/fp32_ptq_qat/summary.json} \\
 Cắt tỉa & Cùng 256 ảnh test, đối chiếu theo runtime & \RepoPath{products/fe/reports/pruning_st/summary.json} \\
+Benchmark app & 256 ảnh/runtime; thiếu metadata thiết bị & \RepoPath{products/fe/reports/mobile/samsung21se.json} \\
 Khẩn cấp LR & 32 profile trạng thái; sanity giữ profile dương & \RepoPath{products/fe/model/urgency_ei/model/urgency_logistic_SOURCE_FINAL.json} và audits \\
 RQ1 cơ sở & 40 run test Generator 3.0 & \RepoPath{thucnghiem/results/cij_baseline_benchmark_results/} \\
 RQ1 stress & 40 run, 7 điều kiện, 5 phương pháp & \RepoPath{thucnghiem/results/rq1_results/aggregate/} \\
@@ -24,6 +25,8 @@ Artifact ảnh ghi PyTorch 2.14.1, ONNX Runtime 1.30.0 và ExecuTorch runtime 1.
 Latency chỉ tính lời gọi suy luận, không bao gồm đọc ảnh, tiền xử lý, nạp model, validation hoặc logging. Các artifact so sánh FP32, lượng tử hóa và cắt tỉa có phiên đo khác nhau, nên thời gian baseline giữa các bảng có thể khác. Đánh giá tốc độ phải dùng cặp trong cùng bảng, cùng runtime, thay vì lấy baseline nhanh nhất ở một bảng so với candidate ở bảng khác.
 
 Đơn vị kích thước trong bảng sinh là MiB, tính byte chia $1024^2$. Nhãn MB trong các bản summary Markdown cũ được chuẩn hóa ở đây để mô tả phép biến đổi rõ ràng. Kích thước checkpoint có thể gồm trạng thái không cần suy luận, nên chỉ dùng dung lượng file không đủ để suy ra số phép tính.
+
+Benchmark tại app là nguồn riêng có năm warmup/runtime và đo lời gọi \texttt{classifyImage}, bao gồm tiền xử lý trong datasource native. Hai khối JSON có cùng sample ID đã được nối với split test theo script đóng gói package; metric và percentile được kiểm tra lại từ dự đoán/thời gian. Do thiếu metadata phần cứng, APK và hash asset, bảng này không được dùng để tính speedup trực tiếp so với các phiên predict CPU hoặc xác nhận một APK cụ thể. Kết quả và giới hạn được trình bày ở Mục~\ref{sec:mobile-results}.
 
 \subsection{Cấu hình và đối chứng RQ1}
 Các phương pháp được chọn qua grid trên 20 run calibration; tập 40 run test chưa dùng để chọn tham số. Đối chứng gồm Additive Louvain, Convex Louvain, Product Leiden, Additive khớp mật độ, K-means tọa độ, gom cụm phân cấp không gian và các phương pháp mật độ. ARI tính trên báo cáo có liên kết sự kiện; các diagnostic khác kiểm tra toàn bộ payload và điểm đến.

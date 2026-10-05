@@ -1,5 +1,5 @@
 {
-  "source_commit": "e92a7a5b62c5e6ab4a50d88925f652c578a528d7",
+  "source_commit": "5d9af9bab515ac9698fe53bdd5b247c3294f7bd4",
   "sources_sha256": {
     "products/fe/model/Edge Ai/split_train_val_test_mobilenetv3_large.csv": "f7b52cd25411d4d1df2f7f80745a2cf430819773854345798cf7e093e3bcba45",
     "products/fe/reports/pth_onnx_pte/summary.json": "6f33b2b2a7c77ba248ac38036dfe0c43ffbf0aed766304c41c5435308a8150d4",
@@ -9,6 +9,7 @@
     "products/fe/reports/pth_onnx_pte/all_predictions.csv": "37852acf40d1f24c085af8309307ec43ce7926890a388c89fd8ab0cb13e649ac",
     "products/fe/reports/fp32_ptq_qat/all_predictions.csv": "8b92641abc68e3412b3931ff8891e1cf434c74ffe6ae7fddc034fc32b96df28d",
     "products/fe/reports/pruning_st/all_predictions.csv": "d269ee738840206395febc2cf4208592fe792c4c8ef059db29998b5e863ad68f",
+    "products/fe/reports/mobile/samsung21se.json": "ee2f604570379fff172d49cb82545582d74ef6946f4714c33a9327c8330c6af3",
     "thucnghiem/results/cij_baseline_benchmark_results/benchmark_summary.csv": "de854e0c710b7dea3d0d2b316d927d9159572edb053e84e9cd7620240337bc0e",
     "thucnghiem/results/rq1_results/aggregate/rq1_stress_summary.csv": "a9079c7248b889bab20a4c96948a5a7c47cff99b78331b4f7f368f568420e24a",
     "thucnghiem/results/rq2_results/rq2_summary.csv": "e2b5d6ccdf2e53291476ea8307a73ac9876d05038f88bcc203d655813b67296b",
@@ -136,5 +137,16 @@
       "csv_macro_f1": 0.7446947885671003
     }
   ],
+  "mobile_audit": {
+    "objects": 2,
+    "samples_per_runtime": 256,
+    "sample_ids_and_labels_match_split": true,
+    "metrics_match_predictions": true,
+    "latency_matches_nearest_rank_summary": true,
+    "top1_agreement_count": 256,
+    "metadata_limitations": [
+      "device model, OS, APK/commit, asset hashes and measurement date absent"
+    ]
+  },
   "note": "Saved artifacts only; no training or mobile benchmark rerun. Source commit does not include report edits. PTQ/QAT summary discrepancies are disclosed in the report, not repaired."
 }
