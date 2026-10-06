@@ -1,0 +1,2368 @@
+{
+  "run_id": "20261005-102040",
+  "created_at": "2026-10-05T03:20:40.335522+00:00",
+  "input_csv": "D:\\nckh-flood-rescue\\nckh2\\thuc_nghiem_nq\\split_val_mobilenetv3_large.csv",
+  "dataset_root": "D:\\nckh-flood-rescue\\nckh2\\products\\fe\\model\\Dataset_Flood",
+  "python": "3.11.0 (main, Oct 24 2022, 18:26:48) [MSC v.1933 64 bit (AMD64)]",
+  "os": "Windows-10-10.0.26200-SP0",
+  "expected_measurements": 2313,
+  "configuration": {
+    "csv_sha256": "cdef5620b7e4d6d7ec48c18f06bab9323e76f4360c9847120f4e02684865c497",
+    "runner_sha256": "debe10c9a8dec109bf6992423a4230836361e2b6419bfe23690dc25e98867b91",
+    "backend_sources": {
+      "canonical.py": "d717461f3bf70d4747d1f1724b9d919fbf76882b6ff7d4a18be02fcb99c73076",
+      "main.py": "2181d999345191309ece26910f091a1c6900a2cef2b1f29958f051949e079150",
+      "storage.py": "bcc68cc8caa092da9c7070aac076ae3406ad7af44275ac32095eea9cabbe1411"
+    },
+    "server": "127.0.0.1:8001",
+    "profiles": [
+      {
+        "name": "2G (EDGE)",
+        "kbps": 50,
+        "rtt_ms": 600
+      },
+      {
+        "name": "3G",
+        "kbps": 400,
+        "rtt_ms": 200
+      },
+      {
+        "name": "4G",
+        "kbps": 5000,
+        "rtt_ms": 50
+      }
+    ],
+    "modes": [
+      "metadata",
+      "compressed",
+      "original"
+    ],
+    "repeats": 1,
+    "timeouts_s": {
+      "metadata": 30.0,
+      "compressed": 60.0,
+      "original": 60.0
+    },
+    "compress_quality": 60,
+    "compress_min_side": 1024,
+    "load1_limit": 8,
+    "images": [
+      {
+        "relative_path": "low/images - 2025-01-28T184849.878.jpg",
+        "label": "low",
+        "sha256": "627c22c607ef478c79ea55e107f001691ab8ed53f6c54afdb050abe5682b7023",
+        "format": "JPEG",
+        "original_bytes": 12316,
+        "compressed_bytes": 13461,
+        "compressed_sha256": "c6f4fc8ef1e8dd18b778d763c6c1623a0c1acdb560d34bc37093eb645db39f01"
+      },
+      {
+        "relative_path": "low/images - 2025-01-28T151941.007.jpg",
+        "label": "low",
+        "sha256": "5f0113ce019bca0d49e4a8f877b9b7bfb1a0d1ffcc2c4e07281f217530db5311",
+        "format": "JPEG",
+        "original_bytes": 11206,
+        "compressed_bytes": 12015,
+        "compressed_sha256": "8176bbbf3cc5e41f4b3ed86b8a85897c6a361fb9aa8cd966b5e7cec17fe45226"
+      },
+      {
+        "relative_path": "low/images - 2025-01-28T184423.521.jpg",
+        "label": "low",
+        "sha256": "bd922bb16c58fc71516ec9d7b5c1d93fb321d00de871e7ce760bf988adbba2d1",
+        "format": "JPEG",
+        "original_bytes": 2798,
+        "compressed_bytes": 3381,
+        "compressed_sha256": "d65516640180d5ca7f004700710f43b1016bb898eb3142e2d33582354f16fa39"
+      },
+      {
+        "relative_path": "low/다운로드 (26).jpg",
+        "label": "low",
+        "sha256": "8e49e8cfc10b1dac0f9007397fa30102f7fea32177ece824c7644737972900ce",
+        "format": "JPEG",
+        "original_bytes": 7386,
+        "compressed_bytes": 7595,
+        "compressed_sha256": "f6ab624d8220bd984e46aa1d352387c8ff9c3f2e3e4959ba7a653aa1dca1d839"
+      },
+      {
+        "relative_path": "low/images - 2025-01-28T151753.297.jpg",
+        "label": "low",
+        "sha256": "8a69d9e6278cb6a11e63a0539c222a18d45a3c9f836d5931fff6de5bb82647d8",
+        "format": "JPEG",
+        "original_bytes": 11180,
+        "compressed_bytes": 11822,
+        "compressed_sha256": "07ade1abc68a0e00ed6a0d8124c1775d1c11abe69f0da3830101ef8ffb2a2fdf"
+      },
+      {
+        "relative_path": "low/10360-2-13961.jpg",
+        "label": "low",
+        "sha256": "6471c406a970b2a0c56e05f2d4ed42dc78000ffb9270c7b845f4538095efef97",
+        "format": "JPEG",
+        "original_bytes": 127381,
+        "compressed_bytes": 21221,
+        "compressed_sha256": "74ac8cb146298cfe2375f600f4df35941df2b65c493462cddb93b3a68c228513"
+      },
+      {
+        "relative_path": "low/images - 2025-01-28T164625.541.jpg",
+        "label": "low",
+        "sha256": "910e7541da110f5fd52f2faf3d5df3773f3c6a8325667b69b6bfac1109c36c4a",
+        "format": "JPEG",
+        "original_bytes": 6883,
+        "compressed_bytes": 7684,
+        "compressed_sha256": "0bab0d6334dc7ba6aab5fbf0cbc6856a0c8b4859fbbca8c647f4aa9de12fe49c"
+      },
+      {
+        "relative_path": "low/images - 2025-01-28T163206.341.jpg",
+        "label": "low",
+        "sha256": "ce4daf7e801563c1ff173822486ce9ef7d57a394370159ff4c8d028d9c4c3315",
+        "format": "JPEG",
+        "original_bytes": 7352,
+        "compressed_bytes": 8286,
+        "compressed_sha256": "2977d017b6d83e05a8630120c9f5bb4c1efe697e73f086205bf0c78f29ecc996"
+      },
+      {
+        "relative_path": "low/images - 2025-01-28T152038.912.jpg",
+        "label": "low",
+        "sha256": "5b080e1cef380726476f73b0aa9611e1b960d63b67c5f6590a9516fa4a56e781",
+        "format": "JPEG",
+        "original_bytes": 12202,
+        "compressed_bytes": 13030,
+        "compressed_sha256": "c1727da09a02235014fc61a8e63d6f5b9ba6c15dff5188a436b9d2b70329e4be"
+      },
+      {
+        "relative_path": "low/images - 2025-01-28T153916.966.jpg",
+        "label": "low",
+        "sha256": "f3feffaad630b6c5c07331468d12eb786d3fa1eff1094150cd2add6d7e2a5622",
+        "format": "JPEG",
+        "original_bytes": 10807,
+        "compressed_bytes": 11409,
+        "compressed_sha256": "88f19d4fd30205094e14cec9951500353b4ebbf24fc4ebec3d2e2dd0b3abe7bf"
+      },
+      {
+        "relative_path": "low/images - 2025-01-28T162916.619.jpg",
+        "label": "low",
+        "sha256": "37191e0f372cf8e2f989db33a05227a3bb392a945a33101a9ee99c43e1b61a11",
+        "format": "JPEG",
+        "original_bytes": 7945,
+        "compressed_bytes": 8077,
+        "compressed_sha256": "013e12d2c2925021d30220adb91edd3f51095dfb4a40052158680c6a3b74068a"
+      },
+      {
+        "relative_path": "low/images - 2025-01-28T162724.362.jpg",
+        "label": "low",
+        "sha256": "522ae358a781adfa05ea28cf94069fd8529c8f93241716587e2d26645ccbabd8",
+        "format": "JPEG",
+        "original_bytes": 9844,
+        "compressed_bytes": 10432,
+        "compressed_sha256": "f2776c8cf4cf847656add295523be9ec47862a562ff356666ad586226e97f046"
+      },
+      {
+        "relative_path": "low/images - 2025-01-28T155350.781.jpg",
+        "label": "low",
+        "sha256": "45ea68dd2c16bca052d27d42b62ff743ecd20bb27e0e18696162cb2370691cc3",
+        "format": "JPEG",
+        "original_bytes": 10373,
+        "compressed_bytes": 10940,
+        "compressed_sha256": "1b724f8780faead52d7b5366f2c18f2d471d8dc9b9902beb524ea27535922c5e"
+      },
+      {
+        "relative_path": "low/images (59).jpg",
+        "label": "low",
+        "sha256": "8e6dbf6872b45499a89e3dace6e33843fa985c6cc64b71396185da03cc52acfa",
+        "format": "JPEG",
+        "original_bytes": 8778,
+        "compressed_bytes": 9593,
+        "compressed_sha256": "31ec2d7f05a0b7a8406baa010b5577e7932cb4f283b242296cf4b882b00e4f8e"
+      },
+      {
+        "relative_path": "low/image_9946309791508995980052.jpg",
+        "label": "low",
+        "sha256": "004188df1dea3d799e7a2c72e3e18b48406182dc1040d6f33ac325e69a2346e3",
+        "format": "JPEG",
+        "original_bytes": 116902,
+        "compressed_bytes": 67334,
+        "compressed_sha256": "b257fcdd8a88823ab437ec83e00caba34f69aff13e9b8b2dd40ac6085ec01815"
+      },
+      {
+        "relative_path": "low/images - 2025-01-28T151819.441.jpg",
+        "label": "low",
+        "sha256": "0e7fa7e909dad9499bc66f079b7321ed3149daa2becccd015371f693bc4e8271",
+        "format": "JPEG",
+        "original_bytes": 10796,
+        "compressed_bytes": 11427,
+        "compressed_sha256": "9047894966d45fd0e541204a1c9ab18ac4024411eed7fc199f51e726715bf011"
+      },
+      {
+        "relative_path": "low/611212110012634149_1.jpg",
+        "label": "low",
+        "sha256": "45e44d7c5ab7f92be0542ab4eba296e772ab9194ae7d75c0dccffbbd067d8b09",
+        "format": "JPEG",
+        "original_bytes": 82227,
+        "compressed_bytes": 47535,
+        "compressed_sha256": "6fda21b18be4df46891a945cae98ff4054a8057a93f8a2f18f946e5a5829d763"
+      },
+      {
+        "relative_path": "low/images - 2025-01-28T154010.314.jpg",
+        "label": "low",
+        "sha256": "36d3870b9c93c429d8f3323a300793e1684348f5f926c9e91be6ec6ba42090c7",
+        "format": "JPEG",
+        "original_bytes": 8212,
+        "compressed_bytes": 8833,
+        "compressed_sha256": "1e17164b9898fe1ec61662b7bdc1769d3b23a44d58dcc4e39f26b96a138f2100"
+      },
+      {
+        "relative_path": "low/images - 2025-01-28T164648.101.jpg",
+        "label": "low",
+        "sha256": "c2efc1e04993962fc74094c7478fb291237307abc74a11df00334fdfbd188dbd",
+        "format": "JPEG",
+        "original_bytes": 6418,
+        "compressed_bytes": 7167,
+        "compressed_sha256": "cdd902f0e9fa7dc8c03664e7697e64962da6d1e8dd28250bcb9148fc8f8a7838"
+      },
+      {
+        "relative_path": "low/images (54).jpg",
+        "label": "low",
+        "sha256": "603f1f9a482a3006952b159cda920bd8ed049209b34a50884f6b119685e131f8",
+        "format": "JPEG",
+        "original_bytes": 4660,
+        "compressed_bytes": 5041,
+        "compressed_sha256": "6eb16fb22fa1f8a1a5f17a351de5fbfa1d4b34301d41a05bf1dc0ac3173069d3"
+      },
+      {
+        "relative_path": "low/AKR20240912005700084_14_i_P2.jpg",
+        "label": "low",
+        "sha256": "c4482010e40a042da2e83fd3c95bbf9c0712183a7770292863fa9417301f4861",
+        "format": "JPEG",
+        "original_bytes": 139130,
+        "compressed_bytes": 30638,
+        "compressed_sha256": "a36479bf4fef0ea0bd8131a80174f33c1a029dc5a70f94b6c2b8b6d400dc42b8"
+      },
+      {
+        "relative_path": "low/images (87).jpg",
+        "label": "low",
+        "sha256": "17e7c86fb13f0323a5c1d3be805646c59eec59d5beaea2658d297c0d3373e74b",
+        "format": "JPEG",
+        "original_bytes": 6295,
+        "compressed_bytes": 7095,
+        "compressed_sha256": "41f1619438820c2792f27887be2a2b8f1ac2f56bb0ed5c1396c4214d7c631b4d"
+      },
+      {
+        "relative_path": "low/0f569675-81fe-4a2b-a287-d2bd795d43ba.jpg",
+        "label": "low",
+        "sha256": "c81707abf5a85406bc2d94929967233a92a9306ae95f498d747d5f7752f7b902",
+        "format": "JPEG",
+        "original_bytes": 44317,
+        "compressed_bytes": 39162,
+        "compressed_sha256": "5aa9f393693c516640a4cd52767b4f81d9f9d7a81a93f814ed4144b3dabbb007"
+      },
+      {
+        "relative_path": "low/다운로드 (9).jpg",
+        "label": "low",
+        "sha256": "5df85c890ea4a636469d83b37c1af9cbc748052677e24a7db858ee48e001958c",
+        "format": "JPEG",
+        "original_bytes": 10859,
+        "compressed_bytes": 11630,
+        "compressed_sha256": "ed99b4e9272d88162c162d003528b2c64188d1156154d015b68cfc4f8a691fa7"
+      },
+      {
+        "relative_path": "low/images - 2025-01-28T185206.840.jpg",
+        "label": "low",
+        "sha256": "6228c1195a7fcd5d74faaea2760e62b51c03ca564ccb0283b455af8570496bee",
+        "format": "JPEG",
+        "original_bytes": 7722,
+        "compressed_bytes": 8281,
+        "compressed_sha256": "a28ae5179152d39ac9e14583a552013661271ce8a2dd23276735ce62fa76b2bd"
+      },
+      {
+        "relative_path": "low/화면 캡처 2025-03-05 165818.jpg",
+        "label": "low",
+        "sha256": "a16ebe8d0133bc9197eccfeb7d04f98d3305ef0b54f63e1ed8e9d3b8e0ad2617",
+        "format": "JPEG",
+        "original_bytes": 46304,
+        "compressed_bytes": 24253,
+        "compressed_sha256": "ffcdebbe0db5cd10ddb979c53e4ba05068365cf6cf91a98f90b3e9c5f7b4c771"
+      },
+      {
+        "relative_path": "low/images - 2025-01-28T154337.022.jpg",
+        "label": "low",
+        "sha256": "3621b715c4382601bd8cc43d18a16fcd9365f45d719b87e48af40fb2f8b0eca7",
+        "format": "JPEG",
+        "original_bytes": 9541,
+        "compressed_bytes": 9577,
+        "compressed_sha256": "352b6ab159b89204dd5376e709659487212fbd3ad1b89801c9c3aea30576cead"
+      },
+      {
+        "relative_path": "low/images - 2025-01-28T164652.242.jpg",
+        "label": "low",
+        "sha256": "61bbb7fe51bc1382fc36cf77c2b73775a0a246084d6feb061712fd1be4fff869",
+        "format": "JPEG",
+        "original_bytes": 10095,
+        "compressed_bytes": 11067,
+        "compressed_sha256": "29b393a78c9f2839ccc9ff672621d30a87e734533f84b33285587dee80034f57"
+      },
+      {
+        "relative_path": "low/images - 2025-01-28T162955.160.jpg",
+        "label": "low",
+        "sha256": "1b302964ed960ca3a241f951926093e59174f5d18c0b37a222855ac08e6956d7",
+        "format": "JPEG",
+        "original_bytes": 9905,
+        "compressed_bytes": 10053,
+        "compressed_sha256": "f7b293a545d80bb8fbdbd2b8b5a4a398a782c8a99848762691374e8025425c40"
+      },
+      {
+        "relative_path": "low/images - 2025-01-28T154225.875.jpg",
+        "label": "low",
+        "sha256": "2b6e1e23e9f6ff7c8f932f4404730b4ecdd6fd9b25b17db4b3169295d653cdf1",
+        "format": "JPEG",
+        "original_bytes": 5133,
+        "compressed_bytes": 5517,
+        "compressed_sha256": "969644605c1cb60144facc12bb7d49f42bb6c776f569d505d6a107becae31598"
+      },
+      {
+        "relative_path": "low/images (15) 2.jpg",
+        "label": "low",
+        "sha256": "42a5648cd763317c8064e73ce7a8af65cf545a2783580afb80f5e540f69bc858",
+        "format": "JPEG",
+        "original_bytes": 11774,
+        "compressed_bytes": 12622,
+        "compressed_sha256": "917f70154d831e2ecf806c6dc2ce47c96d6898e3346e9884a291847385d57fe6"
+      },
+      {
+        "relative_path": "low/00-276.jpg",
+        "label": "low",
+        "sha256": "4a5b33b50f2ee942035dee793f948a2e4e7f67aa117904e8dcb845205c91e1ff",
+        "format": "JPEG",
+        "original_bytes": 60274,
+        "compressed_bytes": 43877,
+        "compressed_sha256": "d391c6789aec3d36d4b3dc156b11bf9126fb313cd6ca4df7b1fd1fe12934e549"
+      },
+      {
+        "relative_path": "low/다운로드 (1).jpg",
+        "label": "low",
+        "sha256": "8d60b77a9b72f390a27542b8465cb0466f5822cc53583d17bba89c6b36cc7d9c",
+        "format": "JPEG",
+        "original_bytes": 12728,
+        "compressed_bytes": 13115,
+        "compressed_sha256": "a022e3d6a4fcf83d331232f99c6376ddd44200d86fd60d95568d2d713d87202f"
+      },
+      {
+        "relative_path": "low/다운로드 (55).jpg",
+        "label": "low",
+        "sha256": "727e6934838d73713fd5680aa6825c4c45ec12e3a8927f05d322de39adacd73d",
+        "format": "JPEG",
+        "original_bytes": 12566,
+        "compressed_bytes": 13620,
+        "compressed_sha256": "4237bf1366a882bc28c802cf1db1671fc9528afaa2aef00fc80026da88f141e9"
+      },
+      {
+        "relative_path": "low/images - 2025-01-28T164829.543.jpg",
+        "label": "low",
+        "sha256": "7179a8b265946063e758d20acaa77ee8e110b6d3e141ca7d703db63e145256a1",
+        "format": "JPEG",
+        "original_bytes": 7436,
+        "compressed_bytes": 8030,
+        "compressed_sha256": "f693fee74f22ed6100d0645c4b5223fc7e28fb2c8b4d1cabc33151eb51c48349"
+      },
+      {
+        "relative_path": "low/images - 2025-01-28T155549.589.jpg",
+        "label": "low",
+        "sha256": "6244cdd6c0edfe22c5952588894aa08869241d031569c86fdce429f18753f322",
+        "format": "JPEG",
+        "original_bytes": 7592,
+        "compressed_bytes": 8297,
+        "compressed_sha256": "c6bd0bb2844dad3e5fede8b5f7f6706d1fd88c32cd0a969908be77e430c8abb7"
+      },
+      {
+        "relative_path": "low/다운로드 (46).jpg",
+        "label": "low",
+        "sha256": "7f2b0f743bc087d93641e7ed726bdba3d3384d89d3c579272c3c2adb58bd7f38",
+        "format": "JPEG",
+        "original_bytes": 5488,
+        "compressed_bytes": 6104,
+        "compressed_sha256": "713b068b66fd07ad042aa8650ada68ca6c974bf49d7d3ab4e91845c8f574237a"
+      },
+      {
+        "relative_path": "low/images - 2025-01-28T164746.970.jpg",
+        "label": "low",
+        "sha256": "257241bb1a41503ca4e3473135a35ccfe89377ad19bc03d86acfcdf04c1fd04e",
+        "format": "JPEG",
+        "original_bytes": 7684,
+        "compressed_bytes": 8184,
+        "compressed_sha256": "5ce87021ce329c0657a2c34a99a3347a708869ed433726e506350f2354720bf5"
+      },
+      {
+        "relative_path": "low/images - 2025-01-28T185020.777.jpg",
+        "label": "low",
+        "sha256": "ffb1ec4da5b736da8737cd08b7fd7151a850e239fe1d35f9beb3b1a16c7bd202",
+        "format": "JPEG",
+        "original_bytes": 2481,
+        "compressed_bytes": 2957,
+        "compressed_sha256": "576fb632a76c401e3add98366ad067dd99c0ebc69e3e68074b60f20bcd0cb72d"
+      },
+      {
+        "relative_path": "low/다운로드 (22).jpg",
+        "label": "low",
+        "sha256": "e1dfc556a80e773bf1f1e3b61cb7ae583d59f2076ae7a8c535500670c82de27b",
+        "format": "JPEG",
+        "original_bytes": 9070,
+        "compressed_bytes": 9866,
+        "compressed_sha256": "802f940a2c9c6652c8ddf5fc1a865d5e714ad7f808708017286612dc8faa4404"
+      },
+      {
+        "relative_path": "low/images (37).jpg",
+        "label": "low",
+        "sha256": "9b946ad1758501c74a140ee2e4f9789598a5d5295c956bf0e8e280805f794205",
+        "format": "JPEG",
+        "original_bytes": 11893,
+        "compressed_bytes": 12606,
+        "compressed_sha256": "0d298f850b6dec307af08f89683c5c39c2ac61b94792a76031d979e287720b03"
+      },
+      {
+        "relative_path": "low/noise (2).jpg",
+        "label": "low",
+        "sha256": "c6ff296ef4fd9aa096d5af20edf68e6c94a34fff61edfc6316b25142bd37cc4b",
+        "format": "JPEG",
+        "original_bytes": 38393,
+        "compressed_bytes": 34531,
+        "compressed_sha256": "6b812cf1234cc7ad002991576b7422088e6811aa2f5ca98c44f2ce7a403ec148"
+      },
+      {
+        "relative_path": "low/images - 2025-01-28T163118.084.jpg",
+        "label": "low",
+        "sha256": "a299fe9fa37c2e607bd62439d742f9f3bc7d9901c9e99c97394343d0713f4081",
+        "format": "JPEG",
+        "original_bytes": 10369,
+        "compressed_bytes": 10906,
+        "compressed_sha256": "691285821519ff3f2b0043d00958ca21c77001606225c25cae82659a8741be7c"
+      },
+      {
+        "relative_path": "low/화면 캡처 2025-03-05 163951.jpg",
+        "label": "low",
+        "sha256": "75f31a48a4346e254922a4eeab72b30456bc9d47b5e88b0b215e2f75b0f79541",
+        "format": "JPEG",
+        "original_bytes": 61979,
+        "compressed_bytes": 32175,
+        "compressed_sha256": "37314625ac83f30e620a65e5637a1c2e69b4e0daff16975c61da038d5a7a74ed"
+      },
+      {
+        "relative_path": "low/a-1697518992.jpg",
+        "label": "low",
+        "sha256": "3289d204c8e03d8944248936bc454d5aea5b59bc41a1b96269125c2ab581cd07",
+        "format": "JPEG",
+        "original_bytes": 96754,
+        "compressed_bytes": 25812,
+        "compressed_sha256": "057e3ddb56f59888138369620f6e589c8c1d99a3ec0310c66819b61fa50c8169"
+      },
+      {
+        "relative_path": "low/images - 2025-01-28T184855.222.jpg",
+        "label": "low",
+        "sha256": "a3ad1d1dd7b1392d7045d0b3c5817c60fd0cb09e35d794ec3d97e405f1535c72",
+        "format": "JPEG",
+        "original_bytes": 11179,
+        "compressed_bytes": 12322,
+        "compressed_sha256": "21533e3a4427621e48ca178ed585ee6e55f157ada99584ab154ea063dc58b0c5"
+      },
+      {
+        "relative_path": "low/Mua-lon-nhieu-tuyen-duong-bi-chia-cat-do-ngap.jpg",
+        "label": "low",
+        "sha256": "4a636722eac7947289e2ee351659d3279aa8bdec7de3d526aa7301e0e8ea83da",
+        "format": "JPEG",
+        "original_bytes": 315609,
+        "compressed_bytes": 146478,
+        "compressed_sha256": "6021c3728153c3b60330a9b9cbb0cca44d5e3dea6f122c649a96194d45367565"
+      },
+      {
+        "relative_path": "low/images (91).jpg",
+        "label": "low",
+        "sha256": "67694493a5915b456599ffc85f79ad2dd89141dceff2f273b1a6fc4eec5545f2",
+        "format": "JPEG",
+        "original_bytes": 12600,
+        "compressed_bytes": 13731,
+        "compressed_sha256": "eda215d1cccbaf7062eb6ded1ae771317ada88f87573303f9fcec69e045b83de"
+      },
+      {
+        "relative_path": "low/화면 캡처 2025-03-05 164019.jpg",
+        "label": "low",
+        "sha256": "1126614ab6ce433834ff4010ee4bd775c2cd1aa3003778eb505e2a4aa9f65347",
+        "format": "JPEG",
+        "original_bytes": 48583,
+        "compressed_bytes": 24434,
+        "compressed_sha256": "ba2a77c9c8495d3eb6ab15b1693ef6aca798edffd8878363adf4c6531f044dd6"
+      },
+      {
+        "relative_path": "low/화면 캡처 2025-03-05 163845.jpg",
+        "label": "low",
+        "sha256": "f37481db61b1f1ec7156ad68fdf0937297f0e9c760cf48f5ab6dab76844e6cd4",
+        "format": "JPEG",
+        "original_bytes": 50032,
+        "compressed_bytes": 25457,
+        "compressed_sha256": "0f5a22b8a5d1b54092a886a421e1ae6de0118e2ec1aa61d98c35aeaf4fdbd20d"
+      },
+      {
+        "relative_path": "low/images (80).jpg",
+        "label": "low",
+        "sha256": "6ab02506062e3a532cc7277be599710a40e1b3d03540eb3cfa12b992e90040df",
+        "format": "JPEG",
+        "original_bytes": 9732,
+        "compressed_bytes": 10589,
+        "compressed_sha256": "84766e911ea418b13359923468db6c6171153f68f2139e91edbeed94e51f3336"
+      },
+      {
+        "relative_path": "low/images - 2025-01-28T153836.835.jpg",
+        "label": "low",
+        "sha256": "2b4d23d3ece2cfa10cee3f0ccbac81b7500e2854e2cd3374c2931007e9eb8fed",
+        "format": "JPEG",
+        "original_bytes": 9612,
+        "compressed_bytes": 10038,
+        "compressed_sha256": "edb533ca5e3049ad6f36d33c582e76dfb3a71a1c3ab3c9658b7d6118305dfbd2"
+      },
+      {
+        "relative_path": "low/화면 캡처 2025-03-05 164330.jpg",
+        "label": "low",
+        "sha256": "ac7842800d9d2b89c7f6b5923074a26327ea286bfe40fe81ccf63c23976a85ec",
+        "format": "JPEG",
+        "original_bytes": 38102,
+        "compressed_bytes": 19314,
+        "compressed_sha256": "03e36302868e7554c6f4470fd8fe11e4fe75996b2c21174dd8644f674c50e3ab"
+      },
+      {
+        "relative_path": "low/images (12) 2.png",
+        "label": "low",
+        "sha256": "19586a122eb5e6c4de00bbc09b02339b387d0249a05e3690dc9383bf50991314",
+        "format": "PNG",
+        "original_bytes": 1751176,
+        "compressed_bytes": 136154,
+        "compressed_sha256": "3a3d23bf9410f7f2e3dd37125ef5ae4e6253d4caab0c9f3a805271b11d701440"
+      },
+      {
+        "relative_path": "low/화면 캡처 2025-03-05 161116.jpg",
+        "label": "low",
+        "sha256": "2f3fe63f36ec75ca5fe0896caac06cf0dfb0e2dee8ed43f0a30fb0a50932a445",
+        "format": "JPEG",
+        "original_bytes": 41419,
+        "compressed_bytes": 21336,
+        "compressed_sha256": "ee2a0f7682ab2d8ddfea4b0e79eb3404c2f91c5b18cbc8d31901f1edb0a04b5b"
+      },
+      {
+        "relative_path": "low/img1.jpeg",
+        "label": "low",
+        "sha256": "df6f1fbc5204bce20da729fd09ed7bab81e77e6be21e927ae06db39c90a2cf79",
+        "format": "JPEG",
+        "original_bytes": 20121,
+        "compressed_bytes": 10652,
+        "compressed_sha256": "e654b38666fd457b1af52b8bb2217ede6092a894f9b03f1b9238f1a53835dbd6"
+      },
+      {
+        "relative_path": "low/images - 2025-01-28T163022.980.jpg",
+        "label": "low",
+        "sha256": "2f635c3682eac9888a201958073889594b75b8dcc7dcbfe564d176fc91dc460c",
+        "format": "JPEG",
+        "original_bytes": 4448,
+        "compressed_bytes": 4780,
+        "compressed_sha256": "94b9a1f17c4b76a3560b228dd7d64e634583dfce0cd951d340af6ffae1e9cd28"
+      },
+      {
+        "relative_path": "medium/images (15).jpg",
+        "label": "medium",
+        "sha256": "68d7ac5485564e08315c8e181b868d10acff2c3c5c6dc30c679eb3b5b69cfbef",
+        "format": "JPEG",
+        "original_bytes": 8013,
+        "compressed_bytes": 8516,
+        "compressed_sha256": "6acfa58494441086c3be45ca7e466683fe2d8ecda5ff5d79f151a64d0ecced7a"
+      },
+      {
+        "relative_path": "medium/images (78).jpg",
+        "label": "medium",
+        "sha256": "b4b3ef29acbc224733e0fca30af83d9c673fcf01e12617e34849d86822b9a976",
+        "format": "JPEG",
+        "original_bytes": 10322,
+        "compressed_bytes": 10995,
+        "compressed_sha256": "7c45762abc3d2c85b509e431eb6970a42ff240e478ce15a397a3b45f922b9fb6"
+      },
+      {
+        "relative_path": "medium/chay-lu-7-21441025-1730073553208-1730073553540228535485.webp",
+        "label": "medium",
+        "sha256": "cfd7d11cdfec3d412e4106d470269c2d681c2e892295978e173cbaad46f5f9d9",
+        "format": "JPEG",
+        "original_bytes": 1407541,
+        "compressed_bytes": 169896,
+        "compressed_sha256": "2787c87affdb4d23b7b222a9279afc13ea89573cb5a99a10d6907dd75a2f0e5d"
+      },
+      {
+        "relative_path": "medium/images (22).jpg",
+        "label": "medium",
+        "sha256": "964bf4e7039c2ec2acabd3c177af4e6ef36611981fee5ba61d36aaedfe62c2e2",
+        "format": "JPEG",
+        "original_bytes": 5885,
+        "compressed_bytes": 5668,
+        "compressed_sha256": "0498ee132251e9a03595ab61d93d317e550756d5cea81d624fd85fdaffb20038"
+      },
+      {
+        "relative_path": "medium/images (45).jpg",
+        "label": "medium",
+        "sha256": "612f49698ba90aa45ecdc5f73e555115e850cfd56c76277e9fd29c228af6e5e6",
+        "format": "JPEG",
+        "original_bytes": 8893,
+        "compressed_bytes": 9489,
+        "compressed_sha256": "f84ce4e5dad5c76373e81eb5d03d737a69f277b1c2731df6fa02d16b87d8c403"
+      },
+      {
+        "relative_path": "medium/flood_6166.jpg",
+        "label": "medium",
+        "sha256": "4159ac8c969671d4a3255912207f9df9bc98049492c0cc0a95362b24eeeb8878",
+        "format": "JPEG",
+        "original_bytes": 43961,
+        "compressed_bytes": 39136,
+        "compressed_sha256": "90f96c4d70ec7e8fd610dae05760d3972400b846cbafc9de8231da41cb7d2cdc"
+      },
+      {
+        "relative_path": "medium/0112mualu_21112025075850_160.jpg",
+        "label": "medium",
+        "sha256": "8e6d53d2adb0fcb04f8e21dc8aab39bbad0c3edc23f7229aa2944aa9748cc253",
+        "format": "JPEG",
+        "original_bytes": 182185,
+        "compressed_bytes": 83525,
+        "compressed_sha256": "c277abad2870656dafa3ccd6cbcf8fe3ae5031cc30484aea1fe0a6cc6f73fee7"
+      },
+      {
+        "relative_path": "medium/images - 2025-01-28T151322.303.jpg",
+        "label": "medium",
+        "sha256": "3f1084ef380ebd82dc42f44fdb037103ec757f85062ae269d4c2b5eb5808e296",
+        "format": "JPEG",
+        "original_bytes": 10455,
+        "compressed_bytes": 11082,
+        "compressed_sha256": "2465e8687fa8e9ccb6a24f339f04029c955824a481f56d308202ee28c2cb7e7a"
+      },
+      {
+        "relative_path": "medium/image.png",
+        "label": "medium",
+        "sha256": "66927b3f9717a549fecf7b7d88f8bed53466a78257911fa97ac4cda3d369968a",
+        "format": "PNG",
+        "original_bytes": 325258,
+        "compressed_bytes": 29460,
+        "compressed_sha256": "cec6f743ba35cc2d95e31c98c6ffc518b839c9ad5b9a7a5accc555ef27febeeb"
+      },
+      {
+        "relative_path": "medium/807798211_1065370852913193_4397432111052496019_n.jpg",
+        "label": "medium",
+        "sha256": "c24f1ae0af40897ab0cb7a1698d101b1e9bb770c27d0f34ab8c6a102df72e9e6",
+        "format": "JPEG",
+        "original_bytes": 435298,
+        "compressed_bytes": 226566,
+        "compressed_sha256": "4bd40fb93ab694d70c9de95994d02fa3ab104d234ef4bc15af2df613c2c3a2ff"
+      },
+      {
+        "relative_path": "medium/flood_6259.jpg",
+        "label": "medium",
+        "sha256": "4de8fa884f2d57dd80d3dfe3178fc9dbe4733bdc5d19a8460ff6bec341aafac4",
+        "format": "JPEG",
+        "original_bytes": 23470,
+        "compressed_bytes": 21111,
+        "compressed_sha256": "79fcbbff47e43baacb74463bf21c3f58c3a6a056c0ada377d16914b31a1e0054"
+      },
+      {
+        "relative_path": "medium/flood_6286.jpg",
+        "label": "medium",
+        "sha256": "eaeee6cb6978717c20f2879f549380c6c27c3bdc8baadc397bd2060fedbf7c44",
+        "format": "JPEG",
+        "original_bytes": 38779,
+        "compressed_bytes": 34443,
+        "compressed_sha256": "79b151baa08f2dd862fef2c0307aa0c64d71f16f3951fa6b298b36793215a969"
+      },
+      {
+        "relative_path": "medium/lam-dong-1764843506279818449019.jpg",
+        "label": "medium",
+        "sha256": "bcacb2153b8df70663102f9fba3181b6b2177a21c79f9bf3123386fd3987e1ac",
+        "format": "JPEG",
+        "original_bytes": 254562,
+        "compressed_bytes": 97469,
+        "compressed_sha256": "9f5410776e7f273805cc999e1096056d8d722b1f1f589fe65fb0cf4b9d279190"
+      },
+      {
+        "relative_path": "medium/images (46).jpg",
+        "label": "medium",
+        "sha256": "38a8de4ce3022b4cdc0338ba5d0a3a4dc567e1af297a376ca1dca48e063ef256",
+        "format": "JPEG",
+        "original_bytes": 7180,
+        "compressed_bytes": 7492,
+        "compressed_sha256": "ad97b72ccb213d042f00535419f8e7ad5284bb0483f2373b2e42e63e4e5257aa"
+      },
+      {
+        "relative_path": "medium/다운로드 (12).jpg",
+        "label": "medium",
+        "sha256": "bcf35d05b7688362f8f6710240a89e8ee8509a08cb181949b7074babcd5d0365",
+        "format": "JPEG",
+        "original_bytes": 12161,
+        "compressed_bytes": 12834,
+        "compressed_sha256": "d10209837d47a2ef18ebc0a30e0d8a5aa5f735ac2d4aca2a246b1ce12eebbad6"
+      },
+      {
+        "relative_path": "medium/noise (5).jpg",
+        "label": "medium",
+        "sha256": "eb819a1dbb0043f513069582edbf918ce471cbaa687c26336af6a2ef8d301e1f",
+        "format": "JPEG",
+        "original_bytes": 32693,
+        "compressed_bytes": 29458,
+        "compressed_sha256": "e543404a4487f15d967396e6da50ccc7c835dba53c2a70a6a341ef849a19cf7e"
+      },
+      {
+        "relative_path": "medium/flood_1247.jpg",
+        "label": "medium",
+        "sha256": "be2b6774ad0ec21cbc1951fb0ceb3f62b35281ede3bb7c5b18c00488e7f3ff5f",
+        "format": "JPEG",
+        "original_bytes": 130752,
+        "compressed_bytes": 45565,
+        "compressed_sha256": "382c5998aa4d32b7fb360273bfd2581ae8567ca3a1351c7b0e9322c29b9f4c86"
+      },
+      {
+        "relative_path": "medium/quangbinh-6177.jpeg",
+        "label": "medium",
+        "sha256": "eed28d4cd27554ac50c77d00e653f3c51123d57f1311e4772fe98da723416719",
+        "format": "JPEG",
+        "original_bytes": 46517,
+        "compressed_bytes": 41486,
+        "compressed_sha256": "20ad17d9fcb048455af3175cacc50a1faaa72b250c92c86c7ba0cd44f0e2e54a"
+      },
+      {
+        "relative_path": "medium/20231124_uS9nUj.jpg",
+        "label": "medium",
+        "sha256": "605154cc415e0e03701135d8283a92ae646b8b1efe374d9647f9c201ff7904d8",
+        "format": "JPEG",
+        "original_bytes": 60817,
+        "compressed_bytes": 50110,
+        "compressed_sha256": "15dae7baee74fddf37eaf5f969205819288fa42038b656398e8b870078112d0c"
+      },
+      {
+        "relative_path": "medium/images (3).jpg",
+        "label": "medium",
+        "sha256": "4e5d64ecdd47da38de6324ac82b12c23fc99fa40da3590684b67029bc4eb9f2f",
+        "format": "JPEG",
+        "original_bytes": 14759,
+        "compressed_bytes": 15855,
+        "compressed_sha256": "ffca41b3b5bd4d8f9f16df39254dfe78cba129b227064acba0dfab1ab64594b3"
+      },
+      {
+        "relative_path": "medium/images (92).jpg",
+        "label": "medium",
+        "sha256": "0a5033d763a93d7c4dc9cb5dbe45a3a857b134882649b6e0442be4087e1c8aad",
+        "format": "JPEG",
+        "original_bytes": 10406,
+        "compressed_bytes": 11252,
+        "compressed_sha256": "2069ec280e989744ccfc4ce1079fe0f96f8b2771870968acee9ffcd531496dfe"
+      },
+      {
+        "relative_path": "medium/images - 2025-01-28T155148.034.jpg",
+        "label": "medium",
+        "sha256": "595d2030d6eb563f32639a2f3a95a81024e5d889bd186a03fb2282b99011752c",
+        "format": "JPEG",
+        "original_bytes": 11474,
+        "compressed_bytes": 12444,
+        "compressed_sha256": "70520fe0649bffeb0fb3113ecb83458a495a09b89577ec5534f25e4d12d761de"
+      },
+      {
+        "relative_path": "medium/image_186.jpg",
+        "label": "medium",
+        "sha256": "41aed1f809a8893cd69369b1ab9d4b22495fca4367babe1d7e85416354d90136",
+        "format": "JPEG",
+        "original_bytes": 103650,
+        "compressed_bytes": 61803,
+        "compressed_sha256": "04076b634d43546b5a4ffbd6e67cd4bf59e13445b3acd88ddf32d241f6804ae1"
+      },
+      {
+        "relative_path": "medium/AA.30869797.1.jpg",
+        "label": "medium",
+        "sha256": "4a1c37b2f5930b315a2a051c78ba8b37577df112f273cfe90e854486413c8474",
+        "format": "JPEG",
+        "original_bytes": 42819,
+        "compressed_bytes": 28087,
+        "compressed_sha256": "10f8c37c61e4af85eae3d916223e0fed011cdbd219481193b512bfe453319316"
+      },
+      {
+        "relative_path": "medium/1000014818-17616251502381327466398-136-106-1007-1500-crop-17616257967731607029814.webp",
+        "label": "medium",
+        "sha256": "cd507abecb098f7dbbb04c9b5b710fd430eeeada6471e06d961d72f260bbcd96",
+        "format": "WEBP",
+        "original_bytes": 262748,
+        "compressed_bytes": 116597,
+        "compressed_sha256": "d3dc4e2bba2cd942626cf2aaa12389dbb5357175e22d2dcf3bdc077eee3edfae"
+      },
+      {
+        "relative_path": "medium/img76.jpg",
+        "label": "medium",
+        "sha256": "b06765974f3a5fc63db4f5affcf65eda68973fa2fe7efbd7007d3fa0548ef3c2",
+        "format": "JPEG",
+        "original_bytes": 58775,
+        "compressed_bytes": 52043,
+        "compressed_sha256": "028025bd3046cfe00f2f984a55e455e2120adfed055a202dc5b29b5a581be49c"
+      },
+      {
+        "relative_path": "medium/flood_6330.jpg",
+        "label": "medium",
+        "sha256": "390684aba7b3f3bba4d62cfbfeb5a2dfe99b486784957eb686faea673a9e203c",
+        "format": "JPEG",
+        "original_bytes": 42957,
+        "compressed_bytes": 38475,
+        "compressed_sha256": "6ecc95c415546f7cde556ea99a8b06860044629452137e3020c362ce18b8fd54"
+      },
+      {
+        "relative_path": "medium/939cf7ba3afa4a60bbb76760f3fd5aba.jpg",
+        "label": "medium",
+        "sha256": "ef98ff56a143b33046879132ceaed70eea555d53ad31f60e20bff9107700f3ab",
+        "format": "JPEG",
+        "original_bytes": 40103,
+        "compressed_bytes": 30792,
+        "compressed_sha256": "6d4ca436df44a34742ab5a2a17774fe57bcfad76448ac8a558f0c5d38cf7c33c"
+      },
+      {
+        "relative_path": "medium/flood_4813.jpg",
+        "label": "medium",
+        "sha256": "bdc67b21f57e090669243d986f772b0450ccc43065c54e162361e6f83f5ed758",
+        "format": "JPEG",
+        "original_bytes": 53682,
+        "compressed_bytes": 23069,
+        "compressed_sha256": "78b355d62cded5caa0441d78c578552cb60a9191b30e76f9a47618174f23c151"
+      },
+      {
+        "relative_path": "medium/images - 2025-01-28T184959.137.jpg",
+        "label": "medium",
+        "sha256": "1ddd3ac5a0681f32307ea622308e561dc84e90c75a16629ac5c1b1b6ec91b3c0",
+        "format": "JPEG",
+        "original_bytes": 6694,
+        "compressed_bytes": 7573,
+        "compressed_sha256": "f9f82a75041ecc1c7cc04f689959f32ddf0fd50b36acec515bd9c89df14ea0ce"
+      },
+      {
+        "relative_path": "medium/quang-tri-quang-ngai-sap-mua-to-dai-ngay-dac-biet-hue-co-the-tren-500mm-1760611196899.webp",
+        "label": "medium",
+        "sha256": "3d3f2f1ffc39aba5eec801859433c261eea9b3bde161c4a0528ddef08557cf39",
+        "format": "WEBP",
+        "original_bytes": 16450,
+        "compressed_bytes": 6497,
+        "compressed_sha256": "d42df2601469bc2e1379102c3b37b2b36a02ae6b433c25bd8e230014fd6a92ab"
+      },
+      {
+        "relative_path": "medium/flood_6326.jpg",
+        "label": "medium",
+        "sha256": "de44e55a13026a349ca25e762328448ac121bae58b24f5913a41b78d04d81704",
+        "format": "JPEG",
+        "original_bytes": 46991,
+        "compressed_bytes": 21506,
+        "compressed_sha256": "5b058a740c55d54f72628d40baf4924b3ef65f605807958a70e31e4bd9a93196"
+      },
+      {
+        "relative_path": "medium/img9.jpg",
+        "label": "medium",
+        "sha256": "db9567b5b08ea11ec818bbd8a6f2571f8fd6bb0fc653a56c7b85ff2fb3d91f65",
+        "format": "JPEG",
+        "original_bytes": 8269,
+        "compressed_bytes": 7866,
+        "compressed_sha256": "f7f53f91055f808c9964ad27d28ce24380790e39db81a44eba14acffcef0160d"
+      },
+      {
+        "relative_path": "medium/images (32).jpg",
+        "label": "medium",
+        "sha256": "0846f0df1312f26089cf20655aec68f8843c27732284c6406337d8acb15e5fef",
+        "format": "JPEG",
+        "original_bytes": 11527,
+        "compressed_bytes": 11788,
+        "compressed_sha256": "780a90cb44bbd0b970ed3f87a433beda0d8cefae7ac3583c9a48e09edfb9d95f"
+      },
+      {
+        "relative_path": "medium/image_0144.jpg",
+        "label": "medium",
+        "sha256": "61f4b3a1508df32e80f65b1bd00bca3059e6b60b624f0e224fa4c92ebeb0c529",
+        "format": "JPEG",
+        "original_bytes": 43235,
+        "compressed_bytes": 38455,
+        "compressed_sha256": "b931787804a96b88d5e842765e45f08076cd624a3c4e874e748f172c8cce4702"
+      },
+      {
+        "relative_path": "medium/images (37).jpg",
+        "label": "medium",
+        "sha256": "ed83e76f54c9708880e842d5c8dc5458dbbb77e0198c0794c7100616d891b7a8",
+        "format": "JPEG",
+        "original_bytes": 5324,
+        "compressed_bytes": 5188,
+        "compressed_sha256": "6a17d2c1e73ba52fcb46e9a6c5c156959dd98a0ab29e4885f2c3b0f32d3b884a"
+      },
+      {
+        "relative_path": "medium/images (13).jpg",
+        "label": "medium",
+        "sha256": "b2918a66e66571b0f53f2f754255d276dc3ddc368ed02583b450ddec3e233505",
+        "format": "JPEG",
+        "original_bytes": 10472,
+        "compressed_bytes": 11070,
+        "compressed_sha256": "ef8c1a9d949e7a5d79246be93252dd15375046a32c99c415bc4da9f282f0788c"
+      },
+      {
+        "relative_path": "medium/flood_6129.jpg",
+        "label": "medium",
+        "sha256": "15e0255f8dd1ce3ee3abc5096854ceb13840bbb1a016e09f63c5dd46aa189b6f",
+        "format": "JPEG",
+        "original_bytes": 31821,
+        "compressed_bytes": 28634,
+        "compressed_sha256": "c767ef063dc4004fea85e8cf9e0c9d24caacebca850cba2962110dad6250c755"
+      },
+      {
+        "relative_path": "medium/gia-lai-1.jpg",
+        "label": "medium",
+        "sha256": "d99d981b85abdd79662b29dc36ceccf6f2c8b516fc557a9aaabffa044ac29110",
+        "format": "JPEG",
+        "original_bytes": 47302,
+        "compressed_bytes": 42217,
+        "compressed_sha256": "9bf2a4461b9bda94758a1f2be716d782f2d977f8d34fe20e2214ed24df325aab"
+      },
+      {
+        "relative_path": "medium/805357338_1065370609579884_4614583555099717146_n.jpg",
+        "label": "medium",
+        "sha256": "4b825284c811f72e3d234cd85fa06bfa6c715a8e0580801cbe37a3897039fedd",
+        "format": "JPEG",
+        "original_bytes": 400498,
+        "compressed_bytes": 205671,
+        "compressed_sha256": "ee0a0f7892b1c4b571da9c73a99361768600c3e386daa0b6118d8bbdf697535b"
+      },
+      {
+        "relative_path": "medium/image_038.jpg",
+        "label": "medium",
+        "sha256": "6136434252d2fd2654427ab7233aa03edc8b4586c9f5edeae9445512a8c1a986",
+        "format": "JPEG",
+        "original_bytes": 87978,
+        "compressed_bytes": 94240,
+        "compressed_sha256": "357355f1bda4686b02d8a2d7fa422aafcd02a1dcfc24e6f29920ae578138be50"
+      },
+      {
+        "relative_path": "medium/img54.webp",
+        "label": "medium",
+        "sha256": "18376708cee0912e197cd3109b168583b99612198d7227800d4e04ddba7efb8c",
+        "format": "WEBP",
+        "original_bytes": 124418,
+        "compressed_bytes": 55551,
+        "compressed_sha256": "43ecf2ae01595b5ac67005c47ea1f1816ef17056700b2fbcc98cd31bc7380314"
+      },
+      {
+        "relative_path": "medium/flood_6343.jpg",
+        "label": "medium",
+        "sha256": "bdaabbf877bb24950a976dcee568d7b2f9da082f2df398c581aa9544c8c2d113",
+        "format": "JPEG",
+        "original_bytes": 31488,
+        "compressed_bytes": 28334,
+        "compressed_sha256": "8bc607b63830b8718ceb763a4aa88f6fbb5ac86e49ce437f226fbee924fd319b"
+      },
+      {
+        "relative_path": "medium/flood_6140.jpg",
+        "label": "medium",
+        "sha256": "75047d855512c1e7aacdcc71d3424ba42258375fb4558f42e0d1e4d2eb95ab8e",
+        "format": "JPEG",
+        "original_bytes": 47687,
+        "compressed_bytes": 23785,
+        "compressed_sha256": "52ea3055ad376326afbae868bdc40f095a4e7cd58e5362906fc38abe7bc22fe0"
+      },
+      {
+        "relative_path": "medium/5836-17634553662361993507720-168-0-1016-1620-crop-17634553816821875286789.webp",
+        "label": "medium",
+        "sha256": "0f7a3cf9489a57a9d7a85f736ecdc9d61f2292d237dc1d516e81b7144328b65c",
+        "format": "WEBP",
+        "original_bytes": 133464,
+        "compressed_bytes": 55107,
+        "compressed_sha256": "15f78d92d6421012fc02fb424569a956d055bf3fbb2aa25e3f68a581525723c8"
+      },
+      {
+        "relative_path": "medium/image_024.jpg",
+        "label": "medium",
+        "sha256": "4eeeb9650eff67134821474e3be3eef270bc952e5ce699ac5058d98d6272e7dd",
+        "format": "JPEG",
+        "original_bytes": 378699,
+        "compressed_bytes": 69607,
+        "compressed_sha256": "334f8c626d33f43350e95a7906494952ea6d885248e99e59d0d5b6b2e434ad95"
+      },
+      {
+        "relative_path": "medium/image_311.jpg",
+        "label": "medium",
+        "sha256": "c2beb6ef457469d2c37347629f6fa6e5734de8643f9f4edf7b66827e56ea6b6d",
+        "format": "JPEG",
+        "original_bytes": 1144367,
+        "compressed_bytes": 135716,
+        "compressed_sha256": "d37729ffdbae6dd50fa05fc6165af0ba52f1b403eeba94445b90b5625c8209d8"
+      },
+      {
+        "relative_path": "medium/images (16).jpg",
+        "label": "medium",
+        "sha256": "c1bb1154b3b1871cf95bfa43c8ff8a3af539e5c68618b1ad2044724ef2759de0",
+        "format": "JPEG",
+        "original_bytes": 9929,
+        "compressed_bytes": 10750,
+        "compressed_sha256": "66f18d1a20611fd00cde0a757c107624d693d5c6bc5b7d87666d5fe8a5ddb6ad"
+      },
+      {
+        "relative_path": "medium/images-873cb504e7c333c6f74c7394a73d201acf9fae6cd36600561e3775ee8c31ca9b060d5497fad80da70437e59e48a14722-_111-6190.jpg",
+        "label": "medium",
+        "sha256": "d43f170f886d44555d05924ddee0439ecc18f50954cb91026c0100f4f0abc874",
+        "format": "JPEG",
+        "original_bytes": 392978,
+        "compressed_bytes": 213085,
+        "compressed_sha256": "9f2756254bf7fb6556b69649608d7141e9ffb54ecc3d362a0ad170241f267554"
+      },
+      {
+        "relative_path": "medium/vnapotalquangtritieptucmualonlulennhanhgayngaplutdienrong1917541315072353-16029002171551755047725.webp",
+        "label": "medium",
+        "sha256": "08612801e26c708aa52eaadfca720becdaa6c15652f2e6f18d51d644f98d9c1d",
+        "format": "WEBP",
+        "original_bytes": 114822,
+        "compressed_bytes": 102638,
+        "compressed_sha256": "bd41969b195c84d076f955ae7a48ffa1f1fc3521ecfe96d83206cdebf03c1eb6"
+      },
+      {
+        "relative_path": "medium/n3.jpg",
+        "label": "medium",
+        "sha256": "07538d70a44b40d3b440325619b3ca9b32650ede44a0d00d1d9dad1b99fbe4ee",
+        "format": "JPEG",
+        "original_bytes": 7767,
+        "compressed_bytes": 8631,
+        "compressed_sha256": "4a4b871e83cb05889f2b8f466eaae66c306b79e36ee2c619d74bc72b72b5fd8a"
+      },
+      {
+        "relative_path": "medium/39.jpg",
+        "label": "medium",
+        "sha256": "fdd7f649e7ae81c6a92c2912a2b1274d61a062ef4a830ad5dcf91d987895347d",
+        "format": "JPEG",
+        "original_bytes": 231907,
+        "compressed_bytes": 82526,
+        "compressed_sha256": "412ab859097d537a0abaa7bd0603586f10a2810a93bbf4908e8bfba3d944559b"
+      },
+      {
+        "relative_path": "medium/lu-ky-luc-tren-hai-song-o-mien-trung-ngap-lut-lan-rong-tai-6-tinh-thanh-904.jpg",
+        "label": "medium",
+        "sha256": "1208d8781d1283f8a2bf6df0db67a322020a4d22d1e5e77c892664b2dbe7ee09",
+        "format": "JPEG",
+        "original_bytes": 278934,
+        "compressed_bytes": 111435,
+        "compressed_sha256": "add87933e3329660c03c4b1124405a4b7ad6bcd815355b57a5f9501845e15ed8"
+      },
+      {
+        "relative_path": "medium/edit-z7290483264645f5e6e37fc44ef85a5b1ffafb92dc59ab-17648137370111953943839-0-27-1131-1837-crop-1764813752388209128783.webp",
+        "label": "medium",
+        "sha256": "e0173401e7ade0280806d8f19ae43363fd2e8405d20aaacd33cee72d7b6dbc73",
+        "format": "WEBP",
+        "original_bytes": 495164,
+        "compressed_bytes": 163762,
+        "compressed_sha256": "817dc173f92aa4e95bc9eb47346d1acc46be4fa0c8ded82b30de769442899329"
+      },
+      {
+        "relative_path": "medium/images - 2025-01-28T185558.906.jpg",
+        "label": "medium",
+        "sha256": "f0860d21495f47388ed3e6696ce3785aee4da2cb1de4a590575461e038f7bae0",
+        "format": "JPEG",
+        "original_bytes": 3448,
+        "compressed_bytes": 4116,
+        "compressed_sha256": "af041f5e6704b056f780bbb44dd405f492831195de0c6900039ec387c45820ad"
+      },
+      {
+        "relative_path": "medium/1763565218045_mua1-191125.jpeg",
+        "label": "medium",
+        "sha256": "c91db90f158b3e8e854df4c1e3e8eb835f1cb537912568ae19100e6c51e917a2",
+        "format": "JPEG",
+        "original_bytes": 54659,
+        "compressed_bytes": 48581,
+        "compressed_sha256": "882c202b587c8244333103f05e4f10f6e49084750c166520abbcbd4e58f48471"
+      },
+      {
+        "relative_path": "medium/noise_n (3).jpg",
+        "label": "medium",
+        "sha256": "737a36757baaeb65b62ecc21fd1a7cd2a49f865293696cdbf80f73a117604639",
+        "format": "JPEG",
+        "original_bytes": 34785,
+        "compressed_bytes": 30935,
+        "compressed_sha256": "6499b2e896d9bf21f6a64189250106aa035646d77d30efdb2ddb3fda80bb1d9e"
+      },
+      {
+        "relative_path": "medium/81329cb922f6cba892e7-jpg-31673361078756138245019-50182452114320146060691.webp",
+        "label": "medium",
+        "sha256": "e0c7a3f120e8fc4f8f930f71cb2441f187c7414913c50d326be0c10542c46d7b",
+        "format": "WEBP",
+        "original_bytes": 16372,
+        "compressed_bytes": 17935,
+        "compressed_sha256": "46e4459051c272a0be76fede8fdee176627f0ee204cbb1cb8c31b5e69329246c"
+      },
+      {
+        "relative_path": "medium/noise (6).jpg",
+        "label": "medium",
+        "sha256": "bacbea8fde543a342777a2e58cffb846bcab7312db734f6bb61c321e3e752dda",
+        "format": "JPEG",
+        "original_bytes": 38382,
+        "compressed_bytes": 33879,
+        "compressed_sha256": "627c080744af5e7e55361a7f6d07a330ef99d462e1fef0de9a56bd04a08e23cd"
+      },
+      {
+        "relative_path": "medium/images - 2025-01-28T151947.364.jpg",
+        "label": "medium",
+        "sha256": "e7b8e37ef4d169937e886cd8663859ecb7af96df687a212be179822094715e95",
+        "format": "JPEG",
+        "original_bytes": 10458,
+        "compressed_bytes": 11120,
+        "compressed_sha256": "fe7d78ab311edafdd72de077cf244f3b381b04b348ffe769e52859f0d13ded15"
+      },
+      {
+        "relative_path": "medium/images (63).jpg",
+        "label": "medium",
+        "sha256": "6184d9e6b2bfe1c7ee6d03565b9bc592d4c3e55b2b707ef326f6c7e8504043b8",
+        "format": "JPEG",
+        "original_bytes": 10539,
+        "compressed_bytes": 11385,
+        "compressed_sha256": "af0903749ed43ee40227a6c79b0710d1ec5d9d5ba4e2ccefd0446f0dc0965271"
+      },
+      {
+        "relative_path": "high/floods_cambodia_avid_w.jpg",
+        "label": "high",
+        "sha256": "ddb850ec825f321b37caa568aee6098cfd4d06c0affb70c72c9ee4ad142c3d9a",
+        "format": "JPEG",
+        "original_bytes": 234714,
+        "compressed_bytes": 39317,
+        "compressed_sha256": "bb3908b12514cacd3a56f16f0daec060009fe41784d52857b98489a6e30c9097"
+      },
+      {
+        "relative_path": "high/download.webp",
+        "label": "high",
+        "sha256": "9882a77a13f8404c4875c672327af6c30f711e1398f55d4278eedc70320775fc",
+        "format": "WEBP",
+        "original_bytes": 19142,
+        "compressed_bytes": 17370,
+        "compressed_sha256": "0c6b0c9e448d22d4ef12c8fd63e7256165bb0675adb76fb55e93d8e1645497c8"
+      },
+      {
+        "relative_path": "high/img9.webp",
+        "label": "high",
+        "sha256": "553641be2dee253e89f8ca5829376e2c718e3455ca1b13cdd9e3f4637edaa900",
+        "format": "WEBP",
+        "original_bytes": 222414,
+        "compressed_bytes": 111755,
+        "compressed_sha256": "c639bed1f116cd7cefd3e238bc58f90e564bf7864a0422a5a21bfbd569db572b"
+      },
+      {
+        "relative_path": "high/flood_4800.jpg",
+        "label": "high",
+        "sha256": "0fcf65f440f4bb571ef8372897e08b4598b0e90023bb6700f222a036752a070e",
+        "format": "JPEG",
+        "original_bytes": 162727,
+        "compressed_bytes": 73856,
+        "compressed_sha256": "8a71108a11c6f7eb8fe4842a35390b003c5e6cc9e9c7c16510ab9862b472711d"
+      },
+      {
+        "relative_path": "high/flood_732.jpg",
+        "label": "high",
+        "sha256": "cd381b32133ec4671de6a5b7bbdaf0934357d776d35c3e143fb4cff864027893",
+        "format": "JPEG",
+        "original_bytes": 1943935,
+        "compressed_bytes": 166394,
+        "compressed_sha256": "4f73a4d1c3e161d7c11721402d2df6e1af28f731de2bd4b2d604a9a51a47d082"
+      },
+      {
+        "relative_path": "high/z7243826042725e83c8d03deb27f56d1a1aad2b13b8e87-176362146979047283232-15-0-615-960-crop-17636214777741938859206.webp",
+        "label": "high",
+        "sha256": "8656b7d16c67126af4681e1671432c38bc8fa52e8753764160db4c4873984988",
+        "format": "WEBP",
+        "original_bytes": 78238,
+        "compressed_bytes": 33925,
+        "compressed_sha256": "9795d66b21918ca525e2d2539c3d26481406875c6fa74ab243b120f82225f3a4"
+      },
+      {
+        "relative_path": "high/R.png",
+        "label": "high",
+        "sha256": "dc0a6fe2a2bd9a52e6e80b51bfba596e52c9c1cdf83b9f74b23ab5ea6a19170d",
+        "format": "PNG",
+        "original_bytes": 219688,
+        "compressed_bytes": 19864,
+        "compressed_sha256": "793a01b1008283adf03e2e3ab6f69a17b2af36ec945d176dbf16dc22838fcaae"
+      },
+      {
+        "relative_path": "high/flood_1261.jpg",
+        "label": "high",
+        "sha256": "e409f5969c2febfdda9ed849c91004358be0a3d10814f787e45e7627ca828214",
+        "format": "JPEG",
+        "original_bytes": 227106,
+        "compressed_bytes": 107754,
+        "compressed_sha256": "e7ddb85c6bb7ae03b1d54733d2c08164c145a0aac18ceec36abfcf42b765feb9"
+      },
+      {
+        "relative_path": "high/AP23209060794692.jpg",
+        "label": "high",
+        "sha256": "512a0322830cabfec0a6e89c2e31ea893b2cef2818cc39e3f317a59ae8fe1fd9",
+        "format": "JPEG",
+        "original_bytes": 1468172,
+        "compressed_bytes": 137628,
+        "compressed_sha256": "445b542482e602deffe8d5c8cfa0b97a500445518d3a4892c44f060b309f17d1"
+      },
+      {
+        "relative_path": "high/images - 2025-01-28T151851.902.jpg",
+        "label": "high",
+        "sha256": "1edde2dab6d62b91b9de6c3c2655197077d5ab6e19d4765d2676cde1a6d8eb20",
+        "format": "JPEG",
+        "original_bytes": 7035,
+        "compressed_bytes": 7713,
+        "compressed_sha256": "ec66a6e2b84d4f818e047e66625bc074ae49413a49463ab937b8a3e074687fca"
+      },
+      {
+        "relative_path": "high/image_027.jpg",
+        "label": "high",
+        "sha256": "165d98120ba7e01d378bc261d7c3f23972249ed3b3be19d0d68043e769063363",
+        "format": "JPEG",
+        "original_bytes": 106715,
+        "compressed_bytes": 58771,
+        "compressed_sha256": "8c6ef38709b0196aa93c64e028640896a1764354c124a3212aee1d3fe9d345be"
+      },
+      {
+        "relative_path": "high/2-1726448843911500454177.webp",
+        "label": "high",
+        "sha256": "ff55a67f3985507695ee4b23060fdfdad9e187fb8504aedfbf092075fa5f0d96",
+        "format": "JPEG",
+        "original_bytes": 263033,
+        "compressed_bytes": 121693,
+        "compressed_sha256": "a80c7ffe32e96c77dea7a507e57a65a1debd6856bba316681929fb35ee0d54de"
+      },
+      {
+        "relative_path": "high/image_049.jpg",
+        "label": "high",
+        "sha256": "3e828a32d6aed42e6ee8dc53661095ca000f242d7e9f02d192b2c01c86a09957",
+        "format": "JPEG",
+        "original_bytes": 148176,
+        "compressed_bytes": 74513,
+        "compressed_sha256": "d160c7db813c730bb7ab147a1ce81c914fbd83b7c3fda75480df8b5145a5363b"
+      },
+      {
+        "relative_path": "high/image_0107.jpg",
+        "label": "high",
+        "sha256": "5fa433bbf249eeb3aa2055834a5f403e493a8cac5cd4b9782a14415183856245",
+        "format": "JPEG",
+        "original_bytes": 22163,
+        "compressed_bytes": 19919,
+        "compressed_sha256": "81b32a15b9eb8dc521ddbebf443ae1380f8d0b7b56943330e1f329170310a58c"
+      },
+      {
+        "relative_path": "high/dd20c6609cc035fedf1a093e97f51af4.jpeg",
+        "label": "high",
+        "sha256": "fce656b8e1f1e90ed783f0ca822286246a21df47469426bba44d1b2ad695ca97",
+        "format": "PNG",
+        "original_bytes": 819746,
+        "compressed_bytes": 56381,
+        "compressed_sha256": "85dd3b4e208c93f0b64d436c7006afb94ea66c1053723985faa8cd3c5457e2db"
+      },
+      {
+        "relative_path": "high/img66.jpg",
+        "label": "high",
+        "sha256": "d55e7de52341508886162ad8719416840af584d47853b998f2d2c45f4c5f5fd2",
+        "format": "JPEG",
+        "original_bytes": 24584,
+        "compressed_bytes": 20273,
+        "compressed_sha256": "17c94dd904987541879a5c2c3bdb17f5a2b23915a0a7f563e69e0d05a12cc83e"
+      },
+      {
+        "relative_path": "high/OIP (10).webp",
+        "label": "high",
+        "sha256": "ed3ec9010a260ac315bd0f17ebe4c044ba2c86905964444aa011b3604366fe8d",
+        "format": "WEBP",
+        "original_bytes": 8178,
+        "compressed_bytes": 7577,
+        "compressed_sha256": "2fc8cce0c3c27fa9efdfb4254e172a9ee242aaa3cf8b8a74f9b5fea1f14cc19f"
+      },
+      {
+        "relative_path": "high/iimages (5).jpg",
+        "label": "high",
+        "sha256": "b0a958225801750c5a6a663c180d26565f8a95584750c5e60879380fd14ded85",
+        "format": "JPEG",
+        "original_bytes": 6528,
+        "compressed_bytes": 6719,
+        "compressed_sha256": "edea81f609939222411b03b6f9e3c5efc574a9a2c7879a1c1ffe329c20adb493"
+      },
+      {
+        "relative_path": "high/iimages (10).jpg",
+        "label": "high",
+        "sha256": "73f6052a7daa8f8de6dade2fa0ac44e339083b998afb2a163d7334c45aee76ad",
+        "format": "JPEG",
+        "original_bytes": 10372,
+        "compressed_bytes": 10959,
+        "compressed_sha256": "cb9d29d1d3b5f12f60c223dc07c57c16adc32c8abddd78c0bcdca0309e6a8e54"
+      },
+      {
+        "relative_path": "high/img55.webp",
+        "label": "high",
+        "sha256": "b5f145285f3fec3d20ccaee444df2159d4f1e362760435f3c6feb51ba725abd1",
+        "format": "WEBP",
+        "original_bytes": 103970,
+        "compressed_bytes": 31013,
+        "compressed_sha256": "e37a2bc6d21d2838feed26270f97bfd4a49045af1effba9e38685d60d02f5ecb"
+      },
+      {
+        "relative_path": "high/image_6483441_7_c62ccb313f.jpg",
+        "label": "high",
+        "sha256": "6dd3bbf14af3264ba7796f69f228df25a4c356c25a6dd15bc161a085cb6c9e79",
+        "format": "JPEG",
+        "original_bytes": 595810,
+        "compressed_bytes": 195650,
+        "compressed_sha256": "d2bd92a61ac720d7713de41e923ffe39629c8743b397a2b5cd6a1341c8a1ddf3"
+      },
+      {
+        "relative_path": "high/jakarta-indonesiafebruary-2021the-search-rescue-600nw-1920679820.webp",
+        "label": "high",
+        "sha256": "c8a13d4112c593635c49f9071db0148b79a1d2e07b71b3df893bfd6a73c037b3",
+        "format": "WEBP",
+        "original_bytes": 76370,
+        "compressed_bytes": 35737,
+        "compressed_sha256": "1a0d048db0ee488631d9719f28e02a7974f9c909fc23a9f2b7506ac1e9025117"
+      },
+      {
+        "relative_path": "high/image_0090.jpg",
+        "label": "high",
+        "sha256": "10264351de402d0dd637b6f6bbc7008be5bf13c86313a6b684875ddd858cf613",
+        "format": "JPEG",
+        "original_bytes": 32203,
+        "compressed_bytes": 29106,
+        "compressed_sha256": "ba7a680b89e059af4e39f8dfb90c51c9c0004cad184db93378ad0e93578fbee3"
+      },
+      {
+        "relative_path": "high/img7.webp",
+        "label": "high",
+        "sha256": "854cee071b8d48b0567b2717b3f8dc71e3694b96892e5e1591566cb0124e7925",
+        "format": "WEBP",
+        "original_bytes": 58674,
+        "compressed_bytes": 29982,
+        "compressed_sha256": "bfa1ecfff903ea903fe0c5a68acbcc9bb869b88c168f7763d7c42f8d4c93b25b"
+      },
+      {
+        "relative_path": "high/4231cd29f2fb53ce8f0359eba8f1caaa85b22b53819bf0b9990e4c4d228c8c89.webp",
+        "label": "high",
+        "sha256": "bcdb14769aad6eeb48dfec2f602435a1d52a3eac013da23c60a3dc34a22f4f38",
+        "format": "WEBP",
+        "original_bytes": 93020,
+        "compressed_bytes": 82082,
+        "compressed_sha256": "4f25074db63d4eb51efe74387a04fa64b81ae0bb397fcd848c2f1de787613961"
+      },
+      {
+        "relative_path": "high/img72.webp",
+        "label": "high",
+        "sha256": "fc43a66f60e642ba21fa6cbe8fcc8846ba555c658dda41d4cd362b511a55cdc6",
+        "format": "WEBP",
+        "original_bytes": 80872,
+        "compressed_bytes": 36973,
+        "compressed_sha256": "f462abad92e45582a972552855a0326cdad4d08bbd7379e8fd6dafed09900ac6"
+      },
+      {
+        "relative_path": "high/img49.webp",
+        "label": "high",
+        "sha256": "96759c7c514ee82e03951cb13230fa9784b1e5e7234dacb2167999386d42da8a",
+        "format": "WEBP",
+        "original_bytes": 193300,
+        "compressed_bytes": 107429,
+        "compressed_sha256": "b1837f9f89161301f64aa626bda2d7ef96547e6619599ee834f274e66e5262af"
+      },
+      {
+        "relative_path": "high/OIP (1).webp",
+        "label": "high",
+        "sha256": "9931f7b540fa118001a5d222735edbddb903cb7469e6f8d551d3e3f9aeb528ff",
+        "format": "WEBP",
+        "original_bytes": 21818,
+        "compressed_bytes": 27124,
+        "compressed_sha256": "295b4315c8cabc5d7b180881781ed30f2a1a5c375bb620f4c803c7585f4f6e30"
+      },
+      {
+        "relative_path": "high/OIP (33).webp",
+        "label": "high",
+        "sha256": "237864469e6f1c257cd918ef25c0b0dc7bf383955b3dd23e21cc2fd4a92cda2c",
+        "format": "WEBP",
+        "original_bytes": 6578,
+        "compressed_bytes": 6587,
+        "compressed_sha256": "56b64b874da77d2d4ad813a88f15e0353ed0c7882303de1a903136169e739ec7"
+      },
+      {
+        "relative_path": "high/image_145.jpeg",
+        "label": "high",
+        "sha256": "bcdda09b5006e6f96bba2f559d90d2d3daf5c41ca66d3886dac46534cf7c7f5c",
+        "format": "JPEG",
+        "original_bytes": 278229,
+        "compressed_bytes": 58643,
+        "compressed_sha256": "bc7152565f63266fe1ee3de7b45320f9b3cabeb5db48f7d6bc2ebe9616f7df50"
+      },
+      {
+        "relative_path": "high/images - 2025-01-28T154039.568.jpg",
+        "label": "high",
+        "sha256": "be2defe1fef5628f1e85d94d12c66075ab7feca57f273f4f903521816128d959",
+        "format": "JPEG",
+        "original_bytes": 7811,
+        "compressed_bytes": 7966,
+        "compressed_sha256": "efd14db655bd3b5639cb4ceb1ec4b96cbd2d5d4733f1c66d13596ef89fb2e1f8"
+      },
+      {
+        "relative_path": "high/3cbf55ff-d524-461d-bf40-fa489285474d.jpg",
+        "label": "high",
+        "sha256": "1f48d2d7cdfbc50fb3ca2297a2ccf866a2d48c3c079242e61df887b896f1c929",
+        "format": "JPEG",
+        "original_bytes": 37501,
+        "compressed_bytes": 33547,
+        "compressed_sha256": "fde439d2c7637365d980c73da91665ea48b7e9f69ef54c85af5c14f1c322a1b4"
+      },
+      {
+        "relative_path": "high/b572b8392df6f2cbbac8a6a19d74bfa2.avif",
+        "label": "high",
+        "sha256": "c0aac4095412b24e58c6132b8e66e2b9f243597aee2eb06d7f193dc154e04f73",
+        "format": "AVIF",
+        "original_bytes": 61606,
+        "compressed_bytes": 46966,
+        "compressed_sha256": "365abf85a398f5cca35f940f72a14c459643cf2e509f7bc47608834ca208a399"
+      },
+      {
+        "relative_path": "high/flood_219.jpg",
+        "label": "high",
+        "sha256": "79facf8f80351b4e020857b9b47604efb7d0ea20f0ddaf838824b215b67ccb05",
+        "format": "JPEG",
+        "original_bytes": 2847592,
+        "compressed_bytes": 290092,
+        "compressed_sha256": "000dd54a001b7e48ae965b731afdd0818855bfb50b779414c6aebc7e602389f0"
+      },
+      {
+        "relative_path": "high/Shutterstock_12250367k.jpg",
+        "label": "high",
+        "sha256": "732957645e5b3b44344a6db0f53486059ed78e70192a22c3b436cd8f93717b07",
+        "format": "JPEG",
+        "original_bytes": 57055,
+        "compressed_bytes": 34710,
+        "compressed_sha256": "1ce2e6412b1a35ed5b4b2e1e793504d9027cf8ce7e3d936f2ef400e2cc80cf73"
+      },
+      {
+        "relative_path": "high/noise1.jpeg",
+        "label": "high",
+        "sha256": "9bbaa77d1bb035ab20937380a2af67a90bd9e4ca71180cfd0b807c5f00b343b8",
+        "format": "JPEG",
+        "original_bytes": 15697,
+        "compressed_bytes": 13916,
+        "compressed_sha256": "818e09f65d966121b49cf01320ca5010c79f8cba9bf946cfcda7fc853eecef39"
+      },
+      {
+        "relative_path": "high/img58.jpg",
+        "label": "high",
+        "sha256": "b9364110f4da93b4e893640de31f3fa2ca0dcdf336741d8934571d72a47043e2",
+        "format": "JPEG",
+        "original_bytes": 82737,
+        "compressed_bytes": 30127,
+        "compressed_sha256": "9727600f54a1b3d619a33185c3796e090aab0dd90160752a437b2ff218873ebf"
+      },
+      {
+        "relative_path": "high/569FB5E8-17FF-4DA7-AF819E7223AD38C7_source.webp",
+        "label": "high",
+        "sha256": "3dcb8b40eeb8b9f8bf80bae7a1df25b52f5004838bc145495c760b8f3789c2c7",
+        "format": "WEBP",
+        "original_bytes": 45462,
+        "compressed_bytes": 30824,
+        "compressed_sha256": "6cfbd3f8a9578eb5cd1262ba97acb565538f4975fe0b62da0074e32bb8c94bd9"
+      },
+      {
+        "relative_path": "high/flood_1214.jpg",
+        "label": "high",
+        "sha256": "0c1e0b47204317c7c194fc94a7dbfc1030e08c065acbda8b4e455df3e23c4585",
+        "format": "JPEG",
+        "original_bytes": 158307,
+        "compressed_bytes": 64661,
+        "compressed_sha256": "ac25aefe91ee4dcb2ec3b59e529b87063dbf4c6954ef81b7fa07ed7219c18c9e"
+      },
+      {
+        "relative_path": "high/skynews-philippines-megi_5737099.jpg",
+        "label": "high",
+        "sha256": "84c1d37b7cba9e20cf409763137f50704c251e784de518f90804e115163765e0",
+        "format": "JPEG",
+        "original_bytes": 233889,
+        "compressed_bytes": 182222,
+        "compressed_sha256": "83c695546bc1aee7685a351115d2322bd258510a8902f9d0c5da1e321470a376"
+      },
+      {
+        "relative_path": "high/flood_4791.jpg",
+        "label": "high",
+        "sha256": "d1c123841ecbd4da557fa97ce87111b212c8228c34a85bd91f2560b0dd7f4540",
+        "format": "JPEG",
+        "original_bytes": 136191,
+        "compressed_bytes": 57086,
+        "compressed_sha256": "ce4de7058825d9f8966529bc4e6ffc8ef76f8c2a13727612b07e9e61fc27a3c6"
+      },
+      {
+        "relative_path": "high/flood_4763.jpg",
+        "label": "high",
+        "sha256": "71dc4359a45d5f7f9a73474695d86dcc2a5fe3fb74f89763be6ea2c971476183",
+        "format": "JPEG",
+        "original_bytes": 109308,
+        "compressed_bytes": 51828,
+        "compressed_sha256": "03a15828799de683ccd2a326b9fef7ee1287d0b9245ce9a828cefc2b9fb400ad"
+      },
+      {
+        "relative_path": "high/OIP (14).webp",
+        "label": "high",
+        "sha256": "327490c28381c700367e1baa43b9b8faa0d4dad840c3f5cc28dbcbc00aef9312",
+        "format": "WEBP",
+        "original_bytes": 6430,
+        "compressed_bytes": 6776,
+        "compressed_sha256": "1eec281f6765d55eb6914f07ea1460dd859ffb4d005c4c87c752ee5994b3684b"
+      },
+      {
+        "relative_path": "high/img60.webp",
+        "label": "high",
+        "sha256": "04fb91efee88688fce39d7c57db3f77e74a131efb54072039947ff44497cab46",
+        "format": "WEBP",
+        "original_bytes": 84220,
+        "compressed_bytes": 56953,
+        "compressed_sha256": "6b906ccef99798516c86d7fd7548b3e122b0374572c359cf58debb63854c9ec8"
+      },
+      {
+        "relative_path": "high/images - 2025-01-28T152121.677.jpg",
+        "label": "high",
+        "sha256": "4eb24b2e8dc4eda02a4cc8771e5f553a3cea43118dc311cd054b50be02659728",
+        "format": "JPEG",
+        "original_bytes": 9854,
+        "compressed_bytes": 10227,
+        "compressed_sha256": "0a3000024fdc1cac84dd0e7b5b53a9ebbb2b42499d072f71d78b571d1b02fba0"
+      },
+      {
+        "relative_path": "high/OIP (15).webp",
+        "label": "high",
+        "sha256": "24f885199ce10f8e1e816382fd1bfbc0cb087adfdbf80d37f50e01f029b902df",
+        "format": "WEBP",
+        "original_bytes": 7936,
+        "compressed_bytes": 7572,
+        "compressed_sha256": "9b451532d81067b69767b083ab97b4d391bfa65d0c0f8568d20df18378edc8fc"
+      },
+      {
+        "relative_path": "high/OIP (29).webp",
+        "label": "high",
+        "sha256": "722c9d66af59c68dec8e0c6d6304791267c63d646e08710fd3e9f26c37df9334",
+        "format": "WEBP",
+        "original_bytes": 15016,
+        "compressed_bytes": 15685,
+        "compressed_sha256": "95901a5a061d4ae034d056c218aabc37c2f0d0fae1909043477dac35e393806b"
+      },
+      {
+        "relative_path": "high/flood-1.jpg",
+        "label": "high",
+        "sha256": "09f55b9b3f375ebed1a877966d39e27f14f7e874b49f4aaeb760640e48391a2e",
+        "format": "JPEG",
+        "original_bytes": 217065,
+        "compressed_bytes": 73229,
+        "compressed_sha256": "6243e6146e5730ce8dbd883382ffd3dd24c5faeef6eed3f60c09e3270579810a"
+      },
+      {
+        "relative_path": "high/702018189_univ_cnt_01_xs.jpg",
+        "label": "high",
+        "sha256": "5425fb7fa7db399de54b9d429fd66d384764c2dfb43a11b1661288a1214928f4",
+        "format": "JPEG",
+        "original_bytes": 25024,
+        "compressed_bytes": 8949,
+        "compressed_sha256": "ee0a49ab658df18dd5a0c4f6f0b4e38fa0d4c01ae545680200902fb02da1184e"
+      },
+      {
+        "relative_path": "high/img4.jpg",
+        "label": "high",
+        "sha256": "2a232bbd43a017ee8635ca368475ed57d4f521ec3a3ac3441179a9a2bf799fd8",
+        "format": "JPEG",
+        "original_bytes": 7596,
+        "compressed_bytes": 5500,
+        "compressed_sha256": "a308d9afed48f936cc5b3251811640125543c945e61bf19fa54e138ecab278e7"
+      },
+      {
+        "relative_path": "high/image_294.png",
+        "label": "high",
+        "sha256": "121729a09e5d44136cae00fe1f03a2937abb87667ab3ecb6ab3c280a5894c585",
+        "format": "PNG",
+        "original_bytes": 1080402,
+        "compressed_bytes": 84479,
+        "compressed_sha256": "6500588b581118f50a035a57b7baacfeb46950354e63766f17760ffa719a52b6"
+      },
+      {
+        "relative_path": "high/65d952b4-90a2-4d18-b035-24352c-3365-2036-1764872629.webp",
+        "label": "high",
+        "sha256": "11f5411abd0b76ea294bd29a7472d8684b48083301862061e6f25da644430a5c",
+        "format": "WEBP",
+        "original_bytes": 84692,
+        "compressed_bytes": 38202,
+        "compressed_sha256": "421998372da5e128f0ed4d951bd1f3b05badc89b6addb86f4f51c5166bfa27c6"
+      },
+      {
+        "relative_path": "high/OIP (36).webp",
+        "label": "high",
+        "sha256": "f5293f48dbaa45b33a582c87433bb04fbbf2dd472469a0332a82bd5feb755c14",
+        "format": "WEBP",
+        "original_bytes": 23048,
+        "compressed_bytes": 39098,
+        "compressed_sha256": "2856126d3825766996a95f724bd1df58b431f149bb85205eed542f710336ef89"
+      },
+      {
+        "relative_path": "non_flood/화면 캡처 2025-03-05 181439.jpg",
+        "label": "non_flood",
+        "sha256": "b75c4f08d2d4af82fae15233d28be9099286d8327bb1728ad06ae8467bd4fd24",
+        "format": "JPEG",
+        "original_bytes": 86563,
+        "compressed_bytes": 43579,
+        "compressed_sha256": "972af8e063622ee8a512e696dcb7835d74ea899fd504b277ffe37de978788a4e"
+      },
+      {
+        "relative_path": "non_flood/화면 캡처 2025-03-05 175742.jpg",
+        "label": "non_flood",
+        "sha256": "9aa30b4ad8e881ee526e62dfd529f7c132517be92583fc25c2a352b59a7b8a10",
+        "format": "JPEG",
+        "original_bytes": 67563,
+        "compressed_bytes": 34472,
+        "compressed_sha256": "72814d2727b2f8bd56a02890ac887173f317e54e3fd517a7944d18d7de2c2d24"
+      },
+      {
+        "relative_path": "non_flood/화면 캡처 2025-03-05 175341.jpg",
+        "label": "non_flood",
+        "sha256": "43a98cd56ba750ceae68f3ca04b1c092e901fff1dcc83a04a19d4652dd5a93ab",
+        "format": "JPEG",
+        "original_bytes": 38665,
+        "compressed_bytes": 19452,
+        "compressed_sha256": "93a627245b9eb687fb38e4f3f1276fe41992a084b39a5bfffae597567b6e5b8c"
+      },
+      {
+        "relative_path": "non_flood/화면 캡처 2025-03-05 172751.jpg",
+        "label": "non_flood",
+        "sha256": "8de13e59f0139f6ad9e553f887ea3e427cfbe24c5523a850651923df6d64011a",
+        "format": "JPEG",
+        "original_bytes": 38116,
+        "compressed_bytes": 19183,
+        "compressed_sha256": "4486af17fbd7b0e81219f70ae53b4a82f80f8bfdfc8f2412948377e7415cbb29"
+      },
+      {
+        "relative_path": "non_flood/images (13)1.jpg",
+        "label": "non_flood",
+        "sha256": "4e2b303a68e00ba4fbca23bdb0585b3f0f6f385e83bfebad4a16d96898663a3e",
+        "format": "JPEG",
+        "original_bytes": 12745,
+        "compressed_bytes": 13714,
+        "compressed_sha256": "08f784ee88853cbfa5c5c83419af496bdea1778f30e5d271c09dc32613ed9ac2"
+      },
+      {
+        "relative_path": "non_flood/화면 캡처 2025-03-05 181412.jpg",
+        "label": "non_flood",
+        "sha256": "6fbd9d9cf16d0e950ccae0c7ec26baf60c4081efe34aa86205785db825fc01bc",
+        "format": "JPEG",
+        "original_bytes": 85248,
+        "compressed_bytes": 42823,
+        "compressed_sha256": "6161931c18aa6c7dbbc92780dc5b11eec9b2ed2fc192988018b175380550b025"
+      },
+      {
+        "relative_path": "non_flood/화면 캡처 2025-03-05 152130.jpg",
+        "label": "non_flood",
+        "sha256": "0df727cf509b4b225f8c3b77ed2b4c65be629b0eb3ef422bd3e6bcd1abe5b4e8",
+        "format": "JPEG",
+        "original_bytes": 97874,
+        "compressed_bytes": 48623,
+        "compressed_sha256": "d2d238fe25ee694ca55834254fa4b4837756d0d7b1e3e35a5f92b97347c2e143"
+      },
+      {
+        "relative_path": "non_flood/화면 캡처 2025-03-05 173917.jpg",
+        "label": "non_flood",
+        "sha256": "29e372c79949fb945d3d217af23e725576f970bc88d47820d56f908c8c1dd8b4",
+        "format": "JPEG",
+        "original_bytes": 84434,
+        "compressed_bytes": 42894,
+        "compressed_sha256": "198b4e8edbfe376d5394ebf2d58bc31a1414c2ba62159a547f830faa0b35e5a1"
+      },
+      {
+        "relative_path": "non_flood/1789568749569_282700609501588260_7406490438318140161_4c67d325471c5a433aa450f9a2bf7b80.jpg",
+        "label": "non_flood",
+        "sha256": "c8128762797fb77bf5feb965d12100cd783be0e0afe1658cbd851ec37a153d83",
+        "format": "JPEG",
+        "original_bytes": 462295,
+        "compressed_bytes": 93355,
+        "compressed_sha256": "4c32e29f2ef671526e6e6a648a872d197c6f96cceefdfa700f5758e5d1af99d3"
+      },
+      {
+        "relative_path": "non_flood/images (9).jpg",
+        "label": "non_flood",
+        "sha256": "18e261369109061b9841676f321894e21cfd91d608fe3dc9acc8c4d1bfd64a53",
+        "format": "JPEG",
+        "original_bytes": 7668,
+        "compressed_bytes": 7710,
+        "compressed_sha256": "02af166c5f45b4ac7bed8c382446f937ed98a92555000d610eb003a62d44c43c"
+      },
+      {
+        "relative_path": "non_flood/images (7).jpg",
+        "label": "non_flood",
+        "sha256": "a5bcc829e70ca0664ad916e26c9ffb440248d5d6e3429a58c9b90d3d3860a7ab",
+        "format": "JPEG",
+        "original_bytes": 12323,
+        "compressed_bytes": 13352,
+        "compressed_sha256": "e5552809c27f5ed8e33100e36786bacfaf09441a0c6bee6c7a69ae309082cc86"
+      },
+      {
+        "relative_path": "non_flood/다운로드 (5).jpg",
+        "label": "non_flood",
+        "sha256": "49d811196ba07508a08d7689a5746494bdd1e6bc89460cb67dffb53154670204",
+        "format": "JPEG",
+        "original_bytes": 10259,
+        "compressed_bytes": 10579,
+        "compressed_sha256": "8c457b05735e5c25cc7f1bdfa1fb33ebf53e5f543157f9384449862e413b4be3"
+      },
+      {
+        "relative_path": "non_flood/다운로드 (45) 3.jpg",
+        "label": "non_flood",
+        "sha256": "1f8553a464ee1aa46de5890b8be0676883513c8083217c3013df8ab6e9bef786",
+        "format": "JPEG",
+        "original_bytes": 11487,
+        "compressed_bytes": 12119,
+        "compressed_sha256": "5539e74d56bdafd59ab01cfcf7a7a564d9ff53a76834b7c8b28cf6fb78a9a7e7"
+      },
+      {
+        "relative_path": "non_flood/다운로드 (31).jpg",
+        "label": "non_flood",
+        "sha256": "c7449da10dfb0cebf3561e433c9a19876e06e81dda26cf39253b8d1aed09be91",
+        "format": "JPEG",
+        "original_bytes": 9664,
+        "compressed_bytes": 9673,
+        "compressed_sha256": "b96db62fca827de53f37bffc29dfa0a08112cd21087c30f759da38f0c47dab6b"
+      },
+      {
+        "relative_path": "non_flood/127465812-일본-교토의-봄비-폭풍우-동안-교토부의-스트리트-뷰.jpg",
+        "label": "non_flood",
+        "sha256": "6ae7d4cc308ffcdbcea455286428f08c4716a26cd6e0f295ba412b38393a1e05",
+        "format": "JPEG",
+        "original_bytes": 180600,
+        "compressed_bytes": 150093,
+        "compressed_sha256": "672fe92cef351d3996bcaa6688fd20cac610509fba204b576a0a9ef23d206b33"
+      },
+      {
+        "relative_path": "non_flood/화면 캡처 2025-03-05 174935.jpg",
+        "label": "non_flood",
+        "sha256": "d9a9b54010a3c3c0b44e085273edb1f64a777f99be11d71a7199030bab07a848",
+        "format": "JPEG",
+        "original_bytes": 123305,
+        "compressed_bytes": 62379,
+        "compressed_sha256": "162de32157d3af0ccb341e992545a897268fc93ec9a8dfd166af483568a38071"
+      },
+      {
+        "relative_path": "non_flood/화면 캡처 2025-03-05 173725.jpg",
+        "label": "non_flood",
+        "sha256": "8088bad691c314800e2472cc5837ed0ddc4fc2a8bb5fc67a0466a5b6dbd4ef41",
+        "format": "JPEG",
+        "original_bytes": 86775,
+        "compressed_bytes": 44279,
+        "compressed_sha256": "1ecedc68b7a3036e6c04b9691a4c16b60abce2dbc0ca3b6a8c1680d358907cb9"
+      },
+      {
+        "relative_path": "non_flood/다운로드 (7).jpg",
+        "label": "non_flood",
+        "sha256": "7882a482c8fa3ac2a100823670b3527953bc13261ced12bef7d2814872bbb73d",
+        "format": "JPEG",
+        "original_bytes": 12438,
+        "compressed_bytes": 13460,
+        "compressed_sha256": "142a5349fa80db82ff88c096df7711e3af0ad5493be93f42b01bee28b8901ab4"
+      },
+      {
+        "relative_path": "non_flood/다운로드 (12).jpg",
+        "label": "non_flood",
+        "sha256": "5a26387b7c471c37b412a214b65d520836f1ccdac5562ba302e9ad91f3063751",
+        "format": "JPEG",
+        "original_bytes": 10323,
+        "compressed_bytes": 11018,
+        "compressed_sha256": "992634576a296ee78a5b7622d3ee523fc4268fe2d603b306aba2cef6d12b016e"
+      },
+      {
+        "relative_path": "non_flood/images (11)1.jpg",
+        "label": "non_flood",
+        "sha256": "254e9ebc6f2b62b50393b6db4914c56a5fe0e43f3aac0ffa71f6cf007e661e61",
+        "format": "JPEG",
+        "original_bytes": 13062,
+        "compressed_bytes": 14198,
+        "compressed_sha256": "ab42c25b0a75932bd62c2d04ea523b944e7e570cb53041acc14d2b198b43ff4d"
+      },
+      {
+        "relative_path": "non_flood/1789568749557_282700609501588260_7406490438318140161_7d5baf7f35b58211bf5d643c66ab8606.jpg",
+        "label": "non_flood",
+        "sha256": "831a018e6022c183e2bad8c815113118193ea4eed8bfe14d0ae7000be299d148",
+        "format": "JPEG",
+        "original_bytes": 517702,
+        "compressed_bytes": 86110,
+        "compressed_sha256": "6062e7ab2722cc313321d664085ba3431fe80b711fa6b2af68615df5885e0a86"
+      },
+      {
+        "relative_path": "non_flood/images (14)1.jpg",
+        "label": "non_flood",
+        "sha256": "62da4a05b2a453136adff5b34666d1bfbbf2fc659e751e9c841909dd1e792d54",
+        "format": "JPEG",
+        "original_bytes": 11632,
+        "compressed_bytes": 12637,
+        "compressed_sha256": "22729912884ec47fe147b153e55efc0eaa61ffa8f8f923520eb0119198e9b3bd"
+      },
+      {
+        "relative_path": "non_flood/images (24)1.jpg",
+        "label": "non_flood",
+        "sha256": "f14078bda9f46dd2b44eb17870ad533778d7daf7085e8b344be8813a125f4694",
+        "format": "JPEG",
+        "original_bytes": 7340,
+        "compressed_bytes": 7965,
+        "compressed_sha256": "58a5491740878c4bc914cce24102b8c86f7022d98726c8caf3475895bdd60ac1"
+      },
+      {
+        "relative_path": "non_flood/다운로드 (43) 3.jpg",
+        "label": "non_flood",
+        "sha256": "82a8697498f35ccc783ad058be58208a775ed79bbf59b68c83a1a95701944ecd",
+        "format": "JPEG",
+        "original_bytes": 12680,
+        "compressed_bytes": 13476,
+        "compressed_sha256": "d8c97076b265e4a4393f612332dec09f5777dc88ee4cd4803c95fc65b7052cf2"
+      },
+      {
+        "relative_path": "non_flood/p1065569336329878_240_thum.jpg",
+        "label": "non_flood",
+        "sha256": "f648f926141df9ee9b70b1f787f660909a44e33c36bb0ed39162ea186a338df4",
+        "format": "JPEG",
+        "original_bytes": 190695,
+        "compressed_bytes": 52647,
+        "compressed_sha256": "2756d18c0854ac0eb9e3e67b582030aff20c93ef0d832c24624b224c8c4d3ec7"
+      },
+      {
+        "relative_path": "non_flood/화면 캡처 2025-03-05 172739.jpg",
+        "label": "non_flood",
+        "sha256": "b40f793569d14767abe9f2e068970f3b795c0563877a1e1f8a7258821f69edcc",
+        "format": "JPEG",
+        "original_bytes": 43887,
+        "compressed_bytes": 21998,
+        "compressed_sha256": "27d301ca08c647dd3f035bce8546ac8e61f416638390b2de8f962d0f5c2978e2"
+      },
+      {
+        "relative_path": "non_flood/다운로드 (36) 3.jpg",
+        "label": "non_flood",
+        "sha256": "8ae6c5d304ced95a61c6567b5c88ddfc5e319f0e3a5ec72dea7e133aa076ef0f",
+        "format": "JPEG",
+        "original_bytes": 17505,
+        "compressed_bytes": 12070,
+        "compressed_sha256": "31cb61e2761c087b6359c688c6a1df710024b2e0bce4c08f29983d1d03d95120"
+      },
+      {
+        "relative_path": "non_flood/화면 캡처 2025-03-05 175927.jpg",
+        "label": "non_flood",
+        "sha256": "0565699f292d6f6e0deb526642cc69d3d067a9e934582eabafbccc3d6d0f1bf2",
+        "format": "JPEG",
+        "original_bytes": 87154,
+        "compressed_bytes": 43528,
+        "compressed_sha256": "8004d651b9908ad65e6809a5dc07cdc9871568ff08ce928563219176f1c9a0ef"
+      },
+      {
+        "relative_path": "non_flood/13382_13779_4019.jpg",
+        "label": "non_flood",
+        "sha256": "6bd6b42bf3dd5e44c475fddcbc9bd6a880a64bfdee58ca7722e49b94de5ee4da",
+        "format": "JPEG",
+        "original_bytes": 84306,
+        "compressed_bytes": 33319,
+        "compressed_sha256": "3b74d15e284ac487d7ea9ab6215744a44d5e39df31b1eec77ca9eca6fce66974"
+      },
+      {
+        "relative_path": "non_flood/RPR20231226002000353_01_i.jpg",
+        "label": "non_flood",
+        "sha256": "28246d242467856c88fbbfd1bafe4924c405331e349aa0a9e8e2814e688afd88",
+        "format": "JPEG",
+        "original_bytes": 108977,
+        "compressed_bytes": 19658,
+        "compressed_sha256": "cf5ffa2cc3b1346a7f18358f50d2fd035eaccd1f790cdb7a5e779184c3dac171"
+      },
+      {
+        "relative_path": "non_flood/다운로드 (34) 3.jpg",
+        "label": "non_flood",
+        "sha256": "568d0b9bf261a2e4fe2afb600416d3eb532f928e57b1d059acfe3a177bbd57f0",
+        "format": "JPEG",
+        "original_bytes": 10696,
+        "compressed_bytes": 11291,
+        "compressed_sha256": "68615c9b5cc0f127ef3f7848816157c2b944d1a69e4ced7a55b9ad44e2d0e373"
+      },
+      {
+        "relative_path": "non_flood/화면 캡처 2025-03-05 174358.jpg",
+        "label": "non_flood",
+        "sha256": "1c7d8c2b8440637fbcec5baaba40642f2e3b0540590cc8a0ac8db672f478cfc7",
+        "format": "JPEG",
+        "original_bytes": 97834,
+        "compressed_bytes": 49747,
+        "compressed_sha256": "74c5af45a6e1bda24a2218d00a2b7ae1fdc18788b4f9546aef4416e046455bb6"
+      },
+      {
+        "relative_path": "non_flood/images (62).jpg",
+        "label": "non_flood",
+        "sha256": "9e03661c93bf0f0f3dd70ccf7f7cfd62cdba0694c8359fef3021f6f2ab3f3b83",
+        "format": "JPEG",
+        "original_bytes": 23189,
+        "compressed_bytes": 17065,
+        "compressed_sha256": "ab06bdf5116bbde8992aa549842d6198ce7d03dc168d631edb7844857434fa30"
+      },
+      {
+        "relative_path": "non_flood/images - 2025-01-28T184436.464.jpg",
+        "label": "non_flood",
+        "sha256": "31ddc209d0f2ff99b445870e708cc8becebb5adbc5c90504371e9c9a76f06d88",
+        "format": "JPEG",
+        "original_bytes": 6691,
+        "compressed_bytes": 7672,
+        "compressed_sha256": "bfa61cd0fcd4aea5945ac041985a8019e6d2908ce1865461b32646a50b8a41c2"
+      },
+      {
+        "relative_path": "non_flood/다운로드 (36).jpg",
+        "label": "non_flood",
+        "sha256": "3d946dfc7512149170bac99b129a06a6587fdc1ce7c057a3f609a89adfc665ee",
+        "format": "JPEG",
+        "original_bytes": 7644,
+        "compressed_bytes": 8305,
+        "compressed_sha256": "0d268b42cd0f5c1fb471e19b828205beabe41587348d9db6fbc5cd6a2f03fe24"
+      },
+      {
+        "relative_path": "non_flood/화면 캡처 2025-03-05 182737.jpg",
+        "label": "non_flood",
+        "sha256": "a456c939a5253ff3dd25bd0706ecf353ff0b5f5ff0c9d1e99bb3cf05487c3f28",
+        "format": "JPEG",
+        "original_bytes": 77443,
+        "compressed_bytes": 39259,
+        "compressed_sha256": "c5bf9871360a15b911127bc8f2776dd9e0fb858b6248e9b3105ec803cb22308b"
+      },
+      {
+        "relative_path": "non_flood/20230113501845.jpg",
+        "label": "non_flood",
+        "sha256": "c06f0a8a109f0b9c110eea5d3caf05bd439e812ecb451bd34a083e1279173fe7",
+        "format": "JPEG",
+        "original_bytes": 196201,
+        "compressed_bytes": 74439,
+        "compressed_sha256": "fb2b42b8a055a85c7d9e829f248bb93ebed0a6fa12976aa175eae4c05466fad9"
+      },
+      {
+        "relative_path": "non_flood/화면 캡처 2025-03-05 151816.jpg",
+        "label": "non_flood",
+        "sha256": "102ada76b9fd2f4eebcdc6faf911ae294692c86d69b8149475c65dc4a821aa32",
+        "format": "JPEG",
+        "original_bytes": 82790,
+        "compressed_bytes": 41277,
+        "compressed_sha256": "d03e83f1a4d7f9a7ece9f16723a126d2f11a8650271ca1cea265a00105b5c78b"
+      },
+      {
+        "relative_path": "non_flood/다운로드 (41).jpg",
+        "label": "non_flood",
+        "sha256": "93ba76f76448bf9350f289fdae38183912d3e0dedb86321977ac4b74e0eccfc4",
+        "format": "JPEG",
+        "original_bytes": 11674,
+        "compressed_bytes": 12758,
+        "compressed_sha256": "078b7df9b724070c5c6febb2b78aac2141594820d4ec4a0eb0420389fc8abc60"
+      },
+      {
+        "relative_path": "non_flood/images (18).jpg",
+        "label": "non_flood",
+        "sha256": "aff1fa1abd5f77fdd2ea5a26bb583771680c48c1bd64720bfa5a9a61012c0ac8",
+        "format": "JPEG",
+        "original_bytes": 13870,
+        "compressed_bytes": 14539,
+        "compressed_sha256": "2e4912c301592ffd2da644f730b56cbf3c3f26672c9739711f43632172207845"
+      },
+      {
+        "relative_path": "non_flood/20180405_152525.jpg",
+        "label": "non_flood",
+        "sha256": "25eb26aff4ee22251f3b24147b467f4a4d39333ff64c9611b65063054d18d120",
+        "format": "JPEG",
+        "original_bytes": 110689,
+        "compressed_bytes": 59381,
+        "compressed_sha256": "27851971737e0bc79098da7c7a71381313ecdf8541331b09fe30d0388d2fe8f9"
+      },
+      {
+        "relative_path": "non_flood/화면 캡처 2025-03-05 164255.jpg",
+        "label": "non_flood",
+        "sha256": "33c16a1a474295f7a31cc57648004d03eb04d2878e9f358250722c237528cd04",
+        "format": "JPEG",
+        "original_bytes": 41066,
+        "compressed_bytes": 20402,
+        "compressed_sha256": "c2fedf8f6758ce9843b36ebcc9cbd47107de42aa3ccb924ec8c64d920fadbf60"
+      },
+      {
+        "relative_path": "non_flood/다운로드 (23).jpg",
+        "label": "non_flood",
+        "sha256": "c11157a4e5d6142a6cf64acf9448d948dc814160ff2ec431734692861bda5a95",
+        "format": "JPEG",
+        "original_bytes": 17943,
+        "compressed_bytes": 18679,
+        "compressed_sha256": "3b0aa842b67d8a7d3f9706efa55b3353fc588f76432e7a960717d0a88183d1de"
+      },
+      {
+        "relative_path": "non_flood/화면 캡처 2025-03-05 152904.jpg",
+        "label": "non_flood",
+        "sha256": "491cfa836d07fdb755e12495203d84dee0d937f82cd29e582eb569d7e5abc771",
+        "format": "JPEG",
+        "original_bytes": 73147,
+        "compressed_bytes": 36470,
+        "compressed_sha256": "7ab3dfb2d04782dd97cef16091fc2b46c60d6b9281deaf70d0fc1ca2f41208de"
+      },
+      {
+        "relative_path": "non_flood/images - 2025-01-28T184427.744.jpg",
+        "label": "non_flood",
+        "sha256": "e6d4712ee1e188f41d9179607bc46ed14c0681f69a5edd8d77ed619b9c4d6f7f",
+        "format": "JPEG",
+        "original_bytes": 8168,
+        "compressed_bytes": 9346,
+        "compressed_sha256": "9f8423ab9361a37f324c28d147f2ba9d88b732823b99779ae5f7ef28a8f5d246"
+      },
+      {
+        "relative_path": "non_flood/화면 캡처 2025-03-05 172144.jpg",
+        "label": "non_flood",
+        "sha256": "67d6ad153034a81055741535ba0bdc53ff8e80076d90d512f42c10a76686d60e",
+        "format": "JPEG",
+        "original_bytes": 62656,
+        "compressed_bytes": 30524,
+        "compressed_sha256": "ddcb5ab349c232889201e16af14169307c6ba93ee9c92cd6c9d0ba146bf91844"
+      },
+      {
+        "relative_path": "non_flood/다운로드 (53) 3.jpg",
+        "label": "non_flood",
+        "sha256": "bac90bc594d2f060fd10ae095378c20d68e6565d54a1e3cc841b2ec094b869de",
+        "format": "JPEG",
+        "original_bytes": 13371,
+        "compressed_bytes": 14193,
+        "compressed_sha256": "2207514127a4e82beea4ee5b8b66cee4eb0a58cc6f701db102aa281fd0f73c21"
+      },
+      {
+        "relative_path": "non_flood/images - 2025-01-28T184942.058.jpg",
+        "label": "non_flood",
+        "sha256": "cebc0d1cbc0ede1e75a7d4765af70a7bb5d44a651f831d11eeccc6f9ef18ffed",
+        "format": "JPEG",
+        "original_bytes": 9354,
+        "compressed_bytes": 10498,
+        "compressed_sha256": "d5c9faa012799c3b8516c28f495552cb3472e557384db28434fac307d6103c30"
+      },
+      {
+        "relative_path": "non_flood/화면 캡처 2025-03-05 152054.jpg",
+        "label": "non_flood",
+        "sha256": "b23bcf8d9814ddc38d73eb269f0be25f0dcc9626cc9a928bb116197859b3b29a",
+        "format": "JPEG",
+        "original_bytes": 87155,
+        "compressed_bytes": 43155,
+        "compressed_sha256": "5f7f2fe4b209941609cbbb3fce76e1edb6c360f171530c798515ce9d79e3a523"
+      },
+      {
+        "relative_path": "non_flood/img (2).jpg",
+        "label": "non_flood",
+        "sha256": "ee879ba624faad0000bc7ae69d2bd8b2fca0d4fc159a181fe7a067a59260d156",
+        "format": "JPEG",
+        "original_bytes": 2363566,
+        "compressed_bytes": 226249,
+        "compressed_sha256": "9be004e702ae3affb3191deddeaa43c2a14cd601caa52881f1dd2ba62dc58b58"
+      },
+      {
+        "relative_path": "non_flood/화면 캡처 2025-03-05 175626.jpg",
+        "label": "non_flood",
+        "sha256": "d9e510c3f2f2d13008fde01e8e520872122d0cc49de5a5ba5f8bab1bcf183cda",
+        "format": "JPEG",
+        "original_bytes": 78689,
+        "compressed_bytes": 40165,
+        "compressed_sha256": "c2088b29d78a7389ec1434c0736570aabe4abb32ee43b71d7db8386b71157b87"
+      },
+      {
+        "relative_path": "non_flood/다운로드 (27).jpg",
+        "label": "non_flood",
+        "sha256": "e78be2b8fc5aea406725fab8f457a9ab79e4413b64e383634d419379d0a64a46",
+        "format": "JPEG",
+        "original_bytes": 1173235,
+        "compressed_bytes": 221175,
+        "compressed_sha256": "15407c1c156acc5a6f0a29dfa429fcf274dc3e3412628f61d8d4e003a787e15a"
+      },
+      {
+        "relative_path": "non_flood/화면 캡처 2025-03-05 153850.jpg",
+        "label": "non_flood",
+        "sha256": "8ed7fe227b6d8a8b890838876b2de8a28c844c7126f2a0d93e626f2387d816a6",
+        "format": "JPEG",
+        "original_bytes": 57957,
+        "compressed_bytes": 29179,
+        "compressed_sha256": "ae04d449f7346d7e1098a304fc81388ff764505b31095d46b6936fa776bbbee5"
+      },
+      {
+        "relative_path": "non_flood/images (5)1.jpg",
+        "label": "non_flood",
+        "sha256": "dae6acca79cb320bd3449d590ccaec16e2c839a431e6ca62911486a65050eab0",
+        "format": "JPEG",
+        "original_bytes": 15769,
+        "compressed_bytes": 16815,
+        "compressed_sha256": "986945e8c2891d3d72df653a44fbb6acfa93a19b60be51ef1ece8674d3db2d96"
+      },
+      {
+        "relative_path": "non_flood/827778_739893_3348.jpg",
+        "label": "non_flood",
+        "sha256": "909c28dfd1ea66f00fcbe72947317e577655cc349a5689b330e5205e0aab2127",
+        "format": "JPEG",
+        "original_bytes": 231023,
+        "compressed_bytes": 44851,
+        "compressed_sha256": "cdc795b88961eeff12ad66a17be2cd30d98494f92e9dbabd614390138d699b1c"
+      },
+      {
+        "relative_path": "non_flood/화면 캡처 2025-03-05 182805.jpg",
+        "label": "non_flood",
+        "sha256": "4637c31d11cb1fe03de357d94fc697479efc2e20be74922ee372ab6b20c2dca0",
+        "format": "JPEG",
+        "original_bytes": 63327,
+        "compressed_bytes": 32292,
+        "compressed_sha256": "f1d9066d5175a465325d1b57595172f08b84460da1e4e812ed88ac24b311864e"
+      },
+      {
+        "relative_path": "non_flood/화면 캡처 2025-03-05 153835.jpg",
+        "label": "non_flood",
+        "sha256": "a37bc97411cb7ac6c602b638a4ae161ec2d7ac8a4355b236c42eac10ef10f277",
+        "format": "JPEG",
+        "original_bytes": 66318,
+        "compressed_bytes": 33312,
+        "compressed_sha256": "75b3b3cd9b91586538090ad85fccd28a011f4b590627b356bcb71220dc31262c"
+      },
+      {
+        "relative_path": "non_flood/다운로드 (17).jpg",
+        "label": "non_flood",
+        "sha256": "10b48951d5016b1dbf60509c17f62c2647a902444531028666d61f165a110771",
+        "format": "JPEG",
+        "original_bytes": 14028,
+        "compressed_bytes": 14736,
+        "compressed_sha256": "3ea01d984f460f6fdeddfb0b29d807b1847e0cf7441e25d8e2451e05d0baeb9c"
+      },
+      {
+        "relative_path": "non_flood/화면 캡처 2025-03-05 153232.jpg",
+        "label": "non_flood",
+        "sha256": "c9e1a30f343094122869eff21dbfe7caaf3ab27b79b75f9fe581eeeb54027375",
+        "format": "JPEG",
+        "original_bytes": 66817,
+        "compressed_bytes": 34060,
+        "compressed_sha256": "4d07c34d07b2de83c72107a812ef8ddf5b7afd487ab0b3d546664d92bd21e4bf"
+      },
+      {
+        "relative_path": "non_flood/1789568749518_282700609501588260_7406490438318140161_457e5b27ff82f5cc09a9054090d4d3c2.jpg",
+        "label": "non_flood",
+        "sha256": "6f8a2b1e3bac95e251969c5917f1e9efd101db672b064d01404e978bf759aab4",
+        "format": "JPEG",
+        "original_bytes": 629855,
+        "compressed_bytes": 119716,
+        "compressed_sha256": "afa080cd5d4896e022ca5db5df7c04a649a693a920c0fb72269a50644be658fb"
+      },
+      {
+        "relative_path": "non_flood/1789568754305_282700609501588260_7406490438318140161_d8a8d242988605b04d1ce450fe6b34f8.jpg",
+        "label": "non_flood",
+        "sha256": "7307e294c31f83de713f169ec3b7f14fbf73b87c78d059b45be2a3f57a9d72ce",
+        "format": "JPEG",
+        "original_bytes": 1484828,
+        "compressed_bytes": 279095,
+        "compressed_sha256": "bf13af982c7a2d8ce28cd8b8d835b3f5b955f77fc21c4f476263bda621da6bc8"
+      },
+      {
+        "relative_path": "non_flood/AKR20211228058800052_01_i_P4.jpg",
+        "label": "non_flood",
+        "sha256": "335da6829f7048e60a42a406f54985c7d1132dfd769137c48965aacc601b4128",
+        "format": "JPEG",
+        "original_bytes": 327293,
+        "compressed_bytes": 61893,
+        "compressed_sha256": "affb944807b35b512e7d282dda824500d06d6cf1d30385be0d7dd6982f3c40e3"
+      },
+      {
+        "relative_path": "non_flood/images (1)1.jpg",
+        "label": "non_flood",
+        "sha256": "dfd2bf25abb8eff1566c1e6ff4ab87eb832382ac1a5a49549e1b0fe0b9a63cb4",
+        "format": "JPEG",
+        "original_bytes": 17346,
+        "compressed_bytes": 18205,
+        "compressed_sha256": "92dbc4e1533a44b740f9d83b1235019103ec1b8cb3aca7901e6c5cf01edd175b"
+      },
+      {
+        "relative_path": "non_flood/화면 캡처 2025-03-05 175914.jpg",
+        "label": "non_flood",
+        "sha256": "ec30de984e565a34847944157425ede963aa0be23b065b3732eb9597ac76b1c9",
+        "format": "JPEG",
+        "original_bytes": 97888,
+        "compressed_bytes": 49975,
+        "compressed_sha256": "088cd5845690f347d8136f874a9e4a6ac5acd22748e64dcd74fed9c31c6dc3e2"
+      },
+      {
+        "relative_path": "non_flood/화면 캡처 2025-03-05 152437.jpg",
+        "label": "non_flood",
+        "sha256": "2c620cd0c3d694d5119d85883fd7b23642f08ce0eb03ca21766e5c11224132a8",
+        "format": "JPEG",
+        "original_bytes": 63108,
+        "compressed_bytes": 31730,
+        "compressed_sha256": "1a39dc866a7d250a871b65955eb5683326c36ee9e40130ae3b8942d563b2aeff"
+      },
+      {
+        "relative_path": "non_flood/1789568749196_282700609501588260_7406490438318140161_1c6009c2a77bfa996d8a4d22d9c3fd58.jpg",
+        "label": "non_flood",
+        "sha256": "fa24d60c34be44fb934a934be05686d66907d81619216b140be5bd63c6439fe9",
+        "format": "JPEG",
+        "original_bytes": 905833,
+        "compressed_bytes": 137253,
+        "compressed_sha256": "72000c23bb83f6f42698f6de12acbc89ffc104edf633c925008a069269f643ed"
+      },
+      {
+        "relative_path": "non_flood/img (1).jpg",
+        "label": "non_flood",
+        "sha256": "2c2088de1756cd1bc0e55d300d928af8b493d59df562e46be9c70c4263716bc2",
+        "format": "JPEG",
+        "original_bytes": 413769,
+        "compressed_bytes": 145136,
+        "compressed_sha256": "feadb6e1e8246a1e0fdb3ab0bcda3754c88d651c2a375894f65b4a0f541ddd96"
+      },
+      {
+        "relative_path": "non_flood/202309111114430145_l.jpg",
+        "label": "non_flood",
+        "sha256": "0fb3a939767b0614bb5786a4f2d77661b71f316fe2cc9e2af3c0ef24d967eba5",
+        "format": "JPEG",
+        "original_bytes": 60417,
+        "compressed_bytes": 46953,
+        "compressed_sha256": "55289e98e3e4491d7ff4f3326a644fbe01cfe046ccbcb0241bb7586f9aa29f45"
+      },
+      {
+        "relative_path": "non_flood/화면 캡처 2025-03-05 180321.jpg",
+        "label": "non_flood",
+        "sha256": "9b63b57d9357dda36bab30f1bc0b45f80c734278fbc5fda7e490cbadde5e9837",
+        "format": "JPEG",
+        "original_bytes": 83583,
+        "compressed_bytes": 42517,
+        "compressed_sha256": "4b343c3cadf81f78410be025dde0d75a5e502c62964461e86b78821ee35970f4"
+      },
+      {
+        "relative_path": "non_flood/6.jpg",
+        "label": "non_flood",
+        "sha256": "c441af2946491166eb9a5c7a7ed9f49d47015d134c3e3290fe4746ba81eee258",
+        "format": "PNG",
+        "original_bytes": 1855386,
+        "compressed_bytes": 130798,
+        "compressed_sha256": "49cb4a3f15f832229555b75c2c2ae9b270aa23127477596dbeec932ffba5ee1f"
+      },
+      {
+        "relative_path": "non_flood/images (28)1.jpg",
+        "label": "non_flood",
+        "sha256": "133ce5159193385fc30a15f207f7b085563f9f513765aa6d9db1527ff27d1e50",
+        "format": "JPEG",
+        "original_bytes": 13457,
+        "compressed_bytes": 13903,
+        "compressed_sha256": "426ff6d856377c63c97af0c8e1fd5664b65e611bb8a74145867678b841803b23"
+      },
+      {
+        "relative_path": "non_flood/images - 2025-01-28T164753.512.jpg",
+        "label": "non_flood",
+        "sha256": "7b6a9c9dcaf36ed2edb0e435c1cbaffd8635cb82a1d1859270f3784b76dc232c",
+        "format": "JPEG",
+        "original_bytes": 6027,
+        "compressed_bytes": 6615,
+        "compressed_sha256": "9462db04ac24f372182198bbe2e046770d318cab9f5a7138cbc6effcbe41692f"
+      },
+      {
+        "relative_path": "non_flood/images (68).jpg",
+        "label": "non_flood",
+        "sha256": "d567a330f9aae5ae4244d9c33131d265796c8b1f4c5b6f5418c96e4071dcb032",
+        "format": "JPEG",
+        "original_bytes": 12293,
+        "compressed_bytes": 12790,
+        "compressed_sha256": "20aa8a8d205f3cdd797b97d681c260be0a7032a561a1dd64910a3269181ef1b5"
+      },
+      {
+        "relative_path": "non_flood/화면 캡처 2025-03-05 153618.jpg",
+        "label": "non_flood",
+        "sha256": "43e12f9c4c083131170e11f2d8982e9a4d0f854c0bca00f22be32a3cf44a28e7",
+        "format": "JPEG",
+        "original_bytes": 95694,
+        "compressed_bytes": 48503,
+        "compressed_sha256": "3d54f621d0efcaa26cf6795339f6f537f0df81b56e716b7411d58ac2a0c2e49e"
+      },
+      {
+        "relative_path": "non_flood/1789568749222_282700609501588260_7406490438318140161_252d56e682395c7bebf8921689643574.jpg",
+        "label": "non_flood",
+        "sha256": "de50feeb6fbbfce20c858b922e4c2b64a9db5cf8ce52fb254307a24842e778c5",
+        "format": "JPEG",
+        "original_bytes": 529910,
+        "compressed_bytes": 94468,
+        "compressed_sha256": "7bd207ef2c3cc3030c011a2ab58b089d1176dfce908cac6ef9b1ba62161d3223"
+      },
+      {
+        "relative_path": "non_flood/다운로드 (26) 3.jpg",
+        "label": "non_flood",
+        "sha256": "de0b95d4b98a14825822659307248874d03101858f644f9721cec72b9101bbe5",
+        "format": "JPEG",
+        "original_bytes": 12208,
+        "compressed_bytes": 12546,
+        "compressed_sha256": "433097dd5857c3c8614871af85106a617d21a0e45cff207dc6cb197187bf826d"
+      },
+      {
+        "relative_path": "non_flood/다운로드 (28) 3.jpg",
+        "label": "non_flood",
+        "sha256": "6a97c90bfae9e3a4ee39e7a5c7fe2b75b4fe6a3e400b2a09afac18a275f41cae",
+        "format": "JPEG",
+        "original_bytes": 11914,
+        "compressed_bytes": 12169,
+        "compressed_sha256": "d773eef3e502ce085b99bb9a22c04557e487ed373e2fd281603c3568ae90137b"
+      },
+      {
+        "relative_path": "non_flood/1000_F_456742052_YudLlJwZCJdCGsCjS95JW1leO2jQrZcp.jpg",
+        "label": "non_flood",
+        "sha256": "782a4aa7d354dceb8d634480c647446953b8c04939dbd8a5ed8139b09f7c4157",
+        "format": "JPEG",
+        "original_bytes": 433724,
+        "compressed_bytes": 117891,
+        "compressed_sha256": "d5dfae6a4b536a695d22fa04cb306536117cd1755ef7047afaf80e6aff481a4b"
+      },
+      {
+        "relative_path": "non_flood/다운로드 (38) 3.jpg",
+        "label": "non_flood",
+        "sha256": "33e834881a9e0e7ca027b9b8d2ac0f4ff9427e6d5bfe69ea0749c9b8c7188764",
+        "format": "JPEG",
+        "original_bytes": 10253,
+        "compressed_bytes": 10702,
+        "compressed_sha256": "94a78e1c22fc86462d476e6626eee961ca345908966749a33da4e05931665b44"
+      },
+      {
+        "relative_path": "non_flood/20200212_134749.jpg",
+        "label": "non_flood",
+        "sha256": "e8abcc77cfebf041681d602996e778ec393b201771d2b254574f0e69605d5ddb",
+        "format": "JPEG",
+        "original_bytes": 507201,
+        "compressed_bytes": 84338,
+        "compressed_sha256": "27ff8900ef7ab6220113c95026704994ac250eac52de6f34e42a04dc9ee5b198"
+      },
+      {
+        "relative_path": "non_flood/화면 캡처 2025-03-05 182937.jpg",
+        "label": "non_flood",
+        "sha256": "8f01696570c558df42bd56f0e1b7a47c082f769ccad329ef34ab30faa3f60f82",
+        "format": "JPEG",
+        "original_bytes": 60819,
+        "compressed_bytes": 30695,
+        "compressed_sha256": "7cdd739e1ec0b4cfd086a040ce62b017da4fca69e4bbe13213591e8e7840c524"
+      },
+      {
+        "relative_path": "non_flood/화면 캡처 2025-03-05 172154.jpg",
+        "label": "non_flood",
+        "sha256": "f6fcb35702106630aad2a2728d5b82efd38162f3e9cf517455d74a5d23278b12",
+        "format": "JPEG",
+        "original_bytes": 63315,
+        "compressed_bytes": 31520,
+        "compressed_sha256": "b660f301d6f0a1e71af88cf0a17cfc39cc51e3c5875812ce52f579043eb9b73e"
+      },
+      {
+        "relative_path": "non_flood/화면 캡처 2025-03-05 172249.jpg",
+        "label": "non_flood",
+        "sha256": "e23a2f32ccc399fb02b93fab72cd958f47f6bb4c22de82a938af7a41d6ce383a",
+        "format": "JPEG",
+        "original_bytes": 62571,
+        "compressed_bytes": 30597,
+        "compressed_sha256": "77476bd2800ac431af8b2c5032e77c74e5e1103903331379cbff807b421be6c3"
+      },
+      {
+        "relative_path": "non_flood/images (6).jpg",
+        "label": "non_flood",
+        "sha256": "134ad7a13637047c799be13d45bc3b1da685a64bc561af6f8a61c48f96183817",
+        "format": "JPEG",
+        "original_bytes": 10543,
+        "compressed_bytes": 11639,
+        "compressed_sha256": "b88351b1275de75eb97942d7946f2e58e79228d4598d9b71d3207382fcbe426c"
+      },
+      {
+        "relative_path": "non_flood/다운로드 (20).jpg",
+        "label": "non_flood",
+        "sha256": "17cc0160b5cdbc2eb9a64b4d744148a135d43c44e6c1681297b514b6ac9f7e47",
+        "format": "JPEG",
+        "original_bytes": 10158,
+        "compressed_bytes": 10935,
+        "compressed_sha256": "81ec1e5a977bcb115af3b3f9127f62c8d7fb17c35f1332ae8f3894718909715f"
+      },
+      {
+        "relative_path": "non_flood/화면 캡처 2025-03-05 181325.jpg",
+        "label": "non_flood",
+        "sha256": "3ec886093348c65fb61f3249fd6060dbb373656412257f12bb9470c0e1de996d",
+        "format": "JPEG",
+        "original_bytes": 77623,
+        "compressed_bytes": 39113,
+        "compressed_sha256": "24c4e6fa112d943865fec332fb248715ade2e76c7c3fcc2e9197bfccbf298d52"
+      }
+    ]
+  },
+  "copied_from": "products/be/experiments/weak_network.py",
+  "original_runner_sha256": "5a521cc6fcfdd757a14f91a267eb8a058ed0e6c34dc12870a66d500447c69357",
+  "git_commit": "6b341d75813986d7aeaec62dec16e0856e11b8f8"
+}

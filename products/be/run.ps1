@@ -1,4 +1,4 @@
-# Script khởi chạy Mock Server trên PowerShell
+﻿# Script khởi chạy Mock Server trên PowerShell
 Write-Host "=================================================" -ForegroundColor Cyan
 Write-Host "   KHỞI ĐỘNG FLOOD RESCUE MOCK SERVER (:8000)   " -ForegroundColor Cyan
 Write-Host "=================================================" -ForegroundColor Cyan
@@ -10,7 +10,7 @@ $venvPython = Join-Path $scriptDir ".venv\Scripts\python.exe"
 
 if (-not (Test-Path $venvPython)) {
     Write-Host "Đang tạo môi trường ảo .venv..." -ForegroundColor Yellow
-    py -3.11 -m venv .venv
+    if (Get-Command py -ErrorAction SilentlyContinue) { py -3.11 -m venv .venv } else { python -m venv .venv }
 }
 
 Write-Host "Đang đồng bộ dependencies..." -ForegroundColor Yellow
