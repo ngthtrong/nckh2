@@ -26,7 +26,6 @@ Từ 1.000 kbit/s, confidence từ 0,90 & Chỉ thông tin khi cờ ưu tiên me
 Từ 50 đến dưới 1.000 kbit/s & Ảnh nén và thông tin \\
 Có data nhưng dưới 50 kbit/s & Chỉ thông tin \\
 \bottomrule\end{tabularx}
-\SourceNote{\RepoPath{products/fe/app/lib/config.dart} và \RepoPath{products/fe/app/lib/domain/entities/send_mode.dart}; cấu hình hiện bật ưu tiên metadata khi confidence cao.}
 \end{table}
 
 Trong chế độ nén, cấu hình hiện khai báo quality 60 và cạnh tối đa 1.024 pixel. Ảnh định dạng không phù hợp endpoint có thể được đổi sang JPEG. Các ngưỡng là quyết định kỹ thuật của demo; chưa có khảo sát tối ưu theo nhiều điện thoại và mạng thực. Đặc biệt, confidence cao có thể làm không gửi ảnh ngay cả khi mạng mạnh; vì vậy hiệu chuẩn confidence và nhu cầu xác minh phải được xem cùng chính sách tiết kiệm truyền tải.
@@ -73,7 +72,6 @@ Hợp đồng trên container & Đạt các ca & App/server message và multipar
 E2E Chromium headless & 46/46 & App web tới backend/dashboard, mạng giả lập \\
 APK debug & Build được & Xác nhận tạo APK, chưa xác nhận chạy máy thật \\
 \bottomrule\end{tabularx}
-\SourceNote{\RepoPath{docs/nghiem-thu/doi_chieu_thuyet_minh.md}; không phải số test chạy lại trong lần viết báo cáo.}
 \end{table}
 
 Test lõi phân cụm được thiết kế so sánh với snapshot nghiên cứu trên 80 run gold. Nó kiểm tra tính khớp công thức và đường tạo đồ thị, không kiểm chứng một nguồn tin thực tế. Test web kiểm tra tạo SOS, bài kèm ảnh, offline/reconnect, không GPS, đăng nhập và cập nhật trạng thái. Cần bổ sung thử nghiệm Android cho camera, permission, tiền xử lý pixel, ONNX/ExecuTorch, Workmanager và SMS.

@@ -12,6 +12,7 @@ ROOT = Path(__file__).resolve().parents[2]
 OUT = ROOT / 'report/generated'
 SOURCES = {}
 PREDICTION_AUDITS = []
+TABLE_NOTES = {}
 
 
 def read_bytes(relative):
@@ -64,7 +65,8 @@ def table(name, caption, label, columns, headers, data, note):
               r'\begin{tabular}{' + columns + '}', r'\toprule',
               ' & '.join(headers) + r' \\ \midrule']
     output.extend(' & '.join(map(str, row)) + r' \\' for row in data)
-    output.extend([r'\bottomrule\end{tabular}', r'\SourceNote{' + note + '}', r'\end{table}', ''])
+    TABLE_NOTES[name] = note
+    output.extend([r'\bottomrule\end{tabular}', r'\end{table}', ''])
     (OUT / 'tables' / f'{name}.tex').write_text('\n'.join(output))
 
 
@@ -127,16 +129,38 @@ def main():
     image_table('pruning_st','Đối chiếu trước và sau cắt tỉa có cấu trúc',pruning,
                 [('baseline_pth','PTH gốc'),('structured_pth','PTH cắt tỉa'),('baseline_onnx','ONNX gốc'),
                  ('structured_onnx','ONNX cắt tỉa'),('baseline_pte','PTE gốc'),('structured_pte','PTE cắt tỉa')])
-    matrix=base['classification_metrics']['pth']['confusion_matrix']
-    table('confusion','Ma trận nhầm lẫn FP32: hàng là nhãn thật, cột là dự đoán','tab:confusion',
+    model = 'products/fe/model/Edge Ai/mobilenetv3_large_dataset_v4_seed1024/'
+    current = obj(model + 'test_metrics_mobilenetv3_large.json')
+    current_config = obj(model + 'config_mobilenetv3_large.json')
+    matrix_rows = rows(model + 'cm_raw_test_mobilenetv3_large.csv')
+    if [row[''] for row in matrix_rows] != classes or current_config['class_order'] != classes:
+        raise ValueError('New model class order mismatch')
+    matrix = [[int(row[c]) for c in classes] for row in matrix_rows]
+    total = sum(map(sum, matrix))
+    if current_config['seed'] != 1024 or total != current['num_samples']:
+        raise ValueError('New model seed or confusion-matrix size mismatch')
+    f1s = []
+    for i, c in enumerate(classes):
+        support = sum(matrix[i]); predicted = sum(row[i] for row in matrix)
+        precision = matrix[i][i] / predicted; recall = matrix[i][i] / support
+        f1 = 2 * precision * recall / (precision + recall)
+        f1s.append(f1)
+        if support != current[c + '_support'] or any(abs(value - current[c + '_' + key]) > 1e-10
+                for key, value in [('precision', precision), ('recall', recall), ('f1', f1)]):
+            raise ValueError('New model per-class metrics mismatch: ' + c)
+    severity = [1, 2, 3, 0]
+    critical = sum(matrix[i][j] for i in range(4) for j in range(4) if abs(severity[i]-severity[j]) >= 2)
+    if (abs(sum(matrix[i][i] for i in range(4))/total - current['acc']) > 1e-10
+            or abs(sum(f1s)/4 - current['macro_f1']) > 1e-10 or critical != current['critical_error_count']):
+        raise ValueError('New model aggregate metrics mismatch')
+    table('confusion','Ma trận nhầm lẫn model seed 1024: hàng thật, cột dự đoán','tab:confusion',
           'lrrrr',['Nhãn','low','medium','high',r'non\_flood'],
-          [[c.replace('_',r'\_'),*r] for c,r in zip(classes,matrix)],
-          r'\RepoPath{products/fe/reports/pth_onnx_pte/summary.json}; tổng 256 ảnh.')
-    metrics=base['classification_metrics']['pth']['per_class']
-    table('image-classes','Chất lượng FP32 theo từng lớp','tab:image-classes','lrrrr',
+          [[c.replace('_',r'\_'),*row] for c,row in zip(classes,matrix)],
+          r'\RepoPath{'+model+r'cm_raw_test_mobilenetv3_large.csv}; 256 ảnh test. Chưa có manifest đường dẫn/hash split riêng cho seed 1024.')
+    table('image-classes','Chất lượng model seed 1024 theo từng lớp','tab:image-classes','lrrrr',
           ['Lớp',r'Precision (\%)',r'Recall (\%)',r'F1 (\%)','Số ảnh'],
-          [[c.replace('_',r'\_'),*[fmt(100*metrics[c][s],2) for s in ['precision','recall','f1']],metrics[c]['support']] for c in classes],
-          r'\RepoPath{products/fe/reports/pth_onnx_pte/summary.json}.')
+          [[c.replace('_',r'\_'),*[fmt(100*current[c+'_'+key],2) for key in ['precision','recall','f1']],
+            current[c+'_support']] for c in classes], r'\RepoPath{'+model+r'test_metrics_mobilenetv3_large.json}; đã đối chiếu ma trận.')
     mobile_path = 'products/fe/reports/mobile/samsung21se.json'
     mobile, mobile_audit = audit_mobile(read_bytes(mobile_path), split)
     table('mobile-runtime', 'Benchmark tại ứng dụng đã lưu: cùng 256 ảnh test',
@@ -247,6 +271,7 @@ def main():
             'ImageTrain':sum(r['split'] == 'train' for r in split),
             'ImageVal':sum(r['split'] == 'val' for r in split),
             'ImageTest':sum(r['split'] == 'test' for r in split),
+            'NewImageAccuracy':fmt(100*current['acc'],2),'NewImageMacroFOne':fmt(100*current['macro_f1'],2),
             'ImageAccuracy':fmt(100*m['accuracy'],2),'ImageMacroFOne':fmt(100*m['macro_f1'],2),
             'PTQAccuracy':fmt(100*quant['classification_metrics']['ptq_int8']['accuracy'],2),
             'QATAccuracy':fmt(100*quant['classification_metrics']['qat_int8']['accuracy'],2)}
@@ -255,6 +280,8 @@ def main():
     snapshot={'source_commit':subprocess.check_output(['git','rev-parse','HEAD'],cwd=ROOT,text=True).strip(),
               'sources_sha256':SOURCES,'image_audit':{'rows':len(split),'missing':0,'md5_mismatch':0,'cross_split_groups':0},
               'prediction_audits': PREDICTION_AUDITS,
+              'table_notes': TABLE_NOTES,
+              'new_model_audit': {'seed': 1024, 'test_samples': total, 'matrix_metrics_match': True, 'split_manifest_available': False},
               'mobile_audit': mobile_audit,
               'note':'Saved artifacts only; no training or mobile benchmark rerun. Source commit does not include report edits. PTQ/QAT summary discrepancies are disclosed in the report, not repaired.'}
     (OUT/'provenance.json').write_text(json.dumps(snapshot,ensure_ascii=False,indent=2)+'\n')

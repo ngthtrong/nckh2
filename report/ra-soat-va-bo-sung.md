@@ -62,3 +62,17 @@ Các mục này được trình bày như hạn chế hoặc công việc tiếp
 ## Kiểm tra
 
 PDF một mặt/hai mặt đều 94 trang, gồm 68 trang thân bài và 19 hình; kết quả kiểm tra chi tiết được ghi trong `README.md`. Quy trình đã chạy gồm xuất bảng/audit 1.702 ảnh, kiểm tra hai benchmark app, sinh hình, build nội dung và các sản phẩm Việt–Anh, `make check` và kiểm tra diff. Không chạy lại training, notebook Colab, E2E hoặc điện thoại.
+
+## Kiểm tra sau cập nhật ngày 08/10/2026
+
+Bản nội dung một mặt/hai mặt đều 98 trang, 70 trang từ Mở đầu đến hết Kết luận/kiến nghị. Bản tin Việt/Anh mỗi bản 1 trang A4; tóm tắt Việt/Anh mỗi bản 2 trang A4. Đã kiểm tra trực quan ma trận/ví dụ lỗi/loss, biểu mẫu chủ nhiệm và hai bản tin; sáu PNG khớp nguyên byte nguồn. Sáu log cuối không có overfull, tham chiếu/trích dẫn chưa giải quyết, nhãn lặp hoặc cảnh báo phông; PDF A4, phông nhúng. Đã xác nhận số liệu model mới trong văn bản PDF.
+
+`make check`, kiểm tra bản hai mặt và `git diff --check` đạt. Git cho phép đúng sáu PDF hiện có trong build; file phụ/môi trường vẫn bỏ qua. `make check-release` chưa đạt: còn hai ghi chú ảnh/quá trình học tập và nhận xét GVHD, các cờ xác nhận hồ sơ false, thiếu thuyết minh phê duyệt và ba PDF sản phẩm. Đây là bản đã biên dịch/kiểm tra, chưa phải bộ hồ sơ đủ điều kiện nộp.
+
+## Kiểm tra sau đối chiếu PDF mẫu — 08/10/2026
+
+Bản nội dung một mặt/hai mặt hiện đều **94 trang**, có **69 trang thân bài**. Thông tin kết quả Việt gồm trang nội dung/chủ nhiệm và trang nhận xét GVHD riêng, đúng cấu trúc hai trang mẫu; thông tin kết quả Anh và thông tin chủ nhiệm mỗi phần một trang. Khối ký chủ nhiệm nằm cùng trang nội dung, không còn trang chỉ có chữ ký. Bốn PDF bản tin/tóm tắt Việt–Anh đều **1 trang A4/bản**.
+
+Đã xem trực quan các mẫu gốc và các trang biểu mẫu/bản tin/tóm tắt biên dịch; xác nhận logo, thứ tự tên cơ quan--tiêu đề, các mục, trường thông tin và vị trí khối ký. Các dòng nguồn nội bộ đã bỏ khỏi cả sáu PDF và bộ xuất bảng; trích dẫn khoa học/danh mục tài liệu giữ nguyên. Sáu log cuối không có overfull, tham chiếu/trích dẫn chưa giải quyết, nhãn lặp hoặc cảnh báo phông.
+
+`make check`, kiểm tra hai mặt và `git diff --check` đạt. `check-release` vẫn chặn do 10 trường trống thực tế (ảnh, xếp loại/thành tích năm 1–4, nhận xét GVHD), cờ xác nhận hồ sơ và bốn PDF phê duyệt/minh chứng còn thiếu. Số trường tăng từ hai ghi chú tổng hợp sang 10 ô kê khai riêng, không có thêm yêu cầu hành chính mới.

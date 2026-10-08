@@ -23,7 +23,6 @@ Hệ thống gồm ứng dụng Flutter tạo thông tin cầu cứu, backend Fa
 \caption{Kiến trúc chức năng của hệ thống demo đang có trong repo}
 \label{fig:system-architecture}
 \end{figure}
-\SourceNote{Tổng hợp từ \RepoPath{products/fe/app/lib/main.dart}, \RepoPath{products/be/main.py}, \RepoPath{products/be/storage.py} và \RepoPath{products/be/cluster_service.py}.}
 
 Dữ liệu từ điện thoại và dữ liệu nạp demo dùng chung API/lưu trữ, nhưng nguồn mô phỏng được gắn nhãn để tránh nhầm với yêu cầu thực tế. Backend nạp run\_001 khi volume trống trong cấu hình demo; đây là 316 báo cáo bán tổng hợp. Việc dashboard có dữ liệu và nhiều cụm sau seed chỉ chứng minh đường tích hợp hoạt động với dữ liệu đó.
 
@@ -68,7 +67,6 @@ SQLite giữ bảng \texttt{reports}, \texttt{messages\_dedup}, \texttt{report\_
 \caption{Quan hệ logic chính của lưu trữ; nét đứt biểu diễn liên hệ nghiệp vụ}
 \label{fig:data-relations}
 \end{figure}
-\SourceNote{\RepoPath{docs/contact_db.md}; sơ đồ là quan hệ logic, không khẳng định mọi đường nối được cài bằng foreign key SQL.}
 
 Transaction theo từng message giúp lỗi của một phần batch không hủy các phần hợp lệ khác. Chế độ WAL cho phép dashboard đọc khi app ghi. \texttt{server\_meta} giữ sequence thay đổi, epoch và version đầu vào cụm. Migration bổ sung cột/bảng và chuẩn hóa trạng thái legacy khi khởi tạo, giữ dữ liệu hiện có.
 
@@ -93,4 +91,3 @@ Luồng thuật toán được minh họa lại ở Hình~\ref{fig:research-pipe
 \caption{Ranh giới dữ liệu quan sát, hàng xem xét và evaluator của pipeline nghiên cứu}
 \label{fig:research-pipeline}
 \end{figure}
-\SourceNote{\RepoPath{paper/figures/pipeline_v2.pdf} và \RepoPath{paper/main.tex}.}

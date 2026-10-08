@@ -4,7 +4,8 @@ Báo cáo sử dụng bốn nhóm dữ liệu có mục đích khác nhau: bộ 
 
 Thông tin đề tài lấy từ \RepoPath{resource/infoGroup.md} và thuyết minh. Tài liệu thiết kế mô tả ý định triển khai; mã nguồn xác định cơ chế hiện tại; tệp split và artifact là căn cứ kết quả. Bản đối chiếu nghiệm thu ngày 27/09/2026 hữu ích cho lịch sử kiểm thử, nhưng một số kết luận về thiếu split, ONNX và lượng tử hóa đã được artifact hiện tại bổ sung. Báo cáo không dùng những kết luận cũ đó để phủ nhận tệp đang có trong repo.
 
-\subsection{Bộ ảnh mức ngập hiện tại}
+\subsection{Bộ ảnh mức ngập và các phiên model}
+Các kiểm tra đường dẫn, MD5 và nhóm chia tập dưới đây áp dụng CSV seed 42 đã lưu. Model seed 1024 cung cấp history (1.189 train, 257 validation) và metric test 256 ảnh, nhưng chưa có manifest split riêng để xác nhận trùng từng ảnh. Hình/bảng phân loại mới và benchmark runtime cũ được ghi riêng trong phần kết quả.
 \texttt{Dataset\_Flood} hiện có \ImageTotal{} ảnh trong bốn thư mục lớp. Tệp chia tập đã lưu có \ImageTrain{} ảnh train, \ImageVal{} ảnh validation và \ImageTest{} ảnh test. Thứ tự đầu ra là \texttt{low}, \texttt{medium}, \texttt{high}, \texttt{non\_flood}. Thứ tự này phải giữ thống nhất trong checkpoint, cấu hình, manifest, nhãn app và tính các thước đo.
 \input{generated/tables/image-split}
 
@@ -25,7 +26,6 @@ Pipeline đánh giá hiện tại khai báo: xử lý EXIF, chuyển RGB, letter
 Tiền xử lý là một phần của mô hình thực thi. Thay đổi EXIF, nội suy, kích thước hoặc thứ tự kênh có thể thay đổi đầu ra dù trọng số không đổi. Tài liệu cũ mô tả đầu vào 224 và không chuyển EXIF cho checkpoint trước. Hai mô tả này không được dùng thay thế nhau. Manifest và config tương ứng checkpoint phải là nguồn xác định pipeline.
 
 Cấu hình hiện tại ghi seed 42, dropout 0,25, batch size 32, tối đa 35 epoch, learning rate backbone $10^{-5}$ và head $2\times10^{-4}$, weight decay $5\times10^{-4}$, label smoothing 0,05, đóng băng backbone trong 3 epoch đầu và patience 7. Đây là thông số trong tệp cấu hình đã lưu; báo cáo không khẳng định đã chạy lại huấn luyện bằng chúng trong lần biên soạn.
-\SourceNote{\RepoPath{products/fe/model/Edge Ai/config_mobilenetv3_large.json}; các báo cáo hiện tại ghi hash config và split để đối chiếu.}
 
 \subsection{Dữ liệu khẩn cấp có cấu trúc}
 Gói \texttt{urgency\_ei}, phiên bản SOURCE FINAL v5.0.0, xây dựng bảng tham chiếu tổng hợp xác định từ toàn bộ $2^5=32$ trạng thái của năm đặc trưng Boolean. Đặc trưng gồm \texttt{unresponsive}, \texttt{respiratory\_distress\_or\_cyanosis}, \texttt{heavy\_bleeding}, \texttt{active\_convulsions} và \texttt{high\_risk\_trauma}. Tên và ánh xạ được ghi trong registry nguồn của gói.

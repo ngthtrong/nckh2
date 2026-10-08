@@ -21,9 +21,9 @@ make -C report full-twoside
 make -C report smoke
 ```
 
-PDF chính: `build/content/content.pdf`. Bốn sản phẩm riêng ở `build/bulletin-vi/`, `build/bulletin-en/`, `build/summary-vi/`, `build/summary-en/`. `build/` được Git bỏ qua. `make clean` chỉ xóa đầu ra build.
+PDF chính: `build/content/content.pdf`. Bốn sản phẩm riêng ở `build/bulletin-vi/`, `build/bulletin-en/`, `build/summary-vi/`, `build/summary-en/`. Git theo dõi PDF chính, bản hai mặt và bốn sản phẩm riêng; các file phụ, log và môi trường trong `build/` vẫn được bỏ qua. `make clean` chỉ xóa đầu ra build.
 
-Yêu cầu XeLaTeX, KOMA-Script, các gói trong `template/packages.tex`, Python 3.9+ và Times New Roman đủ bốn kiểu. Build tự chọn biblatex/biber khi có, nếu không dùng BibTeX/natbib; có thể chỉ định `BIBLIOGRAPHY=biblatex` hoặc `BIBLIOGRAPHY=bibtex`. `xurl` được dùng khi có để ngắt đường dẫn dài. Không cần latexmk; bộ build chạy đủ lượt để giải quyết tham chiếu.
+Yêu cầu XeLaTeX, KOMA-Script, các gói trong `template/packages.tex`, Python 3.9+ và Times New Roman đủ bốn kiểu. Build tự chọn biblatex-ieee/biber khi có (`style=ieee`, `sorting=none`), nếu không dùng BibTeX/natbib với `ieeetr`; có thể chỉ định `BIBLIOGRAPHY=biblatex` hoặc `BIBLIOGRAPHY=bibtex`. `xurl` được dùng khi có để ngắt đường dẫn dài. Không cần latexmk; bộ build chạy đủ lượt để giải quyết tham chiếu.
 
 ## Nội dung và căn cứ
 
@@ -36,15 +36,15 @@ Yêu cầu XeLaTeX, KOMA-Script, các gói trong `template/packages.tex`, Python
 - `bibliography/articles.bib`: 19 nguồn thực sự trích dẫn. Không tạo văn bản pháp quy hoặc tài liệu mẫu để lấp nhóm trống.
 - `evidence/`: manifest ánh xạ ba sản phẩm nhóm III theo mục 17; các cờ xác nhận giữ false và chưa có PDF minh chứng. Nhóm I/II không đăng ký; bản thảo là sản phẩm bổ sung.
 
-Các số liệu chính dùng snapshot ảnh **1.702 mẫu, test 256 ảnh, đầu vào 256**, khác README/notebook cũ (1.621/1.625 mẫu, test 244, đầu vào 224). Accuracy FP32 hiện tại 76,17% không được so với 73,77% của split cũ để kết luận cải thiện. Các kết luận cũ thiếu split/INT8/ONNX được cập nhật theo file đang tồn tại.
+Các số liệu chính dùng snapshot ảnh **1.702 mẫu, test 256 ảnh, đầu vào 256**, khác README/notebook cũ (1.621/1.625 mẫu, test 244, đầu vào 224). Accuracy FP32 của phiên lịch sử seed 42 là 76,17% không được so với 73,77% của split cũ để kết luận cải thiện. Các kết luận cũ thiếu split/INT8/ONNX được cập nhật theo file đang tồn tại.
 
 **Điểm cần rà soát số liệu:** PTQ/QAT summary chưa khớp hoàn toàn CSV dự đoán. QAT summary ghi Accuracy 52,34%, CSV tính ra 51,17%. Báo cáo giữ cả hai nguồn và bảng đối chiếu, chưa xem metric nén là số liệu đã chốt. FP32/pruning khớp CSV; ảnh khớp MD5/split. Mã backend chưa đọc `E_i` mà app gửi khi chuyển sang thuật toán; điều này được ghi như khoảng trống tích hợp, không sửa sản phẩm trong công việc soạn báo cáo.
 
 ## Hình thức và hồ sơ
 
-Thân bài A4, Times New Roman 13 bp, giãn dòng 1,3; lề trái 30 mm, phải/trên/dưới 20 mm. Hai bìa dùng khung đôi, nội dung căn giữa riêng. Phần đầu đánh La Mã; Mở đầu bắt đầu số Ả Rập. Các chương không ép mở ở trang lẻ; hai mặt giữ lề vật lý quy định. Hình/bảng/công thức dùng nhãn và tham chiếu, có ghi nguồn.
+Thân bài A4, Times New Roman 13 bp, giãn dòng 1,3; lề trái 30 mm, phải/trên/dưới 20 mm. Hai bìa dùng khung đôi, nội dung căn giữa riêng. Phần đầu đánh La Mã; Mở đầu bắt đầu số Ả Rập. Các chương không ép mở ở trang lẻ; hai mặt giữ lề vật lý quy định. Hình/bảng/công thức dùng nhãn và tham chiếu. Trích dẫn IEEE dùng số trong ngoặc vuông và một danh mục theo thứ tự xuất hiện. Các dòng nguồn nội bộ đã bỏ khỏi PDF theo yêu cầu; provenance giữ trong generated/.
 
-`make check` cho phép bản sơ bộ và liệt kê thiếu sót. Bộ kiểm tra bản đầy đủ giữ điều kiện 50 trang thân bài theo guideline, không giới hạn tối đa; đủ số trang không thay thế nội dung/hồ sơ. Các trường giới tính, dân tộc, ngành, năm học và số năm đào tạo đã được cập nhật theo xác nhận của người dùng. Ba mẫu đầu quyển và bốn sản phẩm riêng cần đối chiếu biểu mẫu chính thức. Các minh chứng ký/dấu và phê duyệt cần dùng hồ sơ thật.
+`make check` cho phép bản sơ bộ và liệt kê thiếu sót. Bộ kiểm tra bản đầy đủ giữ điều kiện 50 trang thân bài theo guideline, không giới hạn tối đa; đủ số trang không thay thế nội dung/hồ sơ. Các trường giới tính, dân tộc, ngành, năm học và số năm đào tạo đã được cập nhật theo xác nhận của người dùng. Đã đối chiếu các mẫu bổ sung ngày 08/10/2026 và cập nhật cấu trúc; các trường còn thiếu và xác nhận cuối được ghi trong sổ đối chiếu. Các minh chứng ký/dấu và phê duyệt cần dùng hồ sơ thật.
 
 Sau phụ lục khoa học, bản đầy đủ ghép thuyết minh đã phê duyệt, minh chứng đăng ký nhóm I–III và bốn sản phẩm Việt–Anh; video nộp riêng. Đường dẫn minh chứng trong manifest là nơi dành cho hồ sơ sẽ cung cấp, không phải PDF đã tồn tại. Xem [quy ước hồ sơ](evidence/README.md) và [quy trình Word](word/README.md).
 
@@ -76,3 +76,33 @@ Tệp `products/fe/reports/mobile/samsung21se.json` có hai JSON object nối ti
 PTQ/QAT vẫn có chênh lệch summary/CSV; chưa sửa artifact để chốt số. Corpus/model văn bản, khoảng trống adapter `E_i`, thử mạng/SMS/thiết bị có provenance và hồ sơ minh chứng còn cần công việc tiếp theo.
 
 Kết quả kiểm tra cuối đợt: PDF nội dung một mặt và hai mặt đều **94 trang**, trong đó **68 trang thân bài**; bản tin Việt/Anh mỗi bản 2 trang, tóm tắt Việt 2 trang/Anh 3 trang. Sáu log cuối không có tràn khung, tham chiếu/trích dẫn chưa giải quyết, nhãn lặp hoặc cảnh báo phông thay thế. Đã xem trực quan các trang bảng tổng quan, sơ đồ mô hình/đồng bộ/nghiệp vụ/chuỗi cạnh, ảnh ví dụ, bảng mobile và đồ thị RQ2; PDF A4 và phông được nhúng. `make check`, audit nguồn/hình và `git diff --check` đạt. `make check-release` vẫn chặn ở bảy ghi chú chuyển mẫu chính thức cùng cờ/PDF minh chứng còn thiếu; đây chưa phải xác nhận đủ hồ sơ nộp.
+
+## Cập nhật ngày 08/10/2026
+
+Sáu ảnh gốc được sao chép nguyên từ `products/fe/model/Edge Ai/mobilenetv3_large_dataset_v4_seed1024/`: ma trận raw/normalized trên test, loss, metrics, recall validation và các ví dụ lỗi validation. Bảng phân loại mới dùng JSON/CSV cùng thư mục, đã đối chiếu ma trận với accuracy, macro-F1, per-class và lỗi nặng: 75,78%, 74,26%, 3/256. Không có manifest split riêng hoặc benchmark runtime/nén/mobile seed 1024; các phần confidence và benchmark cũ được ghi rõ phạm vi lịch sử. Không huấn luyện/chạy suy luận lại.
+
+Đã đối chiếu các mẫu `.doc` mới, bổ sung đúng mục cho thông tin kết quả Việt–Anh, tóm tắt Việt–Anh, thông tin chủ nhiệm và rút bản tin về giới hạn một trang. Chi tiết thiếu sót, mâu thuẫn và hồ sơ ngoài quyển tại [đối chiếu mẫu](doi-chieu-bieu-mau.md). Các xác nhận/chữ ký, ảnh và thành tích chưa có vẫn để chờ bổ sung; `official_forms_confirmed` chưa được bật.
+
+Các PDF dưới `build/content/`, `build/content-twoside/`, `build/bulletin-vi/`, `build/bulletin-en/`, `build/summary-vi/`, `build/summary-en/` được Git theo dõi sau biên dịch. `full`/`full-twoside` cũng được cho phép khi đủ hồ sơ. `make clean` vẫn xóa các PDF này nên cần biên dịch lại trước khi commit. Không tự commit hoặc push trong đợt cập nhật này.
+
+## Kiểm tra sau cập nhật ngày 08/10/2026
+
+Bản nội dung một mặt/hai mặt đều 98 trang, 70 trang từ Mở đầu đến hết Kết luận/kiến nghị. Bản tin Việt/Anh mỗi bản 1 trang A4; tóm tắt Việt/Anh mỗi bản 2 trang A4. Đã kiểm tra trực quan ma trận/ví dụ lỗi/loss, biểu mẫu chủ nhiệm và hai bản tin; sáu PNG khớp nguyên byte nguồn. Sáu log cuối không có overfull, tham chiếu/trích dẫn chưa giải quyết, nhãn lặp hoặc cảnh báo phông; PDF A4, phông nhúng. Đã xác nhận số liệu model mới trong văn bản PDF.
+
+`make check`, kiểm tra bản hai mặt và `git diff --check` đạt. Git cho phép đúng sáu PDF hiện có trong build; file phụ/môi trường vẫn bỏ qua. `make check-release` chưa đạt: còn hai ghi chú ảnh/quá trình học tập và nhận xét GVHD, các cờ xác nhận hồ sơ false, thiếu thuyết minh phê duyệt và ba PDF sản phẩm. Đây là bản đã biên dịch/kiểm tra, chưa phải bộ hồ sơ đủ điều kiện nộp.
+
+## Kiểm tra sau đối chiếu PDF mẫu — 08/10/2026
+
+Bản nội dung một mặt/hai mặt hiện đều **94 trang**, có **69 trang thân bài**. Thông tin kết quả Việt gồm trang nội dung/chủ nhiệm và trang nhận xét GVHD riêng, đúng cấu trúc hai trang mẫu; thông tin kết quả Anh và thông tin chủ nhiệm mỗi phần một trang. Khối ký chủ nhiệm nằm cùng trang nội dung, không còn trang chỉ có chữ ký. Bốn PDF bản tin/tóm tắt Việt–Anh đều **1 trang A4/bản**.
+
+Đã xem trực quan các mẫu gốc và các trang biểu mẫu/bản tin/tóm tắt biên dịch; xác nhận logo, thứ tự tên cơ quan--tiêu đề, các mục, trường thông tin và vị trí khối ký. Các dòng nguồn nội bộ đã bỏ khỏi cả sáu PDF và bộ xuất bảng; trích dẫn khoa học/danh mục tài liệu giữ nguyên. Sáu log cuối không có overfull, tham chiếu/trích dẫn chưa giải quyết, nhãn lặp hoặc cảnh báo phông.
+
+`make check`, kiểm tra hai mặt và `git diff --check` đạt. `check-release` vẫn chặn do 10 trường trống thực tế (ảnh, xếp loại/thành tích năm 1–4, nhận xét GVHD), cờ xác nhận hồ sơ và bốn PDF phê duyệt/minh chứng còn thiếu. Số trường tăng từ hai ghi chú tổng hợp sang 10 ô kê khai riêng, không có thêm yêu cầu hành chính mới.
+
+## Kiểm tra logo CTU và IEEE — 08/10/2026
+
+Đã biên dịch lại sáu PDF. Bản nội dung một mặt/hai mặt đều 94 trang, 69 trang thân bài; bốn bản tin/tóm tắt mỗi bản một trang A4. Logo CTU hiện ở góc trên trái của tất cả trang biểu mẫu, kể cả trang nhận xét GVHD và các mẫu tiếng Anh; đã xem trực quan để kiểm tra khoảng cách logo/nội dung. Hai bìa giữ logo giữa.
+
+Danh mục IEEE có 19 tài liệu, đánh số liên tục [1]–[19] theo lần trích dẫn đầu tiên. Đã kiểm tra văn bản PDF, thứ tự entry, nhãn `[Online]. Available:` và tên riêng/acronym. Sáu PDF không còn dòng `Nguồn:`; sáu log không có overfull, tham chiếu/trích dẫn chưa giải quyết, nhãn lặp hoặc cảnh báo phông. Fallback BibTeX/ieeetr đã qua bản smoke.
+
+`make check`, kiểm tra bản hai mặt, kiểm tra cú pháp Python và `git diff --check` đạt. `check-release` vẫn chưa đạt do 10 ô thiếu dữ liệu, hai cờ xác nhận và bốn PDF phê duyệt/minh chứng; không thay đổi hoặc xác nhận các hồ sơ này bằng việc sửa bố cục.

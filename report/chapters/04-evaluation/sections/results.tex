@@ -1,45 +1,42 @@
 \section{Kết quả và bàn luận}\label{sec:04-evaluation-results}
 \subsection{Chất lượng phân loại ảnh FP32}
-Trên \ImageTest{} ảnh test, MobileNetV3-Large hiện tại đạt Accuracy \ImageAccuracy\% và macro-F1 \ImageMacroFOne\%. Balanced accuracy là 74,07\%. Ma trận nhầm lẫn và chất lượng từng lớp được trình bày ở Bảng~\ref{tab:confusion} và \ref{tab:image-classes}.
+Model mới được dùng cho các hình phân loại là \RepoPath{mobilenetv3_large_dataset_v4_seed1024}. Trên 256 ảnh test, artifact ghi Accuracy \NewImageAccuracy\%, macro-F1 \NewImageMacroFOne\% và balanced accuracy 73,87\%. Bảng~\ref{tab:confusion} và \ref{tab:image-classes} đã được tính đối chiếu từ ma trận với JSON metric của chính model này.
 \input{generated/tables/confusion}
 \input{generated/tables/image-classes}
-
 \begin{figure}[htbp]\centering
-\includegraphics[width=.86\textwidth]{image-confusion.pdf}
-\caption{Ma trận nhầm lẫn FP32 chuẩn hóa theo từng lớp thật; mỗi ô giữ số ảnh và tỷ lệ}
+\includegraphics[width=.86\textwidth]{image-confusion.png}
+\caption{Ma trận nhầm lẫn trên test của MobileNetV3-Large seed 1024}
 \label{fig:image-confusion}
-\SourceNote{Sinh từ summary FP32 đã khớp CSV dự đoán; mỗi hàng có mẫu số riêng theo Bảng~\ref{tab:image-classes}.}
 \end{figure}
-
-Lớp \texttt{non\_flood} có recall 91,86\%, cao hơn các lớp ngập. Recall \texttt{high} là 66,67\%; trong 54 ảnh high, 14 ảnh bị dự đoán medium và 3 ảnh bị dự đoán low. Ranh giới giữa các mức ngập là hạn chế đáng chú ý, vì nhầm xuống mức thấp có thể làm metadata giảm mức ngập nếu không có kiểm chứng bổ sung.
-
-Có 5 lỗi cách ít nhất hai mức severity, chiếm 1,95\% tập test. Đây là chỉ số do nhóm định nghĩa theo thứ tự mức ngập, không trực tiếp đo hệ quả cứu hộ. Số lượng test mỗi lớp còn nhỏ, nên chênh lệch vài ảnh làm tỷ lệ thay đổi đáng kể. Báo cáo chưa có khoảng tin cậy ghép cặp theo dữ liệu độc lập ngoài nguồn ảnh hiện tại để kết luận khác biệt nhỏ giữa các mô hình.
-
-ECE của FP32 khoảng 0,06350 và Brier khoảng 0,34483 theo artifact. Các chỉ số này cung cấp thêm thông tin về confidence. Không dùng Accuracy tổng thể để chứng minh mọi dự đoán có confidence trên 0,90 đủ tin cậy cho quyết định không gửi ảnh; cần kiểm tra riêng nhóm quyết định đó và các ảnh ngoài phân bố.
-
 \begin{figure}[htbp]\centering
-\includegraphics[width=\textwidth]{image-examples.pdf}
-\caption{Ví dụ dự đoán đúng (hàng trên) và sai (hàng dưới) trong bốn lớp test}
-\label{fig:image-examples}
-\SourceNote{Ảnh trong Dataset\_Flood; chọn đường dẫn đầu tiên theo thứ tự trong từng lớp/nhóm đúng--sai từ CSV FP32. Hình là ví dụ minh họa, không phải mẫu đại diện ngẫu nhiên; danh sách và hash ở figure-provenance.json.}
+\includegraphics[width=.86\textwidth]{image-confusion-normalized.png}
+\caption{Ma trận nhầm lẫn test chuẩn hóa theo lớp thật của model seed 1024}
 \end{figure}
+Recall non\_flood là 90,70\%; recall high là 74,07\%. Trong 54 ảnh high, 12 ảnh bị dự đoán medium và 2 ảnh bị dự đoán low. Có 3 lỗi cách ít nhất hai mức severity (1,17\% test). Đây là chỉ số theo thứ tự mức ngập, chưa đo hệ quả cứu hộ.
 
-Hình~\ref{fig:image-examples} giữ đồng thời nhãn thật, nhãn dự đoán và confidence để người đọc kiểm tra cách model xử lý cảnh cụ thể. Các trường hợp này cho phép quan sát dấu hiệu thị giác, nhưng chưa có phép gán nhãn nguyên nhân lỗi. Vì vậy, không quy mỗi lỗi cho che khuất, góc chụp hoặc sai nhãn chỉ từ một ảnh; cần một quy trình rà soát thống nhất trên tập lỗi và nguồn dữ liệu.
+Thư mục mới chưa có manifest đường dẫn/hash chia tập hoặc dự đoán đầy đủ trên test. Cùng số mẫu 256 và cùng support từng lớp không đủ chứng minh trùng từng ảnh với split seed 42. Vì vậy không dùng chênh lệch với 76,17\% của phiên cũ để kết luận model mới cải thiện hoặc suy giảm, và không gán kết quả chuyển runtime/nén/mobile cũ cho seed 1024.
+\begin{figure}[htbp]\centering
+\includegraphics[width=\textwidth]{image-examples.png}
+\caption{Các ví dụ phân loại sai trên validation của model seed 1024}
+\label{fig:image-examples}
+\end{figure}
+Trong hình, T là nhãn thật, P là dự đoán, conf là xác suất lớp dự đoán và true\_prob là xác suất nhãn thật. Ảnh minh họa gồm các lỗi validation, không phải ví dụ đúng/sai trên test như hình của phiên cũ. Có lỗi confidence cao; không suy nguyên nhân sai nhãn, góc chụp hay che khuất chỉ từ hình. Các ảnh nguồn Dataset\_Flood giữ tác quyền ban đầu; minh họa nội bộ không xác nhận quyền phát hành lại ngoài báo cáo.
 
-\subsection{Confidence và chính sách gửi metadata}
+\subsection{Confidence và chính sách gửi metadata: artifact lịch sử seed 42}
+Các phân tích confidence dưới đây giữ phiên FP32 cũ, không thuộc model seed 1024. ECE cũ là 0,06350 và Brier 0,34483.
 Hình~\ref{fig:confidence-calibration} được tính từ dự đoán FP32 trên 256 ảnh test với bin rộng 0,1. Đường reliability so sánh confidence trung bình với tỷ lệ đúng trong mỗi bin; biểu đồ số mẫu cho biết một điểm trên đường có bao nhiêu quan sát. Đây là phép mô tả trên split hiện tại, không phải kết quả đã hiệu chuẩn lại mô hình. Giá trị ECE nêu trên được lấy theo cấu hình artifact gốc, không tính lại ECE từ các bin minh họa này.
 \begin{figure}[htbp]\centering
 \includegraphics[width=\textwidth]{confidence-calibration.pdf}
 \caption{Reliability và số mẫu theo confidence của mô hình FP32 trên tập test}
 \label{fig:confidence-calibration}
-\SourceNote{\RepoPath{products/fe/reports/pth_onnx_pte/all_predictions.csv}; dùng confidence/dự đoán PyTorch, không trộn ba runtime thành 768 quan sát.}
 \end{figure}
 
 Ở ngưỡng $p\geq0{,}90$, CSV hiện tại có 52/256 ảnh (20,31\%) và cả 52 dự đoán đều đúng. Kết quả hẹp này bổ sung thông tin cho chính sách gửi metadata; nó không bảo đảm mọi ảnh camera mới có confidence cao đều đúng. Ngưỡng 0,90 là cấu hình ứng dụng đang có, không được chọn lại từ phân tích này. Nếu dùng tập test để chỉnh ngưỡng, cần tập xác nhận mới để đánh giá quyết định sau điều chỉnh.
 
 Nghiên cứu calibration phân biệt confidence của mạng với khả năng đúng quan sát được và khảo sát temperature scaling trên các bài toán phân loại \citep{guo2017calibration}. Đối với đề tài, một bước tiếp theo là fit phép hiệu chuẩn trên validation rồi đo trên tập camera độc lập. Đồng thời, cần đánh giá cả lượng dữ liệu tiết kiệm và số ca quan trọng bị thiếu ảnh tại trung tâm, bởi tỷ lệ phân loại đúng chưa đủ đo chất lượng quyết định truyền tải.
 
-\subsection{Tương đương PyTorch, ONNX và ExecuTorch}
+\subsection{Tương đương PyTorch, ONNX và ExecuTorch: phiên lịch sử}
+Các bảng runtime, benchmark ứng dụng và phép nén/cắt tỉa sau đây thuộc artifact cũ; chưa được chạy lại với model seed 1024.
 \input{generated/tables/pth_onnx_pte}
 Cả ba định dạng có cùng nhãn top-1 trên 256 ảnh và cùng chỉ số phân loại. Sai khác xác suất tối đa PTH--ONNX khoảng $3{,}01\times10^{-6}$; PTH--PTE khoảng $5{,}01\times10^{-6}$. Kết quả cho thấy chuyển đổi FP32 giữ đầu ra tốt trên split được đo với pipeline đã khai báo.
 
@@ -57,7 +54,6 @@ Hai runtime cùng có 192/256 dự đoán đúng, Accuracy 75,00\% và macro-F1 
 \includegraphics[width=.9\textwidth]{mobile-latency.pdf}
 \caption{Phân bố thời gian classifyImage của hai benchmark ứng dụng đã lưu}
 \label{fig:mobile-latency}
-\SourceNote{256 thời gian/runtime từ samsung21se.json; boxplot thể hiện trung vị, quartile, whisker 1,5 IQR và điểm ngoài whisker. Các lượt không phải nhiều phiên thiết bị độc lập.}
 \end{figure}
 
 Theo \RepoPath{products/fe/app/lib/domain/services/model_benchmark.dart}, đồng hồ cho từng ảnh bắt đầu sau khi đọc bytes và bao quanh lời gọi repository \texttt{classifyImage}. Datasource native thực hiện giải mã/letterbox, chuẩn hóa tensor và gọi runtime trong lời gọi này. Vì vậy, phạm vi timing rộng hơn predict CPU, nhưng không bao gồm tải ảnh benchmark từ package hay nạp model ban đầu. P50/P95 được mã app tính bằng nearest-rank; báo cáo giữ cách tính đó thay vì dùng median nội suy khác.
@@ -88,7 +84,6 @@ Về tốc độ trong cùng phiên, PTH cắt tỉa có trung vị thấp hơn 
 \includegraphics[width=\textwidth]{compression-tradeoffs.pdf}
 \caption{Đánh đổi dung lượng--accuracy theo summary nén và độ trễ trước/sau cắt tỉa}
 \label{fig:compression-tradeoffs}
-\SourceNote{Summary FP32/PTQ/QAT ở panel trái, pruning\_st ở panel phải. Metric nén còn khác CSV như Bảng~\ref{tab:image-metric-audit}; timing chỉ so sánh cặp trong cùng phiên/runtime, chưa có benchmark các bản nén tại app.}
 \end{figure}
 
 \subsection{Khẩn cấp LR: độ khớp nhãn thay thế}
@@ -104,7 +99,6 @@ Phần app đã có loader và score từ cờ có cấu trúc, nhưng backend v
 \includegraphics[width=\textwidth]{rq1-graph-baselines.pdf}
 \caption{ARI và CI 95\% của năm biến thể đồ thị trên 40 run test RQ1}
 \label{fig:rq1-baselines}
-\SourceNote{benchmark\_summary.csv; hình giữ riêng các pipeline đồ thị để đọc chênh lệch nhỏ. CI từng phương pháp không thay kiểm định ghép cặp và hiệu chỉnh Holm.}
 \end{figure}
 Additive Louvain có ARI trung bình 0,9191, cao nhất bảng; Product Louvain là 0,9072. Product trừ Additive được chọn độc lập có hiệu trung bình $-0{,}01184$, CI bootstrap 95\% chưa hiệu chỉnh $[-0{,}02257;-0{,}00240]$, với 9 run thắng, 19 hòa và 12 thua. Wilcoxon raw $p=0{,}0987$, sau Holm $p=0{,}2560$. Kết quả không xác lập ưu thế thành phần tích.
 
@@ -121,7 +115,6 @@ Một phát hiện vận hành là Product có fake absorption và fake rejectio
 \caption{Thay đổi ARI trong từng phương pháp so với đối chứng, 40 run test RQ1}
 \label{fig:rq1-stress-report}
 \end{figure}
-\SourceNote{\RepoPath{paper/figures/rq1_stress_delta_ari.pdf}; nguồn chính \RepoPath{thucnghiem/results/rq1_results/aggregate/}. Giá trị âm biểu diễn suy giảm; không phải kiểm định ưu thế giữa phương pháp.}
 
 Các mức nhiễu tọa độ và thời gian được thử đều làm ARI trung bình giảm. Không phương pháp nào đứng đầu ở mọi điều kiện. Bản sao hai lần làm ARI của bốn biến thể đồ thị tăng nhẹ, nhưng năm lần làm trung bình về khoảng 0,30. Geo-time DBSCAN giữ mức đối chứng thấp hơn khi chỉ thay multiplicity exact.
 
@@ -135,7 +128,6 @@ Lần chạy độc lập không gộp chỉ làm một số tổng hợp ở đ
 \includegraphics[width=\textwidth]{rq2-alignment.pdf}
 \caption{Mức phù hợp xếp hạng với lợi ích mô phỏng trong điều kiện oracle grouping}
 \label{fig:rq2-alignment}
-\SourceNote{rq2\_summary.csv; trục NDCG giữ miền $[0,1]$. Thanh CI mô tả từng phương pháp, không biểu diễn CI hiệu ghép cặp.}
 \end{figure}
 Điểm có chặn đạt NDCG@5 0,6669, CI 95\% $[0{,}6306;0{,}7018]$. Spearman trung bình $-0{,}0304$ với CI $[-0{,}1165;0{,}0549]$, overlap top-5 bằng 0,285 với CI $[0{,}2349;0{,}3400]$. NDCG@5 cao hơn legacy khoảng 0,0121 nhưng tương phản sau Holm không có ý nghĩa theo artifact.
 
@@ -147,7 +139,6 @@ Lần chạy độc lập không gộp chỉ làm một số tổng hợp ở đ
 \includegraphics[width=\textwidth]{rq2-robustness.pdf}
 \caption{Năm điều kiện RQ2 cho thấy bất biến exact và các giới hạn trước khai báo tăng/phối hợp}
 \label{fig:rq2-robustness}
-\SourceNote{rq2\_summary.csv; chọn các điều kiện để giải thích những cơ chế khác nhau, bảng đầy đủ vẫn giữ ở Bảng~\ref{tab:rq2-robustness}.}
 \end{figure}
 Sao chép exact 2, 5 và 10 lần tạo priority drift bằng không cho score có chặn khi nhóm bằng chứng và đầu vào cố định. Legacy có drift lần lượt 0,0026; 0,0086 và 0,0148. Điều này hỗ trợ thuộc tính bất biến đã nêu, với đúng điều kiện kiểm tra.
 
@@ -168,7 +159,6 @@ So với gần nhất trước, score có chặn kém hơn về harm và trễ h
 \caption{Trung bình mô tả theo điều kiện nguồn lực trên phân hoạch Product}
 \label{fig:rq3-conditions-report}
 \end{figure}
-\SourceNote{\RepoPath{paper/figures/rq3_dispatch_conditions.pdf}; mỗi điểm tổng hợp 40 seed trong một điều kiện. Phân tích chính dùng trung bình điều kiện trong seed và 40 cặp.}
 
 Gần nhất trước có harm và trễ hạn trung bình thấp hơn trong mọi điều kiện được thử. Một diễn giải có thể là score theo nhu cầu chưa biểu diễn đủ chi phí đi lại và ràng buộc lịch; đây là giả thuyết giải thích, chưa được cô lập bằng thực nghiệm cơ chế. Kết quả không xác lập gần nhất trước là chính sách thực địa tối ưu.
 

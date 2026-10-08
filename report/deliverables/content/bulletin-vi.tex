@@ -1,21 +1,25 @@
-\section*{Bản tin tiếng Việt}
-\textbf{Tên đề tài:} \ProjectTitle\\
-\textbf{Mã số:} \ProjectCode\\
-\textbf{Chủ nhiệm:} \PrincipalName\\
-\textbf{Đơn vị:} \PrincipalUnit\\
-\textbf{Người hướng dẫn:} \SupervisorName\ (\SupervisorEmail)\\
-\textbf{Thời gian đăng ký:} \ProjectPeriod
+\begin{officialform}
+\FormAgencyLogoVI
+\FormTitle{BẢN TIN ĐỀ TÀI\\NGHIÊN CỨU KHOA HỌC CỦA SINH VIÊN}
+\FormLine{Mã số đề tài: \ProjectCode}
+\FormLine{Tên đề tài: \ProjectTitle}
+\FormLine{Thời gian thực hiện: \ProjectPeriod}
+\FormLine{Tổng kinh phí: \ProjectBudget}
+\FormLine{Chủ nhiệm đề tài: \PrincipalName\ (\PrincipalPhone)}
+\FormLine{Thành viên tham gia nghiên cứu: Nguyễn Thanh Trọng, Cao Tường Hưng, Nguyễn Như Quỳnh, Ngô Hưng Thịnh.}
+\FormLine{Cán bộ hướng dẫn: \SupervisorName\ (\SupervisorEmail)}
 
-\subsection*{Mục tiêu}
-Xây dựng hệ thống hỗ trợ tiếp nhận, phân tích và gom nhóm báo cáo cứu hộ bão lũ trong điều kiện kết nối không ổn định, kết hợp AI tại thiết bị, truyền thông tin gọn và dashboard điều phối.
-\subsection*{Phương pháp}
-Huấn luyện và đánh giá phân loại ảnh trên split cố định; đối chiếu các định dạng, lượng tử hóa và cắt tỉa; xây dựng pipeline đồ thị/điểm ưu tiên từ dữ liệu quan sát; đánh giá phân cụm, xếp hạng và lịch điều phối bằng các bộ dữ liệu mô phỏng riêng; phát triển ứng dụng Flutter và backend FastAPI với lưu cục bộ, retry và hợp đồng đồng bộ.
-\subsection*{Kết quả và sản phẩm}
-Mô hình ảnh FP32 đạt Accuracy \ImageAccuracy\% và macro-F1 \ImageMacroFOne\% trên \ImageTest{} ảnh test; ONNX/ExecuTorch giữ cùng nhãn top-1 trên tập này. PTQ giảm dung lượng nhưng giảm chất lượng; QAT hiện có kết quả không thuận lợi. Gói LR khẩn cấp dùng 32 trạng thái tổng hợp có cấu trúc, không thay mô hình hiểu tin nhắn tiếng Việt.
+\FormLine{Tính cấp thiết: Tin cứu hộ trùng lặp, thiếu vị trí và đến muộn khi mạng gián đoạn gây khó khăn cho tiếp nhận và điều phối.}
 
-Repo có ứng dụng, backend, dashboard bản đồ, mô hình/asset, dữ liệu và bản thảo nghiên cứu. Pipeline có chặn cạnh và bất biến bản sao có điều kiện; RQ1--RQ3 chưa xác lập ưu thế chung hay lợi ích cứu hộ thực tế. Kết quả mô phỏng và latency CPU được ghi riêng với tình trạng kiểm chứng thiết bị.
-Summary PTQ/QAT có chênh lệch với CSV dự đoán; cần rà soát trước khi chốt metric nén.
-\subsection*{Khả năng ứng dụng và nội dung tiếp tục}
-Nguyên mẫu phục vụ nghiên cứu và trình diễn tiếp nhận--điều phối. Cần bổ sung dữ liệu thực địa, chuyên gia, mô hình văn bản, thống nhất trường khẩn cấp app/backend, phép đo Android, mạng thật và SMS gateway.
+\FormLine{Mục tiêu: Xây dựng nguyên mẫu phân tích ảnh tại biên, truyền thông tin gọn và gom nhóm sự kiện cứu hộ trên bản đồ.}
 
-\DraftNote{Bản tin đã có nội dung sơ bộ; cần chuyển sang mẫu chính thức và xác nhận minh chứng trước khi nộp.}
+\FormLine{Phương pháp nghiên cứu: Huấn luyện MobileNetV3-Large; đánh giá từng thành phần ảnh, phân cụm, xếp hạng và điều phối bằng artifact và dữ liệu mô phỏng riêng.}
+
+\FormLine{Nội dung nghiên cứu: AI ảnh, khẩn cấp có cấu trúc, outbox/gửi lại, đồng bộ và dashboard; kiểm tra chặn cạnh và bất biến bản sao có điều kiện.}
+
+\FormLine{Kết quả đạt được: Model seed 1024 đạt Accuracy \NewImageAccuracy\%, macro-F1 \NewImageMacroFOne\% trên 256 ảnh test, có 3 lỗi nặng. Có ứng dụng Flutter, backend FastAPI/SQLite và dashboard. Các benchmark runtime/nén/mobile lịch sử chưa xác nhận cho model mới; PTQ/QAT còn lệch summary--CSV.}
+
+\FormLine{Ý nghĩa: Hỗ trợ đào tạo và nghiên cứu quy trình tiếp nhận--điều phối; RQ1--RQ3 chưa chứng minh ưu thế chung hay lợi ích cứu hộ thực địa.}
+
+\FormLine{Khả năng ứng dụng: Nguyên mẫu dùng trình diễn. Cần mô hình văn bản, tích hợp khẩn cấp, provenance/đo lặp Android, mạng/SMS thật và xác nhận chuyên gia trước triển khai nghiệp vụ.}
+\end{officialform}

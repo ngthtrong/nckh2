@@ -1,9 +1,8 @@
 #!/usr/bin/env python3
-"""Compile from report/, with separate output directories and grouped bibliography."""
+"""Compile from report/, with separate output directories and IEEE bibliography."""
 import argparse
 import os
 from pathlib import Path
-import re
 import shutil
 import subprocess
 import sys
@@ -41,10 +40,10 @@ def main():
                  'chapters/03-system', 'chapters/04-evaluation', 'appendices']:
         (out / name).mkdir(parents=True, exist_ok=True)
     report = args.target in ['content', 'full', 'smoke']
-    biber_available = has_package('biblatex.sty') and bool(shutil.which('biber'))
+    biber_available = has_package('biblatex.sty') and has_package('ieee.bbx') and bool(shutil.which('biber'))
     use_biber = report and (args.bibliography == 'biblatex' or (args.bibliography == 'auto' and biber_available))
     if use_biber and not biber_available:
-        parser.error('biblatex + biber are required for --bibliography biblatex.')
+        parser.error('biblatex-ieee + biber are required for --bibliography biblatex.')
     if report and not use_biber and not shutil.which('bibtex'):
         parser.error('BibTeX is missing.')
     source = 'main.tex' if args.target in ['content', 'full'] else (
@@ -57,10 +56,10 @@ def main():
            f'-output-directory={out.relative_to(ROOT)}', f'-jobname={job}',
            definitions + '\\input{' + source + '}']
     env = os.environ.copy()
-    # Also find grouped bbl files in the isolated output directory.
+    # Find the target's bbl file in its isolated output directory.
     env['TEXINPUTS'] = str(out) + os.pathsep + env.get('TEXINPUTS', '') + os.pathsep
     env['BIBINPUTS'] = str(ROOT) + os.pathsep + env.get('BIBINPUTS', '') + os.pathsep
-    backend = 'biblatex' if use_biber else 'bibtex'
+    backend = 'biblatex-ieee' if use_biber else 'bibtex-ieeetr'
     marker = out / '.bibliography-backend'
     previous_aux = out / f'{job}.aux'
     incompatible_aux = previous_aux.exists() and ('\\abx@aux' in previous_aux.read_text(errors='replace')) != use_biber
@@ -75,14 +74,7 @@ def main():
         if use_biber:
             run(['biber', '--input-directory', str(out), '--output-directory', str(out), job], env)
         else:
-            for group in ['legal', 'books', 'articles']:
-                aux = out / f'{job}-{group}.aux'
-                databases = re.search(r'\\bibdata\{([^}]+)\}', aux.read_text()).group(1).split(',')
-                if any(re.search(r'@\s*(?!comment\b|preamble\b|string\b)\w+\s*[{(]',
-                                 (ROOT / (db + '.bib')).read_text(), re.I) for db in databases):
-                    run(['bibtex', str(aux.relative_to(ROOT).with_suffix(''))], env)
-                else:
-                    aux.with_suffix('.bbl').unlink(missing_ok=True)
+            run(['bibtex', str((out / job).relative_to(ROOT))], env)
     run(cmd, env)
     run(cmd, env)
     # Resolve longer TOC/float changes until stable, at most three further passes.

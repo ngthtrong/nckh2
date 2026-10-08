@@ -25,6 +25,8 @@ Thông tin dưới đây được người dùng xác nhận ngày 06/10/2026.
 - **Dân tộc:** Kinh
 - **MSSV:** B2303861
 - **Ngày sinh:** 06/10/2005
+- **Nơi sinh:** Sóc Trăng (theo mẫu chủ nhiệm được cung cấp ngày 08/10/2026).
+- **Địa chỉ liên hệ:** Khu vực 5, Phường Ngã Năm, Thành phố Cần Thơ (theo mẫu chủ nhiệm được cung cấp ngày 08/10/2026).
 - **Lớp:** DI2396F1
 - **Khóa:** 49
 - **Ngành đào tạo:** Kỹ thuật phần mềm CLC (chất lượng cao)
@@ -41,3 +43,9 @@ Thông tin dưới đây được người dùng xác nhận ngày 06/10/2026.
 | Cao Tường Hưng | B2303873 | DI2396F1 | 49 |
 | Nguyễn Như Quỳnh | B2303777 | DI2396F1 | 49 |
 | Ngô Hưng Thịnh | B2303904 | DI2396F2 | 49 |
+
+## Điểm cần đối chiếu với mẫu bổ sung ngày 08/10/2026
+
+- Mẫu chủ nhiệm ghi năm sinh 2026; giữ 2005 theo xác nhận ngày 06/10/2026, cần sửa mẫu trước khi ký.
+- Đơn nghiệm thu ghi thời gian 05/2026–10/2026 và tên đề tài có thêm “Xây dựng”; metadata vẫn giữ 03/2026–08/2026 và tên đã xác nhận, chờ thuyết minh/quyết định điều chỉnh chính thức.
+- Chưa có ảnh chân dung 4×6, xếp loại và thành tích học tập từng năm 1–4.

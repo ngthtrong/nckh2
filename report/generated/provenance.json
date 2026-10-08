@@ -1,5 +1,5 @@
 {
-  "source_commit": "5d9af9bab515ac9698fe53bdd5b247c3294f7bd4",
+  "source_commit": "dbff62ce66eacb6a49838c9139b89d0efe58f172",
   "sources_sha256": {
     "products/fe/model/Edge Ai/split_train_val_test_mobilenetv3_large.csv": "f7b52cd25411d4d1df2f7f80745a2cf430819773854345798cf7e093e3bcba45",
     "products/fe/reports/pth_onnx_pte/summary.json": "6f33b2b2a7c77ba248ac38036dfe0c43ffbf0aed766304c41c5435308a8150d4",
@@ -9,6 +9,9 @@
     "products/fe/reports/pth_onnx_pte/all_predictions.csv": "37852acf40d1f24c085af8309307ec43ce7926890a388c89fd8ab0cb13e649ac",
     "products/fe/reports/fp32_ptq_qat/all_predictions.csv": "8b92641abc68e3412b3931ff8891e1cf434c74ffe6ae7fddc034fc32b96df28d",
     "products/fe/reports/pruning_st/all_predictions.csv": "d269ee738840206395febc2cf4208592fe792c4c8ef059db29998b5e863ad68f",
+    "products/fe/model/Edge Ai/mobilenetv3_large_dataset_v4_seed1024/test_metrics_mobilenetv3_large.json": "b77dcfa0e23b123f839a5f99bcf598d4fc27590012459db7a93168a92fbb22a3",
+    "products/fe/model/Edge Ai/mobilenetv3_large_dataset_v4_seed1024/config_mobilenetv3_large.json": "1a14408bd2f42c9c06aba419ec3862fefec109c4e1030fa2a354ca8522a46779",
+    "products/fe/model/Edge Ai/mobilenetv3_large_dataset_v4_seed1024/cm_raw_test_mobilenetv3_large.csv": "f385d7899b7ac381fb4594ff878df7d3aac2321618306908f743580464f9f0c3",
     "products/fe/reports/mobile/samsung21se.json": "ee2f604570379fff172d49cb82545582d74ef6946f4714c33a9327c8330c6af3",
     "thucnghiem/results/cij_baseline_benchmark_results/benchmark_summary.csv": "de854e0c710b7dea3d0d2b316d927d9159572edb053e84e9cd7620240337bc0e",
     "thucnghiem/results/rq1_results/aggregate/rq1_stress_summary.csv": "a9079c7248b889bab20a4c96948a5a7c47cff99b78331b4f7f368f568420e24a",
@@ -137,6 +140,28 @@
       "csv_macro_f1": 0.7446947885671003
     }
   ],
+  "table_notes": {
+    "image-split": "\\RepoPath{products/fe/model/Edge Ai/split_train_val_test_mobilenetv3_large.csv}; kiểm tra đường dẫn, MD5 và nhóm chia tập trên ảnh hiện tại.",
+    "pth_onnx_pte": "\\RepoPath{products/fe/reports/pth_onnx_pte/summary.json}; 256 ảnh test, CPU máy tính; thời gian chỉ tính lời gọi suy luận.",
+    "fp32_ptq_qat": "\\RepoPath{products/fe/reports/fp32_ptq_qat/summary.json}; 256 ảnh test, CPU máy tính; thời gian chỉ tính lời gọi suy luận.",
+    "image-metric-audit": "\\RepoPath{products/fe/reports/fp32_ptq_qat/summary.json} và all\\_predictions.csv cùng thư mục; giữ nguyên hai nguồn, chưa chốt metric nén.",
+    "pruning_st": "\\RepoPath{products/fe/reports/pruning_st/summary.json}; 256 ảnh test, CPU máy tính; thời gian chỉ tính lời gọi suy luận.",
+    "confusion": "\\RepoPath{products/fe/model/Edge Ai/mobilenetv3_large_dataset_v4_seed1024/cm_raw_test_mobilenetv3_large.csv}; 256 ảnh test. Chưa có manifest đường dẫn/hash split riêng cho seed 1024.",
+    "image-classes": "\\RepoPath{products/fe/model/Edge Ai/mobilenetv3_large_dataset_v4_seed1024/test_metrics_mobilenetv3_large.json}; đã đối chiếu ma trận.",
+    "mobile-runtime": "\\RepoPath{products/fe/reports/mobile/samsung21se.json}; hai khối JSON nối tiếp, đã kiểm tra lại dự đoán và percentile nearest-rank. Timing tại lời gọi classifyImage; thiếu metadata thiết bị/asset.",
+    "rq1-benchmark": "\\RepoPath{thucnghiem/results/cij_baseline_benchmark_results/benchmark_summary.csv}; đường kính trung bình chỉ là thống kê mô tả.",
+    "rq1-stress": "\\RepoPath{thucnghiem/results/rq1_results/aggregate/rq1_stress_summary.csv}; không gộp lần chạy lại trong rq1\\_results\\_v2.",
+    "rq2-alignment": "\\RepoPath{thucnghiem/results/rq2_results/rq2_summary.csv}; nhóm oracle chỉ dùng cho chẩn đoán riêng tầng xếp hạng.",
+    "rq2-robustness": "\\RepoPath{thucnghiem/results/rq2_results/rq2_summary.csv}; thống kê mô tả perturbation trên split test.",
+    "rq2-sensitivity": "\\RepoPath{thucnghiem/results/rq2_results/rq2_parameter_sensitivity_summary.csv}; mỗi lần chỉ thay một hằng số, trọng số được chuẩn hóa lại.",
+    "rq3-effects": "\\RepoPath{thucnghiem/results/rq3_results/rq3_paired_comparisons_seed.csv}; giá trị dương có lợi cho điểm có chặn; đpt = điểm phần trăm."
+  },
+  "new_model_audit": {
+    "seed": 1024,
+    "test_samples": 256,
+    "matrix_metrics_match": true,
+    "split_manifest_available": false
+  },
   "mobile_audit": {
     "objects": 2,
     "samples_per_runtime": 256,

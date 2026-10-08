@@ -3,7 +3,6 @@
 MobileNetV3 kết hợp các khối convolution hiệu quả cho thiết bị di động, gồm depthwise convolution, inverted residual, cơ chế điều tiết kênh squeeze-and-excitation và các hàm kích hoạt được chọn theo kiến trúc \citep{howard2019mobilenetv3}. Các khối này phục vụ việc trích xuất đặc trưng ảnh. Việc lựa chọn kiến trúc là một giả thuyết triển khai cần kiểm chứng bằng dữ liệu của đề tài và runtime được dùng.
 
 Hàm tạo mô hình trong notebook giữ backbone của torchvision, thay Dropout trong classifier thành 0,25 và lớp Linear cuối thành bốn đầu ra. Script xuất mô hình nhận diện layout checkpoint cũ có classifier lồng và layout hiện tại thay trực tiếp lớp cuối, rồi dựng đúng cấu trúc trước khi nạp trọng số. Việc phân biệt này tránh lỗi tên/thứ tự tensor khi chuyển một checkpoint sang ONNX hoặc PTE.
-\SourceNote{\RepoPath{products/fe/model/training_img.ipynb}; hàm tạo MobileNetV3-Large và các script export tương ứng.}
 
 \begin{figure}[htbp]\centering
 \begin{tikzpicture}[>=Stealth,node distance=6mm,
@@ -18,7 +17,6 @@ Hàm tạo mô hình trong notebook giữ backbone của torchvision, thay Dropo
 \end{tikzpicture}
 \caption{Hợp đồng suy luận ảnh và vị trí đầu phân loại được thay trong mô hình}
 \label{fig:image-model-design}
-\SourceNote{Sơ đồ từ config hiện tại, notebook huấn luyện và \RepoPath{products/fe/tools/convert_model.py}; không biểu diễn toàn bộ từng block convolution.}
 \end{figure}
 
 Các script export bọc mô hình bằng softmax để xuất xác suất. Vì vậy, nơi nhận cần biết output là probabilities hay logits, tránh áp softmax hai lần. Manifest là hợp đồng đi cùng asset; tên tệp giống nhau không đủ xác nhận hai runtime đang dùng cùng trọng số. Khi kiểm tra parity, phải giữ cả class order, tiền xử lý và loại output.
@@ -40,13 +38,19 @@ Mã notebook dùng AdamW với hai nhóm learning rate cho backbone và classifi
 
 Mã chọn checkpoint ưu tiên accuracy validation; nếu accuracy trong vùng sai số 0,005 so với cực đại đã thấy, checkpoint có tỷ lệ lỗi nặng thấp hơn có thể được chọn. Early stopping có patience 7. Do đó, checkpoint được giữ không nhất thiết là epoch có accuracy cao nhất đơn thuần. Test là bước đánh giá sau lựa chọn, không được đưa vào scheduler hoặc quy tắc chọn checkpoint.
 
-Notebook hiện trong repo đặt seed 599 cho lần thử mới, còn config và thư mục kết quả được dẫn ở báo cáo đặt seed 42. Báo cáo sử dụng config/split/artifact seed 42 làm nguồn cho số liệu, và dùng notebook để giải thích cơ chế cài đặt. Không xem chạy nguyên notebook hiện tại là tái lập trực tiếp checkpoint seed 42. Muốn tái lập đầy đủ cần khôi phục cấu hình, môi trường và snapshot mã tương ứng lần chạy đã lưu.
-
+Hình huấn luyện trong báo cáo được cập nhật từ config và artifact seed 1024. Notebook được dùng để giải thích cơ chế; các benchmark chuyển runtime, nén và mobile đã lưu vẫn thuộc phiên cũ. Seed huấn luyện không tự xác nhận manifest chia tập của phiên mới.
 \begin{figure}[htbp]\centering
-\includegraphics[width=\textwidth]{training-history.pdf}
-\caption{Loss và accuracy theo 11 epoch có trong CSV history seed 42}
+\includegraphics[width=\textwidth]{training-loss.png}
+\caption{Loss theo 11 epoch đã lưu của model seed 1024}
 \label{fig:training-history}
-\SourceNote{\RepoPath{products/fe/model/Edge Ai/mobilenetv3_large_dataset_v4_seed42/history_mobilenetv3_large.csv}; không nội suy thêm epoch và không dùng đường cong để suy ra hiệu quả test.}
+\end{figure}
+\begin{figure}[htbp]\centering
+\includegraphics[width=\textwidth]{training-metrics.png}
+\caption{Các chỉ số train và validation theo epoch của model seed 1024}
+\end{figure}
+\begin{figure}[htbp]\centering
+\includegraphics[width=\textwidth]{validation-recall.png}
+\caption{Recall validation theo từng lớp của model seed 1024}
 \end{figure}
 
 Train loss có xu hướng giảm trong các hàng đã lưu, trong khi validation accuracy dao động. Khoảng cách train--validation ở cuối history cho thấy cần giữ quy tắc chọn trên validation và đánh giá test độc lập. Chỉ từ CSV chưa thể kết luận mọi dao động là overfitting hoặc phiên đã dừng đúng cơ chế early stopping; log và metadata checkpoint cần được đối chiếu nếu muốn xác định nguyên nhân hoặc epoch được xuất cuối.
