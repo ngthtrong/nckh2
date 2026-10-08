@@ -1,0 +1,131 @@
+<mxGraphModel adaptiveColors="auto">
+  <root>
+    <mxCell id="0"/>
+    <mxCell id="1" parent="0"/>
+    <mxCell id="start" value="Bắt đầu" style="ellipse;whiteSpace=wrap;html=1;aspect=fixed;" vertex="1" parent="1">
+      <mxGeometry x="370" y="20" width="60" height="60" as="geometry"/>
+    </mxCell>
+    <mxCell id="trigger" value="deliverRecord()
+được gọi" style="rounded=1;whiteSpace=wrap;html=1;" vertex="1" parent="1">
+      <mxGeometry x="330" y="140" width="140" height="60" as="geometry"/>
+    </mxCell>
+    <mxCell id="probe" value="GET /probe
+Đo thông lượng mạng
+(bandwidth, latency)" style="rounded=1;whiteSpace=wrap;html=1;" vertex="1" parent="1">
+      <mxGeometry x="330" y="260" width="140" height="60" as="geometry"/>
+    </mxCell>
+    <mxCell id="decide_mode" value="Đánh giá
+SendMode?" style="rhombus;whiteSpace=wrap;html=1;" vertex="1" parent="1">
+      <mxGeometry x="330" y="380" width="140" height="80" as="geometry"/>
+    </mxCell>
+    <mxCell id="full_data" value="fullData:
+Gửi HTTP đầy đủ
+POST /api/messages
+(JSON + ảnh multipart)" style="rounded=1;whiteSpace=wrap;html=1;" vertex="1" parent="1">
+      <mxGeometry x="330" y="500" width="140" height="60" as="geometry"/>
+    </mxCell>
+    <mxCell id="sms_fallback" value="smsFallback:
+Gửi SMS tóm tắt
+tới tổng đài 1800-xxx" style="rounded=1;whiteSpace=wrap;html=1;" vertex="1" parent="1">
+      <mxGeometry x="330" y="620" width="140" height="60" as="geometry"/>
+    </mxCell>
+    <mxCell id="sms_ok" value="SMS gửi
+thành công?" style="rhombus;whiteSpace=wrap;html=1;" vertex="1" parent="1">
+      <mxGeometry x="330" y="740" width="140" height="80" as="geometry"/>
+    </mxCell>
+    <mxCell id="mark_sms" value="Ghi sendMode
+= smsFallback" style="rounded=1;whiteSpace=wrap;html=1;" vertex="1" parent="1">
+      <mxGeometry x="330" y="860" width="140" height="60" as="geometry"/>
+    </mxCell>
+    <mxCell id="mark_queued" value="Ghi sendMode
+= queuedOffline" style="rounded=1;whiteSpace=wrap;html=1;" vertex="1" parent="1">
+      <mxGeometry x="330" y="980" width="140" height="60" as="geometry"/>
+    </mxCell>
+    <mxCell id="save_hive" value="Lưu bản ghi
+vào Hive Box
+(store local)" style="shape=cylinder3;whiteSpace=wrap;html=1;boundedLbl=1;backgroundOutline=1;size=15;" vertex="1" parent="1">
+      <mxGeometry x="350" y="1100" width="100" height="70" as="geometry"/>
+    </mxCell>
+    <mxCell id="enqueue" value="Xếp vào Outbox Queue
+synced=false" style="rounded=1;whiteSpace=wrap;html=1;" vertex="1" parent="1">
+      <mxGeometry x="330" y="1220" width="140" height="60" as="geometry"/>
+    </mxCell>
+    <mxCell id="register_wm" value="Đăng ký WorkManager
+giám sát kết nối" style="rounded=1;whiteSpace=wrap;html=1;" vertex="1" parent="1">
+      <mxGeometry x="330" y="1340" width="140" height="60" as="geometry"/>
+    </mxCell>
+    <mxCell id="net_back" value="Mạng phục hồi?
+(ConnectivityMonitor)" style="rhombus;whiteSpace=wrap;html=1;" vertex="1" parent="1">
+      <mxGeometry x="330" y="1460" width="140" height="80" as="geometry"/>
+    </mxCell>
+    <mxCell id="retry" value="Duyệt Outbox
+gửi lần lượt
+POST /api/messages" style="rounded=1;whiteSpace=wrap;html=1;" vertex="1" parent="1">
+      <mxGeometry x="330" y="1580" width="140" height="60" as="geometry"/>
+    </mxCell>
+    <mxCell id="mark_synced" value="Đánh dấu
+synced=true" style="rounded=1;whiteSpace=wrap;html=1;" vertex="1" parent="1">
+      <mxGeometry x="330" y="1700" width="140" height="60" as="geometry"/>
+    </mxCell>
+    <mxCell id="end" value="Kết thúc" style="ellipse;whiteSpace=wrap;html=1;aspect=fixed;" vertex="1" parent="1">
+      <mxGeometry x="370" y="1820" width="60" height="60" as="geometry"/>
+    </mxCell>
+    <mxCell id="e_1" edge="1" parent="1" source="start" target="trigger" style="edgeStyle=orthogonalEdgeStyle;rounded=1;orthogonalLoop=1;jettySize=auto;html=1;sourcePerimeterSpacing=10;targetPerimeterSpacing=10;jumpStyle=arc;">
+      <mxGeometry relative="1" as="geometry"/>
+    </mxCell>
+    <mxCell id="e_2" edge="1" parent="1" source="trigger" target="probe" style="edgeStyle=orthogonalEdgeStyle;rounded=1;orthogonalLoop=1;jettySize=auto;html=1;sourcePerimeterSpacing=10;targetPerimeterSpacing=10;jumpStyle=arc;">
+      <mxGeometry relative="1" as="geometry"/>
+    </mxCell>
+    <mxCell id="e_3" edge="1" parent="1" source="probe" target="decide_mode" style="edgeStyle=orthogonalEdgeStyle;rounded=1;orthogonalLoop=1;jettySize=auto;html=1;sourcePerimeterSpacing=10;targetPerimeterSpacing=10;jumpStyle=arc;">
+      <mxGeometry relative="1" as="geometry"/>
+    </mxCell>
+    <mxCell id="e_4" value="Băng thông đủ" edge="1" parent="1" source="decide_mode" target="full_data" style="edgeStyle=orthogonalEdgeStyle;rounded=1;orthogonalLoop=1;jettySize=auto;html=1;sourcePerimeterSpacing=10;targetPerimeterSpacing=10;jumpStyle=arc;labelBackgroundColor=none;verticalAlign=bottom;">
+      <mxGeometry relative="1" as="geometry"/>
+    </mxCell>
+    <mxCell id="e_5" value="Mất data" edge="1" parent="1" source="decide_mode" target="sms_fallback" style="edgeStyle=orthogonalEdgeStyle;rounded=1;orthogonalLoop=1;jettySize=auto;html=1;sourcePerimeterSpacing=10;targetPerimeterSpacing=10;jumpStyle=arc;labelBackgroundColor=none;verticalAlign=bottom;">
+      <mxGeometry relative="1" as="geometry"/>
+    </mxCell>
+    <mxCell id="e_6" value="Mất hoàn toàn" edge="1" parent="1" source="decide_mode" target="save_hive" style="edgeStyle=orthogonalEdgeStyle;rounded=1;orthogonalLoop=1;jettySize=auto;html=1;sourcePerimeterSpacing=10;targetPerimeterSpacing=10;jumpStyle=arc;labelBackgroundColor=none;verticalAlign=bottom;">
+      <mxGeometry relative="1" as="geometry"/>
+    </mxCell>
+    <mxCell id="e_7" edge="1" parent="1" source="full_data" target="end" style="edgeStyle=orthogonalEdgeStyle;rounded=1;orthogonalLoop=1;jettySize=auto;html=1;sourcePerimeterSpacing=10;targetPerimeterSpacing=10;jumpStyle=arc;">
+      <mxGeometry relative="1" as="geometry"/>
+    </mxCell>
+    <mxCell id="e_8" edge="1" parent="1" source="sms_fallback" target="sms_ok" style="edgeStyle=orthogonalEdgeStyle;rounded=1;orthogonalLoop=1;jettySize=auto;html=1;sourcePerimeterSpacing=10;targetPerimeterSpacing=10;jumpStyle=arc;">
+      <mxGeometry relative="1" as="geometry"/>
+    </mxCell>
+    <mxCell id="e_9" value="Có" edge="1" parent="1" source="sms_ok" target="mark_sms" style="edgeStyle=orthogonalEdgeStyle;rounded=1;orthogonalLoop=1;jettySize=auto;html=1;sourcePerimeterSpacing=10;targetPerimeterSpacing=10;jumpStyle=arc;labelBackgroundColor=none;verticalAlign=bottom;">
+      <mxGeometry relative="1" as="geometry"/>
+    </mxCell>
+    <mxCell id="e_10" value="Không" edge="1" parent="1" source="sms_ok" target="mark_queued" style="edgeStyle=orthogonalEdgeStyle;rounded=1;orthogonalLoop=1;jettySize=auto;html=1;sourcePerimeterSpacing=10;targetPerimeterSpacing=10;jumpStyle=arc;labelBackgroundColor=none;verticalAlign=bottom;">
+      <mxGeometry relative="1" as="geometry"/>
+    </mxCell>
+    <mxCell id="e_11" edge="1" parent="1" source="mark_sms" target="save_hive" style="edgeStyle=orthogonalEdgeStyle;rounded=1;orthogonalLoop=1;jettySize=auto;html=1;sourcePerimeterSpacing=10;targetPerimeterSpacing=10;jumpStyle=arc;">
+      <mxGeometry relative="1" as="geometry"/>
+    </mxCell>
+    <mxCell id="e_12" edge="1" parent="1" source="mark_queued" target="save_hive" style="edgeStyle=orthogonalEdgeStyle;rounded=1;orthogonalLoop=1;jettySize=auto;html=1;sourcePerimeterSpacing=10;targetPerimeterSpacing=10;jumpStyle=arc;">
+      <mxGeometry relative="1" as="geometry"/>
+    </mxCell>
+    <mxCell id="e_13" edge="1" parent="1" source="save_hive" target="enqueue" style="edgeStyle=orthogonalEdgeStyle;rounded=1;orthogonalLoop=1;jettySize=auto;html=1;sourcePerimeterSpacing=10;targetPerimeterSpacing=10;jumpStyle=arc;">
+      <mxGeometry relative="1" as="geometry"/>
+    </mxCell>
+    <mxCell id="e_14" edge="1" parent="1" source="enqueue" target="register_wm" style="edgeStyle=orthogonalEdgeStyle;rounded=1;orthogonalLoop=1;jettySize=auto;html=1;sourcePerimeterSpacing=10;targetPerimeterSpacing=10;jumpStyle=arc;">
+      <mxGeometry relative="1" as="geometry"/>
+    </mxCell>
+    <mxCell id="e_15" edge="1" parent="1" source="register_wm" target="net_back" style="edgeStyle=orthogonalEdgeStyle;rounded=1;orthogonalLoop=1;jettySize=auto;html=1;sourcePerimeterSpacing=10;targetPerimeterSpacing=10;jumpStyle=arc;">
+      <mxGeometry relative="1" as="geometry"/>
+    </mxCell>
+    <mxCell id="e_16" value="Chưa" edge="1" parent="1" source="net_back" target="register_wm" style="edgeStyle=orthogonalEdgeStyle;rounded=1;orthogonalLoop=1;jettySize=auto;html=1;sourcePerimeterSpacing=10;targetPerimeterSpacing=10;jumpStyle=arc;labelBackgroundColor=none;exitX=1;exitY=0.5;exitDx=0;exitDy=0;entryX=1;entryY=0.5;entryDx=0;entryDy=0;verticalAlign=bottom;">
+      <mxGeometry relative="1" as="geometry"/>
+    </mxCell>
+    <mxCell id="e_17" value="Có" edge="1" parent="1" source="net_back" target="retry" style="edgeStyle=orthogonalEdgeStyle;rounded=1;orthogonalLoop=1;jettySize=auto;html=1;sourcePerimeterSpacing=10;targetPerimeterSpacing=10;jumpStyle=arc;labelBackgroundColor=none;verticalAlign=bottom;">
+      <mxGeometry relative="1" as="geometry"/>
+    </mxCell>
+    <mxCell id="e_18" edge="1" parent="1" source="retry" target="mark_synced" style="edgeStyle=orthogonalEdgeStyle;rounded=1;orthogonalLoop=1;jettySize=auto;html=1;sourcePerimeterSpacing=10;targetPerimeterSpacing=10;jumpStyle=arc;">
+      <mxGeometry relative="1" as="geometry"/>
+    </mxCell>
+    <mxCell id="e_19" edge="1" parent="1" source="mark_synced" target="end" style="edgeStyle=orthogonalEdgeStyle;rounded=1;orthogonalLoop=1;jettySize=auto;html=1;sourcePerimeterSpacing=10;targetPerimeterSpacing=10;jumpStyle=arc;">
+      <mxGeometry relative="1" as="geometry"/>
+    </mxCell>
+  </root>
+</mxGraphModel>

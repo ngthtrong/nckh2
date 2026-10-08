@@ -1,0 +1,106 @@
+<mxGraphModel adaptiveColors="auto">
+  <root>
+    <mxCell id="0"/>
+    <mxCell id="1" parent="0"/>
+    <mxCell id="start" value="Bắt đầu" style="ellipse;whiteSpace=wrap;html=1;aspect=fixed;" vertex="1" parent="1">
+      <mxGeometry x="370" y="20" width="60" height="60" as="geometry"/>
+    </mxCell>
+    <mxCell id="trigger" value="Kích hoạt:
+Polling từ Dashboard
+hoặc Worker ngầm" style="shape=mxgraph.aws4.resourceIcon;resIcon=mxgraph.aws4.ecs;fillColor=#ED7100;strokeColor=#ffffff;fontColor=#232F3E;dashed=0;verticalLabelPosition=bottom;verticalAlign=top;align=center;fontSize=11;html=1;" vertex="1" parent="1">
+      <mxGeometry x="361" y="140" width="78" height="78" as="geometry"/>
+    </mxCell>
+    <mxCell id="check_etag" value="So sánh
+cluster_version
+với ETag?" style="rhombus;whiteSpace=wrap;html=1;" vertex="1" parent="1">
+      <mxGeometry x="330" y="260" width="140" height="80" as="geometry"/>
+    </mxCell>
+    <mxCell id="return_304" value="Trả 304
+Not Modified" style="rounded=1;whiteSpace=wrap;html=1;" vertex="1" parent="1">
+      <mxGeometry x="330" y="380" width="140" height="60" as="geometry"/>
+    </mxCell>
+    <mxCell id="fetch_reports" value="Lấy báo cáo
+active_only=True
+(bỏ resolved/cancelled)" style="rounded=1;whiteSpace=wrap;html=1;" vertex="1" parent="1">
+      <mxGeometry x="330" y="500" width="140" height="60" as="geometry"/>
+    </mxCell>
+    <mxCell id="adapt_v2" value="Adapter to_report_v2
+Trích xuất: F, U, N, V
+tọa độ (lat, lng)" style="rounded=1;whiteSpace=wrap;html=1;" vertex="1" parent="1">
+      <mxGeometry x="330" y="620" width="140" height="60" as="geometry"/>
+    </mxCell>
+    <mxCell id="has_gps" value="Có tọa độ
+GPS?" style="rhombus;whiteSpace=wrap;html=1;" vertex="1" parent="1">
+      <mxGeometry x="330" y="740" width="140" height="80" as="geometry"/>
+    </mxCell>
+    <mxCell id="review_queue" value="Đưa vào
+Hàng xem xét
+(Review Queue)" style="rounded=1;whiteSpace=wrap;html=1;" vertex="1" parent="1">
+      <mxGeometry x="330" y="860" width="140" height="60" as="geometry"/>
+    </mxCell>
+    <mxCell id="build_matrix" value="Xây ma trận Cij
+(Haversine + khẩn cấp
++ mức ngập)" style="rounded=1;whiteSpace=wrap;html=1;" vertex="1" parent="1">
+      <mxGeometry x="330" y="980" width="140" height="60" as="geometry"/>
+    </mxCell>
+    <mxCell id="louvain" value="Thuật toán Louvain
+Phân cụm cộng đồng
+→ gán clusterKey" style="rounded=1;whiteSpace=wrap;html=1;" vertex="1" parent="1">
+      <mxGeometry x="330" y="1100" width="140" height="60" as="geometry"/>
+    </mxCell>
+    <mxCell id="score" value="Tính điểm ưu tiên
+P(c) = f(N, V, F)
+Sắp xếp thứ bậc" style="rounded=1;whiteSpace=wrap;html=1;" vertex="1" parent="1">
+      <mxGeometry x="330" y="1220" width="140" height="60" as="geometry"/>
+    </mxCell>
+    <mxCell id="cache" value="Lưu Snapshot Cache
+cập nhật cluster_version" style="shape=mxgraph.aws4.resourceIcon;resIcon=mxgraph.aws4.elasticache;fillColor=#C925D1;strokeColor=#ffffff;fontColor=#232F3E;dashed=0;verticalLabelPosition=bottom;verticalAlign=top;align=center;fontSize=11;html=1;" vertex="1" parent="1">
+      <mxGeometry x="361" y="1340" width="78" height="78" as="geometry"/>
+    </mxCell>
+    <mxCell id="end" value="Kết thúc" style="ellipse;whiteSpace=wrap;html=1;aspect=fixed;" vertex="1" parent="1">
+      <mxGeometry x="370" y="1460" width="60" height="60" as="geometry"/>
+    </mxCell>
+    <mxCell id="e_1" edge="1" parent="1" source="start" target="trigger" style="edgeStyle=orthogonalEdgeStyle;rounded=1;orthogonalLoop=1;jettySize=auto;html=1;sourcePerimeterSpacing=10;targetPerimeterSpacing=10;jumpStyle=arc;">
+      <mxGeometry relative="1" as="geometry"/>
+    </mxCell>
+    <mxCell id="e_2" edge="1" parent="1" source="trigger" target="check_etag" style="edgeStyle=orthogonalEdgeStyle;rounded=1;orthogonalLoop=1;jettySize=auto;html=1;sourcePerimeterSpacing=10;targetPerimeterSpacing=10;jumpStyle=arc;">
+      <mxGeometry relative="1" as="geometry"/>
+    </mxCell>
+    <mxCell id="e_3" value="Không đổi" edge="1" parent="1" source="check_etag" target="return_304" style="edgeStyle=orthogonalEdgeStyle;rounded=1;orthogonalLoop=1;jettySize=auto;html=1;sourcePerimeterSpacing=10;targetPerimeterSpacing=10;jumpStyle=arc;labelBackgroundColor=none;verticalAlign=bottom;">
+      <mxGeometry relative="1" as="geometry"/>
+    </mxCell>
+    <mxCell id="e_4" edge="1" parent="1" source="return_304" target="end" style="edgeStyle=orthogonalEdgeStyle;rounded=1;orthogonalLoop=1;jettySize=auto;html=1;sourcePerimeterSpacing=10;targetPerimeterSpacing=10;jumpStyle=arc;">
+      <mxGeometry relative="1" as="geometry"/>
+    </mxCell>
+    <mxCell id="e_5" value="Có thay đổi" edge="1" parent="1" source="check_etag" target="fetch_reports" style="edgeStyle=orthogonalEdgeStyle;rounded=1;orthogonalLoop=1;jettySize=auto;html=1;sourcePerimeterSpacing=10;targetPerimeterSpacing=10;jumpStyle=arc;labelBackgroundColor=none;verticalAlign=bottom;">
+      <mxGeometry relative="1" as="geometry"/>
+    </mxCell>
+    <mxCell id="e_6" edge="1" parent="1" source="fetch_reports" target="adapt_v2" style="edgeStyle=orthogonalEdgeStyle;rounded=1;orthogonalLoop=1;jettySize=auto;html=1;sourcePerimeterSpacing=10;targetPerimeterSpacing=10;jumpStyle=arc;">
+      <mxGeometry relative="1" as="geometry"/>
+    </mxCell>
+    <mxCell id="e_7" edge="1" parent="1" source="adapt_v2" target="has_gps" style="edgeStyle=orthogonalEdgeStyle;rounded=1;orthogonalLoop=1;jettySize=auto;html=1;sourcePerimeterSpacing=10;targetPerimeterSpacing=10;jumpStyle=arc;">
+      <mxGeometry relative="1" as="geometry"/>
+    </mxCell>
+    <mxCell id="e_8" value="Không" edge="1" parent="1" source="has_gps" target="review_queue" style="edgeStyle=orthogonalEdgeStyle;rounded=1;orthogonalLoop=1;jettySize=auto;html=1;sourcePerimeterSpacing=10;targetPerimeterSpacing=10;jumpStyle=arc;labelBackgroundColor=none;verticalAlign=bottom;">
+      <mxGeometry relative="1" as="geometry"/>
+    </mxCell>
+    <mxCell id="e_9" value="Có" edge="1" parent="1" source="has_gps" target="build_matrix" style="edgeStyle=orthogonalEdgeStyle;rounded=1;orthogonalLoop=1;jettySize=auto;html=1;sourcePerimeterSpacing=10;targetPerimeterSpacing=10;jumpStyle=arc;labelBackgroundColor=none;verticalAlign=bottom;">
+      <mxGeometry relative="1" as="geometry"/>
+    </mxCell>
+    <mxCell id="e_10" edge="1" parent="1" source="review_queue" target="end" style="edgeStyle=orthogonalEdgeStyle;rounded=1;orthogonalLoop=1;jettySize=auto;html=1;sourcePerimeterSpacing=10;targetPerimeterSpacing=10;jumpStyle=arc;">
+      <mxGeometry relative="1" as="geometry"/>
+    </mxCell>
+    <mxCell id="e_11" edge="1" parent="1" source="build_matrix" target="louvain" style="edgeStyle=orthogonalEdgeStyle;rounded=1;orthogonalLoop=1;jettySize=auto;html=1;sourcePerimeterSpacing=10;targetPerimeterSpacing=10;jumpStyle=arc;">
+      <mxGeometry relative="1" as="geometry"/>
+    </mxCell>
+    <mxCell id="e_12" edge="1" parent="1" source="louvain" target="score" style="edgeStyle=orthogonalEdgeStyle;rounded=1;orthogonalLoop=1;jettySize=auto;html=1;sourcePerimeterSpacing=10;targetPerimeterSpacing=10;jumpStyle=arc;">
+      <mxGeometry relative="1" as="geometry"/>
+    </mxCell>
+    <mxCell id="e_13" edge="1" parent="1" source="score" target="cache" style="edgeStyle=orthogonalEdgeStyle;rounded=1;orthogonalLoop=1;jettySize=auto;html=1;sourcePerimeterSpacing=10;targetPerimeterSpacing=10;jumpStyle=arc;">
+      <mxGeometry relative="1" as="geometry"/>
+    </mxCell>
+    <mxCell id="e_14" edge="1" parent="1" source="cache" target="end" style="edgeStyle=orthogonalEdgeStyle;rounded=1;orthogonalLoop=1;jettySize=auto;html=1;sourcePerimeterSpacing=10;targetPerimeterSpacing=10;jumpStyle=arc;">
+      <mxGeometry relative="1" as="geometry"/>
+    </mxCell>
+  </root>
+</mxGraphModel>

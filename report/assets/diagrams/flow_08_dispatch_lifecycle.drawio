@@ -1,0 +1,113 @@
+<mxGraphModel adaptiveColors="auto">
+  <root>
+    <mxCell id="0"/>
+    <mxCell id="1" parent="0"/>
+    <mxCell id="start" value="Bắt đầu" style="ellipse;whiteSpace=wrap;html=1;aspect=fixed;" vertex="1" parent="1">
+      <mxGeometry x="370" y="20" width="60" height="60" as="geometry"/>
+    </mxCell>
+    <mxCell id="view_clusters" value="Điều phối viên xem
+danh sách cụm ưu tiên
+trên bản đồ Leaflet" style="rounded=1;whiteSpace=wrap;html=1;" vertex="1" parent="1">
+      <mxGeometry x="330" y="140" width="140" height="60" as="geometry"/>
+    </mxCell>
+    <mxCell id="select_case" value="Chọn ca cứu hộ:
+xem ảnh, nhãn AI
+số nạn nhân" style="rounded=1;whiteSpace=wrap;html=1;" vertex="1" parent="1">
+      <mxGeometry x="330" y="260" width="140" height="60" as="geometry"/>
+    </mxCell>
+    <mxCell id="need_loc" value="Cần bổ sung
+vị trí?" style="rhombus;whiteSpace=wrap;html=1;" vertex="1" parent="1">
+      <mxGeometry x="330" y="380" width="140" height="80" as="geometry"/>
+    </mxCell>
+    <mxCell id="add_loc" value="Bổ sung tọa độ
+PUT /api/reports/{id}
+/location" style="rounded=1;whiteSpace=wrap;html=1;" vertex="1" parent="1">
+      <mxGeometry x="330" y="500" width="140" height="60" as="geometry"/>
+    </mxCell>
+    <mxCell id="pick_team" value="Chọn đội cứu hộ
+phù hợp địa bàn" style="rounded=1;whiteSpace=wrap;html=1;" vertex="1" parent="1">
+      <mxGeometry x="330" y="620" width="140" height="60" as="geometry"/>
+    </mxCell>
+    <mxCell id="assign" value="Giao đội
+PUT /api/reports/{id}/team
+status → dispatched" style="rounded=1;whiteSpace=wrap;html=1;" vertex="1" parent="1">
+      <mxGeometry x="330" y="740" width="140" height="60" as="geometry"/>
+    </mxCell>
+    <mxCell id="field_work" value="Đội cứu hộ
+tiếp cận hiện trường
+thực hiện cứu trợ" style="rounded=1;whiteSpace=wrap;html=1;" vertex="1" parent="1">
+      <mxGeometry x="330" y="860" width="140" height="60" as="geometry"/>
+    </mxCell>
+    <mxCell id="result" value="Kết quả
+cứu hộ?" style="rhombus;whiteSpace=wrap;html=1;" vertex="1" parent="1">
+      <mxGeometry x="330" y="980" width="140" height="80" as="geometry"/>
+    </mxCell>
+    <mxCell id="resolve" value="Thành công
+status → resolved" style="rounded=1;whiteSpace=wrap;html=1;" vertex="1" parent="1">
+      <mxGeometry x="330" y="1100" width="140" height="60" as="geometry"/>
+    </mxCell>
+    <mxCell id="cancel" value="Hủy (giả/tự thoát)
+status → cancelled
+bắt buộc chọn lý do" style="rounded=1;whiteSpace=wrap;html=1;" vertex="1" parent="1">
+      <mxGeometry x="330" y="1220" width="140" height="60" as="geometry"/>
+    </mxCell>
+    <mxCell id="audit_log" value="Ghi audit log
+report_events
+(ai, hành động, thời gian)" style="shape=cylinder3;whiteSpace=wrap;html=1;boundedLbl=1;backgroundOutline=1;size=15;" vertex="1" parent="1">
+      <mxGeometry x="350" y="1340" width="100" height="70" as="geometry"/>
+    </mxCell>
+    <mxCell id="remove_cluster" value="Loại khỏi cụm
+hoạt động
+phản hồi người gửi" style="rounded=1;whiteSpace=wrap;html=1;" vertex="1" parent="1">
+      <mxGeometry x="330" y="1460" width="140" height="60" as="geometry"/>
+    </mxCell>
+    <mxCell id="end" value="Kết thúc" style="ellipse;whiteSpace=wrap;html=1;aspect=fixed;" vertex="1" parent="1">
+      <mxGeometry x="370" y="1580" width="60" height="60" as="geometry"/>
+    </mxCell>
+    <mxCell id="e_1" edge="1" parent="1" source="start" target="view_clusters" style="edgeStyle=orthogonalEdgeStyle;rounded=1;orthogonalLoop=1;jettySize=auto;html=1;sourcePerimeterSpacing=10;targetPerimeterSpacing=10;jumpStyle=arc;">
+      <mxGeometry relative="1" as="geometry"/>
+    </mxCell>
+    <mxCell id="e_2" edge="1" parent="1" source="view_clusters" target="select_case" style="edgeStyle=orthogonalEdgeStyle;rounded=1;orthogonalLoop=1;jettySize=auto;html=1;sourcePerimeterSpacing=10;targetPerimeterSpacing=10;jumpStyle=arc;">
+      <mxGeometry relative="1" as="geometry"/>
+    </mxCell>
+    <mxCell id="e_3" edge="1" parent="1" source="select_case" target="need_loc" style="edgeStyle=orthogonalEdgeStyle;rounded=1;orthogonalLoop=1;jettySize=auto;html=1;sourcePerimeterSpacing=10;targetPerimeterSpacing=10;jumpStyle=arc;">
+      <mxGeometry relative="1" as="geometry"/>
+    </mxCell>
+    <mxCell id="e_4" value="Có" edge="1" parent="1" source="need_loc" target="add_loc" style="edgeStyle=orthogonalEdgeStyle;rounded=1;orthogonalLoop=1;jettySize=auto;html=1;sourcePerimeterSpacing=10;targetPerimeterSpacing=10;jumpStyle=arc;labelBackgroundColor=none;verticalAlign=bottom;">
+      <mxGeometry relative="1" as="geometry"/>
+    </mxCell>
+    <mxCell id="e_5" value="Không" edge="1" parent="1" source="need_loc" target="pick_team" style="edgeStyle=orthogonalEdgeStyle;rounded=1;orthogonalLoop=1;jettySize=auto;html=1;sourcePerimeterSpacing=10;targetPerimeterSpacing=10;jumpStyle=arc;labelBackgroundColor=none;verticalAlign=bottom;">
+      <mxGeometry relative="1" as="geometry"/>
+    </mxCell>
+    <mxCell id="e_6" edge="1" parent="1" source="add_loc" target="pick_team" style="edgeStyle=orthogonalEdgeStyle;rounded=1;orthogonalLoop=1;jettySize=auto;html=1;sourcePerimeterSpacing=10;targetPerimeterSpacing=10;jumpStyle=arc;">
+      <mxGeometry relative="1" as="geometry"/>
+    </mxCell>
+    <mxCell id="e_7" edge="1" parent="1" source="pick_team" target="assign" style="edgeStyle=orthogonalEdgeStyle;rounded=1;orthogonalLoop=1;jettySize=auto;html=1;sourcePerimeterSpacing=10;targetPerimeterSpacing=10;jumpStyle=arc;">
+      <mxGeometry relative="1" as="geometry"/>
+    </mxCell>
+    <mxCell id="e_8" edge="1" parent="1" source="assign" target="field_work" style="edgeStyle=orthogonalEdgeStyle;rounded=1;orthogonalLoop=1;jettySize=auto;html=1;sourcePerimeterSpacing=10;targetPerimeterSpacing=10;jumpStyle=arc;">
+      <mxGeometry relative="1" as="geometry"/>
+    </mxCell>
+    <mxCell id="e_9" edge="1" parent="1" source="field_work" target="result" style="edgeStyle=orthogonalEdgeStyle;rounded=1;orthogonalLoop=1;jettySize=auto;html=1;sourcePerimeterSpacing=10;targetPerimeterSpacing=10;jumpStyle=arc;">
+      <mxGeometry relative="1" as="geometry"/>
+    </mxCell>
+    <mxCell id="e_10" value="Thành công" edge="1" parent="1" source="result" target="resolve" style="edgeStyle=orthogonalEdgeStyle;rounded=1;orthogonalLoop=1;jettySize=auto;html=1;sourcePerimeterSpacing=10;targetPerimeterSpacing=10;jumpStyle=arc;labelBackgroundColor=none;verticalAlign=bottom;">
+      <mxGeometry relative="1" as="geometry"/>
+    </mxCell>
+    <mxCell id="e_11" value="Hủy" edge="1" parent="1" source="result" target="cancel" style="edgeStyle=orthogonalEdgeStyle;rounded=1;orthogonalLoop=1;jettySize=auto;html=1;sourcePerimeterSpacing=10;targetPerimeterSpacing=10;jumpStyle=arc;labelBackgroundColor=none;verticalAlign=bottom;">
+      <mxGeometry relative="1" as="geometry"/>
+    </mxCell>
+    <mxCell id="e_12" edge="1" parent="1" source="resolve" target="audit_log" style="edgeStyle=orthogonalEdgeStyle;rounded=1;orthogonalLoop=1;jettySize=auto;html=1;sourcePerimeterSpacing=10;targetPerimeterSpacing=10;jumpStyle=arc;">
+      <mxGeometry relative="1" as="geometry"/>
+    </mxCell>
+    <mxCell id="e_13" edge="1" parent="1" source="cancel" target="audit_log" style="edgeStyle=orthogonalEdgeStyle;rounded=1;orthogonalLoop=1;jettySize=auto;html=1;sourcePerimeterSpacing=10;targetPerimeterSpacing=10;jumpStyle=arc;">
+      <mxGeometry relative="1" as="geometry"/>
+    </mxCell>
+    <mxCell id="e_14" edge="1" parent="1" source="audit_log" target="remove_cluster" style="edgeStyle=orthogonalEdgeStyle;rounded=1;orthogonalLoop=1;jettySize=auto;html=1;sourcePerimeterSpacing=10;targetPerimeterSpacing=10;jumpStyle=arc;">
+      <mxGeometry relative="1" as="geometry"/>
+    </mxCell>
+    <mxCell id="e_15" edge="1" parent="1" source="remove_cluster" target="end" style="edgeStyle=orthogonalEdgeStyle;rounded=1;orthogonalLoop=1;jettySize=auto;html=1;sourcePerimeterSpacing=10;targetPerimeterSpacing=10;jumpStyle=arc;">
+      <mxGeometry relative="1" as="geometry"/>
+    </mxCell>
+  </root>
+</mxGraphModel>

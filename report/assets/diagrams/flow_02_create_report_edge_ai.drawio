@@ -1,0 +1,92 @@
+<mxGraphModel adaptiveColors="auto">
+  <root>
+    <mxCell id="0"/>
+    <mxCell id="1" parent="0"/>
+    <mxCell id="start" value="Bắt đầu" style="ellipse;whiteSpace=wrap;html=1;aspect=fixed;" vertex="1" parent="1">
+      <mxGeometry x="370" y="20" width="60" height="60" as="geometry"/>
+    </mxCell>
+    <mxCell id="open_form" value="Mở biểu mẫu
+Báo cáo cứu hộ" style="rounded=1;whiteSpace=wrap;html=1;" vertex="1" parent="1">
+      <mxGeometry x="330" y="140" width="140" height="60" as="geometry"/>
+    </mxCell>
+    <mxCell id="capture" value="Chụp / chọn ảnh
+hiện trường" style="rounded=1;whiteSpace=wrap;html=1;" vertex="1" parent="1">
+      <mxGeometry x="330" y="260" width="140" height="60" as="geometry"/>
+    </mxCell>
+    <mxCell id="has_image" value="Có ảnh?" style="rhombus;whiteSpace=wrap;html=1;" vertex="1" parent="1">
+      <mxGeometry x="330" y="380" width="140" height="80" as="geometry"/>
+    </mxCell>
+    <mxCell id="run_ai" value="AnalyzeImageUseCase
+Tải MobileNetV3 TFLite
+Phân loại mức ngập" style="rounded=1;whiteSpace=wrap;html=1;" vertex="1" parent="1">
+      <mxGeometry x="330" y="500" width="140" height="60" as="geometry"/>
+    </mxCell>
+    <mxCell id="ai_result" value="Kết quả AI:
+nhãn (low/medium/high)
+độ tin cậy" style="rounded=1;whiteSpace=wrap;html=1;" vertex="1" parent="1">
+      <mxGeometry x="330" y="620" width="140" height="60" as="geometry"/>
+    </mxCell>
+    <mxCell id="gen_tags" value="Sinh AiTag[]
+(label, confidence)" style="rounded=1;whiteSpace=wrap;html=1;" vertex="1" parent="1">
+      <mxGeometry x="330" y="740" width="140" height="60" as="geometry"/>
+    </mxCell>
+    <mxCell id="fill_info" value="Nhập thông tin chi tiết:
+số người mắc kẹt, bị thương
+nhóm yếu thế, mô tả" style="rounded=1;whiteSpace=wrap;html=1;" vertex="1" parent="1">
+      <mxGeometry x="330" y="860" width="140" height="60" as="geometry"/>
+    </mxCell>
+    <mxCell id="get_loc" value="Lấy tọa độ GPS
+(lat, lng)" style="rounded=1;whiteSpace=wrap;html=1;" vertex="1" parent="1">
+      <mxGeometry x="330" y="980" width="140" height="60" as="geometry"/>
+    </mxCell>
+    <mxCell id="build_record" value="Tạo RescueRecord
+id=post-*, gắn aiTags
+status=processing" style="rounded=1;whiteSpace=wrap;html=1;" vertex="1" parent="1">
+      <mxGeometry x="330" y="1100" width="140" height="60" as="geometry"/>
+    </mxCell>
+    <mxCell id="deliver" value="deliverRecord()
+Chọn chế độ gửi
+&amp; lưu Outbox" style="rounded=1;whiteSpace=wrap;html=1;" vertex="1" parent="1">
+      <mxGeometry x="330" y="1220" width="140" height="60" as="geometry"/>
+    </mxCell>
+    <mxCell id="end" value="Kết thúc" style="ellipse;whiteSpace=wrap;html=1;aspect=fixed;" vertex="1" parent="1">
+      <mxGeometry x="370" y="1340" width="60" height="60" as="geometry"/>
+    </mxCell>
+    <mxCell id="e_1" edge="1" parent="1" source="start" target="open_form" style="edgeStyle=orthogonalEdgeStyle;rounded=1;orthogonalLoop=1;jettySize=auto;html=1;sourcePerimeterSpacing=10;targetPerimeterSpacing=10;jumpStyle=arc;">
+      <mxGeometry relative="1" as="geometry"/>
+    </mxCell>
+    <mxCell id="e_2" edge="1" parent="1" source="open_form" target="capture" style="edgeStyle=orthogonalEdgeStyle;rounded=1;orthogonalLoop=1;jettySize=auto;html=1;sourcePerimeterSpacing=10;targetPerimeterSpacing=10;jumpStyle=arc;">
+      <mxGeometry relative="1" as="geometry"/>
+    </mxCell>
+    <mxCell id="e_3" edge="1" parent="1" source="capture" target="has_image" style="edgeStyle=orthogonalEdgeStyle;rounded=1;orthogonalLoop=1;jettySize=auto;html=1;sourcePerimeterSpacing=10;targetPerimeterSpacing=10;jumpStyle=arc;">
+      <mxGeometry relative="1" as="geometry"/>
+    </mxCell>
+    <mxCell id="e_4" value="Có" edge="1" parent="1" source="has_image" target="run_ai" style="edgeStyle=orthogonalEdgeStyle;rounded=1;orthogonalLoop=1;jettySize=auto;html=1;sourcePerimeterSpacing=10;targetPerimeterSpacing=10;jumpStyle=arc;labelBackgroundColor=none;verticalAlign=bottom;">
+      <mxGeometry relative="1" as="geometry"/>
+    </mxCell>
+    <mxCell id="e_5" value="Không" edge="1" parent="1" source="has_image" target="fill_info" style="edgeStyle=orthogonalEdgeStyle;rounded=1;orthogonalLoop=1;jettySize=auto;html=1;sourcePerimeterSpacing=10;targetPerimeterSpacing=10;jumpStyle=arc;labelBackgroundColor=none;verticalAlign=bottom;">
+      <mxGeometry relative="1" as="geometry"/>
+    </mxCell>
+    <mxCell id="e_6" edge="1" parent="1" source="run_ai" target="ai_result" style="edgeStyle=orthogonalEdgeStyle;rounded=1;orthogonalLoop=1;jettySize=auto;html=1;sourcePerimeterSpacing=10;targetPerimeterSpacing=10;jumpStyle=arc;">
+      <mxGeometry relative="1" as="geometry"/>
+    </mxCell>
+    <mxCell id="e_7" edge="1" parent="1" source="ai_result" target="gen_tags" style="edgeStyle=orthogonalEdgeStyle;rounded=1;orthogonalLoop=1;jettySize=auto;html=1;sourcePerimeterSpacing=10;targetPerimeterSpacing=10;jumpStyle=arc;">
+      <mxGeometry relative="1" as="geometry"/>
+    </mxCell>
+    <mxCell id="e_8" edge="1" parent="1" source="gen_tags" target="fill_info" style="edgeStyle=orthogonalEdgeStyle;rounded=1;orthogonalLoop=1;jettySize=auto;html=1;sourcePerimeterSpacing=10;targetPerimeterSpacing=10;jumpStyle=arc;">
+      <mxGeometry relative="1" as="geometry"/>
+    </mxCell>
+    <mxCell id="e_9" edge="1" parent="1" source="fill_info" target="get_loc" style="edgeStyle=orthogonalEdgeStyle;rounded=1;orthogonalLoop=1;jettySize=auto;html=1;sourcePerimeterSpacing=10;targetPerimeterSpacing=10;jumpStyle=arc;">
+      <mxGeometry relative="1" as="geometry"/>
+    </mxCell>
+    <mxCell id="e_10" edge="1" parent="1" source="get_loc" target="build_record" style="edgeStyle=orthogonalEdgeStyle;rounded=1;orthogonalLoop=1;jettySize=auto;html=1;sourcePerimeterSpacing=10;targetPerimeterSpacing=10;jumpStyle=arc;">
+      <mxGeometry relative="1" as="geometry"/>
+    </mxCell>
+    <mxCell id="e_11" edge="1" parent="1" source="build_record" target="deliver" style="edgeStyle=orthogonalEdgeStyle;rounded=1;orthogonalLoop=1;jettySize=auto;html=1;sourcePerimeterSpacing=10;targetPerimeterSpacing=10;jumpStyle=arc;">
+      <mxGeometry relative="1" as="geometry"/>
+    </mxCell>
+    <mxCell id="e_12" edge="1" parent="1" source="deliver" target="end" style="edgeStyle=orthogonalEdgeStyle;rounded=1;orthogonalLoop=1;jettySize=auto;html=1;sourcePerimeterSpacing=10;targetPerimeterSpacing=10;jumpStyle=arc;">
+      <mxGeometry relative="1" as="geometry"/>
+    </mxCell>
+  </root>
+</mxGraphModel>
