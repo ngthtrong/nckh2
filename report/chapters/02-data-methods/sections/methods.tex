@@ -117,7 +117,6 @@ Các thuộc tính này làm rõ cấu trúc đồ thị, nhưng không chứng 
 \end{tikzpicture}
 \caption{Ví dụ khái niệm: chặn chiều dài cạnh không chặn trực tiếp đường kính cộng đồng}
 \label{fig:edge-chain}
-\SourceNote{Minh họa Công thức~\ref{eq:edge-radius}; không phải phân hoạch hoặc tọa độ lấy từ thực nghiệm.}
 \end{figure}
 
 \subsection{Chi phí tạo đồ thị và tác động của multiplicity}
@@ -183,7 +182,6 @@ Trong notebook RQ2, NDCG dùng \texttt{sklearn.metrics.ndcg\_score} với releva
 \operatorname{NDCG@5}=\frac{\operatorname{DCG@5}}{\operatorname{IDCG@5}}.
 \end{equation}
 IDCG là DCG của thứ tự lợi ích lý tưởng; evaluator dùng gain tuyến tính như lời gọi thư viện, không thay bằng $2^{g_i}-1$. Việc xử lý tie tuân theo scorer của lần chạy. NDCG cần đối chứng vì một thứ tự ngẫu nhiên cũng có thể đạt giá trị dương khi nhiều sự kiện đều có lợi ích.
-\SourceNote{Cách gọi metric trong benchmark RQ1 và \RepoPath{thucnghiem/results/rq2_results/RQ2_Priority_Robustness_Colab.ipynb}; công thức chỉ giải thích metric, không chạy lại các benchmark.}
 
 \subsection{Quy trình suy luận và kiểm tra có thể tái lập}
 Quy trình nghiên cứu được mô tả theo thứ tự thao tác để làm rõ nơi sử dụng dữ liệu. Trước hết, đọc hợp đồng/schema và chỉ nạp tệp đầu vào quan sát. Kiểm tra miền số, timestamp và tọa độ; đưa báo cáo không đủ vị trí/thời gian vào review. Từ các báo cáo đủ trường, xác định định danh payload, số củng cố và $Q_i$. Sau đó tính từng thành phần tương đồng, ngưỡng quantile và cạnh top-$k$, rồi gọi bộ phát hiện cộng đồng.

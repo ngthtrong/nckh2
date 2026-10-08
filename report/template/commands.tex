@@ -1,5 +1,4 @@
 \newcommand{\DraftNote}[1]{\par\noindent\textit{[TODO: #1]}\par}
-\newcommand{\SourceNote}[1]{\par\noindent\textit{Nguồn: #1}\par}
 % Paths stay readable and may break at directory separators in narrow columns.
 \newcommand{\RepoPath}[1]{{\small\path{#1}}}
 \newcommand{\SignatureBlock}[1]{%
@@ -34,3 +33,48 @@
   \clearpage\newgeometry{left=25mm,right=25mm,top=25mm,bottom=25mm,headheight=22bp,footskip=10mm}%
   \thispagestyle{empty}%
 }{\clearpage\restoregeometry}
+
+% Official forms follow the supplied PDF layout; scientific body keeps its own style.
+\newenvironment{officialform}{%
+  \clearpage\begingroup\pagestyle{empty}\setstretch{1}%
+  \fontsize{13bp}{15bp}\selectfont\setlength{\parindent}{0pt}%
+  \setlength{\parskip}{1bp}\FormLogo%
+}{\clearpage\endgroup}
+% Put the same CTU mark on every official form, independent of the header language.
+\newcommand{\FormLogo}{%
+  \begin{tikzpicture}[remember picture,overlay]
+    \node[anchor=north west,inner sep=0pt] at
+      ($(current page.north west)+(30mm,-20mm)$)
+      {\includegraphics[width=16mm]{logo-ctu.png}};
+  \end{tikzpicture}}
+\newcommand{\FormAgencyVI}{%
+  \noindent\hspace*{18mm}\begin{minipage}{.61\textwidth}\centering
+  BỘ GIÁO DỤC VÀ ĐÀO TẠO\\\textbf{ĐẠI HỌC CẦN THƠ}\par
+  \end{minipage}\par\vspace{6mm}}
+\newcommand{\FormAgencyLogoVI}{%
+  \noindent\hspace*{18mm}\begin{minipage}{.61\textwidth}\centering
+  \textbf{BỘ GIÁO DỤC VÀ ĐÀO TẠO\\ĐẠI HỌC CẦN THƠ}\par
+  \end{minipage}\par\vspace{5mm}}
+\newcommand{\FormAgencyLogoEN}{%
+  \noindent\hspace*{18mm}\begin{minipage}{.82\textwidth}\centering
+  \textbf{MINISTRY OF EDUCATION AND TRAINING\\CAN THO UNIVERSITY}\par
+  \end{minipage}\par\vspace{5mm}}
+\newcommand{\FormAgencyEN}{\FormAgencyLogoEN}
+\newcommand{\FormTitle}[1]{%
+  {\centering\fontsize{14bp}{17bp}\selectfont\bfseries #1\par}\vspace{5mm}}
+\newcommand{\FormContentsEntry}[1]{\phantomsection\addcontentsline{toc}{chapter}{#1}}
+\newcommand{\FormSection}[1]{\par\addvspace{3bp}\textbf{#1}\par\nopagebreak[4]}
+\newcommand{\FormLine}[1]{\par\noindent -- #1\par}
+\newcommand{\FormIndented}[1]{\par\begingroup\leftskip=8mm\noindent #1\par\endgroup}
+% Missing data stays visible as blank fields; the release checker catches this macro.
+\newcommand{\PendingField}[1]{\dotfill}
+\newcommand{\FormSignature}[2]{%
+  \par\noindent\hfill\begin{minipage}{.48\textwidth}\centering
+  Ngày \ldots\ tháng \ldots\ năm \ldots\\\textbf{#1}\par\vspace{20mm}\textbf{#2}\par
+  \end{minipage}\par}
+\newcommand{\FormJointSignature}[2]{%
+  \par\noindent\begin{minipage}[t]{.48\textwidth}\centering\vspace{0pt}
+  \mbox{}\\\textbf{Xác nhận của Đại học Cần Thơ}\par\vspace{20mm}
+  \end{minipage}\hfill\begin{minipage}[t]{.48\textwidth}\centering\vspace{0pt}
+  Ngày \ldots\ tháng \ldots\ năm \ldots\\\textbf{#1}\par\vspace{20mm}\textbf{#2}\par
+  \end{minipage}\par}

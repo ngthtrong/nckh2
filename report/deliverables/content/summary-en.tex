@@ -1,29 +1,5 @@
-\begin{english}
-\section*{Research summary}
-\textbf{Project:} \ProjectTitleEnglish\\\textbf{Code:} \ProjectCode\\
-\textbf{Principal investigator:} \PrincipalName\\\textbf{Supervisor:} \SupervisorName\\
-\textbf{Registered period:} March--August 2026.
-\subsection*{Problem and objective}
-Flood-rescue reports can be duplicated, incomplete or delayed by intermittent connectivity. The project develops a prototype combining local image inference, persistent store-and-forward queues, event consolidation and a dispatch dashboard. Reduced field response time and harm remain application objectives requiring independent validation.
-\subsection*{Data and methods}
-The current image dataset contains \ImageTotal{} samples with a saved seed-42 split of \ImageTrain{} training, \ImageVal{} validation and \ImageTest{} test images. Report preparation checks confirm all paths and MD5 values and no recorded hash/perceptual/split groups crossing splits. MobileNetV3-Large uses $256\times256$ inputs with EXIF handling, RGB conversion, letterboxing and ImageNet NCHW normalization. Runtime formats, quantization and pruning are compared through saved artifacts on the same test split.
-
-The structured urgency LR package enumerates all 32 Boolean states of five source-mapped signs with a reduced OR surrogate label. It is neither patient data nor a Vietnamese text model. The app records \texttt{E\_i}, while the current backend adapter reads \texttt{urgency} or keyword evidence; this integration gap remains explicit.
-
-RQ1 uses 80 geographically contextualized semi-synthetic Generator-3.0 runs with 26,288 reports and 40 held-out test runs. RQ2/RQ3 use a separate fully synthetic Candidate-4.1 suite of 80 datasets and 30,229 reports, including 40 test seeds. Truth is joined after observable inference. RQ2 uses oracle incident groups to diagnose ranking alone; RQ3 uses predicted clusters and averages three resource conditions within each seed before paired inference.
-\subsection*{Results}
-The FP32 image model achieves \ImageAccuracy\% accuracy and \ImageMacroFOne\% macro-F1. ONNX and ExecuTorch agree with PyTorch on all test top-1 labels; this is conversion parity, not 100\% classification accuracy. PTQ reduces file size from about 16.04 to 4.51 MiB with accuracy declining to \PTQAccuracy\%. The recorded QAT branch reaches \QATAccuracy\% with 38 severe errors. Structured pruning removes about 1.46\% of parameters, preserves aggregate accuracy and does not accelerate all runtimes. Timing covers CPU inference calls, not mobile or complete pipeline latency.
-
-A saved app benchmark processes all 256 test images per runtime, with 75.00\% accuracy, 73.31\% macro-F1 and full ONNX--ExecuTorch top-1 agreement. Median classifyImage latency is 54.50 ms for ONNX and 29.49 ms for ExecuTorch. This boundary includes preprocessing and differs from CPU predict timing; device/asset metadata are absent.
-
-RQ1 mean ARI is 0.9191 for Additive Louvain and 0.9072 for Product Louvain, without an established Product advantage after adjusted testing. Location/time noise degrades accuracy; fivefold transport copies reduce graph variants to mean ARI near 0.30. Fake-only destinations persist despite zero fake absorption into genuine clusters.
-
-RQ2 revised NDCG@5 is 0.6669 with Spearman correlation $-0.0304$, providing no general benefit-alignment advantage. Exact-copy invariance holds under fixed grouping and inputs, while coordinated high-confidence reports remain a failure mode. RQ3 establishes no general revised-score benefit over legacy and shows worse simulated harm/deadline outcomes than nearest-first. These results do not validate either policy for field rescue.
-\subsection*{Software outputs}
-The Flutter application provides an outbox, adaptive sending and status feedback. FastAPI/SQLite provides message deduplication, clustering, authentication, audit events and SMS-gateway intake. The dashboard supports maps, team assignment and manual review. A dated repository document records 44 backend tests, 26 Flutter tests and 46 web E2E checks passing on 27 September 2026, plus a debug APK build; these are historical records, not rerun results for the current commit.
-The PTQ/QAT summaries do not fully match their prediction CSV: QAT summary accuracy is 52.34\%, versus 51.17\% recomputed from CSV. Compression metrics require reconciliation before final acceptance.
-\subsection*{Conclusions and follow-up}
-The prototype and diagnostic experiments document implementation capabilities and stage-specific limitations. Follow-up work includes text data/modeling, urgency-field integration, mobile provenance and repeated Android/network/SMS measurements, expert validation and dataset provenance. DTN contact/data-mule support remains a planned extension. Official forms, approval evidence and the demonstration video remain part of completing the submission package; administrative metadata have been confirmed.
-\SourceNote{Saved artifacts in \RepoPath{products/fe/reports} and \RepoPath{thucnghiem/results}, with \RepoPath{paper/main.tex}; tables exported by \RepoPath{report/scripts/export_results.py}.}
-\DraftNote{Preliminary summary content; transfer to the official submission template.}
-\end{english}
+\begin{officialform}\begin{english}
+\FormAgencyEN
+\FormTitle{INFORMATION ON RESEARCH RESULTS}
+\input{frontmatter/research-body-en}
+\end{english}\end{officialform}

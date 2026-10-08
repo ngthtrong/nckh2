@@ -27,7 +27,6 @@ Hình~\ref{fig:sync-sequence} mô tả ca mà server đã ghi dữ liệu nhưng
 \end{tikzpicture}
 \caption{Trình tự gửi lại message khi mất ACK sau khi server đã commit}
 \label{fig:sync-sequence}
-\SourceNote{Dựng từ \RepoPath{docs/contact_connect.md}; sơ đồ cho endpoint JSON, không mô tả multipart như một message JSON.}
 \end{figure}
 
 Hash payload là SHA-256 sau chuẩn tắc hóa JSON theo hợp đồng RFC 8785 \citep{rfc8785}. Hash hỗ trợ phát hiện cùng ID được dùng cho nội dung khác; không xác minh danh tính người tạo tin. Ảnh multipart có hash riêng và kiểm tra byte/định dạng ở server. Hai loại hash phục vụ toàn vẹn của dữ liệu, không phải đánh giá độ thật của hiện trường.
@@ -43,7 +42,6 @@ retry\_later & Lỗi tạm thời theo message & Giữ pending, đặt lịch re
 Timeout, 408, 429, 5xx & Chưa đủ thông tin để kết luận thất bại vĩnh viễn & Giữ ID/hash và exponential backoff có jitter \\
 rejected không retry & Vi phạm payload/TTL/quyền hoặc xung đột định danh & Chuyển dead-letter để truy vết \\
 \bottomrule\end{tabularx}
-\SourceNote{\RepoPath{docs/contact_connect.md}; phản hồi theo message và lỗi mức request có phạm vi khác nhau.}
 \end{table}
 
 Trong batch, ACK phải được nối bằng message ID thay vì vị trí trong mảng. Một message hợp lệ có thể đã thành công trong khi message khác bị từ chối. Retry toàn bộ mà tạo lại ID sẽ phá khả năng chống trùng. Dead-letter giúp giữ nguyên lỗi và payload để rà soát; nếu chỉ xóa message bị từ chối, số ca người dùng tưởng đã gửi có thể khác số ca trung tâm nhận được mà không còn dấu vết giải thích.
@@ -71,7 +69,6 @@ Người gửi chọn ảnh nếu có, khai báo vị trí hoặc để thiếu,
 \end{tikzpicture}
 \caption{Luồng nghiệp vụ từ khai báo tới xác minh và phản hồi}
 \label{fig:user-workflow}
-\SourceNote{Tổng hợp từ ứng dụng, dashboard và hợp đồng hiện tại; đây là sơ đồ nghiệp vụ, không phải ảnh chụp phiên cứu hộ thực tế.}
 \end{figure}
 
 Luồng trên cho thấy phân cụm và xếp hạng là thông tin hỗ trợ trong một chuỗi quyết định có người điều phối. Một ca được xếp hạng cao vẫn có thể cần kiểm tra địa điểm hoặc nguồn tin. Khóa cụm không phải định danh ca bền vững; thao tác nghiệp vụ cần gắn với report ID và danh sách thành viên hiện tại. Đây là lý do hệ thống giữ cả dữ liệu từng báo cáo và nhật ký thay vì chỉ lưu cụm tổng hợp.

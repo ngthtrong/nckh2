@@ -1,53 +1,29 @@
-% Default to biblatex when installed; Makefile forces BibTeX if biber is unavailable.
+% IEEE numbering follows first citation, with one continuous reference list.
 \newif\ifReportBiblatex
-\newif\ifHasLegalBib
-\newif\ifHasBooksBib
-\newif\ifHasArticlesBib
 \ifdefined\UseBibtex
   \ReportBiblatexfalse
 \else
-  \IfFileExists{biblatex.sty}{\ReportBiblatextrue}{\ReportBiblatexfalse}
+  \IfFileExists{ieee.bbx}{\ReportBiblatextrue}{\ReportBiblatexfalse}
 \fi
 \providecommand{\ReportBooksDatabase}{bibliography/books}
 \ifReportBiblatex
-  \usepackage[backend=biber,style=authoryear,sorting=nyt,sortlocale=vi_VN]{biblatex}
+  \usepackage[backend=biber,style=ieee,sorting=none]{biblatex}
   \addbibresource{bibliography/legal.bib}
   \addbibresource{\ReportBooksDatabase.bib}
   \addbibresource{bibliography/articles.bib}
   \addbibresource{bibliography/references.bib}
   \DeclareLanguageMapping{vietnamese}{english}
-  \AtDataInput{\ifkeyword{legal}{\global\HasLegalBibtrue}{}%
-    \ifkeyword{books}{\global\HasBooksBibtrue}{}%
-    \ifkeyword{articles}{\global\HasArticlesBibtrue}{}}
-  \let\citep\parencite
+  % ieee.cbx's cite command encloses each numeric citation in square brackets.
+  \let\citep\cite
   \let\citet\textcite
   \newcommand{\PrintReportBibliography}{%
     \addchap{Tài liệu tham khảo}
-    \ifHasLegalBib\printbibliography[heading=subbibliography,keyword=legal,title={Văn bản pháp quy}]\fi
-    \ifHasBooksBib\printbibliography[heading=subbibliography,keyword=books,title={Sách, báo, tạp chí}]\fi
-    \ifHasArticlesBib\printbibliography[heading=subbibliography,keyword=articles,title={Bài viết của tác giả}]\fi}
+    \begin{english}\printbibliography[heading=none]\end{english}}
 \else
-  \usepackage[authoryear,round]{natbib}
-  % Separate .bib and .aux for the three groups; natbib resolves all labels.
-  \newwrite\LegalBibAux
-  \newwrite\BooksBibAux
-  \newwrite\ArticlesBibAux
-  \newcommand{\WriteBibGroup}[3]{%
-    \immediate\openout#1=\jobname-#2.aux
-    \immediate\write#1{\string\citation{*}}
-    \immediate\write#1{\string\bibstyle{plainnat}}
-    \immediate\write#1{\string\bibdata{#3}}
-    \immediate\closeout#1}
-  \AtBeginDocument{%
-    \WriteBibGroup{\LegalBibAux}{legal}{bibliography/legal}
-    \WriteBibGroup{\BooksBibAux}{books}{\ReportBooksDatabase}
-    \WriteBibGroup{\ArticlesBibAux}{articles}{bibliography/articles}}
-  \newcommand{\PrintBibGroup}[2]{%
-    \renewcommand{\bibsection}{\section*{#2}}
-    \InputIfFileExists{\jobname-#1.bbl}{}{} }
+  % Standard TeX IEEE style for the BibTeX fallback; no grouped/reset numbering.
+  \usepackage[numbers,square,sort&compress]{natbib}
+  \renewcommand{\bibsection}{\addchap{Tài liệu tham khảo}}
   \newcommand{\PrintReportBibliography}{%
-    \addchap{Tài liệu tham khảo}
-    \PrintBibGroup{legal}{Văn bản pháp quy}
-    \PrintBibGroup{books}{Sách, báo, tạp chí}
-    \PrintBibGroup{articles}{Bài viết của tác giả}}
+    \bibliographystyle{ieeetr}
+    \bibliography{bibliography/legal,\ReportBooksDatabase,bibliography/articles,bibliography/references}}
 \fi

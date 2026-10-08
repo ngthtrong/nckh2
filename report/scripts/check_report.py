@@ -6,6 +6,7 @@ import json
 from pathlib import Path
 import re
 import sys
+import subprocess
 from build_evidence import validated_entries
 
 ROOT = Path(__file__).resolve().parents[1]
@@ -23,7 +24,7 @@ def main():
     for file in sorted(sources):
         for number, line in enumerate(file.read_text().splitlines(), 1):
             active = re.split(r'(?<!\\)%', line)[0]
-            if re.search(r'TODO|\\DraftNote\b|FIXME|\[điền', active, re.I):
+            if re.search(r'TODO|\\DraftNote\b|\\PendingField\b|FIXME|\[điền', active, re.I):
                 notes.append(f'{file.relative_to(ROOT)}:{number}: còn nội dung mẫu')
     print(f'Placeholder: {len(notes)} dòng')
     for note in notes:
@@ -70,6 +71,34 @@ def main():
                 print(f'{log.relative_to(ROOT)}: {phrase}')
                 if args.release:
                     errors.append('Cần xử lý cảnh báo PDF trước khi xuất bản đầy đủ.')
+    pdfs = list(out.glob('*.pdf')) + [ROOT / f'build/{name}/{name}.pdf'
+                                    for name in ['bulletin-vi', 'bulletin-en', 'summary-vi', 'summary-en']]
+    for pdf in pdfs:
+        if pdf.is_file():
+            printed = subprocess.check_output(['pdftotext', '-layout', str(pdf), '-'], text=True)
+            if re.search(r'^\s*Nguồn\s*:', printed, re.M):
+                errors.append('PDF còn dòng nguồn nội bộ: ' + str(pdf.relative_to(ROOT)))
+    # The official bilingual bulletin template limits each language to one A4 page.
+    for language in ['vi', 'en']:
+        pdf = ROOT / f'build/bulletin-{language}/bulletin-{language}.pdf'
+        if not pdf.is_file():
+            if args.release:
+                errors.append('Thiếu bản tin: ' + str(pdf.relative_to(ROOT)))
+            continue
+        info = subprocess.check_output(['pdfinfo', str(pdf)], text=True)
+        match = re.search(r'^Pages:\s+(\d+)', info, re.M)
+        if not match or int(match.group(1)) != 1:
+            errors.append(f'Bản tin {language} phải có đúng 1 trang theo mẫu chính thức.')
+        else:
+            print(f'Bản tin {language}: 1 trang A4 theo giới hạn mẫu')
+    template_provenance = ROOT / 'generated/guideline-text/provenance.json'
+    if template_provenance.exists():
+        for relative, digests in json.loads(template_provenance.read_text()).items():
+            source = ROOT / relative
+            extracted = ROOT / digests['text_path']
+            if (not source.is_file() or hashlib.sha256(source.read_bytes()).hexdigest() != digests['source_sha256']
+                    or not extracted.is_file() or hashlib.sha256(extracted.read_bytes()).hexdigest() != digests['text_sha256']):
+                errors.append('Mẫu/văn bản trích xuất đã đổi: ' + relative + '; chạy make templates rồi đối chiếu lại.')
     if args.release:
         try:
             validated_entries()

@@ -1,18 +1,5 @@
-\addchap{Thông tin kết quả nghiên cứu tiếng Anh}
-\begin{english}
-\DraftNote{Preliminary content; transfer to the official research information form when available.}
-\section*{General information}
-Project title: \ProjectTitleEnglish\\Project code: \ProjectCode\\
-Principal investigator: \PrincipalName\\Supervisor: \SupervisorName\\
-Registered period: March--August 2026.
-\section*{Objectives and approach}
-The project studies the collection, analysis and consolidation of flood-rescue information from images, descriptions and locations under intermittent connectivity. Edge inference, compact transmission, persistent queues and event clustering are combined in a prototype. Image classification, clustering, ranking, simulated dispatch and software behavior are evaluated separately.
-\section*{Findings and outputs}
-The repository contains a Flutter application, a FastAPI/SQLite backend and a map dashboard with adaptive sending, retry, message deduplication and status feedback. The current FP32 image model achieves \ImageAccuracy\% accuracy and \ImageMacroFOne\% macro-F1 on \ImageTest{} held-out images. ONNX and ExecuTorch match PyTorch top-1 predictions on this split. PTQ, QAT and structured-pruning artifacts document trade-offs; a structured urgency LR model uses a deterministic 32-state synthetic reference table.
-
-A saved application benchmark covers the same 256 images per runtime: both ONNX and ExecuTorch achieve 75.00\% accuracy, 73.31\% macro-F1 and full top-1 agreement. Device and asset metadata are absent, so this source is reported separately from CPU measurements and cannot confirm a specific APK.
-
-The algorithm study provides conditional edge-localization and exact-copy invariance properties. Synthetic RQ1--RQ3 diagnostics do not establish a general clustering, ranking or dispatch advantage. Geographic context and mathematical safeguards do not constitute field validation. The LR table is neither clinical ground truth nor a trained Vietnamese text model.
-\section*{Application scope}
-The outputs support research and workflow demonstration. Mobile provenance and measurements across multiple devices, operational network tests, expert validation, complete text modeling, urgency-field integration and official acceptance evidence remain to be completed.
-\end{english}
+\begin{officialform}\begin{english}
+\FormContentsEntry{Information on research results}
+\FormTitle{INFORMATION ON RESEARCH RESULTS}\par\vspace{5mm}
+\input{frontmatter/research-body-en}
+\end{english}\end{officialform}

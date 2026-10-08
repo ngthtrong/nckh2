@@ -9,7 +9,7 @@ for tool in ['xelatex', 'bibtex', 'latexmk', 'biber', 'pandoc', 'mutool']:
 if shutil.which('kpsewhich'):
     for package in ['scrreprt.cls', 'fontspec.sty', 'polyglossia.sty', 'unicode-math.sty',
                     'geometry.sty', 'setspace.sty', 'longtable.sty', 'pdfpages.sty',
-                    'natbib.sty', 'biblatex.sty', 'algorithm.sty', 'algpseudocode.sty', 'siunitx.sty']:
+                    'natbib.sty', 'biblatex.sty', 'ieee.bbx', 'ieee.cbx', 'ieeetr.bst', 'algorithm.sty', 'algpseudocode.sty', 'siunitx.sty']:
         result = subprocess.run(['kpsewhich', package], capture_output=True, text=True)
         print(f'{package}: {"có" if result.stdout.strip() else "chưa cài"}')
 font = subprocess.run(['fc-match', '-f', '%{family}', 'Times New Roman'], capture_output=True, text=True) if shutil.which('fc-match') else None
