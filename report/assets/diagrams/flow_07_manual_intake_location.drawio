@@ -1,0 +1,87 @@
+<mxGraphModel adaptiveColors="auto">
+  <root>
+    <mxCell id="0"/>
+    <mxCell id="1" parent="0"/>
+    <mxCell id="start" value="Bắt đầu" style="ellipse;whiteSpace=wrap;html=1;aspect=fixed;" vertex="1" parent="1">
+      <mxGeometry x="370" y="20" width="60" height="60" as="geometry"/>
+    </mxCell>
+    <mxCell id="receive_call" value="Điều phối viên nhận
+cuộc gọi cứu nạn
+hoặc SMS Gateway" style="rounded=1;whiteSpace=wrap;html=1;" vertex="1" parent="1">
+      <mxGeometry x="330" y="140" width="140" height="60" as="geometry"/>
+    </mxCell>
+    <mxCell id="open_modal" value="Mở modal nhập tin
+thủ công trên Dashboard" style="rounded=1;whiteSpace=wrap;html=1;" vertex="1" parent="1">
+      <mxGeometry x="330" y="260" width="140" height="60" as="geometry"/>
+    </mxCell>
+    <mxCell id="enter_info" value="Nhập thông tin:
+tên, SĐT, mô tả
+số người, nhóm yếu thế" style="rounded=1;whiteSpace=wrap;html=1;" vertex="1" parent="1">
+      <mxGeometry x="330" y="380" width="140" height="60" as="geometry"/>
+    </mxCell>
+    <mxCell id="has_addr" value="Người gọi
+mô tả
+địa chỉ?" style="rhombus;whiteSpace=wrap;html=1;" vertex="1" parent="1">
+      <mxGeometry x="330" y="500" width="140" height="80" as="geometry"/>
+    </mxCell>
+    <mxCell id="pick_map" value="Chọn vị trí trên
+bản đồ Leaflet
+hoặc nhập lat/lng" style="rounded=1;whiteSpace=wrap;html=1;" vertex="1" parent="1">
+      <mxGeometry x="330" y="620" width="140" height="60" as="geometry"/>
+    </mxCell>
+    <mxCell id="no_loc" value="Lưu không có tọa độ
+→ đưa vào Review Queue" style="rounded=1;whiteSpace=wrap;html=1;" vertex="1" parent="1">
+      <mxGeometry x="330" y="740" width="140" height="60" as="geometry"/>
+    </mxCell>
+    <mxCell id="submit" value="POST /api/reports/manual
+nguồn gốc = &apos;manual&apos;
+ghi ID điều phối viên" style="rounded=1;whiteSpace=wrap;html=1;" vertex="1" parent="1">
+      <mxGeometry x="330" y="860" width="140" height="60" as="geometry"/>
+    </mxCell>
+    <mxCell id="log_event" value="Ghi report_events
+(audit log)" style="shape=cylinder3;whiteSpace=wrap;html=1;boundedLbl=1;backgroundOutline=1;size=15;" vertex="1" parent="1">
+      <mxGeometry x="350" y="980" width="100" height="70" as="geometry"/>
+    </mxCell>
+    <mxCell id="auto_cluster" value="Tự động đưa vào
+tập dữ liệu hoạt động
+→ gộp cụm cứu hộ" style="rounded=1;whiteSpace=wrap;html=1;" vertex="1" parent="1">
+      <mxGeometry x="330" y="1100" width="140" height="60" as="geometry"/>
+    </mxCell>
+    <mxCell id="end" value="Kết thúc" style="ellipse;whiteSpace=wrap;html=1;aspect=fixed;" vertex="1" parent="1">
+      <mxGeometry x="370" y="1220" width="60" height="60" as="geometry"/>
+    </mxCell>
+    <mxCell id="e_1" edge="1" parent="1" source="start" target="receive_call" style="edgeStyle=orthogonalEdgeStyle;rounded=1;orthogonalLoop=1;jettySize=auto;html=1;sourcePerimeterSpacing=10;targetPerimeterSpacing=10;jumpStyle=arc;">
+      <mxGeometry relative="1" as="geometry"/>
+    </mxCell>
+    <mxCell id="e_2" edge="1" parent="1" source="receive_call" target="open_modal" style="edgeStyle=orthogonalEdgeStyle;rounded=1;orthogonalLoop=1;jettySize=auto;html=1;sourcePerimeterSpacing=10;targetPerimeterSpacing=10;jumpStyle=arc;">
+      <mxGeometry relative="1" as="geometry"/>
+    </mxCell>
+    <mxCell id="e_3" edge="1" parent="1" source="open_modal" target="enter_info" style="edgeStyle=orthogonalEdgeStyle;rounded=1;orthogonalLoop=1;jettySize=auto;html=1;sourcePerimeterSpacing=10;targetPerimeterSpacing=10;jumpStyle=arc;">
+      <mxGeometry relative="1" as="geometry"/>
+    </mxCell>
+    <mxCell id="e_4" edge="1" parent="1" source="enter_info" target="has_addr" style="edgeStyle=orthogonalEdgeStyle;rounded=1;orthogonalLoop=1;jettySize=auto;html=1;sourcePerimeterSpacing=10;targetPerimeterSpacing=10;jumpStyle=arc;">
+      <mxGeometry relative="1" as="geometry"/>
+    </mxCell>
+    <mxCell id="e_5" value="Có" edge="1" parent="1" source="has_addr" target="pick_map" style="edgeStyle=orthogonalEdgeStyle;rounded=1;orthogonalLoop=1;jettySize=auto;html=1;sourcePerimeterSpacing=10;targetPerimeterSpacing=10;jumpStyle=arc;labelBackgroundColor=none;verticalAlign=bottom;">
+      <mxGeometry relative="1" as="geometry"/>
+    </mxCell>
+    <mxCell id="e_6" value="Không" edge="1" parent="1" source="has_addr" target="no_loc" style="edgeStyle=orthogonalEdgeStyle;rounded=1;orthogonalLoop=1;jettySize=auto;html=1;sourcePerimeterSpacing=10;targetPerimeterSpacing=10;jumpStyle=arc;labelBackgroundColor=none;verticalAlign=bottom;">
+      <mxGeometry relative="1" as="geometry"/>
+    </mxCell>
+    <mxCell id="e_7" edge="1" parent="1" source="pick_map" target="submit" style="edgeStyle=orthogonalEdgeStyle;rounded=1;orthogonalLoop=1;jettySize=auto;html=1;sourcePerimeterSpacing=10;targetPerimeterSpacing=10;jumpStyle=arc;">
+      <mxGeometry relative="1" as="geometry"/>
+    </mxCell>
+    <mxCell id="e_8" edge="1" parent="1" source="no_loc" target="submit" style="edgeStyle=orthogonalEdgeStyle;rounded=1;orthogonalLoop=1;jettySize=auto;html=1;sourcePerimeterSpacing=10;targetPerimeterSpacing=10;jumpStyle=arc;">
+      <mxGeometry relative="1" as="geometry"/>
+    </mxCell>
+    <mxCell id="e_9" edge="1" parent="1" source="submit" target="log_event" style="edgeStyle=orthogonalEdgeStyle;rounded=1;orthogonalLoop=1;jettySize=auto;html=1;sourcePerimeterSpacing=10;targetPerimeterSpacing=10;jumpStyle=arc;">
+      <mxGeometry relative="1" as="geometry"/>
+    </mxCell>
+    <mxCell id="e_10" edge="1" parent="1" source="log_event" target="auto_cluster" style="edgeStyle=orthogonalEdgeStyle;rounded=1;orthogonalLoop=1;jettySize=auto;html=1;sourcePerimeterSpacing=10;targetPerimeterSpacing=10;jumpStyle=arc;">
+      <mxGeometry relative="1" as="geometry"/>
+    </mxCell>
+    <mxCell id="e_11" edge="1" parent="1" source="auto_cluster" target="end" style="edgeStyle=orthogonalEdgeStyle;rounded=1;orthogonalLoop=1;jettySize=auto;html=1;sourcePerimeterSpacing=10;targetPerimeterSpacing=10;jumpStyle=arc;">
+      <mxGeometry relative="1" as="geometry"/>
+    </mxCell>
+  </root>
+</mxGraphModel>
