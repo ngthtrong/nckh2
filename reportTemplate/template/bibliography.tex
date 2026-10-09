@@ -1,0 +1,34 @@
+% Một danh mục IEEE, đánh số theo thứ tự trích dẫn.
+\newif\ifReportBiblatex
+\ifdefined\UseBibtex
+  \ReportBiblatexfalse
+\else
+  \ReportBiblatextrue
+\fi
+\providecommand{\ReportArticlesDatabase}{bibliography/articles}
+\ifReportBiblatex
+  \usepackage[backend=biber,style=ieee,sorting=none]{biblatex}
+  \addbibresource{bibliography/legal.bib}
+  \addbibresource{bibliography/books.bib}
+  \addbibresource{\ReportArticlesDatabase.bib}
+  \addbibresource{bibliography/references.bib}
+  \DeclareLanguageMapping{vietnamese}{english}
+  \let\citep\cite
+  \let\citet\textcite
+  \newcommand{\PrintReportBibliography}{%
+    \addchap{Tài liệu tham khảo}
+    \ifdefined\TemplateHasReferences
+      \begin{english}\printbibliography[heading=none]\end{english}
+    \fi}
+\else
+  \usepackage[numbers,square,sort&compress]{natbib}
+  \renewcommand{\bibsection}{\addchap{Tài liệu tham khảo}}
+  \newcommand{\PrintReportBibliography}{%
+    \bibliographystyle{ieeetr}
+    \ifdefined\TemplateHasReferences
+      \bibliography{bibliography/legal,bibliography/books,\ReportArticlesDatabase,bibliography/references}
+    \else
+      \addchap{Tài liệu tham khảo}
+    \fi}
+\fi
+% scripts/build.py tự phát hiện trích dẫn và bật TemplateHasReferences.

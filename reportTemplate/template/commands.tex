@@ -1,0 +1,69 @@
+\newcommand{\SignatureBlock}[1]{%
+  \par\begin{flushright}\begin{minipage}{.46\textwidth}\centering
+  \textbf{#1}\\{\itshape (Ký và ghi rõ họ tên)}\par\vspace{22mm}
+  \end{minipage}\end{flushright}}
+\newcommand{\CoverFrame}{%
+  \begin{tikzpicture}[remember picture,overlay]
+    \draw[line width=.8pt] ($(current page.north west)+(20mm,-20mm)$)
+      rectangle ($(current page.south east)+(-20mm,20mm)$);
+    \draw[line width=.4pt] ($(current page.north west)+(21mm,-21mm)$)
+      rectangle ($(current page.south east)+(-21mm,21mm)$);
+  \end{tikzpicture}}
+\newcommand{\CoverHeading}{%
+  \MinistryName\\\textbf{\UniversityName}\par
+  \vspace{10mm}\includegraphics[width=30mm]{logo-ctu.png}\par
+  \vspace{10mm}{\fontsize{18bp}{22bp}\selectfont\bfseries BÁO CÁO TỔNG KẾT\par}
+  \medskip\textbf{ĐỀ TÀI NGHIÊN CỨU KHOA HỌC CỦA SINH VIÊN}\par}
+\newcommand{\CoverTitle}{%
+  {\fontsize{16bp}{20bp}\selectfont\bfseries\ProjectTitle\par}
+  \vspace{6mm}\textbf{Mã số đề tài: \ProjectCode}\par}
+% Covers have centered content inside the double frame; body margins restored after.
+\newenvironment{reportcover}{%
+  \clearpage\newgeometry{left=25mm,right=25mm,top=25mm,bottom=25mm,headheight=22bp,footskip=10mm}%
+  \thispagestyle{empty}%
+}{\clearpage\restoregeometry}
+
+% Official forms follow the supplied PDF layout; scientific body keeps its own style.
+\newenvironment{officialform}{%
+  \clearpage\begingroup\pagestyle{empty}\setstretch{1}%
+  \fontsize{13bp}{15bp}\selectfont\setlength{\parindent}{0pt}%
+  \setlength{\parskip}{1bp}\FormLogo%
+}{\clearpage\endgroup}
+% Put the same CTU mark on every official form, independent of the header language.
+\newcommand{\FormLogo}{%
+  \begin{tikzpicture}[remember picture,overlay]
+    \node[anchor=north west,inner sep=0pt] at
+      ($(current page.north west)+(30mm,-20mm)$)
+      {\includegraphics[width=16mm]{logo-ctu.png}};
+  \end{tikzpicture}}
+\newcommand{\FormAgencyVI}{%
+  \noindent\hspace*{18mm}\begin{minipage}{.61\textwidth}\centering
+  \MinistryName\\\textbf{\UniversityName}\par
+  \end{minipage}\par\vspace{6mm}}
+\newcommand{\FormAgencyLogoVI}{%
+  \noindent\hspace*{18mm}\begin{minipage}{.61\textwidth}\centering
+  \textbf{\MinistryName\\\UniversityName}\par
+  \end{minipage}\par\vspace{5mm}}
+\newcommand{\FormAgencyLogoEN}{%
+  \noindent\hspace*{18mm}\begin{minipage}{.82\textwidth}\centering
+  \textbf{\MinistryNameEnglish\\\UniversityNameEnglish}\par
+  \end{minipage}\par\vspace{5mm}}
+\newcommand{\FormAgencyEN}{\FormAgencyLogoEN}
+\newcommand{\FormTitle}[1]{%
+  {\centering\fontsize{14bp}{17bp}\selectfont\bfseries #1\par}\vspace{5mm}}
+\newcommand{\FormContentsEntry}[1]{\phantomsection\addcontentsline{toc}{chapter}{#1}}
+\newcommand{\FormSection}[1]{\par\addvspace{3bp}\textbf{#1}\par\nopagebreak[4]}
+\newcommand{\FormLine}[1]{\par\noindent -- #1\par}
+\newcommand{\FormIndented}[1]{\par\begingroup\leftskip=8mm\noindent #1\par\endgroup}
+% Blank fields are intentional in this reusable template.
+\newcommand{\PendingField}[1]{\dotfill}
+\newcommand{\FormSignature}[2]{%
+  \par\noindent\hfill\begin{minipage}{.48\textwidth}\centering
+  Ngày \ldots\ tháng \ldots\ năm \ldots\\\textbf{#1}\par\vspace{20mm}\textbf{#2}\par
+  \end{minipage}\par}
+\newcommand{\FormJointSignature}[2]{%
+  \par\noindent\begin{minipage}[t]{.48\textwidth}\centering\vspace{0pt}
+  \mbox{}\\\textbf{Xác nhận của \UniversitySignatureName}\par\vspace{20mm}
+  \end{minipage}\hfill\begin{minipage}[t]{.48\textwidth}\centering\vspace{0pt}
+  Ngày \ldots\ tháng \ldots\ năm \ldots\\\textbf{#1}\par\vspace{20mm}\textbf{#2}\par
+  \end{minipage}\par}

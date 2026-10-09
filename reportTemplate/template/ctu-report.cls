@@ -1,0 +1,39 @@
+\NeedsTeXFormat{LaTeX2e}
+\ProvidesClass{template/ctu-report}[2026/10/06 CTU student research report]
+\RequirePackage{iftex}
+\ifXeTeX\else
+  \ClassError{ctu-report}{XeLaTeX is required}{Run make content in the template directory}
+\fi
+\DeclareOption{twoside}{\def\TwoSidedReport{1}}
+\DeclareOption*{\PassOptionsToClass{\CurrentOption}{scrreprt}}
+\ProcessOptions\relax
+% geometry owns final margins; explicit DIV avoids the initial 13bp DIV warning.
+\PassOptionsToPackage{usegeometry,DIV=12}{typearea}
+\ifdefined\TwoSidedReport
+  \PassOptionsToClass{twoside}{scrreprt}
+\else
+  \PassOptionsToClass{oneside}{scrreprt}
+\fi
+\LoadClass[fontsize=13bp,a4paper,open=any,chapterprefix=true,
+  listof=totoc,bibliography=totoc,numbers=noenddot]{scrreprt}
+\RequirePackage[reset,a4paper,left=3cm,right=2cm,top=2cm,bottom=2cm,
+  headheight=22bp,footskip=10mm]{geometry}
+\ifdefined\TwoSidedReport
+  \geometry{reset,a4paper,left=3cm,right=2cm,top=2cm,bottom=2cm,
+    asymmetric,headheight=22bp,footskip=10mm}
+\fi
+\addtokomafont{disposition}{\rmfamily}
+\setkomafont{chapter}{\normalfont\bfseries\fontsize{16bp}{20bp}\selectfont}
+\setkomafont{section}{\normalfont\bfseries\fontsize{14bp}{18bp}\selectfont}
+\setkomafont{subsection}{\normalfont\bfseries\normalsize}
+\setkomafont{caption}{\normalfont\normalsize}
+\setkomafont{captionlabel}{\normalfont\bfseries}
+\RedeclareSectionCommand[beforeskip=0pt,afterskip=18bp]{chapter}
+\setcounter{secnumdepth}{2}
+\setcounter{tocdepth}{2}
+\RequirePackage{scrlayer-scrpage}
+\clearpairofpagestyles
+\cfoot*{\pagemark}
+\setkomafont{pageheadfoot}{\normalfont\normalsize}
+\renewcommand*{\chapterpagestyle}{scrheadings}
+\setlength{\footheight}{22bp}

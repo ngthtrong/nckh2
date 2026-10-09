@@ -1,0 +1,42 @@
+% PDF minh họa riêng; không được nhập vào main.tex.
+\documentclass{template/ctu-report}
+\input{config/metadata}
+\input{template/typography}
+\input{template/packages}
+\input{template/commands}
+\newcommand{\ReportArticlesDatabase}{examples/references}
+\input{template/bibliography}
+\begin{document}
+\tableofcontents
+\listoftables
+\listoffigures
+\chapter{Minh họa định dạng}\label{chap:example}
+\section{Văn bản và tham chiếu}
+Đây là ví dụ trình bày, không phải kết quả nghiên cứu.
+Thân bài dùng Times New Roman cỡ 13 bp, giãn dòng 1,3.
+\textbf{Chữ đậm}, \textit{chữ nghiêng}, \textbf{\textit{đậm nghiêng}};
+dấu tiếng Việt: Ắ ằ Ỡ ỡ Ự ự Đ Ư.
+Trích dẫn số theo IEEE: \citep{example-reference}.
+Tham chiếu Hình~\ref{fig:example}, Bảng~\ref{tab:example},
+Công thức~\eqref{eq:example} và Chương~\ref{chap:example}.
+\begin{figure}[htbp]
+  \centering
+  \fbox{\parbox[c][20mm][c]{.65\textwidth}{\centering [Vùng đặt hình minh họa]}}
+  \caption{Hình minh họa định dạng}\label{fig:example}
+\end{figure}
+\begin{table}[htbp]
+  \centering
+  \caption{Bảng minh họa định dạng}\label{tab:example}
+  \begin{tabularx}{.85\textwidth}{lX}
+    \toprule Trường & Nội dung \\
+    \midrule
+    {}[Tên trường] & [Nội dung cần điền] \\
+    \bottomrule
+  \end{tabularx}
+\end{table}
+\begin{equation}\label{eq:example}
+  y = \sum_{i=1}^{n} w_i x_i.
+\end{equation}
+\clearpage
+\PrintReportBibliography
+\end{document}
