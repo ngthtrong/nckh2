@@ -22,9 +22,14 @@ def main():
     parser.add_argument('--twoside', action='store_true')
     parser.add_argument('--bibliography', choices=['auto', 'bibtex', 'biblatex'], default='auto')
     args = parser.parse_args()
-    if not shutil.which('xelatex'):
-        parser.error('XeLaTeX is missing.')
+    has_xelatex = bool(shutil.which('xelatex'))
+    local_tectonic = ROOT / ('tectonic.exe' if sys.platform == 'win32' else 'tectonic')
+    tectonic_bin = str(local_tectonic) if local_tectonic.exists() else ('tectonic' if shutil.which('tectonic') else None)
+    has_tectonic = tectonic_bin is not None
+    if not has_xelatex and not has_tectonic:
+        parser.error('XeLaTeX or Tectonic is required.')
     os.chdir(ROOT)
+
     if args.target == 'full':
         draft_cmd = [sys.executable, 'scripts/build.py', 'content', '--bibliography', args.bibliography]
         if args.twoside:
@@ -44,7 +49,7 @@ def main():
     use_biber = report and (args.bibliography == 'biblatex' or (args.bibliography == 'auto' and biber_available))
     if use_biber and not biber_available:
         parser.error('biblatex-ieee + biber are required for --bibliography biblatex.')
-    if report and not use_biber and not shutil.which('bibtex'):
+    if report and not use_biber and not shutil.which('bibtex') and not has_tectonic:
         parser.error('BibTeX is missing.')
     source = 'main.tex' if args.target in ['content', 'full'] else (
         'template/typography-smoke.tex' if args.target == 'smoke' else f'deliverables/{args.target}.tex')
@@ -52,6 +57,29 @@ def main():
     definitions += '\\def\\TwoSidedReport{1}' if args.twoside else ''
     definitions += '\\def\\UseBiblatex{1}' if use_biber else '\\def\\UseBibtex{1}'
     job = args.target
+
+    if not has_xelatex and has_tectonic:
+        print(f'Building {args.target} via Tectonic...', flush=True)
+        driver = out / f'_{job}_driver.tex'
+        driver.write_text(definitions + f'\\input{{{source}}}\n', encoding='utf-8')
+        tectonic_cmd = [tectonic_bin, '-Z', 'search-path=.', '-o', str(out.relative_to(ROOT)), str(driver.relative_to(ROOT))]
+        env = os.environ.copy()
+        run(tectonic_cmd, env)
+        pdf_out = out / f'_{job}_driver.pdf'
+        if pdf_out.exists():
+            target_pdf = out / f'{job}.pdf'
+            if target_pdf.exists():
+                target_pdf.unlink()
+            shutil.move(str(pdf_out), str(target_pdf))
+        metrics_out = out / f'_{job}_driver.metrics'
+        if metrics_out.exists():
+            target_metrics = out / f'{job}.metrics'
+            if target_metrics.exists():
+                target_metrics.unlink()
+            shutil.move(str(metrics_out), str(target_metrics))
+        print('PDF: ' + str((out / f'{job}.pdf').relative_to(ROOT)))
+        return
+
     cmd = ['xelatex', '-interaction=nonstopmode', '-halt-on-error', '-file-line-error',
            f'-output-directory={out.relative_to(ROOT)}', f'-jobname={job}',
            definitions + '\\input{' + source + '}']

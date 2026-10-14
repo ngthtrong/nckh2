@@ -2,3 +2,5 @@
 \newif\ifReportFull
 \ifdefined\FullReport\ReportFulltrue\else\ReportFullfalse\fi
 % TwoSidedReport is consumed by the class before typearea and geometry load.
+\ifdefined\UseBiblatex\relax\else\providecommand{\UseBibtex}{1}\fi
+

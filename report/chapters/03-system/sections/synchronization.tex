@@ -4,6 +4,13 @@ Một ca cứu hộ cần giữ định danh ổn định ngay khi được tạ
 
 Trạng thái outbox mô tả việc truyền: \texttt{pending}, \texttt{in\_flight}, ACK và dead-letter. Trạng thái báo cáo mô tả nghiệp vụ: \texttt{processing}, \texttt{dispatched}, \texttt{resolved}, \texttt{cancelled}. Backend đã nhận dữ liệu chỉ xác nhận đồng bộ. Việc đội cứu hộ đã được cử đi hoặc ca đã hoàn tất phải được cập nhật bằng thao tác nghiệp vụ có quyền. Giao diện cần giúp người dùng đọc được cả hai thông tin này.
 
+\begin{figure}[htbp]
+\centering
+\includegraphics[width=\textwidth]{flow_04_track_rescue_status.pdf}
+\caption{Quy trình tra cứu và đồng bộ tiến trình cứu hộ 4 trạng thái giữa ứng dụng và máy chủ}
+\label{fig:flow-track-status}
+\end{figure}
+
 \subsection{Mất ACK sau commit và xử lý idempotency}
 Hình~\ref{fig:sync-sequence} mô tả ca mà server đã ghi dữ liệu nhưng ACK bị mất. Đây là một trường hợp khiến hệ thống chỉ ``gửi lại khi lỗi'' dễ tạo trùng nếu không giữ định danh. Theo hợp đồng, ghi nghiệp vụ và ghi chống trùng nằm trong transaction của cùng message; gửi lại đúng message/hash trả kết quả duplicate. Khả năng retry kết hợp với kiểm tra định danh giữ tính nhất quán cho thao tác đã được server ghi.
 
@@ -30,6 +37,13 @@ Hình~\ref{fig:sync-sequence} mô tả ca mà server đã ghi dữ liệu nhưng
 \end{figure}
 
 Hash payload là SHA-256 sau chuẩn tắc hóa JSON theo hợp đồng RFC 8785 \citep{rfc8785}. Hash hỗ trợ phát hiện cùng ID được dùng cho nội dung khác; không xác minh danh tính người tạo tin. Ảnh multipart có hash riêng và kiểm tra byte/định dạng ở server. Hai loại hash phục vụ toàn vẹn của dữ liệu, không phải đánh giá độ thật của hiện trường.
+
+\begin{figure}[htbp]
+\centering
+\includegraphics[width=\textwidth]{flow_05_backend_ingest_dedup.pdf}
+\caption{Quy trình tiếp nhận, chuẩn tắc hóa RFC 8785 JSON, kiểm tra băm SHA-256 và chống gửi trùng lặp phía backend}
+\label{fig:flow-backend-dedup}
+\end{figure}
 
 \subsection{Phân loại phản hồi và giới hạn retry}
 \begin{table}[htbp]\centering\small
@@ -72,3 +86,17 @@ Người gửi chọn ảnh nếu có, khai báo vị trí hoặc để thiếu,
 \end{figure}
 
 Luồng trên cho thấy phân cụm và xếp hạng là thông tin hỗ trợ trong một chuỗi quyết định có người điều phối. Một ca được xếp hạng cao vẫn có thể cần kiểm tra địa điểm hoặc nguồn tin. Khóa cụm không phải định danh ca bền vững; thao tác nghiệp vụ cần gắn với report ID và danh sách thành viên hiện tại. Đây là lý do hệ thống giữ cả dữ liệu từng báo cáo và nhật ký thay vì chỉ lưu cụm tổng hợp.
+
+\begin{figure}[htbp]
+\centering
+\includegraphics[width=.95\textwidth]{flow_01_sos_one_touch.pdf}
+\caption{Quy trình gửi tín hiệu cứu nạn khẩn cấp một chạm (One-Touch SOS) và lưu trữ cục bộ}
+\label{fig:flow-sos-one-touch}
+\end{figure}
+
+\begin{figure}[htbp]
+\centering
+\includegraphics[width=.95\textwidth]{flow_02_create_report_edge_ai.pdf}
+\caption{Quy trình tạo báo cáo chi tiết kèm ảnh hiện trường và suy luận On-device Edge AI}
+\label{fig:flow-create-report}
+\end{figure}

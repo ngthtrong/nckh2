@@ -57,7 +57,7 @@ def main():
         values = dict(line.split('=', 1) for line in metrics.read_text().splitlines() if '=' in line)
         if 'body-start' in values and 'body-end' in values:
             count = int(values['body-end']) - int(values['body-start']) + 1
-            print(f'Số trang từ Mở đầu đến hết Kết luận và kiến nghị: {count}/50')
+            print(f'Số trang từ Mở đầu đến hết Kết luận và hướng phát triển: {count}/50')
             if count < 50:
                 (errors if args.release else notes).append('Thân bài chưa đủ 50 trang.')
         elif args.release:

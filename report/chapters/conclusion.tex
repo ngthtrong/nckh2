@@ -1,4 +1,4 @@
-\addchap{Kết luận và kiến nghị}\label{chap:conclusion}
+\addchap{Kết luận và hướng phát triển}\label{chap:conclusion}
 \addsec{Kết luận}
 Đề tài đã xây dựng một nguyên mẫu tiếp nhận và hỗ trợ điều phối cứu hộ bão lũ với ứng dụng Flutter, backend FastAPI, SQLite và dashboard bản đồ. Luồng tạo báo cáo, lưu cục bộ, gửi thích ứng, retry, kiểm tra trùng message và phản hồi trạng thái được thể hiện trong mã nguồn và các ca kiểm thử đã lưu. Dashboard cung cấp danh sách, bản đồ, cụm, giao đội, nhật ký và xử lý thông tin thiếu vị trí, tạo cơ sở cho một quy trình xác minh do người điều phối thực hiện.
 
@@ -10,7 +10,7 @@ Nghiên cứu thuật toán làm rõ chặn khoảng cách cạnh của đồ th
 
 Các đóng góp có căn cứ của đề tài là nguyên mẫu phần mềm, cách phân tách dữ liệu quan sát và truth, các thuộc tính toán học có điều kiện, bộ thực nghiệm nhiều đối chứng và việc giữ kết quả không thuận lợi. Khả năng ứng dụng hiện ở mức hỗ trợ nghiên cứu và trình diễn quy trình. Mục tiêu giảm thời gian phản ứng hoặc thiệt hại thực tế vẫn cần phép đo độc lập; không suy ra các mục tiêu đó từ thành công build, parity mô hình hoặc ARI.
 
-\addsec{Kiến nghị}
+\addsec{Hướng phát triển}
 Trước hết, cần hoàn thiện ngữ nghĩa tích hợp dữ liệu: thống nhất trường khẩn cấp app--backend, phân biệt dữ liệu thiếu với giá trị bằng không, làm rõ số người có thể chồng lặp và nguồn thời gian. Mỗi thay đổi cần cập nhật hợp đồng và có ca kiểm thử end-to-end trên đúng cây mã đang sử dụng.
 
 Đối với thiết bị, cần stage đúng asset và thử trên nhiều điện thoại Android, ghi thông tin phần cứng/runtime, kiểm tra pixel parity, thời gian tiền xử lý/suy luận/gửi, pin và độ bền outbox sau kill/reboot. SMS cần log đường giao nhận qua gateway/tổng đài thực; Workmanager cần được quan sát trong trạng thái nền. Kết quả mạng giả lập và mạng di động thật cần được báo cáo riêng.

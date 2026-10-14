@@ -4,6 +4,27 @@ Người gửi tạo SOS hoặc báo cáo có mô tả/ảnh, cung cấp vị tr
 
 Một luồng nghiệp vụ tối thiểu bắt đầu bằng tạo báo cáo tại thiết bị, ghi vào lưu trữ cục bộ, chọn chế độ gửi, nhận ACK, đưa báo cáo vào danh sách xử lý và cập nhật phản hồi. Khi mất mạng, báo cáo cần giữ được định danh và payload để tiếp tục ở lần gửi sau. Nếu thiếu GPS, báo cáo được chuyển vào hàng xem xét; gán một tọa độ mặc định sẽ tạo một điểm đến sai có vẻ hợp lệ.
 
+\begin{figure}[htbp]
+\centering
+\includegraphics[width=\textwidth]{usecase.pdf}
+\caption{Sơ đồ Use Case tổng thể toàn hệ thống cứu hộ}
+\label{fig:usecase-overall}
+\end{figure}
+
+\begin{figure}[htbp]
+\centering
+\includegraphics[width=\textwidth]{usecase_mobile.pdf}
+\caption{Sơ đồ Use Case phân hệ ứng dụng di động phía người dân và đội cứu hộ}
+\label{fig:usecase-mobile}
+\end{figure}
+
+\begin{figure}[htbp]
+\centering
+\includegraphics[width=\textwidth]{usecase_dashboard.pdf}
+\caption{Sơ đồ Use Case phân hệ Web Dashboard phục vụ điều phối và quản trị}
+\label{fig:usecase-dashboard}
+\end{figure}
+
 \subsection{Yêu cầu chức năng}
 \begin{longtable}{P{.10\textwidth}P{.40\textwidth}P{.39\textwidth}}
 \caption{Yêu cầu chức năng và căn cứ kiểm chứng}\label{tab:functional-requirements}\\
