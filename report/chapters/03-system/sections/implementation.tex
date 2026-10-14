@@ -4,6 +4,13 @@ Phần sản phẩm nằm trong \RepoPath{products/}. Backend ở \texttt{be/}, 
 
 Docker Compose có ba service: backend, dashboard và frontend web. Cổng mặc định lần lượt là 8000, 8080 và 8081. Frontend có thể được build trước để tránh tải lại SDK trong image. Database/uploads của demo được giữ ở volume; các thử nghiệm cục bộ có thể dùng đường dẫn riêng qua \texttt{RESCUE\_DB\_FILE} và \texttt{RESCUE\_UPLOADS\_DIR} để không thay đổi dữ liệu mẫu đã commit.
 
+\begin{figure}[htbp]
+\centering
+\includegraphics[width=\textwidth]{deployment_infrastructure.pdf}
+\caption{Sơ đồ triển khai hạ tầng các dịch vụ trong môi trường Docker Compose}
+\label{fig:deployment-infrastructure}
+\end{figure}
+
 \subsection{Nạp mô hình và kiểm tra asset}
 Mô hình ảnh hiện tại có checkpoint, ONNX, PTE và các manifest trong cây \RepoPath{products/fe/model/Edge Ai/}. Asset ứng dụng cần được stage theo quy trình demo vì thư mục model app chịu quy tắc git-ignore. Việc artifact tồn tại ở thư mục nghiên cứu không bảo đảm nó đã được bundle vào APK. Cần kiểm tra tên file, checksum, input size, class order và khả năng tải runtime trong phiên build cụ thể.
 
@@ -30,6 +37,13 @@ Có data nhưng dưới 50 kbit/s & Chỉ thông tin \\
 
 Trong chế độ nén, cấu hình hiện khai báo quality 60 và cạnh tối đa 1.024 pixel. Ảnh định dạng không phù hợp endpoint có thể được đổi sang JPEG. Các ngưỡng là quyết định kỹ thuật của demo; chưa có khảo sát tối ưu theo nhiều điện thoại và mạng thực. Đặc biệt, confidence cao có thể làm không gửi ảnh ngay cả khi mạng mạnh; vì vậy hiệu chuẩn confidence và nhu cầu xác minh phải được xem cùng chính sách tiết kiệm truyền tải.
 
+\begin{figure}[htbp]
+\centering
+\includegraphics[width=\textwidth]{flow_03_adaptive_network_send.pdf}
+\caption{Lưu đồ quyết định chế độ gửi thích ứng theo thông lượng mạng và độ tin cậy AI}
+\label{fig:flow-adaptive-send}
+\end{figure}
+
 \subsection{Trạng thái cứu hộ và phản hồi}
 Báo cáo mới ở backend luôn bắt đầu \texttt{processing}, bất kể status client gửi. Các chuyển chính là \texttt{processing} tới \texttt{dispatched}, rồi \texttt{resolved}; từ trạng thái chưa kết thúc có thể đóng \texttt{cancelled} kèm lý do. \texttt{resolved} và \texttt{cancelled} là trạng thái cuối. Version trạng thái tăng khi có cập nhật hợp lệ.
 
@@ -49,10 +63,24 @@ Báo cáo mới ở backend luôn bắt đầu \texttt{processing}, bất kể s
 
 App chỉ chấp nhận cập nhật đi tiến theo quy tắc domain, giúp phản hồi đến muộn không làm trạng thái lùi. Điều phối viên cập nhật qua API yêu cầu phiên đăng nhập; thay đổi trạng thái qua message sync cũng cần quyền dashboard. Luồng công khai tạo báo cáo không có quyền tự kết thúc ca cứu hộ.
 
+\begin{figure}[htbp]
+\centering
+\includegraphics[width=.95\textwidth]{flow_08_dispatch_lifecycle.pdf}
+\caption{Lưu đồ vòng đời nhiệm vụ cứu hộ từ tiếp nhận, điều phối đến đóng ca}
+\label{fig:flow-dispatch-lifecycle}
+\end{figure}
+
 \subsection{SMS, tổng đài và bổ sung thông tin}
 Ứng dụng Android có đường gửi SMS khi mất data và có số tiếp nhận hợp lệ qua cấu hình build. Báo cáo vẫn có thể nằm trong outbox để đồng bộ đầy đủ sau đó. Backend có \texttt{POST /api/sms/inbound} cho gateway có token và \texttt{POST /api/reports/manual} cho nhập tổng đài. Cùng report ID cần được gộp để SMS trước và HTTP sau không tạo hai ca.
 
 Tài liệu nghiệm thu cũ ghi server chưa nhận SMS; mã hiện tại đã có endpoint gateway. Đây là phần đã được bổ sung về phần mềm. Repo chưa có log gửi--nhận SMS qua nhà mạng/gateway thật, nên không thể từ endpoint suy ra tỷ lệ giao SMS hoặc độ trễ thực tế. Cần lưu cả thời điểm thiết bị gửi, gateway nhận, backend ACK và định danh gộp trong thử nghiệm tiếp theo.
+
+\begin{figure}[htbp]
+\centering
+\includegraphics[width=.95\textwidth]{flow_07_manual_intake_location.pdf}
+\caption{Quy trình tiếp nhận thông tin cứu hộ qua tổng đài và định vị thủ công}
+\label{fig:flow-manual-intake}
+\end{figure}
 
 \subsection{Xác thực và quản lý thao tác}
 Backend dùng tài khoản admin/operator, mật khẩu PBKDF2 và phiên có token; database lưu hash token phiên. Đăng nhập được giới hạn theo username và IP, và chỉ tin header proxy từ nguồn được cấu hình. Các thao tác quản trị tài khoản, sao lưu và xóa toàn bộ dữ liệu yêu cầu vai trò admin. Ảnh uploads yêu cầu phiên đăng nhập.

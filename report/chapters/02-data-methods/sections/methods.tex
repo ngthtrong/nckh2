@@ -17,6 +17,13 @@ Theo script so sánh, mức severity có thứ tự \texttt{non\_flood}=0, \text
 
 Ba định dạng FP32 được chạy trên cùng tập test để kiểm tra chuyển đổi. PTQ sử dụng lượng tử hóa QDQ với trọng số INT8 per-channel và activation UINT8; calibration dùng 200 ảnh train phân tầng, seed 42. QAT là một nhánh riêng có artifact và validation riêng. Cắt tỉa có cấu trúc dùng cấu hình đã lưu trong báo cáo \texttt{pruning\_st}. Các phép so sánh giữ split test nhưng không suy ra tốc độ điện thoại từ CPU.
 
+\begin{figure}[htbp]
+\centering
+\includegraphics[width=\textwidth]{flow_09_ai_training_optimization.pdf}
+\caption{Pipeline quy trình huấn luyện, tối ưu nén mô hình và xuất runtime AI kép}
+\label{fig:flow-ai-training-optimization}
+\end{figure}
+
 \subsection{Mô hình khẩn cấp Logistic Regression}
 Với vector cờ $\symbf{x}\in\{0,1\}^{5}$, mô hình v5 có dạng
 \begin{equation}
@@ -80,6 +87,13 @@ Pipeline tính ma trận cặp đủ điều kiện, xác định ngưỡng $\th
 Top-$k$ ở mỗi đầu mút không bảo đảm bậc vô hướng của nút tối đa bằng $k$. Nếu nhiều nút khác chọn một nút, bậc của nó có thể lớn hơn $k$. Quantile cũng là đại lượng phụ thuộc toàn bộ ma trận trọng số. Khi thêm bản sao, phân bố cạnh và tập cạnh cạnh tranh có thể đổi dù từng bản sao có cùng nội dung. Đây là lý do cần kiểm tra riêng tính ổn định của phân cụm dưới multiplicity.
 
 Cấu hình Product chọn ở RQ1 có $\sigma=700$ m, $\tau_t=60$ phút, $q=0{,}90$, $k=8$, resolution 1,2; $\tau_F=0{,}25$, $\tau_E=0{,}35$, $\beta=\gamma=0{,}5$. Additive chọn $\alpha=1$ và $q=0{,}95$ với các thông số tương ứng. Hai cấu hình được hiệu chỉnh độc lập nên phép so sánh chính là giữa hai pipeline được chọn, không phải tác động nhân quả của chỉ riêng phép tích/cộng.
+
+\begin{figure}[htbp]
+\centering
+\includegraphics[width=.95\textwidth]{flow_06_clustering_priority.pdf}
+\caption{Quy trình phân cụm đồ thị không gian Louvain và tính điểm ưu tiên cứu hộ $P(c)$}
+\label{fig:flow-clustering-priority}
+\end{figure}
 
 \subsection{Chặn khoảng cách cạnh và giới hạn của bảo đảm}
 Đặt $B=\beta+\gamma>0$. Vì $a_ia_j\leq1$ và $T_{ij}^{\mathrm{sim}},C_{ij}\leq1$,
