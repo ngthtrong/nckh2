@@ -3,6 +3,42 @@ import 'package:flutter/material.dart';
 
 import '../controllers/app_controller.dart';
 
+String adminLoginErrorMessage(Object exception) {
+  if (exception is StateError) return exception.message.toString();
+  if (exception is! DioException) return 'Đăng nhập quản trị thất bại.';
+
+  final status = exception.response?.statusCode;
+  if (status != null) {
+    final detail = exception.response?.data is Map
+        ? (exception.response!.data as Map)['detail']
+        : null;
+    final message = detail is Map ? detail['error'] : detail;
+    if (message is String && message.isNotEmpty) {
+      return 'Server trả HTTP $status: $message';
+    }
+    if (status >= 200 && status < 300) {
+      return 'Server trả HTTP $status nhưng app không đọc được phản hồi đăng nhập.';
+    }
+    return 'Server trả lỗi HTTP $status.';
+  }
+
+  return switch (exception.type) {
+    DioExceptionType.connectionTimeout => 'Hết thời gian kết nối đến server.',
+    DioExceptionType.sendTimeout => 'Hết thời gian gửi yêu cầu đăng nhập.',
+    DioExceptionType.receiveTimeout =>
+      'Server không trả phản hồi đăng nhập kịp thời.',
+    DioExceptionType.transformTimeout =>
+      'Quá thời gian xử lý phản hồi đăng nhập.',
+    DioExceptionType.connectionError => 'Không kết nối được server.',
+    DioExceptionType.badCertificate => 'Chứng chỉ server không được tin cậy.',
+    DioExceptionType.cancel => 'Yêu cầu đăng nhập đã bị hủy.',
+    DioExceptionType.badResponse => 'Server trả phản hồi không hợp lệ.',
+    DioExceptionType.unknown =>
+      'Lỗi kết nối khi đăng nhập: '
+      '${exception.message ?? exception.error ?? 'không rõ nguyên nhân'}',
+  };
+}
+
 class AdminLoginButton extends StatelessWidget {
   const AdminLoginButton({super.key, required this.controller, this.onSuccess});
   final AppController controller;
@@ -37,9 +73,7 @@ class AdminLoginButton extends StatelessWidget {
               if (!dialogContext.mounted) return;
               update(() {
                 busy = false;
-                error = exception is DioException
-                    ? 'Không đăng nhập được. Kiểm tra server, tài khoản và mật khẩu.'
-                    : 'Tài khoản cần có quyền admin trên server.';
+                error = adminLoginErrorMessage(exception);
               });
             }
           }
