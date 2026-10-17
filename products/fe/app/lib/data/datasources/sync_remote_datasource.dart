@@ -14,6 +14,7 @@ class SyncRemoteDataSource {
               connectTimeout: const Duration(seconds: 10),
               sendTimeout: const Duration(seconds: 30),
               receiveTimeout: const Duration(seconds: 30),
+              followRedirects: false,
             ),
           );
 

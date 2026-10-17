@@ -46,6 +46,13 @@ class PostCard extends StatelessWidget {
               ],
             ),
             const SizedBox(height: 8),
+            if (record.attachmentError != null) ...[
+              const Text(
+                'Không đọc được ảnh đính kèm. Báo cáo chưa đồng bộ xong; hãy gửi lại ảnh cùng báo cáo.',
+                style: TextStyle(color: Color(0xFFB45309)),
+              ),
+              const SizedBox(height: 8),
+            ],
             Row(
               children: [
                 const Icon(

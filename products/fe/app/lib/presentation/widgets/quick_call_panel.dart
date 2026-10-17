@@ -43,13 +43,11 @@ class QuickCallPanel extends StatelessWidget {
                   child: Material(
                     color: Colors.white,
                     borderRadius: BorderRadius.circular(12),
-                    child: InkWell(
+                    child: GestureDetector(
                       onTap: () => _makeCall(c.number),
-                      borderRadius: BorderRadius.circular(12),
                       child: Container(
                         padding: const EdgeInsets.symmetric(vertical: 8),
                         decoration: BoxDecoration(
-                          borderRadius: BorderRadius.circular(12),
                           border: Border.all(color: const Color(0xFFFECACA)),
                         ),
                         child: Column(

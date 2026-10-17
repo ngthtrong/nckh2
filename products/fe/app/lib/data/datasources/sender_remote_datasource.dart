@@ -85,6 +85,7 @@ class SenderRemoteDataSource {
       connectTimeout: const Duration(seconds: 10),
       sendTimeout: const Duration(seconds: 60),
       receiveTimeout: const Duration(seconds: 30),
+      followRedirects: false,
     ),
   );
 

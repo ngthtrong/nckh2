@@ -16,7 +16,42 @@ Bộ xuất sử dụng Python chuẩn, không huấn luyện hoặc thay đổi
 - Xuất 14 bảng: chia ảnh, ma trận/lớp, định dạng FP32, PTQ/QAT, audit metric, pruning, RQ1 benchmark/stress, RQ2 alignment/robustness/sensitivity và RQ3 hiệu ghép cặp theo seed và benchmark ứng dụng.
 - Ghi SHA-256 của các nguồn trực tiếp, commit đầu vào và kết quả audit trong `provenance.json`.
 
-CSV split lịch sử seed 42 có 1.702 ảnh, train/validation/test = 1.189/257/256. Các ảnh và hash khớp split. FP32 và pruning có metric khớp CSV dự đoán. PTQ/QAT có khác biệt summary/CSV được công bố trong bảng `image-metric-audit.tex`; script in `REVIEW REQUIRED` nhưng vẫn xuất **cả số summary được gắn nhãn và bảng đối chiếu**, không sửa artifact gốc. Đây là trạng thái cần rà soát, không phải kiểm tra metric nén đạt.
+## Chọn nguồn benchmark và chuyển sang seed 1024
+
+`../config/benchmark-sources.json` chọn độc lập thư mục FP32, lượng tử hóa,
+pruning, verification và file mobile. FP32, PTQ/QAT, pruning và verification
+đã chuyển sang kết quả seed 1024 vừa chạy lại; mobile tạm giữ seed 42 trong
+khi chờ người dùng khôi phục ba file mobile seed 1024 bị cắt ở ký tự 20.000.
+Không đưa số tổng hợp từ các file bị cắt vào report theo lựa chọn của người dùng.
+Sáu hình phân loại/huấn luyện và
+bảng chất lượng model mới vẫn dùng seed 1024. Bản seed 42 đã kiểm chứng được
+lưu riêng tại `../evidence/benchmarks/seed42/`, phục hồi nguyên byte từ Git và
+đối chiếu hash với provenance trước khi các thư mục kết quả được di chuyển.
+`archive.json` ghi nguồn và hash từng tệp; không dùng tên thư mục để đoán seed. Hash
+config benchmark được đối chiếu với bản lưu trong thư mục `...seed{seed}/`,
+không đọc config ở gốc `Edge Ai` đang chuẩn bị triển khai seed 1024.
+
+Khi có kết quả mới, giữ bản lịch sử, lưu đủ `summary.json` và
+`all_predictions.csv` vào thư mục mới, rồi đổi đường dẫn tương ứng trong
+`benchmark-sources.json`. Với mobile, lưu một object ONNX và một object PTE
+nối tiếp trong file UTF-8, đổi `mobile.file` và `mobile.seed` sau khi xác nhận
+đúng APK/model. Seed mobile là nhãn nguồn do người tổng hợp khai báo; file
+lịch sử chưa có hash model để xác nhận tự động. Chạy lại `export_results.py`
+và `build_figures.py` trước khi biên dịch. Bảng, nhãn seed, số liệu confidence,
+đồng thuận, nguồn/phiên bản runtime và đoạn mô tả runtime/mobile lấy từ nguồn đã chọn; không sửa tay
+các bảng hoặc `values.tex`. Các nhánh lượng tử hóa/pruning vẫn có thể giữ
+seed 42 khi chưa có artifact mới và luôn mang nhãn seed riêng.
+Không diễn giải đồng thuận CPU--mobile là kiểm tra parity khi hai nhóm khác seed.
+
+Đối chiếu CSV với seed 1024: toàn bộ 1.702 ảnh sạch/nhãn/MD5/split group
+trùng, 64 ảnh lỗi validation và 6 lỗi nặng validation đều thuộc validation.
+Không có ảnh thiếu/thay đổi hoặc nhóm MD5/perceptual/split vượt các tập.
+Checkpoint hai seed cùng trỏ manifest dùng chung, nhưng không lưu hash CSV
+hay toàn bộ phân công mẫu; đây là bằng chứng nhất quán, chưa phải xác nhận
+đầy đủ danh tính split của lần train seed 1024. Chi tiết trong
+`provenance.json` ở `new_model_audit`.
+
+CSV split có 1.702 ảnh, train/validation/test = 1.189/257/256. Bộ seed 1024 được chọn có toàn bộ metric FP32, PTQ/QAT và pruning khớp CSV dự đoán; verification đủ 256 ảnh và pass local. Sai lệch QAT do quy tắc hòa xác suất đã được sửa trong bộ xuất benchmark và người dùng đã chạy lại. Các bản PTQ/QAT seed 42 lưu lịch sử vẫn giữ nguyên sai lệch, không sửa artifact cũ. Khi nguồn được chọn có sai lệch, script in `REVIEW REQUIRED` và công bố cả hai giá trị trong bảng đối chiếu.
 
 Script dừng nếu ảnh/config/split hoặc danh sách ảnh test không khớp. `source_commit` là commit nguồn trước các chỉnh sửa báo cáo chưa commit, không chứng minh toàn bộ working tree sạch. Timing, runtime và metric vẫn thuộc những lần chạy đã lưu; không phải benchmark mới trên máy hiện tại hoặc Android.
 
@@ -32,7 +67,7 @@ RQ1 dùng `rq1_results` làm nguồn stress chính. `rq1_results_v2` được gi
 
 ## Cập nhật seed 1024 và mẫu chính thức (08/10/2026)
 
-`tables/confusion.tex` và `tables/image-classes.tex` dùng ma trận/metric của `mobilenetv3_large_dataset_v4_seed1024`, kiểm tra thứ tự lớp, support, precision/recall/F1, accuracy và lỗi nặng. Macro `NewImageAccuracy`/`NewImageMacroFOne` thuộc phiên mới; `ImageAccuracy`/`ImageMacroFOne` giữ phiên lịch sử để các bảng runtime, lượng tử hóa, pruning và mobile không bị gán sang model mới. Provenance ghi rõ chưa có manifest split riêng cho seed 1024.
+`tables/confusion.tex` và `tables/image-classes.tex` dùng ma trận/metric của `mobilenetv3_large_dataset_v4_seed1024`, kiểm tra thứ tự lớp, support, precision/recall/F1, accuracy và lỗi nặng. Macro `NewImageAccuracy`/`NewImageMacroFOne` thuộc model này; `ImageAccuracy`/`ImageMacroFOne` theo nguồn FP32 được chọn, hiện là seed 1024. Lượng tử hóa, pruning và mobile có nguồn và nhãn seed riêng. Provenance ghi rõ chưa có manifest split riêng cho lần train seed 1024.
 
 `figure-provenance.json` ghi 12 hình: sáu PNG sao chép nguyên từ model mới; sáu hình phân tích còn lại được sinh từ artifact lịch sử/thuật toán. Đầu ra chỉ có định dạng thực sự dùng: các PNG gốc không được dựng lại thành biểu đồ PDF. Các PDF/PNG seed 42 của ma trận/ví dụ/training-history đã được bỏ khỏi bộ hình để tránh dùng nhầm.
 

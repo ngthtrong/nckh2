@@ -1,9 +1,9 @@
 import 'package:flutter/material.dart';
 import '../../core/constants/app_colors.dart';
 
-enum SosState { idle, pressed, sent }
+enum SosState { idle, pressed, accepted, queued, sms, failed }
 
-class SosButtonSection extends StatefulWidget {
+class SosButtonSection extends StatelessWidget {
   final SosState state;
   final VoidCallback onPressed;
 
@@ -14,30 +14,40 @@ class SosButtonSection extends StatefulWidget {
   });
 
   @override
-  State<SosButtonSection> createState() => _SosButtonSectionState();
-}
-
-class _SosButtonSectionState extends State<SosButtonSection>
-    with SingleTickerProviderStateMixin {
-  late AnimationController _animController;
-
-  @override
-  void initState() {
-    super.initState();
-    _animController = AnimationController(
-      vsync: this,
-      duration: const Duration(seconds: 2),
-    )..repeat();
-  }
-
-  @override
-  void dispose() {
-    _animController.dispose();
-    super.dispose();
-  }
-
-  @override
   Widget build(BuildContext context) {
+    final (icon, label, message, color) = switch (state) {
+      SosState.idle => (null, 'SOS', null, AppColors.primaryRed),
+      SosState.pressed => (
+        Icons.hourglass_top,
+        'Đang gửi',
+        'Đang gửi SOS…',
+        AppColors.primaryRedDark,
+      ),
+      SosState.accepted => (
+        Icons.check,
+        'Đã tiếp nhận',
+        'Máy chủ đã tiếp nhận SOS.',
+        const Color(0xFF16A34A),
+      ),
+      SosState.queued => (
+        Icons.schedule,
+        'Đã xếp hàng',
+        'SOS trong hàng đợi, sẽ gửi khi có mạng.',
+        const Color(0xFFB45309),
+      ),
+      SosState.sms => (
+        Icons.sms_outlined,
+        'Đã gửi SMS',
+        'Đã gửi SMS; chưa xác nhận tiếp nhận.',
+        const Color(0xFF2563EB),
+      ),
+      SosState.failed => (
+        Icons.error_outline,
+        'Thử lại SOS',
+        'Chưa gửi được SOS. Hãy gọi 112.',
+        AppColors.primaryRed,
+      ),
+    };
     return Container(
       width: double.infinity,
       padding: const EdgeInsets.symmetric(vertical: 20, horizontal: 16),
@@ -45,7 +55,7 @@ class _SosButtonSectionState extends State<SosButtonSection>
       child: Column(
         children: [
           const Text(
-            'Nhấn SOS để gọi cứu hộ ngay',
+            'Nhấn SOS để gửi yêu cầu cứu hộ',
             style: TextStyle(
               color: Color(0xFF374151),
               fontSize: 15,
@@ -65,88 +75,73 @@ class _SosButtonSectionState extends State<SosButtonSection>
           Stack(
             alignment: Alignment.center,
             children: [
-              if (widget.state == SosState.idle)
-                AnimatedBuilder(
-                  animation: _animController,
-                  builder: (context, child) {
-                    final value = _animController.value;
-                    return Container(
-                      width: 100 + (value * 30),
-                      height: 100 + (value * 30),
-                      decoration: BoxDecoration(
-                        shape: BoxShape.circle,
-                        color: AppColors.primaryRed.withValues(alpha: 0.25 * (1 - value)),
-                      ),
-                    );
-                  },
-                ),
-              GestureDetector(
-                onTap: widget.onPressed,
-                child: AnimatedContainer(
-                  duration: const Duration(milliseconds: 200),
-                  width: 100,
-                  height: 100,
-                  decoration: BoxDecoration(
-                    shape: BoxShape.circle,
-                    color: widget.state == SosState.sent
-                        ? const Color(0xFF16A34A)
-                        : widget.state == SosState.pressed
-                            ? AppColors.primaryRedDark
-                            : AppColors.primaryRed,
-                    boxShadow: const [
-                      BoxShadow(
-                        color: Colors.black26,
-                        blurRadius: 12,
-                        offset: Offset(0, 6),
-                      )
-                    ],
-                  ),
-                  child: Column(
-                    mainAxisAlignment: MainAxisAlignment.center,
-                    children: [
-                      if (widget.state == SosState.sent) ...[
-                        const Icon(Icons.check, color: Colors.white, size: 38),
-                        const SizedBox(height: 2),
-                        const Text(
-                          'Đã gửi!',
-                          style: TextStyle(
-                            color: Colors.white,
-                            fontSize: 10,
-                            fontWeight: FontWeight.w800,
-                          ),
-                        ),
-                      ] else ...[
-                        const Text(
-                          'SOS',
-                          style: TextStyle(
-                            color: Colors.white,
-                            fontSize: 30,
-                            fontWeight: FontWeight.w900,
-                            letterSpacing: 1.5,
-                          ),
-                        ),
-                        const SizedBox(height: 2),
-                        const Text(
-                          'Nhấn để gọi',
-                          style: TextStyle(
-                            color: Colors.white70,
-                            fontSize: 10,
-                            fontWeight: FontWeight.w600,
-                          ),
+              Semantics(
+                button: true,
+                enabled: state != SosState.pressed,
+                child: GestureDetector(
+                  onTap: state == SosState.pressed ? null : onPressed,
+                  child: Container(
+                    width: 100,
+                    height: 100,
+                    decoration: BoxDecoration(
+                      shape: BoxShape.circle,
+                      color: color,
+                      boxShadow: const [
+                        BoxShadow(
+                          color: Colors.black26,
+                          blurRadius: 12,
+                          offset: Offset(0, 6),
                         ),
                       ],
-                    ],
+                    ),
+                    child: Column(
+                      mainAxisAlignment: MainAxisAlignment.center,
+                      children: [
+                        if (icon != null) ...[
+                          Icon(icon, color: Colors.white, size: 38),
+                          const SizedBox(height: 2),
+                          Text(
+                            label,
+                            style: const TextStyle(
+                              color: Colors.white,
+                              fontSize: 10,
+                              fontWeight: FontWeight.w800,
+                            ),
+                          ),
+                        ] else ...[
+                          const Text(
+                            'SOS',
+                            style: TextStyle(
+                              color: Colors.white,
+                              fontSize: 30,
+                              fontWeight: FontWeight.w900,
+                              letterSpacing: 1.5,
+                            ),
+                          ),
+                          const SizedBox(height: 2),
+                          const Text(
+                            'Nhấn để gửi',
+                            style: TextStyle(
+                              color: Colors.white70,
+                              fontSize: 10,
+                              fontWeight: FontWeight.w600,
+                            ),
+                          ),
+                        ],
+                      ],
+                    ),
                   ),
                 ),
               ),
             ],
           ),
-          if (widget.state == SosState.sent) ...[
+          if (message != null) ...[
             const SizedBox(height: 12),
-            const Text(
-              '✓ Đội cứu hộ đã nhận vị trí của bạn',
+            Text(
+              message,
+              textAlign: TextAlign.center,
               style: TextStyle(
-                color: Color(0xFF15803D),
+                color: color,
                 fontSize: 12,
                 fontWeight: FontWeight.w700,
               ),

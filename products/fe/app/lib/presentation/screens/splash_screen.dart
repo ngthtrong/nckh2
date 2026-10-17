@@ -13,35 +13,20 @@ class SplashScreen extends StatefulWidget {
   State<SplashScreen> createState() => _SplashScreenState();
 }
 
-class _SplashScreenState extends State<SplashScreen>
-    with SingleTickerProviderStateMixin {
-  late AnimationController _animController;
-  late Animation<double> _fadeAnim;
+class _SplashScreenState extends State<SplashScreen> {
+  Timer? _timer;
 
   @override
   void initState() {
     super.initState();
-    _animController = AnimationController(
-      vsync: this,
-      duration: const Duration(milliseconds: 1000),
-    );
-    _fadeAnim = CurvedAnimation(
-      parent: _animController,
-      curve: Curves.easeIn,
-    );
-
-    _animController.forward();
-
-    Timer(const Duration(milliseconds: 2500), () {
+    _timer = Timer(const Duration(milliseconds: 2500), () {
       if (mounted) {
         Navigator.of(context).pushReplacement(
           PageRouteBuilder(
-            pageBuilder: (context, anim1, anim2) =>
+            pageBuilder: (context, animation, secondaryAnimation) =>
                 MainNavigationScreen(controller: widget.controller),
-            transitionsBuilder: (context, anim1, anim2, child) {
-              return FadeTransition(opacity: anim1, child: child);
-            },
-            transitionDuration: const Duration(milliseconds: 500),
+            transitionDuration: Duration.zero,
+            reverseTransitionDuration: Duration.zero,
           ),
         );
       }
@@ -50,7 +35,7 @@ class _SplashScreenState extends State<SplashScreen>
 
   @override
   void dispose() {
-    _animController.dispose();
+    _timer?.cancel();
     super.dispose();
   }
 
@@ -59,14 +44,11 @@ class _SplashScreenState extends State<SplashScreen>
     return Scaffold(
       backgroundColor: Colors.white,
       body: SizedBox.expand(
-        child: FadeTransition(
-          opacity: _fadeAnim,
-          child: Image.asset(
-            'assets/images/splash-screen.png',
-            fit: BoxFit.cover,
-            width: double.infinity,
-            height: double.infinity,
-          ),
+        child: Image.asset(
+          'assets/images/splash-screen.png',
+          fit: BoxFit.cover,
+          width: double.infinity,
+          height: double.infinity,
         ),
       ),
     );

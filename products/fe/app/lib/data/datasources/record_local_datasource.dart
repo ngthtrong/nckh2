@@ -35,6 +35,8 @@ class RecordLocalDataSource {
       'description': record.description,
       'sendMode': record.sendMode,
       'synced': record.synced,
+      'metadataSynced': record.metadataSynced,
+      'attachmentError': record.attachmentError,
       'status': record.status,
       'syncError': record.syncError,
     };
@@ -44,6 +46,11 @@ class RecordLocalDataSource {
 
   List<RescueRecord> getAllRecords() {
     return getRecordsPage(offset: 0, limit: recordCount);
+  }
+
+  RescueRecord? getRecord(String id) {
+    final raw = _box?.get(id);
+    return raw == null ? null : _recordFromMap(raw);
   }
 
   int get recordCount =>
@@ -121,6 +128,8 @@ class RecordLocalDataSource {
       description: m['description'] as String? ?? m['note'] as String? ?? '',
       sendMode: m['sendMode'] as String? ?? m['mode'] as String? ?? 'direct',
       synced: m['synced'] as bool? ?? (m['status'] == 'sent'),
+      metadataSynced: m['metadataSynced'] as bool? ?? m['synced'] == true,
+      attachmentError: m['attachmentError'] as String?,
       status: m['status'] as String? ?? 'processing',
       syncError: m['syncError'] as String?,
     );

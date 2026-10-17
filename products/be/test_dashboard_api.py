@@ -12,6 +12,7 @@ import os
 import tempfile
 import unittest
 import zipfile
+from unittest.mock import patch
 from datetime import datetime, timedelta, timezone
 from pathlib import Path
 
@@ -26,6 +27,7 @@ import accounts  # noqa: E402
 import auth  # noqa: E402
 import dashboard_service  # noqa: E402
 import main  # noqa: E402
+import model_assets  # noqa: E402
 import storage  # noqa: E402
 from canonical import compute_payload_hash  # noqa: E402
 
@@ -96,6 +98,41 @@ class DashboardApiTest(unittest.TestCase):
         return res.json()
 
     # ------------------------------------------------------------ xác thực
+    def test_model_and_benchmark_resources_require_admin_role(self):
+        paths = ("/api/admin/models", "/api/admin/models/pte", "/api/admin/models/onnx",
+                 "/api/benchmark/package")
+        for path in paths:
+            self.assertEqual(self.client.get(path).status_code, 401, path)
+        # The old special username must not grant an operator admin access.
+        accounts.create_operator({"username": "rhna", "displayName": "Tester",
+                                  "password": PASSWORD, "role": "operator"})
+        self.client.post("/api/auth/login", json={"username": "rhna", "password": PASSWORD})
+        for path in paths:
+            self.assertEqual(self.client.get(path).status_code, 403, path)
+        self.client.post("/api/auth/logout")
+        self.login()
+        with tempfile.TemporaryDirectory() as directory, patch.object(model_assets, "EXPORT_DIR", Path(directory)):
+            manifest = {"version": "test"}
+            for runtime, filename in model_assets.FILENAMES.items():
+                data = f"model-{runtime}".encode()
+                (Path(directory) / filename).write_bytes(data)
+                manifest[f"{runtime}_sha256"] = hashlib.sha256(data).hexdigest()
+            (Path(directory) / "model_manifest.json").write_text(json.dumps(manifest))
+            catalog = self.client.get("/api/admin/models")
+            self.assertEqual(catalog.status_code, 200)
+            self.assertEqual(catalog.json()["manifest"], manifest)
+            for runtime in ("pte", "onnx"):
+                response = self.client.get(f"/api/admin/models/{runtime}")
+                self.assertEqual(response.content, f"model-{runtime}".encode())
+                self.assertEqual(response.headers["cache-control"], "no-store")
+            self.assertEqual(self.client.get("/api/admin/models/invalid").status_code, 404)
+            (Path(directory) / model_assets.FILENAMES["pte"]).write_bytes(b"corrupt")
+            self.assertEqual(self.client.get("/api/admin/models").status_code, 503)
+            self.assertEqual(self.client.get("/api/admin/models/pte").status_code, 503)
+        self.assertEqual(self.client.get("/api/benchmark/package").status_code, 200)
+        self.client.post("/api/auth/logout")
+        self.assertEqual(self.client.get("/api/admin/models").status_code, 401)
+
     def test_dashboard_endpoints_require_login_but_app_endpoints_do_not(self):
         storage.save_report(_report("r1"))
         for method, path in (("get", "/api/reports"), ("get", "/api/clusters"), ("get", "/api/stats"),

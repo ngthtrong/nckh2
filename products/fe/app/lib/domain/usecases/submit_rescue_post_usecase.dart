@@ -4,6 +4,7 @@ import '../entities/rescue_record.dart';
 import '../entities/send_mode.dart';
 import '../repositories/rescue_repository.dart';
 import 'deliver_record.dart';
+import '../../core/platform/local_file.dart';
 
 class SubmitRescuePostUseCase {
   final RescueRepository repository;
@@ -25,13 +26,21 @@ class SubmitRescuePostUseCase {
     String description = '',
     required SendMode sendMode,
   }) async {
+    final id = newRecordId('post');
+    final savedImages = <String, String>{};
+    for (final path in {?imagePath, ...images}) {
+      savedImages[path] = await preserveLocalFile(
+        path,
+        '$id-${savedImages.length}',
+      );
+    }
     final record = RescueRecord(
-      id: newRecordId('post'),
+      id: id,
       createdAt: DateTime.now(),
       lat: lat,
       lng: lng,
-      imagePath: imagePath,
-      images: images,
+      imagePath: savedImages[imagePath],
+      images: images.map((path) => savedImages[path]!).toList(),
       aiTags: aiTags,
       trappedCount: trappedCount,
       injuredCount: injuredCount,

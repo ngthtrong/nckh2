@@ -1,0 +1,348 @@
+{
+  "checkpoint_sha256": "6d4ef6fff1b59e8ac5d3165f935f28214b935ee377e21ecf16e3b0627be3d9ae",
+  "split_csv_sha256": "f7b52cd25411d4d1df2f7f80745a2cf430819773854345798cf7e093e3bcba45",
+  "evaluation_split": "val",
+  "n_images": 257,
+  "scope": "unstructured_global_magnitude_screen_before_finetuning",
+  "prunable_layers": "Conv2d/Linear weights",
+  "latency_note": "CPU desktop, batch=1, dense tensors; no mobile or sparse-kernel speed claim",
+  "size_note": "state tensor payload bytes; unstructured zeros do not shrink dense tensor shapes",
+  "deployment_ready": false,
+  "results": [
+    {
+      "candidate": "baseline",
+      "target_sparsity": 0.0,
+      "actual_sparsity": 0.0,
+      "accuracy": 0.7509727626459144,
+      "balanced_accuracy": 0.7303945926613843,
+      "macro_f1": 0.7312384643779992,
+      "ece": 0.0652390855295649,
+      "brier_score": 0.34410700957086787,
+      "confusion_matrix": [
+        [
+          37,
+          13,
+          1,
+          6
+        ],
+        [
+          6,
+          40,
+          14,
+          1
+        ],
+        [
+          4,
+          12,
+          37,
+          0
+        ],
+        [
+          7,
+          0,
+          0,
+          79
+        ]
+      ],
+      "per_class": {
+        "low": {
+          "precision": 0.6851851851851852,
+          "recall": 0.6491228070175439,
+          "f1": 0.6666666666666666,
+          "support": 57
+        },
+        "medium": {
+          "precision": 0.6153846153846154,
+          "recall": 0.6557377049180327,
+          "f1": 0.6349206349206349,
+          "support": 61
+        },
+        "high": {
+          "precision": 0.7115384615384616,
+          "recall": 0.6981132075471698,
+          "f1": 0.7047619047619048,
+          "support": 53
+        },
+        "non_flood": {
+          "precision": 0.9186046511627907,
+          "recall": 0.9186046511627907,
+          "f1": 0.9186046511627907,
+          "support": 86
+        }
+      },
+      "critical_error_count": 6,
+      "critical_error_rate": 0.023346303501945526,
+      "mean_severity_distance": 0.2723735408560311,
+      "latency_ms_median_cpu": 24.787699978332967,
+      "dense_state_tensor_bytes": 16926592
+    },
+    {
+      "candidate": "global_l1_0.1",
+      "target_sparsity": 0.1,
+      "actual_sparsity": 0.09999995211177495,
+      "accuracy": 0.7431906614785992,
+      "balanced_accuracy": 0.7209606303972333,
+      "macro_f1": 0.7226483616702495,
+      "ece": 0.04427390618083077,
+      "brier_score": 0.3443827493303913,
+      "confusion_matrix": [
+        [
+          37,
+          13,
+          1,
+          6
+        ],
+        [
+          7,
+          40,
+          13,
+          1
+        ],
+        [
+          4,
+          14,
+          35,
+          0
+        ],
+        [
+          7,
+          0,
+          0,
+          79
+        ]
+      ],
+      "per_class": {
+        "low": {
+          "precision": 0.6727272727272727,
+          "recall": 0.6491228070175439,
+          "f1": 0.6607142857142857,
+          "support": 57
+        },
+        "medium": {
+          "precision": 0.5970149253731343,
+          "recall": 0.6557377049180327,
+          "f1": 0.625,
+          "support": 61
+        },
+        "high": {
+          "precision": 0.7142857142857143,
+          "recall": 0.660377358490566,
+          "f1": 0.6862745098039216,
+          "support": 53
+        },
+        "non_flood": {
+          "precision": 0.9186046511627907,
+          "recall": 0.9186046511627907,
+          "f1": 0.9186046511627907,
+          "support": 86
+        }
+      },
+      "critical_error_count": 6,
+      "critical_error_rate": 0.023346303501945526,
+      "mean_severity_distance": 0.2801556420233463,
+      "latency_ms_median_cpu": 26.58880001399666,
+      "dense_state_tensor_bytes": 16926592
+    },
+    {
+      "candidate": "global_l1_0.2",
+      "target_sparsity": 0.2,
+      "actual_sparsity": 0.1999999042235499,
+      "accuracy": 0.7470817120622568,
+      "balanced_accuracy": 0.7284396976912029,
+      "macro_f1": 0.7260457722912174,
+      "ece": 0.06107152215701596,
+      "brier_score": 0.33856009961710914,
+      "confusion_matrix": [
+        [
+          38,
+          13,
+          1,
+          5
+        ],
+        [
+          7,
+          35,
+          19,
+          0
+        ],
+        [
+          3,
+          10,
+          40,
+          0
+        ],
+        [
+          7,
+          0,
+          0,
+          79
+        ]
+      ],
+      "per_class": {
+        "low": {
+          "precision": 0.6909090909090909,
+          "recall": 0.6666666666666666,
+          "f1": 0.6785714285714286,
+          "support": 57
+        },
+        "medium": {
+          "precision": 0.603448275862069,
+          "recall": 0.5737704918032787,
+          "f1": 0.5882352941176471,
+          "support": 61
+        },
+        "high": {
+          "precision": 0.6666666666666666,
+          "recall": 0.7547169811320755,
+          "f1": 0.7079646017699115,
+          "support": 53
+        },
+        "non_flood": {
+          "precision": 0.9404761904761905,
+          "recall": 0.9186046511627907,
+          "f1": 0.9294117647058824,
+          "support": 86
+        }
+      },
+      "critical_error_count": 4,
+      "critical_error_rate": 0.01556420233463035,
+      "mean_severity_distance": 0.26848249027237353,
+      "latency_ms_median_cpu": 30.157000001054257,
+      "dense_state_tensor_bytes": 16926592
+    },
+    {
+      "candidate": "global_l1_0.3",
+      "target_sparsity": 0.3,
+      "actual_sparsity": 0.3000000957764501,
+      "accuracy": 0.7392996108949417,
+      "balanced_accuracy": 0.7142762765104808,
+      "macro_f1": 0.7184970656015918,
+      "ece": 0.1456389380800121,
+      "brier_score": 0.3998259015636812,
+      "confusion_matrix": [
+        [
+          30,
+          23,
+          0,
+          4
+        ],
+        [
+          1,
+          44,
+          15,
+          1
+        ],
+        [
+          0,
+          17,
+          36,
+          0
+        ],
+        [
+          4,
+          0,
+          2,
+          80
+        ]
+      ],
+      "per_class": {
+        "low": {
+          "precision": 0.8571428571428571,
+          "recall": 0.5263157894736842,
+          "f1": 0.6521739130434783,
+          "support": 57
+        },
+        "medium": {
+          "precision": 0.5238095238095238,
+          "recall": 0.7213114754098361,
+          "f1": 0.6068965517241379,
+          "support": 61
+        },
+        "high": {
+          "precision": 0.6792452830188679,
+          "recall": 0.6792452830188679,
+          "f1": 0.6792452830188679,
+          "support": 53
+        },
+        "non_flood": {
+          "precision": 0.9411764705882353,
+          "recall": 0.9302325581395349,
+          "f1": 0.935672514619883,
+          "support": 86
+        }
+      },
+      "critical_error_count": 3,
+      "critical_error_rate": 0.011673151750972763,
+      "mean_severity_distance": 0.2801556420233463,
+      "latency_ms_median_cpu": 33.76780002145097,
+      "dense_state_tensor_bytes": 16926592
+    },
+    {
+      "candidate": "global_l1_0.5",
+      "target_sparsity": 0.5,
+      "actual_sparsity": 0.5,
+      "accuracy": 0.4085603112840467,
+      "balanced_accuracy": 0.3629130966952264,
+      "macro_f1": 0.26097560975609757,
+      "ece": 0.1519205326700025,
+      "brier_score": 0.7451389361360277,
+      "confusion_matrix": [
+        [
+          39,
+          0,
+          0,
+          18
+        ],
+        [
+          44,
+          0,
+          0,
+          17
+        ],
+        [
+          35,
+          0,
+          0,
+          18
+        ],
+        [
+          20,
+          0,
+          0,
+          66
+        ]
+      ],
+      "per_class": {
+        "low": {
+          "precision": 0.2826086956521739,
+          "recall": 0.6842105263157895,
+          "f1": 0.4,
+          "support": 57
+        },
+        "medium": {
+          "precision": 0.0,
+          "recall": 0.0,
+          "f1": 0.0,
+          "support": 61
+        },
+        "high": {
+          "precision": 0.0,
+          "recall": 0.0,
+          "f1": 0.0,
+          "support": 53
+        },
+        "non_flood": {
+          "precision": 0.5546218487394958,
+          "recall": 0.7674418604651163,
+          "f1": 0.6439024390243903,
+          "support": 86
+        }
+      },
+      "critical_error_count": 70,
+      "critical_error_rate": 0.2723735408560311,
+      "mean_severity_distance": 0.933852140077821,
+      "latency_ms_median_cpu": 66.6209000046365,
+      "dense_state_tensor_bytes": 16926592
+    }
+  ]
+}

@@ -8,27 +8,40 @@ import 'outbox_local_datasource.dart';
 class ServerLocator {
   static final Dio _dio = Dio(
     BaseOptions(
-      connectTimeout: const Duration(milliseconds: 800),
-      receiveTimeout: const Duration(milliseconds: 1500),
+      connectTimeout: const Duration(milliseconds: 400),
+      receiveTimeout: const Duration(milliseconds: 700),
+      followRedirects: false,
     ),
   );
 
   ServerLocator({
     Future<List<String>> Function(int port)? candidates,
     Future<String?> Function(String url)? probe,
+    this.allowInsecureLan = kAllowInsecureLan,
+    this.allowLanScan = true,
+    this.configuredUrl = kConfiguredServerUrl,
   }) : _candidates = candidates ?? lanCandidates,
        _probe = probe ?? _probeServer;
 
   final Future<List<String>> Function(int port) _candidates;
   final Future<String?> Function(String url) _probe;
+  final bool allowInsecureLan;
+  final bool allowLanScan;
+  final String configuredUrl;
   OutboxLocalDataSource? _outbox;
   String? _connectedUrl;
   DateTime? _lastScan;
 
   String? get connectedUrl => _connectedUrl;
 
-  Future<bool> init(OutboxLocalDataSource outbox) async {
+  void attach(OutboxLocalDataSource outbox) {
     _outbox = outbox;
+    _connectedUrl = null;
+    setServerBaseUrl(null);
+  }
+
+  Future<bool> init(OutboxLocalDataSource outbox) async {
+    attach(outbox);
     return ensureConnected(force: true);
   }
 
@@ -36,9 +49,8 @@ class ServerLocator {
     final outbox = _outbox!;
     final expectedId = outbox.serverId;
     final hints = <String>{
-      ?_connectedUrl,
-      ?outbox.serverUrl,
-      kConfiguredServerUrl,
+      if (allowInsecureLan) ...[?_connectedUrl, ?outbox.serverUrl],
+      configuredUrl,
     };
     for (final url in hints) {
       final id = await _identity(url);
@@ -50,6 +62,7 @@ class ServerLocator {
 
     _connectedUrl = null;
     setServerBaseUrl(null);
+    if (!allowInsecureLan || !allowLanScan) return false;
     final now = DateTime.now();
     if (!force &&
         _lastScan != null &&
@@ -58,7 +71,8 @@ class ServerLocator {
     }
     _lastScan = now;
 
-    final port = Uri.tryParse(kConfiguredServerUrl)?.port ?? 8000;
+    final configured = Uri.tryParse(configuredUrl);
+    final port = configured?.hasPort == true ? configured!.port : 8000;
     late final List<String> urls;
     try {
       urls = await _candidates(port);
@@ -66,8 +80,8 @@ class ServerLocator {
       return false;
     }
     final found = <String, String>{};
-    for (var i = 0; i < urls.length; i += 32) {
-      final batch = urls.skip(i).take(32).toList();
+    for (var i = 0; i < urls.length; i += 128) {
+      final batch = urls.skip(i).take(128).toList();
       final identities = await Future.wait(batch.map(_identity));
       for (var j = 0; j < identities.length; j++) {
         final id = identities[j];
@@ -90,6 +104,9 @@ class ServerLocator {
   }
 
   Future<String?> _identity(String url) async {
+    if (!isAllowedServerUrl(url, allowInsecureLan: allowInsecureLan)) {
+      return null;
+    }
     try {
       return await _probe(url);
     } catch (_) {

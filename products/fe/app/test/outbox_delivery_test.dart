@@ -56,6 +56,8 @@ class _FakeSync extends SyncRemoteDataSource {
 }
 
 class _FakeSender extends SenderRemoteDataSource {
+  _FakeSender({this.status = 201});
+  final int status;
   var uploads = 0;
 
   @override
@@ -66,11 +68,11 @@ class _FakeSender extends SenderRemoteDataSource {
   }) async {
     uploads++;
     return (
-      ok: true,
+      ok: status == 201,
       bytesSent: image?.length ?? 0,
       durationMs: 1,
-      status: 201,
-      permanent: false,
+      status: status,
+      permanent: isPermanentUploadFailure(status, null),
     );
   }
 }
@@ -111,9 +113,11 @@ void main() {
   );
 
   test('mất IP server: giữ message chờ rồi gửi khi tìm được IP mới', () async {
-    const url = 'http://192.168.6.20:8000';
+    const url = 'https://rescue-new.example';
     var serverUp = false;
     final locator = ServerLocator(
+      allowInsecureLan: true,
+      configuredUrl: url,
       candidates: (_) async => [url],
       probe: (candidate) async =>
           serverUp && candidate == url ? 'abcdef0123456789' : null,
@@ -142,11 +146,13 @@ void main() {
   });
 
   test('metadata đã ACK nhưng ảnh chỉ gửi sau khi xác minh IP mới', () async {
-    const oldUrl = 'http://192.168.6.10:8000';
-    const newUrl = 'http://192.168.6.20:8000';
+    const oldUrl = 'https://rescue-old.example';
+    const newUrl = 'https://rescue-new.example';
     var currentUrl = oldUrl;
     var dropAfterAck = true;
     final locator = ServerLocator(
+      allowInsecureLan: true,
+      configuredUrl: oldUrl,
       candidates: (_) async => [oldUrl, newUrl],
       probe: (url) async => url == currentUrl ? 'abcdef0123456789' : null,
     );
@@ -177,6 +183,8 @@ void main() {
     await r.saveRecord(record);
     final pending = await r.sendRecord(record);
     expect(pending.synced, isFalse);
+    expect(pending.metadataSynced, isTrue);
+    expect(pending.attachmentError, isNull);
     expect(sender.uploads, 0);
 
     currentUrl = newUrl;
@@ -274,5 +282,75 @@ void main() {
     expect(isRecoverableDeadLetter('REPORT_ID_CONFLICT'), isFalse);
     expect(isRecoverableDeadLetter('REQUEST_TOO_LARGE'), isFalse);
     expect(isRecoverableDeadLetter(null), isFalse);
+  });
+
+  test(
+    'missing attachment stays pending and retries without resending metadata',
+    () async {
+      final sync = _FakeSync([]);
+      final sender = _FakeSender();
+      final r = RescueRepositoryImpl(
+        localDataSource: records,
+        senderDataSource: sender,
+        outboxDataSource: outbox,
+        syncDataSource: sync,
+      );
+      final image = File('${dir.path}/missing.jpg');
+      final record = _record(
+        'missing-image',
+        imagePath: image.path,
+      ).copyWith(sendMode: 'fullImage');
+      await r.saveRecord(record);
+      final pending = await r.sendRecord(record);
+      expect(pending.synced, isFalse);
+      expect(pending.metadataSynced, isTrue);
+      expect(pending.attachmentError, 'ATTACHMENT_UNAVAILABLE');
+      expect(r.getPendingCount(), 1);
+      expect(sender.uploads, 0);
+
+      await Hive.close();
+      await records.init(hivePath: dir.path);
+      await outbox.init(hivePath: dir.path);
+      expect(r.getAllRecords().single.metadataSynced, isTrue);
+      expect(
+        r.getAllRecords().single.attachmentError,
+        'ATTACHMENT_UNAVAILABLE',
+      );
+      await image.writeAsBytes([]);
+      await r.syncPendingRecords();
+      expect(r.getPendingCount(), 1);
+      expect(
+        r.getAllRecords().single.attachmentError,
+        'ATTACHMENT_UNAVAILABLE',
+      );
+
+      await image.writeAsBytes([0xFF, 0xD8, 0xFF]);
+      await r.syncPendingRecords();
+      expect(sender.uploads, 1);
+      expect(r.getPendingCount(), 0);
+      expect(sync.batches, hasLength(1));
+      expect(r.getAllRecords().single.attachmentError, isNull);
+    },
+  );
+
+  test('permanent 415 image rejection still completes the report', () async {
+    final image = File('${dir.path}/rejected.jpg');
+    await image.writeAsBytes([0xFF, 0xD8, 0xFF]);
+    final sender = _FakeSender(status: 415);
+    final r = RescueRepositoryImpl(
+      localDataSource: records,
+      senderDataSource: sender,
+      outboxDataSource: outbox,
+      syncDataSource: _FakeSync([]),
+    );
+    final record = _record(
+      'unsupported-image',
+      imagePath: image.path,
+    ).copyWith(sendMode: 'fullImage');
+    await r.saveRecord(record);
+    final sent = await r.sendRecord(record);
+    expect(sent.synced, isTrue);
+    expect(sent.attachmentError, isNull);
+    expect(sender.uploads, 1);
   });
 }

@@ -1,7 +1,8 @@
 import 'package:flutter/material.dart';
 
-import '../../../../core/constants/app_colors.dart';
+import '../../../core/constants/app_colors.dart';
 import '../../controllers/app_controller.dart';
+import '../../widgets/admin_login_button.dart';
 
 class LoginScreen extends StatefulWidget {
   final AppController controller;
@@ -56,7 +57,8 @@ class _LoginScreenState extends State<LoginScreen> {
       widget.onLoginSuccess();
     } else {
       setState(() {
-        _errorMessage = 'Tên đăng nhập hoặc mật khẩu không đúng.\n(Tài khoản mẫu: cuuho / 123456)';
+        _errorMessage =
+            'Tên đăng nhập hoặc mật khẩu không đúng.\n(Tài khoản mẫu: cuuho / 123456)';
       });
     }
   }
@@ -134,10 +136,16 @@ class _LoginScreenState extends State<LoginScreen> {
                     controller: _usernameController,
                     decoration: InputDecoration(
                       hintText: 'Nhập tên đăng nhập (vd: cuuho)',
-                      hintStyle: const TextStyle(fontSize: 14, color: Color(0xFF9CA3AF)),
+                      hintStyle: const TextStyle(
+                        fontSize: 14,
+                        color: Color(0xFF9CA3AF),
+                      ),
                       filled: true,
                       fillColor: const Color(0xFFF9FAFB),
-                      contentPadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 14),
+                      contentPadding: const EdgeInsets.symmetric(
+                        horizontal: 16,
+                        vertical: 14,
+                      ),
                       border: OutlineInputBorder(
                         borderRadius: BorderRadius.circular(16),
                         borderSide: const BorderSide(color: Color(0xFFE5E7EB)),
@@ -148,7 +156,10 @@ class _LoginScreenState extends State<LoginScreen> {
                       ),
                       focusedBorder: OutlineInputBorder(
                         borderRadius: BorderRadius.circular(16),
-                        borderSide: const BorderSide(color: AppColors.primaryRed, width: 1.5),
+                        borderSide: const BorderSide(
+                          color: AppColors.primaryRed,
+                          width: 1.5,
+                        ),
                       ),
                     ),
                   ),
@@ -168,10 +179,16 @@ class _LoginScreenState extends State<LoginScreen> {
                     obscureText: !_showPassword,
                     decoration: InputDecoration(
                       hintText: 'Nhập mật khẩu (vd: 123456)',
-                      hintStyle: const TextStyle(fontSize: 14, color: Color(0xFF9CA3AF)),
+                      hintStyle: const TextStyle(
+                        fontSize: 14,
+                        color: Color(0xFF9CA3AF),
+                      ),
                       filled: true,
                       fillColor: const Color(0xFFF9FAFB),
-                      contentPadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 14),
+                      contentPadding: const EdgeInsets.symmetric(
+                        horizontal: 16,
+                        vertical: 14,
+                      ),
                       border: OutlineInputBorder(
                         borderRadius: BorderRadius.circular(16),
                         borderSide: const BorderSide(color: Color(0xFFE5E7EB)),
@@ -182,15 +199,21 @@ class _LoginScreenState extends State<LoginScreen> {
                       ),
                       focusedBorder: OutlineInputBorder(
                         borderRadius: BorderRadius.circular(16),
-                        borderSide: const BorderSide(color: AppColors.primaryRed, width: 1.5),
+                        borderSide: const BorderSide(
+                          color: AppColors.primaryRed,
+                          width: 1.5,
+                        ),
                       ),
                       suffixIcon: IconButton(
                         icon: Icon(
-                          _showPassword ? Icons.visibility_off : Icons.visibility,
+                          _showPassword
+                              ? Icons.visibility_off
+                              : Icons.visibility,
                           color: const Color(0xFF9CA3AF),
                           size: 20,
                         ),
-                        onPressed: () => setState(() => _showPassword = !_showPassword),
+                        onPressed: () =>
+                            setState(() => _showPassword = !_showPassword),
                       ),
                     ),
                   ),
@@ -251,20 +274,37 @@ class _LoginScreenState extends State<LoginScreen> {
                     ),
                   ),
 
+                  AdminLoginButton(
+                    controller: widget.controller,
+                    onSuccess: widget.onLoginSuccess,
+                  ),
                   const SizedBox(height: 20),
 
                   // Divider
                   Row(
                     children: [
-                      Expanded(child: Container(height: 1, color: Colors.grey.shade200)),
+                      Expanded(
+                        child: Container(
+                          height: 1,
+                          color: Colors.grey.shade200,
+                        ),
+                      ),
                       const Padding(
                         padding: EdgeInsets.symmetric(horizontal: 12),
                         child: Text(
                           'hoặc',
-                          style: TextStyle(fontSize: 12, color: Color(0xFF9CA3AF)),
+                          style: TextStyle(
+                            fontSize: 12,
+                            color: Color(0xFF9CA3AF),
+                          ),
                         ),
                       ),
-                      Expanded(child: Container(height: 1, color: Colors.grey.shade200)),
+                      Expanded(
+                        child: Container(
+                          height: 1,
+                          color: Colors.grey.shade200,
+                        ),
+                      ),
                     ],
                   ),
 

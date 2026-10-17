@@ -2,6 +2,7 @@ import 'dart:async';
 import 'dart:convert';
 
 import 'package:connectivity_plus/connectivity_plus.dart';
+import 'package:dio/dio.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/services.dart';
 import 'package:geolocator/geolocator.dart';
@@ -10,6 +11,8 @@ import 'package:permission_handler/permission_handler.dart';
 
 import '../../config.dart';
 import '../../data/datasources/user_local_datasource.dart';
+import '../../data/datasources/admin_session.dart';
+import '../../data/datasources/admin_model_download.dart';
 import '../../core/platform/local_file.dart';
 import '../../core/platform/sync_isolate_guard.dart';
 import '../../domain/entities/ai_model_type.dart';
@@ -33,6 +36,12 @@ class AppController extends ChangeNotifier {
   final InferenceRepository inferenceRepository;
   final NetworkRepository networkRepository;
   final UserLocalDataSource userLocalDataSource;
+  final AdminSession adminSession;
+  CancelToken? _modelDownload;
+  bool isDownloadingOnnx = false;
+  bool isDeletingBenchmarkResources = false;
+  double? onnxDownloadProgress;
+  String? onnxDownloadError;
 
   late final SendSosUseCase _sendSosUseCase;
   late final SubmitRescuePostUseCase _submitRescuePostUseCase;
@@ -50,6 +59,8 @@ class AppController extends ChangeNotifier {
   /// Hẹn giờ gửi lại message đang chờ backoff (retry scheduler của contract).
   Timer? _retryTimer;
   bool _refreshingStatuses = false;
+  Future<void>? _initialization;
+  Future<void>? _onlineWork;
 
   bool isBusy = false;
   String networkLabel = 'WiFi';
@@ -68,14 +79,21 @@ class AppController extends ChangeNotifier {
   User? currentUser;
   bool isGuest = false;
 
-  bool get isAuthenticated => currentUser != null || isGuest;
+  bool get isAuthenticated => currentUser != null || isGuest || isAdmin;
+  String get adminServerUrl =>
+      (connectedServerUrl ?? kServerBaseUrl).replaceAll(RegExp(r'/+$'), '');
+  bool get isAdmin =>
+      adminSession.isAdmin && adminSession.server == adminServerUrl;
 
   AppController({
     required this.rescueRepository,
     required this.inferenceRepository,
     required this.networkRepository,
     UserLocalDataSource? userLocalDataSource,
-  }) : userLocalDataSource = userLocalDataSource ?? UserLocalDataSource() {
+    AdminSession? adminSession,
+  }) : userLocalDataSource = userLocalDataSource ?? UserLocalDataSource(),
+       adminSession = adminSession ?? AdminSession() {
+    this.adminSession.addListener(_adminChanged);
     _sendSosUseCase = SendSosUseCase(rescueRepository);
     _submitRescuePostUseCase = SubmitRescuePostUseCase(rescueRepository);
     _getRescueRecordsUseCase = GetRescueRecordsUseCase(rescueRepository);
@@ -84,10 +102,113 @@ class AppController extends ChangeNotifier {
     _sendPolicy = AdaptiveSendPolicy(networkRepository);
   }
 
+  void _adminChanged() {
+    if (!isAdmin) _modelDownload?.cancel('Đã đăng xuất admin.');
+    inferenceRepository.setComparisonAccess(
+      isAdmin && !isDeletingBenchmarkResources,
+    );
+    isModelReady = inferenceRepository.ready;
+    notifyListeners();
+  }
+
+  Future<void> loginAdmin(String username, String password) async {
+    if (connectedServerUrl == null) await reconnectServer();
+    await adminSession.login(adminServerUrl, username, password);
+  }
+
+  Future<bool> validateAdmin() async {
+    if (!isAdmin) return false;
+    return adminSession.validate();
+  }
+
+  Future<void> downloadOnnx() async {
+    if (isDownloadingOnnx ||
+        isDeletingBenchmarkResources ||
+        isModelLoading ||
+        isBenchmarking ||
+        !isAdmin) {
+      return;
+    }
+    isDownloadingOnnx = true;
+    onnxDownloadProgress = null;
+    onnxDownloadError = null;
+    final cancel = CancelToken();
+    _modelDownload = cancel;
+    final sessionToken = adminSession.token;
+    notifyListeners();
+    try {
+      if (!await validateAdmin()) return;
+      final path = await downloadAdminOnnx(
+        server: adminServerUrl,
+        token: sessionToken!,
+        cancelToken: cancel,
+        onProgress: (received, total) {
+          onnxDownloadProgress = total > 0 ? received / total : null;
+          notifyListeners();
+        },
+      );
+      if (!isAdmin ||
+          adminSession.token != sessionToken ||
+          cancel.isCancelled) {
+        return;
+      }
+      await inferenceRepository.loadComparisonModel(path);
+    } catch (error) {
+      if (!cancel.isCancelled) {
+        onnxDownloadError = 'Không tải được ONNX: $error';
+      }
+    } finally {
+      _modelDownload = null;
+      isDownloadingOnnx = false;
+      notifyListeners();
+    }
+  }
+
+  bool beginBenchmark() {
+    if (!isAdmin ||
+        isBenchmarking ||
+        isDeletingBenchmarkResources ||
+        isDownloadingOnnx) {
+      return false;
+    }
+    isBenchmarking = true;
+    notifyListeners();
+    return true;
+  }
+
+  void endBenchmark() {
+    isBenchmarking = false;
+    notifyListeners();
+  }
+
+  Future<int> deleteBenchmarkResources() async {
+    if (!isAdmin ||
+        isDeletingBenchmarkResources ||
+        isDownloadingOnnx ||
+        isBenchmarking ||
+        isModelLoading) {
+      throw StateError(
+        'Chờ tác vụ model hoặc benchmark kết thúc trước khi xóa.',
+      );
+    }
+    isDeletingBenchmarkResources = true;
+    notifyListeners();
+    try {
+      await inferenceRepository.unloadComparisonModel();
+      return await pruneModelDownloads(deleteBenchmark: true);
+    } finally {
+      isDeletingBenchmarkResources = false;
+      inferenceRepository.setComparisonAccess(isAdmin);
+      isModelReady = inferenceRepository.ready;
+      notifyListeners();
+    }
+  }
+
   Future<bool> login(String username, String password) async {
     final saved = userLocalDataSource.getUser();
     if (saved != null) {
       if (saved.username == username.trim() && saved.password == password) {
+        await userLocalDataSource.saveUser(saved);
         currentUser = saved;
         isGuest = false;
         notifyListeners();
@@ -126,10 +247,12 @@ class AppController extends ChangeNotifier {
   }
 
   Future<void> logout() async {
-    await userLocalDataSource.deleteUser();
+    final adminLogout = adminSession.logout();
+    await userLocalDataSource.clearSession();
     currentUser = null;
     isGuest = false;
     notifyListeners();
+    await adminLogout;
   }
 
   void continueAsGuest() {
@@ -148,15 +271,19 @@ class AppController extends ChangeNotifier {
 
   Future<void> reconnectServer() async {
     final connected = await rescueRepository.reconnectServer();
+    if (adminSession.server != null && adminSession.server != adminServerUrl) {
+      unawaited(adminSession.logout());
+    }
     notifyListeners();
     if (connected && pendingCount > 0) await syncPending();
   }
 
   AiModelType get currentModel => inferenceRepository.currentModel;
   bool get isPteReady => inferenceRepository.pteReady;
-  bool get isDualComparison => inferenceRepository.isDualComparison;
+  bool get isOnnxReady => isAdmin && inferenceRepository.onnxReady;
+  bool get isDualComparison => isAdmin && inferenceRepository.isDualComparison;
   ModelBenchmarkComparison? get latestComparison =>
-      inferenceRepository.latestComparison;
+      isAdmin ? inferenceRepository.latestComparison : null;
 
   double? urgencyScore(Iterable<String> severeSigns) =>
       _urgencyModel?.score(severeSigns);
@@ -182,21 +309,36 @@ class AppController extends ChangeNotifier {
   }
 
   void switchAiModel(AiModelType model) {
+    if (!isAdmin || isBenchmarking || isDeletingBenchmarkResources) return;
     inferenceRepository.setModel(model);
+    isModelReady = inferenceRepository.ready;
     notifyListeners();
   }
 
   void toggleDualComparison(bool enabled) {
+    if (!isAdmin || isBenchmarking || isDeletingBenchmarkResources) return;
     inferenceRepository.setDualComparison(enabled);
     notifyListeners();
   }
 
-  Future<void> init() async {
+  Future<void> init() =>
+      _initialization ??= _initialize().onError((error, stack) {
+        _initialization = null;
+        Error.throwWithStackTrace(
+          error ?? StateError('Initialization failed.'),
+          stack,
+        );
+      });
+
+  Future<void> _initialize() async {
     // Tác vụ Workmanager đang ghi outbox ở isolate khác: chờ xong mới mở Hive.
     await waitForBackgroundSync();
     await rescueRepository.init();
     await userLocalDataSource.init();
-    currentUser = userLocalDataSource.getUser();
+    currentUser = userLocalDataSource.isSignedIn
+        ? userLocalDataSource.getUser()
+        : null;
+    networkLabel = await networkRepository.getCurrentNetworkType();
     unawaited(_loadUrgencyModel());
     unawaited(
       inferenceRepository
@@ -226,21 +368,35 @@ class AppController extends ChangeNotifier {
             e == ConnectivityResult.ethernet,
       );
       if (hasNet) {
-        await reconnectServer();
-        await refreshStatuses();
+        await _connectAndSync();
       }
     });
 
-    networkLabel = await networkRepository.getCurrentNetworkType();
     notifyListeners();
 
     // Người gửi thấy được khi trung tâm điều phối / hoàn thành báo cáo của mình.
-    unawaited(refreshStatuses());
     _statusTimer = Timer.periodic(
       kStatusPollInterval,
       (_) => unawaited(refreshStatuses()),
     );
     _scheduleRetry(); // message còn chờ từ lần chạy trước
+    registerForegroundSync(syncPending);
+    unawaited(_connectAndSync());
+  }
+
+  Future<void> _connectAndSync() =>
+      _onlineWork ??= _connectAndSyncOnce().whenComplete(() {
+        _onlineWork = null;
+      });
+
+  Future<void> _connectAndSyncOnce() async {
+    try {
+      if (!await rescueRepository.reconnectServer()) return;
+      notifyListeners();
+      await syncPending(immediate: false);
+    } catch (error) {
+      debugPrint('Kết nối/đồng bộ nền chưa hoàn tất: $error');
+    }
   }
 
   /// Hỏi server trạng thái điều phối của các báo cáo đã gửi (chỉ cập nhật tiến).
@@ -280,10 +436,14 @@ class AppController extends ChangeNotifier {
 
   /// Trạng thái mô hình AI để hiển thị: đang nạp, sẵn sàng hoặc lý do không khả dụng.
   String get modelStatusHint {
-    if (isModelReady) return 'Chạm để đổi ONNX/PTE và benchmark';
+    if (isModelReady) {
+      return isAdmin
+          ? 'Chạm để đổi ONNX/PTE và benchmark'
+          : 'AI PTE sẵn sàng trên thiết bị';
+    }
     if (isModelLoading) return 'Đang tải model on-device...';
     if (kIsWeb) return 'Bản web không chạy AI on-device';
-    return 'Thiếu file model trong assets/models';
+    return 'Model PTE chưa sẵn sàng trên thiết bị';
   }
 
   /// Lấy vị trí GPS hiện tại. Thất bại thì giữ vị trí trống (không dùng tọa độ
@@ -325,6 +485,9 @@ class AppController extends ChangeNotifier {
     _connSub?.cancel();
     _statusTimer?.cancel();
     _retryTimer?.cancel();
+    _modelDownload?.cancel();
+    adminSession.removeListener(_adminChanged);
+    adminSession.dispose();
     super.dispose();
   }
 
@@ -429,25 +592,22 @@ class AppController extends ChangeNotifier {
   }
 
   Future<InferenceResult?> testModelBenchmark() async {
-    if (isBenchmarking) return null;
-    isBenchmarking = true;
-    notifyListeners();
+    if (!beginBenchmark()) return null;
 
     try {
+      if (!await validateAdmin()) return null;
       final ByteData raw = await rootBundle.load('assets/images/app_logo.png');
       final bytes = raw.buffer.asUint8List(
         raw.offsetInBytes,
         raw.lengthInBytes,
       );
       final result = await inferenceRepository.classifyImage(bytes);
-      isBenchmarking = false;
-      notifyListeners();
       return result;
     } catch (e) {
       debugPrint('Benchmark test error: $e');
-      isBenchmarking = false;
-      notifyListeners();
       return null;
+    } finally {
+      endBenchmark();
     }
   }
 

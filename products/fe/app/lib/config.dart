@@ -1,17 +1,53 @@
 /// Cấu hình tập trung — sửa tại đây khi deploy thật.
 library;
 
-/// Địa chỉ build-time là gợi ý đầu tiên; Android sẽ xác minh và tìm lại server.
+/// Bản thông thường chỉ kết nối HTTPS tại địa chỉ được cấu hình lúc build.
 const String kConfiguredServerUrl = String.fromEnvironment(
   'SERVER_URL',
-  defaultValue: 'http://localhost:8000',
+  defaultValue: '',
 );
+const bool kAllowInsecureLan = bool.fromEnvironment('ALLOW_INSECURE_LAN');
+
+bool isAllowedServerUrl(
+  String url, {
+  bool allowInsecureLan = kAllowInsecureLan,
+}) {
+  final uri = Uri.tryParse(url);
+  if (uri == null ||
+      uri.host.isEmpty ||
+      uri.userInfo.isNotEmpty ||
+      uri.hasQuery ||
+      uri.hasFragment ||
+      (uri.path.isNotEmpty && uri.path != '/')) {
+    return false;
+  }
+  if (uri.scheme == 'https') return true;
+  if (!allowInsecureLan || uri.scheme != 'http') return false;
+  if (uri.host == 'localhost' || uri.host == '::1') return true;
+  final parts = uri.host.split('.').map(int.tryParse).toList();
+  if (parts.length != 4 || parts.any((p) => p == null || p < 0 || p > 255)) {
+    return false;
+  }
+  return parts[0] == 10 ||
+      parts[0] == 127 ||
+      (parts[0] == 192 && parts[1] == 168) ||
+      (parts[0] == 172 && parts[1]! >= 16 && parts[1]! <= 31);
+}
+
+void requireAllowedServerUrl(String url) {
+  if (!isAllowedServerUrl(url)) {
+    throw StateError(
+      'Cần SERVER_URL HTTPS. HTTP LAN chỉ dùng trong bản demo ALLOW_INSECURE_LAN=true.',
+    );
+  }
+}
+
 String _serverBaseUrl = kConfiguredServerUrl;
 String get kServerBaseUrl => _serverBaseUrl;
 
 /// Không gửi dữ liệu đến địa chỉ cũ khi chưa xác minh được server.
-void setServerBaseUrl(String? url) =>
-    _serverBaseUrl = url ?? 'http://127.0.0.1:1';
+void setServerBaseUrl(String? url) => _serverBaseUrl =
+    url != null && isAllowedServerUrl(url) ? url : 'http://127.0.0.1:1';
 
 /// Số tổng đài nhận SMS fallback. Đặt lúc build/run:
 /// `--dart-define=EMERGENCY_PHONE=+84xxxxxxxxx`. Còn là số giả thì app không gửi SMS.

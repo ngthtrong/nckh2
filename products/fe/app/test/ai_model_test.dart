@@ -15,10 +15,15 @@ void main() {
       repository = InferenceRepositoryImpl(dataSource);
     });
 
-    test('Default model should be ONNX Runtime', () {
-      expect(repository.currentModel, equals(AiModelType.onnx));
-      expect(repository.currentModel.extension, equals('.onnx'));
-      expect(repository.currentModel.badgeText, equals('ONNX (.onnx)'));
+    test('Default model is PTE and comparison requires admin access', () async {
+      expect(repository.currentModel, equals(AiModelType.pte));
+      expect(repository.currentModel.extension, equals('.pte'));
+      repository.setModel(AiModelType.onnx);
+      repository.setDualComparison(true);
+      expect(repository.currentModel, AiModelType.pte);
+      expect(repository.isDualComparison, isFalse);
+      expect(repository.onnxReady, isFalse);
+      await expectLater(repository.loadComparisonModel('untrusted.onnx'), throwsStateError);
     });
 
     test('Invalid image does not fabricate an inference result', () async {

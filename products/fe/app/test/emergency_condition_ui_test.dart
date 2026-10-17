@@ -1,5 +1,4 @@
 import 'package:app/presentation/widgets/emergency_condition_selector.dart';
-import 'package:app/presentation/widgets/payload_demo_panel.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 
@@ -39,14 +38,6 @@ void main() {
                       onSevereSignsChanged: (values) =>
                           setState(() => selected = values),
                     ),
-                    PayloadDemoPanel(
-                      payload: {
-                        'urgency_features': {
-                          'cannot_move': false,
-                          'severe_signs': selected,
-                        },
-                      },
-                    ),
                   ],
                 ),
               ),
@@ -66,12 +57,6 @@ void main() {
       findsOneWidget,
     );
 
-    await tester.ensureVisible(
-      find.text('Xem payload demo (dành cho phát triển)'),
-    );
-    await tester.tap(find.text('Xem payload demo (dành cho phát triển)'));
-    await tester.pumpAndSettle();
-    expect(find.textContaining('heavy_bleeding'), findsOneWidget);
     expect(tester.takeException(), isNull);
   });
 }

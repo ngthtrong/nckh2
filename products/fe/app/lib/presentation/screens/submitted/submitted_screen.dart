@@ -73,9 +73,11 @@ class SubmittedScreen extends StatelessWidget {
                     const SizedBox(height: 6),
                     Text(
                       record.synced
-                          ? 'Đội cứu hộ đã nhận bài và đang xử lý. Trạng thái bên dưới tự cập nhật khi trung tâm điều phối.'
+                          ? 'Máy chủ đã tiếp nhận báo cáo. Trạng thái bên dưới tự cập nhật khi trung tâm điều phối.'
                           : record.syncError != null
                           ? 'Báo cáo bị từ chối (${record.syncError}), app sẽ không gửi lại. Hãy gọi 112 hoặc tổng đài cứu hộ.'
+                          : record.metadataSynced
+                          ? 'Máy chủ đã nhận nội dung; ảnh còn chờ gửi. App sẽ thử lại khi có mạng.'
                           : 'Chưa tới được máy chủ. Bài nằm trong hàng đợi và tự gửi khi có mạng.',
                       textAlign: TextAlign.center,
                       style: TextStyle(
@@ -86,6 +88,12 @@ class SubmittedScreen extends StatelessWidget {
                       ),
                     ),
                     const SizedBox(height: 20),
+                    if (record.attachmentError != null)
+                      const Text(
+                        'Không đọc được ảnh đính kèm. Báo cáo chưa đồng bộ xong; hãy gửi lại ảnh cùng báo cáo.',
+                        textAlign: TextAlign.center,
+                        style: TextStyle(color: Color(0xFFB45309)),
+                      ),
 
                     // Summary Card
                     Container(

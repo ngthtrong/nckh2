@@ -1,0 +1,1670 @@
+{
+  "scope": "local_PTH_ONNX_FP32",
+  "metadata": {
+    "checkpoint": "E:\\RHNA\\1Visual\\NCKH\\nckh2\\products\\fe\\model\\Edge Ai\\flood_mobilenetv3_large_best.pth",
+    "onnx": "E:\\RHNA\\1Visual\\NCKH\\nckh2\\products\\fe\\model\\Edge Ai\\Export\\flood_mobilenetv3_large.onnx",
+    "onnx_engine": "ort",
+    "atol": 1e-05,
+    "rtol": 0.0001,
+    "config": "E:\\RHNA\\1Visual\\NCKH\\nckh2\\products\\fe\\model\\Edge Ai\\config_mobilenetv3_large.json",
+    "config_sha256": "1a14408bd2f42c9c06aba419ec3862fefec109c4e1030fa2a354ca8522a46779",
+    "split_csv": "E:\\RHNA\\1Visual\\NCKH\\nckh2\\products\\fe\\model\\Edge Ai\\split_train_val_test_mobilenetv3_large.csv",
+    "split_csv_sha256": "f7b52cd25411d4d1df2f7f80745a2cf430819773854345798cf7e093e3bcba45",
+    "dataset_dir": "E:\\RHNA\\1Visual\\NCKH\\nckh2\\products\\fe\\model\\Dataset_Flood",
+    "full_test_count": 256,
+    "seed": 1024,
+    "evaluation_scope": "full_test",
+    "n_images": 256,
+    "class_order": [
+      "low",
+      "medium",
+      "high",
+      "non_flood"
+    ],
+    "input_size": 256,
+    "manifest": "E:\\RHNA\\1Visual\\NCKH\\nckh2\\products\\fe\\model\\Edge Ai\\Export\\model_manifest.json",
+    "manifest_sha256": "6e32893a802693c39cca1f5affe4ef4ab21f6f0eae289f1a8f473d11c4bbca93",
+    "checkpoint_sha256": "6d4ef6fff1b59e8ac5d3165f935f28214b935ee377e21ecf16e3b0627be3d9ae",
+    "onnx_sha256": "f74c99b479b6fc55bd5f7bb2dffcf080d376ff7bc25269ad80732f996d3d89a9"
+  },
+  "preflight": {
+    "status": "pass",
+    "reason": "Config/hash/split độc lập khớp; không tự chia lại dataset."
+  },
+  "checks": {
+    "preprocessing": {
+      "status": "pass",
+      "n_images": 256,
+      "pipeline": "EXIF -> RGB -> letterbox BILINEAR -> ImageNet NCHW",
+      "mean": [
+        0.48500001430511475,
+        0.4560000002384186,
+        0.4059999883174896
+      ],
+      "std": [
+        0.2290000021457672,
+        0.2240000069141388,
+        0.22499999403953552
+      ],
+      "flutter_pixel_parity": "not_tested"
+    },
+    "precision": {
+      "status": "pass",
+      "input_shape": [
+        "batch",
+        3,
+        256,
+        256
+      ],
+      "output_shape": [
+        "batch",
+        4
+      ],
+      "input_dtype": "float32",
+      "output_dtype": "float32",
+      "initializer_types": {
+        "FLOAT": 128
+      },
+      "quantized_nodes": {},
+      "node_count": 141,
+      "operators": {
+        "Conv": 62,
+        "HardSwish": 21,
+        "Relu": 19,
+        "Add": 10,
+        "GlobalAveragePool": 9,
+        "HardSigmoid": 8,
+        "Mul": 8,
+        "Flatten": 1,
+        "Gemm": 2,
+        "Softmax": 1
+      }
+    },
+    "execution_provider": {
+      "status": "pass",
+      "engine": "onnxruntime",
+      "version": "1.30.0",
+      "providers": [
+        "CPUExecutionProvider"
+      ],
+      "scope": "CPU desktop, 1 luồng",
+      "mobile_partition": "not_tested"
+    },
+    "graph_parity": {
+      "status": "pass",
+      "softmax_axis": 1,
+      "opset": 17,
+      "top1_agreement": 1.0,
+      "max_abs_diff": 2.1457672119140625e-06,
+      "mean_abs_diff": 2.2653223652469023e-07,
+      "rmse": 3.805612935958839e-07,
+      "l1_mean": 9.061289460987609e-07,
+      "l2_mean": 5.757374310633168e-07,
+      "cosine_similarity_mean": 1.0,
+      "js_divergence_mean": 2.813900027342693e-13,
+      "probabilities_close": true,
+      "atol": 1e-05,
+      "rtol": 0.0001,
+      "checkpoint_loading": "strict=True",
+      "reason": "Sai số đo thực tế trên test, không phải accuracy hay chứng nhận toàn bộ dữ liệu."
+    },
+    "label_mapping": {
+      "status": "pass",
+      "class_order": [
+        "low",
+        "medium",
+        "high",
+        "non_flood"
+      ],
+      "top1_agreement": 1.0,
+      "reason": "Đồng thuận trên ảnh đã kiểm tra; không đồng nghĩa accuracy 100%."
+    }
+  },
+  "mobile": {
+    "status": "not_tested",
+    "reason": "Không chạy Flutter/device; chưa kiểm tra pixel preprocessing, partition hoặc latency mobile."
+  },
+  "predictions": [
+    {
+      "image_path": "E:\\RHNA\\1Visual\\NCKH\\nckh2\\products\\fe\\model\\Dataset_Flood\\low\\images - 2025-01-28T163251.007.jpg",
+      "ground_truth": "low",
+      "pred_pth": "low",
+      "pred_onnx": "low"
+    },
+    {
+      "image_path": "E:\\RHNA\\1Visual\\NCKH\\nckh2\\products\\fe\\model\\Dataset_Flood\\low\\다운로드 (54).jpg",
+      "ground_truth": "low",
+      "pred_pth": "low",
+      "pred_onnx": "low"
+    },
+    {
+      "image_path": "E:\\RHNA\\1Visual\\NCKH\\nckh2\\products\\fe\\model\\Dataset_Flood\\low\\808137151_1065873222862956_2369990287917085533_n.jpg",
+      "ground_truth": "low",
+      "pred_pth": "medium",
+      "pred_onnx": "medium"
+    },
+    {
+      "image_path": "E:\\RHNA\\1Visual\\NCKH\\nckh2\\products\\fe\\model\\Dataset_Flood\\low\\SSI_20170716151354_O2.jpg",
+      "ground_truth": "low",
+      "pred_pth": "medium",
+      "pred_onnx": "medium"
+    },
+    {
+      "image_path": "E:\\RHNA\\1Visual\\NCKH\\nckh2\\products\\fe\\model\\Dataset_Flood\\low\\화면 캡처 2025-03-05 161811.jpg",
+      "ground_truth": "low",
+      "pred_pth": "low",
+      "pred_onnx": "low"
+    },
+    {
+      "image_path": "E:\\RHNA\\1Visual\\NCKH\\nckh2\\products\\fe\\model\\Dataset_Flood\\low\\images - 2025-01-28T163030.279.jpg",
+      "ground_truth": "low",
+      "pred_pth": "low",
+      "pred_onnx": "low"
+    },
+    {
+      "image_path": "E:\\RHNA\\1Visual\\NCKH\\nckh2\\products\\fe\\model\\Dataset_Flood\\low\\images - 2025-01-28T185425.621.jpg",
+      "ground_truth": "low",
+      "pred_pth": "low",
+      "pred_onnx": "low"
+    },
+    {
+      "image_path": "E:\\RHNA\\1Visual\\NCKH\\nckh2\\products\\fe\\model\\Dataset_Flood\\low\\images - 2025-01-28T154416.248.jpg",
+      "ground_truth": "low",
+      "pred_pth": "low",
+      "pred_onnx": "low"
+    },
+    {
+      "image_path": "E:\\RHNA\\1Visual\\NCKH\\nckh2\\products\\fe\\model\\Dataset_Flood\\low\\images - 2025-01-28T154231.729.jpg",
+      "ground_truth": "low",
+      "pred_pth": "low",
+      "pred_onnx": "low"
+    },
+    {
+      "image_path": "E:\\RHNA\\1Visual\\NCKH\\nckh2\\products\\fe\\model\\Dataset_Flood\\low\\화면 캡처 2025-03-05 162152.jpg",
+      "ground_truth": "low",
+      "pred_pth": "non_flood",
+      "pred_onnx": "non_flood"
+    },
+    {
+      "image_path": "E:\\RHNA\\1Visual\\NCKH\\nckh2\\products\\fe\\model\\Dataset_Flood\\low\\images (93).jpg",
+      "ground_truth": "low",
+      "pred_pth": "low",
+      "pred_onnx": "low"
+    },
+    {
+      "image_path": "E:\\RHNA\\1Visual\\NCKH\\nckh2\\products\\fe\\model\\Dataset_Flood\\low\\images (99).jpg",
+      "ground_truth": "low",
+      "pred_pth": "medium",
+      "pred_onnx": "medium"
+    },
+    {
+      "image_path": "E:\\RHNA\\1Visual\\NCKH\\nckh2\\products\\fe\\model\\Dataset_Flood\\low\\화면 캡처 2025-03-05 165853.jpg",
+      "ground_truth": "low",
+      "pred_pth": "non_flood",
+      "pred_onnx": "non_flood"
+    },
+    {
+      "image_path": "E:\\RHNA\\1Visual\\NCKH\\nckh2\\products\\fe\\model\\Dataset_Flood\\low\\images - 2025-01-28T164427.465.jpg",
+      "ground_truth": "low",
+      "pred_pth": "low",
+      "pred_onnx": "low"
+    },
+    {
+      "image_path": "E:\\RHNA\\1Visual\\NCKH\\nckh2\\products\\fe\\model\\Dataset_Flood\\low\\images (38).jpg",
+      "ground_truth": "low",
+      "pred_pth": "medium",
+      "pred_onnx": "medium"
+    },
+    {
+      "image_path": "E:\\RHNA\\1Visual\\NCKH\\nckh2\\products\\fe\\model\\Dataset_Flood\\low\\images - 2025-01-28T151232.035.jpg",
+      "ground_truth": "low",
+      "pred_pth": "low",
+      "pred_onnx": "low"
+    },
+    {
+      "image_path": "E:\\RHNA\\1Visual\\NCKH\\nckh2\\products\\fe\\model\\Dataset_Flood\\low\\images (33).jpg",
+      "ground_truth": "low",
+      "pred_pth": "low",
+      "pred_onnx": "low"
+    },
+    {
+      "image_path": "E:\\RHNA\\1Visual\\NCKH\\nckh2\\products\\fe\\model\\Dataset_Flood\\low\\다운로드 (15) 1.jpg",
+      "ground_truth": "low",
+      "pred_pth": "low",
+      "pred_onnx": "low"
+    },
+    {
+      "image_path": "E:\\RHNA\\1Visual\\NCKH\\nckh2\\products\\fe\\model\\Dataset_Flood\\low\\noise.jpg",
+      "ground_truth": "low",
+      "pred_pth": "medium",
+      "pred_onnx": "medium"
+    },
+    {
+      "image_path": "E:\\RHNA\\1Visual\\NCKH\\nckh2\\products\\fe\\model\\Dataset_Flood\\low\\images - 2025-01-28T151759.595.jpg",
+      "ground_truth": "low",
+      "pred_pth": "low",
+      "pred_onnx": "low"
+    },
+    {
+      "image_path": "E:\\RHNA\\1Visual\\NCKH\\nckh2\\products\\fe\\model\\Dataset_Flood\\low\\721750ca-9b42-42b5-8b16-353112338174-Flood3.jpg",
+      "ground_truth": "low",
+      "pred_pth": "low",
+      "pred_onnx": "low"
+    },
+    {
+      "image_path": "E:\\RHNA\\1Visual\\NCKH\\nckh2\\products\\fe\\model\\Dataset_Flood\\low\\화면 캡처 2025-03-05 161202.jpg",
+      "ground_truth": "low",
+      "pred_pth": "low",
+      "pred_onnx": "low"
+    },
+    {
+      "image_path": "E:\\RHNA\\1Visual\\NCKH\\nckh2\\products\\fe\\model\\Dataset_Flood\\low\\images - 2025-01-28T164448.787.jpg",
+      "ground_truth": "low",
+      "pred_pth": "low",
+      "pred_onnx": "low"
+    },
+    {
+      "image_path": "E:\\RHNA\\1Visual\\NCKH\\nckh2\\products\\fe\\model\\Dataset_Flood\\low\\images - 2025-01-28T164438.545.jpg",
+      "ground_truth": "low",
+      "pred_pth": "low",
+      "pred_onnx": "low"
+    },
+    {
+      "image_path": "E:\\RHNA\\1Visual\\NCKH\\nckh2\\products\\fe\\model\\Dataset_Flood\\low\\images - 2025-01-28T164633.825.jpg",
+      "ground_truth": "low",
+      "pred_pth": "low",
+      "pred_onnx": "low"
+    },
+    {
+      "image_path": "E:\\RHNA\\1Visual\\NCKH\\nckh2\\products\\fe\\model\\Dataset_Flood\\low\\images - 2025-01-28T161955.443.jpg",
+      "ground_truth": "low",
+      "pred_pth": "low",
+      "pred_onnx": "low"
+    },
+    {
+      "image_path": "E:\\RHNA\\1Visual\\NCKH\\nckh2\\products\\fe\\model\\Dataset_Flood\\low\\images - 2025-01-28T154034.580.jpg",
+      "ground_truth": "low",
+      "pred_pth": "non_flood",
+      "pred_onnx": "non_flood"
+    },
+    {
+      "image_path": "E:\\RHNA\\1Visual\\NCKH\\nckh2\\products\\fe\\model\\Dataset_Flood\\low\\다운로드 (24).jpg",
+      "ground_truth": "low",
+      "pred_pth": "non_flood",
+      "pred_onnx": "non_flood"
+    },
+    {
+      "image_path": "E:\\RHNA\\1Visual\\NCKH\\nckh2\\products\\fe\\model\\Dataset_Flood\\low\\화면 캡처 2025-03-05 165641.jpg",
+      "ground_truth": "low",
+      "pred_pth": "low",
+      "pred_onnx": "low"
+    },
+    {
+      "image_path": "E:\\RHNA\\1Visual\\NCKH\\nckh2\\products\\fe\\model\\Dataset_Flood\\low\\images (23) 2.jpg",
+      "ground_truth": "low",
+      "pred_pth": "medium",
+      "pred_onnx": "medium"
+    },
+    {
+      "image_path": "E:\\RHNA\\1Visual\\NCKH\\nckh2\\products\\fe\\model\\Dataset_Flood\\low\\images - 2025-01-28T151814.128.jpg",
+      "ground_truth": "low",
+      "pred_pth": "non_flood",
+      "pred_onnx": "non_flood"
+    },
+    {
+      "image_path": "E:\\RHNA\\1Visual\\NCKH\\nckh2\\products\\fe\\model\\Dataset_Flood\\low\\803005566_1065370432913235_8636202584573284675_n.jpg",
+      "ground_truth": "low",
+      "pred_pth": "medium",
+      "pred_onnx": "medium"
+    },
+    {
+      "image_path": "E:\\RHNA\\1Visual\\NCKH\\nckh2\\products\\fe\\model\\Dataset_Flood\\low\\images (16) 2.jpg",
+      "ground_truth": "low",
+      "pred_pth": "low",
+      "pred_onnx": "low"
+    },
+    {
+      "image_path": "E:\\RHNA\\1Visual\\NCKH\\nckh2\\products\\fe\\model\\Dataset_Flood\\low\\image_297.jpg",
+      "ground_truth": "low",
+      "pred_pth": "medium",
+      "pred_onnx": "medium"
+    },
+    {
+      "image_path": "E:\\RHNA\\1Visual\\NCKH\\nckh2\\products\\fe\\model\\Dataset_Flood\\low\\images - 2025-01-28T162855.395.jpg",
+      "ground_truth": "low",
+      "pred_pth": "low",
+      "pred_onnx": "low"
+    },
+    {
+      "image_path": "E:\\RHNA\\1Visual\\NCKH\\nckh2\\products\\fe\\model\\Dataset_Flood\\low\\images (32).jpg",
+      "ground_truth": "low",
+      "pred_pth": "medium",
+      "pred_onnx": "medium"
+    },
+    {
+      "image_path": "E:\\RHNA\\1Visual\\NCKH\\nckh2\\products\\fe\\model\\Dataset_Flood\\low\\다운로드 (13).jpg",
+      "ground_truth": "low",
+      "pred_pth": "low",
+      "pred_onnx": "low"
+    },
+    {
+      "image_path": "E:\\RHNA\\1Visual\\NCKH\\nckh2\\products\\fe\\model\\Dataset_Flood\\low\\images - 2025-01-28T151448.228.jpg",
+      "ground_truth": "low",
+      "pred_pth": "non_flood",
+      "pred_onnx": "non_flood"
+    },
+    {
+      "image_path": "E:\\RHNA\\1Visual\\NCKH\\nckh2\\products\\fe\\model\\Dataset_Flood\\low\\images - 2025-01-28T184905.989.jpg",
+      "ground_truth": "low",
+      "pred_pth": "low",
+      "pred_onnx": "low"
+    },
+    {
+      "image_path": "E:\\RHNA\\1Visual\\NCKH\\nckh2\\products\\fe\\model\\Dataset_Flood\\low\\images - 2025-01-28T155237.362.jpg",
+      "ground_truth": "low",
+      "pred_pth": "low",
+      "pred_onnx": "low"
+    },
+    {
+      "image_path": "E:\\RHNA\\1Visual\\NCKH\\nckh2\\products\\fe\\model\\Dataset_Flood\\low\\images - 2025-01-28T154421.186.jpg",
+      "ground_truth": "low",
+      "pred_pth": "low",
+      "pred_onnx": "low"
+    },
+    {
+      "image_path": "E:\\RHNA\\1Visual\\NCKH\\nckh2\\products\\fe\\model\\Dataset_Flood\\low\\images - 2025-01-28T164917.120.jpg",
+      "ground_truth": "low",
+      "pred_pth": "low",
+      "pred_onnx": "low"
+    },
+    {
+      "image_path": "E:\\RHNA\\1Visual\\NCKH\\nckh2\\products\\fe\\model\\Dataset_Flood\\low\\images - 2025-01-28T152045.509.jpg",
+      "ground_truth": "low",
+      "pred_pth": "low",
+      "pred_onnx": "low"
+    },
+    {
+      "image_path": "E:\\RHNA\\1Visual\\NCKH\\nckh2\\products\\fe\\model\\Dataset_Flood\\low\\images - 2025-01-28T164148.602.jpg",
+      "ground_truth": "low",
+      "pred_pth": "low",
+      "pred_onnx": "low"
+    },
+    {
+      "image_path": "E:\\RHNA\\1Visual\\NCKH\\nckh2\\products\\fe\\model\\Dataset_Flood\\low\\화면 캡처 2025-03-05 163923.jpg",
+      "ground_truth": "low",
+      "pred_pth": "non_flood",
+      "pred_onnx": "non_flood"
+    },
+    {
+      "image_path": "E:\\RHNA\\1Visual\\NCKH\\nckh2\\products\\fe\\model\\Dataset_Flood\\low\\img_india_20151202_title-759x500.jpg",
+      "ground_truth": "low",
+      "pred_pth": "medium",
+      "pred_onnx": "medium"
+    },
+    {
+      "image_path": "E:\\RHNA\\1Visual\\NCKH\\nckh2\\products\\fe\\model\\Dataset_Flood\\low\\다운로드 (17).jpg",
+      "ground_truth": "low",
+      "pred_pth": "low",
+      "pred_onnx": "low"
+    },
+    {
+      "image_path": "E:\\RHNA\\1Visual\\NCKH\\nckh2\\products\\fe\\model\\Dataset_Flood\\low\\images.jpg",
+      "ground_truth": "low",
+      "pred_pth": "medium",
+      "pred_onnx": "medium"
+    },
+    {
+      "image_path": "E:\\RHNA\\1Visual\\NCKH\\nckh2\\products\\fe\\model\\Dataset_Flood\\low\\images - 2025-01-28T152051.161.jpg",
+      "ground_truth": "low",
+      "pred_pth": "medium",
+      "pred_onnx": "medium"
+    },
+    {
+      "image_path": "E:\\RHNA\\1Visual\\NCKH\\nckh2\\products\\fe\\model\\Dataset_Flood\\low\\images - 2025-01-28T164419.296.jpg",
+      "ground_truth": "low",
+      "pred_pth": "low",
+      "pred_onnx": "low"
+    },
+    {
+      "image_path": "E:\\RHNA\\1Visual\\NCKH\\nckh2\\products\\fe\\model\\Dataset_Flood\\low\\images - 2025-01-28T152202.438.jpg",
+      "ground_truth": "low",
+      "pred_pth": "non_flood",
+      "pred_onnx": "non_flood"
+    },
+    {
+      "image_path": "E:\\RHNA\\1Visual\\NCKH\\nckh2\\products\\fe\\model\\Dataset_Flood\\low\\flood_6194.jpg",
+      "ground_truth": "low",
+      "pred_pth": "medium",
+      "pred_onnx": "medium"
+    },
+    {
+      "image_path": "E:\\RHNA\\1Visual\\NCKH\\nckh2\\products\\fe\\model\\Dataset_Flood\\low\\images - 2025-01-28T164411.442.jpg",
+      "ground_truth": "low",
+      "pred_pth": "low",
+      "pred_onnx": "low"
+    },
+    {
+      "image_path": "E:\\RHNA\\1Visual\\NCKH\\nckh2\\products\\fe\\model\\Dataset_Flood\\low\\images - 2025-01-28T164431.273.jpg",
+      "ground_truth": "low",
+      "pred_pth": "low",
+      "pred_onnx": "low"
+    },
+    {
+      "image_path": "E:\\RHNA\\1Visual\\NCKH\\nckh2\\products\\fe\\model\\Dataset_Flood\\low\\image_203.jpeg",
+      "ground_truth": "low",
+      "pred_pth": "medium",
+      "pred_onnx": "medium"
+    },
+    {
+      "image_path": "E:\\RHNA\\1Visual\\NCKH\\nckh2\\products\\fe\\model\\Dataset_Flood\\low\\다운로드 (50).jpg",
+      "ground_truth": "low",
+      "pred_pth": "low",
+      "pred_onnx": "low"
+    },
+    {
+      "image_path": "E:\\RHNA\\1Visual\\NCKH\\nckh2\\products\\fe\\model\\Dataset_Flood\\medium\\images - 2025-01-28T164558.649.jpg",
+      "ground_truth": "medium",
+      "pred_pth": "low",
+      "pred_onnx": "low"
+    },
+    {
+      "image_path": "E:\\RHNA\\1Visual\\NCKH\\nckh2\\products\\fe\\model\\Dataset_Flood\\medium\\images (40).jpg",
+      "ground_truth": "medium",
+      "pred_pth": "low",
+      "pred_onnx": "low"
+    },
+    {
+      "image_path": "E:\\RHNA\\1Visual\\NCKH\\nckh2\\products\\fe\\model\\Dataset_Flood\\medium\\다운로드 (32).jpg",
+      "ground_truth": "medium",
+      "pred_pth": "low",
+      "pred_onnx": "low"
+    },
+    {
+      "image_path": "E:\\RHNA\\1Visual\\NCKH\\nckh2\\products\\fe\\model\\Dataset_Flood\\medium\\다운로드 (14) 1.jpg",
+      "ground_truth": "medium",
+      "pred_pth": "medium",
+      "pred_onnx": "medium"
+    },
+    {
+      "image_path": "E:\\RHNA\\1Visual\\NCKH\\nckh2\\products\\fe\\model\\Dataset_Flood\\medium\\images (31).jpg",
+      "ground_truth": "medium",
+      "pred_pth": "medium",
+      "pred_onnx": "medium"
+    },
+    {
+      "image_path": "E:\\RHNA\\1Visual\\NCKH\\nckh2\\products\\fe\\model\\Dataset_Flood\\medium\\cuuho-19-4795-1763627595.webp",
+      "ground_truth": "medium",
+      "pred_pth": "medium",
+      "pred_onnx": "medium"
+    },
+    {
+      "image_path": "E:\\RHNA\\1Visual\\NCKH\\nckh2\\products\\fe\\model\\Dataset_Flood\\medium\\38.jpg",
+      "ground_truth": "medium",
+      "pred_pth": "medium",
+      "pred_onnx": "medium"
+    },
+    {
+      "image_path": "E:\\RHNA\\1Visual\\NCKH\\nckh2\\products\\fe\\model\\Dataset_Flood\\medium\\z5675153483527cd80a92c47aaeb3ab9a8fbe5fd9bdaba-1722134771986321631296.webp",
+      "ground_truth": "medium",
+      "pred_pth": "medium",
+      "pred_onnx": "medium"
+    },
+    {
+      "image_path": "E:\\RHNA\\1Visual\\NCKH\\nckh2\\products\\fe\\model\\Dataset_Flood\\medium\\img0412-173554575-1648898672886468709355.jpg",
+      "ground_truth": "medium",
+      "pred_pth": "medium",
+      "pred_onnx": "medium"
+    },
+    {
+      "image_path": "E:\\RHNA\\1Visual\\NCKH\\nckh2\\products\\fe\\model\\Dataset_Flood\\medium\\images - 2025-01-28T164335.071.jpg",
+      "ground_truth": "medium",
+      "pred_pth": "medium",
+      "pred_onnx": "medium"
+    },
+    {
+      "image_path": "E:\\RHNA\\1Visual\\NCKH\\nckh2\\products\\fe\\model\\Dataset_Flood\\medium\\11111_20240910092935.jpg",
+      "ground_truth": "medium",
+      "pred_pth": "medium",
+      "pred_onnx": "medium"
+    },
+    {
+      "image_path": "E:\\RHNA\\1Visual\\NCKH\\nckh2\\products\\fe\\model\\Dataset_Flood\\medium\\803102991_1065370649579880_774651092268573661_n.jpg",
+      "ground_truth": "medium",
+      "pred_pth": "medium",
+      "pred_onnx": "medium"
+    },
+    {
+      "image_path": "E:\\RHNA\\1Visual\\NCKH\\nckh2\\products\\fe\\model\\Dataset_Flood\\medium\\images (17) 2.jpg",
+      "ground_truth": "medium",
+      "pred_pth": "low",
+      "pred_onnx": "low"
+    },
+    {
+      "image_path": "E:\\RHNA\\1Visual\\NCKH\\nckh2\\products\\fe\\model\\Dataset_Flood\\medium\\images (21).jpg",
+      "ground_truth": "medium",
+      "pred_pth": "medium",
+      "pred_onnx": "medium"
+    },
+    {
+      "image_path": "E:\\RHNA\\1Visual\\NCKH\\nckh2\\products\\fe\\model\\Dataset_Flood\\medium\\images - 2025-01-28T184948.206.jpg",
+      "ground_truth": "medium",
+      "pred_pth": "high",
+      "pred_onnx": "high"
+    },
+    {
+      "image_path": "E:\\RHNA\\1Visual\\NCKH\\nckh2\\products\\fe\\model\\Dataset_Flood\\medium\\805785436_1065873412862937_6378472947375029280_n.jpg",
+      "ground_truth": "medium",
+      "pred_pth": "medium",
+      "pred_onnx": "medium"
+    },
+    {
+      "image_path": "E:\\RHNA\\1Visual\\NCKH\\nckh2\\products\\fe\\model\\Dataset_Flood\\medium\\z6586657762546_35b240fb22ac28c998ad31a1de0491e8.webp",
+      "ground_truth": "medium",
+      "pred_pth": "medium",
+      "pred_onnx": "medium"
+    },
+    {
+      "image_path": "E:\\RHNA\\1Visual\\NCKH\\nckh2\\products\\fe\\model\\Dataset_Flood\\medium\\803102985_1065370659579879_8461065299246796518_n.jpg",
+      "ground_truth": "medium",
+      "pred_pth": "medium",
+      "pred_onnx": "medium"
+    },
+    {
+      "image_path": "E:\\RHNA\\1Visual\\NCKH\\nckh2\\products\\fe\\model\\Dataset_Flood\\medium\\images - 2025-01-28T155605.972.jpg",
+      "ground_truth": "medium",
+      "pred_pth": "low",
+      "pred_onnx": "low"
+    },
+    {
+      "image_path": "E:\\RHNA\\1Visual\\NCKH\\nckh2\\products\\fe\\model\\Dataset_Flood\\medium\\mua-lu-thai-nguyen-1760069078776-17600690791511790978445.jpg",
+      "ground_truth": "medium",
+      "pred_pth": "medium",
+      "pred_onnx": "medium"
+    },
+    {
+      "image_path": "E:\\RHNA\\1Visual\\NCKH\\nckh2\\products\\fe\\model\\Dataset_Flood\\medium\\flood_172.jpg",
+      "ground_truth": "medium",
+      "pred_pth": "medium",
+      "pred_onnx": "medium"
+    },
+    {
+      "image_path": "E:\\RHNA\\1Visual\\NCKH\\nckh2\\products\\fe\\model\\Dataset_Flood\\medium\\images - 2025-01-28T153853.563.jpg",
+      "ground_truth": "medium",
+      "pred_pth": "low",
+      "pred_onnx": "low"
+    },
+    {
+      "image_path": "E:\\RHNA\\1Visual\\NCKH\\nckh2\\products\\fe\\model\\Dataset_Flood\\medium\\1582606863.jpg",
+      "ground_truth": "medium",
+      "pred_pth": "medium",
+      "pred_onnx": "medium"
+    },
+    {
+      "image_path": "E:\\RHNA\\1Visual\\NCKH\\nckh2\\products\\fe\\model\\Dataset_Flood\\medium\\noise2.jpeg",
+      "ground_truth": "medium",
+      "pred_pth": "medium",
+      "pred_onnx": "medium"
+    },
+    {
+      "image_path": "E:\\RHNA\\1Visual\\NCKH\\nckh2\\products\\fe\\model\\Dataset_Flood\\medium\\image_0166.jpg",
+      "ground_truth": "medium",
+      "pred_pth": "medium",
+      "pred_onnx": "medium"
+    },
+    {
+      "image_path": "E:\\RHNA\\1Visual\\NCKH\\nckh2\\products\\fe\\model\\Dataset_Flood\\medium\\image_358.jpg",
+      "ground_truth": "medium",
+      "pred_pth": "medium",
+      "pred_onnx": "medium"
+    },
+    {
+      "image_path": "E:\\RHNA\\1Visual\\NCKH\\nckh2\\products\\fe\\model\\Dataset_Flood\\medium\\images (61).jpg",
+      "ground_truth": "medium",
+      "pred_pth": "low",
+      "pred_onnx": "low"
+    },
+    {
+      "image_path": "E:\\RHNA\\1Visual\\NCKH\\nckh2\\products\\fe\\model\\Dataset_Flood\\medium\\nguoi-dan-di-chuyen-bang-do-1726905142020203369784.webp",
+      "ground_truth": "medium",
+      "pred_pth": "high",
+      "pred_onnx": "high"
+    },
+    {
+      "image_path": "E:\\RHNA\\1Visual\\NCKH\\nckh2\\products\\fe\\model\\Dataset_Flood\\medium\\807659213_1065873136196298_5615785750511825525_n.jpg",
+      "ground_truth": "medium",
+      "pred_pth": "medium",
+      "pred_onnx": "medium"
+    },
+    {
+      "image_path": "E:\\RHNA\\1Visual\\NCKH\\nckh2\\products\\fe\\model\\Dataset_Flood\\medium\\images - 2025-01-28T152117.659.jpg",
+      "ground_truth": "medium",
+      "pred_pth": "low",
+      "pred_onnx": "low"
+    },
+    {
+      "image_path": "E:\\RHNA\\1Visual\\NCKH\\nckh2\\products\\fe\\model\\Dataset_Flood\\medium\\images - 2025-01-28T154106.043.jpg",
+      "ground_truth": "medium",
+      "pred_pth": "low",
+      "pred_onnx": "low"
+    },
+    {
+      "image_path": "E:\\RHNA\\1Visual\\NCKH\\nckh2\\products\\fe\\model\\Dataset_Flood\\medium\\hoi_an_ngap_lut_tro_lai_nguoi_dan_lo_chay_lu_lan_2_.webp",
+      "ground_truth": "medium",
+      "pred_pth": "medium",
+      "pred_onnx": "medium"
+    },
+    {
+      "image_path": "E:\\RHNA\\1Visual\\NCKH\\nckh2\\products\\fe\\model\\Dataset_Flood\\medium\\images (35).jpg",
+      "ground_truth": "medium",
+      "pred_pth": "medium",
+      "pred_onnx": "medium"
+    },
+    {
+      "image_path": "E:\\RHNA\\1Visual\\NCKH\\nckh2\\products\\fe\\model\\Dataset_Flood\\medium\\noise4.jpg",
+      "ground_truth": "medium",
+      "pred_pth": "medium",
+      "pred_onnx": "medium"
+    },
+    {
+      "image_path": "E:\\RHNA\\1Visual\\NCKH\\nckh2\\products\\fe\\model\\Dataset_Flood\\medium\\다운로드 (11) 1.jpg",
+      "ground_truth": "medium",
+      "pred_pth": "medium",
+      "pred_onnx": "medium"
+    },
+    {
+      "image_path": "E:\\RHNA\\1Visual\\NCKH\\nckh2\\products\\fe\\model\\Dataset_Flood\\medium\\images (27).jpg",
+      "ground_truth": "medium",
+      "pred_pth": "medium",
+      "pred_onnx": "medium"
+    },
+    {
+      "image_path": "E:\\RHNA\\1Visual\\NCKH\\nckh2\\products\\fe\\model\\Dataset_Flood\\medium\\image_0294.jpg",
+      "ground_truth": "medium",
+      "pred_pth": "medium",
+      "pred_onnx": "medium"
+    },
+    {
+      "image_path": "E:\\RHNA\\1Visual\\NCKH\\nckh2\\products\\fe\\model\\Dataset_Flood\\medium\\images (85).jpg",
+      "ground_truth": "medium",
+      "pred_pth": "medium",
+      "pred_onnx": "medium"
+    },
+    {
+      "image_path": "E:\\RHNA\\1Visual\\NCKH\\nckh2\\products\\fe\\model\\Dataset_Flood\\medium\\image_251.png",
+      "ground_truth": "medium",
+      "pred_pth": "high",
+      "pred_onnx": "high"
+    },
+    {
+      "image_path": "E:\\RHNA\\1Visual\\NCKH\\nckh2\\products\\fe\\model\\Dataset_Flood\\medium\\AKR20200101044751104_09_i.jpg",
+      "ground_truth": "medium",
+      "pred_pth": "medium",
+      "pred_onnx": "medium"
+    },
+    {
+      "image_path": "E:\\RHNA\\1Visual\\NCKH\\nckh2\\products\\fe\\model\\Dataset_Flood\\medium\\images (41).jpg",
+      "ground_truth": "medium",
+      "pred_pth": "medium",
+      "pred_onnx": "medium"
+    },
+    {
+      "image_path": "E:\\RHNA\\1Visual\\NCKH\\nckh2\\products\\fe\\model\\Dataset_Flood\\medium\\image_012.jpg",
+      "ground_truth": "medium",
+      "pred_pth": "medium",
+      "pred_onnx": "medium"
+    },
+    {
+      "image_path": "E:\\RHNA\\1Visual\\NCKH\\nckh2\\products\\fe\\model\\Dataset_Flood\\medium\\images (26).jpg",
+      "ground_truth": "medium",
+      "pred_pth": "non_flood",
+      "pred_onnx": "non_flood"
+    },
+    {
+      "image_path": "E:\\RHNA\\1Visual\\NCKH\\nckh2\\products\\fe\\model\\Dataset_Flood\\medium\\images - 2025-01-28T155421.285.jpg",
+      "ground_truth": "medium",
+      "pred_pth": "medium",
+      "pred_onnx": "medium"
+    },
+    {
+      "image_path": "E:\\RHNA\\1Visual\\NCKH\\nckh2\\products\\fe\\model\\Dataset_Flood\\medium\\images - 2025-01-28T154314.514.jpg",
+      "ground_truth": "medium",
+      "pred_pth": "low",
+      "pred_onnx": "low"
+    },
+    {
+      "image_path": "E:\\RHNA\\1Visual\\NCKH\\nckh2\\products\\fe\\model\\Dataset_Flood\\medium\\chay-lu-3-21413569-1730073550943-1730073551814934630676.jpg",
+      "ground_truth": "medium",
+      "pred_pth": "medium",
+      "pred_onnx": "medium"
+    },
+    {
+      "image_path": "E:\\RHNA\\1Visual\\NCKH\\nckh2\\products\\fe\\model\\Dataset_Flood\\medium\\images - 2025-01-28T185102.902.jpg",
+      "ground_truth": "medium",
+      "pred_pth": "low",
+      "pred_onnx": "low"
+    },
+    {
+      "image_path": "E:\\RHNA\\1Visual\\NCKH\\nckh2\\products\\fe\\model\\Dataset_Flood\\medium\\3_ngoai_giao_doan1.webp",
+      "ground_truth": "medium",
+      "pred_pth": "medium",
+      "pred_onnx": "medium"
+    },
+    {
+      "image_path": "E:\\RHNA\\1Visual\\NCKH\\nckh2\\products\\fe\\model\\Dataset_Flood\\medium\\다운로드 (14).jpg",
+      "ground_truth": "medium",
+      "pred_pth": "medium",
+      "pred_onnx": "medium"
+    },
+    {
+      "image_path": "E:\\RHNA\\1Visual\\NCKH\\nckh2\\products\\fe\\model\\Dataset_Flood\\medium\\img14.jpg",
+      "ground_truth": "medium",
+      "pred_pth": "high",
+      "pred_onnx": "high"
+    },
+    {
+      "image_path": "E:\\RHNA\\1Visual\\NCKH\\nckh2\\products\\fe\\model\\Dataset_Flood\\medium\\cd3a096a-084a-49d7-8d1f-345c16612ce9.jpg.webp",
+      "ground_truth": "medium",
+      "pred_pth": "high",
+      "pred_onnx": "high"
+    },
+    {
+      "image_path": "E:\\RHNA\\1Visual\\NCKH\\nckh2\\products\\fe\\model\\Dataset_Flood\\medium\\flood_6358.jpg",
+      "ground_truth": "medium",
+      "pred_pth": "medium",
+      "pred_onnx": "medium"
+    },
+    {
+      "image_path": "E:\\RHNA\\1Visual\\NCKH\\nckh2\\products\\fe\\model\\Dataset_Flood\\medium\\image_0428.jpg",
+      "ground_truth": "medium",
+      "pred_pth": "medium",
+      "pred_onnx": "medium"
+    },
+    {
+      "image_path": "E:\\RHNA\\1Visual\\NCKH\\nckh2\\products\\fe\\model\\Dataset_Flood\\medium\\images (23).jpg",
+      "ground_truth": "medium",
+      "pred_pth": "medium",
+      "pred_onnx": "medium"
+    },
+    {
+      "image_path": "E:\\RHNA\\1Visual\\NCKH\\nckh2\\products\\fe\\model\\Dataset_Flood\\medium\\img12.jpg",
+      "ground_truth": "medium",
+      "pred_pth": "medium",
+      "pred_onnx": "medium"
+    },
+    {
+      "image_path": "E:\\RHNA\\1Visual\\NCKH\\nckh2\\products\\fe\\model\\Dataset_Flood\\medium\\image_242.jpg",
+      "ground_truth": "medium",
+      "pred_pth": "medium",
+      "pred_onnx": "medium"
+    },
+    {
+      "image_path": "E:\\RHNA\\1Visual\\NCKH\\nckh2\\products\\fe\\model\\Dataset_Flood\\medium\\Mua-Lu-00.jpg",
+      "ground_truth": "medium",
+      "pred_pth": "medium",
+      "pred_onnx": "medium"
+    },
+    {
+      "image_path": "E:\\RHNA\\1Visual\\NCKH\\nckh2\\products\\fe\\model\\Dataset_Flood\\medium\\AA.34456276.1.jpg",
+      "ground_truth": "medium",
+      "pred_pth": "high",
+      "pred_onnx": "high"
+    },
+    {
+      "image_path": "E:\\RHNA\\1Visual\\NCKH\\nckh2\\products\\fe\\model\\Dataset_Flood\\medium\\mien-trung-mua-lu-bao-so-13-kalmaegi-14062802.jpg",
+      "ground_truth": "medium",
+      "pred_pth": "medium",
+      "pred_onnx": "medium"
+    },
+    {
+      "image_path": "E:\\RHNA\\1Visual\\NCKH\\nckh2\\products\\fe\\model\\Dataset_Flood\\medium\\images (5).jpg",
+      "ground_truth": "medium",
+      "pred_pth": "medium",
+      "pred_onnx": "medium"
+    },
+    {
+      "image_path": "E:\\RHNA\\1Visual\\NCKH\\nckh2\\products\\fe\\model\\Dataset_Flood\\high\\flood_208.jpg",
+      "ground_truth": "high",
+      "pred_pth": "high",
+      "pred_onnx": "high"
+    },
+    {
+      "image_path": "E:\\RHNA\\1Visual\\NCKH\\nckh2\\products\\fe\\model\\Dataset_Flood\\high\\img31.webp",
+      "ground_truth": "high",
+      "pred_pth": "high",
+      "pred_onnx": "high"
+    },
+    {
+      "image_path": "E:\\RHNA\\1Visual\\NCKH\\nckh2\\products\\fe\\model\\Dataset_Flood\\high\\184fe5688cfd2ba372ec-1725976227.jpg",
+      "ground_truth": "high",
+      "pred_pth": "high",
+      "pred_onnx": "high"
+    },
+    {
+      "image_path": "E:\\RHNA\\1Visual\\NCKH\\nckh2\\products\\fe\\model\\Dataset_Flood\\high\\images (22).jpg",
+      "ground_truth": "high",
+      "pred_pth": "low",
+      "pred_onnx": "low"
+    },
+    {
+      "image_path": "E:\\RHNA\\1Visual\\NCKH\\nckh2\\products\\fe\\model\\Dataset_Flood\\high\\nha-diva-my-linh-cach-tam-lut-lich-su-40km-bi-ngap-nang-co-len-thuong-qua-thai-nguyen-oi-_9_5_n-1759912630-809-width780height971.jpg",
+      "ground_truth": "high",
+      "pred_pth": "high",
+      "pred_onnx": "high"
+    },
+    {
+      "image_path": "E:\\RHNA\\1Visual\\NCKH\\nckh2\\products\\fe\\model\\Dataset_Flood\\high\\Mua-Lu-1.jpg",
+      "ground_truth": "high",
+      "pred_pth": "high",
+      "pred_onnx": "high"
+    },
+    {
+      "image_path": "E:\\RHNA\\1Visual\\NCKH\\nckh2\\products\\fe\\model\\Dataset_Flood\\high\\image_108.jpg",
+      "ground_truth": "high",
+      "pred_pth": "high",
+      "pred_onnx": "high"
+    },
+    {
+      "image_path": "E:\\RHNA\\1Visual\\NCKH\\nckh2\\products\\fe\\model\\Dataset_Flood\\high\\img96.jpg",
+      "ground_truth": "high",
+      "pred_pth": "high",
+      "pred_onnx": "high"
+    },
+    {
+      "image_path": "E:\\RHNA\\1Visual\\NCKH\\nckh2\\products\\fe\\model\\Dataset_Flood\\high\\a81349fcba3a042928236465e17d5847.jpg",
+      "ground_truth": "high",
+      "pred_pth": "medium",
+      "pred_onnx": "medium"
+    },
+    {
+      "image_path": "E:\\RHNA\\1Visual\\NCKH\\nckh2\\products\\fe\\model\\Dataset_Flood\\high\\img25.jpg",
+      "ground_truth": "high",
+      "pred_pth": "medium",
+      "pred_onnx": "medium"
+    },
+    {
+      "image_path": "E:\\RHNA\\1Visual\\NCKH\\nckh2\\products\\fe\\model\\Dataset_Flood\\high\\ngap_2_0.webp",
+      "ground_truth": "high",
+      "pred_pth": "high",
+      "pred_onnx": "high"
+    },
+    {
+      "image_path": "E:\\RHNA\\1Visual\\NCKH\\nckh2\\products\\fe\\model\\Dataset_Flood\\high\\flood_5032.jpg",
+      "ground_truth": "high",
+      "pred_pth": "high",
+      "pred_onnx": "high"
+    },
+    {
+      "image_path": "E:\\RHNA\\1Visual\\NCKH\\nckh2\\products\\fe\\model\\Dataset_Flood\\high\\img48.webp",
+      "ground_truth": "high",
+      "pred_pth": "high",
+      "pred_onnx": "high"
+    },
+    {
+      "image_path": "E:\\RHNA\\1Visual\\NCKH\\nckh2\\products\\fe\\model\\Dataset_Flood\\high\\huracán Sandy 26-10-12, Santo Domingo.jpg",
+      "ground_truth": "high",
+      "pred_pth": "high",
+      "pred_onnx": "high"
+    },
+    {
+      "image_path": "E:\\RHNA\\1Visual\\NCKH\\nckh2\\products\\fe\\model\\Dataset_Flood\\high\\Flooded-Home-Car.jpg",
+      "ground_truth": "high",
+      "pred_pth": "high",
+      "pred_onnx": "high"
+    },
+    {
+      "image_path": "E:\\RHNA\\1Visual\\NCKH\\nckh2\\products\\fe\\model\\Dataset_Flood\\high\\img.webp",
+      "ground_truth": "high",
+      "pred_pth": "medium",
+      "pred_onnx": "medium"
+    },
+    {
+      "image_path": "E:\\RHNA\\1Visual\\NCKH\\nckh2\\products\\fe\\model\\Dataset_Flood\\high\\flood_157.jpg",
+      "ground_truth": "high",
+      "pred_pth": "high",
+      "pred_onnx": "high"
+    },
+    {
+      "image_path": "E:\\RHNA\\1Visual\\NCKH\\nckh2\\products\\fe\\model\\Dataset_Flood\\high\\images (10).jpg",
+      "ground_truth": "high",
+      "pred_pth": "high",
+      "pred_onnx": "high"
+    },
+    {
+      "image_path": "E:\\RHNA\\1Visual\\NCKH\\nckh2\\products\\fe\\model\\Dataset_Flood\\high\\OIP (32).webp",
+      "ground_truth": "high",
+      "pred_pth": "high",
+      "pred_onnx": "high"
+    },
+    {
+      "image_path": "E:\\RHNA\\1Visual\\NCKH\\nckh2\\products\\fe\\model\\Dataset_Flood\\high\\flood_177.jpg",
+      "ground_truth": "high",
+      "pred_pth": "high",
+      "pred_onnx": "high"
+    },
+    {
+      "image_path": "E:\\RHNA\\1Visual\\NCKH\\nckh2\\products\\fe\\model\\Dataset_Flood\\high\\57273245822796747825365592763479213825731927n-17618117613511361637837.webp",
+      "ground_truth": "high",
+      "pred_pth": "high",
+      "pred_onnx": "high"
+    },
+    {
+      "image_path": "E:\\RHNA\\1Visual\\NCKH\\nckh2\\products\\fe\\model\\Dataset_Flood\\high\\img39.jpg",
+      "ground_truth": "high",
+      "pred_pth": "high",
+      "pred_onnx": "high"
+    },
+    {
+      "image_path": "E:\\RHNA\\1Visual\\NCKH\\nckh2\\products\\fe\\model\\Dataset_Flood\\high\\img100.webp",
+      "ground_truth": "high",
+      "pred_pth": "high",
+      "pred_onnx": "high"
+    },
+    {
+      "image_path": "E:\\RHNA\\1Visual\\NCKH\\nckh2\\products\\fe\\model\\Dataset_Flood\\high\\3f5d93177388049.Y3JvcCwyMjE5LDE3MzYsMTkyLDA.jpg",
+      "ground_truth": "high",
+      "pred_pth": "high",
+      "pred_onnx": "high"
+    },
+    {
+      "image_path": "E:\\RHNA\\1Visual\\NCKH\\nckh2\\products\\fe\\model\\Dataset_Flood\\high\\OIP (27).webp",
+      "ground_truth": "high",
+      "pred_pth": "medium",
+      "pred_onnx": "medium"
+    },
+    {
+      "image_path": "E:\\RHNA\\1Visual\\NCKH\\nckh2\\products\\fe\\model\\Dataset_Flood\\high\\kerala-floods-maruti-swift-submerged-in-water-33a9.jpg",
+      "ground_truth": "high",
+      "pred_pth": "high",
+      "pred_onnx": "high"
+    },
+    {
+      "image_path": "E:\\RHNA\\1Visual\\NCKH\\nckh2\\products\\fe\\model\\Dataset_Flood\\high\\OIP (31).webp",
+      "ground_truth": "high",
+      "pred_pth": "medium",
+      "pred_onnx": "medium"
+    },
+    {
+      "image_path": "E:\\RHNA\\1Visual\\NCKH\\nckh2\\products\\fe\\model\\Dataset_Flood\\high\\img38.jpg",
+      "ground_truth": "high",
+      "pred_pth": "medium",
+      "pred_onnx": "medium"
+    },
+    {
+      "image_path": "E:\\RHNA\\1Visual\\NCKH\\nckh2\\products\\fe\\model\\Dataset_Flood\\high\\texas14n_7_web_adya.jpg",
+      "ground_truth": "high",
+      "pred_pth": "high",
+      "pred_onnx": "high"
+    },
+    {
+      "image_path": "E:\\RHNA\\1Visual\\NCKH\\nckh2\\products\\fe\\model\\Dataset_Flood\\high\\img23.jpg",
+      "ground_truth": "high",
+      "pred_pth": "medium",
+      "pred_onnx": "medium"
+    },
+    {
+      "image_path": "E:\\RHNA\\1Visual\\NCKH\\nckh2\\products\\fe\\model\\Dataset_Flood\\high\\img56.jpg",
+      "ground_truth": "high",
+      "pred_pth": "high",
+      "pred_onnx": "high"
+    },
+    {
+      "image_path": "E:\\RHNA\\1Visual\\NCKH\\nckh2\\products\\fe\\model\\Dataset_Flood\\high\\img88.webp",
+      "ground_truth": "high",
+      "pred_pth": "high",
+      "pred_onnx": "high"
+    },
+    {
+      "image_path": "E:\\RHNA\\1Visual\\NCKH\\nckh2\\products\\fe\\model\\Dataset_Flood\\high\\anh-13-cuu-cu-gia-1-1500-1017-124.jpg",
+      "ground_truth": "high",
+      "pred_pth": "high",
+      "pred_onnx": "high"
+    },
+    {
+      "image_path": "E:\\RHNA\\1Visual\\NCKH\\nckh2\\products\\fe\\model\\Dataset_Flood\\high\\flood_4762.jpg",
+      "ground_truth": "high",
+      "pred_pth": "high",
+      "pred_onnx": "high"
+    },
+    {
+      "image_path": "E:\\RHNA\\1Visual\\NCKH\\nckh2\\products\\fe\\model\\Dataset_Flood\\high\\img28.jpg",
+      "ground_truth": "high",
+      "pred_pth": "high",
+      "pred_onnx": "high"
+    },
+    {
+      "image_path": "E:\\RHNA\\1Visual\\NCKH\\nckh2\\products\\fe\\model\\Dataset_Flood\\high\\anh-nha-dan-ngap-den-noc-tai-tan-ky-1759228506727711366464.webp",
+      "ground_truth": "high",
+      "pred_pth": "high",
+      "pred_onnx": "high"
+    },
+    {
+      "image_path": "E:\\RHNA\\1Visual\\NCKH\\nckh2\\products\\fe\\model\\Dataset_Flood\\high\\img53.png",
+      "ground_truth": "high",
+      "pred_pth": "medium",
+      "pred_onnx": "medium"
+    },
+    {
+      "image_path": "E:\\RHNA\\1Visual\\NCKH\\nckh2\\products\\fe\\model\\Dataset_Flood\\high\\OIP (21).webp",
+      "ground_truth": "high",
+      "pred_pth": "high",
+      "pred_onnx": "high"
+    },
+    {
+      "image_path": "E:\\RHNA\\1Visual\\NCKH\\nckh2\\products\\fe\\model\\Dataset_Flood\\high\\images (1).jpg",
+      "ground_truth": "high",
+      "pred_pth": "high",
+      "pred_onnx": "high"
+    },
+    {
+      "image_path": "E:\\RHNA\\1Visual\\NCKH\\nckh2\\products\\fe\\model\\Dataset_Flood\\high\\IMAGE_1655988793.webp",
+      "ground_truth": "high",
+      "pred_pth": "high",
+      "pred_onnx": "high"
+    },
+    {
+      "image_path": "E:\\RHNA\\1Visual\\NCKH\\nckh2\\products\\fe\\model\\Dataset_Flood\\high\\img44.jpg",
+      "ground_truth": "high",
+      "pred_pth": "high",
+      "pred_onnx": "high"
+    },
+    {
+      "image_path": "E:\\RHNA\\1Visual\\NCKH\\nckh2\\products\\fe\\model\\Dataset_Flood\\high\\OIP (40).webp",
+      "ground_truth": "high",
+      "pred_pth": "high",
+      "pred_onnx": "high"
+    },
+    {
+      "image_path": "E:\\RHNA\\1Visual\\NCKH\\nckh2\\products\\fe\\model\\Dataset_Flood\\high\\3683595427395733579929176168177302426969453n-17000618284281562116315-17001001010301837793450-1700105792646-1700105792799297207396.jpg",
+      "ground_truth": "high",
+      "pred_pth": "high",
+      "pred_onnx": "high"
+    },
+    {
+      "image_path": "E:\\RHNA\\1Visual\\NCKH\\nckh2\\products\\fe\\model\\Dataset_Flood\\high\\OIP (39).webp",
+      "ground_truth": "high",
+      "pred_pth": "low",
+      "pred_onnx": "low"
+    },
+    {
+      "image_path": "E:\\RHNA\\1Visual\\NCKH\\nckh2\\products\\fe\\model\\Dataset_Flood\\high\\1790569740867_6460767276583596373_6460767276583596373_148fba99df2beb60bd9753db9b918adb.jpg",
+      "ground_truth": "high",
+      "pred_pth": "medium",
+      "pred_onnx": "medium"
+    },
+    {
+      "image_path": "E:\\RHNA\\1Visual\\NCKH\\nckh2\\products\\fe\\model\\Dataset_Flood\\high\\flood_197.jpg",
+      "ground_truth": "high",
+      "pred_pth": "high",
+      "pred_onnx": "high"
+    },
+    {
+      "image_path": "E:\\RHNA\\1Visual\\NCKH\\nckh2\\products\\fe\\model\\Dataset_Flood\\high\\image_043.jpg",
+      "ground_truth": "high",
+      "pred_pth": "high",
+      "pred_onnx": "high"
+    },
+    {
+      "image_path": "E:\\RHNA\\1Visual\\NCKH\\nckh2\\products\\fe\\model\\Dataset_Flood\\high\\Song-Lo-Ngap-Lut.jpg",
+      "ground_truth": "high",
+      "pred_pth": "high",
+      "pred_onnx": "high"
+    },
+    {
+      "image_path": "E:\\RHNA\\1Visual\\NCKH\\nckh2\\products\\fe\\model\\Dataset_Flood\\high\\R (1).jpg",
+      "ground_truth": "high",
+      "pred_pth": "medium",
+      "pred_onnx": "medium"
+    },
+    {
+      "image_path": "E:\\RHNA\\1Visual\\NCKH\\nckh2\\products\\fe\\model\\Dataset_Flood\\high\\images (6).jpg",
+      "ground_truth": "high",
+      "pred_pth": "medium",
+      "pred_onnx": "medium"
+    },
+    {
+      "image_path": "E:\\RHNA\\1Visual\\NCKH\\nckh2\\products\\fe\\model\\Dataset_Flood\\high\\flood_4856.jpg",
+      "ground_truth": "high",
+      "pred_pth": "high",
+      "pred_onnx": "high"
+    },
+    {
+      "image_path": "E:\\RHNA\\1Visual\\NCKH\\nckh2\\products\\fe\\model\\Dataset_Flood\\high\\noise5.webp",
+      "ground_truth": "high",
+      "pred_pth": "high",
+      "pred_onnx": "high"
+    },
+    {
+      "image_path": "E:\\RHNA\\1Visual\\NCKH\\nckh2\\products\\fe\\model\\Dataset_Flood\\high\\images (5).jpg",
+      "ground_truth": "high",
+      "pred_pth": "medium",
+      "pred_onnx": "medium"
+    },
+    {
+      "image_path": "E:\\RHNA\\1Visual\\NCKH\\nckh2\\products\\fe\\model\\Dataset_Flood\\high\\OIP (3).webp",
+      "ground_truth": "high",
+      "pred_pth": "high",
+      "pred_onnx": "high"
+    },
+    {
+      "image_path": "E:\\RHNA\\1Visual\\NCKH\\nckh2\\products\\fe\\model\\Dataset_Flood\\non_flood\\화면 캡처 2025-03-05 172713.jpg",
+      "ground_truth": "non_flood",
+      "pred_pth": "non_flood",
+      "pred_onnx": "non_flood"
+    },
+    {
+      "image_path": "E:\\RHNA\\1Visual\\NCKH\\nckh2\\products\\fe\\model\\Dataset_Flood\\non_flood\\images (12)1.jpg",
+      "ground_truth": "non_flood",
+      "pred_pth": "non_flood",
+      "pred_onnx": "non_flood"
+    },
+    {
+      "image_path": "E:\\RHNA\\1Visual\\NCKH\\nckh2\\products\\fe\\model\\Dataset_Flood\\non_flood\\1737619229_376_Nhieu-hem-o-TPHCM-dong-loat-khoac-ao-moi-ruc.jpg",
+      "ground_truth": "non_flood",
+      "pred_pth": "non_flood",
+      "pred_onnx": "non_flood"
+    },
+    {
+      "image_path": "E:\\RHNA\\1Visual\\NCKH\\nckh2\\products\\fe\\model\\Dataset_Flood\\non_flood\\optimize.jpg",
+      "ground_truth": "non_flood",
+      "pred_pth": "non_flood",
+      "pred_onnx": "non_flood"
+    },
+    {
+      "image_path": "E:\\RHNA\\1Visual\\NCKH\\nckh2\\products\\fe\\model\\Dataset_Flood\\non_flood\\화면 캡처 2025-03-05 153248.jpg",
+      "ground_truth": "non_flood",
+      "pred_pth": "non_flood",
+      "pred_onnx": "non_flood"
+    },
+    {
+      "image_path": "E:\\RHNA\\1Visual\\NCKH\\nckh2\\products\\fe\\model\\Dataset_Flood\\non_flood\\화면 캡처 2025-03-05 173857.jpg",
+      "ground_truth": "non_flood",
+      "pred_pth": "non_flood",
+      "pred_onnx": "non_flood"
+    },
+    {
+      "image_path": "E:\\RHNA\\1Visual\\NCKH\\nckh2\\products\\fe\\model\\Dataset_Flood\\non_flood\\다운로드 (44).jpg",
+      "ground_truth": "non_flood",
+      "pred_pth": "non_flood",
+      "pred_onnx": "non_flood"
+    },
+    {
+      "image_path": "E:\\RHNA\\1Visual\\NCKH\\nckh2\\products\\fe\\model\\Dataset_Flood\\non_flood\\화면 캡처 2025-03-05 181559.jpg",
+      "ground_truth": "non_flood",
+      "pred_pth": "non_flood",
+      "pred_onnx": "non_flood"
+    },
+    {
+      "image_path": "E:\\RHNA\\1Visual\\NCKH\\nckh2\\products\\fe\\model\\Dataset_Flood\\non_flood\\화면 캡처 2025-03-05 153034.jpg",
+      "ground_truth": "non_flood",
+      "pred_pth": "non_flood",
+      "pred_onnx": "non_flood"
+    },
+    {
+      "image_path": "E:\\RHNA\\1Visual\\NCKH\\nckh2\\products\\fe\\model\\Dataset_Flood\\non_flood\\1789568749035_282700609501588260_7406490438318140161_f6b1db74c9d78f9d62ae6bb1bcc6557b.jpg",
+      "ground_truth": "non_flood",
+      "pred_pth": "non_flood",
+      "pred_onnx": "non_flood"
+    },
+    {
+      "image_path": "E:\\RHNA\\1Visual\\NCKH\\nckh2\\products\\fe\\model\\Dataset_Flood\\non_flood\\화면 캡처 2025-03-05 160330.jpg",
+      "ground_truth": "non_flood",
+      "pred_pth": "low",
+      "pred_onnx": "low"
+    },
+    {
+      "image_path": "E:\\RHNA\\1Visual\\NCKH\\nckh2\\products\\fe\\model\\Dataset_Flood\\non_flood\\화면 캡처 2025-03-05 175602.jpg",
+      "ground_truth": "non_flood",
+      "pred_pth": "non_flood",
+      "pred_onnx": "non_flood"
+    },
+    {
+      "image_path": "E:\\RHNA\\1Visual\\NCKH\\nckh2\\products\\fe\\model\\Dataset_Flood\\non_flood\\다운로드 (10) 3.jpg",
+      "ground_truth": "non_flood",
+      "pred_pth": "non_flood",
+      "pred_onnx": "non_flood"
+    },
+    {
+      "image_path": "E:\\RHNA\\1Visual\\NCKH\\nckh2\\products\\fe\\model\\Dataset_Flood\\non_flood\\화면 캡처 2025-03-05 175831.jpg",
+      "ground_truth": "non_flood",
+      "pred_pth": "non_flood",
+      "pred_onnx": "non_flood"
+    },
+    {
+      "image_path": "E:\\RHNA\\1Visual\\NCKH\\nckh2\\products\\fe\\model\\Dataset_Flood\\non_flood\\화면 캡처 2025-03-05 175938.jpg",
+      "ground_truth": "non_flood",
+      "pred_pth": "non_flood",
+      "pred_onnx": "non_flood"
+    },
+    {
+      "image_path": "E:\\RHNA\\1Visual\\NCKH\\nckh2\\products\\fe\\model\\Dataset_Flood\\non_flood\\화면 캡처 2025-03-05 174829.jpg",
+      "ground_truth": "non_flood",
+      "pred_pth": "non_flood",
+      "pred_onnx": "non_flood"
+    },
+    {
+      "image_path": "E:\\RHNA\\1Visual\\NCKH\\nckh2\\products\\fe\\model\\Dataset_Flood\\non_flood\\화면 캡처 2025-03-05 155955.jpg",
+      "ground_truth": "non_flood",
+      "pred_pth": "low",
+      "pred_onnx": "low"
+    },
+    {
+      "image_path": "E:\\RHNA\\1Visual\\NCKH\\nckh2\\products\\fe\\model\\Dataset_Flood\\non_flood\\다운로드 (30) 3.jpg",
+      "ground_truth": "non_flood",
+      "pred_pth": "non_flood",
+      "pred_onnx": "non_flood"
+    },
+    {
+      "image_path": "E:\\RHNA\\1Visual\\NCKH\\nckh2\\products\\fe\\model\\Dataset_Flood\\non_flood\\IMG_5052.jpg",
+      "ground_truth": "non_flood",
+      "pred_pth": "non_flood",
+      "pred_onnx": "non_flood"
+    },
+    {
+      "image_path": "E:\\RHNA\\1Visual\\NCKH\\nckh2\\products\\fe\\model\\Dataset_Flood\\non_flood\\382335_275271_3551.jpg",
+      "ground_truth": "non_flood",
+      "pred_pth": "non_flood",
+      "pred_onnx": "non_flood"
+    },
+    {
+      "image_path": "E:\\RHNA\\1Visual\\NCKH\\nckh2\\products\\fe\\model\\Dataset_Flood\\non_flood\\화면 캡처 2025-03-05 153348.jpg",
+      "ground_truth": "non_flood",
+      "pred_pth": "non_flood",
+      "pred_onnx": "non_flood"
+    },
+    {
+      "image_path": "E:\\RHNA\\1Visual\\NCKH\\nckh2\\products\\fe\\model\\Dataset_Flood\\non_flood\\images (10).jpg",
+      "ground_truth": "non_flood",
+      "pred_pth": "non_flood",
+      "pred_onnx": "non_flood"
+    },
+    {
+      "image_path": "E:\\RHNA\\1Visual\\NCKH\\nckh2\\products\\fe\\model\\Dataset_Flood\\non_flood\\화면 캡처 2025-03-05 153859.jpg",
+      "ground_truth": "non_flood",
+      "pred_pth": "non_flood",
+      "pred_onnx": "non_flood"
+    },
+    {
+      "image_path": "E:\\RHNA\\1Visual\\NCKH\\nckh2\\products\\fe\\model\\Dataset_Flood\\non_flood\\화면 캡처 2025-03-05 174553.jpg",
+      "ground_truth": "non_flood",
+      "pred_pth": "non_flood",
+      "pred_onnx": "non_flood"
+    },
+    {
+      "image_path": "E:\\RHNA\\1Visual\\NCKH\\nckh2\\products\\fe\\model\\Dataset_Flood\\non_flood\\images (59).jpg",
+      "ground_truth": "non_flood",
+      "pred_pth": "non_flood",
+      "pred_onnx": "non_flood"
+    },
+    {
+      "image_path": "E:\\RHNA\\1Visual\\NCKH\\nckh2\\products\\fe\\model\\Dataset_Flood\\non_flood\\다운로드 (56) 3.jpg",
+      "ground_truth": "non_flood",
+      "pred_pth": "non_flood",
+      "pred_onnx": "non_flood"
+    },
+    {
+      "image_path": "E:\\RHNA\\1Visual\\NCKH\\nckh2\\products\\fe\\model\\Dataset_Flood\\non_flood\\다운로드 (62) 3.jpg",
+      "ground_truth": "non_flood",
+      "pred_pth": "non_flood",
+      "pred_onnx": "non_flood"
+    },
+    {
+      "image_path": "E:\\RHNA\\1Visual\\NCKH\\nckh2\\products\\fe\\model\\Dataset_Flood\\non_flood\\다운로드 (67) 3.jpg",
+      "ground_truth": "non_flood",
+      "pred_pth": "non_flood",
+      "pred_onnx": "non_flood"
+    },
+    {
+      "image_path": "E:\\RHNA\\1Visual\\NCKH\\nckh2\\products\\fe\\model\\Dataset_Flood\\non_flood\\화면 캡처 2025-03-05 153735.jpg",
+      "ground_truth": "non_flood",
+      "pred_pth": "non_flood",
+      "pred_onnx": "non_flood"
+    },
+    {
+      "image_path": "E:\\RHNA\\1Visual\\NCKH\\nckh2\\products\\fe\\model\\Dataset_Flood\\non_flood\\화면 캡처 2025-03-05 152318.jpg",
+      "ground_truth": "non_flood",
+      "pred_pth": "non_flood",
+      "pred_onnx": "non_flood"
+    },
+    {
+      "image_path": "E:\\RHNA\\1Visual\\NCKH\\nckh2\\products\\fe\\model\\Dataset_Flood\\non_flood\\화면 캡처 2025-03-05 182955.jpg",
+      "ground_truth": "non_flood",
+      "pred_pth": "non_flood",
+      "pred_onnx": "non_flood"
+    },
+    {
+      "image_path": "E:\\RHNA\\1Visual\\NCKH\\nckh2\\products\\fe\\model\\Dataset_Flood\\non_flood\\화면 캡처 2025-03-05 152809.jpg",
+      "ground_truth": "non_flood",
+      "pred_pth": "non_flood",
+      "pred_onnx": "non_flood"
+    },
+    {
+      "image_path": "E:\\RHNA\\1Visual\\NCKH\\nckh2\\products\\fe\\model\\Dataset_Flood\\non_flood\\images (33).jpg",
+      "ground_truth": "non_flood",
+      "pred_pth": "low",
+      "pred_onnx": "low"
+    },
+    {
+      "image_path": "E:\\RHNA\\1Visual\\NCKH\\nckh2\\products\\fe\\model\\Dataset_Flood\\non_flood\\23031215004403700.jpg",
+      "ground_truth": "non_flood",
+      "pred_pth": "non_flood",
+      "pred_onnx": "non_flood"
+    },
+    {
+      "image_path": "E:\\RHNA\\1Visual\\NCKH\\nckh2\\products\\fe\\model\\Dataset_Flood\\non_flood\\화면 캡처 2025-03-05 164114.jpg",
+      "ground_truth": "non_flood",
+      "pred_pth": "low",
+      "pred_onnx": "low"
+    },
+    {
+      "image_path": "E:\\RHNA\\1Visual\\NCKH\\nckh2\\products\\fe\\model\\Dataset_Flood\\non_flood\\화면 캡처 2025-03-05 172356.jpg",
+      "ground_truth": "non_flood",
+      "pred_pth": "non_flood",
+      "pred_onnx": "non_flood"
+    },
+    {
+      "image_path": "E:\\RHNA\\1Visual\\NCKH\\nckh2\\products\\fe\\model\\Dataset_Flood\\non_flood\\화면 캡처 2025-03-05 173938.jpg",
+      "ground_truth": "non_flood",
+      "pred_pth": "non_flood",
+      "pred_onnx": "non_flood"
+    },
+    {
+      "image_path": "E:\\RHNA\\1Visual\\NCKH\\nckh2\\products\\fe\\model\\Dataset_Flood\\non_flood\\1789568749452_282700609501588260_7406490438318140161_27f20da03aed7425178793bf0e655ec5.jpg",
+      "ground_truth": "non_flood",
+      "pred_pth": "non_flood",
+      "pred_onnx": "non_flood"
+    },
+    {
+      "image_path": "E:\\RHNA\\1Visual\\NCKH\\nckh2\\products\\fe\\model\\Dataset_Flood\\non_flood\\2810089_image2_1.jpg",
+      "ground_truth": "non_flood",
+      "pred_pth": "non_flood",
+      "pred_onnx": "non_flood"
+    },
+    {
+      "image_path": "E:\\RHNA\\1Visual\\NCKH\\nckh2\\products\\fe\\model\\Dataset_Flood\\non_flood\\화면 캡처 2025-03-05 175530.jpg",
+      "ground_truth": "non_flood",
+      "pred_pth": "non_flood",
+      "pred_onnx": "non_flood"
+    },
+    {
+      "image_path": "E:\\RHNA\\1Visual\\NCKH\\nckh2\\products\\fe\\model\\Dataset_Flood\\non_flood\\1184178968.jpg",
+      "ground_truth": "non_flood",
+      "pred_pth": "non_flood",
+      "pred_onnx": "non_flood"
+    },
+    {
+      "image_path": "E:\\RHNA\\1Visual\\NCKH\\nckh2\\products\\fe\\model\\Dataset_Flood\\non_flood\\화면 캡처 2025-03-05 172345.jpg",
+      "ground_truth": "non_flood",
+      "pred_pth": "non_flood",
+      "pred_onnx": "non_flood"
+    },
+    {
+      "image_path": "E:\\RHNA\\1Visual\\NCKH\\nckh2\\products\\fe\\model\\Dataset_Flood\\non_flood\\images (61).jpg",
+      "ground_truth": "non_flood",
+      "pred_pth": "non_flood",
+      "pred_onnx": "non_flood"
+    },
+    {
+      "image_path": "E:\\RHNA\\1Visual\\NCKH\\nckh2\\products\\fe\\model\\Dataset_Flood\\non_flood\\화면 캡처 2025-03-05 175812.jpg",
+      "ground_truth": "non_flood",
+      "pred_pth": "non_flood",
+      "pred_onnx": "non_flood"
+    },
+    {
+      "image_path": "E:\\RHNA\\1Visual\\NCKH\\nckh2\\products\\fe\\model\\Dataset_Flood\\non_flood\\화면 캡처 2025-03-05 152934.jpg",
+      "ground_truth": "non_flood",
+      "pred_pth": "non_flood",
+      "pred_onnx": "non_flood"
+    },
+    {
+      "image_path": "E:\\RHNA\\1Visual\\NCKH\\nckh2\\products\\fe\\model\\Dataset_Flood\\non_flood\\다운로드 (9) 3.jpg",
+      "ground_truth": "non_flood",
+      "pred_pth": "non_flood",
+      "pred_onnx": "non_flood"
+    },
+    {
+      "image_path": "E:\\RHNA\\1Visual\\NCKH\\nckh2\\products\\fe\\model\\Dataset_Flood\\non_flood\\1789568749531_282700609501588260_7406490438318140161_bea2323eb3bd6a9504e98226ccf20a6e.jpg",
+      "ground_truth": "non_flood",
+      "pred_pth": "non_flood",
+      "pred_onnx": "non_flood"
+    },
+    {
+      "image_path": "E:\\RHNA\\1Visual\\NCKH\\nckh2\\products\\fe\\model\\Dataset_Flood\\non_flood\\화면 캡처 2025-03-05 153554.jpg",
+      "ground_truth": "non_flood",
+      "pred_pth": "non_flood",
+      "pred_onnx": "non_flood"
+    },
+    {
+      "image_path": "E:\\RHNA\\1Visual\\NCKH\\nckh2\\products\\fe\\model\\Dataset_Flood\\non_flood\\화면 캡처 2025-03-05 181159.jpg",
+      "ground_truth": "non_flood",
+      "pred_pth": "non_flood",
+      "pred_onnx": "non_flood"
+    },
+    {
+      "image_path": "E:\\RHNA\\1Visual\\NCKH\\nckh2\\products\\fe\\model\\Dataset_Flood\\non_flood\\화면 캡처 2025-03-05 153513.jpg",
+      "ground_truth": "non_flood",
+      "pred_pth": "non_flood",
+      "pred_onnx": "non_flood"
+    },
+    {
+      "image_path": "E:\\RHNA\\1Visual\\NCKH\\nckh2\\products\\fe\\model\\Dataset_Flood\\non_flood\\DSC05846-01.jpg",
+      "ground_truth": "non_flood",
+      "pred_pth": "non_flood",
+      "pred_onnx": "non_flood"
+    },
+    {
+      "image_path": "E:\\RHNA\\1Visual\\NCKH\\nckh2\\products\\fe\\model\\Dataset_Flood\\non_flood\\5f420ab85477f0364be7a38916496632.jpg",
+      "ground_truth": "non_flood",
+      "pred_pth": "non_flood",
+      "pred_onnx": "non_flood"
+    },
+    {
+      "image_path": "E:\\RHNA\\1Visual\\NCKH\\nckh2\\products\\fe\\model\\Dataset_Flood\\non_flood\\다운로드 (34).jpg",
+      "ground_truth": "non_flood",
+      "pred_pth": "non_flood",
+      "pred_onnx": "non_flood"
+    },
+    {
+      "image_path": "E:\\RHNA\\1Visual\\NCKH\\nckh2\\products\\fe\\model\\Dataset_Flood\\non_flood\\heavy+rain+and+flooding+safety.jpg",
+      "ground_truth": "non_flood",
+      "pred_pth": "low",
+      "pred_onnx": "low"
+    },
+    {
+      "image_path": "E:\\RHNA\\1Visual\\NCKH\\nckh2\\products\\fe\\model\\Dataset_Flood\\non_flood\\화면 캡처 2025-03-05 181547.jpg",
+      "ground_truth": "non_flood",
+      "pred_pth": "non_flood",
+      "pred_onnx": "non_flood"
+    },
+    {
+      "image_path": "E:\\RHNA\\1Visual\\NCKH\\nckh2\\products\\fe\\model\\Dataset_Flood\\non_flood\\1210_5594_1621.jpg",
+      "ground_truth": "non_flood",
+      "pred_pth": "non_flood",
+      "pred_onnx": "non_flood"
+    },
+    {
+      "image_path": "E:\\RHNA\\1Visual\\NCKH\\nckh2\\products\\fe\\model\\Dataset_Flood\\non_flood\\다운로드 (19) 3.jpg",
+      "ground_truth": "non_flood",
+      "pred_pth": "non_flood",
+      "pred_onnx": "non_flood"
+    },
+    {
+      "image_path": "E:\\RHNA\\1Visual\\NCKH\\nckh2\\products\\fe\\model\\Dataset_Flood\\non_flood\\다운로드 (17) 3.jpg",
+      "ground_truth": "non_flood",
+      "pred_pth": "non_flood",
+      "pred_onnx": "non_flood"
+    },
+    {
+      "image_path": "E:\\RHNA\\1Visual\\NCKH\\nckh2\\products\\fe\\model\\Dataset_Flood\\non_flood\\953056_345891_5555.jpeg",
+      "ground_truth": "non_flood",
+      "pred_pth": "non_flood",
+      "pred_onnx": "non_flood"
+    },
+    {
+      "image_path": "E:\\RHNA\\1Visual\\NCKH\\nckh2\\products\\fe\\model\\Dataset_Flood\\non_flood\\화면 캡처 2025-03-05 153209.jpg",
+      "ground_truth": "non_flood",
+      "pred_pth": "non_flood",
+      "pred_onnx": "non_flood"
+    },
+    {
+      "image_path": "E:\\RHNA\\1Visual\\NCKH\\nckh2\\products\\fe\\model\\Dataset_Flood\\non_flood\\images (41).jpg",
+      "ground_truth": "non_flood",
+      "pred_pth": "low",
+      "pred_onnx": "low"
+    },
+    {
+      "image_path": "E:\\RHNA\\1Visual\\NCKH\\nckh2\\products\\fe\\model\\Dataset_Flood\\non_flood\\230415135444359_w.jpg",
+      "ground_truth": "non_flood",
+      "pred_pth": "non_flood",
+      "pred_onnx": "non_flood"
+    },
+    {
+      "image_path": "E:\\RHNA\\1Visual\\NCKH\\nckh2\\products\\fe\\model\\Dataset_Flood\\non_flood\\images (32).jpg",
+      "ground_truth": "non_flood",
+      "pred_pth": "low",
+      "pred_onnx": "low"
+    },
+    {
+      "image_path": "E:\\RHNA\\1Visual\\NCKH\\nckh2\\products\\fe\\model\\Dataset_Flood\\non_flood\\화면 캡처 2025-03-05 173907.jpg",
+      "ground_truth": "non_flood",
+      "pred_pth": "non_flood",
+      "pred_onnx": "non_flood"
+    },
+    {
+      "image_path": "E:\\RHNA\\1Visual\\NCKH\\nckh2\\products\\fe\\model\\Dataset_Flood\\non_flood\\1789568749022_282700609501588260_7406490438318140161_e59a160960ff6aab4139ef93e6451eaa.jpg",
+      "ground_truth": "non_flood",
+      "pred_pth": "non_flood",
+      "pred_onnx": "non_flood"
+    },
+    {
+      "image_path": "E:\\RHNA\\1Visual\\NCKH\\nckh2\\products\\fe\\model\\Dataset_Flood\\non_flood\\img.jpg",
+      "ground_truth": "non_flood",
+      "pred_pth": "non_flood",
+      "pred_onnx": "non_flood"
+    },
+    {
+      "image_path": "E:\\RHNA\\1Visual\\NCKH\\nckh2\\products\\fe\\model\\Dataset_Flood\\non_flood\\화면 캡처 2025-03-05 153429.jpg",
+      "ground_truth": "non_flood",
+      "pred_pth": "non_flood",
+      "pred_onnx": "non_flood"
+    },
+    {
+      "image_path": "E:\\RHNA\\1Visual\\NCKH\\nckh2\\products\\fe\\model\\Dataset_Flood\\non_flood\\다운로드 (6).jpg",
+      "ground_truth": "non_flood",
+      "pred_pth": "non_flood",
+      "pred_onnx": "non_flood"
+    },
+    {
+      "image_path": "E:\\RHNA\\1Visual\\NCKH\\nckh2\\products\\fe\\model\\Dataset_Flood\\non_flood\\화면 캡처 2025-03-05 172439.jpg",
+      "ground_truth": "non_flood",
+      "pred_pth": "non_flood",
+      "pred_onnx": "non_flood"
+    },
+    {
+      "image_path": "E:\\RHNA\\1Visual\\NCKH\\nckh2\\products\\fe\\model\\Dataset_Flood\\non_flood\\images (20).jpg",
+      "ground_truth": "non_flood",
+      "pred_pth": "non_flood",
+      "pred_onnx": "non_flood"
+    },
+    {
+      "image_path": "E:\\RHNA\\1Visual\\NCKH\\nckh2\\products\\fe\\model\\Dataset_Flood\\non_flood\\images (44).jpg",
+      "ground_truth": "non_flood",
+      "pred_pth": "non_flood",
+      "pred_onnx": "non_flood"
+    },
+    {
+      "image_path": "E:\\RHNA\\1Visual\\NCKH\\nckh2\\products\\fe\\model\\Dataset_Flood\\non_flood\\화면 캡처 2025-03-05 181150.jpg",
+      "ground_truth": "non_flood",
+      "pred_pth": "non_flood",
+      "pred_onnx": "non_flood"
+    },
+    {
+      "image_path": "E:\\RHNA\\1Visual\\NCKH\\nckh2\\products\\fe\\model\\Dataset_Flood\\non_flood\\화면 캡처 2025-03-05 153259.jpg",
+      "ground_truth": "non_flood",
+      "pred_pth": "non_flood",
+      "pred_onnx": "non_flood"
+    },
+    {
+      "image_path": "E:\\RHNA\\1Visual\\NCKH\\nckh2\\products\\fe\\model\\Dataset_Flood\\non_flood\\다운로드 (15).jpg",
+      "ground_truth": "non_flood",
+      "pred_pth": "non_flood",
+      "pred_onnx": "non_flood"
+    },
+    {
+      "image_path": "E:\\RHNA\\1Visual\\NCKH\\nckh2\\products\\fe\\model\\Dataset_Flood\\non_flood\\다운로드 (33).jpg",
+      "ground_truth": "non_flood",
+      "pred_pth": "non_flood",
+      "pred_onnx": "non_flood"
+    },
+    {
+      "image_path": "E:\\RHNA\\1Visual\\NCKH\\nckh2\\products\\fe\\model\\Dataset_Flood\\non_flood\\다운로드 (58) 3.jpg",
+      "ground_truth": "non_flood",
+      "pred_pth": "non_flood",
+      "pred_onnx": "non_flood"
+    },
+    {
+      "image_path": "E:\\RHNA\\1Visual\\NCKH\\nckh2\\products\\fe\\model\\Dataset_Flood\\non_flood\\images (3)1.jpg",
+      "ground_truth": "non_flood",
+      "pred_pth": "non_flood",
+      "pred_onnx": "non_flood"
+    },
+    {
+      "image_path": "E:\\RHNA\\1Visual\\NCKH\\nckh2\\products\\fe\\model\\Dataset_Flood\\non_flood\\화면 캡처 2025-03-05 153800.jpg",
+      "ground_truth": "non_flood",
+      "pred_pth": "non_flood",
+      "pred_onnx": "non_flood"
+    },
+    {
+      "image_path": "E:\\RHNA\\1Visual\\NCKH\\nckh2\\products\\fe\\model\\Dataset_Flood\\non_flood\\images (7)1.jpg",
+      "ground_truth": "non_flood",
+      "pred_pth": "non_flood",
+      "pred_onnx": "non_flood"
+    },
+    {
+      "image_path": "E:\\RHNA\\1Visual\\NCKH\\nckh2\\products\\fe\\model\\Dataset_Flood\\non_flood\\다운로드 (31) 3.jpg",
+      "ground_truth": "non_flood",
+      "pred_pth": "non_flood",
+      "pred_onnx": "non_flood"
+    },
+    {
+      "image_path": "E:\\RHNA\\1Visual\\NCKH\\nckh2\\products\\fe\\model\\Dataset_Flood\\non_flood\\다운로드 (39) 3.jpg",
+      "ground_truth": "non_flood",
+      "pred_pth": "non_flood",
+      "pred_onnx": "non_flood"
+    },
+    {
+      "image_path": "E:\\RHNA\\1Visual\\NCKH\\nckh2\\products\\fe\\model\\Dataset_Flood\\non_flood\\images (21)1.jpg",
+      "ground_truth": "non_flood",
+      "pred_pth": "non_flood",
+      "pred_onnx": "non_flood"
+    },
+    {
+      "image_path": "E:\\RHNA\\1Visual\\NCKH\\nckh2\\products\\fe\\model\\Dataset_Flood\\non_flood\\images - 2025-01-28T185039.760.jpg",
+      "ground_truth": "non_flood",
+      "pred_pth": "non_flood",
+      "pred_onnx": "non_flood"
+    },
+    {
+      "image_path": "E:\\RHNA\\1Visual\\NCKH\\nckh2\\products\\fe\\model\\Dataset_Flood\\non_flood\\화면 캡처 2025-03-05 164447.jpg",
+      "ground_truth": "non_flood",
+      "pred_pth": "low",
+      "pred_onnx": "low"
+    },
+    {
+      "image_path": "E:\\RHNA\\1Visual\\NCKH\\nckh2\\products\\fe\\model\\Dataset_Flood\\non_flood\\images (16)1.jpg",
+      "ground_truth": "non_flood",
+      "pred_pth": "non_flood",
+      "pred_onnx": "non_flood"
+    },
+    {
+      "image_path": "E:\\RHNA\\1Visual\\NCKH\\nckh2\\products\\fe\\model\\Dataset_Flood\\non_flood\\images (25).jpg",
+      "ground_truth": "non_flood",
+      "pred_pth": "non_flood",
+      "pred_onnx": "non_flood"
+    }
+  ],
+  "passed_checks": 5,
+  "failed_checks": 0,
+  "not_tested_checks": 0,
+  "status": "pass_local",
+  "exit_code": 0
+}

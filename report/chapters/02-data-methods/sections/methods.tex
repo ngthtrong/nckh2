@@ -15,7 +15,7 @@ Các thước đo gồm Accuracy, macro-F1, balanced accuracy, ma trận nhầm 
 \end{equation}
 Theo script so sánh, mức severity có thứ tự \texttt{non\_flood}=0, \texttt{low}=1, \texttt{medium}=2, \texttt{high}=3. Lỗi nặng là chênh lệch severity ít nhất hai mức. Severity khác thứ tự index đầu ra; dùng trực tiếp khoảng cách index sẽ tính sai lỗi này.
 
-Ba định dạng FP32 được chạy trên cùng tập test để kiểm tra chuyển đổi. PTQ sử dụng lượng tử hóa QDQ với trọng số INT8 per-channel và activation UINT8; calibration dùng 200 ảnh train phân tầng, seed 42. QAT là một nhánh riêng có artifact và validation riêng. Cắt tỉa có cấu trúc dùng cấu hình đã lưu trong báo cáo \texttt{pruning\_st}. Các phép so sánh giữ split test nhưng không suy ra tốc độ điện thoại từ CPU.
+Ba định dạng FP32 được chạy trên cùng tập test để kiểm tra chuyển đổi. PTQ sử dụng lượng tử hóa QDQ với trọng số INT8 per-channel và activation UINT8; calibration dùng ảnh train phân tầng với seed \QuantizationSeed{} theo cấu hình đã lưu, không dùng test để hiệu chỉnh. QAT là một nhánh riêng có artifact và validation riêng. Cắt tỉa có cấu trúc dùng cấu hình đã lưu trong benchmark seed \PruningSeed{}. Các phép so sánh giữ split test nhưng không suy ra tốc độ điện thoại từ CPU.
 
 \begin{figure}[htbp]
 \centering

@@ -59,12 +59,22 @@ def add_cell(cell_id, value, style, parent="1", vertex="1", x=0, y=0, w=120, h=6
     return cell
 
 
-def add_edge(edge_id, value, style, source, target, parent="1"):
+def add_edge(edge_id, value, style, source, target, parent="1", exit_x=None, exit_y=None, entry_x=None, entry_y=None, points=None, offset_y=0):
+    if exit_x is not None and exit_y is not None:
+        style += f"exitX={exit_x};exitY={exit_y};exitDx=0;exitDy=0;"
+    if entry_x is not None and entry_y is not None:
+        style += f"entryX={entry_x};entryY={entry_y};entryDx=0;entryDy=0;"
     cell = ET.Element("mxCell", {
         "id": str(edge_id), "value": value, "style": style,
         "parent": str(parent), "edge": "1", "source": str(source), "target": str(target)
     })
-    ET.SubElement(cell, "mxGeometry", {"relative": "1", "as": "geometry"})
+    geo = ET.SubElement(cell, "mxGeometry", {"relative": "1", "as": "geometry"})
+    if offset_y != 0:
+        ET.SubElement(geo, "mxPoint", {"as": "offset", "y": str(offset_y)})
+    if points:
+        arr = ET.SubElement(geo, "Array", {"as": "points"})
+        for px, py in points:
+            ET.SubElement(arr, "mxPoint", {"x": str(px), "y": str(py)})
     return cell
 
 
@@ -488,46 +498,304 @@ def generate_flowchart_backend_dedup():
 # =========================================================================
 def generate_system_architecture():
     nodes = []
-    lane_style = "shape=swimlane;whiteSpace=wrap;html=1;startSize=30;fontStyle=1;fontSize=13;fontFamily=Helvetica;"
-    nodes.append(add_cell("tier_mobile", "TẦNG THIẾT BỊ DI ĐỘNG BIÊN (EDGE MOBILE CLIENT - FLUTTER)", lane_style + "fillColor=#EBF3FA;strokeColor=#1976D2;", x=40, y=40, w=460, h=880))
-    nodes.append(add_cell("tier_backend", "TẦNG MÁY CHỦ TIẾP NHẬN & XỬ LÝ LÕI (FASTAPI BACKEND CORE)", lane_style + "fillColor=#F3E5F5;strokeColor=#6A1B9A;", x=540, y=40, w=540, h=880))
-    nodes.append(add_cell("tier_dashboard", "TẦNG ĐIỀU PHỐI & QUẢN TRỊ WEB (DISPATCH DASHBOARD)", lane_style + "fillColor=#FFF8E1;strokeColor=#F57C00;", x=1120, y=40, w=440, h=880))
 
-    # Tier 1 Components
-    nodes.append(add_cell("m_ui", "Giao diện Người dùng (Presentation):\n- Màn hình SOS khẩn cấp (1 chạm)\n- Biểu mẫu Báo cáo Cứu hộ chi tiết\n- Màn hình Tra cứu tiến trình Cứu hộ", STYLE_ACT, parent="tier_mobile", x=30, y=50, w=400, h=70))
-    nodes.append(add_cell("m_ctrl", "Tầng Logic & Quản lý Trạng thái:\n- FormController, LocationController\n- ConnectivityMonitor & ThroughputEvaluator\n- StatusPollingController (15s polling)", STYLE_ACT, parent="tier_mobile", x=30, y=150, w=400, h=70))
-    nodes.append(add_cell("m_ai_eng", "Bộ Suy luận On-device AI (Edge AI Engine):\n- MobileNetV3-Large Backbone (256x256)\n- Custom Head phân loại 4 mức ngập (non/low/med/high)\n- Runtime kép: ONNX Runtime Dart & ExecuTorch (.pte)", STYLE_AI, parent="tier_mobile", x=30, y=250, w=400, h=85))
-    nodes.append(add_cell("m_hive_store", "Lưu trữ Ngoại tuyến Outbox (Hive Store-and-Forward):\n- Hàng đợi Outbox Box (JSON RFC 8785 Canonical SHA-256)\n- Cache bản ghi cứu hộ & tiến trình trạng thái cục bộ", STYLE_DB, parent="tier_mobile", x=30, y=365, w=400, h=75))
-    nodes.append(add_cell("m_bridge", "Cầu nối Phần cứng & Nền tảng (Platform Channels):\n- Định vị GPS (Geolocator)\n- SMS Telephony Bridge (Android SMS Manager)\n- WorkManager (Lịch trình đồng bộ ngầm khi có mạng)", "rounded=1;whiteSpace=wrap;html=1;fillColor=#ECEFF1;strokeColor=#455A64;fontSize=11;fontFamily=Helvetica;", parent="tier_mobile", x=30, y=470, w=400, h=75))
+    # Common styles matching sample_ctu_architecture.drawio
+    card_base = "rounded=1;whiteSpace=wrap;html=1;strokeWidth=1.5;fontSize=14;fontFamily=Helvetica;arcSize=12;"
 
-    # Tier 2 Components
-    nodes.append(add_cell("be_api", "API Ingestion & Webhook Endpoints:\n- POST /sync/messages (JSON batch <= 50, idempotency)\n- POST /api/reports (Multipart Image + JSON metadata)\n- GET /probe (64 KB Network Bandwidth Probe)\n- POST /api/sms/inbound (SMS Gateway Webhook)\n- GET /api/reports/status (Status polling endpoint)", STYLE_ACT, parent="tier_backend", x=30, y=50, w=480, h=95))
-    nodes.append(add_cell("be_dedup_eng", "Xử lý Toàn vẹn & Chống trùng lặp (Dedup Engine):\n- Kiểm tra Contract Version & Kích thước\n- Chuẩn hóa RFC 8785 JSON & SHA-256 Hashing\n- Tra cứu messages_dedup (Phát hiện mất ACK sau commit)\n- Merge Policy gộp ảnh/trường bổ sung theo owner", STYLE_OK, parent="tier_backend", x=30, y=175, w=480, h=85))
-    nodes.append(add_cell("be_core", "Lõi Xử lý & Phân tích Đồ thị (rescue_core):\n- Data Adapter (to_report_v2: [F, U, N, V])\n- Review Queue Manager (Tách ca thiếu tọa độ GPS)\n- Graph Construction (Ma trận tương đồng Haversine + F + U)\n- Louvain Community Detection (Phân cụm không gian)\n- Priority Scoring P(c) = w1*Nc + w2*Vc + w3*Fc + w4*Uc", "rounded=1;whiteSpace=wrap;html=1;fillColor=#EFEBE9;strokeColor=#5D4037;fontSize=11;fontFamily=Helvetica;", parent="tier_backend", x=30, y=290, w=480, h=105))
-    nodes.append(add_cell("be_db_store", "Cơ sở Dữ liệu Quan hệ (SQLite / PostgreSQL WAL):\n- Bảng: reports, messages_dedup, report_events\n- Bảng: teams, operators, sessions, server_meta", STYLE_DB, parent="tier_backend", x=30, y=425, w=480, h=75))
-    nodes.append(add_cell("be_upload_fs", "Lưu trữ Tệp Vật lý (Local File System Storage):\n- Thư mục uploads/: Lưu trữ ảnh gốc & ảnh nén hiện trường", STYLE_DB, parent="tier_backend", x=30, y=530, w=480, h=60))
+    # 4 Perfectly Aligned Column X-Positions
+    # Col 1: x = 65,  w = 250 (Center = 190)
+    # Col 2: x = 360, w = 250 (Center = 485)
+    # Col 3: x = 655, w = 250 (Center = 780)
+    # Col 4: x = 950, w = 250 (Center = 1075)
 
-    # Tier 3 Components
-    nodes.append(add_cell("d_auth", "Xác thực & Bảo mật Điều phối:\n- Đăng nhập PBKDF2 Session Token\n- Phân quyền Admin / Dispatcher Operator", STYLE_ACT, parent="tier_dashboard", x=20, y=50, w=400, h=65))
-    nodes.append(add_cell("d_gis_map", "Bản đồ Giám sát Không gian (Leaflet GIS):\n- Hiển thị vị trí sự cố, ranh giới cụm & mức ưu tiên\n- Chấm tọa độ thủ công cho ca thiếu vị trí", STYLE_ACT, parent="tier_dashboard", x=20, y=145, w=400, h=75))
-    nodes.append(add_cell("d_cluster_board", "Bảng Điều phối Thứ tự Ưu tiên:\n- Danh sách cụm theo thứ bậc điểm P(c)\n- Drawer Quản lý Hàng xem xét (Review Queue)", STYLE_ACT, parent="tier_dashboard", x=20, y=250, w=400, h=70))
-    nodes.append(add_cell("d_case_modal", "Modal Thao tác Chi tiết Ca Cứu hộ:\n- Xem ảnh hiện trường, nhãn AI, số nạn nhân\n- Điều động / Gán đội cứu hộ (Teams Assignment)\n- Chuyển trạng thái (dispatched -> resolved / cancelled)", STYLE_OK, parent="tier_dashboard", x=20, y=350, w=400, h=85))
-    nodes.append(add_cell("d_admin_tools", "Công cụ Quản trị & Báo cáo:\n- Xuất dữ liệu thống kê CSV / GeoJSON\n- Quản lý tài khoản điều phối & Sao lưu CSDL", STYLE_ACT, parent="tier_dashboard", x=20, y=465, w=400, h=75))
+    # =========================================================================
+    # TIER 1: THIẾT BỊ DI ĐỘNG BIÊN (EDGE MOBILE CLIENT & ON-DEVICE AI)
+    # y = 25..195, h = 170, w = 1180
+    # =========================================================================
+    t1_box_style = (
+        "rounded=1;whiteSpace=wrap;html=1;fillColor=#EBF3FA;strokeColor=#1976D2;"
+        "strokeWidth=2;dashed=1;dashPattern=8 4;arcSize=8;fontSize=18;"
+    )
+    nodes.append(add_cell("tier1_box", "", t1_box_style, x=40, y=25, w=1180, h=170))
 
-    # Inter-tier Connections
-    nodes.append(add_edge("sa_e1", "Sync & Upload (HTTP)", STYLE_EDGE, "m_hive_store", "be_api"))
-    nodes.append(add_edge("sa_e2", "SMS Webhook", STYLE_EDGE, "m_bridge", "be_api"))
-    nodes.append(add_edge("sa_e3", "Probe & Polling", STYLE_EDGE, "m_ctrl", "be_api"))
-    nodes.append(add_edge("sa_e4", "Inference Tags", STYLE_EDGE, "m_ai_eng", "m_ctrl"))
-    nodes.append(add_edge("sa_e5", "Verify & Dedup", STYLE_EDGE, "be_api", "be_dedup_eng"))
-    nodes.append(add_edge("sa_e6", "Commit Data", STYLE_EDGE, "be_dedup_eng", "be_db_store"))
-    nodes.append(add_edge("sa_e7", "Save Image", STYLE_EDGE, "be_api", "be_upload_fs"))
-    nodes.append(add_edge("sa_e8", "Fetch Reports", STYLE_EDGE, "be_db_store", "be_core"))
-    nodes.append(add_edge("sa_e9", "Clusters + ETag", STYLE_EDGE, "be_core", "d_cluster_board"))
-    nodes.append(add_edge("sa_e10", "Poll Changes (5s)", STYLE_EDGE, "d_gis_map", "be_api"))
-    nodes.append(add_edge("sa_e11", "Assign & Status", STYLE_EDGE, "d_case_modal", "be_api"))
+    t1_lbl_style = "text;html=1;align=left;verticalAlign=top;spacingLeft=8;spacingTop=4;fontSize=16;fontColor=#0D47A1;fontFamily=Helvetica;"
+    nodes.append(add_cell("tier1_label", "<b>Tier 1: Thiết bị Di động Biên &amp; Edge AI (Flutter 3 / Android Client)</b>", t1_lbl_style, x=50, y=28, w=600, h=26))
 
-    return create_diagram_xml("Kien-truc-Tong-the-He-thong", nodes, w="1620", h="980")
+    # 1.1 SOS 1 chạm (Col 1)
+    c_sos = (
+        "<b>SOS Khẩn cấp 1 chạm</b><br>"
+        "<font style=\"font-size:12px;color:#37474F;\">"
+        "• Định vị GPS tức thời<br>"
+        "• Gói tin cứu nạn tối giản<br>"
+        "• Ưu tiên phát tin khẩn cấp"
+        "</font>"
+    )
+    nodes.append(add_cell("ui_sos", c_sos, card_base + "fillColor=#FFFFFF;strokeColor=#1976D2;", x=65, y=65, w=250, h=110))
+
+    # 1.2 Báo cáo đa phương thức (Col 2)
+    c_report = (
+        "<b>Báo cáo Đa phương thức</b><br>"
+        "<font style=\"font-size:12px;color:#37474F;\">"
+        "• Chụp ảnh ngập + Tọa độ<br>"
+        "• Số người mắc kẹt (N)<br>"
+        "• Nhóm yếu thế &amp; thương tích (V)"
+        "</font>"
+    )
+    nodes.append(add_cell("ui_report", c_report, card_base + "fillColor=#FFFFFF;strokeColor=#1976D2;", x=360, y=65, w=250, h=110))
+
+    # 1.3 Edge AI On-device (Col 3)
+    c_ai = (
+        "<b>Suy luận Edge AI On-device</b><br>"
+        "<font style=\"font-size:12px;color:#37474F;\">"
+        "• MobileNetV3-Large (256×256)<br>"
+        "• Phân loại 4 mức ngập (F) &amp; U<br>"
+        "• ONNX Dart &amp; ExecuTorch JNI"
+        "</font>"
+    )
+    nodes.append(add_cell("ai_edge", c_ai, card_base + "fillColor=#FCE4EC;strokeColor=#D81B60;strokeWidth=2;", x=655, y=65, w=250, h=110))
+
+    # 1.4 Hive Outbox (Col 4)
+    c_outbox = (
+        "<b>Hive Outbox &amp; Toàn vẹn</b><br>"
+        "<font style=\"font-size:12px;color:#37474F;\">"
+        "• Store-and-Forward chống mất tin<br>"
+        "• RFC 8785 Canonical JCS<br>"
+        "• Toàn vẹn mã băm SHA-256"
+        "</font>"
+    )
+    nodes.append(add_cell("hive_outbox", c_outbox, card_base + "fillColor=#F5F5F5;strokeColor=#455A64;", x=950, y=65, w=250, h=110))
+
+    # =========================================================================
+    # INTERMEDIATE NODE: BỘ ĐIỀU PHỐI MẠNG THÍCH ỨNG & KÊNH TRUYỀN
+    # y = 225..273, h = 48, w = 1135
+    # =========================================================================
+    trans_node_style = (
+        "rounded=1;whiteSpace=wrap;html=1;fillColor=#FFF9C4;strokeColor=#F9A825;"
+        "strokeWidth=2;fontSize=14;fontFamily=Helvetica;arcSize=10;"
+    )
+    trans_text = (
+        "<b>Bộ Điều phối Kênh Truyền Thích ứng (Adaptive Network &amp; Transport Channels)</b><br>"
+        "<font style=\"font-size:12px;color:#5D4037;\">"
+        "Kênh IP (4G/LTE/Wi-Fi): REST Batch (≤50 msg), Multipart Upload ảnh, GET /probe (64 KB)   |   Kênh GSM: SMS SOS Fallback dự phòng"
+        "</font>"
+    )
+    nodes.append(add_cell("trans_node", trans_text, trans_node_style, x=65, y=225, w=1135, h=48))
+
+    # =========================================================================
+    # TIER 2: MÁY CHỦ TIẾP NHẬN & XỬ LÝ LÕI BACKEND (FASTAPI / RESCUE_CORE)
+    # y = 300..475, h = 175, w = 1180
+    # =========================================================================
+    t2_box_style = (
+        "rounded=1;whiteSpace=wrap;html=1;fillColor=#F3E5F5;strokeColor=#7B1FA2;"
+        "strokeWidth=2;dashed=1;dashPattern=8 4;arcSize=8;fontSize=18;"
+    )
+    nodes.append(add_cell("tier2_box", "", t2_box_style, x=40, y=300, w=1180, h=175))
+
+    t2_lbl_style = "text;html=1;align=left;verticalAlign=top;spacingLeft=8;spacingTop=4;fontSize=16;fontColor=#7B1FA2;fontFamily=Helvetica;"
+    nodes.append(add_cell("tier2_label", "<b>Tier 2: Máy chủ Tiếp nhận &amp; Xử lý Nghiệp vụ Lõi (FastAPI Backend Core &amp; rescue_core Engine)</b>", t2_lbl_style, x=50, y=304, w=720, h=26))
+
+    # 2.1 Graph & Clustering Engine (Col 1)
+    c_core = (
+        "<b>Lõi Đồ thị &amp; Phân cụm</b><br>"
+        "<font style=\"font-size:12px;color:#37474F;\">"
+        "• Ma trận tương đồng C_ij<br>"
+        "• Phân cụm Louvain (Modularity Q)<br>"
+        "• Điểm ưu tiên cụm P(c)"
+        "</font>"
+    )
+    nodes.append(add_cell("be_core", c_core, card_base + "fillColor=#EFEBE9;strokeColor=#4E342E;strokeWidth=2;", x=65, y=340, w=250, h=115))
+
+    # 2.2 Review Queue (Col 2)
+    c_review = (
+        "<b>Hàng xem xét (Review Queue)</b><br>"
+        "<font style=\"font-size:12px;color:#37474F;\">"
+        "• Tách riêng ca thiếu GPS<br>"
+        "• Thẩm tra &amp; gọi điện xác minh<br>"
+        "• Tránh suy diễn tọa độ sai"
+        "</font>"
+    )
+    nodes.append(add_cell("be_review", c_review, card_base + "fillColor=#FFF8E1;strokeColor=#FF8F00;", x=360, y=340, w=250, h=115))
+
+    # 2.3 Dedup & Integrity Engine (Col 3)
+    c_dedup = (
+        "<b>Toàn vẹn &amp; Dedup Engine</b><br>"
+        "<font style=\"font-size:12px;color:#37474F;\">"
+        "• Header X-Message-Contract: 1<br>"
+        "• RFC 8785 Canonical JCS Hash<br>"
+        "• Idempotency qua messages_dedup"
+        "</font>"
+    )
+    nodes.append(add_cell("be_dedup", c_dedup, card_base + "fillColor=#E8F5E9;strokeColor=#2E7D32;", x=655, y=340, w=250, h=115))
+
+    # 2.4 API Ingestion Gateway (Col 4)
+    c_api = (
+        "<b>Cổng Tiếp nhận (API Gateway)</b><br>"
+        "<font style=\"font-size:12px;color:#37474F;\">"
+        "• POST /sync/messages (Batch)<br>"
+        "• POST /api/reports (Multipart)<br>"
+        "• Webhook POST /api/sms/inbound"
+        "</font>"
+    )
+    nodes.append(add_cell("be_api", c_api, card_base + "fillColor=#FFFFFF;strokeColor=#7B1FA2;", x=950, y=340, w=250, h=115))
+
+    # =========================================================================
+    # TIER 3: BÀN ĐIỀU PHỐI WEB GIS & LƯU TRỮ BỀN VỮNG
+    # y = 525..735, h = 210, w = 1180
+    # =========================================================================
+    t3_box_style = (
+        "rounded=1;whiteSpace=wrap;html=1;fillColor=#FFF3E0;strokeColor=#E65100;"
+        "strokeWidth=2;dashed=1;dashPattern=8 4;arcSize=8;fontSize=18;"
+    )
+    nodes.append(add_cell("tier3_box", "", t3_box_style, x=40, y=525, w=1180, h=210))
+
+    # Đặt nhãn Tier 3 ở đáy tầng 3, ngay dưới Cột 1 (x=55..350, y=686..718).
+    # Không có mũi tên nào đi qua vùng này (các xa lộ kết thúc ở y=545 tại đỉnh các card,
+    # và đường phản hồi xuất phát từ Cột 2 ở x=485).
+    t3_lbl_style = "text;html=1;align=left;verticalAlign=middle;spacingLeft=8;fontSize=14;fontColor=#E65100;fontFamily=Helvetica;"
+    nodes.append(add_cell(
+        "tier3_label",
+        "<b>Tier 3: Bàn Điều phối Web GIS &amp; Lưu trữ Dữ liệu Bền vững</b><br>"
+        "<font style=\"font-size:11px;color:#BF360C;\">(Dashboard Leaflet GIS &amp; Persistent SQLite WAL Engine)</font>",
+        t3_lbl_style, x=55, y=686, w=300, h=32
+    ))
+
+    # 3.1 Leaflet GIS Map (Col 1)
+    c_map = (
+        "<b>Bản đồ Giám sát Leaflet GIS</b><br>"
+        "<font style=\"font-size:12px;color:#37474F;\">"
+        "• Leaflet GIS đóng gói cục bộ<br>"
+        "• Ranh giới cụm &amp; Màu ưu tiên<br>"
+        "• Chấm gán tọa độ thủ công<br>"
+        "• Polling đồng bộ 5s (/changes)"
+        "</font>"
+    )
+    nodes.append(add_cell("d_map", c_map, card_base + "fillColor=#FFFFFF;strokeColor=#F57C00;", x=65, y=545, w=250, h=130))
+
+    # 3.2 Bảng Cụm & Điều phối Ca (Col 2)
+    c_dispatch = (
+        "<b>Bảng Cụm &amp; Điều phối Ca</b><br>"
+        "<font style=\"font-size:12px;color:#37474F;\">"
+        "• Thứ bậc ưu tiên giảm dần P(c)<br>"
+        "• Khóa clusterKey nhất quán khi poll<br>"
+        "• Giao đội (/team) &amp; 4 trạng thái<br>"
+        "• Nhật ký kiểm toán report_events"
+        "</font>"
+    )
+    nodes.append(add_cell("d_dispatch", c_dispatch, card_base + "fillColor=#FFF8E1;strokeColor=#FFA000;", x=360, y=545, w=250, h=130))
+
+    # 3.3 CSDL SQLite WAL (Col 3)
+    c_db = (
+        "<b>Cơ sở Dữ liệu SQLite WAL</b><br>"
+        "<font style=\"font-size:12px;color:#37474F;\">"
+        "• reports: Báo cáo &amp; trạng thái<br>"
+        "• messages_dedup: Chống trùng<br>"
+        "• report_events: Lịch sử điều phối<br>"
+        "• teams, operators, sessions, meta"
+        "</font>"
+    )
+    nodes.append(add_cell("db_sqlite", c_db, card_base + "fillColor=#ECEFF1;strokeColor=#455A64;", x=655, y=545, w=250, h=130))
+
+    # 3.4 Uploads Storage (Col 4)
+    c_fs = (
+        "<b>Kho Lưu trữ Tệp Hiện trường</b><br>"
+        "<font style=\"font-size:12px;color:#37474F;\">"
+        "• Thư mục uploads/ ảnh JPEG<br>"
+        "• Lưu ảnh gốc &amp; ảnh nén hiện trường<br>"
+        "• Đối soát toàn vẹn SHA-256<br>"
+        "• Static Server trả ảnh tức thời"
+        "</font>"
+    )
+    nodes.append(add_cell("fs_uploads", c_fs, card_base + "fillColor=#FFFFFF;strokeColor=#546E7A;", x=950, y=545, w=250, h=130))
+
+    # =========================================================================
+    # FOOTER LEGEND BOX (y = 770..800, h = 30, w = 1180)
+    # =========================================================================
+    legend_style = (
+        "rounded=1;whiteSpace=wrap;html=1;arcSize=6;fillColor=#FAFAFA;strokeColor=#B0BEC5;"
+        "strokeWidth=1;fontFamily=Helvetica;align=center;"
+    )
+    legend_text = (
+        "<font style=\"font-size:11px;color:#263238;\"><b>CHÚ GIẢI QUY ƯỚC DÒNG DỮ LIỆU:</b>   "
+        "<font color=\"#1565C0\">━━━ <b>Xanh Dương</b>: Luồng dữ liệu Thiết bị Biên (Tier 1)</font>   |   "
+        "<font color=\"#7B1FA2\">━━━ <b>Tím</b>: Luồng xử lý Lõi Backend (Tier 2)</font>   |   "
+        "<font color=\"#E65100\">━━━ <b>Cam</b>: Luồng Điều phối Web &amp; GIS (Tier 3)</font>   |   "
+        "<font color=\"#2E7D32\">━━━ <b>Xanh Lá</b>: Giao dịch CSDL &amp; Giao đội</font></font>"
+    )
+    nodes.append(add_cell("legend_box", legend_text, legend_style, x=40, y=770, w=1180, h=30))
+
+    # =========================================================================
+    # EDGES & CONNECTORS (CLEAN DIRECT ORTHOGONAL LANES, NO OVERLAP)
+    # =========================================================================
+    edge_t1 = "edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;html=1;strokeWidth=2;strokeColor=#1976D2;endArrow=block;endFill=1;fontSize=12;fontColor=#0D47A1;labelBackgroundColor=#FFFFFF;"
+    edge_t2 = "edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;html=1;strokeWidth=2;strokeColor=#7B1FA2;endArrow=block;endFill=1;fontSize=12;fontColor=#7B1FA2;labelBackgroundColor=#FFFFFF;"
+    edge_t3 = "edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;html=1;strokeWidth=2;strokeColor=#E65100;endArrow=block;endFill=1;fontSize=12;fontColor=#E65100;labelBackgroundColor=#FFFFFF;"
+    edge_green = "edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;html=1;strokeWidth=2;strokeColor=#2E7D32;endArrow=block;endFill=1;fontSize=12;fontColor=#1B5E20;labelBackgroundColor=#FFFFFF;"
+
+    # 1. Inside Tier 1: Left to Right
+    nodes.append(add_edge("e_report_ai", "Ảnh &amp; Meta", edge_t1, "ui_report", "ai_edge", exit_x=1.0, exit_y=0.5, entry_x=0.0, entry_y=0.5))
+    nodes.append(add_edge("e_ai_outbox", "[F, U, N, V]", edge_t1, "ai_edge", "hive_outbox", exit_x=1.0, exit_y=0.5, entry_x=0.0, entry_y=0.5))
+
+    # 2. Tier 1 -> Intermediate Layer:
+    nodes.append(add_edge("e_sos_trans", "Gói SOS", edge_t1, "ui_sos", "trans_node", exit_x=0.5, exit_y=1.0, entry_x=0.11, entry_y=0.0))
+    nodes.append(add_edge("e_outbox_trans", "Đồng bộ Outbox", edge_t1, "hive_outbox", "trans_node", exit_x=0.5, exit_y=1.0, entry_x=0.89, entry_y=0.0))
+
+    # 3. Intermediate Layer -> Tier 2 (Col 4: be_api):
+    nodes.append(add_edge("e_trans_api", "HTTP REST &amp; Webhook SMS", edge_t2, "trans_node", "be_api", exit_x=0.89, exit_y=1.0, entry_x=0.5, entry_y=0.0))
+
+    # 4. Inside Tier 2: Right to Left Processing Pipeline
+    nodes.append(add_edge("e_api_dedup", "Xác thực Hợp đồng", edge_t2, "be_api", "be_dedup", exit_x=0.0, exit_y=0.5, entry_x=1.0, entry_y=0.5))
+    nodes.append(add_edge("e_dedup_rev", "Báo cáo Hợp lệ", edge_t2, "be_dedup", "be_review", exit_x=0.0, exit_y=0.5, entry_x=1.0, entry_y=0.5))
+    nodes.append(add_edge("e_rev_core", "Đủ GPS", edge_t2, "be_review", "be_core", exit_x=0.0, exit_y=0.5, entry_x=1.0, entry_y=0.5))
+
+    # 5. Tier 2 -> Tier 3: FOUR PERFECTLY PARALLEL STRAIGHT VERTICAL HIGHWAYS (ZERO CROSSINGS)
+    # Highway 1 (Col 1, x = 190): be_core -> d_map
+    nodes.append(add_edge(
+        "e_core_map",
+        "Cụm Louvain (ETag 304)",
+        edge_t3, "be_core", "d_map",
+        exit_x=0.5, exit_y=1.0, entry_x=0.5, entry_y=0.0,
+        offset_y=-8
+    ))
+
+    # Highway 2 (Col 2, x = 485): be_review -> d_dispatch
+    nodes.append(add_edge(
+        "e_rev_dispatch",
+        "Ca Thẩm tra &amp; Điểm P(c)",
+        edge_t3, "be_review", "d_dispatch",
+        exit_x=0.5, exit_y=1.0, entry_x=0.5, entry_y=0.0,
+        offset_y=-8
+    ))
+
+    # Highway 3 (Col 3, x = 780): be_dedup -> db_sqlite
+    nodes.append(add_edge(
+        "e_dedup_db",
+        "Giao dịch WAL Mode",
+        edge_green, "be_dedup", "db_sqlite",
+        exit_x=0.5, exit_y=1.0, entry_x=0.5, entry_y=0.0,
+        offset_y=-8
+    ))
+
+    # Highway 4 (Col 4, x = 1075): be_api -> fs_uploads
+    nodes.append(add_edge(
+        "e_api_uploads",
+        "Lưu trữ Ảnh Hiện trường",
+        edge_t1, "be_api", "fs_uploads",
+        exit_x=0.5, exit_y=1.0, entry_x=0.5, entry_y=0.0,
+        offset_y=-8
+    ))
+
+    # 6. Reverse Feedback (Dispatch Action -> API Gateway):
+    # Smooth bypass cleanly below Tier 3 (y = 748) and along the right edge (x = 1245)
+    nodes.append(add_edge(
+        "e_dispatch_team",
+        "Giao Đội (/team)",
+        edge_green, "d_dispatch", "be_api",
+        exit_x=0.5, exit_y=1.0, entry_x=1.0, entry_y=0.5,
+        points=[(485, 748), (1245, 748), (1245, 402)]
+    ))
+
+    return create_diagram_xml("Kien-truc-Tong-the-3-Tang-NCKH", nodes, w="1280", h="825")
+
 
 
 # =========================================================================

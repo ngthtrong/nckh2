@@ -76,7 +76,7 @@ class _GuideScreenState extends State<GuideScreen> {
   Widget _buildTabButton(String label, int index) {
     final isSelected = _activeTab == index;
     return Expanded(
-      child: InkWell(
+      child: GestureDetector(
         onTap: () => setState(() => _activeTab = index),
         child: Container(
           padding: const EdgeInsets.symmetric(vertical: 14),
@@ -92,7 +92,9 @@ class _GuideScreenState extends State<GuideScreen> {
             label,
             textAlign: TextAlign.center,
             style: TextStyle(
-              color: isSelected ? AppColors.primaryRed : const Color(0xFF9CA3AF),
+              color: isSelected
+                  ? AppColors.primaryRed
+                  : const Color(0xFF9CA3AF),
               fontSize: 13,
               fontWeight: FontWeight.w800,
             ),
@@ -330,16 +332,13 @@ class _GuideScreenState extends State<GuideScreen> {
               physics: const NeverScrollableScrollPhysics(),
               gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
                 crossAxisCount: 2,
-                mainAxisExtent: 68,
+                mainAxisExtent: 104,
                 crossAxisSpacing: 10,
                 mainAxisSpacing: 10,
               ),
               itemCount: region.numbers.length,
               itemBuilder: (context, idx) {
-                return PhoneLinkCard(
-                  item: region.numbers[idx],
-                  compact: true,
-                );
+                return PhoneLinkCard(item: region.numbers[idx], compact: true);
               },
             ),
             if (region.guides.isNotEmpty) ...[
@@ -360,10 +359,13 @@ class _GuideScreenState extends State<GuideScreen> {
                       child: Row(
                         crossAxisAlignment: CrossAxisAlignment.start,
                         children: [
-                          const Text('• ',
-                              style: TextStyle(
-                                  color: Color(0xFFD97706),
-                                  fontWeight: FontWeight.bold)),
+                          const Text(
+                            '• ',
+                            style: TextStyle(
+                              color: Color(0xFFD97706),
+                              fontWeight: FontWeight.bold,
+                            ),
+                          ),
                           Expanded(
                             child: Text(
                               g,

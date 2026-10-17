@@ -43,7 +43,7 @@ class RescueRepositoryImpl implements RescueRepository {
   Future<void> init() async {
     await localDataSource.init();
     await outboxDataSource.init();
-    if (serverLocator != null) await serverLocator!.init(outboxDataSource);
+    serverLocator?.attach(outboxDataSource);
   }
 
   @override
@@ -137,12 +137,17 @@ class RescueRepositoryImpl implements RescueRepository {
       await saveRecord(failed);
       return failed;
     }
-    if (await _finishAttachment(record)) {
-      final done = record.copyWith(synced: true);
-      await saveRecord(done);
-      return done;
+    if (message != null) return record;
+    var current = record.copyWith(metadataSynced: true);
+    try {
+      final done = await _finishAttachment(current);
+      current = current.copyWith(synced: done, clearAttachmentError: true);
+    } catch (error) {
+      debugPrint('Không đọc/gửi được ảnh ${record.id}: $error');
+      current = current.copyWith(attachmentError: 'ATTACHMENT_UNAVAILABLE');
     }
-    return record;
+    await saveRecord(current);
+    return current;
   }
 
   @override
@@ -182,8 +187,11 @@ class RescueRepositoryImpl implements RescueRepository {
     return changed;
   });
 
-  Future<void> _enqueue(RescueRecord record) =>
-      outboxDataSource.enqueueCreate(rescueRecordPayload(record));
+  Future<void> _enqueue(RescueRecord record) async {
+    if (!record.metadataSynced) {
+      await outboxDataSource.enqueueCreate(rescueRecordPayload(record));
+    }
+  }
 
   Future<void> _flushOutbox() async {
     var batch = outboxDataSource.readyMessages();
@@ -213,6 +221,12 @@ class RescueRepositoryImpl implements RescueRepository {
         final result = byId[message.messageId];
         final status = result?['status'];
         if (status == 'accepted' || status == 'duplicate') {
+          final recordId = message.payload['id'];
+          final record = localDataSource.getRecord(recordId as String);
+          if (record != null) {
+            // Persist the ACK before deleting its message so image retries do not re-enqueue it.
+            await saveRecord(record.copyWith(metadataSynced: true));
+          }
           await outboxDataSource.acknowledge(message.messageId);
         } else if (status == 'retry_later' || result?['retryable'] == true) {
           await outboxDataSource.scheduleRetry(
@@ -265,14 +279,6 @@ class RescueRepositoryImpl implements RescueRepository {
     if (serverLocator != null && !await serverLocator!.ensureConnected()) {
       return false;
     }
-    late final Uint8List imageBytes;
-    try {
-      imageBytes = await readLocalFile(path);
-    } catch (_) {
-      return true;
-    }
-    if (imageBytes.isEmpty) return true;
-
     // Chế độ đã chọn lúc gửi; bản ghi xếp hàng khi offline (hoặc bản cũ) thì
     // quyết định lại theo mạng hiện tại.
     var mode = sendModeFromName(record.sendMode);
@@ -292,6 +298,7 @@ class RescueRepositoryImpl implements RescueRepository {
       case SendMode.smsFallback || SendMode.queuedOffline:
         return false; // chưa tới được server, thử lại lần đồng bộ sau
       case SendMode.compressedImage:
+        final imageBytes = await _attachmentBytes(path);
         final compressed = await senderDataSource.compress(imageBytes);
         return _deliverImage(
           record,
@@ -299,7 +306,7 @@ class RescueRepositoryImpl implements RescueRepository {
           allowShrink: false,
         );
       case SendMode.fullImage:
-        var bytes = imageBytes;
+        var bytes = await _attachmentBytes(path);
         if (!isServerSupportedImage(bytes)) {
           // HEIC hoặc định dạng server không nhận: chuyển sang JPEG, giữ độ phân giải.
           bytes =
@@ -312,6 +319,12 @@ class RescueRepositoryImpl implements RescueRepository {
         }
         return _deliverImage(record, bytes);
     }
+  }
+
+  Future<Uint8List> _attachmentBytes(String path) async {
+    final bytes = await readLocalFile(path);
+    if (bytes.isEmpty) throw StateError('Ảnh đính kèm trống.');
+    return bytes;
   }
 
   Future<bool> _deliverImage(

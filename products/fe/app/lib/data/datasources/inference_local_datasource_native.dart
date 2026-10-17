@@ -4,6 +4,7 @@ import 'dart:io';
 import 'dart:math' as math;
 import 'dart:ui' as ui;
 
+import 'package:crypto/crypto.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/services.dart';
 import 'package:onnxruntime/onnxruntime.dart';
@@ -12,6 +13,7 @@ import 'package:path_provider/path_provider.dart';
 import '../../domain/entities/ai_model_type.dart';
 import '../../domain/entities/ai_tag.dart';
 import '../../domain/repositories/inference_repository.dart';
+import 'admin_model_download_native.dart';
 
 class InferenceLocalDataSource {
   static const int _inputSize = 256;
@@ -21,75 +23,92 @@ class InferenceLocalDataSource {
 
   OrtSession? _onnxSession;
   List<String> _labels = [];
-  bool _isLoaded = false;
   bool _pteReady = false;
-  AiModelType _currentModel = AiModelType.onnx;
+  AiModelType _currentModel = AiModelType.pte;
+  bool _comparisonAccess = false;
+  int _onnxRuns = 0;
+  Completer<void>? _onnxIdle;
   bool _isDualComparison = false;
   ModelBenchmarkComparison? _latestComparison;
 
-  bool get ready => _isLoaded;
+  bool get ready =>
+      _labels.length == 4 &&
+      (_currentModel == AiModelType.pte ? _pteReady : onnxReady);
+  bool get onnxReady => _comparisonAccess && _onnxSession != null;
   bool get pteReady => _pteReady;
   AiModelType get currentModel => _currentModel;
   bool get isDualComparison => _isDualComparison;
   ModelBenchmarkComparison? get latestComparison => _latestComparison;
 
   void setModel(AiModelType model) {
-    if (model == AiModelType.pte && !_pteReady) {
-      debugPrint('ExecuTorch is unavailable; keeping ONNX active.');
-      return;
-    }
+    if (model == AiModelType.onnx && !onnxReady) return;
     _currentModel = model;
     _latestComparison = null;
   }
 
   void setDualComparison(bool enabled) {
-    _isDualComparison = enabled && _pteReady;
+    _isDualComparison = enabled && _pteReady && onnxReady;
     _latestComparison = null;
   }
 
-  Future<void> loadModel() async {
-    try {
-      OrtEnv.instance.init();
-    } catch (_) {}
+  void setComparisonAccess(bool enabled) {
+    _comparisonAccess = enabled;
+    if (!enabled) {
+      _currentModel = AiModelType.pte;
+      _isDualComparison = false;
+      _latestComparison = null;
+      _releaseOnnxWhenIdle();
+    }
+  }
 
+  void _releaseOnnxWhenIdle() {
+    if (!_comparisonAccess && _onnxRuns == 0) {
+      _onnxSession?.release();
+      _onnxSession = null;
+    }
+  }
+
+  Future<void> loadComparisonModel(String path) async {
+    if (!_comparisonAccess) throw StateError('Cần đăng nhập admin.');
+    if (_onnxSession != null) return;
+    OrtEnv.instance.init();
+    final options = OrtSessionOptions();
+    try {
+      _onnxSession = OrtSession.fromFile(File(path), options);
+    } finally {
+      options.release();
+    }
+  }
+
+  Future<void> unloadComparisonModel() async {
+    setComparisonAccess(false);
+    if (_onnxRuns > 0) {
+      _onnxIdle ??= Completer<void>();
+      await _onnxIdle!.future;
+    }
+  }
+
+  Future<void> loadModel() async {
     final docDir = await getApplicationSupportDirectory();
     final manifest =
         jsonDecode(
               await rootBundle.loadString('assets/models/model_manifest.json'),
             )
             as Map<String, dynamic>;
-    final version = manifest['version'] as String;
-    final onnxFile = await _syncAsset(
-      directory: docDir,
-      assetPath: 'assets/models/model.onnx',
-      fileName: 'model.onnx',
-      version: version,
-    );
+    try {
+      await pruneModelDownloads(
+        keepOnnxSha256: manifest['onnx_sha256'] as String,
+      );
+    } on FileSystemException catch (error) {
+      debugPrint('Không dọn được ONNX cũ: $error');
+    }
     final pteFile = await _syncAsset(
       directory: docDir,
       assetPath: 'assets/models/model.pte',
       fileName: 'model.pte',
-      version: version,
+      version: manifest['version'] as String,
+      expectedSha256: manifest['pte_sha256'] as String,
     );
-
-    try {
-      _onnxSession = OrtSession.fromFile(onnxFile, OrtSessionOptions());
-      debugPrint('✓ ONNX model loaded: $version');
-    } catch (error) {
-      debugPrint('ONNX file load failed, trying bundled bytes: $error');
-      try {
-        final raw = await rootBundle.load('assets/models/model.onnx');
-        final bytes = raw.buffer.asUint8List(
-          raw.offsetInBytes,
-          raw.lengthInBytes,
-        );
-        _onnxSession = OrtSession.fromBuffer(bytes, OrtSessionOptions());
-      } catch (fallbackError) {
-        debugPrint('ONNX load failed: $fallbackError');
-        _onnxSession = null;
-      }
-    }
-
     _pteReady = false;
     if (!kIsWeb && defaultTargetPlatform == TargetPlatform.android) {
       try {
@@ -98,28 +117,15 @@ class InferenceLocalDataSource {
               'modelPath': pteFile.path,
             }) ??
             false;
-        debugPrint('✓ ExecuTorch PTE loaded: $_pteReady');
       } on PlatformException catch (error) {
         debugPrint('ExecuTorch load failed: ${error.code}: ${error.message}');
       } on MissingPluginException {
         debugPrint('ExecuTorch native bridge is unavailable on this platform.');
       }
     }
-
-    try {
-      final rawLabels = await rootBundle.loadString('assets/labels.json');
-      _labels = List<String>.from(jsonDecode(rawLabels) as List);
-    } catch (error) {
-      debugPrint('Labels load failed: $error');
-      _labels = ['low', 'medium', 'high', 'non_flood'];
-    }
-
-    _isLoaded = _onnxSession != null && _labels.length == 4;
-    if (_onnxSession != null) {
-      unawaited(
-        verifyAndroidLogits(Float32List(1 * 3 * _inputSize * _inputSize)),
-      );
-    }
+    _labels = List<String>.from(
+      jsonDecode(await rootBundle.loadString('assets/labels.json')) as List,
+    );
   }
 
   Future<File> _syncAsset({
@@ -127,6 +133,7 @@ class InferenceLocalDataSource {
     required String assetPath,
     required String fileName,
     required String version,
+    required String expectedSha256,
   }) async {
     final target = File('${directory.path}/$fileName');
     final versionFile = File('${target.path}.version');
@@ -135,13 +142,20 @@ class InferenceLocalDataSource {
         : '';
     if (!await target.exists() ||
         await target.length() == 0 ||
-        installedVersion != version) {
+        installedVersion != version ||
+        (await sha256.bind(target.openRead()).first).toString() !=
+            expectedSha256) {
       final raw = await rootBundle.load(assetPath);
       final bytes = raw.buffer.asUint8List(
         raw.offsetInBytes,
         raw.lengthInBytes,
       );
       final temporary = File('${target.path}.tmp');
+      if (sha256.convert(bytes).toString() != expectedSha256) {
+        throw const FormatException(
+          'PTE asset does not match the bundled manifest.',
+        );
+      }
       await temporary.writeAsBytes(bytes, flush: true);
       if (await target.exists()) await target.delete();
       await temporary.rename(target.path);
@@ -174,7 +188,7 @@ class InferenceLocalDataSource {
 
       final onnxResult = _toResult(onnxOutput, AiModelType.onnx);
       final pteResult = _toResult(pteOutput, AiModelType.pte);
-      if (onnxResult != null && pteResult != null) {
+      if (_comparisonAccess && onnxResult != null && pteResult != null) {
         _latestComparison = ModelBenchmarkComparison(
           activeModel: _currentModel,
           labelOnnx: onnxResult.label,
@@ -198,7 +212,7 @@ class InferenceLocalDataSource {
 
   Future<_EngineOutput?> _runOnnx(Float32List data) async {
     final session = _onnxSession;
-    if (session == null) return null;
+    if (session == null || !_comparisonAccess) return null;
     final input = OrtValueTensor.createTensorWithDataList(data, [
       1,
       3,
@@ -206,6 +220,7 @@ class InferenceLocalDataSource {
       _inputSize,
     ]);
     final options = OrtRunOptions();
+    _onnxRuns++;
     final stopwatch = Stopwatch()..start();
     try {
       final outputs = await session.runAsync(options, {
@@ -225,6 +240,12 @@ class InferenceLocalDataSource {
     } finally {
       input.release();
       options.release();
+      _onnxRuns--;
+      _releaseOnnxWhenIdle();
+      if (_onnxRuns == 0) {
+        _onnxIdle?.complete();
+        _onnxIdle = null;
+      }
     }
   }
 

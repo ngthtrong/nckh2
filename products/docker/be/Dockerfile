@@ -9,13 +9,15 @@ ENV PYTHONDONTWRITEBYTECODE=1 \
     RESCUE_DB_FILE=/var/lib/rescue/rescue_reports.db \
     RESCUE_UPLOADS_DIR=/var/lib/rescue/uploads \
     RESCUE_BACKUP_DIR=/var/lib/rescue/backups \
-    RESCUE_GOLD_DIR=/app/gold
+    RESCUE_GOLD_DIR=/app/gold \
+    RESCUE_MODEL_EXPORT_DIR=/app/model_exports
 
 WORKDIR /app/be
 COPY products/be/requirements.txt ./
 RUN pip install -r requirements.txt
 
 COPY products/be/ ./
+COPY ["products/fe/model/Edge Ai/Export/flood_mobilenetv3_large.onnx", "products/fe/model/Edge Ai/Export/flood_mobilenetv3_large.pte", "products/fe/model/Edge Ai/Export/model_manifest.json", "/app/model_exports/"]
 # Chỉ algorithm_input.json của từng run được phép làm đầu vào suy luận (thucnghiem/data/README.md).
 COPY thucnghiem/data/gold/ /app/gold/
 COPY --chmod=755 products/docker/be/entrypoint.sh /usr/local/bin/entrypoint.sh

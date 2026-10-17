@@ -93,15 +93,15 @@ def image_figures(predictions):
             'history_rows': len(history)}
 
 
-def compression_figures():
-    quant = obj('products/fe/reports/fp32_ptq_qat/summary.json')['classification_metrics']
-    prune = obj('products/fe/reports/pruning_st/summary.json')['classification_metrics']
+def compression_figures(benchmarks):
+    quant = obj(benchmarks['quantization'] + '/summary.json')['classification_metrics']
+    prune = obj(benchmarks['pruning'] + '/summary.json')['classification_metrics']
     fig, axes = plt.subplots(1, 2, figsize=(9.3, 4), layout='constrained')
     for k, title, color in [('onnx_fp32', 'FP32', BLUE), ('ptq_int8', 'PTQ', '#478558'), ('qat_int8', 'QAT', ORANGE)]:
         m = quant[k]
         axes[0].scatter(m['bytes'] / 1024**2, 100*m['accuracy'], s=80, c=color)
         axes[0].annotate(title, (m['bytes']/1024**2, 100*m['accuracy']), xytext=(4, 5), textcoords='offset points')
-    axes[0].set(xlabel='Dung lượng ONNX (MiB)', ylabel='Accuracy summary (%)', xlim=(0, 19), ylim=(40, 85))
+    axes[0].set(xlabel='Dung lượng ONNX (MiB)', ylabel='Accuracy summary (%)', xlim=(0, None), ylim=(0, 100))
     keys = ['pth', 'onnx', 'pte']; x = np.arange(3)
     for prefix, offset, name, color in [('baseline', -.19, 'Gốc', BLUE), ('structured', .19, 'Cắt tỉa', ORANGE)]:
         axes[1].bar(x+offset, [prune[prefix+'_'+k]['latency_ms_median'] for k in keys], .36, label=name, color=color)
@@ -154,8 +154,8 @@ def research_figures():
     save(fig, 'rq2-robustness')
 
 
-def mobile_figure(split, predictions):
-    mobile, audit = audit_mobile(read('products/fe/reports/mobile/samsung21se.json'), split)
+def mobile_figure(split, predictions, source):
+    mobile, audit = audit_mobile(read(source), split)
     fig, ax = plt.subplots(figsize=(7.5, 3.6), layout='constrained')
     data = [[r['latencyMs'] for r in mobile[k]['predictions']] for k in ['onnx', 'pte']]
     ax.boxplot(data, tick_labels=['ONNX', 'ExecuTorch'], widths=.45,
@@ -173,15 +173,17 @@ def mobile_figure(split, predictions):
 
 def main():
     OUT.mkdir(parents=True, exist_ok=True)
-    base = obj('products/fe/reports/pth_onnx_pte/summary.json')
-    predictions = rows('products/fe/reports/pth_onnx_pte/all_predictions.csv')
+    benchmarks = obj('report/config/benchmark-sources.json')
+    base = obj(benchmarks['fp32'] + '/summary.json')
+    predictions = rows(benchmarks['fp32'] + '/all_predictions.csv')
     split = rows('products/fe/model/Edge Ai/split_train_val_test_mobilenetv3_large.csv')
     # Reuse the table exporter's split/prediction consistency check.
     from export_results import verify_predictions
-    verify_predictions(base, 'products/fe/reports/pth_onnx_pte/all_predictions.csv', split)
+    verify_predictions(base, benchmarks['fp32'] + '/all_predictions.csv', split)
     metrics = image_figures(predictions)
-    compression_figures(); research_figures()
-    metrics['mobile_audit'] = mobile_figure(split, predictions)
+    compression_figures(benchmarks); research_figures()
+    metrics['mobile_audit'] = mobile_figure(split, predictions, benchmarks['mobile']['file'])
+    metrics['mobile_audit'].update(cpu_seed=base['metadata']['seed'], mobile_seed=benchmarks['mobile']['seed'])
     for source in ['report/scripts/build_figures.py', 'report/scripts/mobile_evidence.py']:
         read(source)
     (ROOT / 'report/generated/figure-provenance.json').write_text(json.dumps(
@@ -189,8 +191,9 @@ def main():
          'environment': {'font': FONT, **{name: importlib.metadata.version(name)
                                         for name in ['matplotlib', 'numpy', 'Pillow']}},
          'image_model': 'mobilenetv3_large_dataset_v4_seed1024',
-         'historical_figures': ['confidence-calibration', 'compression-tradeoffs', 'mobile-latency'],
-         'note': 'Saved evidence only; six plots copied verbatim from seed1024; calibration, compression and mobile remain historical; no new observations.'},
+         'benchmark_sources': benchmarks,
+         'benchmark_figures': ['confidence-calibration', 'compression-tradeoffs', 'mobile-latency'],
+         'note': 'Saved evidence only; six plots copied verbatim from seed1024; benchmark sources selected in config/benchmark-sources.json; no new observations.'},
         ensure_ascii=False, indent=2) + '\n')
     print(f'Generated {len(OUTPUTS)} figures with input/output hashes.')
 
