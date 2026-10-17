@@ -1,5 +1,6 @@
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
+import 'package:hive_ce_flutter/hive_flutter.dart';
 import 'package:workmanager/workmanager.dart';
 
 import 'core/platform/sync_isolate_guard.dart';
@@ -19,10 +20,13 @@ import 'presentation/screens/splash_screen.dart';
 @pragma('vm:entry-point')
 void callbackDispatcher() {
   Workmanager().executeTask((task, inputData) async {
-    // App đang mở: để isolate UI đồng bộ, không mở Hive song song (docs/contact_connect.md).
-    if (await delegateSyncToForeground()) return true;
-    await runBackgroundSync(_syncInBackground);
-    return true;
+    try {
+      if (await delegateSyncToForeground()) return true;
+      return await runBackgroundSync(_syncInBackground, closeHive: Hive.close);
+    } catch (error) {
+      debugPrint('Đồng bộ nền chưa hoàn tất, sẽ thử lại: $error');
+      return false;
+    }
   });
 }
 
@@ -33,7 +37,8 @@ Future<void> _syncInBackground() async {
     localDataSource: recordLocalDS,
     senderDataSource: senderRemoteDS,
     serverLocator: !kIsWeb && defaultTargetPlatform == TargetPlatform.android
-        ? ServerLocator()
+        // Worker holds the Hive lease; avoid subnet scans while it is held.
+        ? ServerLocator(allowLanScan: false)
         : null,
     sendPolicy: AdaptiveSendPolicy(
       NetworkRepositoryImpl(NetworkRemoteDataSource()),
@@ -84,7 +89,6 @@ Future<void> main() async {
     networkRepository: networkRepository,
   );
 
-  registerForegroundSync(controller.syncPending);
   runApp(RescueApp(controller: controller));
 }
 
@@ -103,6 +107,9 @@ class RescueApp extends StatelessWidget {
         colorSchemeSeed: const Color(0xFFC62828),
         useMaterial3: true,
         scaffoldBackgroundColor: const Color(0xFFF7F7F7),
+        splashFactory: NoSplash.splashFactory,
+        hoverColor: Colors.transparent,
+        highlightColor: Colors.transparent,
       ),
       home: SplashScreen(controller: controller),
     );

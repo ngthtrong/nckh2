@@ -12,12 +12,16 @@ typedef InferenceResult = ({
 abstract class InferenceRepository {
   bool get ready;
   bool get pteReady;
+  bool get onnxReady;
   AiModelType get currentModel;
   bool get isDualComparison;
   ModelBenchmarkComparison? get latestComparison;
 
   void setModel(AiModelType model);
   void setDualComparison(bool enabled);
+  void setComparisonAccess(bool enabled);
+  Future<void> loadComparisonModel(String path);
+  Future<void> unloadComparisonModel();
 
   Future<void> loadModel();
   Future<InferenceResult?> classifyImage(Uint8List imageBytes);

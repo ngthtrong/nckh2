@@ -233,7 +233,7 @@ def evaluate_models(runners: dict, items: list, config: dict) -> tuple[dict, dic
         for name, prob in outputs.items():
             probabilities[name].append(prob)
             latencies[name].append(timings[name])
-            order = np.argsort(prob)[::-1]
+            order = np.argsort(-prob, kind="stable")
             row.update({f"pred_{name}": config["class_order"][int(order[0])],
                         f"confidence_{name}": float(prob[order[0]]),
                         f"latency_ms_{name}": timings[name],

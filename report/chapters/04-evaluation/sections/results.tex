@@ -14,7 +14,7 @@ Model mới được dùng cho các hình phân loại là \RepoPath{mobilenetv3
 \end{figure}
 Recall non\_flood là 90,70\%; recall high là 74,07\%. Trong 54 ảnh high, 12 ảnh bị dự đoán medium và 2 ảnh bị dự đoán low. Có 3 lỗi cách ít nhất hai mức severity (1,17\% test). Đây là chỉ số theo thứ tự mức ngập, chưa đo hệ quả cứu hộ.
 
-Thư mục mới chưa có manifest đường dẫn/hash chia tập hoặc dự đoán đầy đủ trên test. Cùng số mẫu 256 và cùng support từng lớp không đủ chứng minh trùng từng ảnh với split seed 42. Vì vậy không dùng chênh lệch với 76,17\% của phiên cũ để kết luận model mới cải thiện hoặc suy giảm, và không gán kết quả chuyển runtime/nén/mobile cũ cho seed 1024.
+Checkpoint seed 1024 chưa lưu hash manifest chia tập của lần train. Các kiểm tra ảnh sạch và lỗi validation ở Chương~2 nhất quán với split dùng chung, nhưng chưa xác nhận toàn bộ phân công mẫu huấn luyện ban đầu. Phiên benchmark seed 1024 chạy lại đã có đủ dự đoán trên test, hash split/config và hash model để đối chiếu. Bằng chứng của phiên đánh giá này không thay thế hồ sơ chia tập còn thiếu của lần train; không dùng riêng chênh lệch Accuracy giữa các phiên để kết luận model cải thiện hoặc suy giảm.
 \begin{figure}[htbp]\centering
 \includegraphics[width=\textwidth]{image-examples.png}
 \caption{Các ví dụ phân loại sai trên validation của model seed 1024}
@@ -22,8 +22,8 @@ Thư mục mới chưa có manifest đường dẫn/hash chia tập hoặc dự 
 \end{figure}
 Trong hình, T là nhãn thật, P là dự đoán, conf là xác suất lớp dự đoán và true\_prob là xác suất nhãn thật. Ảnh minh họa gồm các lỗi validation, không phải ví dụ đúng/sai trên test như hình của phiên cũ. Có lỗi confidence cao; không suy nguyên nhân sai nhãn, góc chụp hay che khuất chỉ từ hình. Các ảnh nguồn Dataset\_Flood giữ tác quyền ban đầu; minh họa nội bộ không xác nhận quyền phát hành lại ngoài báo cáo.
 
-\subsection{Confidence và chính sách gửi metadata: artifact lịch sử seed 42}
-Các phân tích confidence dưới đây giữ phiên FP32 cũ, không thuộc model seed 1024. ECE cũ là 0,06350 và Brier 0,34483.
+\subsection{Confidence và chính sách gửi metadata}
+Các phân tích confidence dưới đây thuộc benchmark FP32 seed \BenchmarkSeed{} và dùng CSV dự đoán đi kèm. ECE của phiên benchmark là \ImageECE{} và Brier \ImageBrier{}.
 Hình~\ref{fig:confidence-calibration} được tính từ dự đoán FP32 trên 256 ảnh test với bin rộng 0,1. Đường reliability so sánh confidence trung bình với tỷ lệ đúng trong mỗi bin; biểu đồ số mẫu cho biết một điểm trên đường có bao nhiêu quan sát. Đây là phép mô tả trên split hiện tại, không phải kết quả đã hiệu chuẩn lại mô hình. Giá trị ECE nêu trên được lấy theo cấu hình artifact gốc, không tính lại ECE từ các bin minh họa này.
 \begin{figure}[htbp]\centering
 \includegraphics[width=\textwidth]{confidence-calibration.pdf}
@@ -31,54 +31,71 @@ Hình~\ref{fig:confidence-calibration} được tính từ dự đoán FP32 trê
 \label{fig:confidence-calibration}
 \end{figure}
 
-Ở ngưỡng $p\geq0{,}90$, CSV hiện tại có 52/256 ảnh (20,31\%) và cả 52 dự đoán đều đúng. Kết quả hẹp này bổ sung thông tin cho chính sách gửi metadata; nó không bảo đảm mọi ảnh camera mới có confidence cao đều đúng. Ngưỡng 0,90 là cấu hình ứng dụng đang có, không được chọn lại từ phân tích này. Nếu dùng tập test để chỉnh ngưỡng, cần tập xác nhận mới để đánh giá quyết định sau điều chỉnh.
+Ở ngưỡng $p\geq0{,}90$, CSV được chọn có \HighConfidenceCount/\ImageTest{} ảnh (\HighConfidenceCoverage\%), trong đó \HighConfidenceCorrect{} dự đoán đúng. Kết quả này bổ sung thông tin cho chính sách gửi metadata; nó không bảo đảm mọi ảnh camera mới có confidence cao đều đúng. Ngưỡng 0,90 là cấu hình ứng dụng đang có, không được chọn lại từ phân tích này. Nếu dùng tập test để chỉnh ngưỡng, cần tập xác nhận mới để đánh giá quyết định sau điều chỉnh.
 
 Nghiên cứu calibration phân biệt confidence của mạng với khả năng đúng quan sát được và khảo sát temperature scaling trên các bài toán phân loại \citep{guo2017calibration}. Đối với đề tài, một bước tiếp theo là fit phép hiệu chuẩn trên validation rồi đo trên tập camera độc lập. Đồng thời, cần đánh giá cả lượng dữ liệu tiết kiệm và số ca quan trọng bị thiếu ảnh tại trung tâm, bởi tỷ lệ phân loại đúng chưa đủ đo chất lượng quyết định truyền tải.
 
-\subsection{Tương đương PyTorch, ONNX và ExecuTorch: phiên lịch sử}
-Các bảng runtime, benchmark ứng dụng và phép nén/cắt tỉa sau đây thuộc artifact cũ; chưa được chạy lại với model seed 1024.
+\subsection{Đối chiếu PyTorch, ONNX và ExecuTorch}
+Bảng runtime FP32 dưới đây thuộc model seed \BenchmarkSeed{}; benchmark ứng dụng thuộc seed \MobileBenchmarkSeed{}, lượng tử hóa thuộc seed \QuantizationSeed{} và cắt tỉa thuộc seed \PruningSeed{}. Các nguồn được chọn độc lập với checkpoint đang triển khai, tránh gán số liệu lịch sử cho model mới khi chưa đo lại.
+
 \input{generated/tables/pth_onnx_pte}
-Cả ba định dạng có cùng nhãn top-1 trên 256 ảnh và cùng chỉ số phân loại. Sai khác xác suất tối đa PTH--ONNX khoảng $3{,}01\times10^{-6}$; PTH--PTE khoảng $5{,}01\times10^{-6}$. Kết quả cho thấy chuyển đổi FP32 giữ đầu ra tốt trên split được đo với pipeline đã khai báo.
 
-Trong phiên này, trung vị lời gọi suy luận PTH là 65,87 ms, ONNX 25,93 ms và PTE 45,31 ms. File checkpoint PTH khoảng 48,51 MiB, ONNX 16,04 MiB và PTE 16,06 MiB. Đây là đối chiếu trên máy tính, không đủ để chọn runtime nhanh nhất trên mọi điện thoại. Kích thước PTH lớn hơn không có nghĩa toàn bộ phần chênh lệch là tham số tính toán cần cắt tỉa.
+Đồng thuận top-1 PTH--ONNX là \CpuOnnxAgreement\% và PTH--PTE là \CpuPteAgreement\% trên \ImageTest{} ảnh. Sai khác xác suất tối đa tương ứng là $\CpuOnnxMaxDiff$ và $\CpuPteMaxDiff$. Các phép đo này kiểm tra việc giữ đầu ra sau chuyển đổi trên split và pipeline đã khai báo.
 
-Smoke verification trên ba ảnh ghi năm kiểm tra local pass gồm tiền xử lý, precision, provider, parity và label mapping; phần mobile ghi chưa thử. Kết quả smoke hỗ trợ kiểm tra đường thực thi nhỏ, còn kết quả full test hỗ trợ thống kê phân loại. Hai mức kiểm tra bổ sung nhau và không thay thế phép đo pixel/runtime native trên điện thoại.
+Bảng~\ref{tab:pth_onnx_pte} trình bày dung lượng và trung vị lời gọi suy luận của từng định dạng trong cùng phiên. Đây là đối chiếu trên máy tính, không đủ để chọn runtime nhanh nhất trên mọi điện thoại. Chênh lệch kích thước checkpoint và file triển khai không đồng nghĩa toàn bộ phần chênh lệch là tham số tính toán cần cắt tỉa.
+
+Verification trên \VerificationSamples{} ảnh test ghi \VerificationPassedChecks{} kiểm tra local pass gồm tiền xử lý, precision, provider, parity và label mapping. Công cụ verification chỉ kiểm tra PTH/ONNX trên CPU; trường mobile của tệp này không đánh giá phiên benchmark ứng dụng độc lập. Kết quả full test xác nhận đường suy luận đã kiểm tra trên tập cố định, chưa thay thế phép đối chiếu pixel/runtime native trên điện thoại.
 
 \subsection{Benchmark tại ứng dụng và đối chiếu với CPU}\label{sec:mobile-results}
-Repo còn có \RepoPath{products/fe/reports/mobile/samsung21se.json}, chứa hai object JSON nối tiếp cho ONNX và PTE. Mỗi object ghi complete, 256/256 ảnh xử lý, không lỗi suy luận, năm warmup và không lỗi warmup. Script báo cáo đọc riêng hai khối, nối sample ID với SHA-1 rút gọn của đường dẫn tương đối theo script đóng gói benchmark, kiểm tra đủ ID/nhãn test và tính lại ma trận, accuracy, macro-F1, mean/P50/P95. Toàn bộ các kiểm tra này khớp nội dung đã lưu.
+Nguồn benchmark ứng dụng được chọn cho seed \MobileBenchmarkSeed{} chứa một object JSON cho ONNX và một object cho PTE. Bộ xuất yêu cầu đủ \ImageTest{} ảnh ở mỗi runtime, trạng thái complete, không lỗi suy luận và không lỗi warmup. Script nối sample ID với SHA-1 rút gọn của đường dẫn tương đối theo cách đóng gói benchmark, kiểm tra đủ ID/nhãn test và tính lại ma trận, Accuracy, macro-F1, mean/P50/P95 trước khi đưa số liệu vào bảng.
+
 \input{generated/tables/mobile-runtime}
 
-Hai runtime cùng có 192/256 dự đoán đúng, Accuracy 75,00\% và macro-F1 73,31\%. Top-1 ONNX--PTE đồng thuận 256/256. So với nhãn CPU FP32, mỗi runtime đồng thuận 249/256 (97,27\%); có bảy ảnh đổi nhãn, trong đó năm ảnh từ đúng thành sai và hai ảnh từ sai thành đúng. Accuracy giảm 1,17 điểm phần trăm so với 76,17\% trên CPU, nhưng chưa có thí nghiệm cô lập nguyên nhân. Vì hai runtime tại app cùng cho một bộ nhãn, cần đối chiếu tiền xử lý chung và hash asset trước khi kết luận sự khác biệt do engine.
+
+ONNX đạt Accuracy \MobileOnnxAccuracy\% và macro-F1 \MobileOnnxMacroFOne\%; PTE đạt Accuracy \MobilePteAccuracy\% và macro-F1 \MobilePteMacroFOne\%. Hai runtime đồng thuận top-1 trên \MobileAgreementCount/\ImageTest{} ảnh.
+\ifnum\BenchmarkSeed=\MobileBenchmarkSeed\relax
+So với dự đoán CPU FP32 seed \BenchmarkSeed{}, ONNX đồng thuận \MobileOnnxCpuAgreement/\ImageTest{} ảnh (\MobileOnnxCpuAgreementPercent\%) và PTE đồng thuận \MobilePteCpuAgreement/\ImageTest{} ảnh (\MobilePteCpuAgreementPercent\%). Cần đối chiếu hash asset và tiền xử lý trước khi quy chênh lệch cho engine; chưa có thí nghiệm cô lập nguyên nhân.
+\else
+Benchmark CPU và mobile hiện thuộc hai seed khác nhau, vì vậy không dùng chênh lệch dự đoán giữa hai phiên để đánh giá parity runtime. Cần chạy lại benchmark trên đúng APK/model seed \BenchmarkSeed{} trước khi đối chiếu tiền xử lý và engine với CPU.
+\fi
 
 \begin{figure}[htbp]\centering
 \includegraphics[width=.9\textwidth]{mobile-latency.pdf}
-\caption{Phân bố thời gian classifyImage của hai benchmark ứng dụng đã lưu}
+\caption{Phân bố thời gian classifyImage của benchmark ứng dụng seed \MobileBenchmarkSeed{}}
 \label{fig:mobile-latency}
 \end{figure}
 
 Theo \RepoPath{products/fe/app/lib/domain/services/model_benchmark.dart}, đồng hồ cho từng ảnh bắt đầu sau khi đọc bytes và bao quanh lời gọi repository \texttt{classifyImage}. Datasource native thực hiện giải mã/letterbox, chuẩn hóa tensor và gọi runtime trong lời gọi này. Vì vậy, phạm vi timing rộng hơn predict CPU, nhưng không bao gồm tải ảnh benchmark từ package hay nạp model ban đầu. P50/P95 được mã app tính bằng nearest-rank; báo cáo giữ cách tính đó thay vì dùng median nội suy khác.
 
-Trong artifact, P50 PTE là 29,487 ms và ONNX là 54,500 ms; P95 tương ứng 85,890 và 112,139 ms. Kết quả mô tả phiên đã lưu, không chứng minh PTE luôn nhanh hơn trên nhiều điện thoại. Tên file gợi ý thiết bị nhưng object không có model máy, SoC, phiên bản Android, APK/commit, hash model, số luồng, nhiệt độ hoặc ngày đo. Báo cáo gọi đây là \emph{benchmark ứng dụng đã lưu, thiếu metadata thiết bị}; không tự xác nhận cấu hình điện thoại từ tên tệp.
+Bảng~\ref{tab:mobile-runtime} trình bày P50/P95 cho từng runtime của phiên đã lưu. Đối chiếu hiệu năng cần model máy, SoC, Android, APK/commit, hash model, số luồng, nhiệt độ và ngày đo. Tên nguồn chưa đủ xác nhận cấu hình thiết bị hoặc ưu thế tốc độ trên nhiều điện thoại.
 
 Tệp verification CPU ghi mobile NOT TESTED ở thời điểm của tệp đó; checkpoint Android ngày 04/10 ghi còn chờ thao tác người dùng. Hai tài liệu lịch sử được giữ đúng phạm vi, còn benchmark ứng dụng là bằng chứng riêng mới được tìm thấy khi rà soát. Vì thiếu ngày/asset/commit trong benchmark, chưa thể dùng nó để khẳng định APK release của checkpoint đã được xác nhận hết lỗi JNI. Tuy vậy, phát biểu chung rằng repo không có benchmark tại ứng dụng cần được cập nhật.
 
-\subsection{Lượng tử hóa: số liệu đã lưu và đối chiếu chưa khớp}
-Bảng lượng tử hóa dưới đây giữ số từ \texttt{summary.json} để truy nguyên artifact, chưa xem là metric nén được xác nhận cuối cùng. Khi tính lại từ \texttt{all\_predictions.csv} cùng thư mục, PTQ có một khác biệt ở ma trận nhầm lẫn và QAT có ba dự đoán đúng ít hơn summary. Bảng~\ref{tab:image-metric-audit} công bố cả hai nguồn; nguyên nhân cần được rà soát ở quy trình sinh artifact.
+\subsection{Benchmark lượng tử hóa và kiểm tra tính nhất quán}
+\ifnum\ImageMetricDiscrepancies>0\relax
+Bảng lượng tử hóa seed \QuantizationSeed{} giữ số từ \texttt{summary.json} để truy nguyên artifact. Bộ xuất tính lại ma trận, Accuracy và macro-F1 từ \texttt{all\_predictions.csv} cùng thư mục; Bảng~\ref{tab:image-metric-audit} công bố các mục chưa khớp. Khi còn sai khác, cần rà soát quy trình sinh artifact trước khi chốt metric nén.
 \input{generated/tables/image-metric-audit}
+\else
+Các chỉ số summary của benchmark lượng tử hóa seed \QuantizationSeed{} khớp ma trận, Accuracy và macro-F1 tính lại từ CSV dự đoán trên cùng tập test.
+\fi
+
 \input{generated/tables/fp32_ptq_qat}
-PTQ INT8 giảm file ONNX từ khoảng 16,04 xuống 4,51 MiB, xấp xỉ 71,9\% dung lượng theo byte của artifact. Accuracy giảm từ 76,17\% xuống 71,88\%, tương ứng khoảng 4,30 điểm phần trăm. Macro-F1 giảm từ 74,54\% xuống 70,33\%. Top-1 agreement với FP32 bằng 86,72\%, nên việc nén thay đổi một phần dự đoán.
 
-Trong phiên đo FP32/PTQ/QAT, trung vị PTQ 35,37 ms cao hơn FP32 31,90 ms. Artifact lượng tử hóa riêng có trung vị khác vì phiên đo khác; báo cáo không chọn số thuận lợi ở phiên khác để khẳng định INT8 luôn nhanh hơn. Kết luận có căn cứ ở đây là giảm dung lượng kèm đánh đổi chất lượng, còn lợi ích tốc độ phụ thuộc runtime/hardware.
+PTQ INT8 đạt Accuracy \PTQAccuracy\% theo summary, với đồng thuận top-1 FP32--PTQ là \PTQAgreement\%. Bảng~\ref{tab:fp32_ptq_qat} trình bày đồng thời dung lượng, chất lượng và trung vị độ trễ để đánh giá đánh đổi với FP32 trên cùng tập test. Không xem giảm dung lượng là bằng chứng rằng dự đoán hoặc độ trễ được giữ nguyên.
 
-Theo summary đã lưu, QAT INT8 của nhánh hiện tại đạt Accuracy 52,34\%, macro-F1 50,57\% và 38 lỗi nặng (14,84\%). Trung vị 121,36 ms cao hơn hai đối chứng trong cùng phiên. Đây là kết quả không thuận lợi của nhánh QAT đã lưu, cần giữ trong báo cáo. Không suy ra QAT nói chung luôn kém; phép đo chỉ đặc trưng cho checkpoint và quy trình hiện tại, và chưa cô lập được nguyên nhân suy giảm.
+Các thời gian trong bảng thuộc cùng phiên đo FP32/PTQ/QAT. Artifact lượng tử hóa riêng có thể có trung vị khác vì phiên đo khác; báo cáo không chọn số thuận lợi ở phiên khác để khẳng định INT8 luôn nhanh hơn. Lợi ích tốc độ cần được kiểm tra trên runtime và phần cứng triển khai.
+
+Theo summary đã chọn, QAT INT8 đạt Accuracy \QATAccuracy\%, macro-F1 \QATMacroFOne\% và \QATCriticalCount{} lỗi nặng. Độ trễ được đối chiếu với hai phương án còn lại trong cùng bảng. Kết quả đặc trưng cho checkpoint và quy trình đã lưu; không suy ra QAT nói chung luôn tốt hơn hoặc kém hơn các phương pháp khác.
 
 \subsection{Cắt tỉa có cấu trúc}
+
 \input{generated/tables/pruning_st}
-Artifact ghi số tham số giảm từ 4.207.156 xuống 4.145.694, khoảng 1,46\%. File ONNX giảm từ 16,04 xuống 15,81 MiB; PTE giảm từ 16,06 xuống 15,83 MiB. Accuracy giữ ở 76,17\%, macro-F1 thay đổi nhẹ từ 74,54\% xuống 74,47\%, và số lỗi nặng giảm từ 5 xuống 4.
 
-Cùng Accuracy không có nghĩa cùng dự đoán: đồng thuận giữa mô hình gốc và cắt tỉa chỉ 81,64\% trên tập test. Một số ảnh chuyển từ đúng sang sai, trong khi ảnh khác chuyển từ sai sang đúng. Vì vậy cần nhìn per-class và disagreement thay vì chỉ một tỷ lệ tổng.
+Benchmark seed \PruningSeed{} đối chiếu mô hình gốc và cắt tỉa trên cùng test split ở ba định dạng. Artifact ghi số tham số từ \PruningParametersBefore{} xuống \PruningParametersAfter{}, giảm \PruningParameterReduction\%. Bảng~\ref{tab:pruning_st} giữ riêng Accuracy, macro-F1, lỗi nặng, dung lượng và trung vị độ trễ của từng phương án, tránh thay đổi một chỉ số tổng hợp che khuất các đánh đổi còn lại.
 
-Về tốc độ trong cùng phiên, PTH cắt tỉa có trung vị thấp hơn PTH gốc (28,91 so với 33,16 ms), nhưng ONNX cắt tỉa cao hơn (20,32 so với 12,71 ms) và PTE cắt tỉa cao hơn (32,43 so với 25,62 ms). Ít tham số hơn không bảo đảm runtime nhanh hơn, vì kernel, bố trí graph và backend có thể khác. Chưa có nhiều lần đo độc lập hoặc kết quả mobile để khẳng định ưu thế hiệu năng tổng quát.
+Model cắt tỉa đạt Accuracy \PruningAccuracy\% và macro-F1 \PruningMacroFOne\%, nhưng có \PruningCriticalCount{} lỗi nặng so với 3 lỗi của model gốc. Đồng thuận top-1 giữa PTH gốc và cắt tỉa là \PruningAgreement\%. Mức tăng chỉ số tổng hợp đi kèm các ảnh chuyển từ đúng sang sai và ngược lại; cần xem từng lớp và disagreement để đánh giá đánh đổi.
+
+Độ trễ trước/sau cắt tỉa phải được so trong cùng runtime và cùng phiên. Ít tham số hơn không bảo đảm runtime nhanh hơn, vì kernel, bố trí graph và backend có thể khác. Một phiên đo CPU chưa đủ để khẳng định ưu thế hiệu năng tổng quát hoặc tốc độ trên điện thoại.
 
 \begin{figure}[htbp]\centering
 \includegraphics[width=\textwidth]{compression-tradeoffs.pdf}

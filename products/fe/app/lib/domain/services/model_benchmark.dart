@@ -1,6 +1,8 @@
 import 'dart:async';
 import 'dart:typed_data';
 
+import 'package:uuid/uuid.dart';
+
 import '../entities/ai_model_type.dart';
 import '../repositories/inference_repository.dart';
 
@@ -58,6 +60,7 @@ class ModelBenchmarkReport {
   final double? p95LatencyMs;
   final double elapsedMs;
   final List<Map<String, Object?>> predictions;
+  final Map<String, Object?> provenance;
 
   const ModelBenchmarkReport({
     required this.datasetName,
@@ -78,9 +81,12 @@ class ModelBenchmarkReport {
     required this.p95LatencyMs,
     required this.elapsedMs,
     required this.predictions,
+    this.provenance = const {},
   });
 
   Map<String, Object?> toJson() => {
+    'schemaVersion': 2,
+    'provenance': provenance,
     'dataset': datasetName,
     'split': split,
     'runtime': runtime.name,
@@ -125,6 +131,7 @@ class ModelBenchmarkRunner {
     required bool Function() cancelled,
     required void Function(ModelBenchmarkProgress progress) onProgress,
     int warmupRuns = 5,
+    Map<String, Object?> provenance = const {},
   }) async {
     if (samples.isEmpty || labels.isEmpty) {
       throw ArgumentError('Benchmark needs labeled samples.');
@@ -148,9 +155,14 @@ class ModelBenchmarkRunner {
                 : AiModelType.pte,
           ];
     final reports = <ModelBenchmarkReport>[];
+    final runId = const Uuid().v4();
     try {
       repository.setDualComparison(false);
       for (final model in models) {
+        if (cancelled()) break;
+        if (model == AiModelType.onnx && !repository.onnxReady) {
+          throw StateError('ONNX is not ready on this device.');
+        }
         if (model == AiModelType.pte && !repository.pteReady) {
           throw StateError('ExecuTorch is not ready on this device.');
         }
@@ -168,6 +180,7 @@ class ModelBenchmarkRunner {
             loadImage: loadImage,
             cancelled: cancelled,
             onProgress: onProgress,
+            provenance: {...provenance, 'runId': runId},
           ),
         );
         if (cancelled()) break;
@@ -189,14 +202,33 @@ class ModelBenchmarkRunner {
     required Future<Uint8List> Function(BenchmarkSample sample) loadImage,
     required bool Function() cancelled,
     required void Function(ModelBenchmarkProgress progress) onProgress,
+    required Map<String, Object?> provenance,
   }) async {
+    final startedAt = DateTime.now().toUtc();
+    final model = runtime == BenchmarkRuntime.onnx
+        ? AiModelType.onnx
+        : AiModelType.pte;
+    Future<InferenceResult?> classify(Uint8List bytes) async {
+      void checkRuntime() {
+        if (repository.currentModel != model || repository.isDualComparison) {
+          throw _RuntimeChanged();
+        }
+      }
+
+      checkRuntime();
+      final result = await repository.classifyImage(bytes);
+      checkRuntime();
+      if (result != null && result.modelType != model) throw _RuntimeChanged();
+      return result;
+    }
+
     final clock = Stopwatch()..start();
     var warmupErrors = 0;
     var warmupCompleted = 0;
     if (warmupRuns > 0) {
       final firstImage = await loadImage(samples.first);
       for (var i = 0; i < warmupRuns && !cancelled(); i++) {
-        if (await repository.classifyImage(firstImage) == null) warmupErrors++;
+        if (await classify(firstImage) == null) warmupErrors++;
         warmupCompleted++;
       }
     }
@@ -221,7 +253,7 @@ class ModelBenchmarkRunner {
       try {
         final bytes = await loadImage(sample);
         final call = Stopwatch()..start();
-        final result = await repository.classifyImage(bytes);
+        final result = await classify(bytes);
         call.stop();
         latency = result == null ? null : call.elapsedMicroseconds / 1000;
         predicted = result?.label;
@@ -232,6 +264,8 @@ class ModelBenchmarkRunner {
         } else if (latency != null) {
           latencies.add(latency);
         }
+      } on _RuntimeChanged {
+        rethrow;
       } catch (e) {
         error = e.toString();
       }
@@ -302,6 +336,15 @@ class ModelBenchmarkRunner {
       p95LatencyMs: _percentile(latencies, .95),
       elapsedMs: clock.elapsedMicroseconds / 1000,
       predictions: predictions,
+      provenance: {
+        ...provenance,
+        'startedAtUtc': startedAt.toIso8601String(),
+        'finishedAtUtc': DateTime.now().toUtc().toIso8601String(),
+        'artifactSha256':
+            (provenance['model'] as Map?)?['${runtime.name}_sha256'],
+        'latencyScope':
+            'image decode, preprocess and inference; excludes package I/O',
+      },
     );
   }
 
@@ -310,4 +353,9 @@ class ModelBenchmarkRunner {
     final sorted = [...values]..sort();
     return sorted[((sorted.length * p).ceil() - 1).clamp(0, sorted.length - 1)];
   }
+}
+
+class _RuntimeChanged extends StateError {
+  _RuntimeChanged()
+    : super('Runtime changed during benchmark; discard this run and retry.');
 }

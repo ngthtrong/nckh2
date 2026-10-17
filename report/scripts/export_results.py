@@ -72,6 +72,7 @@ def table(name, caption, label, columns, headers, data, note):
 
 def main():
     (OUT / 'tables').mkdir(parents=True, exist_ok=True)
+    benchmarks = obj('report/config/benchmark-sources.json')
     split = rows('products/fe/model/Edge Ai/split_train_val_test_mobilenetv3_large.csv')
     counts = Counter((r['label'], r['split']) for r in split)
     classes = ['low', 'medium', 'high', 'non_flood']
@@ -92,9 +93,9 @@ def main():
             sum(counts[c,s] for s in ['train','val','test'])] for c in classes] +
           [['Tổng', *[sum(counts[c,s] for c in classes) for s in ['train','val','test']],len(split)]],
           r'\RepoPath{products/fe/model/Edge Ai/split_train_val_test_mobilenetv3_large.csv}; kiểm tra đường dẫn, MD5 và nhóm chia tập trên ảnh hiện tại.')
-    base = obj('products/fe/reports/pth_onnx_pte/summary.json')
-    quant = obj('products/fe/reports/fp32_ptq_qat/summary.json')
-    pruning = obj('products/fe/reports/pruning_st/summary.json')
+    base = obj(benchmarks['fp32'] + '/summary.json')
+    quant = obj(benchmarks['quantization'] + '/summary.json')
+    pruning = obj(benchmarks['pruning'] + '/summary.json')
     for artifact in [base, quant, pruning]:
         metadata = artifact['metadata']
         expected_test_count = sum(r['split'] == 'test' for r in split)
@@ -102,33 +103,44 @@ def main():
             raise ValueError('Image evaluation scope/count does not match split')
         if metadata['split_csv_sha256'] != SOURCES['products/fe/model/Edge Ai/split_train_val_test_mobilenetv3_large.csv']:
             raise ValueError('Image artifact split hash mismatch')
-        if metadata['config_sha256'] != hashlib.sha256(read_bytes('products/fe/model/Edge Ai/config_mobilenetv3_large.json')).hexdigest():
+        config_path = (f"products/fe/model/Edge Ai/mobilenetv3_large_dataset_v4_seed{metadata['seed']}/"
+                       'config_mobilenetv3_large.json')
+        if metadata['config_sha256'] != hashlib.sha256(read_bytes(config_path)).hexdigest():
             raise ValueError('Image artifact config hash mismatch')
-    for name, artifact in [('pth_onnx_pte', base), ('fp32_ptq_qat', quant), ('pruning_st', pruning)]:
-        verify_predictions(artifact, f'products/fe/reports/{name}/all_predictions.csv', split)
-    def image_table(name, caption, artifact, models):
+    for key, artifact in [('fp32', base), ('quantization', quant), ('pruning', pruning)]:
+        verify_predictions(artifact, benchmarks[key] + '/all_predictions.csv', split)
+    verification = obj(benchmarks['verification'])
+    if (verification['status'] != 'pass_local' or verification['failed_checks'] != 0
+            or verification['metadata']['n_images'] != expected_test_count
+            or verification['metadata']['evaluation_scope'] != 'full_test'
+            or verification['metadata']['split_csv_sha256'] != base['metadata']['split_csv_sha256']
+            or verification['metadata']['config_sha256'] != base['metadata']['config_sha256']
+            or verification['metadata']['checkpoint_sha256'] != base['classification_metrics']['pth']['sha256']
+            or verification['metadata']['onnx_sha256'] != base['classification_metrics']['onnx']['sha256']):
+        raise ValueError('Verification scope, status or source does not match FP32 benchmark')
+    def image_table(name, caption, artifact, models, source):
         data=[]
         for key,display in models:
             m=artifact['classification_metrics'][key]
             data.append([display,fmt(100*m['accuracy'],2),fmt(100*m['macro_f1'],2),
                          m['critical_error_count'],fmt(m['bytes']/1024**2,2),fmt(m['latency_ms_median'],2)])
-        table(name,caption,'tab:'+name,'lrrrrr',
+        table(name,caption + f" (seed {artifact['metadata']['seed']})",'tab:'+name,'lrrrrr',
               ['Mô hình',r'Acc. (\%)',r'F1 (\%)','Lỗi nặng','MiB','Trung vị ms'],data,
-              r'\RepoPath{products/fe/reports/'+name+r'/summary.json}; 256 ảnh test, CPU máy tính; thời gian chỉ tính lời gọi suy luận.')
+              r'\RepoPath{'+source+f'/summary.json}}; {expected_test_count} ảnh test, CPU máy tính; thời gian chỉ tính lời gọi suy luận.')
     image_table('pth_onnx_pte','So sánh ba định dạng mô hình trên cùng tập test',base,
-                [('pth','PyTorch FP32'),('onnx','ONNX FP32'),('pte','ExecuTorch FP32')])
-    image_table('fp32_ptq_qat','PTQ/QAT theo summary đã lưu; số liệu nén cần rà soát',quant,
-                [('onnx_fp32','ONNX FP32'),('ptq_int8','PTQ INT8'),('qat_int8','QAT INT8')])
+                [('pth','PyTorch FP32'),('onnx','ONNX FP32'),('pte','ExecuTorch FP32')], benchmarks['fp32'])
+    image_table('fp32_ptq_qat','Đối chiếu FP32, PTQ và QAT trên cùng tập test',quant,
+                [('onnx_fp32','ONNX FP32'),('ptq_int8','PTQ INT8'),('qat_int8','QAT INT8')], benchmarks['quantization'])
     table('image-metric-audit', 'Đối chiếu các số liệu summary chưa khớp CSV dự đoán',
           'tab:image-metric-audit', 'lrrrr',
           ['Mô hình', r'\shortstack{Acc. summary\\(\%)}', r'\shortstack{Acc. CSV\\(\%)}', r'\shortstack{F1 summary\\(\%)}', r'\shortstack{F1 CSV\\(\%)}'],
           [[r['model'].replace('_', r'\_'), *[fmt(100*r[key], 2) for key in
             ['summary_accuracy','csv_accuracy','summary_macro_f1','csv_macro_f1']]]
           for r in PREDICTION_AUDITS if not r['consistent']],
-          r'\RepoPath{products/fe/reports/fp32_ptq_qat/summary.json} và all\_predictions.csv cùng thư mục; giữ nguyên hai nguồn, chưa chốt metric nén.')
+          r'\RepoPath{'+benchmarks['quantization']+r'/summary.json} và all\_predictions.csv cùng thư mục; giữ nguyên hai nguồn, chưa chốt metric nén.')
     image_table('pruning_st','Đối chiếu trước và sau cắt tỉa có cấu trúc',pruning,
                 [('baseline_pth','PTH gốc'),('structured_pth','PTH cắt tỉa'),('baseline_onnx','ONNX gốc'),
-                 ('structured_onnx','ONNX cắt tỉa'),('baseline_pte','PTE gốc'),('structured_pte','PTE cắt tỉa')])
+                 ('structured_onnx','ONNX cắt tỉa'),('baseline_pte','PTE gốc'),('structured_pte','PTE cắt tỉa')], benchmarks['pruning'])
     model = 'products/fe/model/Edge Ai/mobilenetv3_large_dataset_v4_seed1024/'
     current = obj(model + 'test_metrics_mobilenetv3_large.json')
     current_config = obj(model + 'config_mobilenetv3_large.json')
@@ -153,6 +165,19 @@ def main():
     if (abs(sum(matrix[i][i] for i in range(4))/total - current['acc']) > 1e-10
             or abs(sum(f1s)/4 - current['macro_f1']) > 1e-10 or critical != current['critical_error_count']):
         raise ValueError('New model aggregate metrics mismatch')
+    clean = rows(model + 'records_after_clean_mobilenetv3_large.csv')
+    identity = lambda row: tuple(row[key] for key in ['relative_path', 'label', 'md5', 'split_group'])
+    if len(clean) != len(split) or {identity(row) for row in clean} != {identity(row) for row in split}:
+        raise ValueError('Seed1024 cleaned dataset does not match saved split')
+    by_path = {row['relative_path']: row for row in split}
+    validation_counts = {}
+    for filename in ['misclassified_val_mobilenetv3_large.csv', 'critical_severity_errors_val_mobilenetv3_large.csv']:
+        validation = rows(model + filename)
+        for row in validation:
+            saved = by_path.get(row['relative_path'])
+            if saved is None or saved['split'] != 'val' or saved['label'] != row['true_label']:
+                raise ValueError('Validation artifact does not match saved split: ' + filename)
+        validation_counts[filename] = len(validation)
     table('confusion','Ma trận nhầm lẫn model seed 1024: hàng thật, cột dự đoán','tab:confusion',
           'lrrrr',['Nhãn','low','medium','high',r'non\_flood'],
           [[c.replace('_',r'\_'),*row] for c,row in zip(classes,matrix)],
@@ -161,15 +186,15 @@ def main():
           ['Lớp',r'Precision (\%)',r'Recall (\%)',r'F1 (\%)','Số ảnh'],
           [[c.replace('_',r'\_'),*[fmt(100*current[c+'_'+key],2) for key in ['precision','recall','f1']],
             current[c+'_support']] for c in classes], r'\RepoPath{'+model+r'test_metrics_mobilenetv3_large.json}; đã đối chiếu ma trận.')
-    mobile_path = 'products/fe/reports/mobile/samsung21se.json'
+    mobile_path = benchmarks['mobile']['file']
     mobile, mobile_audit = audit_mobile(read_bytes(mobile_path), split)
-    table('mobile-runtime', 'Benchmark tại ứng dụng đã lưu: cùng 256 ảnh test',
+    table('mobile-runtime', f"Benchmark tại ứng dụng seed {benchmarks['mobile']['seed']}: cùng {expected_test_count} ảnh test",
           'tab:mobile-runtime', 'lrrrrr',
           ['Runtime', r'Acc. (\%)', r'F1 (\%)', 'TB ms', 'P50 ms', 'P95 ms'],
           [[name.upper(), fmt(100*b['accuracy'], 2), fmt(100*b['macroF1'], 2),
             *[fmt(b['latency'][key], 2) for key in ['meanMs', 'medianMs', 'p95Ms']]]
            for name, b in mobile.items()],
-          r'\RepoPath{products/fe/reports/mobile/samsung21se.json}; hai khối JSON nối tiếp, đã kiểm tra lại dự đoán và percentile nearest-rank. Timing tại lời gọi classifyImage; thiếu metadata thiết bị/asset.')
+          r'\RepoPath{' + mobile_path + r'}; hai khối JSON nối tiếp, đã kiểm tra lại dự đoán và percentile nearest-rank. Timing tại lời gọi classifyImage; seed là nhãn nguồn được khai báo, chưa thay thế hash model/thiết bị.')
     benchmark=rows('thucnghiem/results/cij_baseline_benchmark_results/benchmark_summary.csv')
     names={'product_cij_louvain':'Product Louvain','additive_cij_louvain':'Additive Louvain',
            'convex_cij_louvain':'Convex Louvain','product_cij_leiden':'Product Leiden',
@@ -267,25 +292,72 @@ def main():
                      'products/fe/model/urgency_ei/model/urgency_logistic_SOURCE_FINAL.json']:
         read_bytes(relative)
     m=base['classification_metrics']['pth']
-    values={'ImageTotal':len(split),
+    predictions = rows(benchmarks['fp32'] + '/all_predictions.csv')
+    cpu = {row['image_path'].replace('\\', '/').split('/Dataset_Flood/', 1)[1]: row for row in predictions}
+    test_ids = {hashlib.sha1(row['relative_path'].replace('\\', '/').encode()).hexdigest()[:12]: row['relative_path']
+                for row in split if row['split'] == 'test'}
+    confident = [row for row in predictions if float(row['confidence_pth']) >= .9]
+    pruning_parameters = pruning['metadata']['structured_model_training']['pruning']
+    values={'ImageMetricDiscrepancies':sum(not row['consistent'] for row in PREDICTION_AUDITS),
+            'BenchmarkSeed':base['metadata']['seed'],
+            'QuantizationSeed':quant['metadata']['seed'], 'PruningSeed':pruning['metadata']['seed'],
+            'MobileBenchmarkSeed':benchmarks['mobile']['seed'],
+            'ImageTotal':len(split),
             'ImageTrain':sum(r['split'] == 'train' for r in split),
             'ImageVal':sum(r['split'] == 'val' for r in split),
             'ImageTest':sum(r['split'] == 'test' for r in split),
             'NewImageAccuracy':fmt(100*current['acc'],2),'NewImageMacroFOne':fmt(100*current['macro_f1'],2),
             'ImageAccuracy':fmt(100*m['accuracy'],2),'ImageMacroFOne':fmt(100*m['macro_f1'],2),
+            'ImageECE':fmt(m['ece'],5),'ImageBrier':fmt(m['brier_score'],5),
+            'HighConfidenceCount':len(confident), 'HighConfidenceCoverage':fmt(100*len(confident)/len(predictions),2),
+            'HighConfidenceCorrect':sum(row['pred_pth'] == row['ground_truth'] for row in confident),
+            'MobileAgreementCount':mobile_audit['top1_agreement_count'],
+            'PruningParametersBefore':f"{pruning_parameters['parameter_count_before']:,}".replace(',', '.'),
+            'PruningParametersAfter':f"{pruning_parameters['parameter_count_after']:,}".replace(',', '.'),
+            'PruningParameterReduction':fmt(100*(1-pruning_parameters['parameter_count_after']/pruning_parameters['parameter_count_before']),2),
+            'PruningAgreement':fmt(100*pruning['pairwise_comparison']['baseline_pth_vs_structured_pth']['top1_agreement'],2),
+            'PTQAgreement':fmt(100*quant['pairwise_comparison']['onnx_fp32_vs_ptq_int8']['top1_agreement'],2),
             'PTQAccuracy':fmt(100*quant['classification_metrics']['ptq_int8']['accuracy'],2),
-            'QATAccuracy':fmt(100*quant['classification_metrics']['qat_int8']['accuracy'],2)}
+            'QATAccuracy':fmt(100*quant['classification_metrics']['qat_int8']['accuracy'],2),
+            'QATMacroFOne':fmt(100*quant['classification_metrics']['qat_int8']['macro_f1'],2),
+            'QATCriticalCount':quant['classification_metrics']['qat_int8']['critical_error_count'],
+            'PruningAccuracy':fmt(100*pruning['classification_metrics']['structured_pth']['accuracy'],2),
+            'PruningMacroFOne':fmt(100*pruning['classification_metrics']['structured_pth']['macro_f1'],2),
+            'PruningCriticalCount':pruning['classification_metrics']['structured_pth']['critical_error_count'],
+            'VerificationSamples':verification['metadata']['n_images'],
+            'VerificationPassedChecks':verification['passed_checks']}
+    for runtime, name in [('onnx', 'Onnx'), ('pte', 'Pte')]:
+        pair = base['pairwise_comparison']['pth_vs_' + runtime]
+        agreement = sum(row['prediction'] == cpu[test_ids[row['id']]]['pred_pth'] for row in mobile[runtime]['predictions'])
+        values.update({f'Cpu{name}Agreement':fmt(100*pair['top1_agreement'],2),
+                       f'Cpu{name}MaxDiff':fmt(pair['max_abs_diff'],8),
+                       f'Mobile{name}Accuracy':fmt(100*mobile[runtime]['accuracy'],2),
+                       f'Mobile{name}MacroFOne':fmt(100*mobile[runtime]['macroF1'],2),
+                       f'Mobile{name}CpuAgreement':agreement,
+                       f'Mobile{name}CpuAgreementPercent':fmt(100*agreement/expected_test_count,2)})
+    for key, name in [('fp32', 'Runtime'), ('quantization', 'Quantization'), ('pruning', 'Pruning')]:
+        values[name + 'BenchmarkSource'] = r'\RepoPath{' + benchmarks[key] + '/summary.json}'
+    values['MobileBenchmarkSource'] = r'\RepoPath{' + mobile_path + '}'
+    values.update({'BenchmarkPytorchVersion':base['metadata']['pytorch_version'],
+                   'BenchmarkOnnxVersion':base['metadata']['onnxruntime_version'],
+                   'BenchmarkExecutorchVersion':base['metadata']['executorch_runtime']})
     (OUT/'values.tex').write_text('% Generated from saved artifacts by scripts/export_results.py.\n'+
                                 ''.join('\\newcommand{\\'+k+'}{'+str(v)+'}\n' for k,v in values.items()))
     snapshot={'source_commit':subprocess.check_output(['git','rev-parse','HEAD'],cwd=ROOT,text=True).strip(),
               'sources_sha256':SOURCES,'image_audit':{'rows':len(split),'missing':0,'md5_mismatch':0,'cross_split_groups':0},
               'prediction_audits': PREDICTION_AUDITS,
               'table_notes': TABLE_NOTES,
-              'new_model_audit': {'seed': 1024, 'test_samples': total, 'matrix_metrics_match': True, 'split_manifest_available': False},
+              'benchmark_sources': benchmarks,
+              'new_model_audit': {'seed': 1024, 'test_samples': total, 'matrix_metrics_match': True,
+                                  'cleaned_dataset_matches_saved_split': True, 'validation_artifacts_match_saved_split': validation_counts,
+                                  'split_manifest_available': False,
+                                  'split_identity_limit': 'Consistent with shared split; checkpoint does not record split CSV hash or all sample assignments.'},
               'mobile_audit': mobile_audit,
-              'note':'Saved artifacts only; no training or mobile benchmark rerun. Source commit does not include report edits. PTQ/QAT summary discrepancies are disclosed in the report, not repaired.'}
+              'verification_audit': {'source': benchmarks['verification'], 'status': verification['status'],
+                                     'samples': verification['metadata']['n_images'], 'failed_checks': verification['failed_checks']},
+              'note':'Saved artifacts only; no training or mobile benchmark rerun during report generation. Source commit does not include report edits. Any summary discrepancies are disclosed, not repaired.'}
     (OUT/'provenance.json').write_text(json.dumps(snapshot,ensure_ascii=False,indent=2)+'\n')
-    print(f'Exported 14 tables from {len(SOURCES)} source files; verified {len(split)} images and both mobile reports; disclosed PTQ/QAT discrepancies.')
+    print(f'Exported 14 tables from {len(SOURCES)} source files; verified {len(split)} images; {values["ImageMetricDiscrepancies"]} prediction discrepancies.')
 
 
 if __name__=='__main__':

@@ -1,8 +1,9 @@
 import 'package:flutter/material.dart';
 
-import '../../../core/constants/app_colors.dart';
+import '../../core/constants/app_colors.dart';
 import '../../domain/entities/ai_model_type.dart';
 import '../controllers/app_controller.dart';
+import 'admin_model_download_button.dart';
 
 class AiModelSettingsSheet extends StatelessWidget {
   final AppController controller;
@@ -10,6 +11,7 @@ class AiModelSettingsSheet extends StatelessWidget {
   const AiModelSettingsSheet({super.key, required this.controller});
 
   static void show(BuildContext context, AppController controller) {
+    if (!controller.isAdmin) return;
     showModalBottomSheet(
       context: context,
       isScrollControlled: true,
@@ -23,6 +25,7 @@ class AiModelSettingsSheet extends StatelessWidget {
     return ListenableBuilder(
       listenable: controller,
       builder: (context, _) {
+        if (!controller.isAdmin) return const SizedBox.shrink();
         final ready = controller.isModelReady;
         final benchmarking = controller.isBenchmarking;
         final comparison = controller.latestComparison;
@@ -54,15 +57,17 @@ class AiModelSettingsSheet extends StatelessWidget {
                   style: TextStyle(fontSize: 18, fontWeight: FontWeight.w900),
                 ),
                 const SizedBox(height: 16),
+                AdminModelDownloadButton(controller: controller),
                 Wrap(
                   spacing: 8,
                   children: AiModelType.values.map((model) {
-                    final available =
-                        model == AiModelType.onnx || controller.isPteReady;
+                    final available = model == AiModelType.onnx
+                        ? controller.isOnnxReady
+                        : controller.isPteReady;
                     return ChoiceChip(
                       label: Text(model.badgeText),
                       selected: controller.currentModel == model,
-                      onSelected: available
+                      onSelected: available && !benchmarking
                           ? (_) => controller.switchAiModel(model)
                           : null,
                     );
@@ -77,7 +82,10 @@ class AiModelSettingsSheet extends StatelessWidget {
                         : 'ExecuTorch chỉ sẵn sàng trên Android sau khi nạp PTE',
                   ),
                   value: controller.isDualComparison,
-                  onChanged: controller.isPteReady
+                  onChanged:
+                      controller.isPteReady &&
+                          controller.isOnnxReady &&
+                          !benchmarking
                       ? controller.toggleDualComparison
                       : null,
                 ),

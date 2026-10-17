@@ -12,6 +12,7 @@ import 'settings/settings_screen.dart';
 import 'submitted/submitted_screen.dart';
 
 enum AppViewMode { tabs, compose, submitted }
+
 enum AuthViewMode { login, register }
 
 class MainNavigationScreen extends StatefulWidget {
@@ -27,12 +28,28 @@ class _MainNavigationScreenState extends State<MainNavigationScreen> {
   int _currentTab = 0;
   AppViewMode _viewMode = AppViewMode.tabs;
   AuthViewMode _authMode = AuthViewMode.login;
+  bool _initializing = true;
+  String? _initError;
 
   @override
   void initState() {
     super.initState();
     widget.controller.addListener(_onControllerChange);
-    widget.controller.init();
+    _initialize();
+  }
+
+  Future<void> _initialize() async {
+    setState(() {
+      _initializing = true;
+      _initError = null;
+    });
+    try {
+      await widget.controller.init();
+    } catch (error) {
+      if (mounted) setState(() => _initError = error.toString());
+    } finally {
+      if (mounted) setState(() => _initializing = false);
+    }
   }
 
   void _onControllerChange() {
@@ -47,6 +64,37 @@ class _MainNavigationScreenState extends State<MainNavigationScreen> {
 
   @override
   Widget build(BuildContext context) {
+    if (_initializing || _initError != null) {
+      return Scaffold(
+        body: SafeArea(
+          child: Center(
+            child: Padding(
+              padding: const EdgeInsets.all(24),
+              child: Column(
+                mainAxisSize: MainAxisSize.min,
+                children: [
+                  if (_initializing) ...[
+                    const CircularProgressIndicator(),
+                    const SizedBox(height: 16),
+                    const Text('Đang mở dữ liệu trên thiết bị…'),
+                  ] else ...[
+                    Text(
+                      'Không mở được dữ liệu: $_initError',
+                      textAlign: TextAlign.center,
+                    ),
+                    const SizedBox(height: 16),
+                    FilledButton(
+                      onPressed: _initialize,
+                      child: const Text('Thử lại'),
+                    ),
+                  ],
+                ],
+              ),
+            ),
+          ),
+        ),
+      );
+    }
     // 1. Auth Flow (if not authenticated and not in guest mode)
     if (!widget.controller.isAuthenticated) {
       if (_authMode == AuthViewMode.register) {
@@ -100,7 +148,8 @@ class _MainNavigationScreenState extends State<MainNavigationScreen> {
           children: [
             HomeScreen(
               controller: widget.controller,
-              onComposePressed: () => setState(() => _viewMode = AppViewMode.compose),
+              onComposePressed: () =>
+                  setState(() => _viewMode = AppViewMode.compose),
             ),
             HistoryScreen(
               controller: widget.controller,
@@ -120,8 +169,14 @@ class _MainNavigationScreenState extends State<MainNavigationScreen> {
         type: BottomNavigationBarType.fixed,
         selectedItemColor: AppColors.primaryRed,
         unselectedItemColor: const Color(0xFF9CA3AF),
-        selectedLabelStyle: const TextStyle(fontWeight: FontWeight.w800, fontSize: 12),
-        unselectedLabelStyle: const TextStyle(fontWeight: FontWeight.w600, fontSize: 12),
+        selectedLabelStyle: const TextStyle(
+          fontWeight: FontWeight.w800,
+          fontSize: 12,
+        ),
+        unselectedLabelStyle: const TextStyle(
+          fontWeight: FontWeight.w600,
+          fontSize: 12,
+        ),
         items: const [
           BottomNavigationBarItem(
             icon: Icon(Icons.home_rounded),

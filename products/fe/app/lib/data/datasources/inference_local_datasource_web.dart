@@ -14,12 +14,25 @@ import '../../domain/repositories/inference_repository.dart';
 class InferenceLocalDataSource {
   bool _isLoaded = false;
   bool _pteReady = false;
-  AiModelType _currentModel = AiModelType.onnx;
+  AiModelType _currentModel = AiModelType.pte;
   bool _isDualComparison = false;
   ModelBenchmarkComparison? _latestComparison;
 
   bool get ready => _isLoaded;
   bool get pteReady => _pteReady;
+  bool get onnxReady => false;
+  void setComparisonAccess(bool enabled) {
+    _currentModel = AiModelType.pte;
+    _isDualComparison = false;
+    _latestComparison = null;
+  }
+
+  Future<void> loadComparisonModel(String path) async {
+    throw UnsupportedError('Web không chạy model on-device.');
+  }
+
+  Future<void> unloadComparisonModel() async => setComparisonAccess(false);
+
   AiModelType get currentModel => _currentModel;
   bool get isDualComparison => _isDualComparison;
   ModelBenchmarkComparison? get latestComparison => _latestComparison;

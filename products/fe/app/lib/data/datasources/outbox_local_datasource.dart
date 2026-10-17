@@ -25,6 +25,7 @@ class OutboxLocalDataSource {
   final Uuid _uuid;
   final Random _random;
   Box<dynamic>? _box;
+  final _messageIdsByRecord = <String, List<String>>{};
 
   OutboxLocalDataSource({Uuid? uuid, Random? random})
     : _uuid = uuid ?? const Uuid(),
@@ -38,16 +39,26 @@ class OutboxLocalDataSource {
       await _box!.put(_clientIdKey, _uuid.v4());
     }
     await _recoverInFlight();
+    _messageIdsByRecord.clear();
+    for (final message in _messages()) {
+      if (message.operationType == 'CREATE_RESCUE_RECORD') {
+        _messageIdsByRecord
+            .putIfAbsent(message.payload['id'] as String, () => [])
+            .add(message.messageId);
+      }
+    }
   }
 
   Future<SyncMessageModel> enqueueCreate(Map<String, dynamic> payload) async {
-    final existing = messageForRecord(payload['id'] as String);
+    var existing = messageForRecord(payload['id'] as String);
     if (existing != null) {
-      if (existing.deliveryStatus != 'dead_letter' ||
-          !isRecoverableDeadLetter(existing.lastError)) {
-        return existing;
+      while (existing != null &&
+          existing.deliveryStatus == 'dead_letter' &&
+          isRecoverableDeadLetter(existing.lastError)) {
+        await acknowledge(existing.messageId);
+        existing = messageForRecord(payload['id'] as String);
       }
-      await _box!.delete(existing.messageId);
+      if (existing != null) return existing;
     }
 
     final sequence = ((_box!.get(_sequenceKey) as num?)?.toInt() ?? 0) + 1;
@@ -66,6 +77,9 @@ class OutboxLocalDataSource {
       _sequenceKey: sequence,
       message.messageId: message.toStorageJson(),
     });
+    _messageIdsByRecord
+        .putIfAbsent(payload['id'] as String, () => [])
+        .add(message.messageId);
     return message;
   }
 
@@ -93,13 +107,13 @@ class OutboxLocalDataSource {
   }
 
   SyncMessageModel? messageForRecord(String recordId) {
-    for (final message in _messages()) {
-      if (message.operationType == 'CREATE_RESCUE_RECORD' &&
-          message.payload['id'] == recordId) {
-        return message;
-      }
-    }
-    return null;
+    final messages = _messageIdsByRecord[recordId]
+        ?.map(_read)
+        .whereType<SyncMessageModel>()
+        .toList();
+    if (messages == null || messages.isEmpty) return null;
+    messages.sort((a, b) => a.sequenceNumber.compareTo(b.sequenceNumber));
+    return messages.first;
   }
 
   /// Có mạng trở lại: message đang chờ backoff được gửi ngay (giữ số lần thử).
@@ -134,7 +148,16 @@ class OutboxLocalDataSource {
     });
   }
 
-  Future<void> acknowledge(String messageId) => _box!.delete(messageId);
+  Future<void> acknowledge(String messageId) async {
+    final message = _read(messageId);
+    await _box!.delete(messageId);
+    if (message != null) {
+      final recordId = message.payload['id'];
+      final ids = _messageIdsByRecord[recordId];
+      ids?.remove(messageId);
+      if (ids?.isEmpty == true) _messageIdsByRecord.remove(recordId);
+    }
+  }
 
   Future<void> markDeadLetter(String messageId, String? error) async {
     final message = _read(messageId);

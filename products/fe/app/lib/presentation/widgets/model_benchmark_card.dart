@@ -1,4 +1,3 @@
-import 'dart:async';
 import 'dart:convert';
 
 import 'dart:io' if (dart.library.html) 'benchmark_file_stub.dart';
@@ -9,10 +8,12 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:path_provider/path_provider.dart';
 
-import '../../../config.dart';
-import '../../../core/constants/app_colors.dart';
-import '../../../domain/services/model_benchmark.dart';
+import '../../config.dart';
+import '../../core/platform/benchmark_environment.dart';
+import '../../core/constants/app_colors.dart';
+import '../../domain/services/model_benchmark.dart';
 import '../controllers/app_controller.dart';
+import 'benchmark_report_export_button.dart';
 
 class ModelBenchmarkCard extends StatefulWidget {
   final AppController controller;
@@ -24,187 +25,57 @@ class ModelBenchmarkCard extends StatefulWidget {
 }
 
 class _ModelBenchmarkCardState extends State<ModelBenchmarkCard> {
-  final _dio = Dio(BaseOptions(connectTimeout: const Duration(seconds: 8)));
-  bool _unlocked = false;
+  final _dio = Dio(
+    BaseOptions(
+      connectTimeout: const Duration(seconds: 8),
+      followRedirects: false,
+    ),
+  );
   bool _running = false;
   bool _downloading = false;
+  bool _loadingCachedPackage = false;
   bool _cancelled = false;
-  String? _sessionToken;
+  final _downloadCancel = CancelToken();
   String? _packagePath;
   String? _message;
   double _downloadProgress = 0;
   int _total = 0;
   int _completed = 0;
-  BenchmarkRuntime _runtime = BenchmarkRuntime.onnx;
+  BenchmarkRuntime _runtime = BenchmarkRuntime.pte;
   String _datasetName = '';
+  String? _splitCsvSha256;
   List<String> _labels = const [];
   List<BenchmarkSample> _samples = const [];
   List<ModelBenchmarkReport> _reports = const [];
 
-  String get _server => (widget.controller.connectedServerUrl ?? kServerBaseUrl)
-      .replaceAll(RegExp(r'/$'), '');
+  String get _server => widget.controller.adminServerUrl;
 
-  Future<void> _unlock() async {
-    final password = TextEditingController();
-    String? error;
-    String? loginToken;
-    var busy = false;
-    final accepted = await showDialog<bool>(
-      context: context,
-      builder: (dialogContext) => StatefulBuilder(
-        builder: (context, setDialogState) => AlertDialog(
-          title: const Text('Xác thực quyền benchmark'),
-          content: Column(
-            mainAxisSize: MainAxisSize.min,
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              const Text(
-                'Đăng nhập tài khoản điều phối viên rhna trên server.',
-              ),
-              const SizedBox(height: 16),
-              TextField(
-                controller: password,
-                autofocus: true,
-                obscureText: true,
-                decoration: const InputDecoration(
-                  labelText: 'Mật khẩu server',
-                  border: OutlineInputBorder(),
-                ),
-                onSubmitted: (_) async {
-                  if (busy) return;
-                  setDialogState(() => busy = true);
-                  loginToken = await _verify(password.text, (value) {
-                    setDialogState(() => error = value);
-                  });
-                  if (dialogContext.mounted) {
-                    if (loginToken != null) {
-                      Navigator.pop(dialogContext, true);
-                    } else {
-                      setDialogState(() => busy = false);
-                    }
-                  }
-                },
-              ),
-              if (error != null) ...[
-                const SizedBox(height: 8),
-                Text(error!, style: const TextStyle(color: Colors.red)),
-              ],
-              if (busy) ...[
-                const SizedBox(height: 12),
-                const LinearProgressIndicator(),
-              ],
-            ],
-          ),
-          actions: [
-            TextButton(
-              onPressed: busy
-                  ? null
-                  : () => Navigator.pop(dialogContext, false),
-              child: const Text('Hủy'),
-            ),
-            FilledButton(
-              onPressed: busy
-                  ? null
-                  : () async {
-                      setDialogState(() => busy = true);
-                      loginToken = await _verify(password.text, (value) {
-                        setDialogState(() => error = value);
-                      });
-                      if (dialogContext.mounted) {
-                        if (loginToken != null) {
-                          Navigator.pop(dialogContext, true);
-                        } else {
-                          setDialogState(() => busy = false);
-                        }
-                      }
-                    },
-              child: const Text('Xác thực'),
-            ),
-          ],
-        ),
-      ),
-    );
-    password.dispose();
-    if (accepted == true && loginToken != null && mounted) {
-      setState(() {
-        _sessionToken = loginToken;
-        _unlocked = true;
-        _message = null;
-      });
-      await _loadCachedPackage();
-    }
-  }
-
-  Future<String?> _verify(
-    String password,
-    void Function(String) setError,
-  ) async {
-    if (password.isEmpty) {
-      setError('Nhập mật khẩu server.');
-      return null;
-    }
-    try {
-      final response = await _dio.post<dynamic>(
-        '$_server/api/auth/login',
-        data: {'username': 'rhna', 'password': password},
-        options: Options(contentType: Headers.jsonContentType),
-      );
-      final data = response.data;
-      if (data is! Map ||
-          data['username'] != 'rhna' ||
-          !const {'admin', 'operator'}.contains(data['role']) ||
-          data['token'] is! String) {
-        setError('Tài khoản không có quyền điều phối viên hợp lệ.');
-        return null;
-      }
-      return data['token'] as String;
-    } on DioException catch (e) {
-      setError(
-        e.response?.statusCode == 429
-            ? 'Server tạm khóa đăng nhập do thử sai nhiều lần.'
-            : e.response?.statusCode == 401
-            ? 'Sai mật khẩu hoặc server không nhận tài khoản rhna.'
-            : 'Không kết nối được server tại $_server.',
-      );
-      return null;
-    } catch (_) {
-      setError('Không thể xác thực với server.');
-      return null;
-    }
-  }
-
-  Future<void> _logoutSession() async {
-    final token = _sessionToken;
-    _sessionToken = null;
-    if (token == null) return;
-    try {
-      await _dio.post<void>(
-        '$_server/api/auth/logout',
-        options: Options(headers: {'Authorization': 'Bearer $token'}),
-      );
-    } catch (_) {
-      // Server-side session expiry remains the fallback if offline.
-    }
+  @override
+  void initState() {
+    super.initState();
+    if (widget.controller.isAdmin && !kIsWeb) _loadCachedPackage();
   }
 
   Future<void> _loadCachedPackage() async {
-    final directory = await getApplicationSupportDirectory();
-    final file = File(
-      '${directory.path}${Platform.pathSeparator}benchmark.rhb',
-    );
-    if (!await file.exists()) {
-      return;
-    }
+    _loadingCachedPackage = true;
     try {
+      final directory = await getApplicationSupportDirectory();
+      final file = File(
+        '${directory.path}${Platform.pathSeparator}benchmark.rhb',
+      );
+      if (!await file.exists()) return;
       await _readPackage(file.path);
       if (mounted) {
         setState(() => _packagePath = file.path);
       }
-    } catch (_) {
-      await file.delete();
+    } catch (error) {
       if (mounted) {
-        setState(() => _message = 'Gói benchmark lưu trên máy bị lỗi.');
+        setState(
+          () => _message = 'Không đọc được gói benchmark đã lưu: $error',
+        );
       }
+    } finally {
+      if (mounted) setState(() => _loadingCachedPackage = false);
     }
   }
 
@@ -245,6 +116,14 @@ class _ModelBenchmarkCardState extends State<ModelBenchmarkCard> {
         throw const FormatException('Ảnh benchmark nằm ngoài phạm vi gói.');
       }
       _datasetName = manifest['datasetName'] as String;
+      final splitHash = manifest['splitCsvSha256'];
+      if (splitHash is! String ||
+          !RegExp(r'^[a-f0-9]{64}$').hasMatch(splitHash)) {
+        throw const FormatException(
+          'Gói benchmark thiếu SHA-256 CSV chia tập. Xóa và tải lại gói.',
+        );
+      }
+      _splitCsvSha256 = splitHash;
       _labels = labels;
       _samples = samples;
     } finally {
@@ -253,7 +132,12 @@ class _ModelBenchmarkCardState extends State<ModelBenchmarkCard> {
   }
 
   Future<void> _downloadPackage() async {
-    final token = _sessionToken;
+    if (_downloading ||
+        _loadingCachedPackage ||
+        widget.controller.isDeletingBenchmarkResources) {
+      return;
+    }
+    final token = widget.controller.adminSession.token;
     if (token == null) return;
     setState(() {
       _downloading = true;
@@ -262,6 +146,8 @@ class _ModelBenchmarkCardState extends State<ModelBenchmarkCard> {
     });
     String? partialPath;
     try {
+      if (!await widget.controller.validateAdmin() || !mounted) return;
+      requireAllowedServerUrl(_server);
       final directory = await getApplicationSupportDirectory();
       final path = '${directory.path}${Platform.pathSeparator}benchmark.rhb';
       partialPath = '$path.part';
@@ -269,6 +155,7 @@ class _ModelBenchmarkCardState extends State<ModelBenchmarkCard> {
       await _dio.download(
         '$_server/api/benchmark/package',
         partialPath,
+        cancelToken: _downloadCancel,
         options: Options(headers: {'Authorization': 'Bearer $token'}),
         onReceiveProgress: (received, total) {
           if (mounted && total > 0) {
@@ -282,12 +169,11 @@ class _ModelBenchmarkCardState extends State<ModelBenchmarkCard> {
       if (mounted) {
         setState(() => _packagePath = path);
       }
-      await _logoutSession();
     } on DioException catch (e) {
       if (mounted) {
         setState(
           () => _message = e.response?.statusCode == 403
-              ? 'Server chỉ cho tài khoản rhna tải gói.'
+              ? 'Phiên admin không có quyền tải gói.'
               : 'Không tải được gói benchmark từ server.',
         );
       }
@@ -310,33 +196,39 @@ class _ModelBenchmarkCardState extends State<ModelBenchmarkCard> {
     if (await file.exists()) await file.delete();
   }
 
-  Future<void> _lock() async {
-    await _logoutSession();
-    if (mounted) {
-      setState(() {
-        _unlocked = false;
-        _samples = const [];
-        _labels = const [];
-        _reports = const [];
-        _message = null;
-      });
-    }
-  }
-
   Future<void> _deletePackage() async {
-    final path = _packagePath;
-    if (path != null) await _deleteIfExists(path);
-    if (mounted) {
-      setState(() {
-        _packagePath = null;
-        _samples = const [];
-        _labels = const [];
-        _reports = const [];
-      });
+    if (_running || _downloading || _loadingCachedPackage) return;
+    try {
+      final removedBytes = await widget.controller.deleteBenchmarkResources();
+      if (mounted) {
+        setState(() {
+          _packagePath = null;
+          _samples = const [];
+          _labels = const [];
+          _runtime = BenchmarkRuntime.pte;
+          _message = null;
+        });
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: Text(
+              'Đã giải phóng ${(removedBytes / 1000000).toStringAsFixed(1)} MB. PTE và kết quả JSON vẫn được giữ.',
+            ),
+          ),
+        );
+      }
+    } catch (error) {
+      if (mounted) {
+        setState(() => _message = 'Không xóa được tài nguyên: $error');
+      }
     }
   }
 
   Future<void> _run() async {
+    if (_running ||
+        _loadingCachedPackage ||
+        !widget.controller.beginBenchmark()) {
+      return;
+    }
     setState(() {
       _running = true;
       _cancelled = false;
@@ -346,6 +238,7 @@ class _ModelBenchmarkCardState extends State<ModelBenchmarkCard> {
     });
     RandomAccessFile? package;
     try {
+      if (!await widget.controller.validateAdmin() || !mounted) return;
       final path = _packagePath;
       if (path == null || _samples.isEmpty) {
         throw StateError('Tải gói benchmark trước khi chạy.');
@@ -358,6 +251,10 @@ class _ModelBenchmarkCardState extends State<ModelBenchmarkCard> {
             samples.length * (_runtime == BenchmarkRuntime.both ? 2 : 1),
       );
       final reports = await const ModelBenchmarkRunner().run(
+        provenance: {
+          ...await benchmarkEnvironment(),
+          'splitCsvSha256': _splitCsvSha256,
+        },
         repository: widget.controller.inferenceRepository,
         samples: samples,
         labels: _labels,
@@ -367,7 +264,7 @@ class _ModelBenchmarkCardState extends State<ModelBenchmarkCard> {
           await imagePackage.setPosition(sample.offset);
           return Uint8List.fromList(await imagePackage.read(sample.length));
         },
-        cancelled: () => _cancelled,
+        cancelled: () => _cancelled || !mounted || !widget.controller.isAdmin,
         onProgress: (progress) {
           if (!mounted) return;
           setState(
@@ -386,22 +283,29 @@ class _ModelBenchmarkCardState extends State<ModelBenchmarkCard> {
     } finally {
       await package?.close();
       if (mounted) setState(() => _running = false);
+      widget.controller.endBenchmark();
     }
   }
 
   @override
   void dispose() {
-    if (_sessionToken == null) {
-      _dio.close();
-    } else {
-      unawaited(_logoutSession().whenComplete(() => _dio.close()));
-    }
+    _cancelled = true;
+    _downloadCancel.cancel();
+    _dio.close(force: true);
     super.dispose();
   }
 
   @override
   Widget build(BuildContext context) {
+    if (!widget.controller.isAdmin) return const SizedBox.shrink();
     final canRunPte = widget.controller.isPteReady;
+    final canRunOnnx = widget.controller.isOnnxReady;
+    final deleting = widget.controller.isDeletingBenchmarkResources;
+    final runtimeReady = switch (_runtime) {
+      BenchmarkRuntime.pte => canRunPte,
+      BenchmarkRuntime.onnx => canRunOnnx,
+      BenchmarkRuntime.both => canRunPte && canRunOnnx,
+    };
     return Container(
       decoration: BoxDecoration(
         color: const Color(0xFFF9FAFB),
@@ -413,24 +317,17 @@ class _ModelBenchmarkCardState extends State<ModelBenchmarkCard> {
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
           Text(
-            'Tập test gồm 256 ảnh, 4 lớp. Gói chỉ tải từ server sau khi tài khoản rhna xác thực.',
+            'Tập test gồm 256 ảnh, 4 lớp. Chỉ admin được tải và chạy benchmark.',
             style: TextStyle(color: Colors.grey.shade700, height: 1.4),
           ),
           const SizedBox(height: 12),
           if (kIsWeb)
             const Text('Benchmark ảnh chỉ hỗ trợ ứng dụng cài trên điện thoại.')
-          else if (!_unlocked)
-            OutlinedButton.icon(
-              onPressed: _unlock,
-              icon: const Icon(Icons.lock_outline),
-              label: const Text('Xác thực rhna để mở benchmark'),
-              style: OutlinedButton.styleFrom(
-                foregroundColor: AppColors.primaryRed,
-              ),
-            )
           else if (_samples.isEmpty) ...[
             FilledButton.icon(
-              onPressed: _downloading ? null : _downloadPackage,
+              onPressed: _downloading || _loadingCachedPackage || deleting
+                  ? null
+                  : _downloadPackage,
               icon: const Icon(Icons.download_rounded),
               label: Text(
                 _downloading ? 'Đang tải gói…' : 'Tải gói benchmark (~40 MB)',
@@ -448,17 +345,16 @@ class _ModelBenchmarkCardState extends State<ModelBenchmarkCard> {
             ],
             if (_message != null)
               Text(_message!, style: const TextStyle(color: Colors.red)),
-            Align(
-              alignment: Alignment.centerRight,
-              child: TextButton(
-                onPressed: _downloading ? null : _lock,
-                child: const Text('Đăng xuất'),
-              ),
-            ),
           ] else ...[
             Row(
               children: [
-                Expanded(child: _runtimeChoice('ONNX', BenchmarkRuntime.onnx)),
+                Expanded(
+                  child: _runtimeChoice(
+                    'ONNX',
+                    BenchmarkRuntime.onnx,
+                    enabled: canRunOnnx,
+                  ),
+                ),
                 Expanded(
                   child: _runtimeChoice(
                     'PTE',
@@ -470,14 +366,21 @@ class _ModelBenchmarkCardState extends State<ModelBenchmarkCard> {
                   child: _runtimeChoice(
                     'Cả hai',
                     BenchmarkRuntime.both,
-                    enabled: canRunPte,
+                    enabled: canRunPte && canRunOnnx,
                   ),
                 ),
               ],
             ),
             const SizedBox(height: 8),
             FilledButton.icon(
-              onPressed: _running ? null : _run,
+              onPressed:
+                  _running ||
+                      _loadingCachedPackage ||
+                      deleting ||
+                      !runtimeReady ||
+                      widget.controller.isBenchmarking
+                  ? null
+                  : _run,
               icon: const Icon(Icons.speed_rounded),
               label: Text(_running ? 'Đang đo…' : 'Chạy benchmark thật'),
               style: FilledButton.styleFrom(
@@ -502,23 +405,27 @@ class _ModelBenchmarkCardState extends State<ModelBenchmarkCard> {
             ],
             if (_message != null)
               Text(_message!, style: const TextStyle(color: Colors.red)),
-            for (final report in _reports) _reportView(report),
-            Wrap(
-              alignment: WrapAlignment.end,
-              children: [
-                TextButton.icon(
-                  onPressed: _running ? null : _deletePackage,
-                  icon: const Icon(Icons.delete_outline, size: 16),
-                  label: const Text('Xóa gói đã tải'),
-                ),
-                TextButton.icon(
-                  onPressed: _running ? null : _lock,
-                  icon: const Icon(Icons.lock, size: 16),
-                  label: const Text('Khóa lại'),
-                ),
-              ],
-            ),
           ],
+          for (final report in _reports) _reportView(report),
+          if (!kIsWeb)
+            TextButton.icon(
+              onPressed:
+                  _running ||
+                      _loadingCachedPackage ||
+                      _downloading ||
+                      deleting ||
+                      widget.controller.isDownloadingOnnx ||
+                      widget.controller.isBenchmarking ||
+                      widget.controller.isModelLoading
+                  ? null
+                  : _deletePackage,
+              icon: const Icon(Icons.delete_outline, size: 16),
+              label: Text(
+                deleting
+                    ? 'Đang xóa tài nguyên…'
+                    : 'Xóa ONNX và tập benchmark đã tải',
+              ),
+            ),
         ],
       ),
     );
@@ -556,6 +463,8 @@ class _ModelBenchmarkCardState extends State<ModelBenchmarkCard> {
                   style: const TextStyle(fontWeight: FontWeight.w800),
                 ),
               ),
+              if (!kIsWeb && defaultTargetPlatform == TargetPlatform.android)
+                BenchmarkReportExportButton(report: report),
               IconButton(
                 tooltip: 'Sao chép kết quả JSON',
                 onPressed: () => Clipboard.setData(

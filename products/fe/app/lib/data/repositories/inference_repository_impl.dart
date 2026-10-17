@@ -17,6 +17,20 @@ class InferenceRepositoryImpl implements InferenceRepository {
   bool get pteReady => dataSource.pteReady;
 
   @override
+  bool get onnxReady => dataSource.onnxReady;
+
+  @override
+  void setComparisonAccess(bool enabled) =>
+      dataSource.setComparisonAccess(enabled);
+
+  @override
+  Future<void> loadComparisonModel(String path) =>
+      dataSource.loadComparisonModel(path);
+
+  @override
+  Future<void> unloadComparisonModel() => dataSource.unloadComparisonModel();
+
+  @override
   AiModelType get currentModel => dataSource.currentModel;
 
   @override

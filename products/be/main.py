@@ -28,6 +28,7 @@ from canonical import compute_bytes_sha256
 from cluster_service import ClusterService
 import accounts
 import auth
+import model_assets
 import dashboard_service
 import sms_intake
 import storage
@@ -447,13 +448,8 @@ async def logout(request: Request):
     return response
 
 
-@app.get("/api/benchmark/package", summary="Tải gói benchmark (chỉ tài khoản rhna)")
-def download_benchmark_package(request: Request):
-    session = auth.session_for(request)
-    if not session:
-        raise HTTPException(status_code=status.HTTP_401_UNAUTHORIZED, detail="Cần đăng nhập")
-    if session["username"] != "rhna":
-        raise HTTPException(status_code=status.HTTP_403_FORBIDDEN, detail="Chỉ tài khoản rhna")
+@app.get("/api/benchmark/package", summary="Tải gói benchmark (chỉ admin)")
+def download_benchmark_package(session=Depends(auth.require_admin)):
     package = Path(__file__).with_name("benchmark_package.rhb")
     if not package.is_file():
         raise HTTPException(status_code=status.HTTP_503_SERVICE_UNAVAILABLE, detail="Chưa có gói benchmark")
@@ -464,6 +460,18 @@ def download_benchmark_package(request: Request):
         filename=package.name,
         headers={"Cache-Control": "no-store", "X-Content-Type-Options": "nosniff"},
     )
+
+
+@app.get("/api/admin/models", summary="Danh mục model (chỉ admin)")
+def admin_models(_=Depends(auth.require_admin)):
+    return JSONResponse(model_assets.catalog(), headers={"Cache-Control": "no-store"})
+
+
+@app.get("/api/admin/models/{runtime}", summary="Tải model (chỉ admin)")
+def download_admin_model(runtime: str, _=Depends(auth.require_admin)):
+    path = model_assets.artifact(runtime)
+    return FileResponse(path, media_type="application/octet-stream", filename=path.name,
+                        headers={"Cache-Control": "no-store", "X-Content-Type-Options": "nosniff"})
 
 
 @app.get("/api/auth/me", summary="Phiên đăng nhập hiện tại và cấu hình dashboard")

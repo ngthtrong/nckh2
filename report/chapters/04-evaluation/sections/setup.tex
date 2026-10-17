@@ -1,15 +1,15 @@
 \section{Thiết lập thực nghiệm}\label{sec:04-evaluation-setup}
 \subsection{Phạm vi các phép đo}
-Chương này tổng hợp kết quả đã lưu trong repo. Các bảng được xuất từ JSON/CSV, giữ số mẫu, split, cấu hình và đơn vị thống kê. Đối chiếu mới còn cho thấy summary PTQ/QAT chưa khớp hoàn toàn với CSV dự đoán; các số nén được giữ dưới nhãn summary và công bố khác biệt ở phần kết quả. Không có phép đo mới về điện thoại, mạng viễn thông hoặc người dùng trong lần biên soạn. Kiểm tra bổ sung của báo cáo là kiểm tra tệp ảnh/hash/split và tính nhất quán bảng số liệu.
+Chương này tổng hợp kết quả đã lưu trong repo. Các bảng được xuất từ JSON/CSV, giữ số mẫu, split, cấu hình và đơn vị thống kê. Bộ xuất đối chiếu summary với CSV dự đoán; các sai khác, nếu có, được công bố ở phần kết quả. Mỗi nhóm benchmark mang nhãn seed riêng. Không có phép đo mới về điện thoại, mạng viễn thông hoặc người dùng trong lần biên soạn. Kiểm tra bổ sung của báo cáo là kiểm tra tệp ảnh/hash/split và tính nhất quán bảng số liệu.
 
 \begin{longtable}{P{.18\textwidth}P{.31\textwidth}P{.40\textwidth}}
 \caption{Thiết lập và nguồn kết quả theo nhóm thực nghiệm}\label{tab:experiment-map}\\
 \toprule Nhóm & Dữ liệu và đơn vị & Nguồn kết quả chính \\\midrule\endfirsthead
 \toprule Nhóm & Dữ liệu và đơn vị & Nguồn kết quả chính \\\midrule\endhead
-Ảnh FP32 & 256 ảnh test, split seed 42 & \RepoPath{products/fe/reports/pth_onnx_pte/summary.json} \\
-PTQ/QAT & Cùng 256 ảnh test & \RepoPath{products/fe/reports/fp32_ptq_qat/summary.json} \\
-Cắt tỉa & Cùng 256 ảnh test, đối chiếu theo runtime & \RepoPath{products/fe/reports/pruning_st/summary.json} \\
-Benchmark app & 256 ảnh/runtime; thiếu metadata thiết bị & \RepoPath{products/fe/reports/mobile/samsung21se.json} \\
+Ảnh FP32 & \ImageTest{} ảnh test, model seed \BenchmarkSeed{} & \RuntimeBenchmarkSource{} \\
+PTQ/QAT & Cùng \ImageTest{} ảnh test, seed \QuantizationSeed{} & \QuantizationBenchmarkSource{} \\
+Cắt tỉa & Cùng \ImageTest{} ảnh test, seed \PruningSeed{} & \PruningBenchmarkSource{} \\
+Benchmark app & \ImageTest{} ảnh/runtime, seed \MobileBenchmarkSeed{} & \MobileBenchmarkSource{} \\
 Khẩn cấp LR & 32 profile trạng thái; sanity giữ profile dương & \RepoPath{products/fe/model/urgency_ei/model/urgency_logistic_SOURCE_FINAL.json} và audits \\
 RQ1 cơ sở & 40 run test Generator 3.0 & \RepoPath{thucnghiem/results/cij_baseline_benchmark_results/} \\
 RQ1 stress & 40 run, 7 điều kiện, 5 phương pháp & \RepoPath{thucnghiem/results/rq1_results/aggregate/} \\
@@ -20,7 +20,7 @@ Phần mềm & Ca test lịch sử ngày 27/09/2026 & \RepoPath{docs/nghiem-thu/
 \end{longtable}
 
 \subsection{Runtime ảnh và phạm vi thời gian}
-Artifact ảnh ghi PyTorch 2.14.1, ONNX Runtime 1.30.0 và ExecuTorch runtime 1.4.1. Đây là phiên bản ghi trong metadata lần chạy; không phải môi trường đã được cài và chạy lại để viết báo cáo. PTH/ONNX dùng CPU một luồng theo script; PTE theo runtime tương ứng. Batch bằng một, ba lượt warmup/model không tính vào latency.
+Artifact FP32 ghi PyTorch \BenchmarkPytorchVersion{}, ONNX Runtime \BenchmarkOnnxVersion{} và ExecuTorch runtime \BenchmarkExecutorchVersion{}. Đây là phiên bản ghi trong metadata lần chạy; không phải môi trường đã được cài và chạy lại để viết báo cáo. PTH/ONNX dùng CPU một luồng theo script; PTE theo runtime tương ứng. Batch bằng một, ba lượt warmup/model không tính vào latency.
 
 Latency chỉ tính lời gọi suy luận, không bao gồm đọc ảnh, tiền xử lý, nạp model, validation hoặc logging. Các artifact so sánh FP32, lượng tử hóa và cắt tỉa có phiên đo khác nhau, nên thời gian baseline giữa các bảng có thể khác. Đánh giá tốc độ phải dùng cặp trong cùng bảng, cùng runtime, thay vì lấy baseline nhanh nhất ở một bảng so với candidate ở bảng khác.
 

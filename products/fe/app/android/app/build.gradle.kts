@@ -1,8 +1,15 @@
+import java.util.Base64
+
 plugins {
     id("com.android.application")
     // The Flutter Gradle Plugin must be applied after the Android and Kotlin Gradle plugins.
     id("dev.flutter.flutter-gradle-plugin")
 }
+
+val allowInsecureLan = (project.findProperty("dart-defines") as? String)
+    ?.split(",")
+    ?.map { String(Base64.getDecoder().decode(it), Charsets.UTF_8) }
+    ?.contains("ALLOW_INSECURE_LAN=true") == true
 
 android {
     namespace = "com.example.app"
@@ -23,6 +30,8 @@ android {
         targetSdk = flutter.targetSdkVersion
         versionCode = flutter.versionCode
         versionName = flutter.versionName
+        manifestPlaceholders["networkSecurityConfig"] = if (allowInsecureLan)
+            "@xml/network_security_config_lan" else "@xml/network_security_config"
     }
 
     buildTypes {

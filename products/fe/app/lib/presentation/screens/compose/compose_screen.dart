@@ -7,7 +7,6 @@ import '../../../domain/entities/ai_tag.dart';
 import '../../controllers/app_controller.dart';
 import '../../widgets/emergency_condition_selector.dart';
 import '../../widgets/number_stepper_input.dart';
-import '../../widgets/payload_demo_panel.dart';
 import '../../widgets/screen_header.dart';
 import '../../widgets/tag_chip.dart';
 import '../../widgets/vulnerable_group_selector.dart';
@@ -34,7 +33,6 @@ class _ComposeScreenState extends State<ComposeScreen> {
   List<String> _vulnerableGroups = [];
   bool _cannotMove = false;
   List<String> _severeSigns = [];
-  final DateTime _draftCreatedAt = DateTime.now().toUtc();
   final TextEditingController _descController = TextEditingController();
 
   String? _imagePath;
@@ -452,9 +450,6 @@ class _ComposeScreenState extends State<ComposeScreen> {
                       const SizedBox(height: 18),
                     ],
 
-                    PayloadDemoPanel(payload: _buildPayloadDemo()),
-                    const SizedBox(height: 18),
-
                     // Tips Panel
                     Container(
                       width: double.infinity,
@@ -512,26 +507,4 @@ class _ComposeScreenState extends State<ComposeScreen> {
       ),
     );
   }
-
-  Map<String, dynamic> _buildPayloadDemo() => {
-    'L_i': {
-      'lat': widget.controller.currentLat,
-      'lon': widget.controller.currentLng,
-    },
-    'T_i': _draftCreatedAt.toIso8601String(),
-    'N_i': _trappedCount,
-    'injury_count': _injuredCount,
-    'urgency_features': {
-      'cannot_move': _cannotMove,
-      'severe_condition': _severeSigns.isNotEmpty,
-      'severe_signs': _severeSigns,
-    },
-    'E_i': widget.controller.urgencyScore(_severeSigns),
-    'vulnerability_flags': _vulnerableGroups,
-    'V_i': _vulnerableGroups.length,
-    'note': _descController.text.trim().isEmpty
-        ? null
-        : _descController.text.trim(),
-    'image_attached': _imagePath != null,
-  };
 }

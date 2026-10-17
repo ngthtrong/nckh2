@@ -9,3 +9,7 @@ bool localFileExists(String path) => path.isNotEmpty;
 Future<Uint8List> readLocalFile(String path) async {
   throw UnsupportedError('Local file access is unavailable on this platform.');
 }
+
+Future<String> preserveLocalFile(String path, String name) async {
+  throw UnsupportedError('Local file access is unavailable on this platform.');
+}

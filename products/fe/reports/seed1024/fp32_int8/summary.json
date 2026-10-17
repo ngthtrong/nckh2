@@ -1,0 +1,189 @@
+{
+  "metadata": {
+    "config": "E:\\RHNA\\1Visual\\NCKH\\nckh2\\products\\fe\\model\\Edge Ai\\config_mobilenetv3_large.json",
+    "config_sha256": "1a14408bd2f42c9c06aba419ec3862fefec109c4e1030fa2a354ca8522a46779",
+    "split_csv": "E:\\RHNA\\1Visual\\NCKH\\nckh2\\products\\fe\\model\\Edge Ai\\split_train_val_test_mobilenetv3_large.csv",
+    "split_csv_sha256": "f7b52cd25411d4d1df2f7f80745a2cf430819773854345798cf7e093e3bcba45",
+    "dataset_dir": "E:\\RHNA\\1Visual\\NCKH\\nckh2\\products\\fe\\model\\Dataset_Flood",
+    "full_test_count": 256,
+    "seed": 1024,
+    "evaluation_scope": "full_test",
+    "manifest_sha256": "6e32893a802693c39cca1f5affe4ef4ab21f6f0eae289f1a8f473d11c4bbca93",
+    "int8_manifest_sha256": "b80d15696d9aa03afb0bb43910be51ee84a1664104a1251a314640af58b273a0",
+    "quantization": "QDQ_QInt8_weights_QUInt8_activations_per_channel",
+    "calibration_split": "train",
+    "onnxruntime": "1.30.0",
+    "evaluation_split": "test",
+    "n_images": 256,
+    "class_order": [
+      "low",
+      "medium",
+      "high",
+      "non_flood"
+    ],
+    "input_size": 256,
+    "output_type": "probabilities",
+    "preprocess": "EXIF -> RGB -> letterbox BILINEAR -> ImageNet NCHW",
+    "timing": "CPU máy tính; batch=1; 3 warmup/model không tính vào latency; không gồm load model, preprocessing, validation, logging; tổng là tổng thời gian gọi predict, không phải wall-clock toàn pipeline; không phải latency mobile",
+    "critical_distance": 2
+  },
+  "classification_metrics": {
+    "fp32": {
+      "accuracy": 0.7578125,
+      "balanced_accuracy": 0.7387150855174109,
+      "macro_f1": 0.7426491791647138,
+      "ece": 0.041241662576794604,
+      "brier_score": 0.3426191050183396,
+      "confusion_matrix": [
+        [
+          34,
+          14,
+          0,
+          8
+        ],
+        [
+          11,
+          42,
+          6,
+          1
+        ],
+        [
+          2,
+          12,
+          40,
+          0
+        ],
+        [
+          8,
+          0,
+          0,
+          78
+        ]
+      ],
+      "per_class": {
+        "low": {
+          "precision": 0.6181818181818182,
+          "recall": 0.6071428571428571,
+          "f1": 0.6126126126126126,
+          "support": 56
+        },
+        "medium": {
+          "precision": 0.6176470588235294,
+          "recall": 0.7,
+          "f1": 0.65625,
+          "support": 60
+        },
+        "high": {
+          "precision": 0.8695652173913043,
+          "recall": 0.7407407407407407,
+          "f1": 0.8,
+          "support": 54
+        },
+        "non_flood": {
+          "precision": 0.896551724137931,
+          "recall": 0.9069767441860465,
+          "f1": 0.9017341040462428,
+          "support": 86
+        }
+      },
+      "critical_error_count": 3,
+      "critical_error_rate": 0.01171875,
+      "mean_severity_distance": 0.25390625,
+      "latency_ms_mean": 16.87436445399726,
+      "latency_ms_median": 11.072799999965355,
+      "latency_ms_p95": 38.847500007250346,
+      "latency_ms_min": 8.96810000995174,
+      "latency_ms_max": 69.06829995568842,
+      "latency_ms_total": 4319.837300223298,
+      "file": "E:\\RHNA\\1Visual\\NCKH\\nckh2\\products\\fe\\model\\Edge Ai\\Export\\flood_mobilenetv3_large.onnx",
+      "sha256": "f74c99b479b6fc55bd5f7bb2dffcf080d376ff7bc25269ad80732f996d3d89a9",
+      "bytes": 16821822
+    },
+    "int8": {
+      "accuracy": 0.66796875,
+      "balanced_accuracy": 0.6458341023748,
+      "macro_f1": 0.6436168387451474,
+      "ece": 0.062484684400260435,
+      "brier_score": 0.4377460005781221,
+      "confusion_matrix": [
+        [
+          39,
+          4,
+          0,
+          13
+        ],
+        [
+          25,
+          22,
+          9,
+          4
+        ],
+        [
+          10,
+          6,
+          35,
+          3
+        ],
+        [
+          11,
+          0,
+          0,
+          75
+        ]
+      ],
+      "per_class": {
+        "low": {
+          "precision": 0.4588235294117647,
+          "recall": 0.6964285714285714,
+          "f1": 0.5531914893617021,
+          "support": 56
+        },
+        "medium": {
+          "precision": 0.6875,
+          "recall": 0.36666666666666664,
+          "f1": 0.4782608695652174,
+          "support": 60
+        },
+        "high": {
+          "precision": 0.7954545454545454,
+          "recall": 0.6481481481481481,
+          "f1": 0.7142857142857143,
+          "support": 54
+        },
+        "non_flood": {
+          "precision": 0.7894736842105263,
+          "recall": 0.872093023255814,
+          "f1": 0.8287292817679558,
+          "support": 86
+        }
+      },
+      "critical_error_count": 17,
+      "critical_error_rate": 0.06640625,
+      "mean_severity_distance": 0.41015625,
+      "latency_ms_mean": 16.352677733721066,
+      "latency_ms_median": 10.010600002715364,
+      "latency_ms_p95": 41.66147501382511,
+      "latency_ms_min": 8.321000030264258,
+      "latency_ms_max": 62.35020002350211,
+      "latency_ms_total": 4186.285499832593,
+      "file": "E:\\RHNA\\1Visual\\NCKH\\nckh2\\products\\fe\\model\\Edge Ai\\Quantize\\flood_mobilenetv3_large.int8.onnx",
+      "sha256": "ebc6a32452443dfe134cdcf4a3a9944e744fc5ac8f95eb0e0b2542cad1927c03",
+      "bytes": 4726961
+    }
+  },
+  "pairwise_comparison": {
+    "fp32_vs_int8": {
+      "top1_agreement": 0.7734375,
+      "max_abs_diff": 0.6009965538978577,
+      "mean_abs_diff": 0.09008083492517471,
+      "rmse": 0.14449275647158627,
+      "l1_mean": 0.36032333970069885,
+      "l2_mean": 0.22559711337089539,
+      "cosine_similarity_mean": 0.9189519882202148,
+      "js_divergence_mean": 0.03852017464600254,
+      "probabilities_close": false,
+      "atol": 1e-05,
+      "rtol": 0.0001
+    }
+  }
+}

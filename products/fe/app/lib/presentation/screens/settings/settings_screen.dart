@@ -5,6 +5,8 @@ import '../../../domain/entities/ai_model_type.dart';
 import '../../../domain/entities/user.dart';
 import '../../controllers/app_controller.dart';
 import '../../widgets/model_benchmark_card.dart';
+import '../../widgets/admin_login_button.dart';
+import '../../widgets/admin_model_download_button.dart';
 
 class SettingsScreen extends StatefulWidget {
   final AppController controller;
@@ -673,64 +675,81 @@ class _SettingsScreenState extends State<SettingsScreen> {
                         const SizedBox(height: 20),
                       ],
 
-                      // Section: MÔ HÌNH AI ON-DEVICE (EDGE AI)
-                      _buildSectionLabel('MÔ HÌNH AI ON-DEVICE (EDGE AI)'),
-                      const SizedBox(height: 8),
-                      Container(
-                        decoration: BoxDecoration(
-                          color: const Color(0xFFF9FAFB),
-                          borderRadius: BorderRadius.circular(20),
-                          border: Border.all(color: const Color(0xFFE5E7EB)),
+                      if (!c.isAdmin)
+                        AdminLoginButton(controller: c)
+                      else ...[
+                        ListTile(
+                          leading: const Icon(Icons.admin_panel_settings),
+                          title: Text('Admin: ${c.adminSession.username}'),
+                          trailing: TextButton(
+                            onPressed: c.adminSession.logout,
+                            child: const Text('Đăng xuất admin'),
+                          ),
                         ),
-                        padding: const EdgeInsets.all(16),
-                        child: Column(
-                          crossAxisAlignment: CrossAxisAlignment.start,
-                          children: [
-                            ...AiModelType.values.map((model) {
-                              final available =
-                                  model == AiModelType.onnx || c.isPteReady;
-                              final selected = c.currentModel == model;
-                              return ListTile(
+                        // Section: MÔ HÌNH AI ON-DEVICE (EDGE AI)
+                        _buildSectionLabel('MÔ HÌNH AI ON-DEVICE (EDGE AI)'),
+                        const SizedBox(height: 8),
+                        Container(
+                          decoration: BoxDecoration(
+                            color: const Color(0xFFF9FAFB),
+                            borderRadius: BorderRadius.circular(20),
+                            border: Border.all(color: const Color(0xFFE5E7EB)),
+                          ),
+                          padding: const EdgeInsets.all(16),
+                          child: Column(
+                            crossAxisAlignment: CrossAxisAlignment.start,
+                            children: [
+                              AdminModelDownloadButton(controller: c),
+                              ...AiModelType.values.map((model) {
+                                final available = model == AiModelType.onnx
+                                    ? c.isOnnxReady
+                                    : c.isPteReady;
+                                final selected = c.currentModel == model;
+                                return ListTile(
+                                  contentPadding: EdgeInsets.zero,
+                                  onTap: available && !c.isBenchmarking
+                                      ? () => c.switchAiModel(model)
+                                      : null,
+                                  title: Text(model.name),
+                                  subtitle: Text(
+                                    available
+                                        ? model.description
+                                        : 'Runtime chưa sẵn sàng trên thiết bị này',
+                                  ),
+                                  trailing: Icon(
+                                    selected
+                                        ? Icons.radio_button_checked
+                                        : Icons.radio_button_off,
+                                    color: selected
+                                        ? AppColors.primaryRed
+                                        : const Color(0xFF9CA3AF),
+                                  ),
+                                );
+                              }),
+                              const Divider(height: 16),
+                              SwitchListTile.adaptive(
                                 contentPadding: EdgeInsets.zero,
-                                onTap: available
-                                    ? () => c.switchAiModel(model)
+                                title: const Text('So sánh ONNX và PTE thật'),
+                                subtitle: const Text(
+                                  'Chạy cả hai runtime trên cùng tensor đầu vào',
+                                ),
+                                value: c.isDualComparison,
+                                onChanged:
+                                    c.isPteReady &&
+                                        c.isOnnxReady &&
+                                        !c.isBenchmarking
+                                    ? c.toggleDualComparison
                                     : null,
-                                title: Text(model.name),
-                                subtitle: Text(
-                                  available
-                                      ? model.description
-                                      : 'Runtime chưa sẵn sàng trên thiết bị này',
-                                ),
-                                trailing: Icon(
-                                  selected
-                                      ? Icons.radio_button_checked
-                                      : Icons.radio_button_off,
-                                  color: selected
-                                      ? AppColors.primaryRed
-                                      : const Color(0xFF9CA3AF),
-                                ),
-                              );
-                            }),
-                            const Divider(height: 16),
-                            SwitchListTile.adaptive(
-                              contentPadding: EdgeInsets.zero,
-                              title: const Text('So sánh ONNX và PTE thật'),
-                              subtitle: const Text(
-                                'Chạy cả hai runtime trên cùng tensor đầu vào',
                               ),
-                              value: c.isDualComparison,
-                              onChanged: c.isPteReady
-                                  ? c.toggleDualComparison
-                                  : null,
-                            ),
-                          ],
+                            ],
+                          ),
                         ),
-                      ),
 
-                      const SizedBox(height: 20),
-                      _buildSectionLabel('BENCHMARK TRÊN ĐIỆN THOẠI'),
-                      const SizedBox(height: 8),
-                      ModelBenchmarkCard(controller: c),
+                        const SizedBox(height: 20),
+                        _buildSectionLabel('BENCHMARK TRÊN ĐIỆN THOẠI'),
+                        const SizedBox(height: 8),
+                        ModelBenchmarkCard(controller: c),
+                      ],
 
                       const SizedBox(height: 20),
 
@@ -794,7 +813,7 @@ class _SettingsScreenState extends State<SettingsScreen> {
                               ),
                             ),
                             const Divider(height: 1, color: Color(0xFFE5E7EB)),
-                            InkWell(
+                            GestureDetector(
                               onTap: () {
                                 ScaffoldMessenger.of(context).showSnackBar(
                                   const SnackBar(
@@ -804,9 +823,6 @@ class _SettingsScreenState extends State<SettingsScreen> {
                                   ),
                                 );
                               },
-                              borderRadius: const BorderRadius.vertical(
-                                bottom: Radius.circular(20),
-                              ),
                               child: const Padding(
                                 padding: EdgeInsets.symmetric(
                                   horizontal: 16,
@@ -1002,14 +1018,12 @@ class _SettingsScreenState extends State<SettingsScreen> {
     required String title,
     required VoidCallback onTap,
   }) {
-    return InkWell(
+    return GestureDetector(
       onTap: onTap,
-      borderRadius: BorderRadius.circular(16),
       child: Container(
         padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 12),
         decoration: BoxDecoration(
           color: const Color(0xFFF9FAFB),
-          borderRadius: BorderRadius.circular(16),
           border: Border.all(color: const Color(0xFFE5E7EB)),
         ),
         child: Row(

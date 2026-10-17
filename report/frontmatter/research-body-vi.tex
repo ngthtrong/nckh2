@@ -10,7 +10,7 @@ Xây dựng nguyên mẫu phân tích và gom nhóm tin cứu hộ bão lũ khi 
 \FormSection{3. Tính mới và sáng tạo:}
 Tích hợp suy luận ảnh, outbox bền vững và phân cụm sự kiện; kiểm tra chặn cạnh, bất biến bản sao có điều kiện và hệ quả điều phối.
 \FormSection{4. Kết quả nghiên cứu:}
-Model seed 1024 đạt Accuracy \NewImageAccuracy\%, macro-F1 \NewImageMacroFOne\% trên 256 ảnh test, có 3 lỗi nặng. Chưa có manifest split và benchmark runtime/nén/mobile riêng của model mới. Các benchmark cũ giữ riêng; PTQ/QAT còn lệch summary--CSV. LR dùng 32 trạng thái tổng hợp, chưa thay NLP tiếng Việt. RQ1--RQ3 chưa chứng minh lợi ích cứu hộ thực địa.
+Model seed 1024 đạt Accuracy \NewImageAccuracy\%, macro-F1 \NewImageMacroFOne\% trên 256 ảnh test, có 3 lỗi nặng. Benchmark CPU khớp CSV; cắt tỉa đạt \PruningAccuracy\% với \PruningCriticalCount{} lỗi nặng. Kết quả mobile và giới hạn split được trình bày riêng. LR dùng 32 trạng thái tổng hợp; RQ1--RQ3 chưa chứng minh lợi ích cứu hộ thực địa.
 \FormSection{5. Sản phẩm:}
 Ứng dụng Flutter, backend FastAPI/SQLite, dashboard, mô hình/asset, dữ liệu và báo cáo/bản tin/tóm tắt Việt--Anh.
 \FormSection{6. Công bố khoa học từ kết quả nghiên cứu của đề tài, hoặc nhận xét, đánh giá của cơ sở đã áp dụng các kết quả nghiên cứu (nếu có):}

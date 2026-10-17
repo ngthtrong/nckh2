@@ -28,6 +28,10 @@ class RescueRecord {
   final String description;
   final String sendMode;
   final bool synced;
+  final bool metadataSynced;
+
+  /// Retryable local attachment failure; metadata may already be on the server.
+  final String? attachmentError;
   final String status;
 
   /// Mã lỗi khi server từ chối vĩnh viễn báo cáo (vd. `INVALID_PAYLOAD`): báo cáo
@@ -53,6 +57,8 @@ class RescueRecord {
     this.description = '',
     required this.sendMode,
     this.synced = false,
+    this.metadataSynced = false,
+    this.attachmentError,
     this.status = 'processing',
     this.syncError,
   });
@@ -90,6 +96,9 @@ class RescueRecord {
     String? description,
     String? sendMode,
     bool? synced,
+    bool? metadataSynced,
+    String? attachmentError,
+    bool clearAttachmentError = false,
     String? status,
     String? syncError,
   }) {
@@ -112,6 +121,10 @@ class RescueRecord {
       description: description ?? this.description,
       sendMode: sendMode ?? this.sendMode,
       synced: synced ?? this.synced,
+      metadataSynced: metadataSynced ?? this.metadataSynced,
+      attachmentError: clearAttachmentError
+          ? null
+          : attachmentError ?? this.attachmentError,
       status: status ?? this.status,
       syncError: syncError ?? this.syncError,
     );

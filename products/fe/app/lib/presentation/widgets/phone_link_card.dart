@@ -6,11 +6,7 @@ class PhoneLinkCard extends StatelessWidget {
   final EmergencyNumber item;
   final bool compact;
 
-  const PhoneLinkCard({
-    super.key,
-    required this.item,
-    this.compact = false,
-  });
+  const PhoneLinkCard({super.key, required this.item, this.compact = false});
 
   Color _getBgColor() {
     switch (item.colorType) {
@@ -78,16 +74,14 @@ class PhoneLinkCard extends StatelessWidget {
     return Material(
       color: _getBgColor(),
       borderRadius: BorderRadius.circular(16),
-      child: InkWell(
+      child: GestureDetector(
         onTap: _makeCall,
-        borderRadius: BorderRadius.circular(16),
         child: Container(
           padding: EdgeInsets.symmetric(
             horizontal: 14,
             vertical: compact ? 10 : 14,
           ),
           decoration: BoxDecoration(
-            borderRadius: BorderRadius.circular(16),
             border: Border.all(color: _getBorderColor()),
           ),
           child: Row(

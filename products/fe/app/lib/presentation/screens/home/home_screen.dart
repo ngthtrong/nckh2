@@ -1,9 +1,10 @@
+import 'dart:async';
+
 import 'package:flutter/material.dart';
 import 'package:url_launcher/url_launcher.dart';
 
 import '../../../core/constants/app_colors.dart';
 import '../../controllers/app_controller.dart';
-import '../../widgets/ai_model_settings_sheet.dart';
 import '../../widgets/app_header.dart';
 import '../../widgets/compose_cta_card.dart';
 import '../../widgets/sos_button.dart';
@@ -25,6 +26,7 @@ class HomeScreen extends StatefulWidget {
 
 class _HomeScreenState extends State<HomeScreen> {
   SosState _sosState = SosState.idle;
+  Timer? _sosResetTimer;
 
   @override
   void initState() {
@@ -47,35 +49,44 @@ class _HomeScreenState extends State<HomeScreen> {
 
   @override
   void dispose() {
+    _sosResetTimer?.cancel();
     widget.controller.removeListener(_onControllerChange);
     super.dispose();
   }
 
   Future<void> _handleSos() async {
-    if (_sosState != SosState.idle) return;
+    if (_sosState == SosState.pressed || widget.controller.isBusy) return;
+    _sosResetTimer?.cancel();
     setState(() => _sosState = SosState.pressed);
 
-    final record = await widget.controller.sendSos();
+    final record = await widget.controller.sendSos().catchError((_) => null);
 
     if (mounted) {
       final mode = sendModeFromName(record?.sendMode);
+      final syncError = record?.syncError;
+      final state = record == null || syncError != null
+          ? SosState.failed
+          : record.synced
+          ? SosState.accepted
+          : mode == SendMode.smsFallback
+          ? SosState.sms
+          : SosState.queued;
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(
-          content: Text(
-            record == null
-                ? 'Không gửi được SOS, hãy gọi 112.'
-                : record.synced
-                ? 'Đã gửi SOS tới trung tâm cứu hộ.'
-                : record.syncError != null
-                ? 'Máy chủ từ chối SOS (${record.syncError}), hãy gọi 112.'
-                : mode == SendMode.smsFallback
-                ? 'Không có mạng: đã gửi SMS tới tổng đài, sẽ đồng bộ khi có mạng.'
-                : 'Không có mạng: SOS nằm trong hàng đợi, tự gửi khi có mạng.',
-          ),
+          content: Text(switch (state) {
+            SosState.accepted => 'Máy chủ đã tiếp nhận SOS.',
+            SosState.sms =>
+              'Đã gửi SMS; chưa xác nhận tiếp nhận. SOS sẽ đồng bộ khi có mạng.',
+            SosState.queued => 'SOS trong hàng đợi, sẽ gửi khi có mạng.',
+            _ =>
+              syncError != null
+                  ? 'Máy chủ từ chối SOS ($syncError), hãy gọi 112.'
+                  : 'Không gửi được SOS, hãy gọi 112.',
+          }),
         ),
       );
-      setState(() => _sosState = SosState.sent);
-      Future.delayed(const Duration(seconds: 3), () {
+      setState(() => _sosState = state);
+      _sosResetTimer = Timer(const Duration(seconds: 3), () {
         if (mounted) {
           setState(() => _sosState = SosState.idle);
         }
@@ -155,9 +166,8 @@ class _HomeScreenState extends State<HomeScreen> {
             child: Material(
               color: Colors.transparent,
               borderRadius: BorderRadius.circular(16),
-              child: InkWell(
+              child: GestureDetector(
                 onTap: () => _makeCall(c.$1),
-                borderRadius: BorderRadius.circular(16),
                 child: Padding(
                   padding: const EdgeInsets.symmetric(vertical: 14),
                   child: Column(
@@ -218,17 +228,6 @@ class _HomeScreenState extends State<HomeScreen> {
                 label: 'Kết nối mạng',
                 value: c.networkLabel,
                 isGreen: c.networkLabel != 'none',
-              ),
-              const Divider(height: 24, color: Color(0xFFF3F4F6)),
-              _statusRow(
-                icon: Icons.memory,
-                label: 'Mô hình AI offline',
-                value: c.isModelReady
-                    ? c.currentModel.badgeText
-                    : (c.isModelLoading ? 'Đang nạp' : 'Không khả dụng'),
-                isGreen: c.isModelReady,
-                actionLabel: c.modelStatusHint,
-                onTap: () => AiModelSettingsSheet.show(context, c),
               ),
               const Divider(height: 24, color: Color(0xFFF3F4F6)),
               _statusRow(
@@ -306,9 +305,8 @@ class _HomeScreenState extends State<HomeScreen> {
     );
 
     if (onTap != null) {
-      return InkWell(
+      return GestureDetector(
         onTap: onTap,
-        borderRadius: BorderRadius.circular(10),
         child: Padding(
           padding: const EdgeInsets.symmetric(vertical: 4),
           child: rowContent,

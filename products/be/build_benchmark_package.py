@@ -18,8 +18,10 @@ MAGIC = b"RHB1"
 
 
 def main() -> None:
+    split_bytes = SPLIT_CSV.read_bytes()
+    split_hash = hashlib.sha256(split_bytes).hexdigest()
     files = []
-    for row in csv.DictReader(SPLIT_CSV.open(encoding="utf-8-sig", newline="")):
+    for row in csv.DictReader(split_bytes.decode("utf-8-sig").splitlines()):
         if row["split"].strip().lower() != "test":
             continue
         label = row["label"].strip().lower()
@@ -42,7 +44,8 @@ def main() -> None:
         raise ValueError("CSV test split is empty or missing a class")
 
     manifest = {
-        "datasetName": "MobileNetV3 dataset v4, seed 42",
+        "datasetName": f"MobileNetV3 dataset v4, fixed split {split_hash[:12]}",
+        "splitCsvSha256": split_hash,
         "split": "test",
         "labels": list(LABELS),
         "samples": [sample for _, sample in files],

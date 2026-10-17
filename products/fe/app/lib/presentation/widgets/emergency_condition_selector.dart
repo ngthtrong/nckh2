@@ -121,9 +121,8 @@ class _OptionTile extends StatelessWidget {
           color: selected ? const Color(0xFFE9A3A3) : const Color(0xFFE5E7EB),
         ),
       ),
-      child: InkWell(
+      child: GestureDetector(
         onTap: onTap,
-        borderRadius: BorderRadius.circular(8),
         child: Padding(
           padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 10),
           child: Row(
@@ -137,9 +136,7 @@ class _OptionTile extends StatelessWidget {
                   onChanged: (_) => onTap(),
                   activeColor: AppColors.primaryRed,
                   side: const BorderSide(color: Color(0xFFD1D5DB), width: 2),
-                  shape: RoundedRectangleBorder(
-                    borderRadius: BorderRadius.circular(6),
-                  ),
+                  shape: RoundedRectangleBorder(),
                 ),
               ),
               const SizedBox(width: 8),

@@ -21,6 +21,24 @@ import compare_fp32_int8 as quant_compare
 
 
 class ComparisonTest(unittest.TestCase):
+    def test_csv_predictions_match_argmax_when_probabilities_tie(self):
+        config = dict(class_order=["low", "medium", "high", "non_flood"],
+                      image_size=16, letterbox_fill=[124, 116, 104])
+        probabilities = np.array([[0.1, 0.4, 0.4, 0.1],
+                                  [0.3, 0.1, 0.3, 0.3],
+                                  [0.25, 0.25, 0.25, 0.25],
+                                  [0.1, 0.2, 0.6, 0.1]], dtype=np.float32)
+        outputs = iter([probabilities[0]] * 3 + list(probabilities))
+        items = [(Path(f"case_{i}.jpg"), label) for i, label in enumerate([1, 0, 0, 2])]
+        with patch.object(compare, "preprocess", return_value=np.zeros((1, 3, 16, 16), dtype=np.float32)):
+            measured, _, rows = compare.evaluate_models(
+                {"qat_int8": lambda x: next(outputs)[None, :]}, items, config)
+        self.assertEqual([row["pred_qat_int8"] for row in rows], ["medium", "low", "low", "high"])
+        np.testing.assert_array_equal(measured["qat_int8"].argmax(axis=1), [1, 0, 0, 2])
+        for row, confidence, margin in zip(rows, [0.4, 0.3, 0.25, 0.6], [0, 0, 0, 0.4]):
+            self.assertAlmostEqual(row["confidence_qat_int8"], confidence)
+            self.assertAlmostEqual(row["margin_qat_int8"], margin)
+
     def test_independent_predictions_reports_and_guards(self):
         with tempfile.TemporaryDirectory() as directory:
             root = Path(directory)
