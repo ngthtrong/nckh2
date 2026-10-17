@@ -432,7 +432,8 @@ def _dashboard_config(session: Dict[str, Any]) -> Dict[str, Any]:
 @app.post("/api/auth/login", summary="Điều phối viên đăng nhập dashboard")
 async def login(request: Request, body: LoginBody):
     session = await asyncio.to_thread(auth.login, request, body.username, body.password)
-    response = JSONResponse(content={**session, "config": _dashboard_config(session)})
+    config = await asyncio.to_thread(_dashboard_config, session)
+    response = JSONResponse(content={**session, "config": config})
     response.set_cookie(
         auth.COOKIE_NAME, session["token"], max_age=int(auth.SESSION_HOURS * 3600),
         httponly=True, samesite="strict", secure=auth.COOKIE_SECURE, path="/",
