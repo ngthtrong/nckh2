@@ -15,13 +15,6 @@ Dữ liệu từ điện thoại và dữ liệu nạp demo dùng chung API/lưu
 
 \begin{figure}[htbp]
 \centering
-\includegraphics[width=\textwidth]{system_architecture.pdf}
-\caption{Kiến trúc tổng thể 3 tầng của hệ thống cứu hộ (Edge Mobile, Backend Core, Web Dashboard)}
-\label{fig:system-architecture-detailed}
-\end{figure}
-
-\begin{figure}[htbp]
-\centering
 \includegraphics[width=\textwidth]{flowchart.pdf}
 \caption{Lưu đồ quy trình phối hợp tổng thể 4 làn giữa các tác nhân và phân hệ trong hệ thống}
 \label{fig:overall-flowchart}
@@ -60,17 +53,27 @@ SQLite giữ bảng \texttt{reports}, \texttt{messages\_dedup}, \texttt{report\_
 
 \begin{figure}[htbp]
 \centering
-\begin{tikzpicture}[node distance=10mm,>=Stealth,
- box/.style={draw,align=center,text width=42mm,minimum height=16mm,font=\small}]
-\node[box] (reports) {reports\\id, vị trí, status, payload};
-\node[box,left=9mm of reports] (events) {report\_events\\report\_id, actor, thời gian};
-\node[box,below=of reports] (teams) {teams\\đội được giao};
-\node[box,below=of events] (ops) {operators / sessions\\tài khoản và phiên};
-\node[box,below=of teams] (dedup) {messages\_dedup\\message, hash,\\client, sequence};
-\draw[->] (events)--node[above,font=\footnotesize]{nhật ký}(reports);
+\begin{tikzpicture}[node distance=9mm,>=Stealth,
+ box/.style={draw=black!80,align=center,text width=46mm,minimum height=17mm,font=\small,rounded corners=1pt}]
+\node[box] (reports) {\textbf{reports}\\
+  \scriptsize id, vị trí (lat, lng), status\\
+  \scriptsize trapped, injured, payload};
+\node[box,left=22mm of reports] (events) {\textbf{report\_events}\\
+  \scriptsize id, report\_id, kind\\
+  \scriptsize actor, source, created\_at};
+\node[box,below=of reports] (teams) {\textbf{teams}\\
+  \scriptsize id, name, phone\\
+  \scriptsize members, note, active};
+\node[box,below=of events] (ops) {\textbf{operators / sessions}\\
+  \scriptsize operators (id, user, role)\\
+  \scriptsize sessions (token, op\_id)};
+\node[box,below=of teams] (dedup) {\textbf{messages\_dedup}\\
+  \scriptsize message\_id, payload\_hash\\
+  \scriptsize client\_id, sequence\_number};
+\draw[->] (reports)--node[above,font=\scriptsize]{ghi nhật ký}(events);
 \draw[->] (reports)--node[right,font=\scriptsize]{giao đội}(teams);
-\draw[dashed,->] (ops)--node[left,font=\scriptsize]{actor}(events);
-\draw[dashed,->] (dedup.east)--++(8mm,0)|-(reports.east);
+\draw[dashed,->] (ops)--node[left,font=\scriptsize]{actor kiểm toán}(events);
+\draw[dashed,->] (dedup.east)--++(8mm,0)|-node[pos=0.25,right,font=\scriptsize]{đồng bộ / upsert}(reports.east);
 \end{tikzpicture}
 \caption{Quan hệ logic chính của lưu trữ; nét đứt biểu diễn liên hệ nghiệp vụ}
 \label{fig:data-relations}

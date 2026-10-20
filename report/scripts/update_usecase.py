@@ -35,8 +35,7 @@ def build_layout_data():
         "act_citizen": {"name": "Người dân /\nNạn nhân", "x": 75, "y": 200, "w": 50, "h": 90, "fill": "#E3F2FD", "stroke": "#1976D2"},
         "act_rescuer": {"name": "Đội cứu hộ\nthực địa", "x": 75, "y": 460, "w": 50, "h": 90, "fill": "#E8F5E9", "stroke": "#388E3C"},
         "act_sms_gw": {"name": "«external system»\nSMS Gateway /\nNhà mạng viễn thông", "x": 30, "y": 730, "w": 140, "h": 65, "fill": "#ECEFF1", "stroke": "#455A64"},
-        "act_dispatcher": {"name": "Điều phối viên\n(Dispatcher)", "x": 1460, "y": 300, "w": 50, "h": 90, "fill": "#FFF3E0", "stroke": "#F57C00"},
-        "act_admin": {"name": "Quản trị viên\n(Administrator)", "x": 1460, "y": 725, "w": 50, "h": 90, "fill": "#EDE7F6", "stroke": "#512DA8"},
+        "act_dispatcher": {"name": "Điều phối viên\n(Dispatcher)", "x": 1460, "y": 380, "w": 50, "h": 90, "fill": "#FFF3E0", "stroke": "#F57C00"},
     }
 
     # Use Cases - Mobile
@@ -44,14 +43,11 @@ def build_layout_data():
     fe_c2_x = 650
 
     # Use Cases - Dashboard (sub_da: x=795..1385)
-    # da_c1_x = 910 (rx=108 -> x: 802..1018)
-    # da_c2_x = 1225 (rx=112 -> x: 1113..1337)
-    # Gap: 1113 - 1018 = 95px!
     da_c1_x = 910
     da_c2_x = 1225
 
     usecases = [
-        # --- MOBILE (6 Use Cases) ---
+        # --- MOBILE (5 Use Cases) ---
         {
             "id": "uc_01", "name": "UC-01: Gửi yêu cầu SOS khẩn cấp", "sub": "(1 chạm, định vị nhanh)",
             "cx": fe_c1_x, "cy": sub_fe["y"] + 70, "rx": 105, "ry": 26,
@@ -73,92 +69,64 @@ def build_layout_data():
             "fill": "#FFEBEE", "stroke": "#E53935", "txt": "#B71C1C"
         },
         {
-            "id": "uc_05", "name": "UC-05: Đồng bộ báo cáo ngoại tuyến", "sub": "(tự động gửi khi khôi phục mạng)",
+            "id": "uc_06", "name": "UC-06: Tra cứu trạng thái cứu hộ", "sub": "(tiến trình xử lý & vị trí đội)",
             "cx": fe_c1_x, "cy": sub_fe["y"] + 480, "rx": 105, "ry": 26,
             "fill": "#FFFFFF", "stroke": "#1E88E5", "txt": "#0D47A1"
         },
-        {
-            "id": "uc_06", "name": "UC-06: Tra cứu trạng thái cứu hộ", "sub": "(tiến trình xử lý & vị trí đội)",
-            "cx": fe_c1_x, "cy": sub_fe["y"] + 615, "rx": 105, "ry": 26,
-            "fill": "#FFFFFF", "stroke": "#1E88E5", "txt": "#0D47A1"
-        },
 
-        # --- DASHBOARD (12 Use Cases) ---
+        # --- DASHBOARD (10 Use Cases) ---
         # Col 2 (Phải - Đối diện Dispatcher):
-        # cy = 85 + 75 = 160
-        # cy = 85 + 205 = 290
-        # cy = 85 + 335 = 420
-        # cy = 85 + 465 = 550
-        # cy = 85 + 595 = 680
-        # cy = 85 + 745 = 830
         {
-            "id": "uc_07", "name": "UC-07: Đăng nhập & Xác thực phiên", "sub": "(phân quyền Dispatcher / Admin)",
-            "cx": da_c2_x, "cy": sub_da["y"] + 75, "rx": 112, "ry": 25,
+            "id": "uc_07", "name": "UC-07: Đăng nhập & Xác thực phiên", "sub": "(phiên làm việc điều phối viên)",
+            "cx": da_c2_x, "cy": sub_da["y"] + 80, "rx": 112, "ry": 25,
             "fill": "#FFFFFF", "stroke": "#F57C00", "txt": "#E65100"
         },
         {
             "id": "uc_08", "name": "UC-08: Giám sát bản đồ sự cố", "sub": "& thứ tự ưu tiên cứu hộ",
-            "cx": da_c2_x, "cy": sub_da["y"] + 205, "rx": 112, "ry": 25,
+            "cx": da_c2_x, "cy": sub_da["y"] + 210, "rx": 112, "ry": 25,
             "fill": "#FFFFFF", "stroke": "#F57C00", "txt": "#E65100"
         },
         {
             "id": "uc_13", "name": "UC-13: Phân công & điều động", "sub": "đội cứu hộ thực địa",
-            "cx": da_c2_x, "cy": sub_da["y"] + 335, "rx": 112, "ry": 25,
+            "cx": da_c2_x, "cy": sub_da["y"] + 340, "rx": 112, "ry": 25,
             "fill": "#FFFFFF", "stroke": "#F57C00", "txt": "#E65100"
         },
         {
             "id": "uc_14", "name": "UC-14: Cập nhật tiến độ nhiệm vụ", "sub": "(dispatched -> resolved / close)",
-            "cx": da_c2_x, "cy": sub_da["y"] + 465, "rx": 112, "ry": 25,
+            "cx": da_c2_x, "cy": sub_da["y"] + 470, "rx": 112, "ry": 25,
             "fill": "#FFFFFF", "stroke": "#F57C00", "txt": "#E65100"
         },
         {
             "id": "uc_16", "name": "UC-16: Xuất dữ liệu báo cáo", "sub": "(CSV / GeoJSON / Thống kê)",
-            "cx": da_c2_x, "cy": sub_da["y"] + 595, "rx": 112, "ry": 25,
+            "cx": da_c2_x, "cy": sub_da["y"] + 600, "rx": 112, "ry": 25,
             "fill": "#FFFFFF", "stroke": "#F57C00", "txt": "#E65100"
-        },
-        {
-            "id": "uc_18", "name": "UC-18: Sao lưu & phục hồi CSDL", "sub": "(CSDL và ảnh hiện trường)",
-            "cx": da_c2_x, "cy": sub_da["y"] + 745, "rx": 112, "ry": 25,
-            "fill": "#FFFFFF", "stroke": "#512DA8", "txt": "#311B92"
         },
 
         # Col 1 (Trái trong sub_da):
-        # UC-09 nằm ngang hàng với UC-08 (cy = 85 + 205 = 290)
-        # Các Use Case khác nằm sole ở trung điểm:
-        # cy = 85 + 140 = 225
-        # cy = 85 + 270 = 355
-        # cy = 85 + 400 = 485
-        # cy = 85 + 530 = 615
-        # cy = 85 + 670 = 755
         {
             "id": "uc_10", "name": "UC-10: Quản lý & tra cứu danh sách", "sub": "báo cáo hiện trường",
-            "cx": da_c1_x, "cy": sub_da["y"] + 140, "rx": 108, "ry": 25,
+            "cx": da_c1_x, "cy": sub_da["y"] + 145, "rx": 108, "ry": 25,
             "fill": "#FFFFFF", "stroke": "#F57C00", "txt": "#E65100"
         },
         {
             "id": "uc_09", "name": "UC-09: Tự động gom cụm & xếp hạng", "sub": "ưu tiên cứu hộ (Louvain & P(c))",
-            "cx": da_c1_x, "cy": sub_da["y"] + 205, "rx": 110, "ry": 25,
+            "cx": da_c1_x, "cy": sub_da["y"] + 210, "rx": 110, "ry": 25,
             "fill": "#F3E5F5", "stroke": "#6A1B9A", "txt": "#4A148C"
         },
         {
             "id": "uc_11", "name": "UC-11: Tiếp nhận báo cáo tổng đài", "sub": "(nhập cứu hộ thủ công)",
-            "cx": da_c1_x, "cy": sub_da["y"] + 270, "rx": 108, "ry": 25,
+            "cx": da_c1_x, "cy": sub_da["y"] + 280, "rx": 108, "ry": 25,
             "fill": "#FFFFFF", "stroke": "#F57C00", "txt": "#E65100"
         },
         {
             "id": "uc_12", "name": "UC-12: Tiếp nhận báo cáo qua SMS", "sub": "(đồng bộ tự động từ Gateway)",
-            "cx": da_c1_x, "cy": sub_da["y"] + 400, "rx": 108, "ry": 25,
+            "cx": da_c1_x, "cy": sub_da["y"] + 410, "rx": 108, "ry": 25,
             "fill": "#FFFFFF", "stroke": "#F57C00", "txt": "#E65100"
         },
         {
             "id": "uc_15", "name": "UC-15: Bổ sung tọa độ thủ công", "sub": "(ca thiếu GPS / hàng xem xét)",
-            "cx": da_c1_x, "cy": sub_da["y"] + 530, "rx": 108, "ry": 25,
+            "cx": da_c1_x, "cy": sub_da["y"] + 540, "rx": 108, "ry": 25,
             "fill": "#FFFFFF", "stroke": "#F57C00", "txt": "#E65100"
-        },
-        {
-            "id": "uc_17", "name": "UC-17: Quản lý tài khoản điều phối", "sub": "(CRUD danh mục cán bộ)",
-            "cx": da_c1_x, "cy": sub_da["y"] + 670, "rx": 108, "ry": 25,
-            "fill": "#FFFFFF", "stroke": "#512DA8", "txt": "#311B92"
         },
     ]
 
@@ -220,7 +188,7 @@ def generate_drawio_xml():
         parent="sys_bound", x=sub_fe["x"] - sys["x"], y=sub_fe["y"] - sys["y"], w=sub_fe["w"], h=sub_fe["h"]
     )
     add_cell(
-        "sub_dash", "Phân hệ Điều phối & Quản trị Web (Dispatch Dashboard)",
+        "sub_dash", "Phân hệ Điều phối Web (Dispatch Dashboard)",
         subsys_style + "fillColor=#FFFDF5;strokeColor=#FFB74D;fontColor=#E65100;",
         parent="sys_bound", x=sub_da["x"] - sys["x"], y=sub_da["y"] - sys["y"], w=sub_da["w"], h=sub_da["h"]
     )
@@ -233,10 +201,6 @@ def generate_drawio_xml():
             add_cell(aid, a["name"], ext_sys_style, x=a["x"], y=a["y"], w=a["w"], h=a["h"])
         else:
             add_cell(aid, a["name"], actor_style + f"fillColor={a['fill']};strokeColor={a['stroke']};", x=a["x"], y=a["y"], w=a["w"], h=a["h"])
-
-    # Generalization Actor: Admin --|> Dispatcher
-    gen_style = "endArrow=block;endFill=0;html=1;strokeColor=#512DA8;strokeWidth=1.5;edgeStyle=orthogonalEdgeStyle;rounded=0;"
-    add_edge("edge_gen_admin", "", gen_style, "act_admin", "act_dispatcher")
 
     # 4. Use Cases
     for uc in usecases:
@@ -254,11 +218,11 @@ def generate_drawio_xml():
     ext_style = "endArrow=open;dashed=1;html=1;strokeColor=#E53935;strokeWidth=1.3;fontSize=10;fontColor=#E53935;fontStyle=1;"
 
     # Citizen
-    for ucid in ["uc_01", "uc_02", "uc_05", "uc_06"]:
+    for ucid in ["uc_01", "uc_02", "uc_06"]:
         add_edge(f"e_c_{ucid}", "", edge_style + "strokeColor=#1976D2;", "act_citizen", ucid)
 
     # Rescuer
-    for ucid in ["uc_01", "uc_02", "uc_05", "uc_06"]:
+    for ucid in ["uc_01", "uc_02", "uc_06"]:
         add_edge(f"e_r_{ucid}", "", edge_style + "strokeColor=#388E3C;", "act_rescuer", ucid)
 
     # Includes & Extends
@@ -279,12 +243,6 @@ def generate_drawio_xml():
         else:
             add_edge(f"e_d_{ucid}", "", edge_style + "strokeColor=#F57C00;", "act_dispatcher", ucid)
 
-    # Admin
-    u17 = uc_map["uc_17"]
-    pts_adm = [(1390, u17["cy"]), (1040, u17["cy"])]
-    add_edge("e_a_17", "", edge_style + "strokeColor=#512DA8;", "act_admin", "uc_17", points=pts_adm)
-    add_edge("e_a_18", "", edge_style + "strokeColor=#512DA8;", "act_admin", "uc_18")
-
     return ET.tostring(mxfile, encoding="utf-8", xml_declaration=True).decode("utf-8")
 
 
@@ -303,9 +261,6 @@ def generate_vector_svg():
         '  </marker>',
         '  <marker id="arrow-ext" viewBox="0 0 10 10" refX="8" refY="5" markerWidth="6" markerHeight="6" orient="auto-start-reverse">',
         '    <path d="M 0 1 L 8 5 L 0 9" fill="none" stroke="#E53935" stroke-width="1.6" stroke-linecap="round"/>',
-        '  </marker>',
-        '  <marker id="arrow-gen" viewBox="0 0 12 12" refX="10" refY="6" markerWidth="8" markerHeight="8" orient="auto">',
-        '    <polygon points="0,1 10,6 0,11" fill="#FFFFFF" stroke="#512DA8" stroke-width="1.6" />',
         '  </marker>',
         '</defs>',
         '<style>',
@@ -332,7 +287,7 @@ def generate_vector_svg():
 
     da_x, da_y, da_w, da_h = sub_da["x"], sub_da["y"], sub_da["w"], sub_da["h"]
     svg.append(f'<rect x="{da_x}" y="{da_y}" width="{da_w}" height="{da_h}" rx="8" fill="#FFFDF5" stroke="#FFB74D" stroke-width="1.4" stroke-dasharray="6,4"/>')
-    svg.append(f'<text x="{da_x + 20}" y="{da_y + 25}" class="title-sub" fill="#E65100">Phân hệ Điều phối &amp; Quản trị Web (Dispatch Dashboard)</text>')
+    svg.append(f'<text x="{da_x + 20}" y="{da_y + 25}" class="title-sub" fill="#E65100">Phân hệ Điều phối Web (Dispatch Dashboard)</text>')
 
     # 3. Actor Drawing Helper
     def draw_actor(x, y, name, color, stroke):
@@ -349,13 +304,13 @@ def generate_vector_svg():
     # 4. Association Lines
     # Citizen
     cx, cy = actors["act_citizen"]["x"] + 25, actors["act_citizen"]["y"] + 20
-    for ucid in ["uc_01", "uc_02", "uc_05", "uc_06"]:
+    for ucid in ["uc_01", "uc_02", "uc_06"]:
         u = uc_map[ucid]
         svg.append(f'<line x1="{cx}" y1="{cy}" x2="{u["cx"] - u["rx"]}" y2="{u["cy"]}" stroke="#1976D2" stroke-width="1.2"/>')
 
     # Rescuer
     rx, ry = actors["act_rescuer"]["x"] + 25, actors["act_rescuer"]["y"] + 20
-    for ucid in ["uc_01", "uc_02", "uc_05", "uc_06"]:
+    for ucid in ["uc_01", "uc_02", "uc_06"]:
         u = uc_map[ucid]
         svg.append(f'<line x1="{rx}" y1="{ry}" x2="{u["cx"] - u["rx"]}" y2="{u["cy"]}" stroke="#388E3C" stroke-width="1.2"/>')
 
@@ -383,24 +338,6 @@ def generate_vector_svg():
             svg.append(f'<line x1="{dx}" y1="{dy}" x2="{u["cx"] + u["rx"]}" y2="{u["cy"]}" stroke="#F57C00" stroke-width="1.2"/>')
         else:  # Cột 1
             svg.append(f'<path d="M {dx} {dy} L {corridor_x} {u["cy"]} L {u["cx"] + u["rx"]} {u["cy"]}" fill="none" stroke="#F57C00" stroke-width="1.2"/>')
-
-    # Admin to UC-17, UC-18
-    ax = actors["act_admin"]["x"] - 10
-    ay = actors["act_admin"]["y"] + 20
-    u17 = uc_map["uc_17"]
-    u18 = uc_map["uc_18"]
-    svg.append(f'<path d="M {ax} {ay} L {corridor_x} {u17["cy"]} L {u17["cx"] + u17["rx"]} {u17["cy"]}" fill="none" stroke="#512DA8" stroke-width="1.4"/>')
-    svg.append(f'<line x1="{ax}" y1="{ay}" x2="{u18["cx"] + u18["rx"]}" y2="{u18["cy"]}" stroke="#512DA8" stroke-width="1.4"/>')
-
-    # Generalization Admin -> Dispatcher
-    adm_x = actors["act_admin"]["x"] + 25
-    adm_y = actors["act_admin"]["y"] - 35
-    disp_x = actors["act_dispatcher"]["x"] + 25
-    disp_y = actors["act_dispatcher"]["y"] + 80
-    svg.append(f'<line x1="{adm_x}" y1="{adm_y}" x2="{disp_x}" y2="{disp_y}" stroke="#512DA8" stroke-width="1.8" marker-end="url(#arrow-gen)"/>')
-    mid_gen_y = (adm_y + disp_y) / 2
-    svg.append(f'<rect x="{adm_x - 55}" y="{mid_gen_y - 9}" width="110" height="18" rx="3" fill="#FFFFFF" stroke="#512DA8" stroke-width="0.8"/>')
-    svg.append(f'<text x="{adm_x}" y="{mid_gen_y + 4}" class="uc-sub" font-weight="bold" fill="#512DA8">Kế thừa quyền</text>')
 
     # Internal Use Case Relationships
     # 1. UC-02 includes UC-03 (AI)
