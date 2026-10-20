@@ -1,0 +1,36 @@
+{
+  "model_name": "flood_mobilenetv3_large",
+  "format": "executorch_pte",
+  "backend": "xnnpack",
+  "precision": "fp32",
+  "xnnpack_delegate_count": 1,
+  "file": "flood_mobilenetv3_large.pte",
+  "input_shape": [
+    1,
+    3,
+    256,
+    256
+  ],
+  "classes": [
+    "low",
+    "medium",
+    "high",
+    "non_flood"
+  ],
+  "image_size": 256,
+  "checkpoint_sha256": "8de3a4891f3c2fcadeb0dd541ecc49911fdc634924b2a38500d0ffff43745b27",
+  "pte_sha256": "fa951d0acee77f00d9122322ccde587f0cdd0686fa6483c5bb79dd6f526d8cb7",
+  "executorch_runtime": "1.4.1",
+  "normalization": {
+    "mean": [
+      0.485,
+      0.456,
+      0.406
+    ],
+    "std": [
+      0.229,
+      0.224,
+      0.225
+    ]
+  }
+}
