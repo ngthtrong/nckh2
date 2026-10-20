@@ -1,13 +1,16 @@
 #!/usr/bin/env python3
 """
 Tạo lại usecase_dashboard.drawio và usecase_dashboard.pdf chuẩn 100% theo UML 2.5.
+Tập trung 100% vào nghiệp vụ Điều phối viên (Dispatcher) - Loại bỏ vai trò Quản trị viên (Admin).
 Tối ưu hóa hình học tuyệt đối:
-1. Chuẩn hóa 12 Use Cases nghiệp vụ Dashboard đồng bộ hoàn toàn với sơ đồ tổng thể (UC-07 .. UC-18).
-2. Lược bỏ toàn bộ URL REST API, thư viện JavaScript, tên bảng CSDL khỏi tiêu đề Use Case.
-3. Xóa bỏ mũi tên «include» phi lý từ Cập nhật trạng thái sang Tra cứu nhật ký.
-4. Bố trí 2 cột đối xứng (Row 1..7): Mũi tên «include» thuật toán gom cụm và «extend» bổ sung tọa độ chạy ngang hoàn toàn.
-5. Thể hiện quan hệ Kế thừa Actor (Admin -> Dispatcher) chuẩn UML 2.5 qua hành lang chân trang.
-6. Phông chữ Roboto / DejaVu Sans vector sắc nét cho PDF và Draw.io XML.
+1. 7 Use Cases nghiệp vụ điều phối chính nằm thẳng hàng tại Cột 1.
+2. 3 Use Cases mở rộng/thuật toán tại Cột 2:
+   - UC-09 «include» từ UC-08 (cùng độ cao cy = 190, mũi tên ngang tuyệt đối).
+   - UC-15 «extend» từ UC-10 (cùng độ cao cy = 275, mũi tên ngang tuyệt đối).
+   - UC-12 tiếp nhận SMS nối ngang sang SMS Gateway (cy = 360).
+3. Dispatcher nằm tại vị trí trung tâm (cy = 360), tỏa đều các đường liên kết sang Cột 1.
+4. Triệt tiêu hoàn toàn hiện tượng chồng chéo đường nối.
+5. Phông chữ Roboto / DejaVu Sans vector sắc nét cho PDF và Draw.io XML.
 """
 
 import html
@@ -24,18 +27,18 @@ PREVIEW_PATH = DIAGRAMS_DIR / "usecase_dashboard_preview.png"
 
 def build_dashboard_data():
     """Tọa độ và kích thước cho từng phần tử của phân hệ Dispatch Dashboard."""
-    canvas_w = 1360
-    canvas_h = 820
+    canvas_w = 1320
+    canvas_h = 750
 
     # System boundary
     sys = {
-        "x": 220, "y": 40, "w": 870, "h": 680,
-        "title": "PHÂN HỆ ĐIỀU PHỐI & QUẢN TRỊ WEB (DISPATCH DASHBOARD)"
+        "x": 220, "y": 40, "w": 850, "h": 660,
+        "title": "PHÂN HỆ ĐIỀU PHỐI WEB (DISPATCH DASHBOARD)"
     }
 
     # Cột 1: cx = 430 (rx = 120 -> x: 310..550)
     # Cột 2: cx = 830 (rx = 122 -> x: 708..952)
-    # Khoảng cách giữa 2 cột: 708 - 550 = 158px (rất rộng rãi cho nhãn include và extend)
+    # Khoảng cách giữa 2 cột: 708 - 550 = 158px (rộng rãi cho nhãn include và extend)
     c1_x = 430
     c2_x = 830
 
@@ -43,33 +46,28 @@ def build_dashboard_data():
     actors = {
         "act_dispatcher": {
             "name": "Điều phối viên\n(Dispatcher)",
-            "x": 65, "y": 270, "w": 50, "h": 90,
+            "x": 65, "y": 315, "w": 50, "h": 90,
             "fill": "#FFF3E0", "stroke": "#F57C00"
-        },
-        "act_admin": {
-            "name": "Quản trị viên\n(Administrator)",
-            "x": 1150, "y": 510, "w": 50, "h": 90,
-            "fill": "#EDE7F6", "stroke": "#512DA8"
         },
         "act_sms_gw": {
             "name": "«external system»\nSMS Gateway /\nNhà mạng viễn thông",
-            "x": 1115, "y": sys["y"] + 325 - 32, "w": 145, "h": 65,
+            "x": 1115, "y": sys["y"] + 320 - 32, "w": 145, "h": 65,
             "fill": "#ECEFF1", "stroke": "#546E7A"
         }
     }
 
     usecases = [
-        # --- CỘT 1: Nghiệp vụ điều phối chính (cy = 95 .. 635) ---
+        # --- CỘT 1: Nghiệp vụ điều phối chính (cy = 105 .. 615, bước 85px) ---
         {
             "id": "uc_07", "name": "UC-07: Đăng nhập & Xác thực phiên",
-            "sub": "(phân quyền Dispatcher / Admin)",
-            "cx": c1_x, "cy": sys["y"] + 55, "rx": 120, "ry": 25,
+            "sub": "(phiên làm việc điều phối viên)",
+            "cx": c1_x, "cy": sys["y"] + 65, "rx": 120, "ry": 25,
             "fill": "#FFFFFF", "stroke": "#F57C00", "txt": "#E65100"
         },
         {
             "id": "uc_08", "name": "UC-08: Giám sát bản đồ sự cố",
             "sub": "(& thứ tự ưu tiên cứu hộ)",
-            "cx": c1_x, "cy": sys["y"] + 145, "rx": 120, "ry": 25,
+            "cx": c1_x, "cy": sys["y"] + 150, "rx": 120, "ry": 25,
             "fill": "#FFFFFF", "stroke": "#F57C00", "txt": "#E65100"
         },
         {
@@ -81,33 +79,33 @@ def build_dashboard_data():
         {
             "id": "uc_11", "name": "UC-11: Tiếp nhận báo cáo tổng đài",
             "sub": "(nhập thủ công tin báo hotline)",
-            "cx": c1_x, "cy": sys["y"] + 325, "rx": 120, "ry": 25,
+            "cx": c1_x, "cy": sys["y"] + 320, "rx": 120, "ry": 25,
             "fill": "#FFFFFF", "stroke": "#F57C00", "txt": "#E65100"
         },
         {
             "id": "uc_13", "name": "UC-13: Phân công & điều động cứu hộ",
             "sub": "(giao nhiệm vụ cho đội cơ động)",
-            "cx": c1_x, "cy": sys["y"] + 415, "rx": 120, "ry": 25,
+            "cx": c1_x, "cy": sys["y"] + 405, "rx": 120, "ry": 25,
             "fill": "#FFFFFF", "stroke": "#F57C00", "txt": "#E65100"
         },
         {
             "id": "uc_14", "name": "UC-14: Cập nhật tiến độ nhiệm vụ",
             "sub": "(tiến trình cứu nạn tại hiện trường)",
-            "cx": c1_x, "cy": sys["y"] + 505, "rx": 120, "ry": 25,
+            "cx": c1_x, "cy": sys["y"] + 490, "rx": 120, "ry": 25,
             "fill": "#FFFFFF", "stroke": "#F57C00", "txt": "#E65100"
         },
         {
             "id": "uc_16", "name": "UC-16: Xuất dữ liệu báo cáo cứu hộ",
             "sub": "(kết xuất CSV, GeoJSON, thống kê)",
-            "cx": c1_x, "cy": sys["y"] + 595, "rx": 120, "ry": 25,
+            "cx": c1_x, "cy": sys["y"] + 575, "rx": 120, "ry": 25,
             "fill": "#FFFFFF", "stroke": "#F57C00", "txt": "#E65100"
         },
 
-        # --- CỘT 2: Thuật toán, Mở rộng & Quản trị hệ thống ---
+        # --- CỘT 2: Thuật toán, Mở rộng & Tự động tiếp nhận ---
         {
             "id": "uc_09", "name": "UC-09: Tự động gom cụm & xếp hạng",
             "sub": "(thuật toán Louvain & P(c))",
-            "cx": c2_x, "cy": sys["y"] + 145, "rx": 122, "ry": 25,
+            "cx": c2_x, "cy": sys["y"] + 150, "rx": 122, "ry": 25,
             "fill": "#F3E5F5", "stroke": "#6A1B9A", "txt": "#4A148C"
         },
         {
@@ -119,20 +117,8 @@ def build_dashboard_data():
         {
             "id": "uc_12", "name": "UC-12: Tiếp nhận báo cáo qua SMS",
             "sub": "(Webhook từ SMS Gateway)",
-            "cx": c2_x, "cy": sys["y"] + 325, "rx": 122, "ry": 25,
+            "cx": c2_x, "cy": sys["y"] + 320, "rx": 122, "ry": 25,
             "fill": "#FFFFFF", "stroke": "#F57C00", "txt": "#E65100"
-        },
-        {
-            "id": "uc_17", "name": "UC-17: Quản trị tài khoản điều phối",
-            "sub": "(CRUD operators & phân quyền)",
-            "cx": c2_x, "cy": sys["y"] + 505, "rx": 122, "ry": 25,
-            "fill": "#EDE7F6", "stroke": "#512DA8", "txt": "#311B92"
-        },
-        {
-            "id": "uc_18", "name": "UC-18: Sao lưu, phục hồi & kiểm toán",
-            "sub": "(CSDL & nhật ký hệ thống Audit Logs)",
-            "cx": c2_x, "cy": sys["y"] + 595, "rx": 122, "ry": 25,
-            "fill": "#EDE7F6", "stroke": "#512DA8", "txt": "#311B92"
         },
     ]
 
@@ -152,16 +138,18 @@ def generate_drawio_xml():
                           math="0", shadow="0")
     root_cell = ET.SubElement(model, "root")
     ET.SubElement(root_cell, "mxCell", id="0")
-    ET.SubElement(root_cell, "mxCell", id="1", **{"parent": "0"})
+    ET.SubElement(root_cell, "mxCell", attrib={"id": "1", "parent": "0"})
 
     # 1. System boundary
     sys_style = ("shape=swimlane;whiteSpace=wrap;html=1;startSize=32;horizontal=1;"
                  "fillColor=#FFFDE7;strokeColor=#F57C00;strokeWidth=1.5;fontStyle=1;"
                  "fontSize=14;fontFamily=Helvetica;fontColor=#E65100;")
-    cell_sys = ET.SubElement(root_cell, "mxCell", id="sys_bound", value=sys["title"],
-                             style=sys_style, vertex="1", **{"parent": "1"})
-    ET.SubElement(cell_sys, "mxGeometry", x=str(sys["x"]), y=str(sys["y"]),
-                  width=str(sys["w"]), height=str(sys["h"]), **{"as": "geometry"})
+    cell_sys = ET.SubElement(root_cell, "mxCell", attrib={
+        "id": "sys_bound", "value": sys["title"], "style": sys_style, "vertex": "1", "parent": "1"
+    })
+    ET.SubElement(cell_sys, "mxGeometry", attrib={
+        "x": str(sys["x"]), "y": str(sys["y"]), "width": str(sys["w"]), "height": str(sys["h"]), "as": "geometry"
+    })
 
     # 2. Use Cases inside sys_bound
     for uc in usecases:
@@ -170,77 +158,69 @@ def generate_drawio_xml():
         val = f"{uc['name']}&#xa;{uc['sub']}"
         style = (f"ellipse;whiteSpace=wrap;html=1;fillColor={uc['fill']};strokeColor={uc['stroke']};"
                  f"strokeWidth=1.3;fontFamily=Helvetica;fontSize=11;fontColor={uc['txt']};")
-        c = ET.SubElement(root_cell, "mxCell", id=uc["id"], value=val,
-                          style=style, vertex="1", **{"parent": "sys_bound"})
-        ET.SubElement(c, "mxGeometry", x=str(int(rel_x)), y=str(int(rel_y)),
-                      width=str(int(uc["rx"] * 2)), height=str(int(uc["ry"] * 2)), **{"as": "geometry"})
+        c = ET.SubElement(root_cell, "mxCell", attrib={
+            "id": uc["id"], "value": val, "style": style, "vertex": "1", "parent": "sys_bound"
+        })
+        ET.SubElement(c, "mxGeometry", attrib={
+            "x": str(int(rel_x)), "y": str(int(rel_y)),
+            "width": str(int(uc["rx"] * 2)), "height": str(int(uc["ry"] * 2)),
+            "as": "geometry"
+        })
 
     # 3. Actors outside sys_bound
     for aid, a in actors.items():
         if aid == "act_sms_gw":
             gw_style = (f"rounded=1;whiteSpace=wrap;html=1;fillColor={a['fill']};strokeColor={a['stroke']};"
                         f"strokeWidth=1.5;fontFamily=Helvetica;fontSize=11;fontColor=#263238;align=center;")
-            c = ET.SubElement(root_cell, "mxCell", id=aid, value=a["name"].replace("\n", "&#xa;"),
-                              style=gw_style, vertex="1", **{"parent": "1"})
+            c = ET.SubElement(root_cell, "mxCell", attrib={
+                "id": aid, "value": a["name"].replace("\n", "&#xa;"), "style": gw_style, "vertex": "1", "parent": "1"
+            })
         else:
             act_style = (f"shape=umlActor;verticalLabelPosition=bottom;verticalAlign=top;html=1;outlineConnect=0;"
                          f"fontFamily=Helvetica;fontSize=12;fontStyle=1;fillColor={a['fill']};strokeColor={a['stroke']};")
-            c = ET.SubElement(root_cell, "mxCell", id=aid, value=a["name"].replace("\n", "&#xa;"),
-                              style=act_style, vertex="1", **{"parent": "1"})
-        ET.SubElement(c, "mxGeometry", x=str(a["x"]), y=str(a["y"]),
-                      width=str(a["w"]), height=str(a["h"]), **{"as": "geometry"})
+            c = ET.SubElement(root_cell, "mxCell", attrib={
+                "id": aid, "value": a["name"].replace("\n", "&#xa;"), "style": act_style, "vertex": "1", "parent": "1"
+            })
+        ET.SubElement(c, "mxGeometry", attrib={
+            "x": str(a["x"]), "y": str(a["y"]), "width": str(a["w"]), "height": str(a["h"]), "as": "geometry"
+        })
 
     # 4. Association Edges
     assoc_orange = "endArrow=none;html=1;strokeColor=#F57C00;strokeWidth=1.2;"
-    assoc_purple = "endArrow=none;html=1;strokeColor=#512DA8;strokeWidth=1.2;"
     assoc_gray = "endArrow=none;html=1;strokeColor=#546E7A;strokeWidth=1.2;"
 
     # Dispatcher connections (tới Cột 1)
     for ucid in ["uc_07", "uc_08", "uc_10", "uc_11", "uc_13", "uc_14", "uc_16"]:
-        e = ET.SubElement(root_cell, "mxCell", id=f"e_disp_{ucid}", value="",
-                          style=assoc_orange, edge="1",
-                          source="act_dispatcher", target=ucid, **{"parent": "1"})
-        ET.SubElement(e, "mxGeometry", relative="1", **{"as": "geometry"})
-
-    # Administrator connections (tới Cột 2)
-    for ucid in ["uc_17", "uc_18"]:
-        e = ET.SubElement(root_cell, "mxCell", id=f"e_adm_{ucid}", value="",
-                          style=assoc_purple, edge="1",
-                          source="act_admin", target=ucid, **{"parent": "1"})
-        ET.SubElement(e, "mxGeometry", relative="1", **{"as": "geometry"})
+        e = ET.SubElement(root_cell, "mxCell", attrib={
+            "id": f"e_disp_{ucid}", "value": "", "style": assoc_orange, "edge": "1",
+            "source": "act_dispatcher", "target": ucid, "parent": "1"
+        })
+        ET.SubElement(e, "mxGeometry", attrib={"relative": "1", "as": "geometry"})
 
     # SMS Gateway to UC-12
-    e_sms = ET.SubElement(root_cell, "mxCell", id="e_sms_gw_uc12", value="",
-                          style=assoc_gray, edge="1",
-                          source="uc_12", target="act_sms_gw", **{"parent": "1"})
-    ET.SubElement(e_sms, "mxGeometry", relative="1", **{"as": "geometry"})
-
-    # Generalization: Administrator -> Dispatcher
-    gen_style = "endArrow=block;endFill=0;html=1;strokeColor=#512DA8;strokeWidth=1.6;edgeStyle=orthogonalEdgeStyle;rounded=0;fontSize=10;fontColor=#512DA8;"
-    e_gen = ET.SubElement(root_cell, "mxCell", id="e_gen_admin_disp", value="Kế thừa quyền điều phối",
-                          style=gen_style, edge="1",
-                          source="act_admin", target="act_dispatcher", **{"parent": "1"})
-    geo_gen = ET.SubElement(e_gen, "mxGeometry", relative="1", **{"as": "geometry"})
-    pts_gen = ET.SubElement(geo_gen, "Array", **{"as": "points"})
-    ET.SubElement(pts_gen, "mxPoint", x="1175", y="755")
-    ET.SubElement(pts_gen, "mxPoint", x="90", y="755")
+    e_sms = ET.SubElement(root_cell, "mxCell", attrib={
+        "id": "e_sms_gw_uc12", "value": "", "style": assoc_gray, "edge": "1",
+        "source": "uc_12", "target": "act_sms_gw", "parent": "1"
+    })
+    ET.SubElement(e_sms, "mxGeometry", attrib={"relative": "1", "as": "geometry"})
 
     # 5. Internal UML Stereotypes: «include» and «extend»
     inc_style_purple = "endArrow=open;dashed=1;html=1;strokeColor=#6A1B9A;strokeWidth=1.3;fontSize=10;fontColor=#6A1B9A;"
     ext_style = "endArrow=open;dashed=1;html=1;strokeColor=#E53935;strokeWidth=1.3;fontSize=10;fontColor=#E53935;"
 
     # UC-08 includes UC-09 (Gom cụm & ưu tiên Louvain/P(c))
-    e_inc = ET.SubElement(root_cell, "mxCell", id="e_inc_cluster", value="&laquo;include&raquo;",
-                          style=inc_style_purple, edge="1",
-                          source="uc_08", target="uc_09", **{"parent": "1"})
-    ET.SubElement(e_inc, "mxGeometry", relative="1", **{"as": "geometry"})
+    e_inc = ET.SubElement(root_cell, "mxCell", attrib={
+        "id": "e_inc_cluster", "value": "&laquo;include&raquo;", "style": inc_style_purple, "edge": "1",
+        "source": "uc_08", "target": "uc_09", "parent": "1"
+    })
+    ET.SubElement(e_inc, "mxGeometry", attrib={"relative": "1", "as": "geometry"})
 
     # UC-15 extends UC-10 (Bổ sung tọa độ thủ công khi thiếu GPS)
-    e_ext = ET.SubElement(root_cell, "mxCell", id="e_ext_geocode",
-                          value="&laquo;extend&raquo;&#xa;(khi thiếu GPS)",
-                          style=ext_style, edge="1",
-                          source="uc_15", target="uc_10", **{"parent": "1"})
-    ET.SubElement(e_ext, "mxGeometry", relative="1", **{"as": "geometry"})
+    e_ext = ET.SubElement(root_cell, "mxCell", attrib={
+        "id": "e_ext_geocode", "value": "&laquo;extend&raquo;&#xa;(khi thiếu GPS)",
+        "style": ext_style, "edge": "1", "source": "uc_15", "target": "uc_10", "parent": "1"
+    })
+    ET.SubElement(e_ext, "mxGeometry", attrib={"relative": "1", "as": "geometry"})
 
     return ET.tostring(root, encoding="utf-8", xml_declaration=True).decode("utf-8")
 
@@ -255,17 +235,13 @@ def generate_svg():
     svg.append(f'<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 {canvas_w} {canvas_h}" width="{canvas_w}" height="{canvas_h}">')
     svg.append('<defs>')
 
-    # Markers for include / extend / generalize
+    # Markers for include / extend
     svg.append('<marker id="arrow-inc-purple" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="6" markerHeight="6" orient="auto-start-reverse">')
     svg.append('<path d="M 0 1 L 9 5 L 0 9" fill="none" stroke="#6A1B9A" stroke-width="1.4"/>')
     svg.append('</marker>')
 
     svg.append('<marker id="arrow-ext-red" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="6" markerHeight="6" orient="auto-start-reverse">')
     svg.append('<path d="M 0 1 L 9 5 L 0 9" fill="none" stroke="#E53935" stroke-width="1.4"/>')
-    svg.append('</marker>')
-
-    svg.append('<marker id="arrow-gen" viewBox="0 0 12 12" refX="11" refY="6" markerWidth="9" markerHeight="9" orient="auto-start-reverse">')
-    svg.append('<path d="M 1 1 L 11 6 L 1 11 Z" fill="#FFFFFF" stroke="#512DA8" stroke-width="1.5"/>')
     svg.append('</marker>')
 
     svg.append('</defs>')
@@ -303,31 +279,14 @@ def generate_svg():
         u = uc_map[ucid]
         svg.append(f'<line x1="{disp_x}" y1="{disp_y}" x2="{u["cx"] - u["rx"]}" y2="{u["cy"]}" stroke="#F57C00" stroke-width="1.2"/>')
 
-    # Administrator edges (Nối tới mép phải Cột 2)
-    adm = actors["act_admin"]
-    adm_x, adm_y = adm["x"] + 25, adm["y"] + 20
-    for ucid in ["uc_17", "uc_18"]:
-        u = uc_map[ucid]
-        svg.append(f'<line x1="{adm_x}" y1="{adm_y}" x2="{u["cx"] + u["rx"]}" y2="{u["cy"]}" stroke="#512DA8" stroke-width="1.3"/>')
-
     # SMS Gateway edge (Nối ngang sang UC-12)
     gw = actors["act_sms_gw"]
     gw_x, gw_y = gw["x"], gw["y"] + gw["h"] / 2
     u12 = uc_map["uc_12"]
     svg.append(f'<line x1="{u12["cx"] + u12["rx"]}" y1="{u12["cy"]}" x2="{gw_x}" y2="{gw_y}" stroke="#546E7A" stroke-width="1.3"/>')
 
-    # Generalization Administrator -> Dispatcher (chân trang y = 755)
-    adm_foot_x = adm["x"] + 25
-    adm_foot_y = adm["y"] + 85
-    disp_foot_x = disp["x"] + 25
-    disp_foot_y = disp["y"] + 85
-    svg.append(f'<path d="M {adm_foot_x} {adm_foot_y} L {adm_foot_x} 755 L {disp_foot_x} 755 L {disp_foot_x} {disp_foot_y + 10}" fill="none" stroke="#512DA8" stroke-width="1.6" marker-end="url(#arrow-gen)"/>')
-    mid_gen_x = (adm_foot_x + disp_foot_x) / 2
-    svg.append(f'<rect x="{mid_gen_x - 70}" y="745" width="140" height="20" rx="3" fill="#FFFFFF" stroke="#512DA8" stroke-width="0.8"/>')
-    svg.append(f'<text x="{mid_gen_x}" y="759" {font_attr} font-size="10px" font-weight="bold" fill="#512DA8" text-anchor="middle">Kế thừa quyền điều phối</text>')
-
     # 3. Internal UML Relationships (Chạy ngang hoàn toàn)
-    # UC-08 includes UC-09 (cy = 185)
+    # UC-08 includes UC-09 (cy = 190)
     u8 = uc_map["uc_08"]
     u9 = uc_map["uc_09"]
     svg.append(f'<line x1="{u8["cx"] + u8["rx"]}" y1="{u8["cy"]}" x2="{u9["cx"] - u9["rx"]}" y2="{u9["cy"]}" stroke="#6A1B9A" stroke-width="1.4" stroke-dasharray="5,4" marker-end="url(#arrow-inc-purple)"/>')

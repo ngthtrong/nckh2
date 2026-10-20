@@ -45,19 +45,43 @@ Trong chế độ nén, cấu hình hiện khai báo quality 60 và cạnh tối
 \end{figure}
 
 \subsection{Trạng thái cứu hộ và phản hồi}
-Báo cáo mới ở backend luôn bắt đầu \texttt{processing}, bất kể status client gửi. Các chuyển chính là \texttt{processing} tới \texttt{dispatched}, rồi \texttt{resolved}; từ trạng thái chưa kết thúc có thể đóng \texttt{cancelled} kèm lý do. \texttt{resolved} và \texttt{cancelled} là trạng thái cuối. Version trạng thái tăng khi có cập nhật hợp lệ.
+Báo cáo mới ở backend luôn bắt đầu \texttt{processing}, bất kể status client gửi. Chu trình chuyển trạng thái được chuẩn hóa theo mô hình máy trạng thái (Hình~\ref{fig:status-flow}): các chuyển chính là \texttt{processing} tới \texttt{dispatched}, rồi \texttt{resolved}; từ trạng thái chưa kết thúc có thể đóng \texttt{cancelled} kèm lý do. \texttt{resolved} và \texttt{cancelled} là trạng thái cuối. Version trạng thái tăng khi có cập nhật hợp lệ.
 
 \begin{figure}[htbp]\centering
-\begin{tikzpicture}[>=Stealth,node distance=15mm,
- st/.style={draw,rounded corners,align=center,font=\small,minimum height=11mm}]
-\node[st] (p) {processing};
-\node[st,right=of p] (d) {dispatched};
-\node[st,right=of d] (r) {resolved};
-\node[st,below=of d] (c) {cancelled\\kèm lý do};
-\draw[->] (p)--(d);\draw[->] (d)--(r);
-\draw[->] (p)--(c);\draw[->] (d)--(c);
+\begin{tikzpicture}[>=Stealth,
+  node distance=16mm and 18mm,
+  st/.style={draw=black!85, rounded corners=3pt, align=center, font=\small, minimum height=12mm, text width=26mm, fill=gray!3},
+  final_st/.style={draw=black!85, rounded corners=3pt, align=center, font=\small, minimum height=12mm, text width=26mm, fill=gray!8, double, double distance=1pt},
+  initial/.style={circle, fill=black, inner sep=0pt, minimum size=4.5mm},
+  final_dot/.style={circle, draw=black, line width=0.8pt, inner sep=0pt, minimum size=5.5mm, path picture={\fill[black] (path picture bounding box.center) circle (1.8mm);}}
+]
+
+% Điểm bắt đầu
+\node[initial] (init) at (-1.8, 0) {};
+
+% Các trạng thái
+\node[st, right=10mm of init] (p) {\textbf{processing}\\\scriptsize (tiếp nhận/chờ)};
+\node[st, right=20mm of p] (d) {\textbf{dispatched}\\\scriptsize (đã điều phối)};
+\node[final_st, right=20mm of d] (r) {\textbf{resolved}\\\scriptsize (hoàn tất)};
+\node[final_st, below=16mm of d] (c) {\textbf{cancelled}\\\scriptsize (đã đóng)};
+
+% Điểm kết thúc
+\node[final_dot, right=10mm of r] (end_r) {};
+\node[final_dot, right=10mm of c] (end_c) {};
+
+% Chuyển trạng thái chính
+\draw[->, line width=0.7pt] (init) -- node[above, font=\scriptsize]{tạo ca} (p);
+\draw[->, line width=0.7pt] (p) -- node[above, font=\scriptsize]{giao đội} node[below, font=\fontsize{6.5bp}{7.5bp}\selectfont, text=gray!40!black]{(assign\_team)} (d);
+\draw[->, line width=0.7pt] (d) -- node[above, font=\scriptsize]{hoàn thành} node[below, font=\fontsize{6.5bp}{7.5bp}\selectfont, text=gray!40!black]{(hiện trường)} (r);
+\draw[->, line width=0.7pt] (r) -- (end_r);
+
+% Đóng ca / Hủy ca (kèm close_reason bắt buộc)
+\draw[->, line width=0.7pt] (p.south) |- node[pos=0.7, above, font=\scriptsize]{đóng ca} node[pos=0.7, below, font=\fontsize{6.5bp}{7.5bp}\selectfont, text=gray!40!black]{[kèm lý do]} (c.west);
+\draw[->, line width=0.7pt] (d) -- node[right, font=\scriptsize]{đóng ca} node[left, font=\fontsize{6.5bp}{7.5bp}\selectfont, text=gray!40!black]{[kèm lý do]} (c);
+\draw[->, line width=0.7pt] (c) -- (end_c);
+
 \end{tikzpicture}
-\caption{Các chuyển trạng thái nghiệp vụ chính do backend kiểm soát}
+\caption{Biểu đồ chuyển trạng thái nghiệp vụ của ca cứu hộ do backend kiểm soát}
 \label{fig:status-flow}
 \end{figure}
 

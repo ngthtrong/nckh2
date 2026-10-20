@@ -59,57 +59,49 @@ def build_mobile_data():
     }
 
     usecases = [
-        # --- CỘT 1: Nhóm Người dân (cy = 98 .. 356) ---
+        # --- CỘT 1: Nhóm Người dân (cy = 100 .. 370) ---
         {
             "id": "uc_01", "name": "UC-01: Gửi yêu cầu SOS khẩn cấp",
             "sub": "(1 chạm, tọa độ GPS & mã thiết bị)",
-            "cx": c1_x, "cy": sys["y"] + 58, "rx": 120, "ry": 25,
+            "cx": c1_x, "cy": sys["y"] + 60, "rx": 120, "ry": 25,
             "fill": "#FFFFFF", "stroke": "#1E88E5", "txt": "#0D47A1"
         },
         {
             "id": "uc_02", "name": "UC-02: Tạo báo cáo cứu hộ chi tiết",
             "sub": "(số người kẹt, bị thương, nhóm yếu thế)",
-            "cx": c1_x, "cy": sys["y"] + 144, "rx": 120, "ry": 25,
+            "cx": c1_x, "cy": sys["y"] + 150, "rx": 120, "ry": 25,
             "fill": "#FFFFFF", "stroke": "#1E88E5", "txt": "#0D47A1"
         },
         {
             "id": "uc_06", "name": "UC-06: Tra cứu trạng thái cứu hộ",
             "sub": "(tiến trình xử lý & phản hồi thực địa)",
-            "cx": c1_x, "cy": sys["y"] + 230, "rx": 120, "ry": 25,
+            "cx": c1_x, "cy": sys["y"] + 240, "rx": 120, "ry": 25,
             "fill": "#FFFFFF", "stroke": "#1E88E5", "txt": "#0D47A1"
         },
         {
             "id": "uc_09m", "name": "UC-09M: Tra cứu cẩm nang & điểm trú",
             "sub": "(bản đồ vùng an toàn & kỹ năng sinh tồn)",
-            "cx": c1_x, "cy": sys["y"] + 316, "rx": 120, "ry": 25,
+            "cx": c1_x, "cy": sys["y"] + 330, "rx": 120, "ry": 25,
             "fill": "#FFFFFF", "stroke": "#1E88E5", "txt": "#0D47A1"
         },
 
-        # --- CỘT 1: Dùng chung tại trung tâm (cy = 402) ---
-        {
-            "id": "uc_05", "name": "UC-05: Đồng bộ dữ liệu ngoại tuyến",
-            "sub": "(tự động gửi lại từ Outbox khi có mạng)",
-            "cx": c1_x, "cy": sys["y"] + 402, "rx": 120, "ry": 25,
-            "fill": "#EDE7F6", "stroke": "#5E35B1", "txt": "#311B92"
-        },
-
-        # --- CỘT 1: Nhóm Đội cứu hộ thực địa (cy = 488 .. 660) ---
+        # --- CỘT 1: Nhóm Đội cứu hộ thực địa (cy = 500 .. 660) ---
         {
             "id": "uc_07m", "name": "UC-07M: Tiếp nhận nhiệm vụ cứu nạn",
             "sub": "(danh sách ca cứu trợ, lộ trình & bản đồ)",
-            "cx": c1_x, "cy": sys["y"] + 488, "rx": 120, "ry": 25,
+            "cx": c1_x, "cy": sys["y"] + 480, "rx": 120, "ry": 25,
             "fill": "#E8F5E9", "stroke": "#2E7D32", "txt": "#1B5E20"
         },
         {
             "id": "uc_08m", "name": "UC-08M: Cập nhật tiến độ hiện trường",
             "sub": "(đang tiếp cận, đã giải cứu nạn nhân)",
-            "cx": c1_x, "cy": sys["y"] + 574, "rx": 120, "ry": 25,
+            "cx": c1_x, "cy": sys["y"] + 566, "rx": 120, "ry": 25,
             "fill": "#E8F5E9", "stroke": "#2E7D32", "txt": "#1B5E20"
         },
         {
             "id": "uc_11m", "name": "UC-11M: Báo cáo kết quả & xin chi viện",
             "sub": "(đánh giá hiện trạng & yêu cầu thêm nhân lực)",
-            "cx": c1_x, "cy": sys["y"] + 660, "rx": 120, "ry": 25,
+            "cx": c1_x, "cy": sys["y"] + 652, "rx": 120, "ry": 25,
             "fill": "#E8F5E9", "stroke": "#2E7D32", "txt": "#1B5E20"
         },
 
@@ -117,13 +109,13 @@ def build_mobile_data():
         {
             "id": "uc_03", "name": "UC-03: Nhận diện mức ngập từ ảnh",
             "sub": "(Edge AI on-device MobileNetV3)",
-            "cx": c2_x, "cy": sys["y"] + 110, "rx": 122, "ry": 25,
+            "cx": c2_x, "cy": sys["y"] + 115, "rx": 122, "ry": 25,
             "fill": "#FCE4EC", "stroke": "#D81B60", "txt": "#880E4F"
         },
         {
             "id": "uc_10m", "name": "UC-10M: Truyền dữ liệu thích ứng",
             "sub": "(ảnh gốc / nén JPEG / metadata theo mạng)",
-            "cx": c2_x, "cy": sys["y"] + 205, "rx": 122, "ry": 25,
+            "cx": c2_x, "cy": sys["y"] + 210, "rx": 122, "ry": 25,
             "fill": "#E1F5FE", "stroke": "#0288D1", "txt": "#01579B"
         },
         {
@@ -194,24 +186,27 @@ def generate_drawio_xml():
     assoc_red = "endArrow=none;html=1;strokeColor=#E53935;strokeWidth=1.2;"
 
     # Citizen connections (Không cắt ngang Rescuer)
-    for ucid in ["uc_01", "uc_02", "uc_06", "uc_09m", "uc_05"]:
-        e = ET.SubElement(root_cell, "mxCell", id=f"e_cit_{ucid}", value="",
-                          style=assoc_blue, edge="1",
-                          source="act_citizen", target=ucid, **{"parent": "1"})
-        ET.SubElement(e, "mxGeometry", relative="1", **{"as": "geometry"})
+    for ucid in ["uc_01", "uc_02", "uc_06", "uc_09m"]:
+        e = ET.SubElement(root_cell, "mxCell", attrib={
+            "id": f"e_cit_{ucid}", "value": "", "style": assoc_blue, "edge": "1",
+            "source": "act_citizen", "target": ucid, "parent": "1"
+        })
+        ET.SubElement(e, "mxGeometry", attrib={"relative": "1", "as": "geometry"})
 
     # Rescuer connections (Không cắt ngang Citizen)
-    for ucid in ["uc_05", "uc_07m", "uc_08m", "uc_11m"]:
-        e = ET.SubElement(root_cell, "mxCell", id=f"e_res_{ucid}", value="",
-                          style=assoc_green, edge="1",
-                          source="act_rescuer", target=ucid, **{"parent": "1"})
-        ET.SubElement(e, "mxGeometry", relative="1", **{"as": "geometry"})
+    for ucid in ["uc_07m", "uc_08m", "uc_11m"]:
+        e = ET.SubElement(root_cell, "mxCell", attrib={
+            "id": f"e_res_{ucid}", "value": "", "style": assoc_green, "edge": "1",
+            "source": "act_rescuer", "target": ucid, "parent": "1"
+        })
+        ET.SubElement(e, "mxGeometry", attrib={"relative": "1", "as": "geometry"})
 
     # SMS Gateway to UC-04
-    e_sms = ET.SubElement(root_cell, "mxCell", id="e_sms_gw_uc04", value="",
-                          style=assoc_red, edge="1",
-                          source="uc_04", target="act_sms_gw", **{"parent": "1"})
-    ET.SubElement(e_sms, "mxGeometry", relative="1", **{"as": "geometry"})
+    e_sms = ET.SubElement(root_cell, "mxCell", attrib={
+        "id": "e_sms_gw_uc04", "value": "", "style": assoc_red, "edge": "1",
+        "source": "uc_04", "target": "act_sms_gw", "parent": "1"
+    })
+    ET.SubElement(e_sms, "mxGeometry", attrib={"relative": "1", "as": "geometry"})
 
     # 5. Internal UML Stereotypes: «include» and «extend»
     inc_style_pink = "endArrow=open;dashed=1;html=1;strokeColor=#D81B60;strokeWidth=1.3;fontSize=10;fontColor=#D81B60;"
@@ -296,14 +291,14 @@ def generate_svg():
     # Citizen edges (Nối tới các UC cy <= 442)
     cit = actors["act_citizen"]
     cit_x, cit_y = cit["x"] + 25, cit["y"] + 20
-    for ucid in ["uc_01", "uc_02", "uc_06", "uc_09m", "uc_05"]:
+    for ucid in ["uc_01", "uc_02", "uc_06", "uc_09m"]:
         u = uc_map[ucid]
         svg.append(f'<line x1="{cit_x}" y1="{cit_y}" x2="{u["cx"] - u["rx"]}" y2="{u["cy"]}" stroke="#1976D2" stroke-width="1.2"/>')
 
-    # Rescuer edges (Nối tới UC-05 và các UC cy >= 488)
+    # Rescuer edges (Nối tới các UC đội cứu hộ)
     res = actors["act_rescuer"]
     res_x, res_y = res["x"] + 25, res["y"] + 20
-    for ucid in ["uc_05", "uc_07m", "uc_08m", "uc_11m"]:
+    for ucid in ["uc_07m", "uc_08m", "uc_11m"]:
         u = uc_map[ucid]
         svg.append(f'<line x1="{res_x}" y1="{res_y}" x2="{u["cx"] - u["rx"]}" y2="{u["cy"]}" stroke="#2E7D32" stroke-width="1.2"/>')
 

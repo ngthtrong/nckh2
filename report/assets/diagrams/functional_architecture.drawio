@@ -1,99 +1,99 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <mxfile host="app.diagrams.net" agent="Antigravity" version="24.0.0">
   <diagram id="diag-func-arch" name="Kien-truc-chuc-nang-he-thong">
-    <mxGraphModel dx="1200" dy="700" grid="1" gridSize="10" guides="1" tooltips="1" connect="1" arrows="1" fold="1" page="1" pageScale="1" pageWidth="1140" pageHeight="560" math="0" shadow="0">
+    <mxGraphModel dx="1200" dy="700" grid="1" gridSize="10" guides="1" tooltips="1" connect="1" arrows="1" fold="1" page="1" pageScale="1" pageWidth="1080" pageHeight="500" math="0" shadow="0">
       <root>
         <mxCell id="0" />
         <mxCell id="1" parent="0" />
         
         <!-- Cột 1: Di động biên -->
         <mxCell id="c1_frame" value="" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#F8FAFC;strokeColor=#90CAF9;strokeWidth=1.5;arcSize=4;" vertex="1" parent="1">
-          <mxGeometry x="25" y="18" width="290" height="524" as="geometry" />
+          <mxGeometry x="20" y="16" width="275" height="468" as="geometry" />
         </mxCell>
-        <mxCell id="c1_title" value="&lt;b&gt;PHÂN HỆ DI ĐỘNG BIÊN (EDGE)&lt;/b&gt;" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#E3F2FD;strokeColor=#90CAF9;strokeWidth=1.5;fontColor=#0D47A1;fontSize=13;fontFamily=Helvetica;" vertex="1" parent="1">
-          <mxGeometry x="25" y="18" width="290" height="34" as="geometry" />
+        <mxCell id="c1_title" value="&lt;b&gt;PHÂN HỆ DI ĐỘNG BIÊN (EDGE)&lt;/b&gt;" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#E3F2FD;strokeColor=#90CAF9;strokeWidth=1.5;fontColor=#0D47A1;fontSize=12;fontFamily=Helvetica;" vertex="1" parent="1">
+          <mxGeometry x="20" y="16" width="275" height="32" as="geometry" />
         </mxCell>
-        <mxCell id="act_mob" value="&lt;b&gt;Người dân / Nạn nhân&lt;/b&gt;&lt;br&gt;&lt;b&gt;&amp;amp; Đội cứu hộ thực địa&lt;/b&gt;" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#FFF3E0;strokeColor=#FF9800;strokeWidth=1.2;fontSize=12;fontColor=#BF360C;fontFamily=Helvetica;" vertex="1" parent="1">
-          <mxGeometry x="45" y="64" width="250" height="58" as="geometry" />
+        <mxCell id="act_mob" value="&lt;b&gt;Người dân / Nạn nhân&lt;/b&gt;&lt;br&gt;&lt;b&gt;&amp;amp; Đội cứu hộ thực địa&lt;/b&gt;" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#FFF3E0;strokeColor=#FF9800;strokeWidth=1.2;fontSize=11;fontColor=#BF360C;fontFamily=Helvetica;" vertex="1" parent="1">
+          <mxGeometry x="36" y="58" width="242" height="52" as="geometry" />
         </mxCell>
-        <mxCell id="app_flutter" value="&lt;b&gt;Ứng dụng Di động (Flutter Client)&lt;/b&gt;&lt;hr&gt;&lt;div align=&quot;left&quot; style=&quot;font-size:10px;color:#37474F;&quot;&gt;&lt;b&gt;• SOS &amp;amp; Báo cáo Sự cố:&lt;/b&gt; 1 chạm GPS, Ảnh, N, V&lt;br&gt;&lt;b&gt;• On-device Edge AI:&lt;/b&gt; MobileNetV3 (F); ExecuTorch mặc định, ONNX so sánh; Điểm khẩn cấp E_i (Logistic Regression từ dấu hiệu nặng; backend tạm đọc urgency/mô tả)&lt;br&gt;&lt;b&gt;• Hive Outbox:&lt;/b&gt; Ngoại tuyến Store-and-Forward, JCS RFC 8785&lt;br&gt;&lt;b&gt;• Tiến độ ca cứu hộ:&lt;/b&gt; GET /api/reports/status?ids=... (Đổi trạng thái nghiệp vụ yêu cầu quyền điều phối)&lt;/div&gt;" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#FFFFFF;strokeColor=#1976D2;strokeWidth=1.8;fontSize=11.5;fontFamily=Helvetica;align=center;verticalAlign=top;spacingTop=6;" vertex="1" parent="1">
-          <mxGeometry x="45" y="148" width="250" height="380" as="geometry" />
+        <mxCell id="app_flutter" value="&lt;b&gt;Ứng dụng Di động (Flutter Client)&lt;/b&gt;&lt;hr&gt;&lt;div align=&quot;left&quot; style=&quot;font-size:10px;color:#37474F;&quot;&gt;&lt;b&gt;• SOS &amp;amp; Báo cáo:&lt;/b&gt; 1 chạm GPS, Ảnh, N, V&lt;br&gt;&lt;b&gt;• On-device Edge AI:&lt;/b&gt; MobileNetV3 (F); ExecuTorch, ONNX; Điểm khẩn cấp E_i&lt;br&gt;&lt;b&gt;• Hive Outbox &amp;amp; Ngoại tuyến:&lt;/b&gt; Store-and-Forward, JCS RFC 8785&lt;br&gt;&lt;b&gt;• Tiến độ ca:&lt;/b&gt; Tra cứu /reports/status &amp;amp; Tác nghiệp thực địa&lt;/div&gt;" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#FFFFFF;strokeColor=#1976D2;strokeWidth=1.8;fontSize=11.5;fontFamily=Helvetica;align=center;verticalAlign=top;spacingTop=6;" vertex="1" parent="1">
+          <mxGeometry x="36" y="132" width="242" height="336" as="geometry" />
         </mxCell>
 
-        <!-- Thành phần trung gian: SMS Gateway -->
-        <mxCell id="sms_gw" value="&lt;b&gt;SMS GATEWAY&lt;/b&gt;&lt;br&gt;&lt;font style=&quot;font-size:9px;color:#5D4037;&quot;&gt;Thiết bị / Tổng đài GSM&lt;br&gt;Nhận SMS SOS | Chuyển tiếp POST /api/sms/inbound (Token)&lt;/font&gt;" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#FFFDE7;strokeColor=#FBC02D;strokeWidth=1.2;fontSize=10;fontFamily=Helvetica;align=center;" vertex="1" parent="1">
-          <mxGeometry x="316" y="152" width="108" height="52" as="geometry" />
+        <!-- Trung gian: SMS Gateway -->
+        <mxCell id="sms_gw" value="&lt;b&gt;SMS GATEWAY&lt;/b&gt;&lt;br&gt;&lt;font style=&quot;font-size:9px;color:#5D4037;&quot;&gt;Thiết bị / Tổng đài GSM&lt;br&gt;Nhận SMS SOS &amp;amp; Chuyển tiếp Webhook&lt;/font&gt;" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#FFFDE7;strokeColor=#FBC02D;strokeWidth=1.2;fontSize=9.5;fontFamily=Helvetica;align=center;" vertex="1" parent="1">
+          <mxGeometry x="306" y="132" width="98" height="52" as="geometry" />
         </mxCell>
         
         <!-- Cột 2: Máy chủ trung tâm -->
         <mxCell id="c2_frame" value="" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#FAF5FB;strokeColor=#7B1FA2;strokeWidth=1.6;dashed=1;dashPattern=6 4;arcSize=4;" vertex="1" parent="1">
-          <mxGeometry x="425" y="18" width="315" height="524" as="geometry" />
+          <mxGeometry x="415" y="16" width="290" height="468" as="geometry" />
         </mxCell>
-        <mxCell id="c2_title" value="&lt;b&gt;MÁY CHỦ XỬ LÝ TRUNG TÂM (BACKEND CORE)&lt;/b&gt;" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#F3E5F5;strokeColor=#7B1FA2;strokeWidth=1.6;fontColor=#6A1B9A;fontSize=12.5;fontFamily=Helvetica;" vertex="1" parent="1">
-          <mxGeometry x="425" y="18" width="315" height="34" as="geometry" />
+        <mxCell id="c2_title" value="&lt;b&gt;MÁY CHỦ XỬ LÝ TRUNG TÂM (BACKEND CORE)&lt;/b&gt;" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#F3E5F5;strokeColor=#7B1FA2;strokeWidth=1.6;fontColor=#6A1B9A;fontSize=12;fontFamily=Helvetica;" vertex="1" parent="1">
+          <mxGeometry x="415" y="16" width="290" height="32" as="geometry" />
         </mxCell>
-        <mxCell id="gw_api" value="&lt;b&gt;API tiếp nhận &amp;amp; dịch vụ backend (FastAPI)&lt;/b&gt;&lt;hr&gt;&lt;div align=&quot;left&quot; style=&quot;font-size:10px;color:#37474F;&quot;&gt;• Kiểm tra X-Message-Contract-Version: 1&lt;br&gt;• Kiểm tra hash payload JCS RFC 8785 (sync batch)&lt;br&gt;• Chống trùng lặp Idempotency (messages_dedup)&lt;br&gt;• Xác thực phiên &amp;amp; phân quyền admin/operator&lt;br&gt;• Nhận Webhook POST /api/sms/inbound (Token)&lt;br&gt;• REST API cho Mobile &amp;amp; Web Dashboard&lt;/div&gt;" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#FFFFFF;strokeColor=#7B1FA2;strokeWidth=1.8;fontSize=11.5;fontFamily=Helvetica;align=center;verticalAlign=top;spacingTop=6;" vertex="1" parent="1">
-          <mxGeometry x="440" y="64" width="285" height="128" as="geometry" />
+        <mxCell id="gw_api" value="&lt;b&gt;Cổng Tiếp nhận &amp;amp; REST API (FastAPI)&lt;/b&gt;&lt;hr&gt;&lt;div align=&quot;left&quot; style=&quot;font-size:9.5px;color:#37474F;&quot;&gt;• Hợp đồng JCS (RFC 8785) &amp;amp; Header v1&lt;br&gt;• Chống trùng lặp Idempotency (messages_dedup)&lt;br&gt;• Tiếp nhận SMS Webhook (/api/sms/inbound)&lt;br&gt;• Xác thực phiên &amp;amp; REST API cho Mobile, Web&lt;/div&gt;" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#FFFFFF;strokeColor=#7B1FA2;strokeWidth=1.8;fontSize=10.5;fontFamily=Helvetica;align=center;verticalAlign=top;spacingTop=6;" vertex="1" parent="1">
+          <mxGeometry x="428" y="58" width="264" height="110" as="geometry" />
         </mxCell>
-        <mxCell id="db_storage" value="&lt;b&gt;Lưu trữ Bền vững (SQLite &amp;amp; Files)&lt;/b&gt;&lt;hr&gt;&lt;div align=&quot;left&quot; style=&quot;font-size:10px;color:#37474F;&quot;&gt;• SQLite WAL: reports, messages_dedup, teams, meta&lt;br&gt;• Nhật ký kiểm toán phân công report_events&lt;br&gt;• Thư mục uploads/: Tệp ảnh hiện trường JPEG/PNG (SHA-256)&lt;br&gt;• Ghi nhận tức thời, không bị khóa bởi phân cụm&lt;/div&gt;" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#FFFFFF;strokeColor=#00695C;strokeWidth=1.8;fontSize=11.5;fontFamily=Helvetica;align=center;verticalAlign=top;spacingTop=6;" vertex="1" parent="1">
-          <mxGeometry x="440" y="224" width="285" height="112" as="geometry" />
+        <mxCell id="db_storage" value="&lt;b&gt;Kho Lưu trữ Bền vững (SQLite &amp;amp; Files)&lt;/b&gt;&lt;hr&gt;&lt;div align=&quot;left&quot; style=&quot;font-size:9.5px;color:#37474F;&quot;&gt;• CSDL SQLite WAL (reports, teams, meta)&lt;br&gt;• Nhật ký kiểm toán phân công report_events&lt;br&gt;• Thư mục lưu trữ ảnh hiện trường (uploads/)&lt;/div&gt;" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#FFFFFF;strokeColor=#00695C;strokeWidth=1.8;fontSize=10.5;fontFamily=Helvetica;align=center;verticalAlign=top;spacingTop=6;" vertex="1" parent="1">
+          <mxGeometry x="428" y="198" width="264" height="96" as="geometry" />
         </mxCell>
-        <mxCell id="core_rescue" value="&lt;b&gt;Lõi Thuật toán &amp;amp; Dịch vụ Cụm (rescue_core)&lt;/b&gt;&lt;hr&gt;&lt;div align=&quot;left&quot; style=&quot;font-size:10px;color:#37474F;&quot;&gt;• Ma trận đồ thị C_ij &amp;amp; Phân cụm Louvain đa tỉ lệ&lt;br&gt;• Điểm ưu tiên cụm P(c) đa tiêu chí (E từ urgency/mô tả)&lt;br&gt;• clusterKey: duy trì lựa chọn cụm giữa các lần tải&lt;br&gt;• Hàng xem xét (Review Queue): thiếu vị trí hoặc thời gian&lt;br&gt;• Snapshot Cache trên RAM (ETag) — Không ghi SQLite&lt;/div&gt;" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#FFFFFF;strokeColor=#4E342E;strokeWidth=1.8;fontSize=11.5;fontFamily=Helvetica;align=center;verticalAlign=top;spacingTop=6;" vertex="1" parent="1">
-          <mxGeometry x="440" y="368" width="285" height="164" as="geometry" />
+        <mxCell id="core_rescue" value="&lt;b&gt;Lõi Thuật toán &amp;amp; Phân cụm (rescue_core)&lt;/b&gt;&lt;hr&gt;&lt;div align=&quot;left&quot; style=&quot;font-size:9.5px;color:#37474F;&quot;&gt;• Ma trận đồ thị C_ij &amp;amp; Phân cụm Louvain đa tỉ lệ&lt;br&gt;• Điểm ưu tiên cụm P(c) đa tiêu chí (E, F, N, V)&lt;br&gt;• Khóa clusterKey duy trì lựa chọn khi tải&lt;br&gt;• Hàng xem xét (Review Queue) thiếu GPS/giờ&lt;br&gt;• Bộ nhớ đệm phân cụm trên RAM (ETag)&lt;/div&gt;" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#FFFFFF;strokeColor=#4E342E;strokeWidth=1.8;fontSize=10.5;fontFamily=Helvetica;align=center;verticalAlign=top;spacingTop=6;" vertex="1" parent="1">
+          <mxGeometry x="428" y="324" width="264" height="144" as="geometry" />
         </mxCell>
 
         <!-- Cột 3: Web Dashboard -->
         <mxCell id="c3_frame" value="" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#FFFDF8;strokeColor=#FFE082;strokeWidth=1.5;arcSize=4;" vertex="1" parent="1">
-          <mxGeometry x="845" y="18" width="270" height="524" as="geometry" />
+          <mxGeometry x="795" y="16" width="265" height="468" as="geometry" />
         </mxCell>
-        <mxCell id="c3_title" value="&lt;b&gt;PHÂN HỆ ĐIỀU PHỐI &amp;amp; QUẢN TRỊ WEB&lt;/b&gt;" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#FFF8E1;strokeColor=#FFE082;strokeWidth=1.5;fontColor=#E65100;fontSize=12.5;fontFamily=Helvetica;" vertex="1" parent="1">
-          <mxGeometry x="845" y="18" width="270" height="34" as="geometry" />
+        <mxCell id="c3_title" value="&lt;b&gt;PHÂN HỆ ĐIỀU PHỐI WEB (DASHBOARD)&lt;/b&gt;" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#FFF8E1;strokeColor=#FFE082;strokeWidth=1.5;fontColor=#E65100;fontSize=12;fontFamily=Helvetica;" vertex="1" parent="1">
+          <mxGeometry x="795" y="16" width="265" height="32" as="geometry" />
         </mxCell>
-        <mxCell id="act_disp" value="&lt;b&gt;Điều phối viên cứu nạn&lt;/b&gt;&lt;br&gt;&lt;b&gt;&amp;amp; Quản trị viên (Admin)&lt;/b&gt;" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#FFF3E0;strokeColor=#FF9800;strokeWidth=1.2;fontSize=12;fontColor=#BF360C;fontFamily=Helvetica;" vertex="1" parent="1">
-          <mxGeometry x="860" y="64" width="240" height="58" as="geometry" />
+        <mxCell id="act_disp" value="&lt;b&gt;Điều phối viên cứu nạn&lt;/b&gt;&lt;br&gt;(Dispatcher Web Client)" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#FFF3E0;strokeColor=#FF9800;strokeWidth=1.2;fontSize=11;fontColor=#BF360C;fontFamily=Helvetica;" vertex="1" parent="1">
+          <mxGeometry x="810" y="58" width="235" height="52" as="geometry" />
         </mxCell>
-        <mxCell id="dash_web" value="&lt;b&gt;Bàn điều phối Web (Leaflet GIS)&lt;/b&gt;&lt;hr&gt;&lt;div align=&quot;left&quot; style=&quot;font-size:10px;color:#37474F;&quot;&gt;&lt;b&gt;• Bản đồ số Leaflet GIS:&lt;/b&gt; Ranh giới cụm &amp;amp; màu ưu tiên; Chấm gán tọa độ ca thiếu vị trí/thời gian&lt;br&gt;&lt;b&gt;• Quản lý Ca &amp;amp; Cụm:&lt;/b&gt; Thứ bậc P(c); Khóa clusterKey giữ ổn định khi poll; Review Queue thẩm tra SOS&lt;br&gt;&lt;b&gt;• Phân công &amp;amp; Đội:&lt;/b&gt; PUT /api/reports/{id}/team; PATCH .../status; Quản lý đội GET/POST/PATCH /teams&lt;br&gt;&lt;b&gt;• Quản trị:&lt;/b&gt; Nhật ký report_events; tài khoản &amp;amp; sao lưu&lt;/div&gt;" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#FFFFFF;strokeColor=#F57C00;strokeWidth=1.8;fontSize=11.5;fontFamily=Helvetica;align=center;verticalAlign=top;spacingTop=6;" vertex="1" parent="1">
-          <mxGeometry x="860" y="148" width="240" height="380" as="geometry" />
+        <mxCell id="dash_web" value="&lt;b&gt;Bàn điều phối Web (Leaflet GIS)&lt;/b&gt;&lt;hr&gt;&lt;div align=&quot;left&quot; style=&quot;font-size:9.5px;color:#37474F;&quot;&gt;&lt;b&gt;• Bản đồ Leaflet GIS:&lt;/b&gt; Ranh giới cụm, màu P(c), gán tọa độ&lt;br&gt;&lt;b&gt;• Bảng Cụm &amp;amp; Thẩm tra:&lt;/b&gt; Xếp hạng P(c), Review Queue, clusterKey&lt;br&gt;&lt;b&gt;• Phân công &amp;amp; Đội:&lt;/b&gt; Giao đội, đổi 4 trạng thái, API /teams&lt;br&gt;&lt;b&gt;• Kiểm toán &amp;amp; Xuất dữ liệu:&lt;/b&gt; Nhật ký report_events, CSV, GeoJSON&lt;/div&gt;" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#FFFFFF;strokeColor=#F57C00;strokeWidth=1.8;fontSize=11.5;fontFamily=Helvetica;align=center;verticalAlign=top;spacingTop=6;" vertex="1" parent="1">
+          <mxGeometry x="810" y="132" width="235" height="336" as="geometry" />
         </mxCell>
         
         <!-- Các đường nối -->
-        <mxCell id="e_act_mob" value="Tương tác App" style="edgeStyle=orthogonalEdgeStyle;rounded=0;html=1;strokeWidth=1.5;strokeColor=#FF9800;endArrow=classic;startArrow=classic;fontSize=9.5;fontColor=#D84315;" edge="1" parent="1" source="act_mob" target="app_flutter">
+        <mxCell id="e_act_mob" value="Tương tác App" style="edgeStyle=orthogonalEdgeStyle;rounded=0;html=1;strokeWidth=1.5;strokeColor=#FF9800;endArrow=classic;startArrow=classic;fontSize=9;fontColor=#D84315;" edge="1" parent="1" source="act_mob" target="app_flutter">
           <mxGeometry relative="1" as="geometry" />
         </mxCell>
-        <mxCell id="e_act_disp" value="Vận hành Web" style="edgeStyle=orthogonalEdgeStyle;rounded=0;html=1;strokeWidth=1.5;strokeColor=#FF9800;endArrow=classic;startArrow=classic;fontSize=9.5;fontColor=#D84315;" edge="1" parent="1" source="act_disp" target="dash_web">
+        <mxCell id="e_act_disp" value="Vận hành Web" style="edgeStyle=orthogonalEdgeStyle;rounded=0;html=1;strokeWidth=1.5;strokeColor=#FF9800;endArrow=classic;startArrow=classic;fontSize=9;fontColor=#D84315;" edge="1" parent="1" source="act_disp" target="dash_web">
           <mxGeometry relative="1" as="geometry" />
         </mxCell>
         
         <!-- Kênh IP: App -> FastAPI -->
-        <mxCell id="e_mob_gw_ip" value="KÊNH IP (REST)&lt;br&gt;POST /sync/messages (Batch)&lt;br&gt;Multipart /api/reports&lt;br&gt;GET /api/reports/status" style="edgeStyle=orthogonalEdgeStyle;rounded=0;html=1;strokeWidth=1.8;strokeColor=#1976D2;endArrow=classic;startArrow=classic;fontSize=9;fontColor=#0D47A1;labelBackgroundColor=#FFFFFF;" edge="1" parent="1" source="app_flutter" target="gw_api">
+        <mxCell id="e_mob_gw_ip" value="KÊNH IP (REST)&lt;br&gt;POST /sync, /reports&lt;br&gt;GET /status" style="edgeStyle=orthogonalEdgeStyle;rounded=0;html=1;strokeWidth=1.6;strokeColor=#1976D2;endArrow=classic;startArrow=classic;fontSize=8.5;fontColor=#0D47A1;labelBackgroundColor=#FFFFFF;" edge="1" parent="1" source="app_flutter" target="gw_api">
           <mxGeometry relative="1" as="geometry">
             <Array as="points">
-              <mxPoint x="370" y="105" />
+              <mxPoint x="355" y="92" />
             </Array>
           </mxGeometry>
         </mxCell>
 
         <!-- Kênh SMS: App -> SMS Gateway -> FastAPI -->
-        <mxCell id="e_mob_sms" value="GSM SMS" style="edgeStyle=orthogonalEdgeStyle;rounded=0;html=1;strokeWidth=1.5;strokeColor=#F57C00;dashed=1;endArrow=classic;fontSize=8.5;fontColor=#E65100;labelBackgroundColor=#FFFFFF;" edge="1" parent="1" source="app_flutter" target="sms_gw">
+        <mxCell id="e_mob_sms" value="GSM SMS" style="edgeStyle=orthogonalEdgeStyle;rounded=0;html=1;strokeWidth=1.5;strokeColor=#F57C00;dashed=1;endArrow=classic;fontSize=8;fontColor=#E65100;labelBackgroundColor=#FFFFFF;" edge="1" parent="1" source="app_flutter" target="sms_gw">
           <mxGeometry relative="1" as="geometry" />
         </mxCell>
-        <mxCell id="e_sms_gw" value="POST /api/sms/inbound&lt;br&gt;(X-Gateway-Token)" style="edgeStyle=orthogonalEdgeStyle;rounded=0;html=1;strokeWidth=1.5;strokeColor=#2E7D32;endArrow=classic;fontSize=8.5;fontColor=#2E7D32;labelBackgroundColor=#FFFFFF;" edge="1" parent="1" source="sms_gw" target="gw_api">
+        <mxCell id="e_sms_gw" value="POST /api/sms/inbound" style="edgeStyle=orthogonalEdgeStyle;rounded=0;html=1;strokeWidth=1.5;strokeColor=#2E7D32;endArrow=classic;fontSize=8;fontColor=#2E7D32;labelBackgroundColor=#FFFFFF;" edge="1" parent="1" source="sms_gw" target="gw_api">
           <mxGeometry relative="1" as="geometry" />
         </mxCell>
         
         <!-- Nội bộ Server -->
-        <mxCell id="e_gw_db" value="Ghi nhận tức thời &amp;amp; Đọc ca (SQLite WAL)" style="edgeStyle=orthogonalEdgeStyle;rounded=0;html=1;strokeWidth=1.8;strokeColor=#00695C;endArrow=classic;startArrow=classic;fontSize=9;fontColor=#00695C;labelBackgroundColor=#FFFFFF;" edge="1" parent="1" source="gw_api" target="db_storage">
+        <mxCell id="e_gw_db" value="Ghi nhận tức thời &amp;amp; Đọc ca (SQLite WAL)" style="edgeStyle=orthogonalEdgeStyle;rounded=0;html=1;strokeWidth=1.6;strokeColor=#00695C;endArrow=classic;startArrow=classic;fontSize=8.5;fontColor=#00695C;labelBackgroundColor=#FFFFFF;" edge="1" parent="1" source="gw_api" target="db_storage">
           <mxGeometry relative="1" as="geometry" />
         </mxCell>
-        <mxCell id="e_db_core" value="Đọc active reports ↔ Cache Snapshot RAM" style="edgeStyle=orthogonalEdgeStyle;rounded=0;html=1;strokeWidth=1.8;strokeColor=#4E342E;endArrow=classic;startArrow=classic;fontSize=9;fontColor=#4E342E;labelBackgroundColor=#FFFFFF;" edge="1" parent="1" source="db_storage" target="core_rescue">
+        <mxCell id="e_db_core" value="Đọc active reports ↔ Cache RAM (ETag)" style="edgeStyle=orthogonalEdgeStyle;rounded=0;html=1;strokeWidth=1.6;strokeColor=#4E342E;endArrow=classic;startArrow=classic;fontSize=8.5;fontColor=#4E342E;labelBackgroundColor=#FFFFFF;" edge="1" parent="1" source="db_storage" target="core_rescue">
           <mxGeometry relative="1" as="geometry" />
         </mxCell>
         
         <!-- FastAPI <-> Dashboard -->
-        <mxCell id="e_gw_dash" value="HTTP REST API&lt;br&gt;Poll 5s: /changes&lt;br&gt;ETag: /clusters&lt;br&gt;PUT /reports/{id}/team&lt;br&gt;PATCH .../status&lt;br&gt;GET/POST/PATCH /teams" style="edgeStyle=orthogonalEdgeStyle;rounded=0;html=1;strokeWidth=1.8;strokeColor=#E65100;endArrow=classic;startArrow=classic;fontSize=8.5;fontColor=#E65100;labelBackgroundColor=#FFFFFF;" edge="1" parent="1" source="gw_api" target="dash_web">
+        <mxCell id="e_gw_dash" value="HTTP REST API&lt;br&gt;Poll: /changes, /clusters&lt;br&gt;Điều phối: /team, /status" style="edgeStyle=orthogonalEdgeStyle;rounded=0;html=1;strokeWidth=1.6;strokeColor=#E65100;endArrow=classic;startArrow=classic;fontSize=8.5;fontColor=#E65100;labelBackgroundColor=#FFFFFF;" edge="1" parent="1" source="gw_api" target="dash_web">
           <mxGeometry relative="1" as="geometry">
             <Array as="points">
-              <mxPoint x="790" y="124" />
+              <mxPoint x="750" y="113" />
             </Array>
           </mxGeometry>
         </mxCell>
