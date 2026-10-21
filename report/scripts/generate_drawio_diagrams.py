@@ -96,86 +96,105 @@ STYLE_EDGE_DASH = "endArrow=open;dashed=1;html=1;strokeColor=#D81B60;strokeWidth
 # =========================================================================
 def generate_usecase():
     nodes = []
-    nodes.append(add_cell("sys_bound", "HỆ THỐNG HỖ TRỢ CỨU HỘ BÃO LŨ (THS2026-68)", 
-                          "shape=swimlane;whiteSpace=wrap;html=1;startSize=30;horizontal=1;fillColor=#F8F9FA;strokeColor=#4A5568;fontStyle=1;fontSize=14;fontFamily=Helvetica;",
-                          x=260, y=40, w=1120, h=920))
+    # 1. System Boundary
+    nodes.append(add_cell(
+        "sys_bound", "HỆ THỐNG HỖ TRỢ CỨU HỘ BÃO LŨ (THS2026-68)",
+        "shape=swimlane;whiteSpace=wrap;html=1;startSize=32;horizontal=1;fillColor=#FAFAFA;strokeColor=#37474F;strokeWidth=1.5;fontStyle=1;fontSize=14;fontFamily=Helvetica;fontColor=#263238;",
+        x=220, y=40, w=1190, h=880
+    ))
 
+    # 2. Subsystems
+    subsys_style = "rounded=1;whiteSpace=wrap;html=1;dashed=1;verticalAlign=top;fontStyle=1;fontSize=12;spacingTop=8;strokeWidth=1.2;"
+    nodes.append(add_cell(
+        "sub_fe", "Phân hệ Di động Biên (Edge Mobile App - Flutter)",
+        subsys_style + "fillColor=#F0F7FF;strokeColor=#64B5F6;fontColor=#0D47A1;",
+        parent="sys_bound", x=25, y=45, w=525, h=805
+    ))
+    nodes.append(add_cell(
+        "sub_dash", "Phân hệ Điều phối & Quản trị Web (Dispatch Dashboard)",
+        subsys_style + "fillColor=#FFFDF5;strokeColor=#FFB74D;fontColor=#E65100;",
+        parent="sys_bound", x=575, y=45, w=590, h=805
+    ))
+
+    # 3. Actors
     actor_style = "shape=umlActor;verticalLabelPosition=bottom;verticalAlign=top;html=1;outlineConnect=0;fontFamily=Helvetica;fontSize=12;fontStyle=1;"
-    nodes.append(add_cell("act_citizen", "Người dân /\nNạn nhân", actor_style + "fillColor=#E3F2FD;strokeColor=#1976D2;", x=80, y=200, w=50, h=90))
-    nodes.append(add_cell("act_rescuer", "Đội cứu hộ\nthực địa", actor_style + "fillColor=#E8F5E9;strokeColor=#388E3C;", x=80, y=550, w=50, h=90))
-    nodes.append(add_cell("act_dispatcher", "Điều phối viên\n(Dispatcher)", actor_style + "fillColor=#FFF3E0;strokeColor=#F57C00;", x=1460, y=320, w=50, h=90))
-    nodes.append(add_cell("act_admin", "Quản trị viên\n(Administrator)", actor_style + "fillColor=#EDE7F6;strokeColor=#512DA8;", x=1460, y=700, w=50, h=90))
-    nodes.append(add_cell("act_sms_gw", "SMS Gateway /\nNhà mạng", actor_style + "fillColor=#ECEFF1;strokeColor=#455A64;", x=80, y=780, w=50, h=90))
+    nodes.append(add_cell("act_citizen", "Người dân /\nNạn nhân", actor_style + "fillColor=#E3F2FD;strokeColor=#1976D2;", x=75, y=200, w=50, h=90))
+    nodes.append(add_cell("act_rescuer", "Đội cứu hộ\nthực địa", actor_style + "fillColor=#E8F5E9;strokeColor=#388E3C;", x=75, y=460, w=50, h=90))
+    nodes.append(add_cell("act_sms_gw", "«external system»\nSMS Gateway /\nNhà mạng viễn thông", 
+                          "rounded=1;whiteSpace=wrap;html=1;fillColor=#ECEFF1;strokeColor=#546E7A;strokeWidth=1.5;fontFamily=Helvetica;fontSize=11;fontStyle=1;fontColor=#263238;align=center;", 
+                          x=30, y=730, w=140, h=65))
+    nodes.append(add_cell("act_dispatcher", "Điều phối viên\n(Dispatcher)", actor_style + "fillColor=#FFF3E0;strokeColor=#F57C00;", x=1460, y=300, w=50, h=90))
+    nodes.append(add_cell("act_admin", "Quản trị viên\n(Administrator)", actor_style + "fillColor=#EDE7F6;strokeColor=#512DA8;", x=1460, y=725, w=50, h=90))
 
-    subsys_style = "rounded=1;whiteSpace=wrap;html=1;dashed=1;verticalAlign=top;fontStyle=1;fontSize=12;spacingTop=6;"
-    nodes.append(add_cell("sub_fe", "Phân hệ Di động Biên (Edge Mobile App - Flutter)", subsys_style + "fillColor=#EBF3FA;strokeColor=#90CAF9;", parent="sys_bound", x=40, y=50, w=500, h=520))
-    nodes.append(add_cell("sub_be", "Phân hệ Lõi & Xử lý Tự động (Backend Core)", subsys_style + "fillColor=#EFEBE9;strokeColor=#BCAAA4;", parent="sys_bound", x=40, y=600, w=1040, h=280))
-    nodes.append(add_cell("sub_dash", "Phân hệ Điều phối & Quản trị Web (Dispatch Dashboard)", subsys_style + "fillColor=#FFF8E1;strokeColor=#FFE082;", parent="sys_bound", x=580, y=50, w=500, h=520))
+    # Generalization: Admin --|> Dispatcher
+    nodes.append(add_edge("edge_gen_admin", "", "endArrow=block;endFill=0;html=1;strokeColor=#512DA8;strokeWidth=1.5;edgeStyle=orthogonalEdgeStyle;rounded=0;", "act_admin", "act_dispatcher"))
 
-    uc_style = "ellipse;whiteSpace=wrap;html=1;fillColor=#FFFFFF;strokeColor=#1E88E5;fontFamily=Helvetica;fontSize=11;"
-    nodes.append(add_cell("uc_sos", "UC-01: Gửi SOS khẩn cấp\n(1 chạm, định vị nhanh)", uc_style, parent="sys_bound", x=70, y=90, w=200, h=60))
-    nodes.append(add_cell("uc_post", "UC-02: Tạo báo cáo cứu hộ\n(ảnh, số người, vị trí)", uc_style, parent="sys_bound", x=70, y=180, w=200, h=60))
-    nodes.append(add_cell("uc_ai", "UC-03: Nhận diện mức ngập on-device\n(Edge AI MobileNetV3)", uc_style + "strokeColor=#D81B60;fillColor=#FCE4EC;", parent="sys_bound", x=310, y=180, w=200, h=60))
-    nodes.append(add_cell("uc_outbox", "UC-04: Lưu trữ Outbox ngoại tuyến\n(Hive Store-and-Forward)", uc_style, parent="sys_bound", x=70, y=280, w=200, h=60))
-    nodes.append(add_cell("uc_probe", "UC-05: Đo thông lượng mạng (/probe)\n& Chọn chế độ truyền thích ứng", uc_style, parent="sys_bound", x=310, y=280, w=200, h=60))
-    nodes.append(add_cell("uc_sms", "UC-06: Gửi SMS dự phòng\nkhi mất hoàn toàn kết nối", uc_style + "strokeColor=#E53935;fillColor=#FFEBEE;", parent="sys_bound", x=70, y=380, w=200, h=60))
-    nodes.append(add_cell("uc_sync", "UC-07: Đồng bộ tự động nền\n(Workmanager / Reconnect)", uc_style, parent="sys_bound", x=310, y=380, w=200, h=60))
-    nodes.append(add_cell("uc_status", "UC-08: Tra cứu trạng thái cứu hộ\n(Polling 15s /api/reports/status)", uc_style, parent="sys_bound", x=70, y=470, w=200, h=60))
+    # 4. Use Cases - Mobile
+    uc_fe_style = "ellipse;whiteSpace=wrap;html=1;fillColor=#FFFFFF;strokeColor=#1E88E5;strokeWidth=1.3;fontFamily=Helvetica;fontSize=11;fontColor=#0D47A1;fontStyle=1;"
+    uc_ai_style = "ellipse;whiteSpace=wrap;html=1;fillColor=#FCE4EC;strokeColor=#D81B60;strokeWidth=1.3;fontFamily=Helvetica;fontSize=11;fontColor=#880E4F;fontStyle=1;"
+    uc_sms_style = "ellipse;whiteSpace=wrap;html=1;fillColor=#FFEBEE;strokeColor=#E53935;strokeWidth=1.3;fontFamily=Helvetica;fontSize=11;fontColor=#B71C1C;fontStyle=1;"
 
-    uc_dash_style = "ellipse;whiteSpace=wrap;html=1;fillColor=#FFFFFF;strokeColor=#F57C00;fontFamily=Helvetica;fontSize=11;"
-    nodes.append(add_cell("uc_login", "UC-09: Đăng nhập & Xác thực phiên\n(PBKDF2 /api/auth/login)", uc_dash_style, parent="sys_bound", x=610, y=90, w=200, h=60))
-    nodes.append(add_cell("uc_map", "UC-10: Giám sát bản đồ sự cố\n(Leaflet theo cụm / mức ưu tiên)", uc_dash_style, parent="sys_bound", x=850, y=90, w=200, h=60))
-    nodes.append(add_cell("uc_list", "UC-11: Lọc, phân trang & xem chi tiết\nbáo cáo hiện trường", uc_dash_style, parent="sys_bound", x=610, y=180, w=200, h=60))
-    nodes.append(add_cell("uc_manual", "UC-12: Nhập báo cáo tổng đài\n(/api/reports/manual)", uc_dash_style, parent="sys_bound", x=850, y=180, w=200, h=60))
-    nodes.append(add_cell("uc_team_assign", "UC-13: Giao / điều chuyển đội cứu hộ\n(/api/reports/{id}/team)", uc_dash_style, parent="sys_bound", x=610, y=280, w=200, h=60))
-    nodes.append(add_cell("uc_update_status", "UC-14: Cập nhật trạng thái nhiệm vụ\n(dispatched -> resolved / cancelled)", uc_dash_style, parent="sys_bound", x=850, y=280, w=200, h=60))
-    nodes.append(add_cell("uc_manual_loc", "UC-15: Bổ sung tọa độ thủ công\n(ca thiếu GPS / hàng xem xét)", uc_dash_style, parent="sys_bound", x=610, y=380, w=200, h=60))
-    nodes.append(add_cell("uc_export", "UC-16: Xuất dữ liệu báo cáo\n(CSV / GeoJSON / Thống kê)", uc_dash_style, parent="sys_bound", x=850, y=380, w=200, h=60))
+    nodes.append(add_cell("uc_01", "UC-01: Gửi yêu cầu SOS khẩn cấp\n(1 chạm, định vị nhanh)", uc_fe_style, parent="sys_bound", x=35, y=89, w=210, h=52))
+    nodes.append(add_cell("uc_02", "UC-02: Tạo báo cáo cứu hộ chi tiết\n(vị trí, số người, ảnh hiện trường)", uc_fe_style, parent="sys_bound", x=35, y=219, w=210, h=52))
+    nodes.append(add_cell("uc_03", "UC-03: Nhận diện mức ngập từ ảnh\n(Edge AI on-device MobileNetV3)", uc_ai_style, parent="sys_bound", x=325, y=219, w=210, h=52))
+    nodes.append(add_cell("uc_04", "UC-04: Gửi tin nhắn SMS dự phòng\n(khi mất hoàn toàn dữ liệu mạng)", uc_sms_style, parent="sys_bound", x=325, y=364, w=210, h=52))
+    nodes.append(add_cell("uc_05", "UC-05: Đồng bộ báo cáo ngoại tuyến\n(tự động gửi khi khôi phục mạng)", uc_fe_style, parent="sys_bound", x=35, y=499, w=210, h=52))
+    nodes.append(add_cell("uc_06", "UC-06: Tra cứu trạng thái cứu hộ\n(tiến trình xử lý & vị trí đội)", uc_fe_style, parent="sys_bound", x=35, y=634, w=210, h=52))
 
-    uc_adm_style = "ellipse;whiteSpace=wrap;html=1;fillColor=#FFFFFF;strokeColor=#512DA8;fontFamily=Helvetica;fontSize=11;"
-    nodes.append(add_cell("uc_manage_acc", "UC-17: Quản lý tài khoản điều phối\n(CRUD operators)", uc_adm_style, parent="sys_bound", x=610, y=470, w=200, h=60))
-    nodes.append(add_cell("uc_backup", "UC-18: Sao lưu CSDL & ảnh hiện trường\n(/api/admin/backup)", uc_adm_style, parent="sys_bound", x=850, y=470, w=200, h=60))
+    # 5. Use Cases - Dashboard
+    uc_dash_style = "ellipse;whiteSpace=wrap;html=1;fillColor=#FFFFFF;strokeColor=#F57C00;strokeWidth=1.3;fontFamily=Helvetica;fontSize=11;fontColor=#E65100;fontStyle=1;"
+    uc_algo_style = "ellipse;whiteSpace=wrap;html=1;fillColor=#F3E5F5;strokeColor=#6A1B9A;strokeWidth=1.3;fontFamily=Helvetica;fontSize=11;fontColor=#4A148C;fontStyle=1;"
+    uc_adm_style = "ellipse;whiteSpace=wrap;html=1;fillColor=#FFFFFF;strokeColor=#512DA8;strokeWidth=1.3;fontFamily=Helvetica;fontSize=11;fontColor=#311B92;fontStyle=1;"
 
-    uc_be_style = "ellipse;whiteSpace=wrap;html=1;fillColor=#FFFFFF;strokeColor=#5D4037;fontFamily=Helvetica;fontSize=11;"
-    nodes.append(add_cell("uc_ingest", "UC-19: Tiếp nhận & kiểm tra toàn vẹn\n(RFC 8785 JSON SHA-256)", uc_be_style, parent="sys_bound", x=80, y=660, w=220, h=60))
-    nodes.append(add_cell("uc_dedup", "UC-20: Chống trùng lặp & Idempotency\n(messages_dedup theo hash/seq)", uc_be_style, parent="sys_bound", x=340, y=660, w=220, h=60))
-    nodes.append(add_cell("uc_cluster", "UC-21: Xây dựng đồ thị & Phân cụm\n(Graph Louvain Community)", uc_be_style, parent="sys_bound", x=600, y=660, w=220, h=60))
-    nodes.append(add_cell("uc_rank", "UC-22: Tính điểm ưu tiên cụm P(c)\n& Quản lý Hàng xem xét", uc_be_style, parent="sys_bound", x=850, y=660, w=220, h=60))
-    nodes.append(add_cell("uc_sms_in", "UC-23: Tiếp nhận SMS Gateway\n(Token auth /api/sms/inbound)", uc_be_style, parent="sys_bound", x=200, y=770, w=220, h=60))
-    nodes.append(add_cell("uc_audit", "UC-24: Ghi nhật ký truy vết sự kiện\n(report_events audit log)", uc_be_style, parent="sys_bound", x=700, y=770, w=220, h=60))
+    nodes.append(add_cell("uc_07", "UC-07: Đăng nhập & Xác thực phiên\n(phân quyền Dispatcher / Admin)", uc_dash_style, parent="sys_bound", x=893, y=95, w=224, h=50))
+    nodes.append(add_cell("uc_08", "UC-08: Giám sát bản đồ sự cố\n& thứ tự ưu tiên cứu hộ", uc_dash_style, parent="sys_bound", x=893, y=225, w=224, h=50))
+    nodes.append(add_cell("uc_13", "UC-13: Phân công & điều động\nđội cứu hộ thực địa", uc_dash_style, parent="sys_bound", x=893, y=355, w=224, h=50))
+    nodes.append(add_cell("uc_14", "UC-14: Cập nhật tiến độ nhiệm vụ\n(dispatched -> resolved / close)", uc_dash_style, parent="sys_bound", x=893, y=485, w=224, h=50))
+    nodes.append(add_cell("uc_16", "UC-16: Xuất dữ liệu báo cáo\n(CSV / GeoJSON / Thống kê)", uc_dash_style, parent="sys_bound", x=893, y=615, w=224, h=50))
+    nodes.append(add_cell("uc_18", "UC-18: Sao lưu & phục hồi CSDL\n(CSDL và ảnh hiện trường)", uc_adm_style, parent="sys_bound", x=893, y=765, w=224, h=50))
 
-    edge_style = "endArrow=none;html=1;strokeColor=#546E7A;strokeWidth=1.2;"
-    inc_style = "endArrow=open;dashed=1;html=1;strokeColor=#D81B60;strokeWidth=1.2;fontSize=10;fontColor=#D81B60;"
-    ext_style = "endArrow=open;dashed=1;html=1;strokeColor=#E53935;strokeWidth=1.2;fontSize=10;fontColor=#E53935;"
+    nodes.append(add_cell("uc_10", "UC-10: Quản lý & tra cứu danh sách\nbáo cáo hiện trường", uc_dash_style, parent="sys_bound", x=582, y=160, w=216, h=50))
+    nodes.append(add_cell("uc_09", "UC-09: Tự động gom cụm & xếp hạng\nưu tiên cứu hộ (Louvain & P(c))", uc_algo_style, parent="sys_bound", x=580, y=225, w=220, h=50))
+    nodes.append(add_cell("uc_11", "UC-11: Tiếp nhận báo cáo tổng đài\n(nhập cứu hộ thủ công)", uc_dash_style, parent="sys_bound", x=582, y=290, w=216, h=50))
+    nodes.append(add_cell("uc_12", "UC-12: Tiếp nhận báo cáo qua SMS\n(đồng bộ tự động từ Gateway)", uc_dash_style, parent="sys_bound", x=582, y=420, w=216, h=50))
+    nodes.append(add_cell("uc_15", "UC-15: Bổ sung tọa độ thủ công\n(ca thiếu GPS / hàng xem xét)", uc_dash_style, parent="sys_bound", x=582, y=550, w=216, h=50))
+    nodes.append(add_cell("uc_17", "UC-17: Quản lý tài khoản điều phối\n(CRUD danh mục cán bộ)", uc_adm_style, parent="sys_bound", x=582, y=690, w=216, h=50))
 
-    nodes.append(add_edge("e_c_1", "", edge_style, "act_citizen", "uc_sos"))
-    nodes.append(add_edge("e_c_2", "", edge_style, "act_citizen", "uc_post"))
-    nodes.append(add_edge("e_c_3", "", edge_style, "act_citizen", "uc_status"))
-    nodes.append(add_edge("e_r_1", "", edge_style, "act_rescuer", "uc_post"))
-    nodes.append(add_edge("e_r_2", "", edge_style, "act_rescuer", "uc_status"))
-    nodes.append(add_edge("e_sms_1", "", edge_style, "act_sms_gw", "uc_sms_in"))
+    # 6. Edges
+    edge_style = "endArrow=none;html=1;strokeColor=#455A64;strokeWidth=1.2;"
+    inc_style = "endArrow=open;dashed=1;html=1;strokeColor=#D81B60;strokeWidth=1.3;fontSize=10;fontColor=#D81B60;fontStyle=1;"
+    ext_style = "endArrow=open;dashed=1;html=1;strokeColor=#E53935;strokeWidth=1.3;fontSize=10;fontColor=#E53935;fontStyle=1;"
 
-    nodes.append(add_edge("e_d_1", "", edge_style, "act_dispatcher", "uc_login"))
-    nodes.append(add_edge("e_d_2", "", edge_style, "act_dispatcher", "uc_map"))
-    nodes.append(add_edge("e_d_3", "", edge_style, "act_dispatcher", "uc_list"))
-    nodes.append(add_edge("e_d_4", "", edge_style, "act_dispatcher", "uc_manual"))
-    nodes.append(add_edge("e_d_5", "", edge_style, "act_dispatcher", "uc_team_assign"))
-    nodes.append(add_edge("e_d_6", "", edge_style, "act_dispatcher", "uc_update_status"))
-    nodes.append(add_edge("e_d_7", "", edge_style, "act_dispatcher", "uc_manual_loc"))
-    nodes.append(add_edge("e_d_8", "", edge_style, "act_dispatcher", "uc_export"))
+    # Citizen
+    for ucid in ["uc_01", "uc_02", "uc_05", "uc_06"]:
+        nodes.append(add_edge(f"e_c_{ucid}", "", edge_style + "strokeColor=#1976D2;", "act_citizen", ucid))
 
-    nodes.append(add_edge("e_a_1", "", edge_style, "act_admin", "uc_manage_acc"))
-    nodes.append(add_edge("e_a_2", "", edge_style, "act_admin", "uc_backup"))
+    # Rescuer
+    for ucid in ["uc_01", "uc_02", "uc_05", "uc_06"]:
+        nodes.append(add_edge(f"e_r_{ucid}", "", edge_style + "strokeColor=#388E3C;", "act_rescuer", ucid))
 
-    nodes.append(add_edge("e_inc_1", "«include»", inc_style, "uc_post", "uc_ai"))
-    nodes.append(add_edge("e_inc_2", "«include»", inc_style, "uc_post", "uc_outbox"))
-    nodes.append(add_edge("e_inc_3", "«include»", inc_style, "uc_outbox", "uc_probe"))
-    nodes.append(add_edge("e_ext_1", "«extend»\n(mất mạng)", ext_style, "uc_sms", "uc_probe"))
-    nodes.append(add_edge("e_inc_4", "«include»", inc_style, "uc_ingest", "uc_dedup"))
-    nodes.append(add_edge("e_inc_5", "«include»", inc_style, "uc_cluster", "uc_rank"))
-    nodes.append(add_edge("e_inc_6", "«include»", inc_style, "uc_update_status", "uc_audit"))
+    # Includes & Extends
+    nodes.append(add_edge("e_inc_ai", "«include»", inc_style, "uc_02", "uc_03"))
+    nodes.append(add_edge("e_ext_sms", "«extend»\n(mất mạng)", ext_style, "uc_04", "uc_02", points=[(505, 360)]))
+    nodes.append(add_edge("e_inc_cluster", "«include»", inc_style, "uc_08", "uc_09"))
 
-    return create_diagram_xml("So-do-Use-Case-Tong-The", nodes)
+    # SMS Gateway
+    nodes.append(add_edge("e_sms_out", "", edge_style + "strokeColor=#E53935;", "act_sms_gw", "uc_04", points=[(180, 410)]))
+    nodes.append(add_edge("e_sms_in", "", edge_style + "strokeColor=#546E7A;dashed=1;", "act_sms_gw", "uc_12", points=[(100, 890), (910, 890)]))
+
+    # Dispatcher (Corridor Routing)
+    for ucid in ["uc_07", "uc_08", "uc_13", "uc_14", "uc_16"]:
+        nodes.append(add_edge(f"e_d_{ucid}", "", edge_style + "strokeColor=#F57C00;", "act_dispatcher", ucid))
+    for ucid in ["uc_10", "uc_11", "uc_15"]:
+        cy = 225 if ucid == "uc_10" else (355 if ucid == "uc_11" else 615)
+        pts = [(1390, cy), (1040, cy)]
+        nodes.append(add_edge(f"e_d_{ucid}", "", edge_style + "strokeColor=#F57C00;", "act_dispatcher", ucid, points=pts))
+
+    # Admin
+    nodes.append(add_edge("e_a_17", "", edge_style + "strokeColor=#512DA8;", "act_admin", "uc_17", points=[(1390, 755), (1040, 755)]))
+    nodes.append(add_edge("e_a_18", "", edge_style + "strokeColor=#512DA8;", "act_admin", "uc_18"))
+
+    return create_diagram_xml("So-do-Use-Case-Tong-The", nodes, w="1600", h="950")
 
 
 # =========================================================================
@@ -184,52 +203,83 @@ def generate_usecase():
 def generate_usecase_mobile():
     nodes = []
     nodes.append(add_cell("sys_bound", "PHÂN HỆ DI ĐỘNG BIÊN (EDGE MOBILE APP - FLUTTER)",
-                          "shape=swimlane;whiteSpace=wrap;html=1;startSize=30;horizontal=1;fillColor=#F8F9FA;strokeColor=#1976D2;fontStyle=1;fontSize=14;fontFamily=Helvetica;",
-                          x=260, y=40, w=880, h=780))
+                          "shape=swimlane;whiteSpace=wrap;html=1;startSize=32;horizontal=1;fillColor=#F8F9FA;strokeColor=#1976D2;strokeWidth=1.5;fontStyle=1;fontSize=14;fontFamily=Helvetica;fontColor=#0D47A1;",
+                          x=220, y=40, w=850, h=710))
 
     actor_style = "shape=umlActor;verticalLabelPosition=bottom;verticalAlign=top;html=1;outlineConnect=0;fontFamily=Helvetica;fontSize=12;fontStyle=1;"
-    nodes.append(add_cell("act_citizen", "Người dân /\nNạn nhân", actor_style + "fillColor=#E3F2FD;strokeColor=#1976D2;", x=80, y=220, w=50, h=90))
-    nodes.append(add_cell("act_rescuer", "Đội cứu hộ\nthực địa", actor_style + "fillColor=#E8F5E9;strokeColor=#388E3C;", x=80, y=520, w=50, h=90))
-    nodes.append(add_cell("act_sms_gw", "SMS Gateway /\nNhà mạng", actor_style + "fillColor=#ECEFF1;strokeColor=#455A64;", x=1220, y=450, w=50, h=90))
+    nodes.append(add_cell("act_citizen", "Người dân /\nNạn nhân", actor_style + "fillColor=#E3F2FD;strokeColor=#1976D2;", x=65, y=200, w=50, h=90))
+    nodes.append(add_cell("act_rescuer", "Đội cứu hộ\nthực địa", actor_style + "fillColor=#E8F5E9;strokeColor=#2E7D32;", x=65, y=555, w=50, h=90))
+    nodes.append(add_cell("act_sms_gw", "«external system»\nSMS Gateway /\nNhà mạng viễn thông",
+                          "rounded=1;whiteSpace=wrap;html=1;fillColor=#ECEFF1;strokeColor=#546E7A;strokeWidth=1.5;fontFamily=Helvetica;fontSize=11;fontColor=#263238;align=center;",
+                          x=1115, y=353, w=145, h=65))
 
-    uc_style = "ellipse;whiteSpace=wrap;html=1;fillColor=#FFFFFF;strokeColor=#1E88E5;fontFamily=Helvetica;fontSize=11;"
-    nodes.append(add_cell("uc_m01", "UC-M01: Gửi SOS khẩn cấp\n(1 chạm, định vị nhanh)", uc_style, parent="sys_bound", x=60, y=60, w=210, h=60))
-    nodes.append(add_cell("uc_m02", "UC-M02: Tạo báo cáo cứu nạn\n(số người kẹt, bị thương, yếu thế)", uc_style, parent="sys_bound", x=60, y=150, w=210, h=60))
-    nodes.append(add_cell("uc_m03", "UC-M03: Chụp ảnh hiện trường\nngập lụt từ camera/thư viện", uc_style, parent="sys_bound", x=330, y=100, w=210, h=60))
-    nodes.append(add_cell("uc_m04", "UC-M04: Phân loại mức ngập On-device\n(MobileNetV3 ONNX/ExecuTorch)", uc_style + "strokeColor=#D81B60;fillColor=#FCE4EC;", parent="sys_bound", x=600, y=100, w=240, h=60))
-    nodes.append(add_cell("uc_m05", "UC-M05: Tự động tính độ khẩn cấp\n(Urgency Score)", uc_style, parent="sys_bound", x=330, y=190, w=210, h=60))
-    nodes.append(add_cell("uc_m06", "UC-M06: Lưu trữ ngoại tuyến Outbox\n(Hive Box Store-and-Forward)", uc_style, parent="sys_bound", x=60, y=260, w=210, h=60))
-    nodes.append(add_cell("uc_m07", "UC-M07: Đo thông lượng mạng (/probe)\n& Chọn chế độ truyền thích ứng", uc_style, parent="sys_bound", x=330, y=280, w=220, h=60))
-    nodes.append(add_cell("uc_m08", "UC-M08: Nén ảnh thông minh\n(JPEG max 1024px, quality 60)", uc_style, parent="sys_bound", x=600, y=280, w=220, h=60))
-    nodes.append(add_cell("uc_m09", "UC-M09: Gửi SMS dự phòng\nkhi mất hoàn toàn dữ liệu mạng", uc_style + "strokeColor=#E53935;fillColor=#FFEBEE;", parent="sys_bound", x=600, y=390, w=220, h=60))
-    nodes.append(add_cell("uc_m10", "UC-M10: Đồng bộ tự động nền\n(WorkManager khi có mạng)", uc_style, parent="sys_bound", x=60, y=370, w=210, h=60))
-    nodes.append(add_cell("uc_m11", "UC-M11: Theo dõi tiến trình cứu hộ\n(Polling 15s trạng thái)", uc_style, parent="sys_bound", x=60, y=470, w=210, h=60))
-    nodes.append(add_cell("uc_m12", "UC-M12: Xem lịch sử yêu cầu\n& chi tiết phản hồi cứu hộ", uc_style, parent="sys_bound", x=60, y=570, w=210, h=60))
+    uc_c1_x = 90
+    uc_c2_x = 490
 
-    edge_style = "endArrow=none;html=1;strokeColor=#546E7A;strokeWidth=1.2;"
-    inc_style = "endArrow=open;dashed=1;html=1;strokeColor=#D81B60;strokeWidth=1.2;fontSize=10;fontColor=#D81B60;"
-    ext_style = "endArrow=open;dashed=1;html=1;strokeColor=#E53935;strokeWidth=1.2;fontSize=10;fontColor=#E53935;"
+    # Cột 1: Người dân
+    nodes.append(add_cell("uc_01", "UC-01: Gửi yêu cầu SOS khẩn cấp\n(1 chạm, tọa độ GPS & mã thiết bị)",
+                          "ellipse;whiteSpace=wrap;html=1;fillColor=#FFFFFF;strokeColor=#1E88E5;strokeWidth=1.3;fontFamily=Helvetica;fontSize=11;fontColor=#0D47A1;",
+                          parent="sys_bound", x=uc_c1_x, y=58, w=240, h=50))
+    nodes.append(add_cell("uc_02", "UC-02: Tạo báo cáo cứu hộ chi tiết\n(số người kẹt, bị thương, nhóm yếu thế)",
+                          "ellipse;whiteSpace=wrap;html=1;fillColor=#FFFFFF;strokeColor=#1E88E5;strokeWidth=1.3;fontFamily=Helvetica;fontSize=11;fontColor=#0D47A1;",
+                          parent="sys_bound", x=uc_c1_x, y=144, w=240, h=50))
+    nodes.append(add_cell("uc_06", "UC-06: Tra cứu trạng thái cứu hộ\n(tiến trình xử lý & phản hồi thực địa)",
+                          "ellipse;whiteSpace=wrap;html=1;fillColor=#FFFFFF;strokeColor=#1E88E5;strokeWidth=1.3;fontFamily=Helvetica;fontSize=11;fontColor=#0D47A1;",
+                          parent="sys_bound", x=uc_c1_x, y=230, w=240, h=50))
+    nodes.append(add_cell("uc_09m", "UC-09M: Tra cứu cẩm nang & điểm trú\n(bản đồ vùng an toàn & kỹ năng sinh tồn)",
+                          "ellipse;whiteSpace=wrap;html=1;fillColor=#FFFFFF;strokeColor=#1E88E5;strokeWidth=1.3;fontFamily=Helvetica;fontSize=11;fontColor=#0D47A1;",
+                          parent="sys_bound", x=uc_c1_x, y=316, w=240, h=50))
 
-    nodes.append(add_edge("e_mc_1", "", edge_style, "act_citizen", "uc_m01"))
-    nodes.append(add_edge("e_mc_2", "", edge_style, "act_citizen", "uc_m02"))
-    nodes.append(add_edge("e_mc_3", "", edge_style, "act_citizen", "uc_m11"))
-    nodes.append(add_edge("e_mc_4", "", edge_style, "act_citizen", "uc_m12"))
-    nodes.append(add_edge("e_mr_1", "", edge_style, "act_rescuer", "uc_m02"))
-    nodes.append(add_edge("e_mr_2", "", edge_style, "act_rescuer", "uc_m11"))
-    nodes.append(add_edge("e_mr_3", "", edge_style, "act_rescuer", "uc_m12"))
-    nodes.append(add_edge("e_msms", "", edge_style, "uc_m09", "act_sms_gw"))
+    # Cột 1: Dùng chung (Offline Sync)
+    nodes.append(add_cell("uc_05", "UC-05: Đồng bộ dữ liệu ngoại tuyến\n(tự động gửi lại từ Outbox khi có mạng)",
+                          "ellipse;whiteSpace=wrap;html=1;fillColor=#EDE7F6;strokeColor=#5E35B1;strokeWidth=1.3;fontFamily=Helvetica;fontSize=11;fontColor=#311B92;",
+                          parent="sys_bound", x=uc_c1_x, y=402, w=240, h=50))
 
-    nodes.append(add_edge("e_minc_1", "«include»", inc_style, "uc_m02", "uc_m03"))
-    nodes.append(add_edge("e_minc_2", "«include»", inc_style, "uc_m03", "uc_m04"))
-    nodes.append(add_edge("e_minc_3", "«include»", inc_style, "uc_m02", "uc_m05"))
-    nodes.append(add_edge("e_minc_4", "«include»", inc_style, "uc_m02", "uc_m06"))
-    nodes.append(add_edge("e_minc_5", "«include»", inc_style, "uc_m01", "uc_m06"))
-    nodes.append(add_edge("e_minc_6", "«include»", inc_style, "uc_m06", "uc_m07"))
-    nodes.append(add_edge("e_mext_1", "«extend»\n(50-1000 kbps)", ext_style, "uc_m08", "uc_m07"))
-    nodes.append(add_edge("e_mext_2", "«extend»\n(mất mạng)", ext_style, "uc_m09", "uc_m07"))
-    nodes.append(add_edge("e_minc_7", "«include»", inc_style, "uc_m06", "uc_m10"))
+    # Cột 1: Đội cứu hộ
+    nodes.append(add_cell("uc_07m", "UC-07M: Tiếp nhận nhiệm vụ cứu nạn\n(danh sách ca cứu trợ, lộ trình & bản đồ)",
+                          "ellipse;whiteSpace=wrap;html=1;fillColor=#E8F5E9;strokeColor=#2E7D32;strokeWidth=1.3;fontFamily=Helvetica;fontSize=11;fontColor=#1B5E20;",
+                          parent="sys_bound", x=uc_c1_x, y=488, w=240, h=50))
+    nodes.append(add_cell("uc_08m", "UC-08M: Cập nhật tiến độ hiện trường\n(đang tiếp cận, đã giải cứu nạn nhân)",
+                          "ellipse;whiteSpace=wrap;html=1;fillColor=#E8F5E9;strokeColor=#2E7D32;strokeWidth=1.3;fontFamily=Helvetica;fontSize=11;fontColor=#1B5E20;",
+                          parent="sys_bound", x=uc_c1_x, y=574, w=240, h=50))
+    nodes.append(add_cell("uc_11m", "UC-11M: Báo cáo kết quả & xin chi viện\n(đánh giá hiện trạng & yêu cầu thêm nhân lực)",
+                          "ellipse;whiteSpace=wrap;html=1;fillColor=#E8F5E9;strokeColor=#2E7D32;strokeWidth=1.3;fontFamily=Helvetica;fontSize=11;fontColor=#1B5E20;",
+                          parent="sys_bound", x=uc_c1_x, y=660, w=240, h=50))
 
-    return create_diagram_xml("So-do-Use-Case-Chi-tiet-Mobile-App", nodes, w="1400", h="900")
+    # Cột 2: AI, Adaptivity, SMS
+    nodes.append(add_cell("uc_03", "UC-03: Nhận diện mức ngập từ ảnh\n(Edge AI on-device MobileNetV3)",
+                          "ellipse;whiteSpace=wrap;html=1;fillColor=#FCE4EC;strokeColor=#D81B60;strokeWidth=1.3;fontFamily=Helvetica;fontSize=11;fontColor=#880E4F;",
+                          parent="sys_bound", x=uc_c2_x, y=110, w=244, h=50))
+    nodes.append(add_cell("uc_10m", "UC-10M: Truyền dữ liệu thích ứng\n(ảnh gốc / nén JPEG / metadata theo mạng)",
+                          "ellipse;whiteSpace=wrap;html=1;fillColor=#E1F5FE;strokeColor=#0288D1;strokeWidth=1.3;fontFamily=Helvetica;fontSize=11;fontColor=#01579B;",
+                          parent="sys_bound", x=uc_c2_x, y=205, w=244, h=50))
+    nodes.append(add_cell("uc_04", "UC-04: Gửi tin nhắn SMS dự phòng\n(khi mất hoàn toàn dữ liệu Internet)",
+                          "ellipse;whiteSpace=wrap;html=1;fillColor=#FFEBEE;strokeColor=#E53935;strokeWidth=1.3;fontFamily=Helvetica;fontSize=11;fontColor=#B71C1C;",
+                          parent="sys_bound", x=uc_c2_x, y=345, w=244, h=52))
+
+    # Association Edges
+    assoc_blue = "endArrow=none;html=1;strokeColor=#1976D2;strokeWidth=1.2;"
+    assoc_green = "endArrow=none;html=1;strokeColor=#2E7D32;strokeWidth=1.2;"
+    assoc_red = "endArrow=none;html=1;strokeColor=#E53935;strokeWidth=1.2;"
+
+    for ucid in ["uc_01", "uc_02", "uc_06", "uc_09m", "uc_05"]:
+        nodes.append(add_edge(f"e_cit_{ucid}", "", assoc_blue, "act_citizen", ucid))
+
+    for ucid in ["uc_05", "uc_07m", "uc_08m", "uc_11m"]:
+        nodes.append(add_edge(f"e_res_{ucid}", "", assoc_green, "act_rescuer", ucid))
+
+    nodes.append(add_edge("e_sms_gw_uc04", "", assoc_red, "uc_04", "act_sms_gw"))
+
+    # UML include and extend
+    inc_style_pink = "endArrow=open;dashed=1;html=1;strokeColor=#D81B60;strokeWidth=1.3;fontSize=10;fontColor=#D81B60;"
+    inc_style_blue = "endArrow=open;dashed=1;html=1;strokeColor=#0288D1;strokeWidth=1.3;fontSize=10;fontColor=#0288D1;"
+    ext_style = "endArrow=open;dashed=1;html=1;strokeColor=#E53935;strokeWidth=1.3;fontSize=10;fontColor=#E53935;"
+
+    nodes.append(add_edge("e_inc_ai", "«include»", inc_style_pink, "uc_02", "uc_03"))
+    nodes.append(add_edge("e_inc_adapt", "«include»", inc_style_blue, "uc_02", "uc_10m"))
+    nodes.append(add_edge("e_ext_sms", "«extend»\n(khi mất mạng)", ext_style, "uc_04", "uc_02"))
+
+    return create_diagram_xml("So-do-Use-Case-Chi-tiet-Mobile-App", nodes, w="1320", h="790")
 
 
 # =========================================================================
@@ -238,44 +288,84 @@ def generate_usecase_mobile():
 def generate_usecase_dashboard():
     nodes = []
     nodes.append(add_cell("sys_bound", "PHÂN HỆ ĐIỀU PHỐI & QUẢN TRỊ WEB (DISPATCH DASHBOARD)",
-                          "shape=swimlane;whiteSpace=wrap;html=1;startSize=30;horizontal=1;fillColor=#FFFDE7;strokeColor=#F57C00;fontStyle=1;fontSize=14;fontFamily=Helvetica;",
-                          x=260, y=40, w=880, h=820))
+                          "shape=swimlane;whiteSpace=wrap;html=1;startSize=32;horizontal=1;fillColor=#FFFDE7;strokeColor=#F57C00;strokeWidth=1.5;fontStyle=1;fontSize=14;fontFamily=Helvetica;fontColor=#E65100;",
+                          x=220, y=40, w=870, h=680))
 
     actor_style = "shape=umlActor;verticalLabelPosition=bottom;verticalAlign=top;html=1;outlineConnect=0;fontFamily=Helvetica;fontSize=12;fontStyle=1;"
-    nodes.append(add_cell("act_dispatcher", "Điều phối viên\n(Dispatcher)", actor_style + "fillColor=#FFF3E0;strokeColor=#F57C00;", x=80, y=300, w=50, h=90))
-    nodes.append(add_cell("act_admin", "Quản trị viên\n(Administrator)", actor_style + "fillColor=#EDE7F6;strokeColor=#512DA8;", x=1220, y=400, w=50, h=90))
+    nodes.append(add_cell("act_dispatcher", "Điều phối viên\n(Dispatcher)", actor_style + "fillColor=#FFF3E0;strokeColor=#F57C00;", x=65, y=270, w=50, h=90))
+    nodes.append(add_cell("act_admin", "Quản trị viên\n(Administrator)", actor_style + "fillColor=#EDE7F6;strokeColor=#512DA8;", x=1150, y=510, w=50, h=90))
+    nodes.append(add_cell("act_sms_gw", "«external system»\nSMS Gateway /\nNhà mạng viễn thông",
+                          "rounded=1;whiteSpace=wrap;html=1;fillColor=#ECEFF1;strokeColor=#546E7A;strokeWidth=1.5;fontFamily=Helvetica;fontSize=11;fontColor=#263238;align=center;",
+                          x=1115, y=333, w=145, h=65))
 
-    uc_style = "ellipse;whiteSpace=wrap;html=1;fillColor=#FFFFFF;strokeColor=#F57C00;fontFamily=Helvetica;fontSize=11;"
-    nodes.append(add_cell("uc_d01", "UC-D01: Đăng nhập & Quản lý phiên\n(PBKDF2 session token)", uc_style, parent="sys_bound", x=60, y=60, w=220, h=60))
-    nodes.append(add_cell("uc_d02", "UC-D02: Giám sát bản đồ sự cố không gian\n(Leaflet GIS hiển thị điểm & cụm)", uc_style, parent="sys_bound", x=60, y=140, w=230, h=60))
-    nodes.append(add_cell("uc_d03", "UC-D03: Xem danh sách cụm cứu hộ\ntheo thứ bậc ưu tiên P(c)", uc_style, parent="sys_bound", x=60, y=220, w=220, h=60))
-    nodes.append(add_cell("uc_d04", "UC-D04: Xem chi tiết báo cáo hiện trường\n(ảnh, nhãn AI, số nạn nhân, mô tả)", uc_style, parent="sys_bound", x=60, y=300, w=220, h=60))
-    nodes.append(add_cell("uc_d05", "UC-D05: Quản lý hàng xem xét\n(Review Queue ca thiếu tọa độ)", uc_style + "fillColor=#FFF8E1;", parent="sys_bound", x=60, y=380, w=220, h=60))
-    nodes.append(add_cell("uc_d06", "UC-D06: Bổ sung tọa độ thủ công\n(Chấm bản đồ hoặc nhập tọa độ)", uc_style, parent="sys_bound", x=340, y=380, w=220, h=60))
-    nodes.append(add_cell("uc_d07", "UC-D07: Nhập báo cáo tổng đài/hotline\n(/api/reports/manual)", uc_style, parent="sys_bound", x=60, y=460, w=220, h=60))
-    nodes.append(add_cell("uc_d08", "UC-D08: Giao / điều chuyển đội cứu hộ\n(/api/reports/{id}/team)", uc_style, parent="sys_bound", x=60, y=540, w=220, h=60))
-    nodes.append(add_cell("uc_d09", "UC-D09: Cập nhật trạng thái nhiệm vụ\n(dispatched -> resolved / cancelled)", uc_style, parent="sys_bound", x=60, y=620, w=220, h=60))
-    nodes.append(add_cell("uc_d10", "UC-D10: Xuất dữ liệu báo cáo cứu hộ\n(CSV, GeoJSON, thống kê)", uc_style, parent="sys_bound", x=60, y=700, w=220, h=60))
+    uc_c1_x = 90
+    uc_c2_x = 490
 
-    uc_adm_style = "ellipse;whiteSpace=wrap;html=1;fillColor=#FFFFFF;strokeColor=#512DA8;fontFamily=Helvetica;fontSize=11;"
-    nodes.append(add_cell("uc_d11", "UC-D11: Quản lý tài khoản điều phối\n(CRUD operators & phân quyền)", uc_adm_style, parent="sys_bound", x=600, y=300, w=230, h=60))
-    nodes.append(add_cell("uc_d12", "UC-D12: Sao lưu & phục hồi CSDL/ảnh\n(/api/admin/backup)", uc_adm_style, parent="sys_bound", x=600, y=400, w=230, h=60))
-    nodes.append(add_cell("uc_d13", "UC-D13: Tra cứu nhật ký kiểm toán\n(Audit Log report_events)", uc_adm_style, parent="sys_bound", x=600, y=500, w=230, h=60))
+    # Cột 1: Nghiệp vụ điều phối chính
+    nodes.append(add_cell("uc_07", "UC-07: Đăng nhập & Xác thực phiên\n(phân quyền Dispatcher / Admin)",
+                          "ellipse;whiteSpace=wrap;html=1;fillColor=#FFFFFF;strokeColor=#F57C00;strokeWidth=1.3;fontFamily=Helvetica;fontSize=11;fontColor=#E65100;",
+                          parent="sys_bound", x=uc_c1_x, y=55, w=240, h=50))
+    nodes.append(add_cell("uc_08", "UC-08: Giám sát bản đồ sự cố\n(& thứ tự ưu tiên cứu hộ)",
+                          "ellipse;whiteSpace=wrap;html=1;fillColor=#FFFFFF;strokeColor=#F57C00;strokeWidth=1.3;fontFamily=Helvetica;fontSize=11;fontColor=#E65100;",
+                          parent="sys_bound", x=uc_c1_x, y=145, w=240, h=50))
+    nodes.append(add_cell("uc_10", "UC-10: Quản lý danh sách báo cáo\n(xác minh tin báo & lọc dữ liệu)",
+                          "ellipse;whiteSpace=wrap;html=1;fillColor=#FFFFFF;strokeColor=#F57C00;strokeWidth=1.3;fontFamily=Helvetica;fontSize=11;fontColor=#E65100;",
+                          parent="sys_bound", x=uc_c1_x, y=235, w=240, h=50))
+    nodes.append(add_cell("uc_11", "UC-11: Tiếp nhận báo cáo tổng đài\n(nhập thủ công tin báo hotline)",
+                          "ellipse;whiteSpace=wrap;html=1;fillColor=#FFFFFF;strokeColor=#F57C00;strokeWidth=1.3;fontFamily=Helvetica;fontSize=11;fontColor=#E65100;",
+                          parent="sys_bound", x=uc_c1_x, y=325, w=240, h=50))
+    nodes.append(add_cell("uc_13", "UC-13: Phân công & điều động cứu hộ\n(giao nhiệm vụ cho đội cơ động)",
+                          "ellipse;whiteSpace=wrap;html=1;fillColor=#FFFFFF;strokeColor=#F57C00;strokeWidth=1.3;fontFamily=Helvetica;fontSize=11;fontColor=#E65100;",
+                          parent="sys_bound", x=uc_c1_x, y=415, w=240, h=50))
+    nodes.append(add_cell("uc_14", "UC-14: Cập nhật tiến độ nhiệm vụ\n(tiến trình cứu nạn tại hiện trường)",
+                          "ellipse;whiteSpace=wrap;html=1;fillColor=#FFFFFF;strokeColor=#F57C00;strokeWidth=1.3;fontFamily=Helvetica;fontSize=11;fontColor=#E65100;",
+                          parent="sys_bound", x=uc_c1_x, y=505, w=240, h=50))
+    nodes.append(add_cell("uc_16", "UC-16: Xuất dữ liệu báo cáo cứu hộ\n(kết xuất CSV, GeoJSON, thống kê)",
+                          "ellipse;whiteSpace=wrap;html=1;fillColor=#FFFFFF;strokeColor=#F57C00;strokeWidth=1.3;fontFamily=Helvetica;fontSize=11;fontColor=#E65100;",
+                          parent="sys_bound", x=uc_c1_x, y=595, w=240, h=50))
 
-    edge_style = "endArrow=none;html=1;strokeColor=#546E7A;strokeWidth=1.2;"
-    inc_style = "endArrow=open;dashed=1;html=1;strokeColor=#D81B60;strokeWidth=1.2;fontSize=10;fontColor=#D81B60;"
-    ext_style = "endArrow=open;dashed=1;html=1;strokeColor=#E53935;strokeWidth=1.2;fontSize=10;fontColor=#E53935;"
+    # Cột 2: Thuật toán & Quản trị
+    nodes.append(add_cell("uc_09", "UC-09: Tự động gom cụm & xếp hạng\n(thuật toán Louvain & P(c))",
+                          "ellipse;whiteSpace=wrap;html=1;fillColor=#F3E5F5;strokeColor=#6A1B9A;strokeWidth=1.3;fontFamily=Helvetica;fontSize=11;fontColor=#4A148C;",
+                          parent="sys_bound", x=uc_c2_x, y=145, w=244, h=50))
+    nodes.append(add_cell("uc_15", "UC-15: Bổ sung tọa độ thủ công\n(chấm bản đồ hoặc nhập tọa độ)",
+                          "ellipse;whiteSpace=wrap;html=1;fillColor=#FFF8E1;strokeColor=#F57C00;strokeWidth=1.3;fontFamily=Helvetica;fontSize=11;fontColor=#E65100;",
+                          parent="sys_bound", x=uc_c2_x, y=235, w=244, h=50))
+    nodes.append(add_cell("uc_12", "UC-12: Tiếp nhận báo cáo qua SMS\n(Webhook từ SMS Gateway)",
+                          "ellipse;whiteSpace=wrap;html=1;fillColor=#FFFFFF;strokeColor=#F57C00;strokeWidth=1.3;fontFamily=Helvetica;fontSize=11;fontColor=#E65100;",
+                          parent="sys_bound", x=uc_c2_x, y=325, w=244, h=50))
+    nodes.append(add_cell("uc_17", "UC-17: Quản trị tài khoản điều phối\n(CRUD operators & phân quyền)",
+                          "ellipse;whiteSpace=wrap;html=1;fillColor=#EDE7F6;strokeColor=#512DA8;strokeWidth=1.3;fontFamily=Helvetica;fontSize=11;fontColor=#311B92;",
+                          parent="sys_bound", x=uc_c2_x, y=505, w=244, h=50))
+    nodes.append(add_cell("uc_18", "UC-18: Sao lưu, phục hồi & kiểm toán\n(CSDL & nhật ký hệ thống Audit Logs)",
+                          "ellipse;whiteSpace=wrap;html=1;fillColor=#EDE7F6;strokeColor=#512DA8;strokeWidth=1.3;fontFamily=Helvetica;fontSize=11;fontColor=#311B92;",
+                          parent="sys_bound", x=uc_c2_x, y=595, w=244, h=50))
 
-    for u in ["uc_d01", "uc_d02", "uc_d03", "uc_d04", "uc_d05", "uc_d07", "uc_d08", "uc_d09", "uc_d10"]:
-        nodes.append(add_edge(f"e_disp_{u}", "", edge_style, "act_dispatcher", u))
+    # Association Edges
+    assoc_orange = "endArrow=none;html=1;strokeColor=#F57C00;strokeWidth=1.2;"
+    assoc_purple = "endArrow=none;html=1;strokeColor=#512DA8;strokeWidth=1.2;"
+    assoc_gray = "endArrow=none;html=1;strokeColor=#546E7A;strokeWidth=1.2;"
 
-    for u in ["uc_d01", "uc_d11", "uc_d12", "uc_d13"]:
-        nodes.append(add_edge(f"e_adm_{u}", "", edge_style, "act_admin", u))
+    for ucid in ["uc_07", "uc_08", "uc_10", "uc_11", "uc_13", "uc_14", "uc_16"]:
+        nodes.append(add_edge(f"e_disp_{ucid}", "", assoc_orange, "act_dispatcher", ucid))
 
-    nodes.append(add_edge("e_dext_1", "«extend»\n(bổ sung GPS)", ext_style, "uc_d06", "uc_d05"))
-    nodes.append(add_edge("e_dinc_1", "«include»", inc_style, "uc_d09", "uc_d13"))
+    for ucid in ["uc_17", "uc_18"]:
+        nodes.append(add_edge(f"e_adm_{ucid}", "", assoc_purple, "act_admin", ucid))
 
-    return create_diagram_xml("So-do-Use-Case-Chi-tiet-Dashboard", nodes, w="1400", h="950")
+    nodes.append(add_edge("e_sms_gw_uc12", "", assoc_gray, "uc_12", "act_sms_gw"))
+
+    # Generalization: Administrator -> Dispatcher
+    gen_style = "endArrow=block;endFill=0;html=1;strokeColor=#512DA8;strokeWidth=1.6;edgeStyle=orthogonalEdgeStyle;rounded=0;fontSize=10;fontColor=#512DA8;"
+    nodes.append(add_edge("e_gen_admin_disp", "Kế thừa quyền điều phối", gen_style, "act_admin", "act_dispatcher"))
+
+    # UML include and extend
+    inc_style_purple = "endArrow=open;dashed=1;html=1;strokeColor=#6A1B9A;strokeWidth=1.3;fontSize=10;fontColor=#6A1B9A;"
+    ext_style = "endArrow=open;dashed=1;html=1;strokeColor=#E53935;strokeWidth=1.3;fontSize=10;fontColor=#E53935;"
+
+    nodes.append(add_edge("e_inc_cluster", "«include»", inc_style_purple, "uc_08", "uc_09"))
+    nodes.append(add_edge("e_ext_geocode", "«extend»\n(khi thiếu GPS)", ext_style, "uc_15", "uc_10"))
+
+    return create_diagram_xml("So-do-Use-Case-Chi-tiet-Dashboard", nodes, w="1360", h="820")
 
 
 # =========================================================================
@@ -803,110 +893,167 @@ def generate_system_architecture():
 # =========================================================================
 def generate_database_erd():
     nodes = []
-    tbl_style = "shape=table;startSize=30;container=1;collapsible=0;childLayout=tableLayout;fixedRows=1;rowLines=1;fontStyle=1;align=center;fontSize=12;fontFamily=Helvetica;fillColor=#EDE7F6;strokeColor=#512DA8;"
-    row_style = "shape=tableRow;horizontal=0;startSize=0;swimlaneHead=0;swimlaneBody=0;top=0;left=0;bottom=0;right=0;collapsible=0;dropTarget=0;fillColor=none;points=[[0,0.5],[1,0.5]];portConstraint=eastwest;"
-    cell_pk = "shape=partialRectangle;connectable=0;fillColor=#FFF9C4;top=0;left=0;bottom=0;right=0;align=left;spacingLeft=6;fontStyle=1;fontSize=10;fontFamily=Helvetica;"
-    cell_fk = "shape=partialRectangle;connectable=0;fillColor=#E1F5FE;top=0;left=0;bottom=0;right=0;align=left;spacingLeft=6;fontStyle=2;fontSize=10;fontFamily=Helvetica;"
-    cell_def = "shape=partialRectangle;connectable=0;fillColor=#FFFFFF;top=0;left=0;bottom=0;right=0;align=left;spacingLeft=6;fontSize=10;fontFamily=Helvetica;"
+    tbl_style = (
+        "shape=swimlane;fontStyle=1;align=center;verticalAlign=top;"
+        "childLayout=stackLayout;horizontal=1;startSize=30;horizontalStack=0;"
+        "resizeParent=1;resizeParentMax=0;resizeLast=0;collapsible=0;marginBottom=0;"
+        "whiteSpace=wrap;html=1;fontFamily=Helvetica;fontSize=11;"
+        "fillColor=#EDE7F6;strokeColor=#512DA8;swimlaneFillColor=#FFFFFF;"
+    )
+    cell_pk = (
+        "text;strokeColor=none;fillColor=#FFF9C4;align=left;verticalAlign=middle;"
+        "spacingLeft=8;spacingRight=4;overflow=hidden;points=[[0,0.5],[1,0.5]];portConstraint=eastwest;"
+        "rotatable=0;whiteSpace=wrap;html=1;fontStyle=1;fontSize=10;fontFamily=Helvetica;"
+    )
+    cell_uq = (
+        "text;strokeColor=none;fillColor=#E8F5E9;align=left;verticalAlign=middle;"
+        "spacingLeft=8;spacingRight=4;overflow=hidden;points=[[0,0.5],[1,0.5]];portConstraint=eastwest;"
+        "rotatable=0;whiteSpace=wrap;html=1;fontStyle=1;fontSize=10;fontFamily=Helvetica;"
+    )
+    cell_fk = (
+        "text;strokeColor=none;fillColor=#E1F5FE;align=left;verticalAlign=middle;"
+        "spacingLeft=8;spacingRight=4;overflow=hidden;points=[[0,0.5],[1,0.5]];portConstraint=eastwest;"
+        "rotatable=0;whiteSpace=wrap;html=1;fontStyle=2;fontSize=10;fontFamily=Helvetica;"
+    )
+    cell_def = (
+        "text;strokeColor=none;fillColor=#FFFFFF;align=left;verticalAlign=middle;"
+        "spacingLeft=8;spacingRight=4;overflow=hidden;points=[[0,0.5],[1,0.5]];portConstraint=eastwest;"
+        "rotatable=0;whiteSpace=wrap;html=1;fontSize=10;fontFamily=Helvetica;"
+    )
+    cell_alt = (
+        "text;strokeColor=none;fillColor=#F8F9FA;align=left;verticalAlign=middle;"
+        "spacingLeft=8;spacingRight=4;overflow=hidden;points=[[0,0.5],[1,0.5]];portConstraint=eastwest;"
+        "rotatable=0;whiteSpace=wrap;html=1;fontSize=9;fontStyle=2;fontFamily=Helvetica;fontColor=#546E7A;"
+    )
 
-    # Table: reports
-    nodes.append(add_cell("t_reports", "Table: reports (Báo cáo cứu hộ)", tbl_style, x=500, y=80, w=340, h=350))
+    # 1. Table: reports (Báo cáo cứu hộ khẩn cấp - Cốt lõi hệ thống)
+    nodes.append(add_cell("t_reports", "Table: reports (Báo cáo cứu hộ khẩn cấp)", tbl_style, x=510, y=50, w=400, h=605))
     cols_reports = [
-        ("r_c1", "PK  id", "VARCHAR(64)", cell_pk),
-        ("r_c2", "    status", "VARCHAR(20) [processing, dispatched...]", cell_def),
-        ("r_c3", "    status_version", "INTEGER DEFAULT 1", cell_def),
-        ("r_c4", "    lat, lng", "REAL (Nullable GPS coordinates)", cell_def),
-        ("r_c5", "    location_source", "VARCHAR(20) [gps, manual, cell]", cell_def),
-        ("r_c6", "    image_url", "VARCHAR(255) (Nullable path)", cell_def),
-        ("r_c7", "    image_hash", "VARCHAR(64) (SHA-256)", cell_def),
-        ("r_c8", "    owner_client_id", "VARCHAR(64)", cell_def),
-        ("r_c9", "    payload_json", "TEXT (Original canonical payload)", cell_def),
-        ("r_c10", "    payload_hash", "VARCHAR(64) (RFC 8785 SHA-256)", cell_def),
-        ("r_c11", "FK  team_id", "VARCHAR(32) [Ref: teams.id]", cell_fk),
-        ("r_c12", "    created_at, updated_at", "TIMESTAMP", cell_def),
+        ("r_c1", "PK  id", "TEXT PRIMARY KEY (Mã SOS duy nhất)", cell_pk),
+        ("r_c2", "    server_received_at", "TEXT NOT NULL (ISO-8601 UTC)", cell_def),
+        ("r_c3", "    created_at", "TEXT (Thời điểm tạo tại client)", cell_def),
+        ("r_c4", "    lat, lng", "REAL (Tọa độ WGS84 GPS hiện trường)", cell_def),
+        ("r_c5", "    trapped_count", "INTEGER DEFAULT 0 (Số người mắc kẹt)", cell_def),
+        ("r_c6", "    injured_count", "INTEGER DEFAULT 0 (Số người bị thương)", cell_def),
+        ("r_c7", "    vulnerable_groups", "TEXT (JSON: trẻ em, người già...)", cell_def),
+        ("r_c8", "    description", "TEXT (Mô tả hiện trường / khẩn cấp)", cell_def),
+        ("r_c9", "    ai_tags", "TEXT (JSON kết quả Edge AI on-device)", cell_def),
+        ("r_c10", "    send_mode", "TEXT (Chế độ gửi: HTTP, Sync, SMS)", cell_def),
+        ("r_c11", "    status", "TEXT DEFAULT 'processing'", cell_def),
+        ("r_c12", "    status_version", "INTEGER DEFAULT 1 (Phiên bản đồng bộ)", cell_def),
+        ("r_c13", "    image_sha256", "TEXT (SHA-256 hash ảnh hiện trường)", cell_def),
+        ("r_c14", "    image_size_bytes", "INTEGER (Dung lượng ảnh byte)", cell_def),
+        ("r_c15", "    image_filename, image_url", "TEXT (Tên file & URL xem ảnh)", cell_def),
+        ("r_c16", "    raw_payload", "TEXT NOT NULL (Canonical RFC 8785)", cell_def),
+        ("r_c17", "FK  assigned_team_id", "INTEGER [Ref: teams.id]", cell_fk),
+        ("r_c18", "    location_source", "TEXT ('device' GPS | 'manual')", cell_def),
+        ("r_c19", "    owner_client_id", "TEXT (Client ID thiết bị sở hữu)", cell_def),
+        ("r_c20", "    close_reason", "TEXT (Lý do khi status='cancelled')", cell_def),
+        ("r_c21", "    first_received_at", "TEXT (Thời điểm nhận đầu tính SLA)", cell_def),
+        ("r_c22", "    status_updated_at", "TEXT (Lần đổi trạng thái gần nhất)", cell_def),
+        ("r_c23", "    updated_seq", "INTEGER DEFAULT 0 (Seq counter delta)", cell_def),
     ]
-    for cid, name, dtype, cstyle in cols_reports:
-        nodes.append(add_cell(cid, f"{name} : {dtype}", cstyle, parent="t_reports", w=340, h=25))
+    for i, (cid, name, dtype, cstyle) in enumerate(cols_reports):
+        nodes.append(add_cell(cid, f"{name} : {dtype}" if dtype else name, cstyle, parent="t_reports", x=0, y=30 + i * 25, w=400, h=25))
 
-    # Table: messages_dedup
-    nodes.append(add_cell("t_dedup", "Table: messages_dedup (Chống trùng lặp)", tbl_style, x=80, y=80, w=320, h=200))
+    # 2. Table: messages_dedup (Nhật ký chống trùng lặp & Outbox Store-and-Forward)
+    nodes.append(add_cell("t_dedup", "Table: messages_dedup (Chống trùng lặp Outbox)", tbl_style, x=40, y=50, w=340, h=305))
     cols_dedup = [
-        ("d_c1", "PK  message_id", "VARCHAR(64)", cell_pk),
-        ("d_c2", "PK  client_id", "VARCHAR(64)", cell_pk),
-        ("d_c3", "    sequence_number", "INTEGER", cell_def),
-        ("d_c4", "    payload_hash", "VARCHAR(64)", cell_def),
-        ("d_c5", "FK  report_id", "VARCHAR(64) [Ref: reports.id]", cell_fk),
-        ("d_c6", "    received_at", "TIMESTAMP", cell_def),
+        ("d_c1", "PK  message_id", "TEXT PRIMARY KEY (UUID outbox)", cell_pk),
+        ("d_c2", "UQ  client_id", "TEXT NOT NULL (Định danh thiết bị)", cell_uq),
+        ("d_c3", "UQ  sequence_number", "INTEGER NOT NULL (Tuần tự tăng dần)", cell_uq),
+        ("d_c4", "    operation_type", "TEXT NOT NULL (CREATE_REPORT...)", cell_def),
+        ("d_c5", "    payload_hash", "TEXT NOT NULL (RFC 8785 SHA-256)", cell_def),
+        ("d_c6", "    status", "TEXT NOT NULL (PROCESSED, DUPLICATE...)", cell_def),
+        ("d_c7", "    error_code", "TEXT (Mã lỗi nếu bị từ chối)", cell_def),
+        ("d_c8", "    result_data", "TEXT (JSON: record_id, ack token)", cell_def),
+        ("d_c9", "    processed_at", "TEXT NOT NULL (Thời điểm server xử lý)", cell_def),
+        ("d_c10", "    created_at", "TEXT NOT NULL (Thời điểm tạo client)", cell_def),
+        ("d_c11", "    expires_at", "TEXT (Thời điểm hết hạn lưu trữ)", cell_def),
     ]
-    for cid, name, dtype, cstyle in cols_dedup:
-        nodes.append(add_cell(cid, f"{name} : {dtype}", cstyle, parent="t_dedup", w=320, h=25))
+    for i, (cid, name, dtype, cstyle) in enumerate(cols_dedup):
+        nodes.append(add_cell(cid, f"{name} : {dtype}" if dtype else name, cstyle, parent="t_dedup", x=0, y=30 + i * 25, w=340, h=25))
 
-    # Table: report_events
-    nodes.append(add_cell("t_events", "Table: report_events (Nhật ký truy vết)", tbl_style, x=940, y=80, w=320, h=200))
+    # 3. Table: report_events (Nhật ký kiểm toán truy vết sự kiện)
+    nodes.append(add_cell("t_events", "Table: report_events (Nhật ký kiểm toán truy vết)", tbl_style, x=1040, y=50, w=340, h=280))
     cols_events = [
-        ("e_c1", "PK  id", "INTEGER AUTOINCREMENT", cell_pk),
-        ("e_c2", "FK  report_id", "VARCHAR(64) [Ref: reports.id]", cell_fk),
-        ("e_c3", "    actor", "VARCHAR(64) (operator/system/app)", cell_def),
-        ("e_c4", "    action", "VARCHAR(32) (create/status/location)", cell_def),
-        ("e_c5", "    metadata_json", "TEXT (Event snapshot)", cell_def),
-        ("e_c6", "    created_at", "TIMESTAMP", cell_def),
+        ("e_c1", "PK  id", "INTEGER PRIMARY KEY AUTOINCREMENT", cell_pk),
+        ("e_c2", "FK  report_id", "TEXT NOT NULL [Ref: reports.id]", cell_fk),
+        ("e_c3", "    kind", "TEXT NOT NULL (status/assign/note/loc...)", cell_def),
+        ("e_c4", "    from_value", "TEXT (Giá trị trước thao tác)", cell_def),
+        ("e_c5", "    to_value", "TEXT (Giá trị sau thao tác)", cell_def),
+        ("e_c6", "    status_version", "INTEGER (Phiên bản trạng thái)", cell_def),
+        ("e_c7", "    actor", "TEXT (Điều phối viên / App client)", cell_def),
+        ("e_c8", "    source", "TEXT NOT NULL (app/sync/sms/dashboard)", cell_def),
+        ("e_c9", "    note", "TEXT (Ghi chú điều phối / lý do hủy)", cell_def),
+        ("e_c10", "    created_at", "TEXT NOT NULL (ISO-8601 UTC)", cell_def),
     ]
-    for cid, name, dtype, cstyle in cols_events:
-        nodes.append(add_cell(cid, f"{name} : {dtype}", cstyle, parent="t_events", w=320, h=25))
+    for i, (cid, name, dtype, cstyle) in enumerate(cols_events):
+        nodes.append(add_cell(cid, f"{name} : {dtype}" if dtype else name, cstyle, parent="t_events", x=0, y=30 + i * 25, w=340, h=25))
 
-    # Table: teams
-    nodes.append(add_cell("t_teams", "Table: teams (Đội cứu hộ thực địa)", tbl_style, x=500, y=500, w=340, h=175))
+    # 4. Table: teams (Đội cứu hộ / Cứu nạn cơ động thực địa)
+    nodes.append(add_cell("t_teams", "Table: teams (Đội cứu hộ / Cứu nạn cơ động)", tbl_style, x=510, y=710, w=400, h=205))
     cols_teams = [
-        ("tm_c1", "PK  id", "VARCHAR(32)", cell_pk),
-        ("tm_c2", "    name", "VARCHAR(100)", cell_def),
-        ("tm_c3", "    contact_phone", "VARCHAR(50)", cell_def),
-        ("tm_c4", "    status", "VARCHAR(20) [available, dispatched...]", cell_def),
-        ("tm_c5", "    members_count", "INTEGER", cell_def),
+        ("tm_c1", "PK  id", "INTEGER PRIMARY KEY AUTOINCREMENT", cell_pk),
+        ("tm_c2", "UQ  name", "TEXT NOT NULL UNIQUE (Tên đội thực địa)", cell_uq),
+        ("tm_c3", "    phone", "TEXT (Số điện thoại liên lạc chỉ huy)", cell_def),
+        ("tm_c4", "    members", "INTEGER (Số lượng thành viên trong đội)", cell_def),
+        ("tm_c5", "    note", "TEXT (Năng lực, phương tiện xuồng/ca nô)", cell_def),
+        ("tm_c6", "    active", "INTEGER NOT NULL DEFAULT 1 (Sẵn sàng)", cell_def),
+        ("tm_c7", "    created_at", "TEXT NOT NULL (ISO-8601 UTC)", cell_def),
     ]
-    for cid, name, dtype, cstyle in cols_teams:
-        nodes.append(add_cell(cid, f"{name} : {dtype}", cstyle, parent="t_teams", w=340, h=25))
+    for i, (cid, name, dtype, cstyle) in enumerate(cols_teams):
+        nodes.append(add_cell(cid, f"{name} : {dtype}" if dtype else name, cstyle, parent="t_teams", x=0, y=30 + i * 25, w=400, h=25))
 
-    # Table: operators
-    nodes.append(add_cell("t_operators", "Table: operators (Tài khoản điều phối)", tbl_style, x=940, y=360, w=320, h=175))
+    # 5. Table: operators (Tài khoản điều phối & Quản trị)
+    nodes.append(add_cell("t_operators", "Table: operators (Tài khoản điều phối & Quản trị)", tbl_style, x=1040, y=410, w=340, h=255))
     cols_operators = [
-        ("op_c1", "PK  username", "VARCHAR(50)", cell_pk),
-        ("op_c2", "    password_hash", "VARCHAR(255) (PBKDF2-SHA256)", cell_def),
-        ("op_c3", "    role", "VARCHAR(20) [admin, operator]", cell_def),
-        ("op_c4", "    full_name", "VARCHAR(100)", cell_def),
-        ("op_c5", "    created_at", "TIMESTAMP", cell_def),
+        ("op_c1", "PK  id", "INTEGER PRIMARY KEY AUTOINCREMENT", cell_pk),
+        ("op_c2", "UQ  username", "TEXT NOT NULL UNIQUE COLLATE NOCASE", cell_uq),
+        ("op_c3", "UQ  display_name", "TEXT NOT NULL UNIQUE (Actor log)", cell_uq),
+        ("op_c4", "    password_hash", "TEXT NOT NULL (PBKDF2-SHA256)", cell_def),
+        ("op_c5", "    role", "TEXT NOT NULL DEFAULT 'operator'", cell_def),
+        ("op_c6", "    active", "INTEGER NOT NULL DEFAULT 1 (Hoạt động)", cell_def),
+        ("op_c7", "    must_change_password", "INTEGER NOT NULL DEFAULT 0", cell_def),
+        ("op_c8", "    created_at", "TEXT NOT NULL (ISO-8601 UTC)", cell_def),
+        ("op_c9", "    last_login_at", "TEXT (Lần đăng nhập gần nhất)", cell_def),
     ]
-    for cid, name, dtype, cstyle in cols_operators:
-        nodes.append(add_cell(cid, f"{name} : {dtype}", cstyle, parent="t_operators", w=320, h=25))
+    for i, (cid, name, dtype, cstyle) in enumerate(cols_operators):
+        nodes.append(add_cell(cid, f"{name} : {dtype}" if dtype else name, cstyle, parent="t_operators", x=0, y=30 + i * 25, w=340, h=25))
 
-    # Table: sessions
-    nodes.append(add_cell("t_sessions", "Table: sessions (Phiên đăng nhập)", tbl_style, x=940, y=600, w=320, h=150))
+    # 6. Table: sessions (Phiên đăng nhập Web Dashboard)
+    nodes.append(add_cell("t_sessions", "Table: sessions (Phiên đăng nhập Web Dashboard)", tbl_style, x=1040, y=730, w=340, h=155))
     cols_sessions = [
-        ("s_c1", "PK  token_hash", "VARCHAR(64)", cell_pk),
-        ("s_c2", "FK  username", "VARCHAR(50) [Ref: operators]", cell_fk),
-        ("s_c3", "    created_at", "TIMESTAMP", cell_def),
-        ("s_c4", "    expires_at", "TIMESTAMP", cell_def),
+        ("s_c1", "PK  token_hash", "TEXT PRIMARY KEY (SHA-256 session)", cell_pk),
+        ("s_c2", "FK  operator_id", "INTEGER [Ref: operators.id]", cell_fk),
+        ("s_c3", "    operator", "TEXT NOT NULL (Tên hiển thị lúc login)", cell_def),
+        ("s_c4", "    created_at", "TEXT NOT NULL (Thời điểm cấp phiên)", cell_def),
+        ("s_c5", "    expires_at", "TEXT NOT NULL (Thời điểm hết hạn)", cell_def),
     ]
-    for cid, name, dtype, cstyle in cols_sessions:
-        nodes.append(add_cell(cid, f"{name} : {dtype}", cstyle, parent="t_sessions", w=320, h=25))
+    for i, (cid, name, dtype, cstyle) in enumerate(cols_sessions):
+        nodes.append(add_cell(cid, f"{name} : {dtype}" if dtype else name, cstyle, parent="t_sessions", x=0, y=30 + i * 25, w=340, h=25))
 
-    # Table: server_meta
-    nodes.append(add_cell("t_meta", "Table: server_meta (Metadata hệ thống)", tbl_style, x=80, y=360, w=320, h=150))
+    # 7. Table: server_meta (Metadata đồng bộ hệ thống)
+    nodes.append(add_cell("t_meta", "Table: server_meta (Metadata đồng bộ hệ thống)", tbl_style, x=40, y=430, w=340, h=155))
     cols_meta = [
-        ("m_c1", "PK  key", "VARCHAR(50)", cell_pk),
-        ("m_c2", "    value", "TEXT (Cluster version, epoch, seeds)", cell_def),
-        ("m_c3", "    updated_at", "TIMESTAMP", cell_def),
+        ("m_c1", "PK  key", "TEXT PRIMARY KEY ('seq', 'epoch'..)", cell_pk),
+        ("m_c2", "    value", "TEXT NOT NULL (Counter / UUID / Rev)", cell_def),
+        ("m_c3", "    -- seq", "Bộ đếm tăng dần cho Polling delta", cell_alt),
+        ("m_c4", "    -- epoch", "Đổi khi reset dữ liệu (Hard sync)", cell_alt),
+        ("m_c5", "    -- cluster_rev", "Phiên bản đầu vào phân cụm Louvain", cell_alt),
     ]
-    for cid, name, dtype, cstyle in cols_meta:
-        nodes.append(add_cell(cid, f"{name} : {dtype}", cstyle, parent="t_meta", w=320, h=25))
+    for i, (cid, name, dtype, cstyle) in enumerate(cols_meta):
+        nodes.append(add_cell(cid, f"{name} : {dtype}" if dtype else name, cstyle, parent="t_meta", x=0, y=30 + i * 25, w=340, h=25))
 
     # Relationships
     erd_edge = "endArrow=diamondThin;endFill=1;startArrow=none;html=1;strokeColor=#455A64;strokeWidth=1.5;fontSize=10;"
-    nodes.append(add_edge("erd_e1", "1 : N (Dedup -> Report)", erd_edge, "t_reports", "t_dedup"))
-    nodes.append(add_edge("erd_e2", "1 : N (Report -> Events)", erd_edge, "t_reports", "t_events"))
-    nodes.append(add_edge("erd_e3", "1 : N (Team -> Reports)", erd_edge, "t_teams", "t_reports"))
-    nodes.append(add_edge("erd_e4", "1 : N (Operator -> Sessions)", erd_edge, "t_operators", "t_sessions"))
+    nodes.append(add_edge("erd_e1", "1 : N (Giao đội: assigned_team_id)", erd_edge, "t_teams", "t_reports", exit_x=0.5, exit_y=0.0, entry_x=0.5, entry_y=1.0))
+    nodes.append(add_edge("erd_e2", "1 : N (Events)", erd_edge, "t_reports", "t_events", exit_x=1.0, exit_y=0.2, entry_x=0.0, entry_y=0.35))
+    nodes.append(add_edge("erd_e3", "1 : N (Phiên làm việc)", erd_edge, "t_operators", "t_sessions", exit_x=0.5, exit_y=1.0, entry_x=0.5, entry_y=0.0))
+    nodes.append(add_edge("erd_e4", "1 : N (Upsert)", erd_edge, "t_dedup", "t_reports", exit_x=1.0, exit_y=0.3, entry_x=0.0, entry_y=0.2))
+    nodes.append(add_edge("erd_e5", "Audit: actor", erd_edge, "t_operators", "t_events", exit_x=0.5, exit_y=0.0, entry_x=0.5, entry_y=1.0))
 
-    return create_diagram_xml("So-do-Thuc-the-Lien-ket-CSDL-ERD", nodes, w="1350", h="850")
+    return create_diagram_xml("So-do-Thuc-the-Lien-ket-CSDL-ERD", nodes, w="1420", h="960")
 
 
 # =========================================================================
@@ -916,38 +1063,44 @@ def generate_mobile_architecture():
     nodes = []
     layer_style = "shape=swimlane;whiteSpace=wrap;html=1;startSize=28;fontStyle=1;fontSize=12;fontFamily=Helvetica;"
 
-    nodes.append(add_cell("l_pres", "1. PRESENTATION LAYER (GIAO DIỆN & TRẠNG THÁI)", layer_style + "fillColor=#E3F2FD;strokeColor=#1976D2;", x=40, y=40, w=1120, h=180))
-    nodes.append(add_cell("l_dom", "2. DOMAIN LAYER (NGHIỆP VỤ & QUY TẮC CỐT LÕI)", layer_style + "fillColor=#EDE7F6;strokeColor=#512DA8;", x=40, y=250, w=1120, h=180))
-    nodes.append(add_cell("l_data", "3. DATA LAYER (DỮ LIỆU & REPOSITORY IMPLEMENTATION)", layer_style + "fillColor=#E8F5E9;strokeColor=#2E7D32;", x=40, y=460, w=1120, h=200))
-    nodes.append(add_cell("l_plat", "4. PLATFORM CHANNELS & NATIVE HARDWARE BRIDGES", layer_style + "fillColor=#ECEFF1;strokeColor=#455A64;", x=40, y=690, w=1120, h=150))
+    nodes.append(add_cell("l_pres", "1. PRESENTATION LAYER (GIAO DIỆN &amp; QUẢN LÝ TRẠNG THÁI)", layer_style + "fillColor=#E3F2FD;strokeColor=#1976D2;", x=40, y=40, w=1120, h=180))
+    nodes.append(add_cell("l_dom", "2. DOMAIN LAYER (NGHIỆP VỤ &amp; QUY TẮC CỐT LÕI - THUẦN DART)", layer_style + "fillColor=#EDE7F6;strokeColor=#512DA8;", x=40, y=250, w=1120, h=180))
+    nodes.append(add_cell("l_data", "3. DATA LAYER (DỮ LIỆU &amp; HIỆN THỰC REPOSITORY)", layer_style + "fillColor=#E8F5E9;strokeColor=#2E7D32;", x=40, y=460, w=1120, h=200))
+    nodes.append(add_cell("l_plat", "4. PLATFORM CHANNELS &amp; NATIVE HARDWARE BRIDGES", layer_style + "fillColor=#ECEFF1;strokeColor=#455A64;", x=40, y=690, w=1120, h=160))
 
     # Presentation Layer
-    nodes.append(add_cell("p_views", "UI Views / Screens:\n- SosScreen (Gửi SOS 1 chạm)\n- CreateReportScreen (Biểu mẫu kèm ảnh)\n- RescueTimelineScreen (Tra cứu tiến trình)\n- MapOverviewScreen (Bản đồ offline)", STYLE_ACT, parent="l_pres", x=40, y=50, w=480, h=95))
-    nodes.append(add_cell("p_ctrl", "Controllers / State Management:\n- SosController & ReportFormController\n- ConnectivityController & ProbeEvaluator\n- StatusPollingController (15s Timer)", STYLE_ACT, parent="l_pres", x=580, y=50, w=480, h=95))
+    nodes.append(add_cell("p_views", "UI Views &amp; Screens:\n- HomeScreen (Tổng quan &amp; Nút SOS 1 chạm)\n- ComposeScreen (Soạn báo cáo cứu trợ kèm ảnh)\n- HistoryScreen / SubmittedScreen (Tra cứu tiến trình)\n- SettingsScreen (Cấu hình máy chủ &amp; Tải model AI)", STYLE_ACT, parent="l_pres", x=40, y=45, w=480, h=110))
+    nodes.append(add_cell("p_ctrl", "Controllers &amp; State Management:\n- AppController (Quản lý trạng thái trung tâm qua ChangeNotifier)\n- Điều phối luồng gửi SOS &amp; Soạn bài cứu nạn\n- Đánh giá thông lượng mạng (Probe) &amp; Chọn chế độ gửi thích ứng\n- Thăm dò định kỳ trạng thái điều phối (15s Timer)", STYLE_ACT, parent="l_pres", x=560, y=45, w=520, h=110))
 
     # Domain Layer
-    nodes.append(add_cell("d_ent", "Entities & Models:\n- RescueRecord (id, status, gps, urgency)\n- AiTag (label, confidence)\n- SendMode (smsFallback, metadataOnly, compressedImage, originalImage)", STYLE_ACT, parent="l_dom", x=40, y=50, w=480, h=95))
-    nodes.append(add_cell("d_uc", "Use Cases & Business Policies:\n- AnalyzeImageUseCase (Khởi chạy mô hình AI)\n- DeliverRecordUseCase (Chính sách thích ứng)\n- ProbeNetworkUseCase & PollStatusUseCase", STYLE_ACT, parent="l_dom", x=580, y=50, w=480, h=95))
+    nodes.append(add_cell("d_repo_intf", "Repository Interfaces (Abstractions):\n- RescueRepository (Lưu &amp; gửi báo cáo)\n- InferenceRepository (Suy luận AI)\n- NetworkRepository (Đo kiểm mạng)", STYLE_ACT, parent="l_dom", x=40, y=45, w=340, h=115))
+    nodes.append(add_cell("d_uc", "Use Cases &amp; Business Policies:\n- SendSosUseCase (Gửi SOS khẩn)\n- SubmitRescuePostUseCase (Gửi bài kèm ảnh)\n- DeliverRecordUseCase (Thực thi gửi thích ứng)\n- AdaptiveSendPolicy &amp; UrgencyLogisticModel", STYLE_ACT, parent="l_dom", x=410, y=45, w=350, h=115))
+    nodes.append(add_cell("d_ent", "Entities &amp; Value Objects:\n- RescueRecord (id, status, gps, urgency)\n- AiTag (label, confidence)\n- SendMode (fullImage, compressedImage,\n  textOnly, smsFallback, queuedOffline)\n- SyncMessage (payload_hash, sequence)", STYLE_ACT, parent="l_dom", x=790, y=45, w=300, h=115))
 
     # Data Layer
-    nodes.append(add_cell("dt_repo", "Repository Implementations:\n- RescueRepositoryImpl\n- InferenceRepositoryImpl (Conditional export)\n- NetworkProbeRepositoryImpl", STYLE_ACT, parent="l_data", x=40, y=45, w=340, h=120))
-    nodes.append(add_cell("dt_local", "Local DataSources:\n- HiveBoxLocalDataSource (Outbox store-and-forward)\n- RFC 8785 Canonical JSON Encoder & SHA-256 Hasher", STYLE_DB, parent="l_data", x=420, y=45, w=330, h=120))
-    nodes.append(add_cell("dt_remote", "Remote & Native DataSources:\n- HttpRemoteDataSource (FastAPI REST Client)\n- SmsRemoteDataSource (Android SMS Bridge)\n- OnnxInferenceDataSource (onnxruntime package)\n- ExecutorchMethodChannel (C++ Android Runner)", STYLE_ACT, parent="l_data", x=780, y=45, w=310, h=120))
+    nodes.append(add_cell("dt_repo", "Repository Implementations:\n- RescueRepositoryImpl\n- InferenceRepositoryImpl (Conditional export)\n- NetworkRepositoryImpl", STYLE_ACT, parent="l_data", x=40, y=45, w=340, h=130))
+    nodes.append(add_cell("dt_local", "Local DataSources:\n- OutboxLocalDataSource (Hive store-and-forward)\n- RecordLocalDataSource (Lưu trữ bản ghi offline)\n- RFC 8785 Canonical JCS &amp; SHA-256 Hasher", "shape=cylinder3;whiteSpace=wrap;html=1;boundedLbl=1;backgroundOutline=1;size=15;fillColor=#ECEFF1;strokeColor=#455A64;fontSize=10;fontFamily=Helvetica;spacingTop=16;align=center;", parent="l_data", x=410, y=45, w=340, h=130))
+    nodes.append(add_cell("dt_remote", "Remote &amp; Native DataSources:\n- SenderRemoteDataSource (FastAPI REST &amp; Multipart)\n- SyncRemoteDataSource (/sync/messages Batch)\n- NetworkRemoteDataSource (GET /probe 64KB)\n- InferenceLocalDataSource (ONNX / ExecuTorch PTE)", STYLE_ACT, parent="l_data", x=780, y=45, w=310, h=130))
 
     # Platform Layer
-    nodes.append(add_cell("pl_gps", "Geolocator (GPS Sensor)", STYLE_ACT, parent="l_plat", x=60, y=50, w=220, h=60))
-    nodes.append(add_cell("pl_cam", "Camera & Gallery Picker", STYLE_ACT, parent="l_plat", x=320, y=50, w=220, h=60))
-    nodes.append(add_cell("pl_sms", "Android SMS Telephony Manager", STYLE_WARN, parent="l_plat", x=580, y=50, w=240, h=60))
-    nodes.append(add_cell("pl_wm", "WorkManager (Background Tasks)", STYLE_ACT, parent="l_plat", x=860, y=50, w=220, h=60))
+    nodes.append(add_cell("pl_gps", "Geolocator (GPS Location Service)", STYLE_ACT, parent="l_plat", x=40, y=50, w=240, h=65))
+    nodes.append(add_cell("pl_cam", "Camera &amp; Image Picker (Ảnh hiện trường)", STYLE_ACT, parent="l_plat", x=310, y=50, w=240, h=65))
+    nodes.append(add_cell("pl_sms", "Android Telephony (MethodChannel rescue/sms)", STYLE_WARN, parent="l_plat", x=580, y=50, w=240, h=65))
+    nodes.append(add_cell("pl_wm", "Workmanager (Tiến trình nền 15 phút)", STYLE_ACT, parent="l_plat", x=850, y=50, w=240, h=65))
 
     # Connectors
     nodes.append(add_edge("ma_e1", "Calls", STYLE_EDGE, "p_ctrl", "d_uc"))
-    nodes.append(add_edge("ma_e2", "Implements", STYLE_EDGE, "dt_repo", "d_uc"))
+    nodes.append(add_edge("ma_e6", "Uses", STYLE_EDGE, "d_uc", "d_repo_intf"))
+    nodes.append(add_edge("ma_e10", "Uses", STYLE_EDGE, "d_uc", "d_ent"))
+    nodes.append(add_edge("ma_e2", "Implements", "endArrow=classic;html=1;strokeColor=#2E7D32;strokeWidth=1.5;fontSize=10;fontFamily=Helvetica;fontStyle=1;", "dt_repo", "d_repo_intf"))
     nodes.append(add_edge("ma_e3", "Uses", STYLE_EDGE, "dt_repo", "dt_local"))
     nodes.append(add_edge("ma_e4", "Uses", STYLE_EDGE, "dt_repo", "dt_remote"))
-    nodes.append(add_edge("ma_e5", "Hardware Channel", STYLE_EDGE, "dt_remote", "pl_sms"))
+    nodes.append(add_edge("ma_e5", "Hardware Channel", "endArrow=classic;html=1;strokeColor=#E53935;strokeWidth=1.3;fontSize=10;fontFamily=Helvetica;", "dt_remote", "pl_sms"))
+    nodes.append(add_edge("ma_e7", "Background Sync", "endArrow=classic;html=1;strokeColor=#455A64;strokeWidth=1.2;fontSize=10;fontFamily=Helvetica;dashed=1;", "dt_local", "pl_wm"))
+    nodes.append(add_edge("ma_e8", "Platform Service", "endArrow=classic;html=1;strokeColor=#455A64;strokeWidth=1.2;fontSize=10;fontFamily=Helvetica;dashed=1;", "dt_repo", "pl_gps"))
+    nodes.append(add_edge("ma_e9", "Device Picker", "endArrow=classic;html=1;strokeColor=#455A64;strokeWidth=1.2;fontSize=10;fontFamily=Helvetica;dashed=1;", "dt_repo", "pl_cam"))
 
-    return create_diagram_xml("Kien-truc-Phan-lop-Mobile-Flutter", nodes, w="1220", h="900")
+    return create_diagram_xml("Kien-truc-Phan-lop-Mobile-Flutter", nodes, w="1220", h="920")
 
 
 # =========================================================================
