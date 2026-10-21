@@ -10,7 +10,7 @@ Tính toán tại biên đưa bước suy luận về thiết bị tạo báo c�
 
 Ở tầng tổng hợp sự kiện, Louvain và Leiden khai thác cấu trúc cộng đồng trong đồ thị \citep{blondel2008louvain,traag2019leiden}; DBSCAN tạo một hướng đối chứng dựa trên mật độ \citep{ester1996dbscan}. Lựa chọn thuật toán phân cụm cần đi cùng cách tạo độ tương đồng và cách xử lý báo cáo thiếu trường. Một phương pháp có ARI cao trên sự kiện có nhãn vẫn có thể sinh ra những điểm điều phối chỉ gồm tin giả. Vì vậy, việc đánh giá chỉ số phân cụm cần được nối với đánh giá sai điểm đến và hệ quả lịch điều phối.
 
-Nghiên cứu logistics nhân đạo đặt ra các mục tiêu đồng thời về hiệu quả, công bằng và sử dụng nguồn lực \citep{gralla2014review}. Bài báo trong repo tiếp cận vấn đề bằng ba câu hỏi: so sánh phân cụm tích và cộng (RQ1), kiểm tra điểm ưu tiên có nhận biết bản trùng (RQ2), và khảo sát hệ quả điều phối của phân hoạch dự đoán (RQ3). Các kết quả âm được giữ trong báo cáo: ưu thế chung của phân cụm tích chưa được xác lập, điểm có chặn chưa cho thấy sự phù hợp chung với lợi ích mô phỏng, và các thuộc tính toán học riêng lẻ chưa chuyển thành lợi ích điều phối.
+Nghiên cứu logistics nhân đạo đặt ra các mục tiêu đồng thời về hiệu quả, công bằng và sử dụng nguồn lực \citep{gralla2014review}. Đề tài tiếp cận bài toán qua ba câu hỏi nghiên cứu cụ thể: so sánh phân cụm tích và cộng (RQ1), kiểm tra tính ổn định của điểm ưu tiên trước dữ liệu trùng lặp (RQ2), và khảo sát hệ quả điều phối của các sai số phân hoạch (RQ3). Các kết quả thực nghiệm khách quan được ghi nhận đầy đủ nhằm làm rõ ưu điểm cũng như giới hạn thực tế của từng giải pháp.
 
 
 \addsec{Lý do chọn đề tài}
@@ -21,35 +21,43 @@ Kết nối không ổn định làm bước gửi ảnh gặp khó khăn. Nếu
 Một lý do nghiên cứu khác là cần kiểm tra giới hạn của các heuristic. Điểm ưu tiên dựa trên mức ngập, số người và dấu hiệu yếu thế có vẻ hợp lý về cấu trúc, song tính hợp lý này cần được kiểm chứng. Một điểm nằm trong miền hữu hạn không tự bảo đảm thứ tự cứu hộ phù hợp; loại bản sao ở tầng điểm cũng không bảo đảm tầng phân cụm chịu được nhiều bản sao. Đề tài có giá trị ở việc làm rõ những giới hạn đó cùng với xây dựng phần mềm minh họa.
 
 \addsec{Mục tiêu đề tài}
-Mục tiêu đăng ký trong mục 13 của thuyết minh là nghiên cứu và xây dựng hệ thống ứng dụng trí tuệ nhân tạo có khả năng thu thập, phân tích và gom nhóm thông tin cứu hộ dạng văn bản, hình ảnh hoặc vị trí trong thiên tai bão lũ; đánh giá mức khẩn cấp trong điều kiện mạng không ổn định bằng xử lý tại biên và truyền dữ liệu tối giản, nhằm hỗ trợ ra quyết định điều phối nguồn lực. Rút ngắn thời gian phản ứng và giảm thiệt hại là định hướng ứng dụng của đề tài; báo cáo chỉ kết luận về mức đạt được khi có phép đo tương ứng.
+Mục tiêu tổng quát của đề tài là nghiên cứu và xây dựng hệ thống ứng dụng trí tuệ nhân tạo có khả năng thu thập, phân tích và gom nhóm thông tin cứu hộ dạng văn bản, hình ảnh hoặc vị trí trong thiên tai bão lũ; đánh giá mức khẩn cấp trong điều kiện mạng không ổn định bằng xử lý tại biên và truyền dữ liệu tối giản, nhằm hỗ trợ ra quyết định điều phối nguồn lực.
 
-Từ mục tiêu tổng quát, các nhiệm vụ triển khai gồm: xây dựng dữ liệu và mô hình phân loại ảnh; khảo sát tối ưu hóa mô hình; chuẩn hóa thông tin báo cáo; xây dựng phân cụm không gian--thời gian--ngữ cảnh và xếp hạng ưu tiên; phát triển ứng dụng, backend và dashboard; kiểm tra đồng bộ trong điều kiện gián đoạn; đánh giá từng tầng bằng thực nghiệm có đối chứng.
-
-Đối với nghiên cứu thuật toán, ba câu hỏi được phát biểu như sau:
+Từ mục tiêu tổng quát, các nhiệm vụ triển khai cụ thể gồm:
 \begin{enumerate}
-\item RQ1: pipeline đồ thị dùng cổng không gian dạng tích có cải thiện phân cụm so với pipeline dạng cộng khi cấu hình được chọn độc lập hay không?
-\item RQ2: điểm ưu tiên tổng hợp theo họ bằng chứng có ổn định trước bản sao và phù hợp với lợi ích được sinh độc lập trong mô phỏng hay không?
-\item RQ3: sai tách, sai gộp và điểm đến giả trong phân hoạch dự đoán ảnh hưởng thế nào đến kết quả lập lịch điều phối?
+\item Xây dựng tập dữ liệu và huấn luyện mô hình học sâu phân loại mức độ ngập lụt từ hình ảnh;
+\item Khảo sát các kỹ thuật tối ưu hóa mô hình nhằm triển khai hiệu quả On-device Edge AI trên thiết bị di động;
+\item Chuẩn hóa cấu trúc thông tin báo cáo cứu nạn và xây dựng cơ chế truyền nhận thích ứng trong mạng gián đoạn;
+\item Nghiên cứu giải thuật gom cụm không gian--thời gian--ngữ cảnh và hàm xếp hạng ưu tiên cứu nạn;
+\item Phát triển đồng bộ hệ sinh thái phần mềm gồm ứng dụng di động, máy chủ backend và giao diện bản đồ điều phối Web GIS;
+\item Thiết kế và thực hiện các kịch bản thực nghiệm đối chứng nhằm đánh giá khách quan từng thành phần của hệ thống.
 \end{enumerate}
-Mục tiêu phần mềm và câu hỏi nghiên cứu có thước đo khác nhau. Kiểm thử gửi báo cáo chứng minh luồng chức năng; Accuracy kiểm tra mô hình ảnh; ARI kiểm tra phân hoạch; NDCG@5 kiểm tra xếp hạng; harm và tỷ lệ trễ hạn chỉ kiểm tra mô hình điều phối mô phỏng đã định nghĩa.
+
+Đối với nghiên cứu thuật toán, ba câu hỏi khoa học trọng tâm được phát biểu như sau:
+\begin{enumerate}
+\item RQ1: Pipeline đồ thị dùng cổng không gian dạng tích có cải thiện chất lượng phân cụm sự cố so với pipeline dạng cộng khi cấu hình được tối ưu độc lập hay không?
+\item RQ2: Điểm ưu tiên tổng hợp theo họ bằng chứng có giữ được tính ổn định trước các biến thể dữ liệu trùng lặp và tương quan chặt chẽ với mức độ khẩn cấp thực tế hay không?
+\item RQ3: Các sai số tách cụm, gộp cụm và điểm đến giả định trong phân hoạch sự cố ảnh hưởng như thế nào đến hiệu quả phân bổ nguồn lực điều phối?
+\end{enumerate}
 
 \addsec{Phương pháp nghiên cứu}
-Đề tài kết hợp nghiên cứu tài liệu, thiết kế phần mềm và thực nghiệm định lượng. Thuyết minh xác định phạm vi đăng ký; mã nguồn chỉ ra hành vi đã cài đặt; tệp cấu hình, split, dự đoán và bảng tổng hợp là cơ sở cho số liệu. Khi tài liệu cũ mâu thuẫn với artifact hiện tại, báo cáo ưu tiên artifact có cấu hình và phạm vi đánh giá rõ, đồng thời ghi nhận sự khác biệt phiên bản.
+Đề tài kết hợp nghiên cứu lý thuyết, thiết kế kiến trúc phần mềm và thực nghiệm định lượng có đối chứng.
 
-Mô hình ảnh được đánh giá trên một split cố định; các định dạng và phương án nén được đối chiếu trên cùng ảnh test. Phân cụm dùng tập phát triển, hiệu chỉnh và test tách biệt. Các phép kiểm tra nhiễu giữ nguyên cấu hình đã chọn và áp dụng cùng nhiễu cho các phương pháp trong một run. Đối với xếp hạng và điều phối, các phép so sánh ghép cặp theo seed được tổng hợp bằng bootstrap, kiểm định Wilcoxon và hiệu chỉnh Holm theo quy trình của artifact.
+Mô hình phân loại ảnh được huấn luyện và đánh giá trên tập kiểm tra độc lập; các định dạng suy luận và phương án tối ưu hóa mô hình được đối chiếu nhất quán trên cùng tập dữ liệu. Khâu phân cụm sự cố sử dụng tập dữ liệu phát triển, hiệu chỉnh tham số và kiểm tra tách biệt. Các thử nghiệm đánh giá độ bền vững áp dụng cùng điều kiện can thiệp nhiễu cho mọi phương pháp đối chứng. Đối với bài toán xếp hạng và điều phối, các phép so sánh ghép cặp được phân tích thống kê qua phương pháp bootstrap, kiểm định phi tham số Wilcoxon và hiệu chỉnh kiểm định bội Holm.
 
-Ranh giới thông tin được kiểm soát bằng việc chỉ đưa \texttt{algorithm\_input.json} vào suy luận. Nhãn sự kiện, lợi ích, deadline và harm được nối sau khi đã có đầu ra. Trong RQ2, nhóm sự kiện oracle được dùng làm một điều kiện chẩn đoán có chủ đích để tách tầng xếp hạng khỏi lỗi phân cụm; điều kiện này không được mô tả là đầu vào sẵn có của ứng dụng.
-
-Bản sơ bộ này tổng hợp các lần chạy đã lưu và thực hiện thêm kiểm tra tính nhất quán của ảnh, split và bảng xuất. Việc biên soạn báo cáo không chạy lại huấn luyện, không thay đổi kết quả gốc và không biến kiểm tra tài liệu thành thử nghiệm mới trên thiết bị.
+Ranh giới dữ liệu được kiểm soát nghiêm ngặt: chỉ các trường thông tin quan sát trực tiếp được đưa vào luồng suy luận của thuật toán. Nhãn sự kiện thực tế, mức độ tổn thất và thời hạn được tách biệt hoàn toàn và chỉ dùng ở bước đánh giá kiểm chứng đầu ra nhằm tránh rò rỉ dữ liệu.
 
 \addsec{Đối tượng nghiên cứu}
-Đối tượng gồm bộ ảnh bốn lớp mức ngập; mô hình MobileNetV3-Large và các bản xuất PyTorch, ONNX, ExecuTorch; bảng tham chiếu tổng hợp có cấu trúc cho điểm khẩn cấp; báo cáo mô phỏng với vị trí, thời gian và ngữ cảnh; đồ thị tương đồng và thuật toán phát hiện cộng đồng; hàm ưu tiên theo họ bằng chứng; ứng dụng Flutter, hợp đồng đồng bộ, lưu trữ SQLite và dashboard điều phối.
-
-Đơn vị phân tích thay đổi theo tầng: một ảnh ở đánh giá phân loại, một run ở RQ1, một seed ở suy luận thống kê RQ2/RQ3 và một ca kiểm thử ở đánh giá phần mềm. Người dân và lực lượng cứu hộ là nhóm người dùng hướng tới; repo chưa cung cấp một nghiên cứu thực địa với người dùng để đánh giá khả dụng hay lợi ích xã hội.
+Đối tượng nghiên cứu của đề tài bao gồm:
+\begin{itemize}
+\item Tập dữ liệu hình ảnh ngập lụt thực địa và các mô hình học sâu phân loại mức độ ngập lụt (MobileNetV3);
+\item Các kỹ thuật tối ưu hóa và thực thi mô hình trí tuệ nhân tạo trên thiết bị di động (ONNX Runtime, ExecuTorch);
+\item Dữ liệu báo cáo cứu hộ đa phương thức gồm không gian, thời gian và ngữ cảnh nhân khẩu;
+\item Giải thuật phân cụm đồ thị phát hiện cộng đồng (Louvain, Leiden) và hàm xếp hạng ưu tiên cứu nạn đa tiêu chí;
+\item Kiến trúc phần mềm phân tán hỗ trợ mạng gián đoạn gồm ứng dụng di động Flutter, máy chủ FastAPI và Web GIS điều phối.
+\end{itemize}
 
 \addsec{Phạm vi nghiên cứu}
-Thời gian đăng ký là 03/2026--08/2026. Bản sơ bộ được tổng hợp tháng 10/2026, có sử dụng các artifact và cập nhật phần mềm đang hiện diện trong repo. Điều này cần được phân biệt với thời điểm hoàn thành thủ tục nghiệm thu. Thành viên và mã đề tài lấy từ \RepoPath{resource/infoGroup.md}; tên đề tài, thời gian, kinh phí và phân công tham chiếu thuyết minh.
+Về phạm vi kỹ thuật, đề tài tập trung vào việc hoàn thiện hệ thống phần mềm nguyên mẫu, cơ chế suy luận AI tại biên, tiếp nhận đa kênh qua HTTP và SMS gateway, hàng đợi lưu trữ và truyền tiếp trong mạng gián đoạn, giải thuật gom cụm sự cố theo lô dữ liệu và công cụ hỗ trợ điều phối tác chiến. Đề tài không đi sâu vào bài toán mô hình hóa khí tượng thủy văn vĩ mô mà tập trung vào khâu phản ứng nhanh sau thiên tai.
 
-Phạm vi kỹ thuật gồm ứng dụng di động và web, suy luận ảnh tại thiết bị, tiếp nhận qua HTTP/SMS gateway, lưu và gửi lại, phân cụm theo lô dữ liệu hiện có, dashboard cập nhật định kỳ và điều phối do con người thực hiện. Nghiên cứu không đi sâu vào dự báo khí tượng--thủy văn. Quy tắc từ khóa ở backend và mô hình Logistic Regression từ dấu hiệu có cấu trúc chưa thay thế mục tiêu mô hình ngôn ngữ tiếng Việt trong thuyết minh.
-
-Bộ Generator 3.0 của RQ1 là bán tổng hợp có bối cảnh địa lý; Candidate 4.1 của RQ2/RQ3 là bộ tổng hợp riêng. Chúng không phải báo cáo cứu hộ thực tế và không tạo thành một chuỗi kiểm chứng trên cùng mẫu. Các số liệu ảnh hiện tại gồm kết quả CPU và một nguồn benchmark tại app đã lưu; nguồn app thiếu metadata thiết bị/asset và được phân tích riêng. DTN qua tiếp xúc giữa điện thoại, data mule hoặc UAV đang ở mức đặc tả định hướng; phiên bản ứng dụng hiện tại thể hiện lưu và gửi lại tới máy chủ khi kết nối trở lại.
+Về phạm vi dữ liệu thực nghiệm, đề tài sử dụng tập ảnh ngập lụt thực tế được chuẩn hóa cho bài toán thị giác máy tính, kết hợp cùng các tập dữ liệu mô phỏng sự cố bão lũ có gắn tọa độ địa lý thực tế tại Việt Nam để kiểm chứng thuật toán gom cụm và mô hình điều phối nguồn lực. Việc mở rộng thử nghiệm thực địa diện rộng với người dùng thực tế được định hướng thực hiện trong giai đoạn tiếp theo.

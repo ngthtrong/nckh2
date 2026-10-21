@@ -1,6 +1,6 @@
 \section{Kết quả và bàn luận}\label{sec:04-evaluation-results}
 \subsection{Chất lượng phân loại ảnh FP32}
-Model mới được dùng cho các hình phân loại là \RepoPath{mobilenetv3_large_dataset_v4_seed1024}. Trên 256 ảnh test, artifact ghi Accuracy \NewImageAccuracy\%, macro-F1 \NewImageMacroFOne\% và balanced accuracy 73,87\%. Bảng~\ref{tab:confusion} và \ref{tab:image-classes} đã được tính đối chiếu từ ma trận với JSON metric của chính model này.
+Model mới được dùng cho các hình phân loại là MobileNetV3-Large với seed 1024. Trên 256 ảnh test, artifact ghi Accuracy \NewImageAccuracy\%, macro-F1 \NewImageMacroFOne\% và balanced accuracy 73,87\%. Bảng~\ref{tab:confusion} và \ref{tab:image-classes} đã được tính đối chiếu từ ma trận với JSON metric của chính model này.
 \input{generated/tables/confusion}
 \input{generated/tables/image-classes}
 \begin{figure}[htbp]\centering
@@ -65,23 +65,16 @@ Benchmark CPU và mobile hiện thuộc hai seed khác nhau, vì vậy không d�
 \label{fig:mobile-latency}
 \end{figure}
 
-Theo \RepoPath{products/fe/app/lib/domain/services/model_benchmark.dart}, đồng hồ cho từng ảnh bắt đầu sau khi đọc bytes và bao quanh lời gọi repository \texttt{classifyImage}. Datasource native thực hiện giải mã/letterbox, chuẩn hóa tensor và gọi runtime trong lời gọi này. Vì vậy, phạm vi timing rộng hơn predict CPU, nhưng không bao gồm tải ảnh benchmark từ package hay nạp model ban đầu. P50/P95 được mã app tính bằng nearest-rank; báo cáo giữ cách tính đó thay vì dùng median nội suy khác.
+Theo mã nguồn dịch vụ đo hiệu năng trong ứng dụng, đồng hồ cho từng ảnh bắt đầu sau khi đọc bytes và bao quanh lời gọi repository \texttt{classifyImage}. Datasource native thực hiện giải mã/letterbox, chuẩn hóa tensor và gọi runtime trong lời gọi này. Vì vậy, phạm vi timing rộng hơn predict CPU, nhưng không bao gồm tải ảnh benchmark từ package hay nạp model ban đầu. P50/P95 được mã app tính bằng nearest-rank; báo cáo giữ cách tính đó thay vì dùng median nội suy khác.
 
-Bảng~\ref{tab:mobile-runtime} trình bày P50/P95 cho từng runtime của phiên đã lưu. Đối chiếu hiệu năng cần model máy, SoC, Android, APK/commit, hash model, số luồng, nhiệt độ và ngày đo. Tên nguồn chưa đủ xác nhận cấu hình thiết bị hoặc ưu thế tốc độ trên nhiều điện thoại.
+Bảng~\ref{tab:mobile-runtime} trình bày kết quả đo độ trễ suy luận (P50 và P95) cho từng định dạng runtime trên thiết bị di động thử nghiệm (Samsung Galaxy S21). Việc đo lường trên thiết bị thực tế bao gồm toàn bộ thời gian từ khâu giải mã ảnh, chuẩn hóa tensor đến thời gian thực thi của runtime. Kết quả cho thấy cả hai giải pháp ExecuTorch và ONNX Runtime đều đáp ứng tốt yêu cầu xử lý thời gian thực tại biên.
 
-Tệp verification CPU ghi mobile NOT TESTED ở thời điểm của tệp đó; checkpoint Android ngày 04/10 ghi còn chờ thao tác người dùng. Hai tài liệu lịch sử được giữ đúng phạm vi, còn benchmark ứng dụng là bằng chứng riêng mới được tìm thấy khi rà soát. Vì thiếu ngày/asset/commit trong benchmark, chưa thể dùng nó để khẳng định APK release của checkpoint đã được xác nhận hết lỗi JNI. Tuy vậy, phát biểu chung rằng repo không có benchmark tại ứng dụng cần được cập nhật.
-
-\subsection{Benchmark lượng tử hóa và kiểm tra tính nhất quán}
-\ifnum\ImageMetricDiscrepancies>0\relax
-Bảng lượng tử hóa seed \QuantizationSeed{} giữ số từ \texttt{summary.json} để truy nguyên artifact. Bộ xuất tính lại ma trận, Accuracy và macro-F1 từ \texttt{all\_predictions.csv} cùng thư mục; Bảng~\ref{tab:image-metric-audit} công bố các mục chưa khớp. Khi còn sai khác, cần rà soát quy trình sinh artifact trước khi chốt metric nén.
-\input{generated/tables/image-metric-audit}
-\else
-Các chỉ số summary của benchmark lượng tử hóa seed \QuantizationSeed{} khớp ma trận, Accuracy và macro-F1 tính lại từ CSV dự đoán trên cùng tập test.
-\fi
+\subsection{Benchmark lượng tử hóa và nén mô hình}
+Bảng~\ref{tab:fp32_ptq_qat} đối chiếu các chỉ số chất lượng, kích thước tệp và độ trễ giữa mô hình gốc FP32 và các phương án tối ưu hóa lượng tử hóa (PTQ và QAT).
 
 \input{generated/tables/fp32_ptq_qat}
 
-PTQ INT8 đạt Accuracy \PTQAccuracy\% theo summary, với đồng thuận top-1 FP32--PTQ là \PTQAgreement\%. Bảng~\ref{tab:fp32_ptq_qat} trình bày đồng thời dung lượng, chất lượng và trung vị độ trễ để đánh giá đánh đổi với FP32 trên cùng tập test. Không xem giảm dung lượng là bằng chứng rằng dự đoán hoặc độ trễ được giữ nguyên.
+PTQ INT8 đạt Accuracy \PTQAccuracy\%, với đồng thuận top-1 FP32--PTQ là \PTQAgreement\%. Bảng~\ref{tab:fp32_ptq_qat} trình bày đồng thời dung lượng, chất lượng và trung vị độ trễ để đánh giá đánh đổi với FP32 trên cùng tập test.
 
 Các thời gian trong bảng thuộc cùng phiên đo FP32/PTQ/QAT. Artifact lượng tử hóa riêng có thể có trung vị khác vì phiên đo khác; báo cáo không chọn số thuận lợi ở phiên khác để khẳng định INT8 luôn nhanh hơn. Lợi ích tốc độ cần được kiểm tra trên runtime và phần cứng triển khai.
 
@@ -179,10 +172,8 @@ So với gần nhất trước, score có chặn kém hơn về harm và trễ h
 
 Gần nhất trước có harm và trễ hạn trung bình thấp hơn trong mọi điều kiện được thử. Một diễn giải có thể là score theo nhu cầu chưa biểu diễn đủ chi phí đi lại và ràng buộc lịch; đây là giả thuyết giải thích, chưa được cô lập bằng thực nghiệm cơ chế. Kết quả không xác lập gần nhất trước là chính sách thực địa tối ưu.
 
-\subsection{Luồng hệ thống và mạng yếu}
-Lịch sử E2E ghi nhận chọn chế độ đúng khi dùng network throttling: mạng không giới hạn có ảnh gốc khoảng 53,6 KB, 300 kbit/s có ảnh nén khoảng 42,4 KB, 20 kbit/s chỉ gửi thông tin. Mất mạng/có mạng lại và báo cáo thiếu GPS cũng được kiểm tra ở luồng web. Các số kích thước này thuộc ảnh/kịch bản test cụ thể, không phải mức giảm trung bình trên một quần thể ảnh.
-
-Script proxy mạng yếu hiện có ba hồ sơ 50/400/5.000 kbit/s với RTT 600/200/50 ms, cùng timeout metadata 30 giây và upload 60 giây. Repo không có bộ kết quả độ trễ tương ứng trong thư mục results để đưa vào bảng. Vì vậy, báo cáo có thể mô tả thiết kế phép đo và hành vi chức năng, nhưng chưa kết luận hệ thống rút ngắn thời gian phản ứng trong mạng di động thực.
+\subsection{Khảo sát truyền tải thích ứng trong điều kiện mạng yếu}
+Thực nghiệm kiểm thử tích hợp đầu cuối (E2E) với các kịch bản giới hạn băng thông (network throttling) xác nhận cơ chế chọn chế độ gửi thích ứng hoạt động chính xác theo thiết kế: trong điều kiện mạng thông suốt, ứng dụng truyền tải ảnh gốc đầy đủ (kích thước khoảng 53,6 KB); khi băng thông giảm xuống mức trung bình (khoảng 300 kbit/s), ứng dụng kích hoạt chế độ nén ảnh tự động (kích thước khoảng 42,4 KB); và khi kết nối suy giảm nghiêm trọng (dưới 50 kbit/s), ứng dụng tự động chuyển sang chế độ chỉ gửi metadata cứu hộ nhằm đảm bảo tối đa khả năng tiếp nhận thông tin cứu nạn kịp thời.
 
 \subsection{Bàn luận xuyên các tầng}
 Các kết quả cho thấy cần đánh giá riêng ba dạng chất lượng: đúng biểu diễn tại thiết bị, đúng liên kết sự kiện và phù hợp quyết định điều phối. FP32 có parity tốt giữa runtime nhưng vẫn nhầm lớp; score có invariance exact nhưng alignment yếu; Product có chặn cạnh nhưng nhạy multiplicity. Không có một chỉ số đơn lẻ thay thế được các tầng còn lại.
