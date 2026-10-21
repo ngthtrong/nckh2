@@ -1,37 +1,17 @@
 \section{Kiến trúc hệ thống}\label{sec:03-system-architecture}
 \subsection{Tổng thể các thành phần}
-Hệ thống gồm ứng dụng Flutter tạo thông tin cầu cứu, backend FastAPI tiếp nhận và lưu trữ, lõi \texttt{rescue\_core} phân cụm/xếp hạng, và dashboard web phục vụ điều phối. SQLite giữ trạng thái bền vững tại backend; ảnh lưu ở thư mục uploads. Mô hình ảnh và mô hình khẩn cấp có cấu trúc thuộc phần tạo đặc trưng tại ứng dụng. Các notebook nghiên cứu là một đường đánh giá riêng, không chạy bên trong dashboard.
+Hệ thống cứu hộ khẩn cấp được thiết kế theo mô hình kiến trúc phân tán đa tầng, bao gồm ba phân hệ chính: (1) Ứng dụng di động biên trên nền Flutter phục vụ người dân gửi yêu cầu cứu nạn và đội cứu hộ tiếp nhận nhiệm vụ tại thực địa; (2) Máy chủ xử lý trung tâm nền FastAPI tích hợp lõi thuật toán \texttt{rescue\_core} phục vụ gom cụm đồ thị Louvain và xếp hạng ưu tiên đa tiêu chí $P(c)$; (3) Bàn điều phối Web GIS trên nền Leaflet phục vụ điều phối viên giám sát bản đồ sự cố và ra quyết định cứu trợ theo thời gian thực. Trạng thái nghiệp vụ được lưu trữ bền vững tại cơ sở dữ liệu SQLite (chế độ WAL), kết hợp cùng thư mục lưu trữ ảnh hiện trường (\texttt{uploads/}).
+
+Mô hình học sâu phân loại ngập lụt MobileNetV3 và bộ quy tắc tính điểm khẩn cấp được triển khai trực tiếp tại biên (On-device Edge AI) nhằm trích xuất đặc trưng tức thời. Các Jupyter Notebook nghiên cứu đóng vai trò là môi trường đánh giá độc lập để kiểm chứng thuật toán và phân tích hiệu năng ngoại tuyến, hoàn toàn tách biệt khỏi quy trình vận hành trực tuyến của hệ thống.
 
 \begin{figure}[htbp]
 \centering
-\begin{tikzpicture}[node distance=9mm,>=Stealth,
- box/.style={draw,rounded corners,align=center,text width=49mm,minimum height=15mm,font=\small},
- store/.style={box,fill=blue!7}]
-\node[box] (user) {Người gửi\\SOS, mô tả, ảnh, GPS};
-\node[store,below=of user] (app) {Flutter\\AI và outbox cục bộ};
-\node[box,right=13mm of app] (backend) {FastAPI\\kiểm tra hợp đồng và ACK};
-\node[store,below=of backend] (db) {SQLite và ảnh\\báo cáo, dedup, nhật ký};
-\node[box,below=of app] (core) {rescue\_core\\đồ thị, cụm, điểm ưu tiên};
-\node[box,below=of core] (dashboard) {Dashboard điều phối\\bản đồ, đội, trạng thái};
-\draw[->] (user)--(app);
-\draw[<->] (app)--node[above,font=\scriptsize,align=center]{HTTP\\ACK}(backend);
-\draw[<->] (backend)--(db);
-\draw[->] (db)--(core);
-\draw[->] (core)--(dashboard);
-\draw[->] (dashboard.east)-|(db.south);
-\end{tikzpicture}
-\caption{Kiến trúc chức năng của hệ thống demo đang có trong repo}
+\includegraphics[width=\textwidth]{functional_architecture.pdf}
+\caption{Sơ đồ luồng chức năng và tương tác giữa các phân hệ trong hệ thống cứu hộ}
 \label{fig:system-architecture}
 \end{figure}
 
 Dữ liệu từ điện thoại và dữ liệu nạp demo dùng chung API/lưu trữ, nhưng nguồn mô phỏng được gắn nhãn để tránh nhầm với yêu cầu thực tế. Backend nạp run\_001 khi volume trống trong cấu hình demo; đây là 316 báo cáo bán tổng hợp. Việc dashboard có dữ liệu và nhiều cụm sau seed chỉ chứng minh đường tích hợp hoạt động với dữ liệu đó.
-
-\begin{figure}[htbp]
-\centering
-\includegraphics[width=\textwidth]{system_architecture.pdf}
-\caption{Kiến trúc tổng thể 3 tầng của hệ thống cứu hộ (Edge Mobile, Backend Core, Web Dashboard)}
-\label{fig:system-architecture-detailed}
-\end{figure}
 
 \begin{figure}[htbp]
 \centering
@@ -73,17 +53,27 @@ SQLite giữ bảng \texttt{reports}, \texttt{messages\_dedup}, \texttt{report\_
 
 \begin{figure}[htbp]
 \centering
-\begin{tikzpicture}[node distance=10mm,>=Stealth,
- box/.style={draw,align=center,text width=42mm,minimum height=16mm,font=\small}]
-\node[box] (reports) {reports\\id, vị trí, status, payload};
-\node[box,left=9mm of reports] (events) {report\_events\\report\_id, actor, thời gian};
-\node[box,below=of reports] (teams) {teams\\đội được giao};
-\node[box,below=of events] (ops) {operators / sessions\\tài khoản và phiên};
-\node[box,below=of teams] (dedup) {messages\_dedup\\message, hash,\\client, sequence};
-\draw[->] (events)--node[above,font=\footnotesize]{nhật ký}(reports);
+\begin{tikzpicture}[node distance=9mm,>=Stealth,
+ box/.style={draw=black!80,align=center,text width=46mm,minimum height=17mm,font=\small,rounded corners=1pt}]
+\node[box] (reports) {\textbf{reports}\\
+  \scriptsize id, vị trí (lat, lng), status\\
+  \scriptsize trapped, injured, payload};
+\node[box,left=22mm of reports] (events) {\textbf{report\_events}\\
+  \scriptsize id, report\_id, kind\\
+  \scriptsize actor, source, created\_at};
+\node[box,below=of reports] (teams) {\textbf{teams}\\
+  \scriptsize id, name, phone\\
+  \scriptsize members, note, active};
+\node[box,below=of events] (ops) {\textbf{operators / sessions}\\
+  \scriptsize operators (id, user, role)\\
+  \scriptsize sessions (token, op\_id)};
+\node[box,below=of teams] (dedup) {\textbf{messages\_dedup}\\
+  \scriptsize message\_id, payload\_hash\\
+  \scriptsize client\_id, sequence\_number};
+\draw[->] (reports)--node[above,font=\scriptsize]{ghi nhật ký}(events);
 \draw[->] (reports)--node[right,font=\scriptsize]{giao đội}(teams);
-\draw[dashed,->] (ops)--node[left,font=\scriptsize]{actor}(events);
-\draw[dashed,->] (dedup.east)--++(8mm,0)|-(reports.east);
+\draw[dashed,->] (ops)--node[left,font=\scriptsize]{actor kiểm toán}(events);
+\draw[dashed,->] (dedup.east)--++(8mm,0)|-node[pos=0.25,right,font=\scriptsize]{đồng bộ / upsert}(reports.east);
 \end{tikzpicture}
 \caption{Quan hệ logic chính của lưu trữ; nét đứt biểu diễn liên hệ nghiệp vụ}
 \label{fig:data-relations}
