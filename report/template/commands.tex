@@ -7,15 +7,15 @@
   \end{minipage}\end{flushright}}
 \newcommand{\CoverFrame}{%
   \begin{tikzpicture}[remember picture,overlay]
-    \draw[line width=.8pt] ($(current page.north west)+(20mm,-20mm)$)
-      rectangle ($(current page.south east)+(-20mm,20mm)$);
-    \draw[line width=.4pt] ($(current page.north west)+(21mm,-21mm)$)
-      rectangle ($(current page.south east)+(-21mm,21mm)$);
+    \draw[line width=.8pt] ($(current page.north west)+(18.5mm,-22.5mm)$)
+      rectangle ($(current page.south east)+(-23.5mm,32.5mm)$);
+    \draw[line width=.4pt] ($(current page.north west)+(19.5mm,-23.5mm)$)
+      rectangle ($(current page.south east)+(-24.5mm,33.5mm)$);
   \end{tikzpicture}}
-\newcommand{\CoverHeading}{%
+\newcommand{\CoverHeading}[1][0mm]{%
   BỘ GIÁO DỤC VÀ ĐÀO TẠO\\\textbf{ĐẠI HỌC CẦN THƠ}\par
-  \vspace{10mm}\includegraphics[width=30mm]{logo-ctu.png}\par
-  \vspace{10mm}{\fontsize{18bp}{22bp}\selectfont\bfseries BÁO CÁO TỔNG KẾT\par}
+  \vspace{\dimexpr15mm+#1\relax}\includegraphics[width=37.5mm]{logo-ctu.png}\par
+  \vspace{13mm}{\fontsize{18bp}{22bp}\selectfont\bfseries BÁO CÁO TỔNG KẾT\par}
   \medskip\textbf{ĐỀ TÀI NGHIÊN CỨU KHOA HỌC CỦA SINH VIÊN}\par}
 \newcommand{\CoverTitle}{%
   {\fontsize{16bp}{20bp}\selectfont\bfseries\ProjectTitle\par}
@@ -30,7 +30,7 @@
 
 % Covers have centered content inside the double frame; body margins restored after.
 \newenvironment{reportcover}{%
-  \clearpage\newgeometry{left=25mm,right=25mm,top=25mm,bottom=25mm,headheight=22bp,footskip=10mm}%
+  \clearpage\newgeometry{left=30mm,right=35mm,top=30mm,bottom=43mm,headheight=22bp,footskip=10mm}%
   \thispagestyle{empty}%
 }{\clearpage\restoregeometry}
 
@@ -38,18 +38,17 @@
 \newenvironment{officialform}{%
   \clearpage\begingroup\pagestyle{empty}\setstretch{1}%
   \fontsize{13bp}{15bp}\selectfont\setlength{\parindent}{0pt}%
-  \setlength{\parskip}{1bp}\FormLogo%
+  \setlength{\parskip}{1bp}%
 }{\clearpage\endgroup}
-% Put the same CTU mark on every official form, independent of the header language.
+% Shipout fixes the logo to the opening page even when a form spans several pages.
 \newcommand{\FormLogo}{%
-  \begin{tikzpicture}[remember picture,overlay]
-    \node[anchor=north west,inner sep=0pt] at
-      ($(current page.north west)+(30mm,-20mm)$)
-      {\includegraphics[width=16mm]{logo-ctu.png}};
-  \end{tikzpicture}}
+  \AddToShipoutPictureFG*{\AtPageUpperLeft{%
+    \put(\LenToUnit{30mm},\LenToUnit{-20mm}){%
+      \raisebox{-\height}{\includegraphics[width=16mm]{logo-ctu.png}}}}}}
 \newcommand{\FormAgencyVI}{%
-  \noindent\hspace*{18mm}\begin{minipage}{.61\textwidth}\centering
+  \noindent\begin{minipage}{60mm}\centering
   BỘ GIÁO DỤC VÀ ĐÀO TẠO\\\textbf{ĐẠI HỌC CẦN THƠ}\par
+  \nointerlineskip\vspace{1bp}\centerline{\rule{18.6mm}{.75bp}}%
   \end{minipage}\par\vspace{6mm}}
 \newcommand{\FormAgencyLogoVI}{%
   \noindent\hspace*{18mm}\begin{minipage}{.61\textwidth}\centering
