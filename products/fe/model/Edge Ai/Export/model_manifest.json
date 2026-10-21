@@ -1,5 +1,5 @@
 {
-  "checkpoint_sha256": "6d4ef6fff1b59e8ac5d3165f935f28214b935ee377e21ecf16e3b0627be3d9ae",
+  "checkpoint_sha256": "20cf602a50ae50f66792d7fb3b90d5cbee000c31c0fc7878539d21baa9ed97b1",
   "input_size": 256,
   "preprocess": "letterbox_rgb_124_116_104",
   "letterbox_fill": [
@@ -13,9 +13,20 @@
     "high",
     "non_flood"
   ],
-  "onnx_sha256": "f74c99b479b6fc55bd5f7bb2dffcf080d376ff7bc25269ad80732f996d3d89a9",
-  "version": "mobilenetv3-mobilenetv3_large-1c78d34949fa-f74c99b479b6-ca2b36efd541",
+  "onnx_sha256": "91179227b53ffa333afa3a3a04284ec220a07fc4f757e73e92ea8898cdc28210",
+  "version": "mobilenetv3-mobilenetv3_large-1c78d34949fa-91179227b53f-8a0ee83124a9",
   "artifacts_complete": true,
-  "pte_sha256": "ca2b36efd541295ea5fd538b400d4a57124d5f28c4d8693d49d78472e3078321",
+  "model_type": "structured_pruned",
+  "source_checkpoint_sha256": "8de3a4891f3c2fcadeb0dd541ecc49911fdc634924b2a38500d0ffff43745b27",
+  "pruning": {
+    "method": "global_group_magnitude_channel",
+    "target_ratio": 0.01,
+    "round_to": null,
+    "parameter_count_before": 4207156,
+    "parameter_count_after": 4146562
+  },
+  "best_epoch": 17,
+  "parameter_count": 4146562,
+  "pte_sha256": "8a0ee83124a9b4eab2f967bce1a3550bc9d5cf5b787d43ca262e38a3628cf3d2",
   "executorch_runtime": "1.4.1"
 }

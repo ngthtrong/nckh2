@@ -3,7 +3,9 @@ class Platform {
 }
 
 class File {
-  File(String path);
+  File(this.path);
+
+  final String path;
 
   Future<bool> exists() async => false;
   Future<void> delete() async =>
