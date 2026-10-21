@@ -4,18 +4,18 @@
 \caption{Nguồn được dùng và phạm vi}\label{tab:source-register}\\
 \toprule Nội dung & Nguồn trong repo & Phạm vi \\\midrule\endfirsthead
 \toprule Nội dung & Nguồn trong repo & Phạm vi \\\midrule\endhead
-Nhóm, mã đề tài & \RepoPath{resource/infoGroup.md} & Nguồn ưu tiên thông tin nhóm \\
-Mục tiêu, tiến độ, sản phẩm & \RepoPath{resource/Thuyết minh NCKH.md} & Văn bản trong repo, chưa thay bản ký \\
-Số lượng/chia ảnh & Split CSV trong \RepoPath{products/fe/model/Edge Ai/} & Snapshot 1.702 ảnh \\
+Nhóm, mã đề tài & Hồ sơ đề tài đã lưu & Nguồn ưu tiên thông tin nhóm \\
+Mục tiêu, tiến độ, sản phẩm & Thuyết minh NCKH (bản Markdown) & Văn bản trong repo, chưa thay bản ký \\
+Số lượng/chia ảnh & Split CSV trong thư mục mô hình biên & Snapshot 1.702 ảnh \\
 Metric/runtime FP32 & \RuntimeBenchmarkSource{} & 256 ảnh test, CPU \\
-Benchmark ứng dụng & \MobileBenchmarkSource{} & 256 ảnh/runtime; giới hạn metadata được nêu riêng \\
+Đo tại ứng dụng & \MobileBenchmarkSource{} & 256 ảnh/runtime; giới hạn metadata được nêu riêng \\
 Nén/cắt tỉa & \QuantizationBenchmarkSource{}; \PruningBenchmarkSource{} & Cùng test; khác phiên timing \\
-LR khẩn cấp & \RepoPath{products/fe/model/urgency_ei/} & SOURCE FINAL v5, tổng hợp \\
-RQ1 benchmark & \RepoPath{thucnghiem/results/cij_baseline_benchmark_results/} & Generator 3.0, 40 test run \\
-RQ1 stress & \RepoPath{thucnghiem/results/rq1_results/} & Nguồn chính, 1.400 fit \\
-RQ2/RQ3 & \RepoPath{thucnghiem/results/rq2_results/}; \RepoPath{thucnghiem/results/rq3_results/} & Candidate 4.1, 40 seed \\
-Hợp đồng/DB & \RepoPath{docs/contact_connect.md}; \RepoPath{docs/contact_db.md} & Đối chiếu cùng mã hiện tại \\
-Test lịch sử & \RepoPath{docs/nghiem-thu/doi_chieu_thuyet_minh.md} & Ngày 27/09/2026 \\
+LR khẩn cấp & Gói mô hình khẩn cấp có cấu trúc & SOURCE FINAL v5, tổng hợp \\
+RQ1 đối chứng cơ sở & Thư mục kết quả đối chứng cơ sở & Generator 3.0, 40 test run \\
+RQ1 stress & Thư mục kết quả stress & Nguồn chính, 1.400 fit \\
+RQ2/RQ3 & Thư mục kết quả RQ2 và RQ3 & Candidate 4.1, 40 seed \\
+Hợp đồng/DB & Tài liệu hợp đồng kết nối và cơ sở dữ liệu & Đối chiếu cùng mã hiện tại \\
+Test lịch sử & Tài liệu đối chiếu nghiệm thu & Ngày 27/09/2026 \\
 \bottomrule
 \end{longtable}
 
@@ -42,6 +42,6 @@ Renderer khác & Có bảng short ID/OOD & Không dùng ghép vào protocol bả
 Phép đo hiệu năng cần tách tải model, tiền xử lý, suy luận, tạo payload, chờ mạng và ACK. Phép đo mạng cần nhiều lượt cho mỗi profile/ảnh, ghi kích thước thực, tỷ lệ thành công và hàng đợi còn lại. Những mục này là kế hoạch bổ sung minh chứng, chưa phải kết quả đã đạt trong báo cáo.
 
 \section{Nội dung hành chính còn chờ xác nhận}
-Các trường giới tính, dân tộc, ngành, năm học và số năm đào tạo của chủ nhiệm đã được cập nhật theo thông tin xác nhận ngày 06/10/2026 trong \RepoPath{resource/infoGroup.md} và \RepoPath{report/config/metadata.tex}; phần này không còn chờ điền metadata. Đã đối chiếu cấu trúc các mẫu bổ sung ngày 08/10/2026; còn chờ ảnh chủ nhiệm, thành tích học tập, nhận xét GVHD và xác nhận ký/dấu. Năm sinh và thời gian thực hiện trong mẫu mới có mâu thuẫn với metadata đã xác nhận; xem sổ đối chiếu biểu mẫu trong report. Thuyết minh Markdown không thay bản phê duyệt có chữ ký/dấu.
+Các trường giới tính, dân tộc, ngành, năm học và số năm đào tạo của chủ nhiệm đã được cập nhật theo thông tin xác nhận ngày 06/10/2026 trong hồ sơ đề tài và tệp cấu hình metadata; phần này không còn chờ điền metadata. Đã đối chiếu cấu trúc các mẫu bổ sung ngày 08/10/2026; còn chờ ảnh chủ nhiệm, thành tích học tập, nhận xét GVHD và xác nhận ký/dấu. Năm sinh và thời gian thực hiện trong mẫu mới có mâu thuẫn với metadata đã xác nhận; xem sổ đối chiếu biểu mẫu trong report. Thuyết minh Markdown không thay bản phê duyệt có chữ ký/dấu.
 
 Manifest hồ sơ giữ cờ xác nhận false cho các minh chứng chưa được cung cấp. Nội dung sơ bộ của bản tin/tóm tắt Việt--Anh đã soạn có thể dùng để điền mẫu chính thức, nhưng không xác nhận thủ tục nộp. Video chưa được tạo trong công việc này. Bản đầy đủ cần đối chiếu danh sách cam kết, mẫu, bản phê duyệt và từng minh chứng thật.
