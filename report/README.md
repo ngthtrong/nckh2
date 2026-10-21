@@ -23,7 +23,7 @@ make -C report smoke
 
 PDF chính: `build/content/content.pdf`. Bốn sản phẩm riêng ở `build/bulletin-vi/`, `build/bulletin-en/`, `build/summary-vi/`, `build/summary-en/`. Git theo dõi PDF chính, bản hai mặt và bốn sản phẩm riêng; các file phụ, log và môi trường trong `build/` vẫn được bỏ qua. `make clean` chỉ xóa đầu ra build.
 
-Yêu cầu XeLaTeX, KOMA-Script, các gói trong `template/packages.tex`, Python 3.9+ và Times New Roman đủ bốn kiểu. Build tự chọn biblatex-ieee/biber khi có (`style=ieee`, `sorting=none`), nếu không dùng BibTeX/natbib với `ieeetr`; có thể chỉ định `BIBLIOGRAPHY=biblatex` hoặc `BIBLIOGRAPHY=bibtex`. `xurl` được dùng khi có để ngắt đường dẫn dài. Không cần latexmk; bộ build chạy đủ lượt để giải quyết tham chiếu.
+Yêu cầu XeLaTeX hoặc Tectonic, KOMA-Script, các gói trong `template/packages.tex`, Python 3.9+ và Times New Roman đủ bốn kiểu. Tài liệu tham khảo chia nhóm pháp quy, sách/báo/tạp chí, bài viết/tài liệu khác; xếp theo tác giả trong từng nhóm và chỉ in nhóm có tài liệu được trích dẫn. Build tự chọn biblatex-ieee/biber khi có (`sorting=nyt`), nếu không dùng BibTeX với `plainurl` và `splitbib`; có thể chỉ định `BIBLIOGRAPHY=biblatex` hoặc `BIBLIOGRAPHY=bibtex`. `xurl` hỗ trợ ngắt đường dẫn dài. Không cần latexmk; bộ build chạy đủ lượt để giải quyết tham chiếu.
 
 ## Nội dung và căn cứ
 

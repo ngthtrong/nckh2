@@ -1,15 +1,13 @@
 \chapter{Tái lập thực nghiệm}\label{chap:reproducibility}
 \section{Nguồn và phiên bản}
-Bản sơ bộ được tổng hợp từ trạng thái repo hiện tại; commit đầu vào được ghi bằng SHA đầy đủ trong \RepoPath{report/generated/provenance.json}. Commit này mô tả nguồn trước chỉnh sửa nội dung báo cáo, không bao gồm các chỉnh sửa chưa commit. Script xuất bảng ghi SHA-256 từng JSON/CSV trực tiếp được dùng, cho phép kiểm tra bảng có còn khớp nguồn khi artifact thay đổi.
+Bản sơ bộ được tổng hợp từ trạng thái repo hiện tại; commit đầu vào được ghi bằng SHA đầy đủ trong tệp provenance sinh tự động. Commit này mô tả nguồn trước chỉnh sửa nội dung báo cáo, không bao gồm các chỉnh sửa chưa commit. Script xuất bảng ghi SHA-256 từng JSON/CSV trực tiếp được dùng, cho phép kiểm tra bảng có còn khớp nguồn khi artifact thay đổi.
 
-Hai snapshot nghiên cứu lịch sử có vai trò khác nhau:
+Hai snapshot lịch sử của mã nguồn phục vụ tái lập độc lập các bước sinh dữ liệu và đánh giá phân cụm:
 \begin{itemize}
-\item \texttt{a6be3e9}: snapshot sinh dữ liệu và external benchmark; SHA đầy đủ \RepoPath{a6be3e988dad1aa442c8c8e158c2bba96b2b7fb9}.
-\item \texttt{6ac75c2}: snapshot benchmark phân cụm RQ1; SHA đầy đủ \RepoPath{6ac75c202d04934deb46d84486132e54d42d735f}.
+\item Snapshot sinh dữ liệu và kiểm thử đối chứng: commit \texttt{a6be3e9};
+\item Snapshot thực nghiệm thuật toán phân cụm RQ1: commit \texttt{6ac75c2}.
 \end{itemize}
-Package \texttt{demo/} không nằm trong cây hiện tại. Các đường dẫn \texttt{src/} trong tài liệu lịch sử phải được dùng ở đúng snapshot lịch sử; đường dẫn tương ứng hiện tại là \texttt{thucnghiem/}. Không đổi một đường dẫn trong notebook rồi xem đó là tái lập cùng protocol nếu các nguồn khác chưa được đối chiếu.
-
-Release v1.0.1 và artifact nghiên cứu lưu trữ được ghi trong bài báo \citep{nguyen2026floodartifact}. Bổ sung stress sau release và phiên bản sản phẩm hiện tại cần được ghi riêng. Mã nguồn theo MIT; nội dung khác theo điều khoản của repo và nguồn tương ứng. Bản báo cáo không thay đổi release, checksum hay dữ liệu thực nghiệm gốc.
+Mã nguồn của hệ thống và các tập dữ liệu thực nghiệm được lưu trữ theo quy chuẩn tái lập khoa học \citep{nguyen2026floodartifact}, cho phép kiểm chứng độc lập mọi kết quả công bố trong báo cáo.
 
 \section{Sinh lại bảng và kiểm tra ảnh}
 Từ thư mục gốc repo, chạy:
@@ -28,7 +26,7 @@ Tệp config có SHA-256:
 Ảnh test phải lấy theo cột \texttt{relative\_path}, không chia lại dataset và không thay thế bằng toàn bộ thư mục ảnh. Đường dẫn tuyệt đối Windows trong metadata là đường môi trường của lần chạy gốc; cần ánh xạ sang đường tương đối khi dùng máy khác.
 
 \section{Tái lập các phép so sánh ảnh}
-Các công cụ ở \RepoPath{products/fe/tools/} có CLI cho so sánh FP32, PTQ/QAT và pruning. Cần xem \texttt{--help} của đúng script trước khi chạy để chọn output riêng và tránh ghi đè artifact đang dẫn trong báo cáo. Thí dụ kiểm tra parity nhỏ từ thư mục tools:
+Các công cụ trong thư mục \texttt{tools/} có CLI cho so sánh FP32, PTQ/QAT và pruning. Cần xem \texttt{--help} của đúng script trước khi chạy để chọn output riêng và tránh ghi đè artifact đang dẫn trong báo cáo. Thí dụ kiểm tra parity nhỏ từ thư mục tools:
 \begin{verbatim}
 python3 compare_models.py --help
 python3 compare_models.py --limit 3 --skip-pte --no-plots
@@ -38,7 +36,7 @@ Lệnh smoke không thay kết quả full test. Với full test, cần checkpoin
 Phiên đo cần ghi phần cứng, provider, số luồng, warmup, batch và ranh giới timing. Các phiên summary CPU tính predict; nguồn app tại Mục~\ref{sec:mobile-results} tính classifyImage rộng hơn. Cần giữ output trong một thư mục riêng khi đo lại để có thể so sánh mà không mất bản cũ. Kết quả app hiện thiếu thông tin thiết bị và asset; các phiên tiếp theo cần bổ sung log thiết bị và phiên bản asset trong APK.
 
 \section{Sinh hình và kiểm tra benchmark ứng dụng}
-Chín hình định lượng và ví dụ ảnh được sinh từ artifact bằng matplotlib. PDF được dùng trong LaTeX; PNG đi cùng để xem nhanh. Script giữ mã chọn ảnh minh họa xác định, hash các nguồn trực tiếp, hash đầu ra và các số tổng hợp trong \RepoPath{report/generated/figure-provenance.json}. Các sơ đồ kiến trúc/nghiệp vụ được viết bằng TikZ trong nguồn chương; sơ đồ khái niệm có ghi rõ không phải kết quả thực nghiệm.
+Chín hình định lượng và ví dụ ảnh được sinh từ artifact bằng matplotlib. PDF được dùng trong LaTeX; PNG đi cùng để xem nhanh. Script giữ mã chọn ảnh minh họa xác định, hash các nguồn trực tiếp, hash đầu ra và các số tổng hợp trong tệp provenance hình sinh tự động. Các sơ đồ kiến trúc/nghiệp vụ được viết bằng TikZ trong nguồn chương; sơ đồ khái niệm có ghi rõ không phải kết quả thực nghiệm.
 \begin{verbatim}
 python3 -m venv report/build/visual-env
 report/build/visual-env/bin/python -m pip install \
@@ -47,21 +45,21 @@ make -C report figures
 \end{verbatim}
 Các file hình đã có trong repo nên build nội dung thường không cần cài matplotlib. Khi nguồn thực nghiệm đổi, cần xuất lại bảng và hình để giữ đồng bộ. Bộ kiểm tra report đối chiếu hash hình/nguồn và sẽ báo nếu hình đã lỗi thời.
 
-Tệp samsung21se.json là hai JSON object nối tiếp, không phải một JSON object hay mảng JSON hợp lệ cho \texttt{json.load}. Module \RepoPath{report/scripts/mobile_evidence.py} dùng raw decoding để tách hai khối mà không sửa tệp gốc. Nó nối ID theo cách đóng gói package, kiểm tra nhãn/số mẫu, ma trận/metric và mean/P50/P95 theo nearest-rank. Đây là kiểm tra artifact, không chạy lại suy luận trên điện thoại.
+Tệp samsung21se.json là hai JSON object nối tiếp, không phải một JSON object hay mảng JSON hợp lệ cho \texttt{json.load}. Module xử lý bằng chứng ứng dụng dùng raw decoding để tách hai khối mà không sửa tệp gốc. Nó nối ID theo cách đóng gói package, kiểm tra nhãn/số mẫu, ma trận/metric và mean/P50/P95 theo nearest-rank. Đây là kiểm tra artifact, không chạy lại suy luận trên điện thoại.
 
 \section{Tái lập RQ1 và stress}
-Benchmark RQ1 cần đúng snapshot \texttt{6ac75c2} và notebook \RepoPath{Benchmark_Cij_Baselines_Colab.ipynb}. Bộ dữ liệu giữ split run 1--20/21--40/41--80. Cấu hình chọn có trong \RepoPath{thucnghiem/results/cij_baseline_benchmark_results/selected_configs.json}. Stress dùng các cấu hình này không tuning lại.
+Đánh giá phân cụm RQ1 cần đúng snapshot \texttt{6ac75c2} và notebook tương ứng. Bộ dữ liệu giữ split run 1--20/21--40/41--80. Cấu hình chọn có trong tệp cấu hình đã lưu kèm kết quả. Stress dùng các cấu hình này không tuning lại.
 
-Nguồn stress chính gồm protocol, manifest, selected configs, checkpoint từng run/điều kiện, aggregate, duplicate mapping và runtime log. Notebook đã chạy ở \RepoPath{thucnghiem/results/rq1_results/RQ1_Reviewer_Stress_Colab.executed.ipynb}. Một lần chạy mới cần giữ seed, snapshot notebook, checksum dữ liệu và cấu hình; resume chỉ từ checkpoint có provenance khớp.
+Nguồn stress chính gồm protocol, manifest, selected configs, checkpoint từng run/điều kiện, aggregate, duplicate mapping và runtime log. Notebook đã chạy được lưu kèm kết quả stress. Một lần chạy mới cần giữ seed, snapshot notebook, checksum dữ liệu và cấu hình; resume chỉ từ checkpoint có provenance khớp.
 
 Có 1.400 fit ở full batch. Smoke một run không chứng minh full batch hoàn thành. Nếu chạy lại, giữ kết quả trong thư mục riêng và so sánh với nguồn chính; không gộp với \texttt{rq1\_results\_v2} hoặc chọn bản có kết quả tốt hơn.
 
 \section{RQ2/RQ3 và kiểm tra evidence}
 Nguồn RQ2 chứa summary, alignment, robustness, paired comparisons và sensitivity. Nguồn RQ3 chứa bảng theo điều kiện, bảng theo seed, destination assignments, partition losses và provenance tái phân tích. Bản theo seed là nguồn suy luận chính cho RQ3.
 
-Script \RepoPath{thucnghiem/results/verify_camera_ready_evidence.py} kiểm tra artifact và số liệu manuscript theo môi trường khóa trong \RepoPath{thucnghiem/results/requirements-camera-ready-figures.txt}. Cần môi trường biệt lập có đúng phiên bản được pin trước khi dùng script; không xem việc thiếu dependency là bằng chứng artifact sai. Bản báo cáo này xuất từ artifact đã lưu, không tuyên bố đã chạy lại bộ verifier trong môi trường khác.
+Script kiểm tra artifact và số liệu manuscript đã được lưu kèm theo môi trường khóa phiên bản. Cần môi trường biệt lập có đúng phiên bản được pin trước khi dùng script; không xem việc thiếu dependency là bằng chứng artifact sai. Bản báo cáo này xuất từ artifact đã lưu, không tuyên bố đã chạy lại bộ verifier trong môi trường khác.
 
-Để tái lập suy luận RQ3 từ bảng đã lưu, script \RepoPath{thucnghiem/results/rq3_results/recompute_seed_level.py} lấy trung bình điều kiện theo seed, bootstrap 5.000 và Holm cho 14 endpoint trong mỗi block so sánh. Nguồn provenance ghi hash vào/ra và runtime. Giữ nguyên hướng metric khi diễn giải hiệu ghép cặp.
+Để tái lập suy luận RQ3 từ bảng đã lưu, script tái tính tầng seed lấy trung bình điều kiện theo seed, bootstrap 5.000 và Holm cho 14 endpoint trong mỗi block so sánh. Nguồn provenance ghi hash vào/ra và runtime. Giữ nguyên hướng metric khi diễn giải hiệu ghép cặp.
 
 \section{Chạy demo và kiểm thử phần mềm}
 Từ gốc repo, có thể build web và chạy Compose theo hướng dẫn hiện tại:
@@ -71,7 +69,7 @@ FE_BUILD_TARGET=prebuilt docker compose up -d --build
 \end{verbatim}
 Thao tác này tạo môi trường demo và có thể nạp dữ liệu bán tổng hợp nếu volume trống. Không dùng dữ liệu nạp này như yêu cầu cứu hộ thực. Đối với test backend cục bộ, đặt database/uploads ở vùng tạm trước import \texttt{main}, vì khởi tạo module có thể tạo/migrate database.
 
-Kiểm thử backend và Flutter được hướng dẫn ở \RepoPath{products/README.md}; E2E nằm ở \RepoPath{products/scripts/demo/e2e/e2e_system.py}. Kiểm thử E2E có ghi báo cáo vào server đang chạy, nên cần môi trường demo riêng. Điện thoại Android cần URL có thể truy cập từ thiết bị và asset đã stage; số SMS cần cấu hình theo nơi tiếp nhận của phiên kiểm tra.
+Kiểm thử backend và Flutter được hướng dẫn ở tài liệu README của sản phẩm; E2E nằm ở script kiểm thử tích hợp trong thư mục demo. Kiểm thử E2E có ghi báo cáo vào server đang chạy, nên cần môi trường demo riêng. Điện thoại Android cần URL có thể truy cập từ thiết bị và asset đã stage; số SMS cần cấu hình theo nơi tiếp nhận của phiên kiểm tra.
 
 \section{Những gì chưa tái lập trong bản sơ bộ}
 Bản sơ bộ chưa chạy lại huấn luyện MobileNet, các runtime ảnh, toàn bộ notebook Colab, E2E Docker hay điện thoại Android. Kết quả test lịch sử được dẫn rõ ngày và nguồn. Kiểm tra mới chỉ xác nhận tính nhất quán dữ liệu đầu vào bảng và khả năng biên dịch báo cáo. Phân biệt này giúp người đọc biết phần nào là kết quả nghiên cứu đã lưu và phần nào là kiểm tra biên soạn.

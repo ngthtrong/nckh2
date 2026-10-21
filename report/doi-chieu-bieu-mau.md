@@ -1,5 +1,20 @@
 # Đối chiếu hướng dẫn và biểu mẫu — 08/10/2026
 
+## Cập nhật theo yêu cầu ngày 22/10/2026
+
+- Tên Việt/Anh và thời gian 05/2026–10/2026 đồng bộ với `resource/Thuyết minh NCKH -THS2026-68.pdf` và xác nhận của người dùng; thay các mốc 03/2026–08/2026 trước đây.
+- Người dùng chốt đơn vị phối hợp là **Trường CNTT&TT và Phòng Quản lý Khoa học**; giữ hai đơn vị này trong danh sách thành viên, dù mục 9 của thuyết minh ghi Không.
+- Hai bìa căn theo khung, logo và khoảng cách của `guideline/Bìa.pdf`. Theo yêu cầu tiếp theo ngày 22/10, bìa phụ tách riêng dòng lớp và trường/khoa/viện; năm thứ ở trái, số năm đào tạo ở phải thẳng cột Nam, Nữ. Tên đơn vị viết đầy đủ, giữ nguyên cỡ chữ.
+- Phiếu chủ nhiệm giữ kết quả năm 1–3, bổ sung ô kết quả năm 4. Ô ảnh giữ kích thước ô hướng dẫn trong mẫu Word (khoảng 28 × 34 mm), ghi “Ảnh 4 × 6” và gắn liên kết Drive vào dòng “CHÈN FILE ẢNH VÀO Ô NÀY”; theo xác nhận của người dùng, không chèn ảnh trực tiếp. Các dữ liệu học tập chưa có vẫn dùng `PendingField`, không tự điền.
+- Theo xác nhận mới nhất của người dùng, thông tin kết quả Việt/Anh, trang nhận xét GVHD và phiếu thông tin sinh viên không có logo, đúng ba mẫu `.doc` trong thư mục 510. Không tự chèn logo từ môi trường biểu mẫu chung; các sản phẩm bản tin/tóm tắt quản lý logo riêng.
+- Khối cơ quan trên thông tin kết quả tiếng Việt và phiếu sinh viên đặt sát phía trái vùng nội dung; hai dòng Bộ/Đại học căn giữa trong khối rộng 60 mm, có gạch ngắn dưới tên trường như mẫu. Tiêu đề biểu mẫu vẫn căn giữa trang; bìa và bản tin dùng kiểu đầu trang riêng.
+- Tài liệu tham khảo trở lại thứ tự nhóm/chữ cái theo mẫu, thay lựa chọn IEEE theo lần trích dẫn ở các bản ghi lịch sử bên dưới. Dùng các tệp `bibliography/legal.bib`, `books.bib`, `articles.bib`; BibLaTeX dùng keyword tương ứng, BibTeX phân nhóm theo tệp nguồn và giữ URL/DOI với `plainurl`.
+- `build/content/content.pdf` đang có xung đột Git từ trước khi sửa. Bản kiểm tra lần này xuất riêng trong `build/template-review/`; chưa giải quyết hay ghi đè tệp PDF đang xung đột.
+
+Các mục ghi ngày 08/10 bên dưới là lịch sử đối chiếu, không thay thế các xác nhận mới ở trên.
+
+Kiểm tra sau sửa: Tectonic/BibTeX biên dịch báo cáo 111 trang, 82 trang thân bài; phiếu chủ nhiệm và khối ký cùng trang PDF 19. Bản tin Việt/Anh mỗi bản 1 trang, tóm tắt Việt/Anh mỗi bản 2 trang. Đã đối chiếu 18 tài liệu được trích dẫn với nhãn trong `.aux`, thứ tự chữ cái (kể cả Ngô trước Nguyen), URL/DOI, A4 và các trang bìa/biểu mẫu/danh mục qua ảnh render. Log cuối không có overfull hoặc trích dẫn/tham chiếu chưa giải quyết; `git diff --check` đạt. Bản smoke hiện có kiểm tra được nhóm sách với BibTeX. Chưa chạy nhánh Biber vì máy hiện dùng Tectonic/BibTeX; còn cảnh báo môi trường fontconfig/đọc font Windows và phiên bản PDF của các hình nhúng. Ảnh chủ nhiệm, kết quả năm 4 và hồ sơ ký/dấu vẫn chưa được cung cấp.
+
 Căn cứ trực tiếp: `guideline/template/HinhThucBC.doc` (đối chiếu với `guideline/HinhThucBC.pdf`) và toàn bộ chín mẫu `.doc` còn lại trong `guideline/template/`. Đã đọc nội dung văn bản Word nhị phân; phần bố cục đồ họa/ô bảng cần đối chiếu trực quan với Word trước khi ký. Bản LaTeX áp dụng thứ tự và các mục nội dung, không phải bản chuyển đổi Word giống từng vị trí. Hash và nội dung trích xuất lưu tại `generated/guideline-text/`.
 
 ## Những phần thuộc quyển báo cáo tổng kết
