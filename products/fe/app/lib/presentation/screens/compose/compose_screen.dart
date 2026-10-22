@@ -1,3 +1,5 @@
+import 'dart:async';
+
 import 'package:flutter/material.dart';
 import 'package:image_picker/image_picker.dart';
 
@@ -39,6 +41,14 @@ class _ComposeScreenState extends State<ComposeScreen> {
   List<AiTag> _aiTags = [];
   bool _isAnalyzing = false;
   bool _isSubmitting = false;
+
+  @override
+  void initState() {
+    super.initState();
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      if (mounted) unawaited(widget.controller.ensureModelLoaded());
+    });
+  }
 
   Future<void> _pickPhoto(ImageSource source) async {
     final path = await widget.controller.pickImage(source: source);

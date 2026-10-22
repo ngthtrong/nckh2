@@ -1,3 +1,4 @@
+import 'dart:async';
 import 'dart:convert';
 
 import 'dart:io' if (dart.library.html) 'benchmark_file_stub.dart';
@@ -36,6 +37,7 @@ class _ModelBenchmarkCardState extends State<ModelBenchmarkCard> {
   bool _loadingCachedPackage = false;
   bool _cancelled = false;
   final _downloadCancel = CancelToken();
+  int _resourceRevision = 0;
   String? _packagePath;
   String? _message;
   double _downloadProgress = 0;
@@ -53,10 +55,30 @@ class _ModelBenchmarkCardState extends State<ModelBenchmarkCard> {
   @override
   void initState() {
     super.initState();
+    _resourceRevision = widget.controller.benchmarkResourcesRevision;
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      if (mounted && widget.controller.isAdmin) {
+        unawaited(widget.controller.ensureModelLoaded());
+      }
+    });
     if (widget.controller.isAdmin && !kIsWeb) _loadCachedPackage();
   }
 
+  @override
+  void didUpdateWidget(covariant ModelBenchmarkCard oldWidget) {
+    super.didUpdateWidget(oldWidget);
+    if (_resourceRevision != widget.controller.benchmarkResourcesRevision) {
+      _resourceRevision = widget.controller.benchmarkResourcesRevision;
+      _packagePath = null;
+      _samples = const [];
+      _labels = const [];
+      _runtime = BenchmarkRuntime.pte;
+    }
+  }
+
   Future<void> _loadCachedPackage() async {
+    if (widget.controller.isDeletingBenchmarkResources) return;
+    widget.controller.isPreparingBenchmark = true;
     _loadingCachedPackage = true;
     try {
       final directory = await getApplicationSupportDirectory();
@@ -75,6 +97,7 @@ class _ModelBenchmarkCardState extends State<ModelBenchmarkCard> {
         );
       }
     } finally {
+      widget.controller.isPreparingBenchmark = false;
       if (mounted) setState(() => _loadingCachedPackage = false);
     }
   }
@@ -139,6 +162,7 @@ class _ModelBenchmarkCardState extends State<ModelBenchmarkCard> {
     }
     final token = widget.controller.adminSession.token;
     if (token == null) return;
+    widget.controller.isPreparingBenchmark = true;
     setState(() {
       _downloading = true;
       _downloadProgress = 0;
@@ -185,6 +209,7 @@ class _ModelBenchmarkCardState extends State<ModelBenchmarkCard> {
       if (partialPath != null) {
         await _deleteIfExists(partialPath);
       }
+      widget.controller.isPreparingBenchmark = false;
       if (mounted) {
         setState(() => _downloading = false);
       }
@@ -239,6 +264,7 @@ class _ModelBenchmarkCardState extends State<ModelBenchmarkCard> {
     RandomAccessFile? package;
     try {
       if (!await widget.controller.validateAdmin() || !mounted) return;
+      await widget.controller.ensureModelLoaded();
       final path = _packagePath;
       if (path == null || _samples.isEmpty) {
         throw StateError('Tải gói benchmark trước khi chạy.');

@@ -17,20 +17,24 @@ class ServerLocator {
   ServerLocator({
     Future<List<String>> Function(int port)? candidates,
     Future<String?> Function(String url)? probe,
+    DateTime Function()? now,
     this.allowInsecureLan = kAllowInsecureLan,
     this.allowLanScan = true,
     this.configuredUrl = kConfiguredServerUrl,
   }) : _candidates = candidates ?? lanCandidates,
+       _now = now ?? DateTime.now,
        _probe = probe ?? _probeServer;
 
   final Future<List<String>> Function(int port) _candidates;
   final Future<String?> Function(String url) _probe;
+  final DateTime Function() _now;
   final bool allowInsecureLan;
   final bool allowLanScan;
   final String configuredUrl;
   OutboxLocalDataSource? _outbox;
   String? _connectedUrl;
-  DateTime? _lastScan;
+  DateTime? _nextScan;
+  int _failedScans = 0;
 
   String? get connectedUrl => _connectedUrl;
 
@@ -63,13 +67,13 @@ class ServerLocator {
     _connectedUrl = null;
     setServerBaseUrl(null);
     if (!allowInsecureLan || !allowLanScan) return false;
-    final now = DateTime.now();
-    if (!force &&
-        _lastScan != null &&
-        now.difference(_lastScan!) < const Duration(minutes: 1)) {
+    final now = _now();
+    if (!force && _nextScan != null && now.isBefore(_nextScan!)) {
       return false;
     }
-    _lastScan = now;
+    const delays = [1, 2, 5];
+    _nextScan = now.add(Duration(minutes: delays[_failedScans.clamp(0, 2)]));
+    _failedScans++;
 
     final configured = Uri.tryParse(configuredUrl);
     final port = configured?.hasPort == true ? configured!.port : 8000;
@@ -120,6 +124,8 @@ class ServerLocator {
     String url,
   ) async {
     await outbox.saveServer(id, url);
+    _failedScans = 0;
+    _nextScan = null;
     _connectedUrl = url;
     setServerBaseUrl(url);
   }

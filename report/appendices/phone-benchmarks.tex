@@ -1,0 +1,31 @@
+\section{Kết quả đầy đủ của benchmark nhận diện trên điện thoại}\label{sec:phone-full-results}
+Phần này công bố đủ 32 cấu hình của bộ benchmark có provenance, làm căn cứ cho ba bảng tóm tắt và kết luận tại Mục~\ref{sec:phone-benchmark-results}. Không loại cấu hình kém thuận lợi. Mỗi cấu hình dùng cùng 256 ảnh test, gồm 86 non\_flood, 56 low, 60 medium và 54 high; mỗi ảnh có một dự đoán trong từng phiên. Các phiên dùng lại ảnh nên không làm tăng số ảnh độc lập lên 8.192.
+
+Mã cấu hình có dạng \texttt{seed-biến thể-máy-runtime}. B là baseline, P là cắt tỉa; RM15 là realme 15, RN11 là Redmi Note 11, RN13 là Redmi Note 13 và S10e là Samsung S10e. O là ONNX, T là ExecuTorch/PTE. Ví dụ, \texttt{1024-P-RN13-T} là seed 1024 cắt tỉa chạy PTE trên Redmi Note 13. Thông tin thiết bị, dataset và phạm vi đo được mô tả ở Mục~\ref{sec:phone-benchmark-setup}.
+
+\subsection{Chất lượng phân loại theo cấu hình}
+Accuracy (Acc.) là tỷ lệ dự đoán đúng; P/R/F1 macro là trung bình có trọng số bằng nhau của chỉ số tương ứng ở bốn lớp. Macro-Recall cũng chính là balanced accuracy trong bài toán này. Các giá trị phần trăm được làm tròn hai chữ số; CSV giữ độ chính xác cao hơn.
+\input{generated/tables/phone-full-quality}
+
+\subsection{Sai lệch thứ bậc và lỗi nặng}
+Đặt $s(\mathrm{non\_flood})=0$, $s(\mathrm{low})=1$, $s(\mathrm{medium})=2$, $s(\mathrm{high})=3$. Với $e_i=s(\hat y_i)-s(y_i)$ và $n=256$, hai chỉ số bổ sung được tính như sau:
+\[
+\operatorname{MAE}=\frac{1}{n}\sum_{i=1}^{n}|e_i|,
+\qquad
+\operatorname{RMSE}=\sqrt{\frac{1}{n}\sum_{i=1}^{n}e_i^2}.
+\]
+Lỗi nặng là số ảnh có $|e_i|\geq2$. Khoảng cách giữa các mức được quy ước bằng một, không phải độ sâu ngập hay chi phí cứu hộ. MAE/RMSE chưa có trong JSON gốc; chúng được tính lại từ dự đoán, không chạy suy luận mới và không sửa dữ liệu nguồn.
+\input{generated/tables/phone-full-ordinal}
+
+\subsection{Thời gian xử lý theo cấu hình}
+Mean là trung bình thời gian từng ảnh; P50/P95 dùng nearest-rank sau khi loại năm lượt warmup khỏi latency. Đơn vị là ms; phạm vi là giải mã, tiền xử lý và suy luận trong \texttt{classifyImage}. Bảng giữ thời gian riêng từng máy, không dùng thời gian tổng hợp thay cho kết quả từng thiết bị.
+\input{generated/tables/phone-full-latency}
+
+\subsection{Precision, Recall và F1 theo từng lớp}
+Bảng gồm 128 hàng, tương ứng 32 cấu hình nhân bốn lớp. Cột số ảnh là số mẫu thật của lớp trong test; không phải số ảnh model dự đoán vào lớp đó. F1 được tính riêng từ Precision/Recall từng lớp, sau đó mới lấy trung bình để có macro-F1. Việc hai runtime có cùng nhãn top-1 làm các chỉ số này bằng nhau trong từng cặp máy/model, nhưng không chứng minh vector xác suất của hai runtime giống tuyệt đối.
+\input{generated/tables/phone-full-classes}
+
+\subsection{Truy vết nguồn và cách tổng hợp}
+CSV tổng hợp được lưu ở \RepoPath{report/generated/phone-benchmarks/summary.csv}; các file \path{predictions.csv}, \path{class_metrics.csv} và \path{coverage.csv} nằm trong thư mục con \path{evaluate_model_phone}. Bốn CSV từng điện thoại nằm trong \path{evaluate_phone}; các bảng so sánh model và runtime ở \path{evaluate_baseline_pruning} và \path{evaluate_onnx_pte}. Mỗi dòng summary giữ nguồn JSON, hash nguồn, hash model/split, run ID và timestamp UTC để đối chiếu. Dự đoán từng ảnh và ma trận nhầm lẫn gốc vẫn được giữ trong CSV/JSON, không in hàng nghìn dòng vào báo cáo.
+
+Bảy bảng được sinh bởi \RepoPath{report/scripts/build_phone_report_tables.py}; công cụ đối chiếu 32 JSON với hash nguồn, dự đoán, chỉ số, thời gian và support từng lớp trước khi xuất bảng. Bảng tóm tắt bốn phương án ở Chương~4 lấy trung bình chỉ số của tám phiên máy--runtime; số lỗi nặng cũng lấy trung bình nên có thể không nguyên. Các bảng trong phụ lục này giữ chỉ số riêng của từng phiên; không thay thế bằng một ma trận gộp các ảnh được dùng lại.
