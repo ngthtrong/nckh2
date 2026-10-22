@@ -22,7 +22,7 @@ Tái xuất từ thư mục gốc repo:
 python report/scripts/export_phone_benchmarks.py
 ```
 
-Mục 4.2.5 của báo cáo đã có ba bảng chính và đánh giá lựa chọn; phụ lục công bố đủ 32 cấu hình và 128 hàng chỉ số từng lớp.
+Mục 4.2.4 của báo cáo đã có ba bảng chính và đánh giá lựa chọn; phụ lục công bố đủ 32 cấu hình và 128 hàng chỉ số từng lớp.
 
 ## So sánh và lựa chọn baseline/pruning
 

@@ -38,7 +38,7 @@ Hình~\ref{fig:confidence-calibration} được tính từ dự đoán FP32 trê
 Nghiên cứu calibration phân biệt confidence của mạng với khả năng đúng quan sát được và khảo sát temperature scaling trên các bài toán phân loại \citep{guo2017calibration}. Đối với đề tài, một bước tiếp theo là fit phép hiệu chuẩn trên validation rồi đo trên tập camera độc lập. Đồng thời, cần đánh giá cả lượng dữ liệu tiết kiệm và số ca quan trọng bị thiếu ảnh tại trung tâm, bởi tỷ lệ phân loại đúng chưa đủ đo chất lượng quyết định truyền tải.
 
 \subsection{Đối chiếu PyTorch, ONNX và ExecuTorch}
-Bảng runtime FP32 dưới đây thuộc model seed \BenchmarkSeed{}; benchmark ứng dụng thuộc seed \MobileBenchmarkSeed{}, lượng tử hóa thuộc seed \QuantizationSeed{} và cắt tỉa thuộc seed \PruningSeed{}. Các nguồn được chọn độc lập với checkpoint đang triển khai, tránh gán số liệu lịch sử cho model mới khi chưa đo lại.
+Bảng runtime FP32 dưới đây thuộc model seed \BenchmarkSeed{}; benchmark trên bốn điện thoại dùng seed 159/1024 tại Mục~\ref{sec:phone-benchmark-results}, lượng tử hóa thuộc seed \QuantizationSeed{} và cắt tỉa thuộc seed \PruningSeed{}. Các nguồn được chọn độc lập với checkpoint đang triển khai, tránh gán số liệu lịch sử cho model mới khi chưa đo lại.
 
 \input{generated/tables/pth_onnx_pte}
 
@@ -48,31 +48,8 @@ Bảng~\ref{tab:pth_onnx_pte} trình bày dung lượng và trung vị lời g�
 
 Verification trên \VerificationSamples{} ảnh test ghi \VerificationPassedChecks{} kiểm tra local pass gồm tiền xử lý, precision, provider, parity và label mapping. Công cụ verification chỉ kiểm tra PTH/ONNX trên CPU; trường mobile của tệp này không đánh giá phiên benchmark ứng dụng độc lập. Kết quả full test xác nhận đường suy luận đã kiểm tra trên tập cố định, chưa thay thế phép đối chiếu pixel/runtime native trên điện thoại.
 
-\subsection{Benchmark tại ứng dụng và đối chiếu với CPU}\label{sec:mobile-results}
-Nguồn benchmark ứng dụng được chọn cho seed \MobileBenchmarkSeed{} chứa một object JSON cho ONNX và một object cho PTE. Bộ xuất yêu cầu đủ \ImageTest{} ảnh ở mỗi runtime, trạng thái complete, không lỗi suy luận và không lỗi warmup. Script nối sample ID với SHA-1 rút gọn của đường dẫn tương đối theo cách đóng gói benchmark, kiểm tra đủ ID/nhãn test và tính lại ma trận, Accuracy, macro-F1, mean/P50/P95 trước khi đưa số liệu vào bảng.
-
-\input{generated/tables/mobile-runtime}
-
-
-ONNX đạt Accuracy \MobileOnnxAccuracy\% và macro-F1 \MobileOnnxMacroFOne\%; PTE đạt Accuracy \MobilePteAccuracy\% và macro-F1 \MobilePteMacroFOne\%. Hai runtime đồng thuận top-1 trên \MobileAgreementCount/\ImageTest{} ảnh.
-\ifnum\BenchmarkSeed=\MobileBenchmarkSeed\relax
-So với dự đoán CPU FP32 seed \BenchmarkSeed{}, ONNX đồng thuận \MobileOnnxCpuAgreement/\ImageTest{} ảnh (\MobileOnnxCpuAgreementPercent\%) và PTE đồng thuận \MobilePteCpuAgreement/\ImageTest{} ảnh (\MobilePteCpuAgreementPercent\%). Cần đối chiếu hash asset và tiền xử lý trước khi quy chênh lệch cho engine; chưa có thí nghiệm cô lập nguyên nhân.
-\else
-Benchmark CPU và mobile hiện thuộc hai seed khác nhau, vì vậy không dùng chênh lệch dự đoán giữa hai phiên để đánh giá parity runtime. Cần chạy lại benchmark trên đúng APK/model seed \BenchmarkSeed{} trước khi đối chiếu tiền xử lý và engine với CPU.
-\fi
-
-\begin{figure}[htbp]\centering
-\includegraphics[width=.9\textwidth]{mobile-latency.pdf}
-\caption{Phân bố thời gian classifyImage của benchmark ứng dụng seed \MobileBenchmarkSeed{}}
-\label{fig:mobile-latency}
-\end{figure}
-
-Theo mã nguồn dịch vụ đo hiệu năng trong ứng dụng, đồng hồ cho từng ảnh bắt đầu sau khi đọc bytes và bao quanh lời gọi repository \texttt{classifyImage}. Datasource native thực hiện giải mã/letterbox, chuẩn hóa tensor và gọi runtime trong lời gọi này. Vì vậy, phạm vi timing rộng hơn predict CPU, nhưng không bao gồm tải ảnh benchmark từ package hay nạp model ban đầu. P50/P95 được mã app tính bằng nearest-rank; báo cáo giữ cách tính đó thay vì dùng median nội suy khác.
-
-Bảng~\ref{tab:mobile-runtime} trình bày kết quả đo độ trễ suy luận (P50 và P95) cho từng định dạng runtime trên thiết bị di động thử nghiệm (Samsung Galaxy S21). Việc đo lường trên thiết bị thực tế bao gồm toàn bộ thời gian từ khâu giải mã ảnh, chuẩn hóa tensor đến thời gian thực thi của runtime. Kết quả cho thấy cả hai giải pháp ExecuTorch và ONNX Runtime đều đáp ứng tốt yêu cầu xử lý thời gian thực tại biên.
-
 \subsection{Đánh giá mô hình nhận diện trên các mẫu điện thoại}\label{sec:phone-benchmark-results}
-Theo thiết lập ở Mục~\ref{sec:phone-benchmark-setup}, bộ đánh giá gồm đủ 32 cấu hình: bốn điện thoại, hai seed 159/1024, hai biến thể baseline/cắt tỉa và hai runtime ONNX/PTE. Mỗi cấu hình có 256 ảnh test và năm lượt warmup; không có lỗi suy luận hoặc warmup trong các JSON đã lưu. Bộ số liệu này tách khỏi nguồn benchmark seed 42 lịch sử ở mục trước. Ba bảng dưới đây trình bày cơ sở lựa chọn; Mục~\ref{sec:phone-full-results} giữ đủ kết quả từng cấu hình và từng lớp.
+Theo thiết lập ở Mục~\ref{sec:phone-benchmark-setup}, bộ đánh giá gồm đủ 32 cấu hình: bốn điện thoại, hai seed 159/1024, hai biến thể baseline/cắt tỉa và hai runtime ONNX/PTE. Mỗi cấu hình có 256 ảnh test và năm lượt warmup; không có lỗi suy luận hoặc warmup trong các JSON đã lưu. Bộ số liệu này độc lập với nguồn benchmark ứng dụng lịch sử được lưu để truy vết ở Mục~\ref{sec:historical-app-benchmark}. Ba bảng dưới đây trình bày cơ sở lựa chọn; Mục~\ref{sec:phone-full-results} giữ đủ kết quả từng cấu hình và từng lớp.
 
 \subsubsection{So sánh baseline và cắt tỉa trong từng seed}
 Bảng~\ref{tab:phone-model-quality} dùng cùng bốn điện thoại để đối chiếu bốn phương án; B là baseline, P là cắt tỉa có cấu trúc. Mỗi giá trị là trung bình có trọng số bằng nhau của tám phiên máy--runtime thuộc phương án đó. Trong cùng máy và model, ONNX/PTE trùng nhãn dự đoán trên 256/256 ảnh, nên lấy trung bình hai runtime không làm tăng số ảnh độc lập. Không diễn giải tám phiên hoặc toàn bộ dự đoán lặp là các tập test độc lập.
@@ -228,11 +205,14 @@ Mục CHƯA CÓ của cả hai lượt là thông báo cho người dùng giải
 
 Hồ sơ hiện có summary, checks và checkpoint của hai lượt, nhưng chưa tìm thấy manifest tại vị trí log chuẩn; log hiện chỉ thấy của run\_002. Vì vậy trạng thái complete không đồng nghĩa hồ sơ truy vết đã đầy đủ. Không cộng hai lượt thành 92 tiêu chí độc lập để suy luận độ tin cậy tổng quát của hệ thống.
 
-\subsection{Khảo sát truyền tải thích ứng trong điều kiện mạng yếu}
+\subsection{Truyền tải thích ứng và hiệu năng trong điều kiện mạng yếu}\label{sec:weak-network-results}
+Phần này đối chiếu hai khía cạnh của truyền tải dưới mạng yếu: cơ chế chọn chế độ gửi và hiệu năng khi đo riêng từng chế độ. Kết quả chức năng lịch sử và lượt đo định lượng được giữ rõ nguồn, vì có cấu hình mạng và phạm vi kiểm tra khác nhau.
+
+\subsubsection{Kiểm tra cơ chế chọn chế độ gửi}
 Thực nghiệm kiểm thử tích hợp đầu cuối (E2E) với các kịch bản giới hạn băng thông (network throttling) xác nhận cơ chế chọn chế độ gửi thích ứng hoạt động chính xác theo thiết kế: trong điều kiện mạng thông suốt, ứng dụng truyền tải ảnh gốc đầy đủ (kích thước khoảng 53,6 KB); khi băng thông giảm xuống mức trung bình (khoảng 300 kbit/s), ứng dụng kích hoạt chế độ nén ảnh tự động (kích thước khoảng 42,4 KB); và khi kết nối suy giảm nghiêm trọng (dưới 50 kbit/s), ứng dụng tự động chuyển sang chế độ chỉ gửi metadata cứu hộ nhằm đảm bảo tối đa khả năng tiếp nhận thông tin cứu nạn kịp thời.
 
-\subsection{Đánh giá định lượng truyền tải dưới mạng yếu giả lập}\label{sec:weak-network-results}
-Khác với khảo sát hành vi chọn chế độ ở mục trước, lượt \texttt{20261005-102040} đo riêng từng chế độ gửi trên 257 ảnh validation theo Mục~\ref{sec:weak-network-setup}. Checkpoint ghi complete, CSV có đủ 2.313 lượt hợp lệ. Nguồn số liệu là \RepoPath{thuc_nghiem_nq/experiment_weak_network/results/20261005-102040/weak_network.csv} và bản tổng hợp \texttt{weak\_network.md} cùng thư mục. Đây là kết quả đã lưu, không phải chạy mới khi biên soạn báo cáo.
+\subsubsection{Đánh giá độ trễ và tỷ lệ truyền thành công}
+Bên cạnh kiểm tra hành vi chọn chế độ, lượt \texttt{20261005-102040} đo riêng từng chế độ gửi trên 257 ảnh validation theo Mục~\ref{sec:weak-network-setup}. Checkpoint ghi complete, CSV có đủ 2.313 lượt hợp lệ. Nguồn số liệu là \RepoPath{thuc_nghiem_nq/experiment_weak_network/results/20261005-102040/weak_network.csv} và bản tổng hợp \texttt{weak\_network.md} cùng thư mục. Đây là kết quả đã lưu, không phải chạy mới khi biên soạn báo cáo.
 
 \begin{table}[htbp]\centering
 \caption{Tỷ lệ thành công và độ trễ theo cấu hình mạng giả lập}
