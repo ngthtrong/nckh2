@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-import 'package:url_launcher/url_launcher.dart';
+import 'emergency_call.dart';
 import '../../domain/entities/emergency_number.dart';
 
 class PhoneLinkCard extends StatelessWidget {
@@ -62,20 +62,13 @@ class PhoneLinkCard extends StatelessWidget {
     }
   }
 
-  Future<void> _makeCall() async {
-    final Uri uri = Uri.parse('tel:${item.num.replaceAll(' ', '')}');
-    if (await canLaunchUrl(uri)) {
-      await launchUrl(uri);
-    }
-  }
-
   @override
   Widget build(BuildContext context) {
     return Material(
       color: _getBgColor(),
       borderRadius: BorderRadius.circular(16),
       child: GestureDetector(
-        onTap: _makeCall,
+        onTap: () => openEmergencyDialer(context, item.num),
         child: Container(
           padding: EdgeInsets.symmetric(
             horizontal: 14,

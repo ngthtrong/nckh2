@@ -1,14 +1,14 @@
 import 'dart:async';
 
 import 'package:flutter/material.dart';
-import 'package:url_launcher/url_launcher.dart';
 
 import '../../../core/constants/app_colors.dart';
 import '../../controllers/app_controller.dart';
 import '../../widgets/app_header.dart';
 import '../../widgets/compose_cta_card.dart';
 import '../../widgets/sos_button.dart';
-import '../../../domain/entities/send_mode.dart';
+import '../../widgets/emergency_call.dart';
+import '../../../domain/entities/sms_delivery.dart';
 
 class HomeScreen extends StatefulWidget {
   final AppController controller;
@@ -54,22 +54,30 @@ class _HomeScreenState extends State<HomeScreen> {
     super.dispose();
   }
 
-  Future<void> _handleSos() async {
+  Future<void> _handleSos({bool retrySms = false}) async {
     if (_sosState == SosState.pressed || widget.controller.isBusy) return;
     _sosResetTimer?.cancel();
     setState(() => _sosState = SosState.pressed);
 
-    final record = await widget.controller.sendSos().catchError((_) => null);
+    final record =
+        await (retrySms
+                ? widget.controller.retrySosSms()
+                : widget.controller.sendSos())
+            .catchError((_) => null);
 
     if (mounted) {
-      final mode = sendModeFromName(record?.sendMode);
       final syncError = record?.syncError;
       final state = record == null || syncError != null
           ? SosState.failed
           : record.synced
           ? SosState.accepted
-          : mode == SendMode.smsFallback
+          : record.smsStatus == SmsStatus.sent
           ? SosState.sms
+          : record.smsStatus == SmsStatus.unknown ||
+                record.smsStatus == SmsStatus.sending
+          ? SosState.smsUnknown
+          : record.smsStatus == SmsStatus.failed
+          ? SosState.smsFailed
           : SosState.queued;
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(
@@ -77,6 +85,8 @@ class _HomeScreenState extends State<HomeScreen> {
             SosState.accepted => 'Máy chủ đã tiếp nhận SOS.',
             SosState.sms =>
               'Đã gửi SMS; chưa xác nhận tiếp nhận. SOS sẽ đồng bộ khi có mạng.',
+            SosState.smsUnknown => smsStatusMessage(SmsStatus.unknown),
+            SosState.smsFailed => smsStatusMessage(SmsStatus.failed),
             SosState.queued => 'SOS trong hàng đợi, sẽ gửi khi có mạng.',
             _ =>
               syncError != null
@@ -95,10 +105,40 @@ class _HomeScreenState extends State<HomeScreen> {
   }
 
   Future<void> _makeCall(String number) async {
-    final Uri uri = Uri.parse('tel:$number');
-    if (await canLaunchUrl(uri)) {
-      await launchUrl(uri);
+    await openEmergencyDialer(context, number);
+  }
+
+  Future<void> _retrySms() async {
+    final record = widget.controller.latestSos;
+    final attemptedAt = record?.smsAttemptedAt;
+    if (record == null || attemptedAt == null) return;
+    final remaining = 30 - DateTime.now().difference(attemptedAt).inSeconds;
+    if (remaining > 0) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(content: Text('Chờ $remaining giây trước khi thử lại SMS.')),
+      );
+      return;
     }
+    final confirmed = await showDialog<bool>(
+      context: context,
+      builder: (context) => AlertDialog(
+        title: const Text('Thử gửi lại SMS?'),
+        content: const Text(
+          'Lần trước gửi lỗi. Một số phần có thể đã gửi được; gửi lại có thể phát sinh phí SMS.',
+        ),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.pop(context, false),
+            child: const Text('Hủy'),
+          ),
+          TextButton(
+            onPressed: () => Navigator.pop(context, true),
+            child: const Text('Gửi lại'),
+          ),
+        ],
+      ),
+    );
+    if (confirmed == true && mounted) await _handleSos(retrySms: true);
   }
 
   @override
@@ -115,6 +155,14 @@ class _HomeScreenState extends State<HomeScreen> {
 
           // SOS Section
           SosButtonSection(state: _sosState, onPressed: _handleSos),
+          if (c.latestSos case final last?
+              when last.smsStatus == SmsStatus.failed &&
+                  !last.metadataSynced &&
+                  last.syncError == null)
+            TextButton(
+              onPressed: c.isBusy ? null : _retrySms,
+              child: const Text('Thử lại SMS cho SOS đã lưu'),
+            ),
 
           // Compose CTA Card (Giữ nguyên kích thước như cũ)
           ComposeCtaCard(onPressed: widget.onComposePressed),

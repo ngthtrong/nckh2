@@ -1,6 +1,8 @@
 import 'package:hive_ce_flutter/hive_flutter.dart';
 import '../../domain/entities/ai_tag.dart';
 import '../../domain/entities/rescue_record.dart';
+import '../../domain/entities/rescue_status.dart';
+import '../../domain/entities/sms_delivery.dart';
 
 class RecordLocalDataSource {
   static const String boxName = 'records';
@@ -11,11 +13,40 @@ class RecordLocalDataSource {
   Future<void> init({String? hivePath}) async {
     hivePath == null ? await Hive.initFlutter() : Hive.init(hivePath);
     _box = await Hive.openBox<Map>(boxName);
+    _orderedIds = null;
   }
 
   bool get ready => _box != null;
 
   Future<void> saveRecord(RescueRecord record) async {
+    final previous = _box?.get(record.id);
+    if (previous != null) {
+      final saved = _recordFromMap(previous);
+      // A foreground SMS result may arrive after the worker has saved an ACK.
+      record = record.copyWith(
+        metadataSynced: record.metadataSynced || saved.metadataSynced,
+        synced: record.synced || saved.synced,
+        status: advancedStatus(saved.status, record.status) ?? saved.status,
+        syncError: record.syncError ?? saved.syncError,
+      );
+      final incomingSmsAt = record.smsAttemptedAt?.millisecondsSinceEpoch ?? -1;
+      final savedSmsAt = saved.smsAttemptedAt?.millisecondsSinceEpoch ?? -1;
+      if (incomingSmsAt < savedSmsAt ||
+          (incomingSmsAt == savedSmsAt &&
+              ((record.smsStatus == SmsStatus.notAttempted &&
+                      saved.smsStatus != SmsStatus.notAttempted) ||
+                  (record.smsStatus == SmsStatus.sending &&
+                      saved.smsStatus != SmsStatus.notAttempted &&
+                      saved.smsStatus != SmsStatus.sending) ||
+                  saved.smsStatus == SmsStatus.sent))) {
+        record = record.copyWith(
+          smsStatus: saved.smsStatus,
+          smsError: saved.smsError,
+          smsAttemptedAt: saved.smsAttemptedAt,
+          clearSmsError: saved.smsError == null,
+        );
+      }
+    }
     final map = {
       'id': record.id,
       'createdAtMs': record.createdAt.millisecondsSinceEpoch,
@@ -33,15 +64,22 @@ class RecordLocalDataSource {
       'severeSigns': record.severeSigns,
       'urgencyScore': record.urgencyScore,
       'description': record.description,
+      'contactPhone': record.contactPhone,
       'sendMode': record.sendMode,
       'synced': record.synced,
       'metadataSynced': record.metadataSynced,
+      'smsStatus': record.smsStatus.name,
+      'smsError': record.smsError,
+      'smsAttemptedAtMs': record.smsAttemptedAt?.millisecondsSinceEpoch,
       'attachmentError': record.attachmentError,
       'status': record.status,
       'syncError': record.syncError,
     };
     await _box?.put(record.id, map);
-    _orderedIds = null;
+    if (previous == null ||
+        _createdAtMs(previous) != record.createdAt.millisecondsSinceEpoch) {
+      _orderedIds = null;
+    }
   }
 
   List<RescueRecord> getAllRecords() {
@@ -106,6 +144,7 @@ class RecordLocalDataSource {
             .toList() ??
         [];
     final createdAtMs = _createdAtMs(m);
+    final smsAttemptedAtMs = m['smsAttemptedAtMs'];
 
     return RescueRecord(
       id: m['id'] as String? ?? 'id-${DateTime.now().millisecondsSinceEpoch}',
@@ -126,9 +165,23 @@ class RecordLocalDataSource {
       severeSigns: severeSigns,
       urgencyScore: (m['urgencyScore'] as num?)?.toDouble(),
       description: m['description'] as String? ?? m['note'] as String? ?? '',
+      contactPhone: m['contactPhone'] as String?,
       sendMode: m['sendMode'] as String? ?? m['mode'] as String? ?? 'direct',
       synced: m['synced'] as bool? ?? (m['status'] == 'sent'),
       metadataSynced: m['metadataSynced'] as bool? ?? m['synced'] == true,
+      smsStatus: SmsStatus.values.firstWhere(
+        (status) => status.name == m['smsStatus'],
+        orElse: () => m['sendMode'] == 'smsFallback'
+            ? SmsStatus.unknown
+            : SmsStatus.notAttempted,
+      ),
+      smsError: m['smsError'] as String?,
+      smsAttemptedAt: smsAttemptedAtMs is num
+          ? DateTime.fromMillisecondsSinceEpoch(
+              smsAttemptedAtMs.toInt(),
+              isUtc: true,
+            )
+          : null,
       attachmentError: m['attachmentError'] as String?,
       status: m['status'] as String? ?? 'processing',
       syncError: m['syncError'] as String?,

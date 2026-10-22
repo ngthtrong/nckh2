@@ -1,17 +1,10 @@
 import 'package:flutter/material.dart';
-import 'package:url_launcher/url_launcher.dart';
+import 'emergency_call.dart';
 import '../../core/constants/app_colors.dart';
 import '../../core/constants/emergency_data.dart';
 
 class QuickCallPanel extends StatelessWidget {
   const QuickCallPanel({super.key});
-
-  Future<void> _makeCall(String number) async {
-    final Uri uri = Uri.parse('tel:$number');
-    if (await canLaunchUrl(uri)) {
-      await launchUrl(uri);
-    }
-  }
 
   @override
   Widget build(BuildContext context) {
@@ -44,7 +37,7 @@ class QuickCallPanel extends StatelessWidget {
                     color: Colors.white,
                     borderRadius: BorderRadius.circular(12),
                     child: GestureDetector(
-                      onTap: () => _makeCall(c.number),
+                      onTap: () => openEmergencyDialer(context, c.number),
                       child: Container(
                         padding: const EdgeInsets.symmetric(vertical: 8),
                         decoration: BoxDecoration(

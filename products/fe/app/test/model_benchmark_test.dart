@@ -1,4 +1,5 @@
 import 'package:app/core/platform/benchmark_environment.dart';
+import 'package:app/config.dart';
 import 'package:app/data/datasources/admin_session.dart';
 import 'package:app/domain/entities/ai_model_type.dart';
 import 'package:app/domain/repositories/inference_repository.dart';
@@ -107,6 +108,14 @@ void main() {
       );
       addTearDown(controller.dispose);
       controller.isModelLoading = false;
+      if (!kAdminModelTools) {
+        expect(controller.beginBenchmark(), isFalse);
+        controller.switchAiModel(AiModelType.onnx);
+        controller.toggleDualComparison(true);
+        expect(repo.currentModel, AiModelType.pte);
+        expect(repo.isDualComparison, isFalse);
+        return;
+      }
       expect(controller.beginBenchmark(), isTrue);
       controller.switchAiModel(AiModelType.onnx);
       controller.toggleDualComparison(true);

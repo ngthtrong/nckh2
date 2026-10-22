@@ -3,6 +3,7 @@ import 'package:intl/intl.dart';
 
 import '../../../domain/entities/rescue_record.dart';
 import '../../../domain/entities/send_mode.dart';
+import '../../../domain/entities/sms_delivery.dart';
 import '../../widgets/quick_call_panel.dart';
 import '../../widgets/status_tracker.dart';
 import '../../widgets/tag_chip.dart';
@@ -88,6 +89,14 @@ class SubmittedScreen extends StatelessWidget {
                       ),
                     ),
                     const SizedBox(height: 20),
+                    if (record.smsStatus != SmsStatus.notAttempted) ...[
+                      Text(
+                        smsStatusMessage(record.smsStatus),
+                        textAlign: TextAlign.center,
+                        style: const TextStyle(color: Color(0xFFB45309)),
+                      ),
+                      const SizedBox(height: 12),
+                    ],
                     if (record.attachmentError != null)
                       const Text(
                         'Không đọc được ảnh đính kèm. Báo cáo chưa đồng bộ xong; hãy gửi lại ảnh cùng báo cáo.',

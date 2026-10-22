@@ -1,6 +1,7 @@
 import 'dart:async';
 import 'dart:convert';
 import 'dart:io';
+import 'package:app/config.dart';
 
 import 'package:app/data/datasources/admin_model_download_native.dart';
 import 'package:app/data/datasources/admin_session.dart';
@@ -184,6 +185,17 @@ void main() {
         () => controller.loginAdmin('admin', 'server-password'),
       );
       await tester.pump();
+      if (!kAdminModelTools) {
+        expect(controller.isAdmin, isFalse);
+        expect(find.byType(ModelBenchmarkCard), findsNothing);
+        expect(
+          find.text('Dọn ONNX và dữ liệu benchmark đã tải'),
+          findsOneWidget,
+        );
+        await tester.pumpWidget(const SizedBox());
+        controller.dispose();
+        return;
+      }
       expect(controller.isAdmin, isTrue);
       expect(find.byType(ModelBenchmarkCard), findsOneWidget);
       expect(find.text('So sánh ONNX và PTE thật'), findsOneWidget);

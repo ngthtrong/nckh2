@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import '../../core/constants/app_colors.dart';
+import '../../config.dart';
 
 class NumberStepperInput extends StatefulWidget {
   final String label;
@@ -47,8 +48,14 @@ class _NumberStepperInputState extends State<NumberStepperInput> {
   }
 
   void _updateValue(int newValue) {
-    final clamped = newValue < 0 ? 0 : newValue;
-    _textController.text = '$clamped';
+    final clamped = newValue.clamp(0, kMaxReportPeople);
+    final text = '$clamped';
+    if (_textController.text != text) {
+      _textController.value = TextEditingValue(
+        text: text,
+        selection: TextSelection.collapsed(offset: text.length),
+      );
+    }
     widget.onChanged(clamped);
   }
 
@@ -89,8 +96,10 @@ class _NumberStepperInputState extends State<NumberStepperInput> {
                       : null,
                   icon: const Icon(Icons.remove, size: 18),
                   padding: EdgeInsets.zero,
-                  constraints:
-                      const BoxConstraints(minWidth: 36, minHeight: 36),
+                  constraints: const BoxConstraints(
+                    minWidth: 36,
+                    minHeight: 36,
+                  ),
                 ),
                 SizedBox(
                   width: 48,
@@ -109,18 +118,21 @@ class _NumberStepperInputState extends State<NumberStepperInput> {
                       contentPadding: EdgeInsets.symmetric(vertical: 6),
                       border: InputBorder.none,
                     ),
-                    onChanged: (val) {
-                      final parsed = int.tryParse(val) ?? 0;
-                      widget.onChanged(parsed);
-                    },
+                    onChanged: (val) => _updateValue(
+                      val.isEmpty ? 0 : int.tryParse(val) ?? kMaxReportPeople,
+                    ),
                   ),
                 ),
                 IconButton(
-                  onPressed: () => _updateValue(widget.value + 1),
+                  onPressed: widget.value < kMaxReportPeople
+                      ? () => _updateValue(widget.value + 1)
+                      : null,
                   icon: const Icon(Icons.add, size: 18),
                   padding: EdgeInsets.zero,
-                  constraints:
-                      const BoxConstraints(minWidth: 36, minHeight: 36),
+                  constraints: const BoxConstraints(
+                    minWidth: 36,
+                    minHeight: 36,
+                  ),
                 ),
               ],
             ),

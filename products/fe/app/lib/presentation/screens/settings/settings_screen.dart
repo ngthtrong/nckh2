@@ -299,6 +299,7 @@ class _SettingsScreenState extends State<SettingsScreen> {
     bool showCurrent = false;
     bool showNew = false;
     bool showConfirm = false;
+    bool changingPassword = false;
     String? errorMessage;
 
     showModalBottomSheet(
@@ -402,44 +403,62 @@ class _SettingsScreenState extends State<SettingsScreen> {
                           ),
                           elevation: 0,
                         ),
-                        onPressed: () async {
-                          final current = currentPassController.text;
-                          final next = newPassController.text;
-                          final confirm = confirmPassController.text;
+                        onPressed: changingPassword
+                            ? null
+                            : () async {
+                                final current = currentPassController.text;
+                                final next = newPassController.text;
+                                final confirm = confirmPassController.text;
 
-                          if (current != user.password) {
-                            setModalState(
-                              () => errorMessage =
-                                  'Mật khẩu hiện tại không đúng.',
-                            );
-                            return;
-                          }
-                          if (next.length < 6) {
-                            setModalState(
-                              () => errorMessage =
-                                  'Mật khẩu mới tối thiểu 6 ký tự.',
-                            );
-                            return;
-                          }
-                          if (next != confirm) {
-                            setModalState(
-                              () => errorMessage =
-                                  'Mật khẩu xác nhận không khớp.',
-                            );
-                            return;
-                          }
+                                if (next.length < 6) {
+                                  setModalState(
+                                    () => errorMessage =
+                                        'Mật khẩu mới tối thiểu 6 ký tự.',
+                                  );
+                                  return;
+                                }
+                                if (next != confirm) {
+                                  setModalState(
+                                    () => errorMessage =
+                                        'Mật khẩu xác nhận không khớp.',
+                                  );
+                                  return;
+                                }
 
-                          final updated = user.copyWith(password: next);
-                          await widget.controller.updateUser(updated);
-                          if (sheetContext.mounted) {
-                            Navigator.of(sheetContext).pop();
-                            ScaffoldMessenger.of(context).showSnackBar(
-                              const SnackBar(
-                                content: Text('Đổi mật khẩu thành công!'),
-                              ),
-                            );
-                          }
-                        },
+                                setModalState(() => changingPassword = true);
+                                bool changed;
+                                try {
+                                  changed = await widget.controller
+                                      .changePassword(current, next);
+                                } catch (_) {
+                                  if (sheetContext.mounted) {
+                                    setModalState(() {
+                                      changingPassword = false;
+                                      errorMessage =
+                                          'Không đổi được mật khẩu. Vui lòng thử lại.';
+                                    });
+                                  }
+                                  return;
+                                }
+                                if (!changed) {
+                                  if (sheetContext.mounted) {
+                                    setModalState(() {
+                                      changingPassword = false;
+                                      errorMessage =
+                                          'Mật khẩu hiện tại không đúng.';
+                                    });
+                                  }
+                                  return;
+                                }
+                                if (sheetContext.mounted) {
+                                  Navigator.of(sheetContext).pop();
+                                  ScaffoldMessenger.of(context).showSnackBar(
+                                    const SnackBar(
+                                      content: Text('Đổi mật khẩu thành công!'),
+                                    ),
+                                  );
+                                }
+                              },
                         child: const Text(
                           'Đổi mật khẩu',
                           style: TextStyle(
@@ -781,7 +800,8 @@ class _SettingsScreenState extends State<SettingsScreen> {
                         leading: const Icon(Icons.dns_outlined),
                         title: const Text('Máy chủ cứu hộ'),
                         subtitle: Text(
-                          c.connectedServerUrl ?? 'Đang tìm trên mạng Wi-Fi',
+                          c.connectedServerUrl ??
+                              'Chưa kết nối · bấm để tìm lại',
                           maxLines: 1,
                           overflow: TextOverflow.ellipsis,
                         ),

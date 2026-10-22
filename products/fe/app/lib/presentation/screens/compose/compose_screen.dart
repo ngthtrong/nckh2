@@ -4,6 +4,8 @@ import 'package:flutter/material.dart';
 import 'package:image_picker/image_picker.dart';
 
 import '../../../core/constants/app_colors.dart';
+import '../../../config.dart';
+import '../../../domain/usecases/submit_rescue_post_usecase.dart';
 import '../../../core/platform/local_file.dart';
 import '../../../domain/entities/ai_tag.dart';
 import '../../controllers/app_controller.dart';
@@ -40,7 +42,9 @@ class _ComposeScreenState extends State<ComposeScreen> {
   String? _imagePath;
   List<AiTag> _aiTags = [];
   bool _isAnalyzing = false;
+  int _analysisGeneration = 0;
   bool _isSubmitting = false;
+  String? _submissionError;
 
   @override
   void initState() {
@@ -52,14 +56,16 @@ class _ComposeScreenState extends State<ComposeScreen> {
 
   Future<void> _pickPhoto(ImageSource source) async {
     final path = await widget.controller.pickImage(source: source);
-    if (path != null) {
+    if (path != null && mounted) {
+      final generation = ++_analysisGeneration;
       setState(() {
         _imagePath = path;
+        _aiTags = [];
         _isAnalyzing = true;
       });
 
       final tags = await widget.controller.analyzeImage(path);
-      if (mounted) {
+      if (mounted && generation == _analysisGeneration) {
         setState(() {
           _aiTags = tags;
           _isAnalyzing = false;
@@ -70,7 +76,10 @@ class _ComposeScreenState extends State<ComposeScreen> {
 
   Future<void> _handleSubmit() async {
     if (_isSubmitting) return;
-    setState(() => _isSubmitting = true);
+    setState(() {
+      _isSubmitting = true;
+      _submissionError = null;
+    });
 
     final record = await widget.controller.submitPost(
       trappedCount: _trappedCount,
@@ -87,6 +96,12 @@ class _ComposeScreenState extends State<ComposeScreen> {
       setState(() => _isSubmitting = false);
       if (record != null) {
         widget.onSuccess();
+      } else {
+        setState(
+          () => _submissionError =
+              widget.controller.submissionError ??
+              'Chưa gửi được báo cáo. Nội dung form vẫn được giữ; hãy thử lại.',
+        );
       }
     }
   }
@@ -99,6 +114,11 @@ class _ComposeScreenState extends State<ComposeScreen> {
 
   @override
   Widget build(BuildContext context) {
+    final inputError = SubmitRescuePostUseCase.validateInput(
+      trappedCount: _trappedCount,
+      injuredCount: _injuredCount,
+      description: _descController.text.trim(),
+    );
     final canSubmit =
         (_trappedCount > 0 ||
             _injuredCount > 0 ||
@@ -107,7 +127,8 @@ class _ComposeScreenState extends State<ComposeScreen> {
             _severeSigns.isNotEmpty ||
             _descController.text.trim().isNotEmpty ||
             _imagePath != null) &&
-        !_isSubmitting;
+        !_isSubmitting &&
+        inputError == null;
 
     return Scaffold(
       backgroundColor: Colors.white,
@@ -152,6 +173,14 @@ class _ComposeScreenState extends State<ComposeScreen> {
                       ),
               ),
             ),
+            if (_submissionError != null)
+              Padding(
+                padding: const EdgeInsets.fromLTRB(16, 0, 16, 12),
+                child: Text(
+                  _submissionError!,
+                  style: const TextStyle(color: AppColors.primaryRed),
+                ),
+              ),
             Expanded(
               child: SingleChildScrollView(
                 padding: const EdgeInsets.all(16),
@@ -259,8 +288,11 @@ class _ComposeScreenState extends State<ComposeScreen> {
                     TextField(
                       controller: _descController,
                       maxLines: 4,
-                      maxLength: 300,
+                      maxLength: kMaxDescriptionCharacters,
                       decoration: InputDecoration(
+                        errorText: inputError,
+                        counterText:
+                            '${SubmitRescuePostUseCase.descriptionWordCount(_descController.text)}/$kMaxDescriptionWords từ · ${_descController.text.runes.length}/$kMaxDescriptionCharacters ký tự',
                         hintText:
                             'Ghi rõ: ở đâu, gần cột điện/mốc đường nào, mức độ ngập nước hay tình trạng khẩn cấp...',
                         hintStyle: const TextStyle(
@@ -356,8 +388,10 @@ class _ComposeScreenState extends State<ComposeScreen> {
                             right: 8,
                             child: GestureDetector(
                               onTap: () => setState(() {
+                                _analysisGeneration++;
                                 _imagePath = null;
                                 _aiTags = [];
+                                _isAnalyzing = false;
                               }),
                               child: Container(
                                 padding: const EdgeInsets.all(6),

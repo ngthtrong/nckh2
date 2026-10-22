@@ -68,10 +68,6 @@ class InferenceLocalDataSource {
     _pteReady = false;
   }
 
-  Future<List<double>?> verifyAndroidLogits(Float32List inputTensor) async {
-    return null;
-  }
-
   Future<InferenceResult?> classifyImage(Uint8List imageBytes) async {
     return null;
   }

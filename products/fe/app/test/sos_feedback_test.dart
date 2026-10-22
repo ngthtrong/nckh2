@@ -1,6 +1,7 @@
 import 'dart:async';
 
 import 'package:app/domain/entities/rescue_record.dart';
+import 'package:app/domain/entities/sms_delivery.dart';
 import 'package:app/presentation/controllers/app_controller.dart';
 import 'package:app/presentation/screens/home/home_screen.dart';
 import 'package:app/presentation/widgets/sos_button.dart';
@@ -26,6 +27,8 @@ class _Controller extends ChangeNotifier implements AppController {
   @override
   bool get isAdmin => false;
   @override
+  RescueRecord? get latestSos => null;
+  @override
   int get pendingCount => 0;
 
   @override
@@ -42,6 +45,7 @@ RescueRecord _record({
   bool synced = false,
   String sendMode = 'queuedOffline',
   String? syncError,
+  SmsStatus smsStatus = SmsStatus.notAttempted,
 }) => RescueRecord(
   id: 'sos-test',
   createdAt: DateTime(2026),
@@ -50,6 +54,7 @@ RescueRecord _record({
   synced: synced,
   sendMode: sendMode,
   syncError: syncError,
+  smsStatus: smsStatus,
 );
 
 Future<void> _show(WidgetTester tester, _Controller controller) =>
@@ -82,9 +87,21 @@ void main() {
     ),
     (
       'sent by SMS',
-      _record(sendMode: 'smsFallback'),
+      _record(sendMode: 'smsFallback', smsStatus: SmsStatus.sent),
       'Đã gửi SMS; chưa xác nhận tiếp nhận.',
       'Đã gửi SMS; chưa xác nhận tiếp nhận. SOS sẽ đồng bộ khi có mạng.',
+    ),
+    (
+      'SMS result unknown',
+      _record(smsStatus: SmsStatus.unknown),
+      'Chưa xác nhận kết quả SMS. SOS vẫn chờ đồng bộ; không tự gửi SMS lặp.',
+      smsStatusMessage(SmsStatus.unknown),
+    ),
+    (
+      'SMS failed',
+      _record(smsStatus: SmsStatus.failed),
+      'Không gửi được SMS. SOS đã được lưu; hãy gọi 112 nếu cần trợ giúp ngay.',
+      smsStatusMessage(SmsStatus.failed),
     ),
     (
       'failed',

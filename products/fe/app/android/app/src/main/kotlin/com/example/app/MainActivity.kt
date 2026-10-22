@@ -1,9 +1,16 @@
 package com.example.app
 
 import android.app.Activity
+import android.app.PendingIntent
+import android.content.BroadcastReceiver
+import android.content.Context
 import android.content.Intent
+import android.content.IntentFilter
 import android.os.Build
+import android.os.Handler
+import android.os.Looper
 import android.telephony.SmsManager
+import androidx.core.content.ContextCompat
 import io.flutter.embedding.android.FlutterActivity
 import io.flutter.embedding.engine.FlutterEngine
 import io.flutter.plugin.common.MethodChannel
@@ -12,15 +19,43 @@ import org.pytorch.executorch.Module
 import org.pytorch.executorch.Tensor
 import java.net.Inet4Address
 import java.net.NetworkInterface
+import java.util.UUID
 import java.util.concurrent.Executors
+
+internal class SmsPartResults(totalParts: Int) {
+    private val results = arrayOfNulls<Boolean>(totalParts)
+    val totalParts: Int get() = results.size
+    val sentParts: Int get() = results.count { it == true }
+    val status: String?
+        get() = when {
+            results.any { it == null } -> null
+            results.all { it == true } -> "sent"
+            else -> "failed"
+        }
+
+    fun recordPart(index: Int, sent: Boolean): Boolean {
+        if (index !in results.indices || results[index] != null) return false
+        results[index] = sent
+        return true
+    }
+}
 
 class MainActivity : FlutterActivity() {
     private val pteExecutor = Executors.newSingleThreadExecutor()
     private var pteModule: Module? = null
     private val benchmarkExportExecutor = Executors.newSingleThreadExecutor()
     private var pendingBenchmarkExport: BenchmarkExport? = null
+    private val smsHandler = Handler(Looper.getMainLooper())
+    private var pendingSms: SmsSend? = null
 
     private data class BenchmarkExport(val json: String, val result: MethodChannel.Result)
+    private class SmsSend(val result: MethodChannel.Result, val parts: SmsPartResults) {
+        var receiver: BroadcastReceiver? = null
+        var timeout: Runnable? = null
+        val intents = arrayListOf<PendingIntent>()
+        var errorCode: String? = null
+        var submitted = false
+    }
 
     private companion object {
         const val SAVE_BENCHMARK = 0x5248
@@ -71,27 +106,7 @@ class MainActivity : FlutterActivity() {
         MethodChannel(flutterEngine.dartExecutor.binaryMessenger, "rescue/sms")
             .setMethodCallHandler { call, result ->
                 when (call.method) {
-                    "sendSms" -> {
-                        val to = call.argument<String>("to")!!
-                        val body = call.argument<String>("body")!!
-                        try {
-                            val sm: SmsManager =
-                                if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.S)
-                                    getSystemService(SmsManager::class.java)
-                                else
-                                    @Suppress("DEPRECATION") SmsManager.getDefault()
-                            // Tin nhắn >160 ký tự → gửi nhiều phần.
-                            val parts = sm.divideMessage(body)
-                            if (parts.size <= 1) {
-                                sm.sendTextMessage(to, null, body, null, null)
-                            } else {
-                                sm.sendMultipartTextMessage(to, null, parts, null, null)
-                            }
-                            result.success(true)
-                        } catch (e: Exception) {
-                            result.error("sms_failed", e.message, null)
-                        }
-                    }
+                    "sendSms" -> sendSms(call.argument<String>("to"), call.argument<String>("body"), result)
                     else -> result.notImplemented()
                 }
             }
@@ -149,6 +164,94 @@ class MainActivity : FlutterActivity() {
                     else -> result.notImplemented()
                 }
             }
+    }
+
+    @Suppress("DEPRECATION")
+    private fun sendSms(to: String?, body: String?, result: MethodChannel.Result) {
+        if (pendingSms != null) {
+            result.success(mapOf("status" to "failed", "errorCode" to "SMS_BUSY"))
+            return
+        }
+        if (to.isNullOrBlank() || !to.matches(Regex("\\+?[0-9]{9,15}")) || body.isNullOrBlank()) {
+            result.success(mapOf("status" to "failed", "errorCode" to "INVALID_SMS"))
+            return
+        }
+        var pending: SmsSend? = null
+        try {
+            // A single active SIM is accepted; an unset choice on a multi-SIM phone is not.
+            val subscriptionId = SmsManager.getDefaultSmsSubscriptionId()
+            if (subscriptionId < 0) {
+                result.success(mapOf("status" to "failed", "errorCode" to "NO_DEFAULT_SMS_SIM"))
+                return
+            }
+            val manager = if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.S) {
+                getSystemService(SmsManager::class.java)?.createForSubscriptionId(subscriptionId)
+            } else {
+                SmsManager.getSmsManagerForSubscriptionId(subscriptionId)
+            } ?: throw UnsupportedOperationException("SMS unavailable")
+            val parts = manager.divideMessage(body)
+            require(parts.isNotEmpty())
+            val sending = SmsSend(result, SmsPartResults(parts.size))
+            pending = sending
+            pendingSms = sending
+            val attemptId = UUID.randomUUID().toString()
+            val actions = List(parts.size) { "$packageName.SMS_SENT.$attemptId.$it" }
+            val receiver = object : BroadcastReceiver() {
+                override fun onReceive(context: Context?, intent: Intent?) {
+                    if (pendingSms !== sending) return
+                    val index = actions.indexOf(intent?.action)
+                    if (!sending.parts.recordPart(index, resultCode == Activity.RESULT_OK)) return
+                    if (resultCode != Activity.RESULT_OK && sending.errorCode == null) {
+                        sending.errorCode = "SEND_ERROR_$resultCode"
+                    }
+                    sending.parts.status?.let { finishSms(sending, it, sending.errorCode) }
+                }
+            }
+            ContextCompat.registerReceiver(
+                this,
+                receiver,
+                IntentFilter().apply { actions.forEach { addAction(it) } },
+                ContextCompat.RECEIVER_NOT_EXPORTED,
+            )
+            sending.receiver = receiver
+            actions.forEach { action ->
+                sending.intents.add(PendingIntent.getBroadcast(
+                    this,
+                    0,
+                    Intent(action).setPackage(packageName),
+                    PendingIntent.FLAG_ONE_SHOT or PendingIntent.FLAG_IMMUTABLE,
+                ))
+            }
+            sending.timeout = Runnable { finishSms(sending, "unknown", "SEND_TIMEOUT") }
+            smsHandler.postDelayed(sending.timeout!!, 30_000L)
+            // Once handed to telephony, a missing callback does not prove that no part was sent.
+            sending.submitted = true
+            manager.sendMultipartTextMessage(to, null, parts, sending.intents, null)
+        } catch (error: Exception) {
+            val code = when (error) {
+                is SecurityException -> "SMS_PERMISSION_DENIED"
+                is IllegalArgumentException -> "INVALID_SMS"
+                is UnsupportedOperationException -> "SMS_UNAVAILABLE"
+                else -> "SMS_NATIVE_ERROR"
+            }
+            val sending = pending
+            if (sending == null) result.success(mapOf("status" to "failed", "errorCode" to code))
+            else finishSms(sending, if (sending.submitted && code == "SMS_NATIVE_ERROR") "unknown" else "failed", code)
+        }
+    }
+
+    private fun finishSms(pending: SmsSend, status: String, errorCode: String? = null) {
+        if (pendingSms !== pending) return
+        pendingSms = null
+        pending.timeout?.let { smsHandler.removeCallbacks(it) }
+        pending.receiver?.let { runCatching { unregisterReceiver(it) } }
+        pending.intents.forEach { it.cancel() }
+        pending.result.success(mapOf(
+            "status" to status,
+            "errorCode" to errorCode,
+            "sentParts" to pending.parts.sentParts,
+            "totalParts" to pending.parts.totalParts,
+        ))
     }
 
     private fun localIpv4Networks(): List<Map<String, Any>> {
@@ -231,6 +334,7 @@ class MainActivity : FlutterActivity() {
     }
 
     override fun onDestroy() {
+        pendingSms?.let { finishSms(it, "unknown", "ACTIVITY_DESTROYED") }
         pendingBenchmarkExport?.let { finishBenchmarkExport(it, false) }
         benchmarkExportExecutor.shutdown()
         pteModule?.close()

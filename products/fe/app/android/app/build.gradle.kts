@@ -32,6 +32,7 @@ android {
         versionName = flutter.versionName
         manifestPlaceholders["networkSecurityConfig"] = if (allowInsecureLan)
             "@xml/network_security_config_lan" else "@xml/network_security_config"
+        manifestPlaceholders["appLabel"] = "Cứu hộ khẩn cấp"
     }
 
     buildTypes {
@@ -48,6 +49,7 @@ android {
         create("admin") {
             dimension = "audience"
             applicationIdSuffix = ".admin"
+            manifestPlaceholders["appLabel"] = "Cứu hộ · Admin"
         }
     }
 }

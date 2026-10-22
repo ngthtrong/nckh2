@@ -8,6 +8,7 @@ import 'package:permission_handler/permission_handler.dart';
 
 import '../../config.dart';
 import '../../domain/entities/rescue_record.dart';
+import '../../domain/entities/sms_delivery.dart';
 import '../models/rescue_record_payload.dart';
 
 /// Kết quả gửi ảnh. `status` là mã HTTP khi server trả lời; `permanent` khi server
@@ -166,25 +167,29 @@ class SenderRemoteDataSource {
     }
   }
 
-  /// SMS dự phòng tới tổng đài khi không có data. Chỉ Android có kênh
-  /// `rescue/sms`; web/desktop, số tổng đài chưa cấu hình hoặc bị từ chối quyền
-  /// thì trả false để báo cáo nằm lại hàng đợi.
-  Future<bool> sendSms(RescueRecord record) async {
-    if (kIsWeb || defaultTargetPlatform != TargetPlatform.android) return false;
-    if (kEmergencyPhone == kPlaceholderEmergencyPhone) {
-      debugPrint('SMS fallback bỏ qua: chưa đặt EMERGENCY_PHONE.');
-      return false;
+  /// Chỉ callback gửi của Android được phép xác nhận SMS đã gửi từ máy.
+  Future<SmsResult> sendSms(RescueRecord record) async {
+    if (kIsWeb || defaultTargetPlatform != TargetPlatform.android) {
+      return const SmsResult(SmsStatus.failed, 'UNSUPPORTED_PLATFORM');
+    }
+    if (!RegExp(r'^\+?[0-9]{9,15}$').hasMatch(kEmergencyPhone) ||
+        kEmergencyPhone == kPlaceholderEmergencyPhone) {
+      return const SmsResult(SmsStatus.failed, 'NOT_CONFIGURED');
     }
     try {
-      if (!await Permission.sms.request().isGranted) return false;
-      final ok = await _smsChannel.invokeMethod<bool>('sendSms', {
-        'to': kEmergencyPhone,
-        'body': smsBody(record),
-      });
-      return ok ?? false;
-    } catch (e) {
-      debugPrint('SMS fallback lỗi: $e');
-      return false;
+      if (!await Permission.sms.request().isGranted) {
+        return const SmsResult(SmsStatus.failed, 'PERMISSION_DENIED');
+      }
+      final result = await _smsChannel
+          .invokeMethod<Object?>('sendSms', {
+            'to': kEmergencyPhone,
+            'body': smsBody(record),
+          })
+          .timeout(const Duration(seconds: 35));
+      return SmsResult.fromNative(result);
+    } catch (_) {
+      // A lost callback does not prove that the modem failed to send.
+      return const SmsResult(SmsStatus.unknown, 'CALLBACK_UNAVAILABLE');
     }
   }
 }
@@ -197,7 +202,10 @@ String smsBody(RescueRecord r) {
       ? '${lat.toStringAsFixed(5)},${lng.toStringAsFixed(5)}'
       : 'unknown';
   final vulnerable = r.vulnerableGroups.join(',');
+  String safe(String text) => text.replaceAll('|', '/').replaceAll('\n', ' ');
   return 'SOS|id:${r.id}|pos:$pos|trapped:${r.trappedCount}|injured:${r.injuredCount}'
-      '${vulnerable.isNotEmpty ? '|vuln:$vulnerable' : ''}'
+      '${vulnerable.isNotEmpty ? '|vuln:${safe(vulnerable)}' : ''}'
+      '${r.cannotMove ? '|immobile:1' : ''}'
+      '${r.severeSigns.isNotEmpty ? '|severe:${r.severeSigns.map(canonicalSevereSign).map(safe).join(',')}' : ''}'
       '${r.description.isNotEmpty ? '|note:${r.description}' : ''}';
 }
