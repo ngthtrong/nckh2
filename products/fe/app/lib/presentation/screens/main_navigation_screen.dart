@@ -31,6 +31,17 @@ class _MainNavigationScreenState extends State<MainNavigationScreen> {
   bool _initializing = true;
   String? _initError;
 
+  void _navigate({int? tab, AppViewMode? view}) {
+    setState(() {
+      if (tab != null) _currentTab = tab;
+      if (view != null) _viewMode = view;
+    });
+    widget.controller.setWatchingStatus(
+      _viewMode == AppViewMode.submitted ||
+          (_viewMode == AppViewMode.tabs && _currentTab == 1),
+    );
+  }
+
   @override
   void initState() {
     super.initState();
@@ -121,8 +132,8 @@ class _MainNavigationScreenState extends State<MainNavigationScreen> {
     if (_viewMode == AppViewMode.compose) {
       return ComposeScreen(
         controller: widget.controller,
-        onBack: () => setState(() => _viewMode = AppViewMode.tabs),
-        onSuccess: () => setState(() => _viewMode = AppViewMode.submitted),
+        onBack: () => _navigate(view: AppViewMode.tabs),
+        onSuccess: () => _navigate(view: AppViewMode.submitted),
       );
     }
 
@@ -131,10 +142,7 @@ class _MainNavigationScreenState extends State<MainNavigationScreen> {
         widget.controller.lastSubmittedPost != null) {
       return SubmittedScreen(
         record: widget.controller.lastSubmittedPost!,
-        onHomePressed: () => setState(() {
-          _viewMode = AppViewMode.tabs;
-          _currentTab = 0;
-        }),
+        onHomePressed: () => _navigate(view: AppViewMode.tabs, tab: 0),
       );
     }
 
@@ -148,8 +156,7 @@ class _MainNavigationScreenState extends State<MainNavigationScreen> {
           children: [
             HomeScreen(
               controller: widget.controller,
-              onComposePressed: () =>
-                  setState(() => _viewMode = AppViewMode.compose),
+              onComposePressed: () => _navigate(view: AppViewMode.compose),
             ),
             HistoryScreen(
               controller: widget.controller,
@@ -165,7 +172,7 @@ class _MainNavigationScreenState extends State<MainNavigationScreen> {
       ),
       bottomNavigationBar: BottomNavigationBar(
         currentIndex: _currentTab,
-        onTap: (index) => setState(() => _currentTab = index),
+        onTap: (index) => _navigate(tab: index),
         type: BottomNavigationBarType.fixed,
         selectedItemColor: AppColors.primaryRed,
         unselectedItemColor: const Color(0xFF9CA3AF),

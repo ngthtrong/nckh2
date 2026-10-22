@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import '../../../config.dart';
 
 import '../../../core/constants/app_colors.dart';
 import '../../../domain/entities/ai_model_type.dart';
@@ -19,6 +20,25 @@ class SettingsScreen extends StatefulWidget {
 }
 
 class _SettingsScreenState extends State<SettingsScreen> {
+  Future<void> _clearDownloads() async {
+    try {
+      final bytes = await widget.controller.deleteBenchmarkResources();
+      if (!mounted) return;
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+          content: Text(
+            'Đã dọn ${(bytes / 1048576).toStringAsFixed(1)} MiB. Báo cáo, ảnh cứu hộ và AI offline được giữ lại.',
+          ),
+        ),
+      );
+    } catch (error) {
+      if (!mounted) return;
+      ScaffoldMessenger.of(
+        context,
+      ).showSnackBar(SnackBar(content: Text('$error')));
+    }
+  }
+
   void _showEditProfileSheet(BuildContext context, User user) {
     final phoneController = TextEditingController(text: user.phone);
     final addressController = TextEditingController(text: user.address);
@@ -675,9 +695,9 @@ class _SettingsScreenState extends State<SettingsScreen> {
                         const SizedBox(height: 20),
                       ],
 
-                      if (!c.isAdmin)
+                      if (kAdminModelTools && !c.isAdmin)
                         AdminLoginButton(controller: c)
-                      else ...[
+                      else if (kAdminModelTools && c.isAdmin) ...[
                         ListTile(
                           leading: const Icon(Icons.admin_panel_settings),
                           title: Text('Admin: ${c.adminSession.username}'),
@@ -776,6 +796,23 @@ class _SettingsScreenState extends State<SettingsScreen> {
                       // Section: KHÁC
                       _buildSectionLabel('KHÁC'),
                       const SizedBox(height: 8),
+                      ListTile(
+                        leading: const Icon(Icons.cleaning_services_outlined),
+                        title: const Text(
+                          'Dọn ONNX và dữ liệu benchmark đã tải',
+                        ),
+                        subtitle: const Text(
+                          'Giữ báo cáo, ảnh cứu hộ và AI offline',
+                        ),
+                        onTap:
+                            c.isDeletingBenchmarkResources ||
+                                c.isPreparingBenchmark ||
+                                c.isDownloadingOnnx ||
+                                c.isBenchmarking ||
+                                c.isModelLoading
+                            ? null
+                            : _clearDownloads,
+                      ),
                       Container(
                         decoration: BoxDecoration(
                           color: const Color(0xFFF9FAFB),
