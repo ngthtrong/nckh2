@@ -18,6 +18,7 @@ RescueRecord record({
   createdAt: DateTime(2026),
   lat: null,
   lng: null,
+  sendMode: 'textOnly',
   status: status,
   synced: synced,
   syncError: syncError,
@@ -42,6 +43,8 @@ class Rescue extends Fake implements RescueRepository {
 
   @override
   DateTime? get nextRetryAt => null;
+  @override
+  Future<bool> reconnectServer({bool force = false}) async => true;
 }
 
 class Inference extends Fake implements InferenceRepository {
