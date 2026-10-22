@@ -421,7 +421,7 @@ class AppController extends ChangeNotifier with WidgetsBindingObserver {
     _scheduleStatusPoll();
     _scheduleRetry();
     if (_foreground && hasSyncWork(records)) {
-      unawaited(syncPending());
+      unawaited(_connectAndSync());
     }
   }
 
@@ -430,8 +430,9 @@ class AppController extends ChangeNotifier with WidgetsBindingObserver {
     if (_disposed ||
         !_foreground ||
         networkLabel == 'none' ||
-        !hasTrackedReports(records))
+        !hasTrackedReports(records)) {
       return;
+    }
     _statusTimer = Timer(
       _watchingStatus ? kStatusPollInterval : const Duration(seconds: 60),
       () => unawaited(refreshStatuses()),
