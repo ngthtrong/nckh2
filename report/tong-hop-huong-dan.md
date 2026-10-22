@@ -200,8 +200,8 @@ HD trang 4 ghi hồ sơ thanh toán hội đồng gồm quyết định có dấ
 |---|---|---:|
 | Mở đầu | Tổng quan trong/ngoài nước, lý do, mục tiêu, phương pháp, đối tượng, phạm vi | 7–9 |
 | Chương 1. Cơ sở khoa học và yêu cầu bài toán | Edge AI, dữ liệu đa phương thức, mạng yếu, phân cụm và điều phối; yêu cầu và tiêu chí đánh giá | 8–10 |
-| Chương 2. Dữ liệu và phương pháp nghiên cứu | Dữ liệu ảnh; dữ liệu báo cáo bán tổng hợp; mô hình, đồ thị, xếp hạng, thiết kế thực nghiệm | 10–12 |
-| Chương 3. Thiết kế và xây dựng hệ thống | Ứng dụng, AI tại thiết bị, đồng bộ, backend, CSDL, dashboard; trạng thái triển khai | 10–12 |
+| Chương 2. Thiết kế và xây dựng hệ thống | Kiến trúc, yêu cầu chức năng/phi chức năng, xử lý dữ liệu thiếu, đồng bộ, ứng dụng, backend, CSDL và dashboard | 10–12 |
+| Chương 3. Dữ liệu và phương pháp nghiên cứu | Dữ liệu ảnh; dữ liệu báo cáo bán tổng hợp; mô hình, đồ thị, xếp hạng, thiết kế thực nghiệm | 10–12 |
 | Chương 4. Thực nghiệm, kết quả và bàn luận | Kết quả mô hình ảnh; RQ1–RQ3; kiểm thử hệ thống/mạng; đối chiếu mục tiêu và sản phẩm, hạn chế | 14–18 |
 | Kết luận và kiến nghị | Mức hoàn thành mục tiêu, đóng góp, khả năng ứng dụng, hướng tiếp theo | 3–4 |
 | **Tổng dự toán** | **Không tính phần đầu, tài liệu tham khảo, phụ lục, hồ sơ minh chứng** | **52–65** |

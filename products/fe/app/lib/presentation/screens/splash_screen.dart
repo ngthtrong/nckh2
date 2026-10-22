@@ -45,7 +45,7 @@ class _SplashScreenState extends State<SplashScreen> {
       backgroundColor: Colors.white,
       body: SizedBox.expand(
         child: Image.asset(
-          'assets/images/splash-screen.png',
+          'assets/images/splash-screen.webp',
           fit: BoxFit.cover,
           width: double.infinity,
           height: double.infinity,

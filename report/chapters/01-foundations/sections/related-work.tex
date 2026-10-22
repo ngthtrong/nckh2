@@ -23,10 +23,5 @@ Bundle Protocol v7 \citep{rfc9171} & Bundle trong mạng gián đoạn; lưu và
 \bottomrule
 \end{longtable}
 
-\subsection{Đóng góp được kiểm tra ở từng tầng}
-Đề tài kết nối bước tạo báo cáo tại biên với lưu bền vững, tiếp nhận và tổng hợp tại trung tâm. Giá trị kỹ thuật của kết nối này cần được đánh giá ở ba tầng. Thứ nhất, mô hình phải giữ hợp đồng đầu vào/đầu ra khi chuyển runtime. Thứ hai, bản sao do truyền tải phải được phân biệt với quan sát mới của cùng hiện trường. Thứ ba, một cụm và một điểm ưu tiên phải được kiểm tra bằng mục tiêu độc lập thay vì chỉ nhìn độ hợp lý của công thức.
-
-Các bảo đảm toán học của đề tài thuộc tầng cạnh và điểm: cổng không gian giới hạn khoảng cách của một cạnh được giữ; tổng hợp theo họ giữ điểm trước bản sao exact khi grouping cố định. Các RQ kiểm tra liệu những thuộc tính này có chuyển thành lợi ích phân cụm, xếp hạng hoặc điều phối hay không. Việc kết quả chưa cho thấy lợi ích chung là một kết luận nghiên cứu cần công bố, không phải lý do thay mục tiêu đánh giá sau khi đã thấy dữ liệu.
-
 \subsection{Ngữ nghĩa mạng gián đoạn theo chuẩn tham chiếu}
 RFC 9171 mô tả BPv7 như lớp phủ store-carry-forward cho môi trường kết nối gián đoạn \citep{rfc9171}. Trong ứng dụng hiện tại, điện thoại giữ dữ liệu cục bộ rồi gửi đến server bằng HTTP hoặc thử SMS dự phòng. Cơ chế này giải quyết việc chờ kết nối trở lại giữa client và server. Khả năng đưa dữ liệu qua thiết bị trung gian khi hai đầu không đồng thời kết nối còn cần bộ giao thức và log chuyển tiếp riêng. Sự phân biệt này xác định đúng phần đã triển khai và phần DTN trong hướng phát triển.

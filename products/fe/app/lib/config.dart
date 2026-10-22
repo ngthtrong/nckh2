@@ -1,6 +1,10 @@
 /// Cấu hình tập trung — sửa tại đây khi deploy thật.
 library;
 
+// Flutter supplies the flavor to Dart and Gradle together.
+const bool kAdminModelTools =
+    String.fromEnvironment('FLUTTER_APP_FLAVOR') != 'user';
+
 /// Bản thông thường chỉ kết nối HTTPS tại địa chỉ được cấu hình lúc build.
 const String kConfiguredServerUrl = String.fromEnvironment(
   'SERVER_URL',

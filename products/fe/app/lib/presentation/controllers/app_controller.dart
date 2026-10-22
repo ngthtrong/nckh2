@@ -5,6 +5,7 @@ import 'package:connectivity_plus/connectivity_plus.dart';
 import 'package:dio/dio.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/services.dart';
+import 'package:flutter/widgets.dart';
 import 'package:geolocator/geolocator.dart';
 import 'package:image_picker/image_picker.dart';
 import 'package:permission_handler/permission_handler.dart';
@@ -21,6 +22,7 @@ import '../../domain/entities/rescue_record.dart';
 import '../../domain/entities/send_mode.dart';
 import '../../domain/services/adaptive_send_policy.dart';
 import '../../domain/services/urgency_logistic_model.dart';
+import '../../domain/services/sync_activity.dart';
 import '../../domain/entities/user.dart';
 import '../../domain/usecases/analyze_image_usecase.dart';
 import '../../domain/usecases/get_rescue_records_usecase.dart';
@@ -31,7 +33,7 @@ import '../../domain/repositories/inference_repository.dart';
 import '../../domain/repositories/network_repository.dart';
 import '../../domain/repositories/rescue_repository.dart';
 
-class AppController extends ChangeNotifier {
+class AppController extends ChangeNotifier with WidgetsBindingObserver {
   final RescueRepository rescueRepository;
   final InferenceRepository inferenceRepository;
   final NetworkRepository networkRepository;
@@ -40,6 +42,8 @@ class AppController extends ChangeNotifier {
   CancelToken? _modelDownload;
   bool isDownloadingOnnx = false;
   bool isDeletingBenchmarkResources = false;
+  bool isPreparingBenchmark = false;
+  int benchmarkResourcesRevision = 0;
   double? onnxDownloadProgress;
   String? onnxDownloadError;
 
@@ -61,12 +65,16 @@ class AppController extends ChangeNotifier {
   bool _refreshingStatuses = false;
   Future<void>? _initialization;
   Future<void>? _onlineWork;
+  Future<void>? _modelLoad;
+  bool _foreground = true;
+  bool _watchingStatus = false;
+  bool _disposed = false;
 
   bool isBusy = false;
   String networkLabel = 'WiFi';
   bool isModelReady = false;
   bool isBenchmarking = false;
-  bool isModelLoading = true;
+  bool isModelLoading = false;
   String locationLabel = 'Đang lấy vị trí GPS...';
   // Không có tọa độ mặc định: gửi tọa độ giả sẽ dẫn đội cứu hộ tới sai chỗ.
   double? currentLat;
@@ -83,7 +91,9 @@ class AppController extends ChangeNotifier {
   String get adminServerUrl =>
       (connectedServerUrl ?? kServerBaseUrl).replaceAll(RegExp(r'/+$'), '');
   bool get isAdmin =>
-      adminSession.isAdmin && adminSession.server == adminServerUrl;
+      kAdminModelTools &&
+      adminSession.isAdmin &&
+      adminSession.server == adminServerUrl;
 
   AppController({
     required this.rescueRepository,
@@ -112,6 +122,7 @@ class AppController extends ChangeNotifier {
   }
 
   Future<void> loginAdmin(String username, String password) async {
+    if (!kAdminModelTools) return;
     if (connectedServerUrl == null) await reconnectServer();
     await adminSession.login(adminServerUrl, username, password);
   }
@@ -138,6 +149,7 @@ class AppController extends ChangeNotifier {
     notifyListeners();
     try {
       if (!await validateAdmin()) return;
+      await ensureModelLoaded();
       final path = await downloadAdminOnnx(
         server: adminServerUrl,
         token: sessionToken!,
@@ -168,7 +180,8 @@ class AppController extends ChangeNotifier {
     if (!isAdmin ||
         isBenchmarking ||
         isDeletingBenchmarkResources ||
-        isDownloadingOnnx) {
+        isDownloadingOnnx ||
+        isPreparingBenchmark) {
       return false;
     }
     isBenchmarking = true;
@@ -182,8 +195,8 @@ class AppController extends ChangeNotifier {
   }
 
   Future<int> deleteBenchmarkResources() async {
-    if (!isAdmin ||
-        isDeletingBenchmarkResources ||
+    if (isDeletingBenchmarkResources ||
+        isPreparingBenchmark ||
         isDownloadingOnnx ||
         isBenchmarking ||
         isModelLoading) {
@@ -195,7 +208,9 @@ class AppController extends ChangeNotifier {
     notifyListeners();
     try {
       await inferenceRepository.unloadComparisonModel();
-      return await pruneModelDownloads(deleteBenchmark: true);
+      final bytes = await pruneModelDownloads(deleteBenchmark: true);
+      benchmarkResourcesRevision++;
+      return bytes;
     } finally {
       isDeletingBenchmarkResources = false;
       inferenceRepository.setComparisonAccess(isAdmin);
@@ -270,7 +285,7 @@ class AppController extends ChangeNotifier {
   String? get connectedServerUrl => rescueRepository.connectedServerUrl;
 
   Future<void> reconnectServer() async {
-    final connected = await rescueRepository.reconnectServer();
+    final connected = await rescueRepository.reconnectServer(force: true);
     if (adminSession.server != null && adminSession.server != adminServerUrl) {
       unawaited(adminSession.logout());
     }
@@ -340,25 +355,15 @@ class AppController extends ChangeNotifier {
         : null;
     networkLabel = await networkRepository.getCurrentNetworkType();
     unawaited(_loadUrgencyModel());
-    unawaited(
-      inferenceRepository
-          .loadModel()
-          .then((_) {
-            isModelReady = inferenceRepository.ready;
-            isModelLoading = false;
-            notifyListeners();
-          })
-          .catchError((e) {
-            debugPrint('Notice loading AI model: $e');
-            isModelReady = inferenceRepository.ready;
-            isModelLoading = false;
-            notifyListeners();
-          }),
-    );
+    WidgetsBinding.instance.addObserver(this);
+    _foreground =
+        WidgetsBinding.instance.lifecycleState == null ||
+        WidgetsBinding.instance.lifecycleState == AppLifecycleState.resumed;
 
     unawaited(refreshLocation(requestPermission: true));
 
     _connSub = networkRepository.networkChanges.listen((results) async {
+      final previousNetwork = networkLabel;
       networkLabel = await networkRepository.getCurrentNetworkType();
       notifyListeners();
       final hasNet = results.any(
@@ -367,33 +372,82 @@ class AppController extends ChangeNotifier {
             e == ConnectivityResult.mobile ||
             e == ConnectivityResult.ethernet,
       );
+      _scheduleStatusPoll();
       if (hasNet) {
-        await _connectAndSync();
+        if (!hasSyncWork(records)) return;
+        await _connectAndSync(force: previousNetwork != networkLabel);
       }
     });
 
     notifyListeners();
 
     // Người gửi thấy được khi trung tâm điều phối / hoàn thành báo cáo của mình.
-    _statusTimer = Timer.periodic(
-      kStatusPollInterval,
-      (_) => unawaited(refreshStatuses()),
-    );
+    _scheduleStatusPoll();
     _scheduleRetry(); // message còn chờ từ lần chạy trước
     registerForegroundSync(syncPending);
-    unawaited(_connectAndSync());
+    if (hasSyncWork(records)) unawaited(_connectAndSync());
   }
 
-  Future<void> _connectAndSync() =>
-      _onlineWork ??= _connectAndSyncOnce().whenComplete(() {
+  Future<void> ensureModelLoaded() {
+    if (inferenceRepository.pteReady) return Future.value();
+    return _modelLoad ??= _loadModelOnce().whenComplete(
+      () => _modelLoad = null,
+    );
+  }
+
+  Future<void> _loadModelOnce() async {
+    isModelLoading = true;
+    notifyListeners();
+    try {
+      await inferenceRepository.loadModel();
+    } catch (error) {
+      debugPrint('Không nạp được PTE: $error');
+    } finally {
+      isModelReady = inferenceRepository.ready;
+      isModelLoading = false;
+      if (!_disposed) notifyListeners();
+    }
+  }
+
+  void setWatchingStatus(bool watching) {
+    if (_watchingStatus == watching) return;
+    _watchingStatus = watching;
+    _scheduleStatusPoll();
+  }
+
+  @override
+  void didChangeAppLifecycleState(AppLifecycleState state) {
+    _foreground = state == AppLifecycleState.resumed;
+    _scheduleStatusPoll();
+    _scheduleRetry();
+    if (_foreground && hasSyncWork(records)) {
+      unawaited(syncPending());
+    }
+  }
+
+  void _scheduleStatusPoll() {
+    _statusTimer?.cancel();
+    if (_disposed ||
+        !_foreground ||
+        networkLabel == 'none' ||
+        !hasTrackedReports(records))
+      return;
+    _statusTimer = Timer(
+      _watchingStatus ? kStatusPollInterval : const Duration(seconds: 60),
+      () => unawaited(refreshStatuses()),
+    );
+  }
+
+  Future<void> _connectAndSync({bool force = false}) =>
+      _onlineWork ??= _connectAndSyncOnce(force: force).whenComplete(() {
         _onlineWork = null;
       });
 
-  Future<void> _connectAndSyncOnce() async {
+  Future<void> _connectAndSyncOnce({bool force = false}) async {
     try {
-      if (!await rescueRepository.reconnectServer()) return;
+      if (!await rescueRepository.reconnectServer(force: force)) return;
       notifyListeners();
-      await syncPending(immediate: false);
+      await syncPending(immediate: force);
     } catch (error) {
       debugPrint('Kết nối/đồng bộ nền chưa hoàn tất: $error');
     }
@@ -417,6 +471,7 @@ class AppController extends ChangeNotifier {
       debugPrint('Không lấy được trạng thái điều phối: $e');
     } finally {
       _refreshingStatuses = false;
+      _scheduleStatusPoll();
     }
   }
 
@@ -443,7 +498,7 @@ class AppController extends ChangeNotifier {
     }
     if (isModelLoading) return 'Đang tải model on-device...';
     if (kIsWeb) return 'Bản web không chạy AI on-device';
-    return 'Model PTE chưa sẵn sàng trên thiết bị';
+    return 'AI sẽ được chuẩn bị khi tạo báo cáo';
   }
 
   /// Lấy vị trí GPS hiện tại. Thất bại thì giữ vị trí trống (không dùng tọa độ
@@ -482,6 +537,8 @@ class AppController extends ChangeNotifier {
 
   @override
   void dispose() {
+    _disposed = true;
+    WidgetsBinding.instance.removeObserver(this);
     _connSub?.cancel();
     _statusTimer?.cancel();
     _retryTimer?.cancel();
@@ -508,6 +565,7 @@ class AppController extends ChangeNotifier {
       isBusy = false;
       notifyListeners();
       _scheduleRetry();
+      _scheduleStatusPoll();
       return record;
     } catch (_) {
       isBusy = false;
@@ -558,6 +616,7 @@ class AppController extends ChangeNotifier {
       );
       lastSubmittedPost = record;
       _scheduleRetry();
+      _scheduleStatusPoll();
       isBusy = false;
       notifyListeners();
       return record;
@@ -570,6 +629,7 @@ class AppController extends ChangeNotifier {
 
   Future<List<AiTag>> analyzeImage(String imagePath) async {
     try {
+      await ensureModelLoaded();
       final bytes = await readLocalFile(imagePath);
       return await _analyzeImageUseCase(bytes);
     } catch (_) {
@@ -596,7 +656,8 @@ class AppController extends ChangeNotifier {
 
     try {
       if (!await validateAdmin()) return null;
-      final ByteData raw = await rootBundle.load('assets/images/app_logo.png');
+      await ensureModelLoaded();
+      final ByteData raw = await rootBundle.load('assets/images/app_logo.webp');
       final bytes = raw.buffer.asUint8List(
         raw.offsetInBytes,
         raw.lengthInBytes,
@@ -626,6 +687,7 @@ class AppController extends ChangeNotifier {
   /// bài kế tiếp hoặc Workmanager (15 phút).
   void _scheduleRetry() {
     _retryTimer?.cancel();
+    if (_disposed || !_foreground) return;
     final due = rescueRepository.nextRetryAt;
     if (due == null) return;
     final wait = due.difference(DateTime.now().toUtc());

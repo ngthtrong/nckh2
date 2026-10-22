@@ -9,6 +9,7 @@ import 'package:flutter/foundation.dart';
 import 'package:flutter/services.dart';
 import 'package:onnxruntime/onnxruntime.dart';
 import 'package:path_provider/path_provider.dart';
+import '../../config.dart';
 
 import '../../domain/entities/ai_model_type.dart';
 import '../../domain/entities/ai_tag.dart';
@@ -52,8 +53,8 @@ class InferenceLocalDataSource {
   }
 
   void setComparisonAccess(bool enabled) {
-    _comparisonAccess = enabled;
-    if (!enabled) {
+    _comparisonAccess = enabled && kAdminModelTools;
+    if (!_comparisonAccess) {
       _currentModel = AiModelType.pte;
       _isDualComparison = false;
       _latestComparison = null;
@@ -69,6 +70,8 @@ class InferenceLocalDataSource {
   }
 
   Future<void> loadComparisonModel(String path) async {
+    if (!kAdminModelTools)
+      throw UnsupportedError('Bản người dùng chỉ chạy PTE.');
     if (!_comparisonAccess) throw StateError('Cần đăng nhập admin.');
     if (_onnxSession != null) return;
     OrtEnv.instance.init();
@@ -211,6 +214,7 @@ class InferenceLocalDataSource {
   }
 
   Future<_EngineOutput?> _runOnnx(Float32List data) async {
+    if (!kAdminModelTools) return null;
     final session = _onnxSession;
     if (session == null || !_comparisonAccess) return null;
     final input = OrtValueTensor.createTensorWithDataList(data, [
