@@ -1,41 +1,56 @@
-\section{Dữ liệu và tiền xử lý}\label{sec:02-data-methods-data}
+\section{Dữ liệu}\label{sec:02-data-methods-data}
 \subsection{Các nguồn dữ liệu và vai trò}
-Báo cáo sử dụng bốn nhóm dữ liệu có mục đích khác nhau: bộ ảnh để huấn luyện và đánh giá phân loại; bảng trạng thái Boolean để xây dựng điểm khẩn cấp có cấu trúc; bộ báo cáo Generator 3.0 để đánh giá phân cụm; và bộ Candidate 4.1 để khảo sát xếp hạng/điều phối. Không gộp số mẫu của các nhóm thành một bộ đa phương thức chung, vì không có quan hệ ghép hàng ảnh--tin nhắn--sự kiện được xác lập giữa chúng.
+Báo cáo dùng bốn nhóm dữ liệu có mục đích khác nhau (Bảng~\ref{tab:data-sources}): bộ ảnh để huấn luyện và đánh giá phân loại; bảng trạng thái Boolean để xây dựng điểm khẩn cấp có cấu trúc; bộ báo cáo Generator 3.0 để đánh giá phân cụm; và bộ Candidate 4.1 để khảo sát xếp hạng và điều phối. Không gộp số mẫu của các nhóm thành một bộ đa phương thức chung, vì giữa chúng không có quan hệ ghép hàng ảnh--tin nhắn--sự kiện.
 
-Thông tin thực nghiệm được chuẩn hóa nhất quán với thuyết minh đề tài và các kết quả lưu trữ chính thức. Các tập dữ liệu được quản lý chặt chẽ theo phân loại đối tượng nghiên cứu nhằm đảm bảo tính khách quan và khả năng tái lập của mọi kết quả phân tích.
+\begin{table}[htbp]\centering\small
+\caption{Bốn nhóm dữ liệu, bản chất và phạm vi sử dụng}\label{tab:data-sources}
+\begin{tabular}{P{.19\textwidth}P{.17\textwidth}P{.23\textwidth}P{.28\textwidth}}
+\toprule Nhóm & Quy mô & Bản chất & Dùng cho \\\midrule
+Bộ ảnh mức ngập & \ImageTotal{} ảnh & Ảnh do nhóm thu thập, gán nhãn thủ công & Huấn luyện và đánh giá phân loại ảnh \\
+Bảng trạng thái khẩn cấp & 32 trạng thái & Bảng tham chiếu tổng hợp, liệt kê đầy đủ & Mô hình Logistic Regression \\
+Generator 3.0 & 80 run, 26.288 báo cáo & Bán tổng hợp, neo vào bối cảnh Copernicus EMSR848 & RQ1 \\
+Candidate 4.1 & 80 tập, 30.229 báo cáo & Tổng hợp & RQ2 và RQ3 \\
+\bottomrule\end{tabular}
+\end{table}
 
-\subsection{Bộ ảnh mức ngập và các phiên model}
-Các kiểm tra đường dẫn, mã băm MD5 và phân chia tập dữ liệu áp dụng bảng phân chia cố định đã lưu trữ. Mô hình sử dụng tập dữ liệu gồm \ImageTotal{} ảnh sạch được phân bố vào bốn mức độ ngập lụt. Thứ tự các lớp nhãn được chuẩn hóa thống nhất trên toàn hệ thống gồm: \texttt{low}, \texttt{medium}, \texttt{high} và \texttt{non\_flood}. Thứ tự này được bảo toàn xuyên suốt từ khâu huấn luyện, xuất mô hình nhị phân đến quy trình xử lý tại ứng dụng di động.
+Hai bộ báo cáo mô phỏng không đại diện cho báo cáo cứu hộ thực tế và không tạo thành chuỗi kiểm chứng liên tục trên cùng một tập mẫu.
+
+\subsection{Bộ ảnh mức ngập}
+Mô hình dùng \ImageTotal{} ảnh sạch phân bố vào bốn mức. Thứ tự lớp được giữ thống nhất từ huấn luyện, xuất mô hình đến xử lý trong ứng dụng: \texttt{low}, \texttt{medium}, \texttt{high}, \texttt{non\_flood}.
 \input{generated/tables/image-split}
 
-Tiêu chí gán nhãn dựa trên các dấu hiệu thị giác đặc trưng: lớp \texttt{non\_flood} thể hiện cảnh quan khô ráo, không có dấu hiệu ngập úng; lớp \texttt{low} thể hiện mức ngập cục bộ ở mức mắt cá chân đến bánh xe; lớp \texttt{medium} ngập sâu ngang thân người hoặc nửa phương tiện; và lớp \texttt{high} biểu thị ngập sâu diện rộng đe dọa trực tiếp đến tính mạng và tài sản. Nhãn phân loại đóng vai trò là chỉ dấu mức độ nghiêm trọng hỗ trợ thuật toán xếp hạng ưu tiên.
+\paragraph{Nguồn gốc.} Bộ ảnh do nhóm thu thập. Tên tệp cho thấy nhiều ảnh lấy từ web và báo điện tử, trong đó có ảnh chụp màn hình. Hiện chưa có bản ghi nguồn và giấy phép cho từng ảnh, nên bộ ảnh chỉ dùng cho nghiên cứu và không phân phối lại khi chưa rà soát bản quyền. Ảnh web đã nén thường nhỏ và khác ảnh chụp trực tiếp bằng điện thoại; mô hình chưa được đánh giá riêng trên ảnh chụp thực địa.
 
-Tập dữ liệu hình ảnh được chuẩn hóa với kích thước đầu vào $256\times256$ pixel, kết hợp tập kiểm tra độc lập gồm \ImageTest{} ảnh phục vụ đánh giá năng lực tổng quát hóa của mô hình học sâu.
+\paragraph{Tiêu chí gán nhãn.} Nhãn theo hướng dẫn gán nhãn trong notebook huấn luyện (Bảng~\ref{tab:label-criteria}), dùng người và phương tiện trong ảnh làm mốc tham chiếu. Nhãn là chỉ dấu mức ngập hỗ trợ xếp hạng, không phải số đo độ sâu. Tài liệu của bộ ảnh không ghi số người gán nhãn hay độ đồng thuận giữa người gán, nên nhãn được xem là nhãn của nhóm theo hướng dẫn này. Ranh giới \texttt{low}/\texttt{medium} và \texttt{medium}/\texttt{high} phụ thuộc mốc tham chiếu nhìn thấy trong ảnh; đây là hai cặp lớp dễ nhầm nhất.
+
+\begin{table}[htbp]\centering\small
+\caption{Tiêu chí gán nhãn bốn mức ngập}\label{tab:label-criteria}
+\begin{tabular}{P{.14\textwidth}P{.78\textwidth}}
+\toprule Lớp & Dấu hiệu thị giác \\\midrule
+\texttt{non\_flood} & Không có nước ngập rõ ràng; đường khô, ướt, mưa hoặc vũng nước nhỏ nhưng chưa phải ngập \\
+\texttt{low} & Có nước ngập rõ nhưng dưới gối người, dưới thân thấp xe máy, dưới phần chính bánh xe ô tô \\
+\texttt{medium} & Nước khoảng từ gối đến dưới ngực; tới hoặc gần yên xe máy; qua bánh xe ô tô \\
+\texttt{high} & Nước từ ngực trở lên; qua tay lái xe máy; tới cửa kính hoặc mái xe; ngập sâu vào nhà, cửa sổ \\
+\bottomrule\end{tabular}
+\end{table}
 
 \subsection{Làm sạch, nhóm ảnh và kiểm soát chia tập}
-Quy trình tiền xử lý dữ liệu ảnh áp dụng mã băm nội dung để loại bỏ các ảnh trùng lặp tuyệt đối, kết hợp giải thuật mã băm cảm nhận (perceptual hash - dHash) để gom cụm các biến thể hình ảnh gần giống nhau. Việc phân chia tập dữ liệu được thực hiện theo từng nhóm ảnh tương đồng, đảm bảo không có bất kỳ biến thể nào của cùng một cảnh chụp xuất hiện đồng thời trong cả tập huấn luyện và tập kiểm tra, ngăn chặn triệt để hiện tượng rò rỉ dữ liệu.
+Trước khi huấn luyện, notebook loại ảnh không đọc được và các thư mục chờ rà soát. Ảnh trùng tuyệt đối theo MD5 nằm ở nhiều lớp khác nhau bị loại khỏi huấn luyện. Các ảnh gần giống nhau được gom thành nhóm cảm nhận (perceptual group) bằng dHash; nhóm có nhãn xung đột bị loại để rà soát. Mỗi nhóm chỉ nằm trong một tập, nhằm không để biến thể của cùng một cảnh xuất hiện ở cả huấn luyện lẫn kiểm tra. Việc chia phân tầng theo lớp với tỷ lệ xấp xỉ 70/15/15 theo bảng chia cố định đã lưu; Bảng~\ref{tab:image-split} là kết quả.
 
-Các kiểm tra toàn vẹn định kỳ xác nhận tính nhất quán 100\% giữa danh sách dữ liệu khai báo và tập tin thực tế trên đĩa lưu trữ, đảm bảo nền tảng dữ liệu vững chắc cho mọi phân tích thực nghiệm tiếp theo.
-
-\subsection{Tiền xử lý ảnh và cấu hình hiện tại}
-Pipeline tiền xử lý hình ảnh bao gồm: chuẩn hóa định hướng ảnh theo thẻ EXIF, chuyển đổi không gian màu RGB, kỹ thuật chèn viền bảo toàn tỷ lệ khung hình (letterbox) với thuật toán nội suy song tuyến tính (Bilinear), chuẩn hóa giá trị điểm ảnh theo phân phối ImageNet và sắp xếp chiều tensor theo chuẩn NCHW. Kích thước ảnh chuẩn hóa là $256\times256$ pixel với màu đệm RGB $(124,116,104)$. Phương pháp letterbox giúp triệt tiêu hiện tượng méo mó hình học của các vật thể quan sát so với kỹ thuật kéo giãn điểm ảnh thông thường.
-
-Cấu hình huấn luyện mô hình MobileNetV3 sử dụng tỷ lệ dropout 0,25, kích thước lô (batch size) 32, tối đa 35 epoch, tốc độ học backbone $10^{-5}$ và phân lớp $2\times10^{-4}$, hệ số suy giảm trọng số (weight decay) $5\times10^{-4}$, làm mịn nhãn (label smoothing) 0,05, đồng thời áp dụng cơ chế dừng sớm (early stopping) với độ kiên nhẫn bằng 7.
+Cách làm này giảm nguy cơ rò rỉ do ảnh trùng hoặc gần trùng, nhưng không chứng minh các tập độc lập hoàn toàn về nguồn hay sự kiện: hai ảnh cùng một trận ngập từ hai nguồn có thể rơi vào hai tập khác nhau. Bộ xuất kết quả đối chiếu đường dẫn và MD5 giữa bảng chia với các tệp ảnh hiện có (Mục~\ref{sec:04-evaluation-setup}).
 
 \subsection{Dữ liệu khẩn cấp có cấu trúc}
-Mô hình ước lượng mức độ khẩn cấp xây dựng bảng tham chiếu tổng hợp xác định từ toàn bộ $2^5=32$ tổ hợp trạng thái Boolean của năm đặc trưng lâm sàng cơ bản: hôn mê/mất ý thức (\texttt{unresponsive}), suy hô hấp/tím tái (\texttt{respiratory\_distress}), xuất huyết nặng (\texttt{heavy\_bleeding}), co giật cấp tính (\texttt{active\_convulsions}) và chấn thương nguy cơ cao (\texttt{high\_risk\_trauma}).
+Bảng tham chiếu liệt kê toàn bộ $2^5=32$ tổ hợp của năm cờ Boolean do nhóm chọn: không phản ứng (\texttt{unresponsive}), khó thở (\texttt{respiratory\_distress}), chảy máu nhiều (\texttt{heavy\_bleeding}), co giật (\texttt{active\_convulsions}) và chấn thương nguy cơ cao (\texttt{high\_risk\_trauma}). Nhãn dương theo quy tắc OR của nhóm: có ít nhất một cờ thì dương. Do duyệt đủ không gian tổ hợp, bảng có tính tất định và có thể kiểm tra từng dòng.
 
-Bảng dữ liệu được thiết lập thông qua phương pháp duyệt vét cạn toàn bộ không gian tổ hợp nhị phân, đảm bảo tính tất định và minh bạch tuyệt đối về mặt logic nghiệp vụ y tế khẩn cấp, cung cấp điểm số tham chiếu $E_i$ chuẩn hóa trong khoảng $[0, 1]$ phục vụ thuật toán cứu hộ.
+Bảng này phục vụ khảo sát phương pháp ước lượng điểm khẩn cấp $E_i^{\mathrm{LR}}\in[0,1]$; nó không phải dữ liệu lâm sàng và không được dùng để kết luận về hiệu quả y khoa. Cách mô hình dùng bảng được trình bày ở Mục~\ref{sec:02-urgency-lr}.
 
 \subsection{Generator 3.0 cho RQ1}
-Bộ dữ liệu thực nghiệm RQ1 bao gồm 80 lượt chạy (run) với seed từ 1 đến 80, mô phỏng 16 sự kiện thiên tai tiềm ẩn trên mỗi lượt. Tổng quy mô dữ liệu đạt 26.288 báo cáo cứu nạn, bao gồm 17.901 báo cáo thật, 3.587 báo cáo trùng lặp và 4.800 báo cáo tin giả có phối hợp. Bối cảnh không gian và mật độ dân cư được neo vào kích hoạt vệ tinh Copernicus EMSR848 kết hợp dữ liệu OpenStreetMap và WorldPop tại Việt Nam \citep{copernicusEMSR848,worldpop2025vietnam}.
+Bộ dữ liệu RQ1 gồm 80 run với seed từ 1 đến 80, mỗi run mô phỏng 16 sự kiện thiên tai tiềm ẩn. Tổng cộng 26.288 báo cáo, gồm 17.901 báo cáo thật trong mô phỏng, 3.587 báo cáo trùng lặp và 4.800 báo cáo tin giả có phối hợp. Bối cảnh không gian và mật độ dân cư được neo vào kích hoạt vệ tinh Copernicus EMSR848 kết hợp OpenStreetMap và WorldPop tại Việt Nam \citep{copernicusEMSR848,worldpop2025vietnam}. Đây là dữ liệu bán tổng hợp, không phải báo cáo cứu hộ thực tế.
 
-Mỗi lượt chạy bao gồm năm thành phần dữ liệu phân lập: dữ liệu đầu vào thuật toán, danh sách báo cáo quan sát được, nhãn thực tế (ground truth), các sự cố tiềm ẩn và siêu dữ liệu cấu hình. Cơ chế này đảm bảo thuật toán chỉ tiếp cận thông tin quan sát thời gian thực, trong khi các nhãn thực tế được bảo mật phục vụ công tác đối soát độc lập.
+Mỗi run gồm năm thành phần tách riêng: dữ liệu đầu vào thuật toán, danh sách báo cáo quan sát được, nhãn thật (ground truth), các sự cố tiềm ẩn và siêu dữ liệu cấu hình. Chỉ tệp đầu vào thuật toán được đưa vào suy luận; nhãn thật được nối sau khi đã lưu dự đoán để đối soát độc lập.
 
-\subsection{Candidate 4.1 cho RQ2/RQ3}
-Bộ dữ liệu Candidate 4.1 được khởi tạo chuyên biệt cho các câu hỏi nghiên cứu về độ bền vững của điểm ưu tiên và hệ quả điều phối nguồn lực. Bộ dữ liệu bao gồm 80 tập kiểm thử với tổng cộng 30.229 báo cáo cứu hộ, mô phỏng đa dạng các dạng thức tấn công phối hợp, tin giả và dữ liệu trùng lặp.
+\subsection{Candidate 4.1 cho RQ2 và RQ3}
+Candidate 4.1 là bộ dữ liệu tổng hợp riêng cho độ bền vững của điểm ưu tiên và hệ quả điều phối. Bộ gồm 80 tập với 30.229 báo cáo, mô phỏng các dạng tấn công phối hợp, tin giả và dữ liệu trùng lặp. Mô hình sinh dữ liệu cung cấp thời hạn phục vụ, điều kiện tiếp cận hiện trường và mức tổn thất mô phỏng, đủ để tính lợi ích và harm khi đánh giá điều phối. Vì các đại lượng này do generator quy định, kết quả chỉ nói về sự phù hợp với mục tiêu mô phỏng.
 
-Mô hình thực nghiệm cung cấp các đại lượng kiểm chứng gồm thời hạn phục vụ, điều kiện tiếp cận hiện trường và mức độ tổn thất mô phỏng, cho phép phân tích sâu sắc độ nhạy của thuật toán điều phối trước các sai lệch phân cụm sự cố.
-
-\subsection{Quy chuẩn quản lý dữ liệu thực nghiệm}
-Toàn bộ dữ liệu thực nghiệm, siêu dữ liệu tham số và mã băm toàn vẹn được lưu trữ theo quy chuẩn phiên bản khoa học, đảm bảo tính độc lập giữa các kịch bản đối chứng và khả năng tái lập đầy đủ của mọi biểu đồ và bảng số liệu trong báo cáo.
+\subsection{Lưu trữ và truy vết}
+Mỗi bảng và hình trong báo cáo được sinh từ artifact đã lưu bằng script, kèm bản ghi nguồn và mã băm (\texttt{generated/provenance.json}). Dữ liệu, seed, cấu hình và kết quả của từng lần chạy được giữ cùng nhau để tái lập; quy trình cụ thể ở Mục~\ref{sec:02-reproducibility}.
