@@ -33,7 +33,7 @@ python3 compare_models.py --limit 3 --skip-pte --no-plots
 \end{verbatim}
 Lệnh smoke không thay kết quả full test. Với full test, cần checkpoint, config, split và manifest khớp hash, dependency đúng runtime và quyền truy cập đủ ảnh. Khi PTE không có runtime, trạng thái phải ghi rõ chưa thử thay vì tạo dự đoán thay thế từ ONNX.
 
-Phiên đo cần ghi phần cứng, provider, số luồng, warmup, batch và ranh giới timing. Các phiên summary CPU tính predict; nguồn app tại Mục~\ref{sec:mobile-results} tính classifyImage rộng hơn. Cần giữ output trong một thư mục riêng khi đo lại để có thể so sánh mà không mất bản cũ. Kết quả app hiện thiếu thông tin thiết bị và asset; các phiên tiếp theo cần bổ sung log thiết bị và phiên bản asset trong APK.
+Phiên đo cần ghi phần cứng, provider, số luồng, warmup, batch và ranh giới timing. Các phiên summary CPU tính predict; benchmark điện thoại tại Mục~\ref{sec:phone-benchmark-results} tính classifyImage rộng hơn. Cần giữ output trong một thư mục riêng khi đo lại để có thể so sánh mà không mất bản cũ. Bộ benchmark bốn điện thoại đã có metadata thiết bị và hash model; các phiên tiếp theo vẫn cần bổ sung hash APK/commit, log tải và nhiệt độ để xác nhận build và độ ổn định hiệu năng.
 
 \section{Sinh hình và kiểm tra benchmark ứng dụng}
 Chín hình định lượng và ví dụ ảnh được sinh từ artifact bằng matplotlib. PDF được dùng trong LaTeX; PNG đi cùng để xem nhanh. Script giữ mã chọn ảnh minh họa xác định, hash các nguồn trực tiếp, hash đầu ra và các số tổng hợp trong tệp provenance hình sinh tự động. Các sơ đồ kiến trúc/nghiệp vụ được viết bằng TikZ trong nguồn chương; sơ đồ khái niệm có ghi rõ không phải kết quả thực nghiệm.
@@ -45,7 +45,8 @@ make -C report figures
 \end{verbatim}
 Các file hình đã có trong repo nên build nội dung thường không cần cài matplotlib. Khi nguồn thực nghiệm đổi, cần xuất lại bảng và hình để giữ đồng bộ. Bộ kiểm tra report đối chiếu hash hình/nguồn và sẽ báo nếu hình đã lỗi thời.
 
-Tệp samsung21se.json là hai JSON object nối tiếp, không phải một JSON object hay mảng JSON hợp lệ cho \texttt{json.load}. Module xử lý bằng chứng ứng dụng dùng raw decoding để tách hai khối mà không sửa tệp gốc. Nó nối ID theo cách đóng gói package, kiểm tra nhãn/số mẫu, ma trận/metric và mean/P50/P95 theo nearest-rank. Đây là kiểm tra artifact, không chạy lại suy luận trên điện thoại.
+\subsection{Nguồn benchmark ứng dụng lịch sử}\label{sec:historical-app-benchmark}
+Nguồn này được giữ để truy vết, không dùng trong phần kết quả chính hoặc lựa chọn model/runtime. Tệp samsung21se.json là hai JSON object nối tiếp, không phải một JSON object hay mảng JSON hợp lệ cho \texttt{json.load}. Module xử lý bằng chứng ứng dụng dùng raw decoding để tách hai khối mà không sửa tệp gốc. Nó nối ID theo cách đóng gói package, kiểm tra nhãn/số mẫu, ma trận/metric và mean/P50/P95 theo nearest-rank. Đây là kiểm tra artifact, không chạy lại suy luận trên điện thoại.
 
 \section{Tái lập RQ1 và stress}
 Đánh giá phân cụm RQ1 cần đúng snapshot \texttt{6ac75c2} và notebook tương ứng. Bộ dữ liệu giữ split run 1--20/21--40/41--80. Cấu hình chọn có trong tệp cấu hình đã lưu kèm kết quả. Stress dùng các cấu hình này không tuning lại.
