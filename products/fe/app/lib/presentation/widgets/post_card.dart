@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
 
 import '../../domain/entities/rescue_record.dart';
+import '../../domain/entities/sms_delivery.dart';
 import '../../core/platform/local_file.dart';
 import 'status_badge.dart';
 import 'tag_chip.dart';
@@ -46,6 +47,13 @@ class PostCard extends StatelessWidget {
               ],
             ),
             const SizedBox(height: 8),
+            if (record.smsStatus != SmsStatus.notAttempted) ...[
+              Text(
+                smsStatusMessage(record.smsStatus),
+                style: const TextStyle(color: Color(0xFFB45309)),
+              ),
+              const SizedBox(height: 8),
+            ],
             if (record.attachmentError != null) ...[
               const Text(
                 'Không đọc được ảnh đính kèm. Báo cáo chưa đồng bộ xong; hãy gửi lại ảnh cùng báo cáo.',

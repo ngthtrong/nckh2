@@ -92,7 +92,10 @@ class OutboxLocalDataSource {
   Future<void> saveServer(String id, String url) =>
       _box!.putAll({_serverIdKey: id, _serverUrlKey: url});
 
-  List<SyncMessageModel> readyMessages({int limit = 50}) {
+  List<SyncMessageModel> readyMessages({
+    int limit = 50,
+    String? priorityRecordId,
+  }) {
     final now = DateTime.now().toUtc();
     final messages =
         _messages()
@@ -102,7 +105,12 @@ class OutboxLocalDataSource {
                   !m.nextAttemptAt.isAfter(now),
             )
             .toList()
-          ..sort((a, b) => a.sequenceNumber.compareTo(b.sequenceNumber));
+          ..sort((a, b) {
+            final aPriority = a.payload['id'] == priorityRecordId;
+            final bPriority = b.payload['id'] == priorityRecordId;
+            if (aPriority != bPriority) return aPriority ? -1 : 1;
+            return a.sequenceNumber.compareTo(b.sequenceNumber);
+          });
     return messages.take(limit).toList();
   }
 

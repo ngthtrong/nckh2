@@ -327,18 +327,25 @@ class _GuideScreenState extends State<GuideScreen> {
               ),
             ),
             const SizedBox(height: 8),
-            GridView.builder(
-              shrinkWrap: true,
-              physics: const NeverScrollableScrollPhysics(),
-              gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
-                crossAxisCount: 2,
-                mainAxisExtent: 104,
-                crossAxisSpacing: 10,
-                mainAxisSpacing: 10,
-              ),
-              itemCount: region.numbers.length,
-              itemBuilder: (context, idx) {
-                return PhoneLinkCard(item: region.numbers[idx], compact: true);
+            LayoutBuilder(
+              builder: (context, constraints) {
+                final singleColumn =
+                    constraints.maxWidth < 300 ||
+                    MediaQuery.textScalerOf(context).scale(12) > 16;
+                final width = singleColumn
+                    ? constraints.maxWidth
+                    : (constraints.maxWidth - 10) / 2;
+                return Wrap(
+                  spacing: 10,
+                  runSpacing: 10,
+                  children: [
+                    for (final number in region.numbers)
+                      SizedBox(
+                        width: width,
+                        child: PhoneLinkCard(item: number, compact: true),
+                      ),
+                  ],
+                );
               },
             ),
             if (region.guides.isNotEmpty) ...[

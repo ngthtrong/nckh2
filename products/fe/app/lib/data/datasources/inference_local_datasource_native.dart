@@ -70,9 +70,9 @@ class InferenceLocalDataSource {
   }
 
   Future<void> loadComparisonModel(String path) async {
-    if (!kAdminModelTools)
-      throw UnsupportedError('Bản người dùng chỉ chạy PTE.');
-    if (!_comparisonAccess) throw StateError('Cần đăng nhập admin.');
+    if (!kAdminModelTools || !_comparisonAccess) {
+      throw StateError('Cần bản admin và đăng nhập admin để chạy ONNX.');
+    }
     if (_onnxSession != null) return;
     OrtEnv.instance.init();
     final options = OrtSessionOptions();
@@ -165,12 +165,6 @@ class InferenceLocalDataSource {
       await versionFile.writeAsString(version, flush: true);
     }
     return target;
-  }
-
-  Future<List<double>?> verifyAndroidLogits(Float32List inputTensor) async {
-    final output = await _runOnnx(inputTensor);
-    debugPrint('📱 [ANDROID ONNX RUNTIME OUTPUT]: ${output?.scores}');
-    return output?.scores;
   }
 
   Future<InferenceResult?> classifyImage(Uint8List imageBytes) async {

@@ -500,6 +500,31 @@ class DashboardApiTest(unittest.TestCase):
         self.assertEqual([r["id"] for r in self.client.get("/api/reports?source=sms").json()["reports"]], [report["id"]])
         self.assertEqual(self.sms({"from": "0911", "text": "   "}).status_code, 400)
 
+    def test_app_sms_keeps_full_2000_character_description(self):
+        main.SMS_GATEWAY_TOKEN = "gw-secret"
+        description = "cứu " * 299 + "x" * 804  # 300 words, 2000 Unicode characters
+        self.assertEqual(len(description), 2000)
+        rid = "post-full-sms-description"
+        text = f"SOS|id:{rid}|pos:unknown|trapped:1|injured:0|note:{description}"
+        response = self.sms({"from": "0900", "text": text})
+        self.assertEqual(response.status_code, 201, response.text)
+        report = storage.get_report_by_id(rid)
+        self.assertEqual(report["description"], description)
+        self.assertEqual(report["payload"]["smsText"], text)
+
+    def test_severe_only_app_sms_preserves_urgency_features(self):
+        main.SMS_GATEWAY_TOKEN = "gw-secret"
+        rid = "sos-severe-only"
+        text = f"SOS|id:{rid}|pos:unknown|trapped:0|injured:0|immobile:1|severe:heavy_bleeding,active_convulsions"
+        result = self.sms({"from": "0900", "text": text})
+        self.assertEqual(result.status_code, 201, result.text)
+        features = storage.get_report_by_id(rid)["payload"]["urgency_features"]
+        self.assertEqual(features, {
+            "cannot_move": True, "severe_condition": True,
+            "severe_signs": ["heavy_bleeding", "active_convulsions"],
+        })
+        self.assertFalse(self.sms({"from": "0900", "text": text}).json()["created"])
+
     def test_sms_after_app_sync_logs_contact(self):
         main.SMS_GATEWAY_TOKEN = "gw-secret"
         rid = "sos-1790000000001-000000000001"

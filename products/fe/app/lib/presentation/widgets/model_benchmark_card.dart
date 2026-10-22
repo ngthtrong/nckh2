@@ -59,9 +59,9 @@ class _ModelBenchmarkCardState extends State<ModelBenchmarkCard> {
     WidgetsBinding.instance.addPostFrameCallback((_) {
       if (mounted && widget.controller.isAdmin) {
         unawaited(widget.controller.ensureModelLoaded());
+        if (!kIsWeb) unawaited(_loadCachedPackage());
       }
     });
-    if (widget.controller.isAdmin && !kIsWeb) _loadCachedPackage();
   }
 
   @override
@@ -78,7 +78,7 @@ class _ModelBenchmarkCardState extends State<ModelBenchmarkCard> {
 
   Future<void> _loadCachedPackage() async {
     if (widget.controller.isDeletingBenchmarkResources) return;
-    widget.controller.isPreparingBenchmark = true;
+    widget.controller.setPreparingBenchmark(true);
     _loadingCachedPackage = true;
     try {
       final directory = await getApplicationSupportDirectory();
@@ -97,7 +97,7 @@ class _ModelBenchmarkCardState extends State<ModelBenchmarkCard> {
         );
       }
     } finally {
-      widget.controller.isPreparingBenchmark = false;
+      widget.controller.setPreparingBenchmark(false);
       if (mounted) setState(() => _loadingCachedPackage = false);
     }
   }
@@ -162,7 +162,7 @@ class _ModelBenchmarkCardState extends State<ModelBenchmarkCard> {
     }
     final token = widget.controller.adminSession.token;
     if (token == null) return;
-    widget.controller.isPreparingBenchmark = true;
+    widget.controller.setPreparingBenchmark(true);
     setState(() {
       _downloading = true;
       _downloadProgress = 0;
@@ -209,7 +209,7 @@ class _ModelBenchmarkCardState extends State<ModelBenchmarkCard> {
       if (partialPath != null) {
         await _deleteIfExists(partialPath);
       }
-      widget.controller.isPreparingBenchmark = false;
+      widget.controller.setPreparingBenchmark(false);
       if (mounted) {
         setState(() => _downloading = false);
       }

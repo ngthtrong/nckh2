@@ -12,9 +12,18 @@ class _Repository implements RescueRepository {
   final saved = <RescueRecord>[];
 
   @override
-  Future<void> saveRecord(RescueRecord record) async => saved.add(record);
+  Future<void> saveRecord(
+    RescueRecord record, {
+    bool preparing = false,
+  }) async => saved.add(record);
   @override
-  Future<RescueRecord> sendRecord(RescueRecord record) async => record;
+  RescueRecord? getRecord(String id) =>
+      saved.where((r) => r.id == id).lastOrNull;
+  @override
+  Future<void> queueRecord(RescueRecord record) async {}
+  @override
+  Future<RescueRecord> sendRecord(RescueRecord record) async =>
+      record.copyWith(metadataSynced: true);
   @override
   dynamic noSuchMethod(Invocation invocation) => super.noSuchMethod(invocation);
 }
@@ -46,11 +55,13 @@ void main() {
       imagePath: image.path,
       images: [image.path],
       sendMode: SendMode.queuedOffline,
+      contactPhone: '0900000000',
     );
     await image.delete();
     expect(await File(record.imagePath!).readAsBytes(), [0xFF, 0xD8, 0xFF, 42]);
     expect(record.images, [record.imagePath]);
-    expect(repo.saved.single.imagePath, record.imagePath);
+    expect(repo.saved.last.imagePath, record.imagePath);
+    expect(record.contactPhone, '0900000000');
   });
 
   test('missing or empty picker image fails before saving a report', () async {
@@ -64,12 +75,52 @@ void main() {
           imagePath: image.path,
           sendMode: SendMode.queuedOffline,
         ),
-        throwsA(anything),
+        throwsA(
+          isA<FormatException>().having(
+            (error) => error.message,
+            'message',
+            contains('bỏ ảnh hoặc chọn lại'),
+          ),
+        ),
       );
       await image.writeAsBytes([]);
     }
     expect(repo.saved, isEmpty);
   });
+
+  test(
+    'invalid form input is rejected before saving or reading images',
+    () async {
+      final repo = _Repository();
+      for (final input in [
+        (trapped: -1, injured: 0, text: ''),
+        (trapped: 10001, injured: 0, text: ''),
+        (trapped: 0, injured: 10001, text: ''),
+        (trapped: 0, injured: 0, text: 'a' * 2001),
+        (trapped: 0, injured: 0, text: List.filled(301, 'a').join(' ')),
+      ]) {
+        await expectLater(
+          SubmitRescuePostUseCase(repo)(
+            lat: null,
+            lng: null,
+            trappedCount: input.trapped,
+            injuredCount: input.injured,
+            description: input.text,
+            imagePath: 'missing.jpg',
+            sendMode: SendMode.queuedOffline,
+          ),
+          throwsA(
+            isA<FormatException>().having(
+              (error) => error.message,
+              'message',
+              isNot(contains('ảnh')),
+            ),
+          ),
+        );
+      }
+      expect(repo.saved, isEmpty);
+    },
+  );
 
   test(
     'web attachment data survives expired picker URLs without dart:io',

@@ -9,6 +9,8 @@ Map<String, dynamic> rescueRecordPayload(RescueRecord record) => {
   'injuredCount': record.injuredCount,
   'vulnerableGroups': record.vulnerableGroups,
   'description': record.description,
+  if (record.contactPhone?.trim().isNotEmpty == true)
+    'contactPhone': record.contactPhone!.trim(),
   'aiTags': record.aiTags.map((tag) => tag.toJson()).toList(),
   'sendMode': record.sendMode,
   'L_i': {'lat': record.lat, 'lon': record.lng},

@@ -3,7 +3,7 @@
 App gửi SMS dự phòng khi không có data, dạng (xem ``smsBody`` trong
 ``fe/app/lib/data/datasources/sender_remote_datasource.dart``)::
 
-    SOS|id:<id báo cáo>|pos:<lat>,<lng>|trapped:<n>|injured:<n>|vuln:<a,b>|note:<mô tả>
+    SOS|id:<id>|pos:<lat>,<lng>|trapped:<n>|injured:<n>|vuln:<a,b>|immobile:1|severe:<a,b>|note:<mô tả>
 
 ``pos`` là ``unknown`` khi không có GPS; ``vuln`` và ``note`` có thể vắng; ``note`` luôn
 đứng cuối nên được phép chứa ``|``. Tin theo định dạng này dùng đúng id của app, nên
@@ -23,7 +23,8 @@ import storage
 
 logger = logging.getLogger("rescue_mock_server")
 
-SMS_TEXT_MAX_LENGTH = 1600  # ~10 tin ghép
+# Leave room for structured SOS fields before the full app description.
+SMS_TEXT_MAX_LENGTH = storage.DESCRIPTION_MAX_LENGTH + 1024
 
 
 def parse_sos(text: str) -> Optional[Dict[str, Any]]:
@@ -56,6 +57,13 @@ def parse_sos(text: str) -> Optional[Dict[str, Any]]:
     groups = [g.strip() for g in fields.get("vuln", "").split(",") if g.strip()]
     if groups:
         meta["vulnerableGroups"] = [g[:50] for g in groups[:20]]
+    signs = [s.strip()[:64] for s in fields.get("severe", "").split(",") if s.strip()][:20]
+    if signs or fields.get("immobile") in ("0", "1"):
+        meta["urgency_features"] = {
+            "cannot_move": fields.get("immobile") == "1",
+            "severe_condition": bool(signs),
+            "severe_signs": signs,
+        }
     if note.strip():
         meta["description"] = note.strip()[: storage.DESCRIPTION_MAX_LENGTH]
     return meta

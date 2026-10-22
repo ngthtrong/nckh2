@@ -1,7 +1,16 @@
 import 'package:flutter/material.dart';
 import '../../core/constants/app_colors.dart';
 
-enum SosState { idle, pressed, accepted, queued, sms, failed }
+enum SosState {
+  idle,
+  pressed,
+  accepted,
+  queued,
+  sms,
+  smsUnknown,
+  smsFailed,
+  failed,
+}
 
 class SosButtonSection extends StatelessWidget {
   final SosState state;
@@ -40,6 +49,18 @@ class SosButtonSection extends StatelessWidget {
         'Đã gửi SMS',
         'Đã gửi SMS; chưa xác nhận tiếp nhận.',
         const Color(0xFF2563EB),
+      ),
+      SosState.smsUnknown => (
+        Icons.help_outline,
+        'SMS chưa rõ',
+        'Chưa xác nhận kết quả SMS. SOS vẫn chờ đồng bộ; không tự gửi SMS lặp.',
+        const Color(0xFFB45309),
+      ),
+      SosState.smsFailed => (
+        Icons.sms_failed_outlined,
+        'SMS lỗi',
+        'Không gửi được SMS. SOS đã được lưu; hãy gọi 112 nếu cần trợ giúp ngay.',
+        const Color(0xFFB45309),
       ),
       SosState.failed => (
         Icons.error_outline,

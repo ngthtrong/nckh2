@@ -3,6 +3,7 @@ import 'package:app/domain/entities/ai_tag.dart';
 import 'package:app/domain/entities/rescue_record.dart';
 import 'package:app/domain/entities/rescue_status.dart';
 import 'package:app/domain/entities/send_mode.dart';
+import 'package:app/domain/entities/sms_delivery.dart';
 import 'package:app/domain/repositories/network_repository.dart';
 import 'package:app/domain/repositories/rescue_repository.dart';
 import 'package:app/domain/services/adaptive_send_policy.dart';
@@ -28,25 +29,68 @@ class _FakeNetwork implements NetworkRepository {
 }
 
 class _FakeRepo implements RescueRepository {
-  _FakeRepo({required this.sendOk, required this.smsOk});
+  _FakeRepo({
+    required this.sendOk,
+    required this.smsOk,
+    this.metadataAck = false,
+    this.rejection,
+    this.smsStatus,
+    this.ackOnQueue = false,
+    this.ackOnSms = false,
+  });
   final bool sendOk;
   final bool smsOk;
+  final bool metadataAck;
+  final String? rejection;
+  final SmsStatus? smsStatus;
+  final bool ackOnQueue;
+  final bool ackOnSms;
+  bool acknowledged = false;
   final saved = <RescueRecord>[];
   final sent = <RescueRecord>[];
   int smsCalls = 0;
+  int queued = 0;
 
   @override
-  Future<void> saveRecord(RescueRecord record) async => saved.add(record);
+  List<RescueRecord> getAllRecords() =>
+      {for (final r in saved) r.id: r}.values.toList();
   @override
-  Future<RescueRecord> sendRecord(RescueRecord record) async {
-    sent.add(record);
-    return sendOk ? record.copyWith(synced: true) : record;
+  Future<void> queueRecord(RescueRecord record) async {
+    expect(saved.last.id, record.id);
+    queued++;
+    if (ackOnQueue) {
+      acknowledged = true;
+      await saveRecord(record);
+    }
   }
 
   @override
-  Future<bool> sendSmsFallback(RescueRecord record) async {
+  Future<void> saveRecord(
+    RescueRecord record, {
+    bool preparing = false,
+  }) async => saved.add(
+    acknowledged ? record.copyWith(metadataSynced: true, synced: true) : record,
+  );
+  @override
+  RescueRecord? getRecord(String id) =>
+      getAllRecords().where((r) => r.id == id).firstOrNull;
+  @override
+  Future<RescueRecord> sendRecord(RescueRecord record) async {
+    sent.add(record);
+    return record.copyWith(
+      synced: sendOk,
+      metadataSynced: sendOk || metadataAck,
+      syncError: rejection,
+    );
+  }
+
+  @override
+  Future<SmsResult> sendSmsFallback(RescueRecord record) async {
+    expect(saved.last.smsStatus, SmsStatus.sending);
+    expect(queued, greaterThan(0));
     smsCalls++;
-    return smsOk;
+    if (ackOnSms) acknowledged = true;
+    return SmsResult(smsStatus ?? (smsOk ? SmsStatus.sent : SmsStatus.failed));
   }
 
   @override
@@ -122,13 +166,49 @@ void main() {
       expect(repo.smsCalls, 1);
       expect(r.sendMode, 'smsFallback');
       expect(r.synced, isFalse);
-      expect(repo.sent, hasLength(1));
+      expect(repo.sent, isEmpty);
     });
     test('mất data, SMS không gửi được → queuedOffline', () async {
       final repo = _FakeRepo(sendOk: false, smsOk: false);
       final r = await deliverRecord(repo, _record(), SendMode.smsFallback);
       expect(r.sendMode, 'queuedOffline');
+      expect(r.smsStatus, SmsStatus.failed);
     });
+    test(
+      'WiFi without reachable server falls back once after durable queue',
+      () async {
+        final repo = _FakeRepo(sendOk: false, smsOk: true);
+        final r = await deliverRecord(repo, _record(), SendMode.textOnly);
+        expect(repo.sent, hasLength(1));
+        expect(repo.smsCalls, 1);
+        expect(r.smsStatus, SmsStatus.sent);
+        expect(r.metadataSynced, isFalse);
+      },
+    );
+    test('metadata ACK or permanent rejection never triggers SMS', () async {
+      for (final repo in [
+        _FakeRepo(sendOk: false, smsOk: true, metadataAck: true),
+        _FakeRepo(sendOk: false, smsOk: true, rejection: 'INVALID_PAYLOAD'),
+      ]) {
+        await deliverRecord(repo, _record(), SendMode.textOnly);
+        expect(repo.smsCalls, 0);
+      }
+    });
+    test(
+      'lost SMS callback remains unknown and does not resend on retry',
+      () async {
+        final repo = _FakeRepo(
+          sendOk: false,
+          smsOk: true,
+          smsStatus: SmsStatus.unknown,
+        );
+        final r = await deliverRecord(repo, _record(), SendMode.smsFallback);
+        expect(r.smsStatus, SmsStatus.unknown);
+        expect(r.sendMode, 'queuedOffline');
+        await deliverRecord(repo, r, SendMode.smsFallback);
+        expect(repo.smsCalls, 1);
+      },
+    );
   });
 
   test('advancedStatus chỉ cho đi tiến', () {
@@ -167,5 +247,75 @@ void main() {
     );
     expect(r.maxAiConfidence, 0.8);
     expect(_record().maxAiConfidence, 0);
+  });
+  test('severe-only SMS keeps mobility and canonical signs before note', () {
+    final text = smsBody(
+      _record().copyWith(
+        cannotMove: true,
+        severeSigns: ['seizure', 'heavy_bleeding'],
+        description: 'x|trapped:999',
+      ),
+    );
+    expect(
+      text,
+      contains('|immobile:1|severe:active_convulsions,heavy_bleeding|note:'),
+    );
+    expect(text, endsWith('x|trapped:999'));
+  });
+  test('SMS retry is explicit, delayed, and keeps its report ID', () async {
+    final repo = _FakeRepo(sendOk: false, smsOk: true);
+    final firstAttempt = DateTime.utc(2026, 10, 22);
+    final failed = _record().copyWith(
+      smsStatus: SmsStatus.failed,
+      smsAttemptedAt: firstAttempt,
+    );
+    await deliverRecord(
+      repo,
+      failed,
+      SendMode.smsFallback,
+      retrySms: true,
+      now: () => firstAttempt.add(const Duration(seconds: 29)),
+    );
+    expect(repo.smsCalls, 0);
+    final resent = await deliverRecord(
+      repo,
+      failed,
+      SendMode.smsFallback,
+      retrySms: true,
+      now: () => firstAttempt.add(const Duration(seconds: 30)),
+    );
+    expect(repo.smsCalls, 1);
+    expect(resent.id, failed.id);
+    expect(resent.smsStatus, SmsStatus.sent);
+    final unknown = failed.copyWith(smsStatus: SmsStatus.unknown);
+    await deliverRecord(
+      repo,
+      unknown,
+      SendMode.smsFallback,
+      retrySms: true,
+      now: () => firstAttempt.add(const Duration(minutes: 1)),
+    );
+    expect(repo.smsCalls, 1);
+  });
+  test('ACK while queueing prevents an unnecessary SMS', () async {
+    final repo = _FakeRepo(sendOk: false, smsOk: true, ackOnQueue: true);
+    final result = await deliverRecord(repo, _record(), SendMode.smsFallback);
+    expect(repo.smsCalls, 0);
+    expect(result.synced, isTrue);
+  });
+  test('ACK during native SMS wait is reflected in returned report', () async {
+    final repo = _FakeRepo(sendOk: false, smsOk: true, ackOnSms: true);
+    final result = await deliverRecord(repo, _record(), SendMode.smsFallback);
+    expect(repo.smsCalls, 1);
+    expect(result.metadataSynced, isTrue);
+    expect(result.synced, isTrue);
+  });
+  test('legacy boolean callback never confirms sent', () {
+    expect(SmsResult.fromNative(true).status, SmsStatus.unknown);
+    expect(SmsResult.fromNative({'status': 'sent'}).status, SmsStatus.sent);
+    expect(
+      SmsResult.fromNative({'status': 'unknown'}).status,
+      SmsStatus.unknown,
+    );
   });
 }

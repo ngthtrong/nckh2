@@ -1,6 +1,10 @@
 /// Cấu hình tập trung — sửa tại đây khi deploy thật.
 library;
 
+const int kMaxReportPeople = 10000;
+const int kMaxDescriptionWords = 300;
+const int kMaxDescriptionCharacters = 2000;
+
 // Flutter supplies the flavor to Dart and Gradle together.
 const bool kAdminModelTools =
     String.fromEnvironment('FLUTTER_APP_FLAVOR') != 'user';
@@ -54,7 +58,8 @@ void setServerBaseUrl(String? url) => _serverBaseUrl =
     url != null && isAllowedServerUrl(url) ? url : 'http://127.0.0.1:1';
 
 /// Số tổng đài nhận SMS fallback. Đặt lúc build/run:
-/// `--dart-define=EMERGENCY_PHONE=+84xxxxxxxxx`. Còn là số giả thì app không gửi SMS.
+/// `--dart-define-from-file=.env.local`. Tệp bị Git bỏ qua, không đóng gói như asset.
+/// Cấu hình build vẫn có thể được trích từ APK; không dùng cho khóa bí mật.
 const String kEmergencyPhone = String.fromEnvironment(
   'EMERGENCY_PHONE',
   defaultValue: kPlaceholderEmergencyPhone,

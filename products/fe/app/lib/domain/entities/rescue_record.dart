@@ -1,4 +1,5 @@
 import 'ai_tag.dart';
+import 'sms_delivery.dart';
 
 String canonicalSevereSign(String sign) => switch (sign) {
   'respiratory_distress' => 'respiratory_distress_or_cyanosis',
@@ -26,9 +27,13 @@ class RescueRecord {
   final List<String> severeSigns;
   final double? urgencyScore;
   final String description;
+  final String? contactPhone;
   final String sendMode;
   final bool synced;
   final bool metadataSynced;
+  final SmsStatus smsStatus;
+  final String? smsError;
+  final DateTime? smsAttemptedAt;
 
   /// Retryable local attachment failure; metadata may already be on the server.
   final String? attachmentError;
@@ -55,9 +60,13 @@ class RescueRecord {
     this.severeSigns = const [],
     this.urgencyScore,
     this.description = '',
+    this.contactPhone,
     required this.sendMode,
     this.synced = false,
     this.metadataSynced = false,
+    this.smsStatus = SmsStatus.notAttempted,
+    this.smsError,
+    this.smsAttemptedAt,
     this.attachmentError,
     this.status = 'processing',
     this.syncError,
@@ -94,9 +103,14 @@ class RescueRecord {
     List<String>? severeSigns,
     double? urgencyScore,
     String? description,
+    String? contactPhone,
     String? sendMode,
     bool? synced,
     bool? metadataSynced,
+    SmsStatus? smsStatus,
+    String? smsError,
+    bool clearSmsError = false,
+    DateTime? smsAttemptedAt,
     String? attachmentError,
     bool clearAttachmentError = false,
     String? status,
@@ -119,9 +133,13 @@ class RescueRecord {
       severeSigns: severeSigns ?? this.severeSigns,
       urgencyScore: urgencyScore ?? this.urgencyScore,
       description: description ?? this.description,
+      contactPhone: contactPhone ?? this.contactPhone,
       sendMode: sendMode ?? this.sendMode,
       synced: synced ?? this.synced,
       metadataSynced: metadataSynced ?? this.metadataSynced,
+      smsStatus: smsStatus ?? this.smsStatus,
+      smsError: clearSmsError ? null : smsError ?? this.smsError,
+      smsAttemptedAt: smsAttemptedAt ?? this.smsAttemptedAt,
       attachmentError: clearAttachmentError
           ? null
           : attachmentError ?? this.attachmentError,

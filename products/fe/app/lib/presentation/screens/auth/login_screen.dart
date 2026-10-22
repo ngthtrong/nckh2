@@ -57,8 +57,7 @@ class _LoginScreenState extends State<LoginScreen> {
       widget.onLoginSuccess();
     } else {
       setState(() {
-        _errorMessage =
-            'Tên đăng nhập hoặc mật khẩu không đúng.\n(Tài khoản mẫu: cuuho / 123456)';
+        _errorMessage = 'Tên đăng nhập hoặc mật khẩu không đúng.';
       });
     }
   }
@@ -135,7 +134,7 @@ class _LoginScreenState extends State<LoginScreen> {
                   TextField(
                     controller: _usernameController,
                     decoration: InputDecoration(
-                      hintText: 'Nhập tên đăng nhập (vd: cuuho)',
+                      hintText: 'Nhập tên đăng nhập',
                       hintStyle: const TextStyle(
                         fontSize: 14,
                         color: Color(0xFF9CA3AF),
@@ -178,7 +177,7 @@ class _LoginScreenState extends State<LoginScreen> {
                     controller: _passwordController,
                     obscureText: !_showPassword,
                     decoration: InputDecoration(
-                      hintText: 'Nhập mật khẩu (vd: 123456)',
+                      hintText: 'Nhập mật khẩu',
                       hintStyle: const TextStyle(
                         fontSize: 14,
                         color: Color(0xFF9CA3AF),

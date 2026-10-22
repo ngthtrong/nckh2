@@ -1,8 +1,8 @@
 # App cứu hộ Android
 
 App Flutter gửi báo cáo/SOS tới backend Docker, lưu hàng đợi khi offline và đồng
-bộ lại khi có mạng. Model PTE và Logistic Regression E_i được đóng gói trong APK;
-ONNX chỉ tải sau khi admin đăng nhập.
+bộ lại khi có mạng. Model PTE và Logistic Regression E_i được đóng gói trong APK.
+Bản `user` chỉ chạy PTE; bản `admin` có thêm ONNX và công cụ benchmark.
 
 ## Server Docker trên laptop
 
@@ -26,30 +26,42 @@ có chặn kết nối giữa các thiết bị hay không. Không dùng `localh
 
 ## Build APK Release
 
-Chạy trong thư mục có file `pubspec.yaml` này:
+Chạy từ thư mục gốc `nckh2`; dùng đường dẫn tương đối để vào thư mục ứng dụng:
 
 ```powershell
+cd .\products\fe\app
+
 flutter pub get
 flutter analyze
-flutter test
-flutter build apk --release --split-per-abi --target-platform android-arm64 --dart-define=SERVER_URL=https://TEN_MIEN_BACKEND
+flutter test --flavor user
+flutter test --flavor admin test/admin_model_access_test.dart test/ai_model_test.dart test/model_benchmark_test.dart test/model_download_cleanup_test.dart
+flutter build apk --flavor user --release --split-per-abi --target-platform android-arm64 --dart-define-from-file=.env.local --dart-define=SERVER_URL=https://TEN_MIEN_BACKEND
 ```
 
 Lệnh trên tạo riêng APK ARM64 cho Redmi Note 11/13:
-`build/app/outputs/flutter-apk/app-arm64-v8a-release.apk`. Nếu cần cả ARM32 và
+`build/app/outputs/flutter-apk/app-arm64-v8a-user-release.apk`. Nếu cần cả ARM32 và
 x86_64, bỏ tùy chọn `--target-platform android-arm64`.
 
 Thay `TEN_MIEN_BACKEND` bằng tên miền HTTPS thực tế có chứng chỉ hợp lệ. Bản mặc
 định chỉ dùng địa chỉ này, không dò LAN hoặc dùng lại địa chỉ HTTP đã lưu.
 Mã database giúp nhận đúng DB; nó không chứng thực máy chủ hay mã hóa kết nối.
 
-Nếu chỉ trình diễn backend HTTP trong Wi-Fi tin cậy, dùng lệnh riêng:
+Nếu chỉ trình diễn backend HTTP trong Wi-Fi tin cậy, mở PowerShell tại thư mục
+gốc `nckh2` và chạy:
 
 ```powershell
-flutter build apk --release --split-per-abi --target-platform android-arm64 --dart-define=ALLOW_INSECURE_LAN=true
+cd .\products\fe\app
+
+flutter build apk --flavor user --release --split-per-abi --target-platform android-arm64 --dart-define-from-file=.env.local --dart-define=ALLOW_INSECURE_LAN=true
 ```
 
-Đây vẫn là **một APK dùng chung User/Admin**. Tùy chọn này bật HTTP cho IP nội
+Bản `user` mặc định không đóng gói `libonnxruntime.so` và không mở công cụ admin.
+Để build bản admin, thay `--flavor user` bằng `--flavor admin` trong cùng lệnh;
+APK có tên `app-arm64-v8a-admin-release.apk`, package `com.example.app.admin`,
+cài song song với bản user `com.example.app`. Dữ liệu và phiên đăng nhập của
+hai bản tách biệt. Bản user có thể cập nhật đè APK cũ nếu cùng chữ ký.
+
+Tùy chọn demo bật HTTP cho IP nội
 bộ/loopback và tự tìm backend cổng 8000; có thể thêm
 `--dart-define=SERVER_URL=http://IP_LAPTOP:8000` để thử IP đó trước. Không cần
 build lại khi IP đổi trong cùng `/24`. HTTP demo không mã hóa mật khẩu/token,
@@ -64,7 +76,7 @@ chưa phải bản ký phát hành trên Play Store.
 gọi từ native code. Flutter tự áp dụng file này khi build release. Không bỏ quy
 tắc này: R8 có thể xóa lớp xử lý lỗi/`HybridData`, làm app crash lúc nạp PTE
 (`SIGABRT` trong `libfbjni`). Sau khi sửa, cài APK cập nhật đè lên bản cũ và
-kiểm tra mở app, xác nhận PTE nạp mặc định. Benchmark model trên thiết bị và
+kiểm tra mở form báo cáo, xác nhận PTE nạp một lần theo yêu cầu. Benchmark model trên thiết bị và
 so sánh ONNX/PTE chỉ hiện sau khi admin đăng nhập; nút benchmark ảnh logo kiểm
 tra nạp/chạy model, không đánh giá accuracy/F1.
 
@@ -74,32 +86,72 @@ Chuyển APK sang điện thoại và mở file để cài, hoặc bật USB deb
 
 ```powershell
 flutter devices
-flutter install --release -d DEVICE_ID
+flutter install --flavor user --release -d DEVICE_ID
 ```
 
 Sau khi cài:
 
-1. Cấp quyền vị trí khi app yêu cầu; kiểm tra AI đã nạp.
+1. Cấp quyền vị trí; mở form tạo báo cáo để PTE bắt đầu nạp bất đồng bộ.
 2. Gửi một báo cáo thử và kiểm tra báo cáo xuất hiện trên dashboard server.
 3. Tắt Wi-Fi/data, gửi thêm báo cáo; xác nhận bản ghi nằm trong hàng đợi.
 4. Bật lại Wi-Fi; xác nhận báo cáo được đồng bộ và hàng đợi giảm.
-5. Đổi trạng thái trên dashboard; xác nhận app cập nhật trong khoảng 15 giây.
+5. Đổi trạng thái trên dashboard; khi đang xem lịch sử/trạng thái, app hỏi mỗi
+   15 giây sau khi lần trước hoàn tất, ở màn hình khác mỗi 60 giây. Không có
+   mạng/báo cáo cần theo dõi hoặc app ra nền thì dừng timer; mở lại app cập nhật ngay.
 
-SMS dự phòng chỉ hoạt động khi build với số tổng đài thật bằng
-`--dart-define=EMERGENCY_PHONE=...` và đã cấp quyền SMS. Khi chưa cấu hình số này,
-báo cáo offline vẫn được giữ để đồng bộ qua data sau.
+WorkManager chỉ được giữ khi còn tin/ảnh chờ gửi **hoặc** báo cáo chưa kết thúc.
+Lịch kiểm tra nền 15 phút có điều kiện có mạng; Android quyết định thời điểm chạy
+thực tế. Hết việc thì hủy, lưu báo cáo mới thì đăng ký lại. SOS/gửi báo cáo thử
+ngay, độc lập với lịch nền và trạng thái AI. Buộc dừng app có thể ngăn chạy nền
+cho đến lần mở tiếp theo; cần kiểm tra thêm hạn chế pin riêng của hãng điện thoại.
 
-Benchmark tập test được tải theo yêu cầu, không nằm trong APK. Trong Cài đặt,
+Các lần tìm LAN tự động thất bại chờ 1 → 2 → 5 phút, tiếp tục giới hạn 5 phút.
+Luôn thử địa chỉ đã biết trước; gửi mới, bấm tìm lại hoặc đổi loại kết nối có thể
+tìm lại ngay. Worker nền chỉ thử địa chỉ đã biết, không quét LAN.
+Tin quá hạn chưa gửi được chờ ít nhất 30 giây trước lần thử tự động kế tiếp;
+không hẹn retry khi app ra nền hoặc không có mạng. Tránh vòng lặp 0 giây khi
+server mất kết nối nhưng thời điểm retry của message chưa được cập nhật.
+
+SMS dự phòng lấy `EMERGENCY_PHONE` từ `.env.local` qua cờ build
+`--dart-define-from-file=.env.local`. Tệp này bị Git bỏ qua; không đưa vào assets,
+README, test hay log. Số nhận vẫn tồn tại trong APK sau build và không phải secret
+đối với người phân tích APK. Thiếu cấu hình/quyền/SIM gửi được thì báo cáo vẫn lưu
+trong hàng đợi; ứng dụng hiển thị SMS thất bại thay vì báo đã gửi.
+
+SOS được lưu trước khi lấy GPS/dò mạng/xin quyền SMS. Mỗi báo cáo lấy GPS mới trong
+tối đa 3 giây; thất bại thì để trống vị trí. Các lần bấm SOS lặp trong 30 giây dùng
+cùng báo cáo, không tạo SMS mới; trạng thái này được đọc từ dữ liệu đã lưu nên vẫn
+có hiệu lực khi mở lại app. Sau 30 giây có thể tạo SOS mới. Gửi lại dữ liệu dùng
+cùng mã báo cáo; WorkManager không tự gửi SMS. Wi-Fi có kết nối nhưng server không
+nhận được metadata sẽ thử SMS một lần; lỗi từ chối vĩnh viễn hoặc metadata đã ACK
+không kích hoạt SMS. Nội dung SMS có dấu hiệu nguy cấp và khả năng di chuyển.
+Khi SMS đã xác nhận lỗi, nút **Thử lại SMS cho SOS đã lưu** ở Trang chủ cho phép
+gửi lại cùng mã sau ít nhất 30 giây và xác nhận phí/tin nhiều phần. SMS chưa rõ
+kết quả không có nút gửi lại tự động để tránh trùng tin.
+
+Android chỉ báo SMS đã gửi khi mọi phần có callback gửi thành công. Hết thời gian
+chờ hoặc app đóng khi đang gửi hiển thị chưa rõ kết quả và không tự gửi SMS lặp.
+Máy hai SIM cần cấu hình SIM SMS mặc định trong Android. Trạng thái gửi không xác
+nhận điện thoại nhận/trung tâm đã tiếp nhận. Muốn tin xuất hiện trên dashboard,
+máy/dịch vụ gateway phải chuyển tiếp tới `/api/sms/inbound` bằng token phía server;
+không đưa token gateway vào app.
+
+Hồ sơ cục bộ lưu mật khẩu bằng PBKDF2-HMAC-SHA256 với salt ngẫu nhiên. Khi cập nhật
+app, dữ liệu mật khẩu cũ được chuyển đổi một lần và compact file Hive, giữ nguyên
+hồ sơ/phiên. Đã bỏ đăng nhập demo. Việc hash chạy trong isolate để giao diện phản hồi.
+
+Trong bản `admin`, benchmark tập test được tải theo yêu cầu, không nằm trong APK. Trong Cài đặt,
 đăng nhập bằng tài khoản có quyền `admin` trên server. Model PTE được đóng gói
-trong APK để AI chạy offline ngay; ONNX và tập benchmark chỉ tải sau khi admin
+trong APK để AI chạy offline; ONNX và tập benchmark chỉ tải sau khi admin
 đăng nhập. App kiểm tra SHA-256 ONNX theo manifest đi kèm PTE trước khi nạp.
 Gói benchmark lưu trong bộ nhớ riêng của app, có thể xóa ở mục benchmark và
 chạy offline sau khi tải.
 
-Trong Cài đặt → Benchmark, bấm **Xóa ONNX và tập benchmark đã tải** để giải phóng
-dung lượng. App quay về PTE và báo số MB đã xóa; PTE, hồ sơ cứu hộ và kết quả JSON
+Ở cả hai bản, trong Cài đặt → Khác, bấm **Dọn ONNX và dữ liệu benchmark đã tải**
+để giải phóng dung lượng. Bản admin còn có nút xóa trong mục Benchmark.
+App quay về PTE và báo dung lượng đã xóa; PTE, hồ sơ cứu hộ, ảnh và kết quả JSON
 được giữ. Nút tạm khóa khi đang nạp model, tải tài nguyên hoặc chạy benchmark.
-Khi khởi động, app tự dọn ONNX của bản cũ, cache ONNX khác hash hiện tại và file
+Khi nạp PTE, app tự dọn ONNX của bản cũ, cache ONNX khác hash hiện tại và file
 tải ONNX dở; ONNX đúng phiên bản đang dùng được giữ để admin nạp lại.
 
 `integration_test` nằm trong `dev_dependencies`; Flutter loại native plugin này
@@ -132,6 +184,24 @@ nếu runtime hoặc loại kết quả thay đổi, phép đo bị hủy để 
 mất/không đọc được, app giữ trạng thái chưa gửi xong và báo lỗi ảnh; ACK nội dung
 đã nhận được lưu riêng để không tạo lại message mỗi lần thử gửi ảnh.
 Đăng xuất chỉ xóa trạng thái đăng nhập, giữ tài khoản/hồ sơ local để đăng nhập lại.
+
+Form giới hạn mỗi mục số người từ 0 đến 10.000; mô tả tối đa 300 từ và 2.000
+ký tự Unicode, từ được tách bằng khoảng trắng/xuống dòng. Bộ đếm hiển thị cả hai
+giới hạn; vượt giới hạn thì không gửi. Luồng tạo báo cáo cũng kiểm tra lại trước
+khi chép ảnh/lưu dữ liệu. Ảnh không đọc/lưu được sẽ hiện lỗi trên form, giữ nội
+dung để người dùng bỏ ảnh hoặc chọn lại; chưa tạo báo cáo trong trường hợp này.
+Mô tả dài có thể tạo nhiều phần SMS và phát sinh phí; callback chỉ xác nhận khi
+mọi phần đã gửi. Gateway backend giữ đủ mô tả 2.000 ký tự cộng các trường SOS;
+cần cập nhật/rebuild backend cùng bản app này nếu đang dùng gateway SMS.
+
+SOS/báo cáo mới chụp số điện thoại từ hồ sơ local vào record, giữ qua lần mở lại
+app và gửi `contactPhone` cùng metadata. Khách chưa có hồ sơ và báo cáo cũ không
+có số liên hệ vẫn gửi được. Không lấy số từ hồ sơ hiện tại để ghi ngược vào các
+báo cáo cũ.
+
+Metadata đã ACK nhưng ảnh còn chờ thì foreground hẹn thử lại sau 30 giây, kể cả
+outbox metadata đã trống. Timer dừng khi offline/app ra nền hoặc đã gửi xong;
+WorkManager tiếp tục phụ trách lịch nền như trên.
 
 Foreground giữ quyền sở hữu Hive suốt phiên; Workmanager nhờ foreground đồng bộ
 hoặc chỉ tự mở Hive khi không có chủ sở hữu. Nếu khởi động báo tác vụ cũ còn giữ

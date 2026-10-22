@@ -27,6 +27,7 @@ import '../../domain/entities/user.dart';
 import '../../domain/usecases/analyze_image_usecase.dart';
 import '../../domain/usecases/get_rescue_records_usecase.dart';
 import '../../domain/usecases/send_sos_usecase.dart';
+import '../../domain/usecases/deliver_record.dart';
 import '../../domain/usecases/submit_rescue_post_usecase.dart';
 import '../../domain/usecases/sync_pending_records_usecase.dart';
 import '../../domain/repositories/inference_repository.dart';
@@ -44,6 +45,12 @@ class AppController extends ChangeNotifier with WidgetsBindingObserver {
   bool isDeletingBenchmarkResources = false;
   bool isPreparingBenchmark = false;
   int benchmarkResourcesRevision = 0;
+
+  void setPreparingBenchmark(bool preparing) {
+    isPreparingBenchmark = preparing;
+    if (!_disposed) notifyListeners();
+  }
+
   double? onnxDownloadProgress;
   String? onnxDownloadError;
 
@@ -66,6 +73,7 @@ class AppController extends ChangeNotifier with WidgetsBindingObserver {
   Future<void>? _initialization;
   Future<void>? _onlineWork;
   Future<void>? _modelLoad;
+  bool _modelLoadAttempted = false;
   bool _foreground = true;
   bool _watchingStatus = false;
   bool _disposed = false;
@@ -79,8 +87,10 @@ class AppController extends ChangeNotifier with WidgetsBindingObserver {
   // Không có tọa độ mặc định: gửi tọa độ giả sẽ dẫn đội cứu hộ tới sai chỗ.
   double? currentLat;
   double? currentLng;
+  int _locationRequest = 0;
 
   RescueRecord? lastSubmittedPost;
+  String? submissionError;
 
   /// Throughput đo qua /probe ở lần gửi gần nhất (kbit/s), null nếu không đo.
   int? lastThroughputKbps;
@@ -220,45 +230,36 @@ class AppController extends ChangeNotifier with WidgetsBindingObserver {
   }
 
   Future<bool> login(String username, String password) async {
-    final saved = userLocalDataSource.getUser();
-    if (saved != null) {
-      if (saved.username == username.trim() && saved.password == password) {
-        await userLocalDataSource.saveUser(saved);
-        currentUser = saved;
-        isGuest = false;
-        notifyListeners();
-        return true;
-      }
-    }
-    // Demo fallback account if not registered yet
-    if (username.trim() == 'cuuho' && password == '123456') {
-      final demoUser = User(
-        username: 'cuuho',
-        password: password,
-        phone: '0901234567',
-        address: 'Quận 1, TP. Hồ Chí Minh',
-      );
-      await userLocalDataSource.saveUser(demoUser);
-      currentUser = demoUser;
-      isGuest = false;
-      notifyListeners();
-      return true;
-    }
-    return false;
+    final saved = await userLocalDataSource.authenticate(username, password);
+    if (saved == null) return false;
+    currentUser = saved;
+    isGuest = false;
+    notifyListeners();
+    return true;
   }
 
   Future<bool> register(User user) async {
-    await userLocalDataSource.saveUser(user);
-    currentUser = user;
+    try {
+      currentUser = await userLocalDataSource.saveUser(user);
+    } catch (_) {
+      return false;
+    }
     isGuest = false;
     notifyListeners();
     return true;
   }
 
   Future<void> updateUser(User user) async {
-    await userLocalDataSource.saveUser(user);
-    currentUser = user;
+    currentUser = await userLocalDataSource.saveUser(user);
     notifyListeners();
+  }
+
+  Future<bool> changePassword(String current, String next) async {
+    final updated = await userLocalDataSource.changePassword(current, next);
+    if (updated == null) return false;
+    currentUser = updated;
+    notifyListeners();
+    return true;
   }
 
   Future<void> logout() async {
@@ -282,6 +283,8 @@ class AppController extends ChangeNotifier with WidgetsBindingObserver {
   }) => rescueRepository.getRecordsPage(offset: offset, limit: limit);
   int get recordCount => rescueRepository.recordCount;
   int get pendingCount => rescueRepository.getPendingCount();
+  RescueRecord? get latestSos =>
+      records.where((record) => record.id.startsWith('sos-')).firstOrNull;
   String? get connectedServerUrl => rescueRepository.connectedServerUrl;
 
   Future<void> reconnectServer() async {
@@ -373,6 +376,7 @@ class AppController extends ChangeNotifier with WidgetsBindingObserver {
             e == ConnectivityResult.ethernet,
       );
       _scheduleStatusPoll();
+      _scheduleRetry();
       if (hasNet) {
         if (!hasSyncWork(records)) return;
         await _connectAndSync(force: previousNetwork != networkLabel);
@@ -396,6 +400,7 @@ class AppController extends ChangeNotifier with WidgetsBindingObserver {
   }
 
   Future<void> _loadModelOnce() async {
+    _modelLoadAttempted = true;
     isModelLoading = true;
     notifyListeners();
     try {
@@ -420,7 +425,7 @@ class AppController extends ChangeNotifier with WidgetsBindingObserver {
     _foreground = state == AppLifecycleState.resumed;
     _scheduleStatusPoll();
     _scheduleRetry();
-    if (_foreground && hasSyncWork(records)) {
+    if (_foreground && networkLabel != 'none' && hasSyncWork(records)) {
       unawaited(_connectAndSync());
     }
   }
@@ -481,7 +486,10 @@ class AppController extends ChangeNotifier with WidgetsBindingObserver {
     required bool hasImage,
     required double confidence,
   }) async {
-    await rescueRepository.reconnectServer();
+    // A plain SOS needs no throughput probe; its real metadata send decides fallback.
+    if (hasImage && !await rescueRepository.reconnectServer()) {
+      return SendMode.smsFallback;
+    }
     final decision = await _sendPolicy.decide(
       hasImage: hasImage,
       confidence: confidence,
@@ -499,6 +507,7 @@ class AppController extends ChangeNotifier with WidgetsBindingObserver {
     }
     if (isModelLoading) return 'Đang tải model on-device...';
     if (kIsWeb) return 'Bản web không chạy AI on-device';
+    if (_modelLoadAttempted) return 'AI chưa sẵn sàng · vẫn có thể gửi báo cáo';
     return 'AI sẽ được chuẩn bị khi tạo báo cáo';
   }
 
@@ -508,6 +517,7 @@ class AppController extends ChangeNotifier with WidgetsBindingObserver {
     bool requestPermission = false,
     Duration timeLimit = const Duration(seconds: 5),
   }) async {
+    final request = ++_locationRequest;
     if (requestPermission) {
       try {
         await Permission.locationWhenInUse.request();
@@ -523,15 +533,17 @@ class AppController extends ChangeNotifier with WidgetsBindingObserver {
           timeLimit: timeLimit,
         ),
       );
+      if (request != _locationRequest || _disposed) return;
       currentLat = pos.latitude;
       currentLng = pos.longitude;
       locationLabel =
           '${pos.latitude.toStringAsFixed(4)}° N, ${pos.longitude.toStringAsFixed(4)}° E · GPS';
     } catch (e) {
+      if (request != _locationRequest || _disposed) return;
       debugPrint('Không lấy được GPS: $e');
-      if (currentLat == null) {
-        locationLabel = 'Chưa có GPS · trung tâm sẽ xác minh vị trí';
-      }
+      currentLat = null;
+      currentLng = null;
+      locationLabel = 'Chưa có GPS · trung tâm sẽ xác minh vị trí';
     }
     notifyListeners();
   }
@@ -555,13 +567,16 @@ class AppController extends ChangeNotifier with WidgetsBindingObserver {
     notifyListeners();
 
     try {
-      if (currentLat == null) {
-        await refreshLocation(timeLimit: const Duration(seconds: 3));
-      }
       final record = await _sendSosUseCase(
-        lat: currentLat,
-        lng: currentLng,
-        sendMode: await _decideSendMode(hasImage: false, confidence: 0),
+        contactPhone: currentUser?.phone,
+        lat: null,
+        lng: null,
+        sendMode: SendMode.queuedOffline,
+        locate: () async {
+          await refreshLocation(timeLimit: const Duration(seconds: 3));
+          return (lat: currentLat, lng: currentLng);
+        },
+        chooseMode: () => _decideSendMode(hasImage: false, confidence: 0),
       );
       isBusy = false;
       notifyListeners();
@@ -572,6 +587,26 @@ class AppController extends ChangeNotifier with WidgetsBindingObserver {
       isBusy = false;
       notifyListeners();
       return null;
+    }
+  }
+
+  Future<RescueRecord?> retrySosSms() async {
+    if (isBusy) return null;
+    final record = latestSos;
+    if (record == null) return null;
+    isBusy = true;
+    notifyListeners();
+    try {
+      return await deliverRecord(
+        rescueRepository,
+        record,
+        SendMode.smsFallback,
+        retrySms: true,
+      );
+    } finally {
+      isBusy = false;
+      _scheduleRetry();
+      if (!_disposed) notifyListeners();
     }
   }
 
@@ -586,15 +621,15 @@ class AppController extends ChangeNotifier with WidgetsBindingObserver {
     required List<AiTag> aiTags,
   }) async {
     if (isBusy) return null;
+    submissionError = null;
     isBusy = true;
     notifyListeners();
 
     try {
-      if (currentLat == null) {
-        await refreshLocation(timeLimit: const Duration(seconds: 3));
-      }
+      await refreshLocation(timeLimit: const Duration(seconds: 3));
       final urgencyModel = await _loadUrgencyModel();
       final record = await _submitRescuePostUseCase(
+        contactPhone: currentUser?.phone,
         lat: currentLat,
         lng: currentLng,
         imagePath: imagePath,
@@ -607,7 +642,8 @@ class AppController extends ChangeNotifier with WidgetsBindingObserver {
         severeSigns: severeSigns,
         urgencyScore: urgencyModel?.score(severeSigns),
         description: description,
-        sendMode: await _decideSendMode(
+        sendMode: SendMode.queuedOffline,
+        chooseMode: () => _decideSendMode(
           hasImage: imagePath != null,
           confidence: aiTags.fold(
             0.0,
@@ -621,7 +657,10 @@ class AppController extends ChangeNotifier with WidgetsBindingObserver {
       isBusy = false;
       notifyListeners();
       return record;
-    } catch (_) {
+    } catch (error) {
+      submissionError = error is FormatException
+          ? error.message
+          : 'Chưa hoàn tất gửi báo cáo. Nội dung form vẫn được giữ; hãy thử lại.';
       isBusy = false;
       notifyListeners();
       return null;
@@ -677,6 +716,10 @@ class AppController extends ChangeNotifier with WidgetsBindingObserver {
     try {
       await _syncPendingRecordsUseCase(immediate: immediate);
     } finally {
+      final last = lastSubmittedPost;
+      if (last != null) {
+        lastSubmittedPost = rescueRepository.getRecord(last.id) ?? last;
+      }
       _scheduleRetry();
     }
     notifyListeners();
@@ -688,13 +731,26 @@ class AppController extends ChangeNotifier with WidgetsBindingObserver {
   /// bài kế tiếp hoặc Workmanager (15 phút).
   void _scheduleRetry() {
     _retryTimer?.cancel();
-    if (_disposed || !_foreground) return;
-    final due = rescueRepository.nextRetryAt;
+    if (_disposed || !_foreground || networkLabel == 'none') return;
+    final due =
+        rescueRepository.nextRetryAt ??
+        (records.any((r) => r.awaitingSync && r.metadataSynced)
+            ? DateTime.now().toUtc().add(const Duration(seconds: 30))
+            : null);
     if (due == null) return;
     final wait = due.difference(DateTime.now().toUtc());
     _retryTimer = Timer(
-      wait.isNegative ? Duration.zero : wait + const Duration(milliseconds: 50),
-      () => unawaited(syncPending(immediate: false)),
+      // A missing server leaves the message overdue; avoid a zero-delay loop.
+      wait <= Duration.zero
+          ? const Duration(seconds: 30)
+          : wait + const Duration(milliseconds: 50),
+      () async {
+        try {
+          await syncPending(immediate: false);
+        } catch (error) {
+          debugPrint('Chưa gửi lại được báo cáo: $error');
+        }
+      },
     );
   }
 }
