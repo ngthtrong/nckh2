@@ -9,7 +9,7 @@ Chương này tổng hợp kết quả đã lưu trong repo. Các bảng đượ
 Ảnh FP32 & \ImageTest{} ảnh test, model seed \BenchmarkSeed{} & \RuntimeBenchmarkSource{} \\
 PTQ/QAT & Cùng \ImageTest{} ảnh test, seed \QuantizationSeed{} & \QuantizationBenchmarkSource{} \\
 Cắt tỉa & Cùng \ImageTest{} ảnh test, seed \PruningSeed{} & \PruningBenchmarkSource{} \\
-Benchmark app & \ImageTest{} ảnh/runtime, seed \MobileBenchmarkSeed{} & \MobileBenchmarkSource{} \\
+Benchmark app & 32 cấu hình; 256 ảnh/runtime, seed 159/1024 & JSON có provenance của bốn điện thoại; xem Mục~\ref{sec:phone-benchmark-setup} \\
 Khẩn cấp LR & 32 profile trạng thái; sanity giữ profile dương & JSON mô hình và các bảng kiểm tra \\
 RQ1 cơ sở & 40 run test Generator 3.0 & Thư mục kết quả đối chứng cơ sở \\
 RQ1 stress & 40 run, 7 điều kiện, 5 phương pháp & Thư mục kết quả tổng hợp stress \\
@@ -26,10 +26,10 @@ Latency chỉ tính lời gọi suy luận, không bao gồm đọc ảnh, tiề
 
 Đơn vị kích thước trong bảng sinh là MiB, tính byte chia $1024^2$. Nhãn MB trong các bản summary Markdown cũ được chuẩn hóa ở đây để mô tả phép biến đổi rõ ràng. Kích thước checkpoint có thể gồm trạng thái không cần suy luận, nên chỉ dùng dung lượng file không đủ để suy ra số phép tính.
 
-Benchmark tại app là nguồn riêng có năm warmup/runtime và đo lời gọi \texttt{classifyImage}, bao gồm tiền xử lý trong datasource native. Hai khối JSON có cùng sample ID đã được nối với split test theo script đóng gói package; metric và percentile được kiểm tra lại từ dự đoán/thời gian. Do thiếu metadata phần cứng, APK và hash asset, bảng này không được dùng để tính speedup trực tiếp so với các phiên predict CPU hoặc xác nhận một APK cụ thể. Kết quả và giới hạn được trình bày ở Mục~\ref{sec:mobile-results}.
+Benchmark trên điện thoại đo lời gọi \texttt{classifyImage}, gồm giải mã, tiền xử lý và suy luận, nên có phạm vi rộng hơn predict CPU. Không dùng chênh lệch thời gian giữa hai phạm vi này để tính speedup. Thiết lập được mô tả ở Mục~\ref{sec:phone-benchmark-setup}; kết quả và lựa chọn model/runtime ở Mục~\ref{sec:phone-benchmark-results}.
 
 \subsection{Thiết lập đánh giá mô hình nhận diện trên điện thoại}\label{sec:phone-benchmark-setup}
-Phép đo trên ứng dụng Android chỉ đánh giá mô hình nhận diện mức ngập: chất lượng phân loại và thời gian xử lý ảnh của ONNX/ExecuTorch trên từng điện thoại. Đây không phải thực nghiệm E2E Android; không dùng benchmark này để đánh giá gửi SOS, GPS, đồng bộ nền hoặc SMS. Bộ JSON mới có provenance được tách khỏi benchmark ứng dụng seed 42 lịch sử trong phần kết quả hiện có.
+Phép đo trên ứng dụng Android chỉ đánh giá mô hình nhận diện mức ngập: chất lượng phân loại và thời gian xử lý ảnh của ONNX/ExecuTorch trên từng điện thoại. Đây không phải thực nghiệm E2E Android; không dùng benchmark này để đánh giá gửi SOS, GPS, đồng bộ nền hoặc SMS. Bộ JSON có provenance này là nguồn đánh giá điện thoại trong phần kết quả chính; nguồn benchmark ứng dụng lịch sử được giữ riêng trong phụ lục để truy vết.
 
 \begin{table}[htbp]\centering
 \caption{Thiết bị trong bộ benchmark nhận diện có provenance}
