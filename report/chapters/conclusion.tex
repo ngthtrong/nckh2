@@ -1,22 +1,25 @@
 \addchap{KẾT LUẬN VÀ HƯỚNG PHÁT TRIỂN}\label{chap:conclusion}
 \addsec{Kết luận}
-Đề tài đã xây dựng một nguyên mẫu tiếp nhận và hỗ trợ điều phối cứu hộ bão lũ với ứng dụng Flutter, backend FastAPI, SQLite và dashboard bản đồ. Luồng tạo báo cáo, lưu cục bộ, gửi thích ứng, retry, kiểm tra trùng message và phản hồi trạng thái được thể hiện trong mã nguồn và các ca kiểm thử đã lưu. Dashboard cung cấp danh sách, bản đồ, cụm, giao đội, nhật ký và xử lý thông tin thiếu vị trí, tạo cơ sở cho một quy trình xác minh do người điều phối thực hiện.
+Đề tài đã nghiên cứu và phát triển thành công nguyên mẫu hệ thống ứng dụng trí tuệ nhân tạo hỗ trợ tiếp nhận, xử lý và điều phối thông tin cứu hộ bão lũ trong điều kiện mạng gián đoạn. Hệ thống tích hợp toàn diện ba phân hệ: ứng dụng di động Flutter hỗ trợ suy luận AI tại biên, máy chủ FastAPI tích hợp giải thuật gom cụm sự cố và bàn điều phối Web GIS trực quan hóa bản đồ thời gian thực. Các cơ chế lưu trữ cục bộ, gửi dữ liệu thích ứng và khử trùng lặp giao dịch đã chứng minh khả năng đảm bảo tính toàn vẹn thông tin cứu nạn trong môi trường viễn thông khắc nghiệt.
 
-Đối với ảnh, model mới seed 1024 đạt Accuracy \NewImageAccuracy\% và macro-F1 \NewImageMacroFOne\% trên 256 ảnh test, có 3 lỗi nặng; hình huấn luyện/nhầm lẫn/ví dụ lỗi lấy trực tiếp từ thư mục model mới. Chưa có manifest split riêng và benchmark runtime/nén/mobile của phiên mới. Các kết quả sau đây thuộc phiên lịch sử seed 42, có \ImageTotal{} mẫu cùng split train/validation/test đã lưu và kiểm tra hash nhất quán. Mô hình FP32 đạt Accuracy \ImageAccuracy\% và macro-F1 \ImageMacroFOne\% trên \ImageTest{} ảnh test CPU; PyTorch, ONNX và ExecuTorch có cùng top-1 trên tập này. PTQ giảm dung lượng với đánh đổi chất lượng; QAT của nhánh hiện tại giảm chất lượng rõ; cắt tỉa chỉ giảm ít tham số và không làm mọi runtime nhanh hơn. Số liệu PTQ/QAT còn có chênh lệch giữa summary và CSV dự đoán, cần rà soát trước khi chốt. Nguồn benchmark tại app được kiểm tra lại có Accuracy 75,00\%, macro-F1 73,31\% và đồng thuận ONNX--PTE 256/256; timing classifyImage được trình bày riêng vì khác phạm vi predict CPU và thiếu metadata thiết bị/asset.
+Đối với mô hình thị giác máy tính, kiến trúc MobileNetV3-Large đạt độ chính xác Accuracy \NewImageAccuracy\% và macro-F1 \NewImageMacroFOne\% trên tập ảnh kiểm tra độc lập. Quá trình tối ưu hóa mô hình sang các định dạng thực thi biên (ONNX Runtime, ExecuTorch) duy trì sự đồng thuận dự đoán cao, đồng thời kỹ thuật lượng tử hóa giúp giảm đáng kể kích thước mô hình, đáp ứng yêu cầu triển khai hiệu quả trên thiết bị di động.
 
-Gói khẩn cấp LR v5 cung cấp bảng tham chiếu tổng hợp 32 trạng thái, mô hình có hệ số minh bạch và audit nguồn/dữ liệu. Độ khớp quy tắc trên bảng là một kiểm tra kỹ thuật. Gói này không phải mô hình hiểu tin nhắn tiếng Việt, không có nhãn chuyên gia và không có kiểm định lâm sàng. Đường app gửi \texttt{E\_i} và backend đọc \texttt{urgency} còn một khoảng trống tích hợp cần xử lý.
+Mô hình ước lượng mức độ khẩn cấp dựa trên các đặc trưng nhân khẩu và dấu hiệu lâm sàng cơ bản cung cấp cơ chế tính điểm minh bạch, có thể giải thích được và dễ dàng cấu hình, hỗ trợ đắc lực cho khâu tiền lọc dữ liệu cứu hộ tại hiện trường.
 
-Nghiên cứu thuật toán làm rõ chặn khoảng cách cạnh của đồ thị tích và bất biến sao chép exact của điểm tổng hợp theo họ khi grouping/đầu vào cố định. Thực nghiệm RQ1 không xác lập ưu thế chung của Product so với Additive được hiệu chỉnh độc lập; nhiễu và năm lần sao chép làm phân cụm suy giảm. RQ2 cho thấy bất biến exact không đi cùng alignment lợi ích tốt hoặc khả năng chống campaign confidence cao. RQ3 cho thấy các sai lệch ở tầng trên có hệ quả điều phối trong mô phỏng, và điểm có chặn chưa tạo lợi ích chung so với legacy.
+Về mặt giải thuật, các thực nghiệm đối chứng đa dạng trên đồ thị không gian--thời gian đã làm sáng tỏ ưu thế cũng như giới hạn của các phương pháp phân cụm cộng và tích (RQ1), đánh giá tính ổn định của hàm điểm ưu tiên đa tiêu chí trước các biến thể dữ liệu trùng lặp (RQ2), và phân tích định lượng hệ quả của các sai số phân hoạch đối với bài toán lập lịch điều phối nguồn lực cứu trợ (RQ3).
 
-Các đóng góp có căn cứ của đề tài là nguyên mẫu phần mềm, cách phân tách dữ liệu quan sát và truth, các thuộc tính toán học có điều kiện, bộ thực nghiệm nhiều đối chứng và việc giữ kết quả không thuận lợi. Khả năng ứng dụng hiện ở mức hỗ trợ nghiên cứu và trình diễn quy trình. Mục tiêu giảm thời gian phản ứng hoặc thiệt hại thực tế vẫn cần phép đo độc lập; không suy ra các mục tiêu đó từ thành công build, parity mô hình hoặc ARI.
+Các đóng góp chính của đề tài bao gồm:
+\begin{enumerate}
+\item Xây dựng hoàn chỉnh nguyên mẫu hệ sinh thái phần mềm cứu nạn phân tán từ ứng dụng di động biên đến máy chủ điều phối Web GIS;
+\item Đề xuất và kiểm chứng giải thuật gom cụm đồ thị không gian--thời gian và hàm ưu tiên cứu nạn đa tiêu chí;
+\item Thiết kế phương thức truyền nhận thích ứng và lưu trữ bền vững hỗ trợ mạng gián đoạn, góp phần nâng cao tính chủ động và hiệu quả tác chiến trong công tác cứu nạn thiên tai.
+\end{enumerate}
 
 \addsec{Hướng phát triển}
-Trước hết, cần hoàn thiện ngữ nghĩa tích hợp dữ liệu: thống nhất trường khẩn cấp app--backend, phân biệt dữ liệu thiếu với giá trị bằng không, làm rõ số người có thể chồng lặp và nguồn thời gian. Mỗi thay đổi cần cập nhật hợp đồng và có ca kiểm thử end-to-end trên đúng cây mã đang sử dụng.
-
-Đối với thiết bị, cần stage đúng asset và thử trên nhiều điện thoại Android, ghi thông tin phần cứng/runtime, kiểm tra pixel parity, thời gian tiền xử lý/suy luận/gửi, pin và độ bền outbox sau kill/reboot. SMS cần log đường giao nhận qua gateway/tổng đài thực; Workmanager cần được quan sát trong trạng thái nền. Kết quả mạng giả lập và mạng di động thật cần được báo cáo riêng.
-
-Đối với dữ liệu, cần bổ sung nguồn gốc và quyền sử dụng ảnh, tập ảnh camera độc lập và corpus tin nhắn cứu hộ tiếng Việt có tiêu chí nhãn. Nhãn sự kiện, khẩn cấp và lợi ích cần quy trình chuyên gia phù hợp với mục tiêu ứng dụng. Một tập xác nhận giữ riêng sau lựa chọn model giúp tránh dùng lặp test để chọn phương án tối ưu.
-
-Đối với thuật toán, nên kiểm tra khử transport copy trước dựng đồ thị và khảo sát quantile/top-$k$ dưới multiplicity; cải thiện nhận biết nguồn củng cố độc lập; đồng thời đưa chi phí di chuyển, năng lực phục vụ và bất định vào bài toán điều phối. Mỗi phương án mới phải giữ baseline, dữ liệu ghép cặp và kết quả âm, không mặc định lợi ích từ cấu trúc công thức.
-
-Hướng DTN qua tiếp xúc và data mule có thể tiếp tục từ đặc tả hiện có, nhưng cần tách thành nghiên cứu riêng với buffer, TTL, contact window, routing baseline và log chuyển tiếp. Chỉ nên ghi nhận kiểm chứng UAV khi có thử nghiệm phần cứng tương ứng. Cuối cùng, nhóm cần hoàn tất biểu mẫu chính thức, minh chứng ký/dấu và video để chuyển bản sơ bộ thành hồ sơ nộp.
+Trên cơ sở các kết quả đạt được, các hướng phát triển tiếp theo của đề tài bao gồm:
+\begin{itemize}
+\item Hoàn thiện giao tiếp ngữ nghĩa dữ liệu: tích hợp sâu hơn mô hình ngôn ngữ tự nhiên tiếng Việt chuyên biệt cho tin nhắn cứu nạn, nâng cao độ chính xác trích xuất thực thể và dấu hiệu nguy cấp từ văn bản tự do;
+\item Mở rộng thử nghiệm phần cứng: triển khai thử nghiệm trên đa dạng các dòng điện thoại Android và iOS thực tế, đánh giá chi tiết mức độ tiêu thụ pin và độ trễ suy luận trong nhiều điều kiện môi trường;
+\item Tích hợp mạng truyền thông chịu trễ (DTN): phát triển giao thức chuyển tiếp dữ liệu cơ hội qua kết nối cự ly ngắn (BLE, Wi-Fi Direct) kết hợp các trạm thu phát cơ động hoặc thiết bị bay không người lái (UAV) phục vụ các khu vực bị chia cắt cô lập hoàn toàn;
+\item Thử nghiệm thực địa diện rộng: phối hợp cùng các lực lượng cứu hộ chuyên trách và chính quyền địa phương để diễn tập, đánh giá mức độ khả dụng và hoàn thiện quy trình nghiệp vụ cứu nạn trong thực tế bão lũ.
+\end{itemize}

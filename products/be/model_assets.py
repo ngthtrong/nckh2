@@ -8,11 +8,11 @@ from fastapi import HTTPException
 
 EXPORT_DIR = Path(os.environ.get(
     "RESCUE_MODEL_EXPORT_DIR",
-    Path(__file__).resolve().parents[1] / "fe" / "model" / "Edge Ai" / "Export",
+    Path(__file__).resolve().parents[1] / "fe" / "model" / "Edge Ai" / "seed159" / "Export" / "pruning_st",
 ))
 FILENAMES = {
-    "onnx": "flood_mobilenetv3_large.onnx",
-    "pte": "flood_mobilenetv3_large.pte",
+    "onnx": "flood_mobilenetv3_large_structured.onnx",
+    "pte": "flood_mobilenetv3_large_structured.pte",
 }
 
 

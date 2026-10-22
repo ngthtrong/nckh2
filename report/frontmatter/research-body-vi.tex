@@ -5,17 +5,50 @@
 \FormLine{Lớp: DI2396F1 -- Khóa 49; Trường/Khoa/Viện: Trường CNTT\&TT.}
 \FormIndented{Năm thứ: \PrincipalYear\qquad Số năm đào tạo: \TrainingYears}
 \FormLine{Người hướng dẫn: \SupervisorName}
+
 \FormSection{2. Mục tiêu đề tài:}
-Xây dựng nguyên mẫu phân tích và gom nhóm tin cứu hộ bão lũ khi mạng gián đoạn, kết hợp AI tại biên và truyền thông tin gọn.
+Xây dựng hệ thống ứng dụng trí tuệ nhân tạo trên thiết bị di động nhằm hỗ trợ tiếp nhận, phân tích và xử lý thông tin cứu hộ bão lũ trong điều kiện kết nối mạng không ổn định. Hệ thống tập trung phân tích dữ liệu đa phương thức gồm hình ảnh và văn bản, ứng dụng Edge AI để xử lý thông tin tại thiết bị, giảm lượng dữ liệu truyền tải, đồng thời đánh giá mức độ khẩn cấp và gom nhóm các sự kiện cứu hộ nhằm hỗ trợ quá trình điều phối nguồn lực.
+
 \FormSection{3. Tính mới và sáng tạo:}
-Tích hợp suy luận ảnh, outbox bền vững và phân cụm sự kiện; kiểm tra chặn cạnh, bất biến bản sao có điều kiện và hệ quả điều phối.
+Đề tài đề xuất cách tiếp cận kết hợp phân tích dữ liệu đa phương thức, trí tuệ nhân tạo tại biên và phân cụm sự kiện cứu hộ trong một hệ thống thống nhất.
+
+Thay vì phụ thuộc hoàn toàn vào máy chủ, hệ thống hướng tới thực hiện suy luận AI trực tiếp trên thiết bị di động, sử dụng mô hình học sâu được tối ưu hóa nhằm giảm yêu cầu tài nguyên và hạn chế truyền tải dữ liệu dung lượng lớn.
+
+Bên cạnh đó, việc kết hợp thông tin vị trí, thời gian và nội dung cứu hộ để phát hiện, gom nhóm các yêu cầu liên quan giúp hạn chế thông tin trùng lặp và hỗ trợ trực quan hóa tình huống cứu hộ trên bản đồ số.
+
 \FormSection{4. Kết quả nghiên cứu:}
-Model seed 1024 đạt Accuracy \NewImageAccuracy\%, macro-F1 \NewImageMacroFOne\% trên 256 ảnh test, có 3 lỗi nặng. Benchmark CPU khớp CSV; cắt tỉa đạt \PruningAccuracy\% với \PruningCriticalCount{} lỗi nặng. Kết quả mobile và giới hạn split được trình bày riêng. LR dùng 32 trạng thái tổng hợp; RQ1--RQ3 chưa chứng minh lợi ích cứu hộ thực địa.
+Đề tài tập trung nghiên cứu quy trình xây dựng dữ liệu cứu hộ bão lũ, phân tích hình ảnh và văn bản bằng học sâu, tối ưu hóa mô hình AI cho thiết bị di động và thiết kế hệ thống tiếp nhận, phân cụm thông tin cứu hộ.
+
+Đối với bài toán phân loại hình ảnh, mô hình được đánh giá trên tập kiểm thử gồm 256 ảnh. Với cấu hình seed 1024, mô hình đạt Accuracy \NewImageAccuracy\% và macro-F1 \NewImageMacroFOne\%, ghi nhận 3 lỗi nghiêm trọng. Thử nghiệm cắt tỉa mô hình đạt Accuracy \PruningAccuracy\% với \PruningCriticalCount{} lỗi nghiêm trọng.
+
+Các nội dung về phân tích văn bản, phân cụm sự kiện, đồng bộ dữ liệu và hoạt động trong điều kiện mạng yếu được xác định theo mục tiêu nghiên cứu của đề tài. Hiệu quả của từng thành phần cần được đánh giá bằng các kết quả thực nghiệm tương ứng.
+
+Các kết quả hiện có phản ánh khả năng triển khai và đánh giá nguyên mẫu trong môi trường nghiên cứu, chưa đủ cơ sở để khẳng định hiệu quả điều phối cứu hộ trong điều kiện thiên tai thực tế.
+
 \FormSection{5. Sản phẩm:}
-Ứng dụng Flutter, backend FastAPI/SQLite, dashboard, mô hình/asset, dữ liệu và báo cáo/bản tin/tóm tắt Việt--Anh.
+Theo thuyết minh, đề tài đăng ký ba sản phẩm khoa học và công nghệ chính:
+\FormIndented{-- Ứng dụng di động hỗ trợ cứu hộ thiên tai, tích hợp mô hình AI và chức năng gửi thông tin cầu cứu.}
+\FormIndented{-- Website quản lý thông tin cứu hộ, trực quan hóa vị trí cầu cứu và phân cụm sự kiện trên bản đồ số.}
+\FormIndented{-- Bộ mô hình AI đa phương thức được huấn luyện, tinh chỉnh và tối ưu hóa để phục vụ phân loại thông tin cứu hộ.}
+\par\noindent Ngoài ra, đề tài đăng ký các sản phẩm theo quy định của Đại học Cần Thơ gồm bản tin, báo cáo tóm tắt và video giới thiệu kết quả nghiên cứu có thời lượng tối đa 02 phút.
+
 \FormSection{6. Công bố khoa học từ kết quả nghiên cứu của đề tài, hoặc nhận xét, đánh giá của cơ sở đã áp dụng các kết quả nghiên cứu (nếu có):}
-Chưa có minh chứng công bố hoặc nhận xét của cơ sở áp dụng. Bản thảo ISDS 2026 chưa được kê là bài đã xuất bản.
+Theo thuyết minh, đề tài không đăng ký sản phẩm xuất bản phẩm khoa học. Hiện chưa có minh chứng về công bố khoa học chính thức hoặc văn bản nhận xét, đánh giá của cơ sở đã áp dụng kết quả nghiên cứu.
+
 \FormSection{7. Đóng góp về mặt kinh tế -- xã hội, giáo dục và đào tạo, an ninh, quốc phòng và khả năng áp dụng của đề tài:}
-Hỗ trợ đào tạo, nghiên cứu và trình diễn tiếp nhận--điều phối; chưa đo hiệu quả kinh tế--xã hội hoặc giảm thiệt hại thực tế.
+Về giáo dục và đào tạo, đề tài tạo điều kiện để sinh viên vận dụng kiến thức về học sâu, xử lý dữ liệu đa phương thức, Edge AI, phát triển ứng dụng di động và hệ thống thông tin vào bài toán thực tiễn.
+
+Về khoa học và công nghệ, nghiên cứu góp phần khảo sát khả năng xử lý thông tin cứu hộ tại biên, tối ưu hóa mô hình học sâu và kết hợp phân cụm sự kiện với trực quan hóa dữ liệu không gian.
+
+Về kinh tế -- xã hội, hệ thống có tiềm năng hỗ trợ tiếp nhận, tổng hợp và phân loại thông tin cứu hộ trong điều kiện hạ tầng mạng bị hạn chế, qua đó góp phần nâng cao khả năng hỗ trợ ra quyết định và điều phối nguồn lực khi xảy ra thiên tai.
+
+Các lợi ích thực tế về thời gian cứu hộ, chi phí vận hành và mức độ giảm thiệt hại cần được kiểm chứng trong những nghiên cứu và thử nghiệm triển khai tiếp theo.
+
 \FormSection{8. Hiệu quả, phương thức chuyển giao kết quả nghiên cứu và khả năng áp dụng:}
-Dự kiến chuyển giao mã nguồn, ứng dụng, dashboard và tài liệu; chưa có biên bản chuyển giao. Cần NLP, tích hợp khẩn cấp, thử Android/mạng/SMS và xác nhận chuyên gia.
+Theo thuyết minh, các sản phẩm của đề tài dự kiến được đóng gói và chuyển giao cho Trường Công nghệ Thông tin và Truyền thông, Đại học Cần Thơ để phục vụ lưu trữ, giảng dạy, học tập và nghiên cứu.
+
+Kết quả nghiên cứu có thể làm cơ sở để phát triển các ứng dụng hỗ trợ tiếp nhận và quản lý thông tin cứu hộ thiên tai, đặc biệt trong môi trường kết nối mạng hạn chế.
+
+Để triển khai thực tế, hệ thống cần tiếp tục hoàn thiện khả năng phân tích đa phương thức, tối ưu hóa mô hình trên thiết bị di động, kiểm thử trong điều kiện mạng yếu và đánh giá độ tin cậy của quá trình phân cụm, đồng bộ dữ liệu.
+
+Việc ứng dụng vào công tác cứu hộ thực tế cần có thêm thử nghiệm, xác nhận chuyên môn và sự phối hợp với các cơ quan chức năng.

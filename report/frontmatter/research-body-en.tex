@@ -1,16 +1,43 @@
 \FormSection{1. General information:}
 \FormIndented{Project code: \ProjectCode}
 \FormIndented{Project title: \ProjectTitleEnglish}
-\FormIndented{Coordinator: \PrincipalName}
+\FormIndented{Project coordinator: \PrincipalName}
 \FormIndented{Implementing institution: \PrincipalUnit}
-\FormIndented{Duration: from March 2026 to August 2026.}
+\FormIndented{Duration: \ProjectPeriodEnglish{} (six months).}
+
 \FormSection{2. Objective(s):}
-Develop a prototype for analyzing and consolidating flood-rescue reports under intermittent connectivity, combining edge inference, compact transmission and event clustering.
+Develop an Edge AI-based mobile system to support the collection, analysis and processing of flood rescue information under unstable network conditions. The system aims to analyze multimodal data, including images and Vietnamese text, perform AI inference directly on mobile devices, and minimize data transmission requirements. It also aims to assess the urgency of rescue requests and cluster related rescue events based on spatial, temporal and contextual information to support resource coordination and decision-making.
+
 \FormSection{3. Creativeness and innovativeness:}
-Combine adaptive sending, persistent queues and event clustering with conditional edge-localization and exact-copy invariance audits. Evaluate clustering, ranking and dispatch separately.
+The project proposes an integrated approach combining multimodal data analysis, Edge AI and intelligent rescue-event clustering within a unified system.
+
+Instead of relying entirely on centralized server processing, the proposed system aims to perform AI inference directly on mobile devices using optimized lightweight deep learning models, thereby reducing computational requirements and the transmission of large data files.
+
+Furthermore, the integration of location, time and rescue information for identifying and grouping related events is intended to reduce duplicate reports and support visualization of rescue situations on a digital map.
+
 \FormSection{4. Research results:}
-The seed-1024 image model achieves \NewImageAccuracy\% accuracy and \NewImageMacroFOne\% macro-F1 on 256 test images, with three critical errors. CPU benchmarks cover FP32, PTQ/QAT and structured pruning from seed 1024; summaries match prediction CSVs. Pruning achieves \PruningAccuracy\% accuracy with \PruningCriticalCount{} critical errors. Mobile benchmarks are reported separately by source. The training checkpoint does not record the split hash. Structured urgency uses a synthetic 32-state table rather than a Vietnamese text corpus. RQ1--RQ3 do not establish field rescue benefits.
+The research investigates the development of flood rescue datasets, deep learning-based image and text analysis, AI model optimization for mobile devices, and the design of a rescue information management and event clustering system.
+
+For image classification, the model was evaluated on a test set of 256 images. Using seed 1024, the model achieved \NewImageAccuracy\% accuracy and \NewImageMacroFOne\% macro-F1, with three critical errors. The structured pruning experiment achieved \PruningAccuracy\% accuracy, with \PruningCriticalCount{} critical errors.
+
+The research also addresses Vietnamese rescue-message analysis, event clustering, data synchronization and system operation under unstable network conditions. These components require separate experimental evaluation to establish their performance.
+
+The available results demonstrate the feasibility of selected prototype components in a research environment. They do not yet establish improvements in real-world rescue coordination or disaster response effectiveness.
+
 \FormSection{5. Products:}
-Flutter application, FastAPI/SQLite backend, map dashboard, model assets, experiment data, research report and bilingual bulletins/summaries. An ISDS 2026 draft exists without publication or formal adoption evidence.
+According to the approved research proposal, the project registers three main scientific and technological products:
+\FormIndented{-- A mobile application supporting disaster rescue, integrating AI models and rescue request submission functions.}
+\FormIndented{-- A web-based rescue information management system featuring a digital map for visualizing rescue locations and clustering related events.}
+\FormIndented{-- A trained and optimized multimodal AI model package for analyzing rescue information and supporting deployment on mobile devices.}
+\par\noindent In addition, the project registers a research bulletin, a research summary and a demonstration video of no more than two minutes, in accordance with Can Tho University's requirements. No scientific publication is registered as an official research output in the approved proposal.
+
 \FormSection{6. Effects, technology transfer means and applicability:}
-The prototype supports education, research and workflow demonstration. Planned transfer uses the application, source code, dashboard and operating documentation; no completed transfer record is available. Text modeling, urgency-field integration, repeated Android/network/SMS tests and expert validation remain necessary before operational deployment.
+The project contributes to education and research by providing practical experience in deep learning, multimodal data processing, Edge AI, mobile application development and disaster-related information systems.
+
+From a technological perspective, the research explores the feasibility of processing rescue information at the network edge and integrating event clustering with spatial data visualization.
+
+The proposed system has the potential to support the collection, classification and consolidation of rescue information under limited network connectivity, thereby assisting rescue-related decision-making and resource coordination.
+
+According to the research proposal, the project outputs are intended to be packaged and transferred to the School of Information and Communication Technology, Can Tho University, for educational, research and further development purposes.
+
+Future practical deployment requires additional validation of multimodal analysis, mobile inference performance, network synchronization, event clustering reliability and system operation under realistic disaster conditions. Real-world rescue effectiveness and socioeconomic benefits have not yet been experimentally established.

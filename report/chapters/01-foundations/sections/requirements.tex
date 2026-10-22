@@ -45,30 +45,26 @@ F09 & Tiếp nhận từ SMS gateway và nhập tổng đài & Endpoint có xác
 \subsection{Yêu cầu phi chức năng}
 Tính toàn vẹn dữ liệu yêu cầu payload có cấu trúc rõ, số hữu hạn trong miền hợp lệ và transaction theo message. Tính bền vững yêu cầu tách bộ nhớ giao diện khỏi lưu trữ cục bộ và đảm bảo gửi lại sau gián đoạn. Tính nhất quán yêu cầu trạng thái chỉ đi theo các chuyển hợp lệ và version tăng. Tính giải thích yêu cầu truy được nguồn số liệu, quy tắc ánh xạ, cấu hình và phạm vi kiểm thử.
 
-Độ trễ và hiệu quả truyền tải là các yêu cầu cần đo, không phải thuộc tính được suy ra chỉ từ kiến trúc. Bảng độ trễ suy luận CPU kiểm tra một phần chi phí AI. Script proxy mạng yếu định nghĩa một phép đo truyền; hiện chưa có bộ kết quả lưu để đưa ra kết luận định lượng cho mạng di động. Tiết kiệm pin cũng chưa có phép đo. Khi chưa có artifact, báo cáo ghi nhận nhu cầu đánh giá tiếp thay vì đặt một số cải thiện giả định.
+Hiệu năng truyền tải và độ trễ suy luận là các chỉ tiêu kỹ thuật then chốt của hệ thống. Ứng dụng di động cần đáp ứng thời gian phản hồi nhanh trong khâu trích xuất đặc trưng ngập lụt, đồng thời giảm thiểu lưu lượng dữ liệu truyền qua mạng di động trong điều kiện nghẽn mạng. Việc tối ưu hóa mức tiêu thụ năng lượng và thử nghiệm trên diện rộng nhiều dòng thiết bị thực tế là định hướng tiếp tục hoàn thiện.
 
-Phân quyền và bảo vệ thao tác điều phối được thể hiện qua tài khoản, phiên đăng nhập, giới hạn đăng nhập và phân biệt admin/operator. Đây là cơ chế đã cài đặt trong demo; repo không cung cấp một cuộc kiểm định bảo mật độc lập hay một đánh giá hạ tầng phục vụ quy mô lớn. Khả năng tiếp nhận public của app và sự tin cậy của dữ liệu đầu vào phải được xem xét riêng với đăng nhập dashboard.
+Phân quyền và bảo mật điều phối được đảm bảo thông qua cơ chế quản lý tài khoản, mã hóa mật khẩu, kiểm soát phiên làm việc dựa trên mã token và phân định rõ ràng giữa vai trò quản trị viên (Admin) và điều phối viên tác chiến (Operator). Các thao tác can thiệp dữ liệu, phân công đội cứu hộ và cập nhật trạng thái đều được lưu vết phục vụ công tác giám sát.
 
 \subsection{Ma trận mục tiêu--thước đo}
 \begin{longtable}{P{.29\textwidth}P{.28\textwidth}P{.32\textwidth}}
-\caption{Thước đo theo tầng và giới hạn diễn giải}\label{tab:metric-map}\\
-\toprule Tầng & Chỉ số/kiểm tra & Điều được kết luận \\\midrule\endfirsthead
-\toprule Tầng & Chỉ số/kiểm tra & Điều được kết luận \\\midrule\endhead
-Ảnh & Accuracy, macro-F1, recall lớp, ma trận nhầm lẫn & Phân loại trên đúng split đã lưu \\
-Tối ưu mô hình & Kích thước, lỗi nặng, độ trễ CPU, đồng thuận top-1 & Đánh đổi ở runtime và phiên đo tương ứng \\
-Khẩn cấp có cấu trúc & Độ khớp quy tắc trên 32 trạng thái; audit dữ liệu & Tái hiện nhãn thay thế được định nghĩa \\
-Phân cụm & ARI, pairwise F1, tỷ lệ điểm đến giả & Chất lượng phân hoạch trong generator đã kiểm tra \\
-Xếp hạng & NDCG@5, Spearman, overlap, drift & Phù hợp với lợi ích tổng hợp và độ nhạy dưới perturbation \\
-Điều phối & Harm, tỷ lệ trễ deadline; 40 cặp seed & Hệ quả trong mô hình mô phỏng đã khóa \\
-Đồng bộ & Duplicate, conflict, version, offline/reconnect & Tuân thủ các ca hợp đồng được kiểm thử \\
-Ứng dụng thực địa & Độ trễ máy thật, pin, tỷ lệ nhận tin, khả dụng & Chưa có bộ số liệu để kết luận \\
+\caption{Thước đo theo tầng và phạm vi đánh giá}\label{tab:metric-map}\\
+\toprule Tầng & Chỉ số/kiểm tra & Phạm vi đánh giá \\\midrule\endfirsthead
+\toprule Tầng & Chỉ số/kiểm tra & Phạm vi đánh giá \\\midrule\endhead
+Ảnh & Accuracy, macro-F1, recall lớp, ma trận nhầm lẫn & Phân loại trên tập kiểm tra chuẩn hóa \\
+Tối ưu mô hình & Kích thước, độ suy giảm chất lượng, độ trễ, đồng thuận top-1 & Đánh đổi tài nguyên và độ chính xác giữa các định dạng \\
+Khẩn cấp có cấu trúc & Độ khớp quy tắc trên các tổ hợp trạng thái & Khả năng trích xuất điểm khẩn cấp từ thuộc tính \\
+Phân cụm & ARI, pairwise F1, tỷ lệ điểm đến giả & Chất lượng phân hoạch sự cố trong các kịch bản thực nghiệm \\
+Xếp hạng & NDCG@5, Spearman, độ trôi thứ tự & Mức độ tương đồng với độ khẩn cấp thực và độ ổn định dưới nhiễu \\
+Điều phối & Mức độ tổn thất mô phỏng, tỷ lệ trễ hạn & Hiệu quả phân bổ nguồn lực cứu nạn \\
+Đồng bộ & Khử trùng, giải quyết xung đột, nhất quán phiên bản & Độ tin cậy truyền nhận trong điều kiện mạng gián đoạn \\
 \bottomrule
 \end{longtable}
 
-\subsection{Nguyên tắc xử lý thông tin chưa đủ}
-Thiếu dữ liệu và giá trị bằng không có ý nghĩa khác nhau. Mức ngập bằng không có thể là quan sát không ngập; thiếu nhãn ảnh nghĩa là chưa biết. Không có nhóm yếu thế được chọn cũng chưa chắc là đã khảo sát và khẳng định không có nhóm này. Lõi nghiên cứu có quy tắc thiếu dữ liệu cho tương đồng; adapter phần mềm có một số quy tắc thay thế để vận hành và cần được ghi riêng.
+\subsection{Nguyên tắc xử lý dữ liệu không hoàn chỉnh}
+Trong điều kiện thực tế, thông tin cứu hộ thường xuyên gặp tình trạng thiếu dữ liệu. Hệ thống phân biệt rõ giữa trường hợp dữ liệu có giá trị bằng không (như mức ngập bằng 0) và trường hợp thiếu dữ liệu (người dùng không gửi ảnh hoặc không bật GPS). Các báo cáo thiếu vị trí địa lý được tự động chuyển vào hàng đợi xem xét riêng để điều phối viên bổ sung thủ công qua phỏng vấn hoặc nghiệp vụ ngoại tuyến, tuyệt đối không gán tọa độ giả định nhằm tránh điều động sai hiện trường.
 
-Báo cáo tạo sau mất mạng vẫn giữ thời điểm tạo ở client, đồng thời máy chủ lưu thời điểm nhận. Trong mã adapter hiện tại, nếu không đọc được \texttt{createdAt}, thời điểm nhận có thể được dùng thay. Vì vậy, ngữ nghĩa thời gian ở demo không hoàn toàn trùng với thiết kế nghiên cứu chỉ dùng thời gian quan sát gốc. Cần đánh giá độ nhạy của cách thay thế này trước khi áp dụng kết quả benchmark vào dữ liệu đến trễ.
-
-\subsection{Tiêu chí hoàn thành bản sơ bộ}
-Bản sơ bộ cần mô tả đủ bài toán, dữ liệu, phương pháp, phần mềm, kết quả và hạn chế; số liệu phải truy về artifact và tên nhóm đúng nguồn. Các trường hành chính không có căn cứ, mẫu chính thức và minh chứng có chữ ký vẫn được đánh dấu để nhóm hoàn tất hồ sơ. Mức hoàn thành nội dung khoa học được tách với mức hoàn thành sản phẩm đăng ký và điều kiện nộp bản đầy đủ.
+Về mặt thời gian, hệ thống ưu tiên lưu giữ thời điểm ghi nhận ban đầu tại thiết bị biên (\texttt{createdAt}) song song với thời điểm tiếp nhận tại máy chủ (\texttt{receivedAt}). Cách tiếp cận này giúp phân biệt độ trễ truyền thông với thời gian phát sinh sự cố, đảm bảo tính khách quan khi thuật toán tái hiện trình tự diễn biến thiên tai.

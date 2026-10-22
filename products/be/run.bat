@@ -1,6 +1,7 @@
 @echo off
 title Flood Rescue Mock Server (Port 8000)
 cd /d "%~dp0"
+set "RESCUE_MODEL_EXPORT_DIR=%~dp0..\fe\model\Edge Ai\seed159\Export\pruning_st"
 
 echo =================================================
 echo    KHOI DONG FLOOD RESCUE MOCK SERVER (:8000)   
