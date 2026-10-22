@@ -22,6 +22,43 @@ void main() {
     await dir.delete(recursive: true);
   });
 
+  test(
+    'failed LAN scans back off 1/2/5 minutes; manual reconnect bypasses delay',
+    () async {
+      var now = DateTime(2026);
+      var scans = 0;
+      final locator = ServerLocator(
+        allowInsecureLan: true,
+        now: () => now,
+        candidates: (_) async {
+          scans++;
+          return [];
+        },
+        probe: (_) async => null,
+      );
+      locator.attach(outbox);
+      await locator.ensureConnected();
+      expect(scans, 1);
+      now = now.add(const Duration(seconds: 59));
+      await locator.ensureConnected();
+      expect(scans, 1);
+      now = now.add(const Duration(seconds: 1));
+      await locator.ensureConnected();
+      expect(scans, 2);
+      now = now.add(const Duration(minutes: 1));
+      await locator.ensureConnected();
+      expect(scans, 2);
+      now = now.add(const Duration(minutes: 1));
+      await locator.ensureConnected();
+      expect(scans, 3);
+      now = now.add(const Duration(minutes: 4));
+      await locator.ensureConnected();
+      expect(scans, 3);
+      await locator.ensureConnected(force: true);
+      expect(scans, 4);
+    },
+  );
+
   test('tìm lại đúng DB khi IP đổi, từ chối server khác ở IP cũ', () async {
     const oldUrl = 'https://192.168.6.10:8000';
     const newUrl = 'https://192.168.6.20:8000';

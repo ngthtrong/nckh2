@@ -14,7 +14,7 @@ Model mới được dùng cho các hình phân loại là MobileNetV3-Large v�
 \end{figure}
 Recall non\_flood là 90,70\%; recall high là 74,07\%. Trong 54 ảnh high, 12 ảnh bị dự đoán medium và 2 ảnh bị dự đoán low. Có 3 lỗi cách ít nhất hai mức severity (1,17\% test). Đây là chỉ số theo thứ tự mức ngập, chưa đo hệ quả cứu hộ.
 
-Checkpoint seed 1024 chưa lưu hash manifest chia tập của lần train. Các kiểm tra ảnh sạch và lỗi validation ở Chương~2 nhất quán với split dùng chung, nhưng chưa xác nhận toàn bộ phân công mẫu huấn luyện ban đầu. Phiên benchmark seed 1024 chạy lại đã có đủ dự đoán trên test, hash split/config và hash model để đối chiếu. Bằng chứng của phiên đánh giá này không thay thế hồ sơ chia tập còn thiếu của lần train; không dùng riêng chênh lệch Accuracy giữa các phiên để kết luận model cải thiện hoặc suy giảm.
+Checkpoint seed 1024 chưa lưu hash manifest chia tập của lần train. Các kiểm tra ảnh sạch và lỗi validation ở Chương~\ref{chap:02-data-methods} nhất quán với split dùng chung, nhưng chưa xác nhận toàn bộ phân công mẫu huấn luyện ban đầu. Phiên benchmark seed 1024 chạy lại đã có đủ dự đoán trên test, hash split/config và hash model để đối chiếu. Bằng chứng của phiên đánh giá này không thay thế hồ sơ chia tập còn thiếu của lần train; không dùng riêng chênh lệch Accuracy giữa các phiên để kết luận model cải thiện hoặc suy giảm.
 \begin{figure}[htbp]\centering
 \includegraphics[width=\textwidth]{image-examples.png}
 \caption{Các ví dụ phân loại sai trên validation của model seed 1024}
