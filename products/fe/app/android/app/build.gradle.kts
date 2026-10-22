@@ -41,6 +41,21 @@ android {
             signingConfig = signingConfigs.getByName("debug")
         }
     }
+
+    flavorDimensions += "audience"
+    productFlavors {
+        create("user") { dimension = "audience" }
+        create("admin") {
+            dimension = "audience"
+            applicationIdSuffix = ".admin"
+        }
+    }
+}
+
+androidComponents {
+    onVariants(selector().withFlavor("audience" to "user")) { variant ->
+        variant.packaging.jniLibs.excludes.add("**/libonnxruntime.so")
+    }
 }
 
 kotlin {

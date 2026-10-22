@@ -4,6 +4,8 @@ import 'package:dio/dio.dart';
 import 'package:flutter/foundation.dart';
 
 import '../../config.dart';
+import '../../core/platform/background_sync_schedule.dart';
+import '../../domain/services/sync_activity.dart';
 import '../../domain/entities/rescue_record.dart';
 import '../../domain/entities/rescue_status.dart';
 import '../../domain/entities/send_mode.dart';
@@ -44,6 +46,7 @@ class RescueRepositoryImpl implements RescueRepository {
     await localDataSource.init();
     await outboxDataSource.init();
     serverLocator?.attach(outboxDataSource);
+    await updateBackgroundSync(hasSyncWork(getAllRecords()));
   }
 
   @override
@@ -52,8 +55,8 @@ class RescueRepositoryImpl implements RescueRepository {
       (serverLocator == null ? kServerBaseUrl : null);
 
   @override
-  Future<bool> reconnectServer() => _serial(
-    () => serverLocator?.ensureConnected(force: true) ?? Future.value(true),
+  Future<bool> reconnectServer({bool force = false}) => _serial(
+    () => serverLocator?.ensureConnected(force: force) ?? Future.value(true),
   );
 
   @override
@@ -77,6 +80,7 @@ class RescueRepositoryImpl implements RescueRepository {
   @override
   Future<void> saveRecord(RescueRecord record) async {
     await localDataSource.saveRecord(record);
+    await updateBackgroundSync(hasSyncWork(getAllRecords()));
   }
 
   /// Gửi, đồng bộ và cập nhật trạng thái cùng đọc-ghi outbox và bản ghi: chạy lần

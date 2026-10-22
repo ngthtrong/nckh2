@@ -4,6 +4,8 @@ import 'package:hive_ce_flutter/hive_flutter.dart';
 import 'package:workmanager/workmanager.dart';
 
 import 'core/platform/sync_isolate_guard.dart';
+import 'core/platform/background_sync_schedule.dart';
+import 'domain/services/sync_activity.dart';
 
 import 'data/datasources/inference_local_datasource.dart';
 import 'data/datasources/network_remote_datasource.dart';
@@ -45,12 +47,14 @@ Future<void> _syncInBackground() async {
     ),
   );
   await rescueRepo.init();
+  if (!hasSyncWork(rescueRepo.getAllRecords())) return;
   await rescueRepo.syncPendingRecords();
   try {
     await rescueRepo.refreshStatuses();
   } catch (_) {
     // Mất mạng giữa chừng: lần chạy sau (15 phút) sẽ thử lại.
   }
+  await updateBackgroundSync(hasSyncWork(rescueRepo.getAllRecords()));
 }
 
 Future<void> main() async {
@@ -59,12 +63,6 @@ Future<void> main() async {
       (defaultTargetPlatform == TargetPlatform.android ||
           defaultTargetPlatform == TargetPlatform.iOS)) {
     await Workmanager().initialize(callbackDispatcher);
-    await Workmanager().registerPeriodicTask(
-      'rescue-outbox-sync',
-      'syncPendingMessages',
-      frequency: const Duration(minutes: 15),
-      constraints: Constraints(networkType: NetworkType.connected),
-    );
   }
 
   final recordLocalDS = RecordLocalDataSource();
