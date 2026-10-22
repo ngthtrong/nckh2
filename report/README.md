@@ -27,6 +27,8 @@ Yêu cầu XeLaTeX hoặc Tectonic, KOMA-Script, các gói trong `template/packa
 
 ## Nội dung và căn cứ
 
+Bố cục chương theo xác nhận ngày 22/10/2026: (1) Cơ sở lý thuyết; (2) Thiết kế và xây dựng hệ thống; (3) Dữ liệu và phương pháp nghiên cứu; (4) Thực nghiệm và kết quả. Kết quả và kịch bản kiểm thử hệ thống nằm ở chương 4. Thứ tự chương được xác định bởi `main.tex`; tên thư mục nguồn và khóa nhãn cũ được giữ để bảo toàn liên kết.
+
 - `config/metadata.tex`: nguồn thông tin hành chính dùng khi biên dịch, đồng bộ với `resource/infoGroup.md`. Người dùng đã xác nhận ngày 06/10/2026: chủ nhiệm nữ, dân tộc Kinh, ngành Kỹ thuật phần mềm CLC, khóa 49, năm thứ 4, chương trình 4,5 năm và các thông tin hành chính còn lại. Các trường đã có trước đó lấy từ thuyết minh và email GVHD từ bản thảo. Bìa báo cáo ghi tháng 10/2026.
 - `chapters/`: bài toán, yêu cầu, dữ liệu, công thức, kiến trúc, triển khai, thực nghiệm và đối chiếu mục tiêu. Phân biệt LR khẩn cấp có cấu trúc với NLP, demo với scheduler nghiên cứu, mô phỏng với dữ liệu thực địa.
 - `generated/`: 14 bảng và macro xuất bằng `scripts/export_results.py`, cùng hash nguồn/audit. Xem [quy trình số liệu](generated/README.md).

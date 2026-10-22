@@ -1,4 +1,4 @@
-\section{Triển khai và kiểm thử chức năng}\label{sec:03-system-implementation}
+\section{Triển khai hệ thống}\label{sec:03-system-implementation}
 \subsection{Cấu trúc mã nguồn và đóng gói}
 Hệ thống phần mềm được tổ chức thành các phân hệ chuyên biệt bao gồm: máy chủ backend (FastAPI), ứng dụng di động phía người dân và lực lượng cứu nạn (Flutter), phân hệ Web GIS điều phối tác chiến và các dịch vụ vùng chứa Docker. Quy trình đóng gói và triển khai được tự động hóa thông qua các kịch bản chuẩn hóa, hỗ trợ triển khai nhanh chóng tại trung tâm điều hành hoặc máy chủ dã chiến.
 
@@ -107,45 +107,4 @@ Backend dùng tài khoản admin/operator, mật khẩu PBKDF2 và phiên có to
 
 Hệ thống ghi nhận nhật ký thao tác (\emph{audit trail}) gắn liền với danh tính điều phối viên (actor) phục vụ công tác giám sát, phân quyền và hậu kiểm. Đối với các yêu cầu cứu nạn gửi từ cộng đồng, quy trình nghiệp vụ yêu cầu điều phối viên xác minh thông tin trước khi ra quyết định xuất quân, hạn chế nguy cơ bị phân tán nguồn lực bởi các thông tin thiếu chính xác.
 
-\subsection{Kiểm thử chức năng hệ thống}
-Bảng~\ref{tab:historical-tests} tổng hợp kết quả kiểm thử chức năng của hệ thống phần mềm trên các phân hệ chính:
-\begin{table}[htbp]\centering\small
-\caption{Tổng hợp kết quả kiểm thử chức năng của hệ thống phần mềm}
-\label{tab:historical-tests}
-\begin{tabularx}{\textwidth}{P{.32\textwidth}P{.16\textwidth}X}
-\toprule Bộ kiểm thử & Kết quả ghi nhận & Phạm vi \\\midrule
-Backend unit test & 44/44 & Hợp đồng, migration, hash, cụm, dashboard \\
-Flutter unit test & 26/26 & Chính sách gửi, SMS, trạng thái, hash \\
-Hợp đồng trên container & Đạt các ca & App/server message và multipart \\
-E2E Chromium headless & 46/46 & App web tới backend/dashboard, mạng giả lập \\
-APK debug & Hoàn thành & Tạo gói cài đặt Android APK phục vụ kiểm thử \\
-\bottomrule\end{tabularx}
-\end{table}
-
-Các bộ kiểm thử đơn vị của lõi gom cụm tập trung xác thực tính chính xác của công thức đồ thị và thuật toán phân cụm cộng đồng. Bộ kiểm thử giao diện và tích hợp xác thực toàn vẹn các kịch bản: gửi SOS khẩn cấp, đính kèm hình ảnh hiện trường, hoạt động khi mất kết nối mạng và phục hồi trạng thái sau khi kết nối lại.
-
-\subsection{Kịch bản kiểm thử tích hợp hệ thống}
-Kịch bản kiểm thử tích hợp của hệ thống bao gồm: tạo báo cáo thiếu tọa độ GPS để kiểm tra quy trình đưa vào hàng đợi xem xét; gửi báo cáo đính kèm hình ảnh hiện trường qua giao thức multipart; mô phỏng ngắt kết nối mạng và khôi phục để xác thực cơ chế lưu trữ cục bộ và gửi bù tự động; điều phối nhiệm vụ và kiểm tra khả năng phản hồi trạng thái về ứng dụng di động; đồng thời kiểm tra cơ chế chống trùng lặp khi người dùng gửi lại cùng một bản tin.
-
-\subsection{Ma trận kiểm thử tích hợp từ các ràng buộc nghiệp vụ}
-Bảng~\ref{tab:integration-cases} tổng hợp ma trận các trường hợp kiểm thử tích hợp nhằm đảm bảo tính toàn vẹn dữ liệu, khả năng chịu lỗi và tính nhất quán trạng thái giữa ứng dụng di động và máy chủ:
-\begin{longtable}{P{.27\textwidth}P{.34\textwidth}P{.28\textwidth}}
-\caption{Ca kiểm thử theo yêu cầu toàn vẹn và khả năng gửi lại}\label{tab:integration-cases}\\
-\toprule Tình huống & Kết quả cần quan sát & Bằng chứng cần lưu \\\midrule\endfirsthead
-\toprule Tình huống & Kết quả cần quan sát & Bằng chứng cần lưu \\\midrule\endhead
-Server ghi xong, client mất ACK & Retry cùng ID/hash trả duplicate; chỉ một thao tác & ACK, dedup và số bản ghi \\
-Cùng message ID, payload đổi & Từ chối xung đột; dữ liệu đầu không đổi & Mã lỗi và payload/hash hai lần \\
-Cùng client/sequence bị dùng lại & Không tạo message mới & Phản hồi SEQUENCE\_REUSED \\
-Metadata đến trước ảnh & Bổ sung ảnh cho đúng report, giữ trạng thái & ID, hash ảnh và nhật ký \\
-Người khác gộp report & Từ chối theo kiểm tra chủ bản ghi & Mã lỗi xung đột và dữ liệu trước/sau \\
-Không có GPS & Không thêm tọa độ giả; hiện ở review & Payload thiếu tọa độ và API review \\
-Trạng thái phản hồi đến muộn & App không lùi trạng thái & Version/trạng thái trước và sau \\
-Chuyển trạng thái đã kết thúc & Backend giữ quy tắc trạng thái cuối & API response và log sự kiện \\
-Độ tin cậy cao nhưng dữ liệu nhiễu & Cho phép người điều phối can thiệp hiệu chỉnh & Nhật ký cập nhật và trạng thái \\
-App có E\_i, adapter không đọc & Xác định chính xác E dùng ở đồ thị & Payload và ReportV2 sau ánh xạ \\
-App bị đóng khi offline & Outbox còn để tiếp tục sau mở lại & Log cục bộ, ID và thời điểm retry \\
-SMS rồi HTTP cùng report & Gộp một ca và giữ các nguồn & Gateway/HTTP log và owner/client ID \\
-\bottomrule
-\end{longtable}
-
-Quy trình kiểm thử phân tầng từ kiểm thử đơn vị, kiểm thử tích hợp API đến kiểm thử đầu cuối trên thiết bị di động giúp phát hiện sớm các xung đột hợp đồng dữ liệu, đảm bảo tính ổn định và độ tin cậy của toàn bộ hệ thống cứu hộ trong môi trường vận hành thực tế.
+Kết quả kiểm thử chức năng, các kịch bản tích hợp và ma trận kiểm chứng được trình bày tại Mục~\ref{sec:system-testing}.
