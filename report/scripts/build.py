@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-"""Compile from report/, with separate output directories and IEEE bibliography."""
+"""Compile from report/, with separate output directories and grouped bibliography."""
 import argparse
 import os
 from pathlib import Path
@@ -87,7 +87,7 @@ def main():
     # Find the target's bbl file in its isolated output directory.
     env['TEXINPUTS'] = str(out) + os.pathsep + env.get('TEXINPUTS', '') + os.pathsep
     env['BIBINPUTS'] = str(ROOT) + os.pathsep + env.get('BIBINPUTS', '') + os.pathsep
-    backend = 'biblatex-ieee' if use_biber else 'bibtex-ieeetr'
+    backend = 'biblatex-ieee-grouped-nyt' if use_biber else 'bibtex-grouped-plainurl'
     marker = out / '.bibliography-backend'
     previous_aux = out / f'{job}.aux'
     incompatible_aux = previous_aux.exists() and ('\\abx@aux' in previous_aux.read_text(errors='replace')) != use_biber

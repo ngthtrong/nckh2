@@ -5,13 +5,13 @@ Thông tin dưới đây được người dùng xác nhận ngày 06/10/2026.
 ## Đề tài
 
 - **Mã số:** THS2026-68
-- **Tên tiếng Việt:** Hệ thống phân tích đa phương thức và phân cụm sự kiện cứu hộ bão lũ dựa trên Edge AI.
-- **Tên tiếng Anh:** An Edge AI–Based System for Multimodal Analysis and Clustering of Flood Rescue Events.
+- **Tên tiếng Việt:** Xây dựng hệ thống phân tích đa phương thức và phân cụm sự kiện cứu hộ bão lũ dựa trên Edge AI.
+- **Tên tiếng Anh:** Development of an Edge AI-based System for Multimodal Analysis and Clustering of Flood Rescue Events.
 - **Đơn vị:** Trường Công nghệ Thông tin và Truyền thông, Đại học Cần Thơ.
-- **Thời gian thực hiện:** Từ tháng 03/2026 đến tháng 08/2026.
+- **Thời gian thực hiện:** Từ tháng 05/2026 đến tháng 10/2026 (người dùng xác nhận lại ngày 22/10/2026, khớp thuyết minh PDF/DOCX).
 - **Kinh phí:** 15.000.000 đồng.
 - **Thời điểm ghi trên bìa báo cáo:** Tháng 10 năm 2026.
-- **Đơn vị phối hợp chính:** Không có.
+- **Đơn vị phối hợp chính:** Trường Công nghệ Thông tin và Truyền thông, Đại học Cần Thơ; Phòng Quản lý Khoa học, Đại học Cần Thơ (người dùng chốt ngày 22/10/2026).
 
 ## Giảng viên hướng dẫn
 
@@ -47,5 +47,5 @@ Thông tin dưới đây được người dùng xác nhận ngày 06/10/2026.
 ## Điểm cần đối chiếu với mẫu bổ sung ngày 08/10/2026
 
 - Mẫu chủ nhiệm ghi năm sinh 2026; giữ 2005 theo xác nhận ngày 06/10/2026, cần sửa mẫu trước khi ký.
-- Đơn nghiệm thu ghi thời gian 05/2026–10/2026 và tên đề tài có thêm “Xây dựng”; metadata vẫn giữ 03/2026–08/2026 và tên đã xác nhận, chờ thuyết minh/quyết định điều chỉnh chính thức.
-- Chưa có ảnh chân dung 4×6, xếp loại và thành tích học tập từng năm 1–4.
+- Thuyết minh PDF/DOCX được cung cấp ngày 22/10/2026 xác nhận tên có “Xây dựng” và thời gian 05/2026–10/2026; metadata đã đồng bộ. Đơn vị phối hợp giữ theo xác nhận mới nhất của người dùng nêu trên.
+- Đã có kết quả học tập năm 1–3: 3.63, 3.79, 3.81 theo mẫu chủ nhiệm; còn thiếu ảnh chân dung 4×6 và kết quả năm 4.

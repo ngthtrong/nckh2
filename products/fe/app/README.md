@@ -113,9 +113,9 @@ nội dung có thể bị cắt. Nút sao chép vẫn được giữ để xem n
 
 Gói server được tạo bằng `python products/be/build_benchmark_package.py` từ CSV
 và ảnh thuộc test split. Backend Docker chứa model ONNX/PTE cùng manifest tại
-`/app/model_exports`; build lại image sau khi thay model. Backend native dùng
-thư mục `products/fe/model/Edge Ai/Export` mặc định hoặc cấu hình
-`RESCUE_MODEL_EXPORT_DIR`.
+`/app/model_exports`; build lại image sau khi thay model. Backend native mặc định
+dùng cặp seed159 tại `products/fe/model/Edge Ai/seed159/Export/pruning_st` hoặc
+cấu hình thư mục khác bằng `RESCUE_MODEL_EXPORT_DIR`.
 
 Tên gói dùng fingerprint của CSV chia tập, không dùng seed huấn luyện. Manifest
 có `splitCsvSha256`; cùng một split có thể đánh giá cả checkpoint seed 42 và
