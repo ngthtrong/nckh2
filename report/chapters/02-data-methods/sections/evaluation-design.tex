@@ -1,0 +1,61 @@
+\section{Thiết kế đánh giá}\label{sec:02-evaluation-design}
+\subsection{Giao thức dữ liệu và đơn vị độc lập}
+Đơn vị đánh giá thay đổi theo bài toán (Bảng~\ref{tab:method-map}): một ảnh với bộ phân loại; một run với RQ1; một seed với RQ2 và RQ3. Tham số của RQ1 được chọn bằng grid trên 20 run calibration, còn 40 run test không dùng để chọn tham số; chi tiết đối chứng và điều kiện stress ở Mục~\ref{sec:04-evaluation-setup}. Với mô hình ảnh, test không tham gia scheduler, quy tắc chọn checkpoint hay calibration lượng tử hóa. Với mọi nhánh, nhãn thật chỉ được nối sau khi dự đoán và cấu hình đã được lưu.
+
+Hai phép kiểm tra cần phân biệt. Trong score-invariance test, grouping được giữ cố định trước và sau perturbation, nên chỉ đo tầng điểm. Trong end-to-end test, grouping được dự đoán lại và có thể đổi. Đầu ra của phép thứ nhất không là bằng chứng cho phép thứ hai. Trong RQ1 stress, multiplicity có thể đổi đồ thị trước khi tính điểm; trong RQ2, nhóm oracle được khóa để chẩn đoán riêng tầng điểm.
+
+\subsection{Thước đo phân loại ảnh}\label{sec:02-metrics-image}
+Các thước đo gồm Accuracy, macro-F1, balanced accuracy, ma trận nhầm lẫn và lỗi nặng. Với $\mathcal Y$ là tập bốn lớp và $\operatorname{Prec}_c,\operatorname{Rec}_c$ là precision và recall của lớp $c$,
+\begin{align}
+ \operatorname{Acc}&=\frac{1}{n}\sum_{i=1}^{n}\mathbf{1}\{\widehat y_i=y_i\},\nonumber\\
+ \operatorname{F1}_{\mathrm{macro}}&=\frac{1}{|\mathcal Y|}\sum_{c\in\mathcal Y}\frac{2\operatorname{Prec}_c\operatorname{Rec}_c}{\operatorname{Prec}_c+\operatorname{Rec}_c},\nonumber\\
+ \operatorname{BalAcc}&=\frac{1}{|\mathcal Y|}\sum_{c\in\mathcal Y}\operatorname{Rec}_c.
+ \label{eq:image-metrics}
+\end{align}
+Macro-F1 và balanced accuracy cho phép quan sát chất lượng từng lớp dù phân bố không đều. Theo script so sánh, severity có thứ tự $\texttt{non\_flood}=0$, $\texttt{low}=1$, $\texttt{medium}=2$, $\texttt{high}=3$, và lỗi nặng là chênh lệch severity ít nhất hai mức. Thứ tự này khác thứ tự chỉ số đầu ra; dùng trực tiếp khoảng cách chỉ số sẽ tính sai lỗi này.
+
+Để kiểm tra chuyển đổi, các định dạng FP32 (PyTorch, ONNX, ExecuTorch) chạy trên cùng tập test. PTQ, QAT và cắt tỉa (Mục~\ref{sec:02-optimization}) giữ nguyên split test. Latency đo trên CPU máy tính không suy ra được tốc độ trên điện thoại; số đo trên thiết bị được báo cáo thành nguồn riêng.
+
+\subsection{Thước đo phân cụm}
+ARI so sánh quan hệ ``cùng cụm'' của các cặp báo cáo giữa phân hoạch dự đoán và nhãn thật, có hiệu chỉnh mức khớp ngẫu nhiên, và không phụ thuộc tên hay số thứ tự nhãn cụm. Gọi $n_{uv}$ là số báo cáo nằm ở cụm thật $u$ và cụm dự đoán $v$, $a_u=\sum_vn_{uv}$ và $b_v=\sum_un_{uv}$. Đặt
+\begin{align}
+S&=\sum_{u,v}\binom{n_{uv}}{2},\quad
+S_a=\sum_u\binom{a_u}{2},\quad S_b=\sum_v\binom{b_v}{2},\\
+\operatorname{ARI}&=\frac{S-S_aS_b/\binom{n}{2}}{(S_a+S_b)/2-S_aS_b/\binom{n}{2}}.
+\end{align}
+Công thức mô tả trường hợp mẫu số khác không; các trường hợp suy biến xử lý theo thư viện của protocol. ARI bằng một khi phân hoạch khớp hoàn toàn trên đơn vị được đánh giá. ARI thấp hoặc âm phản ánh mức khớp kém so với hiệu chỉnh ngẫu nhiên, không có nghĩa một tỷ lệ cụ thể các ca cứu hộ đã bị phân loại sai.
+
+F1 theo cặp dùng cặp báo cáo làm đơn vị: TP là cặp cùng sự kiện và cùng cụm, FP là cặp khác sự kiện nhưng bị gom chung, FN là cặp cùng sự kiện nhưng bị tách. Khi các mẫu số xác định,
+\begin{equation}
+\operatorname{Prec}_{\mathrm{pair}}=\frac{\mathrm{TP}}{\mathrm{TP}+\mathrm{FP}},\quad
+\operatorname{Rec}_{\mathrm{pair}}=\frac{\mathrm{TP}}{\mathrm{TP}+\mathrm{FN}},\quad
+\operatorname{F1}_{\mathrm{pair}}=\frac{2\mathrm{TP}}{2\mathrm{TP}+\mathrm{FP}+\mathrm{FN}}.
+\end{equation}
+Đây là F1 của quan hệ cặp, khác macro-F1 bốn lớp ảnh. Một sự kiện có nhiều báo cáo tạo nhiều cặp hơn, nên phải giữ định nghĩa mẫu và cách đánh giá trên báo cáo gốc khi thay multiplicity.
+
+\subsection{Thước đo xếp hạng}
+RQ2 đánh giá thứ tự cụm theo ba nhóm thước đo. Về phù hợp với mục tiêu, NDCG@5, Spearman và overlap top-5 so sánh thứ tự dự đoán với lợi ích do evaluator sinh. Về độ bền, drift điểm là độ thay đổi tuyệt đối đã chuẩn hóa giữa điểm sau perturbation và điểm nền; drift thứ hạng là thay đổi vị trí trung bình trên danh sách chuẩn hóa; churn là thay đổi thành viên top-5. Drift và churn không đo sự đúng với lợi ích: một danh sách sai nhưng không đổi có drift thấp và churn bằng không. Vì vậy phải xem đồng thời phù hợp và độ bền.
+
+Trong notebook RQ2, NDCG dùng \texttt{sklearn.metrics.ndcg\_score} với relevance là lợi ích evaluator, xét năm vị trí đầu. Với thứ tự dự đoán $\pi$ và lợi ích không âm $g_i$, biểu diễn không có tie là
+\begin{equation}
+\operatorname{DCG@5}=\sum_{r=1}^{5}\frac{g_{\pi(r)}}{\log_2(r+1)},\qquad
+\operatorname{NDCG@5}=\frac{\operatorname{DCG@5}}{\operatorname{IDCG@5}}.
+\end{equation}
+IDCG là DCG của thứ tự lợi ích lý tưởng trong cùng mẫu; evaluator dùng gain tuyến tính như lời gọi thư viện, không thay bằng $2^{g_i}-1$, và xử lý tie theo scorer của lần chạy. Vì lợi ích do generator quy định, NDCG chỉ đo sự phù hợp với mục tiêu đó. Spearman gần không có thể cùng tồn tại với NDCG dương do hai thước đo chú trọng vùng thứ hạng khác nhau. Một thứ tự ngẫu nhiên cũng có thể đạt NDCG dương khi nhiều sự kiện đều có lợi ích, nên phải dùng đối chứng và tương phản ghép cặp, không lấy một NDCG dương làm bằng chứng tốt hơn ngẫu nhiên.
+
+\subsection{Thước đo điều phối}
+RQ3 tạo lịch từ cụm dự đoán và điểm ưu tiên, sau đó evaluator nối nhãn thật để tính harm, trễ deadline, thời gian đến, điều phối trùng, điểm đến giả và số sự kiện chưa được phục vụ. Các chính sách so sánh gồm legacy, chỉ khẩn cấp, chỉ số người, tuyến tính, ngẫu nhiên và gần nhất trước. Oracle là điều kiện chẩn đoán, không phải lựa chọn dùng được trong vận hành thật.
+
+``Cải thiện'' trong bảng ghép cặp được tính theo hướng tốt của từng thước đo. Khi harm thấp hơn là tốt hơn, $\Delta$ bằng harm đối chứng trừ harm candidate; khi tỷ lệ phục vụ cao hơn là tốt hơn, hướng trừ đổi lại. CSV còn giữ cột candidate-minus-comparator, nên cần xem hướng của thước đo trước khi dùng dấu. Chênh lệch tỷ lệ được báo bằng điểm phần trăm để tránh nhầm với phần trăm thay đổi tương đối.
+
+\subsection{Suy luận thống kê}
+Với mỗi seed, hai phương pháp được đánh giá trên cùng dữ liệu để tạo hiệu ghép cặp. Bootstrap lấy mẫu lại theo run hoặc seed thay vì theo từng báo cáo có tương quan. RQ1 dùng 10.000 resample cho so sánh chính; RQ2 và RQ3 dùng 5.000. Kiểm định Wilcoxon và hiệu chỉnh Holm theo các họ giả thuyết đã xuất giúp kiểm soát việc xét nhiều chỉ số và đối chứng.
+
+Trong RQ3, ba điều kiện nguồn lực thuộc cùng một seed được lấy trung bình trước, giữ 40 cặp seed. Bảng cũ có $40\times3=120$ hàng điều kiện chỉ phục vụ chẩn đoán; coi tất cả là mẫu độc lập sẽ sai đơn vị suy luận. Khoảng tin cậy bootstrap chưa hiệu chỉnh và kiểm định Wilcoxon có Holm là hai thủ tục khác nhau, nên một CI không chứa không không tự cho phép bỏ qua kết luận của kiểm định đã hiệu chỉnh.
+
+Các phép kiểm tra stress RQ1 báo cáo thay đổi trong từng phương pháp so với chính đối chứng của nó; chúng không phải kiểm định ưu thế giữa các phương pháp. Giữ các ranh giới này giúp trình bày đầy đủ kết quả âm và tránh diễn giải chọn lọc.
+
+\subsection{Quy trình suy luận và tái lập}\label{sec:02-reproducibility}
+Quy trình được mô tả theo thứ tự thao tác để làm rõ nơi sử dụng dữ liệu. Trước hết đọc hợp đồng và schema, chỉ nạp tệp đầu vào quan sát. Kiểm tra miền số, timestamp và tọa độ; đưa báo cáo không đủ vị trí hoặc thời gian vào hàng xem xét. Từ các báo cáo đủ trường, xác định định danh payload, số củng cố và $Q_i$. Sau đó tính các thành phần tương đồng, ngưỡng quantile và cạnh top-$K$, rồi gọi bộ phát hiện cộng đồng. Với mỗi cụm dự đoán, xây họ bằng chứng từ fingerprint và envelope, tính các tổng hợp ở Công thức~\ref{eq:aggregate-e}--\ref{eq:aggregate-v}. Điểm $P_k$ đi cùng cụm vào scheduler nghiên cứu hoặc danh sách hỗ trợ điều phối. Chỉ sau khi lưu đầu ra và cấu hình, evaluator mới nối nhãn để tính chỉ số. Hàng xem xét được giữ trong output; loại khỏi bảng kết quả sẽ che mất khối lượng mà con người phải xử lý.
+
+Đầu ra một lần chạy chứa định danh dữ liệu, seed, config canonical JSON, commit, checksum, danh sách báo cáo được nhận, bị từ chối hoặc đưa vào xem xét, nhãn dự đoán và thời gian. Bảng tổng hợp chỉ được sinh từ các lần chạy cùng protocol. Nếu một lần thất bại, cần giữ trạng thái lỗi và mẫu số thay vì bỏ hàng rồi tính trên những run còn lại; đây là điều kiện để kết quả âm, timeout hoặc từ chối dữ liệu vẫn quan sát được.
