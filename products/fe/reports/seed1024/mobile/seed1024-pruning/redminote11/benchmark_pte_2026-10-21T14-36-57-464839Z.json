@@ -1,0 +1,1922 @@
+{
+  "schemaVersion": 2,
+  "provenance": {
+    "model": {
+      "checkpoint_sha256": "6e8f06c36cbfc700de17bd5864380923f8e3f7c0b2bd40fd59a43b406e68cc70",
+      "input_size": 256,
+      "preprocess": "letterbox_rgb_124_116_104",
+      "letterbox_fill": [
+        124,
+        116,
+        104
+      ],
+      "class_order": [
+        "low",
+        "medium",
+        "high",
+        "non_flood"
+      ],
+      "onnx_sha256": "2ec932a12e4730811597d297edc4de4566cdd6b381e871bc65c658ec8d794d27",
+      "version": "mobilenetv3-mobilenetv3_large-1c78d34949fa-2ec932a12e47-6d4ca4471275",
+      "artifacts_complete": true,
+      "model_type": "structured_pruned",
+      "source_checkpoint_sha256": "6d4ef6fff1b59e8ac5d3165f935f28214b935ee377e21ecf16e3b0627be3d9ae",
+      "pruning": {
+        "method": "global_group_magnitude_channel",
+        "target_ratio": 0.01,
+        "round_to": null,
+        "parameter_count_before": 4207156,
+        "parameter_count_after": 4145694
+      },
+      "best_epoch": 32,
+      "parameter_count": 4145694,
+      "pte_sha256": "6d4ca447127556041f603e84b32be7828c95e45bca0afcfb2793e19501a9c433",
+      "executorch_runtime": "1.4.1"
+    },
+    "device": {
+      "manufacturer": "Xiaomi",
+      "model": "2201116TG",
+      "androidRelease": "13",
+      "androidSdk": 33,
+      "supportedAbis": [
+        "arm64-v8a",
+        "armeabi-v7a",
+        "armeabi"
+      ]
+    },
+    "app": {
+      "packageName": "com.example.app",
+      "versionName": "0.1.0",
+      "versionCode": 2001
+    },
+    "splitCsvSha256": "f7b52cd25411d4d1df2f7f80745a2cf430819773854345798cf7e093e3bcba45",
+    "runId": "da7d2f4c-67ab-40b6-b0de-4013f8e6786d",
+    "startedAtUtc": "2026-10-21T14:33:33.190996Z",
+    "finishedAtUtc": "2026-10-21T14:34:00.375790Z",
+    "artifactSha256": "6d4ca447127556041f603e84b32be7828c95e45bca0afcfb2793e19501a9c433",
+    "latencyScope": "image decode, preprocess and inference; excludes package I/O"
+  },
+  "dataset": "MobileNetV3 dataset v4, fixed split f7b52cd25411",
+  "split": "test",
+  "runtime": "pte",
+  "complete": true,
+  "expectedSamples": 256,
+  "processedSamples": 256,
+  "failedSamples": 0,
+  "warmupRuns": 5,
+  "warmupErrors": 0,
+  "accuracy": 0.76171875,
+  "macroF1": 0.7410016736103693,
+  "confusionMatrix": {
+    "low": {
+      "low": 33,
+      "medium": 14,
+      "high": 0,
+      "non_flood": 9,
+      "unclassified": 0
+    },
+    "medium": {
+      "low": 12,
+      "medium": 36,
+      "high": 11,
+      "non_flood": 1,
+      "unclassified": 0
+    },
+    "high": {
+      "low": 3,
+      "medium": 5,
+      "high": 46,
+      "non_flood": 0,
+      "unclassified": 0
+    },
+    "non_flood": {
+      "low": 6,
+      "medium": 0,
+      "high": 0,
+      "non_flood": 80,
+      "unclassified": 0
+    }
+  },
+  "classMetrics": {
+    "low": {
+      "precision": 0.6111111111111112,
+      "recall": 0.5892857142857143,
+      "f1": 0.6
+    },
+    "medium": {
+      "precision": 0.6545454545454545,
+      "recall": 0.6,
+      "f1": 0.6260869565217392
+    },
+    "high": {
+      "precision": 0.8070175438596491,
+      "recall": 0.8518518518518519,
+      "f1": 0.8288288288288288
+    },
+    "non_flood": {
+      "precision": 0.8888888888888888,
+      "recall": 0.9302325581395349,
+      "f1": 0.9090909090909092
+    }
+  },
+  "latency": {
+    "meanMs": 102.76557031250002,
+    "medianMs": 90.892,
+    "p95Ms": 202.812
+  },
+  "elapsedMs": 27183.043,
+  "predictions": [
+    {
+      "id": "a3bbeda1f791",
+      "truth": "low",
+      "prediction": "low",
+      "confidence": 0.9911226034164429,
+      "latencyMs": 51.38
+    },
+    {
+      "id": "96a8b2c8cd4b",
+      "truth": "low",
+      "prediction": "low",
+      "confidence": 0.5856438279151917,
+      "latencyMs": 86.452
+    },
+    {
+      "id": "95e8c217df9e",
+      "truth": "low",
+      "prediction": "medium",
+      "confidence": 0.9841779470443726,
+      "latencyMs": 238.426
+    },
+    {
+      "id": "87f060c4f19b",
+      "truth": "low",
+      "prediction": "medium",
+      "confidence": 0.5161067247390747,
+      "latencyMs": 126.092
+    },
+    {
+      "id": "d1a14dce1991",
+      "truth": "low",
+      "prediction": "non_flood",
+      "confidence": 0.4457235336303711,
+      "latencyMs": 129.691
+    },
+    {
+      "id": "62c0ae5d0d3b",
+      "truth": "low",
+      "prediction": "low",
+      "confidence": 0.9686897397041321,
+      "latencyMs": 107.76
+    },
+    {
+      "id": "7a41c9aabb58",
+      "truth": "low",
+      "prediction": "low",
+      "confidence": 0.997115969657898,
+      "latencyMs": 116.211
+    },
+    {
+      "id": "81707e19f361",
+      "truth": "low",
+      "prediction": "low",
+      "confidence": 0.9931520223617554,
+      "latencyMs": 78.039
+    },
+    {
+      "id": "dd75a8cf8f35",
+      "truth": "low",
+      "prediction": "low",
+      "confidence": 0.958333432674408,
+      "latencyMs": 85.755
+    },
+    {
+      "id": "eabe94371787",
+      "truth": "low",
+      "prediction": "non_flood",
+      "confidence": 0.6784145832061768,
+      "latencyMs": 129.723
+    },
+    {
+      "id": "f299bfaa48c6",
+      "truth": "low",
+      "prediction": "low",
+      "confidence": 0.9625349044799805,
+      "latencyMs": 72.455
+    },
+    {
+      "id": "1438b15cb7f1",
+      "truth": "low",
+      "prediction": "low",
+      "confidence": 0.7030037045478821,
+      "latencyMs": 104.104
+    },
+    {
+      "id": "e61f84f64f37",
+      "truth": "low",
+      "prediction": "low",
+      "confidence": 0.89033043384552,
+      "latencyMs": 107.612
+    },
+    {
+      "id": "86d30270b836",
+      "truth": "low",
+      "prediction": "low",
+      "confidence": 0.877880871295929,
+      "latencyMs": 114.853
+    },
+    {
+      "id": "63d11e4b9dc5",
+      "truth": "low",
+      "prediction": "low",
+      "confidence": 0.838314950466156,
+      "latencyMs": 85.102
+    },
+    {
+      "id": "79f6075598fe",
+      "truth": "low",
+      "prediction": "low",
+      "confidence": 0.8672404885292053,
+      "latencyMs": 129.397
+    },
+    {
+      "id": "961b7fc74e25",
+      "truth": "low",
+      "prediction": "medium",
+      "confidence": 0.861671507358551,
+      "latencyMs": 67.833
+    },
+    {
+      "id": "760cb822567a",
+      "truth": "low",
+      "prediction": "non_flood",
+      "confidence": 0.507534921169281,
+      "latencyMs": 102.207
+    },
+    {
+      "id": "defc12fb6c79",
+      "truth": "low",
+      "prediction": "medium",
+      "confidence": 0.5601814985275269,
+      "latencyMs": 116.894
+    },
+    {
+      "id": "861101d79459",
+      "truth": "low",
+      "prediction": "low",
+      "confidence": 0.8858165144920349,
+      "latencyMs": 97.745
+    },
+    {
+      "id": "d4495f12e4ec",
+      "truth": "low",
+      "prediction": "low",
+      "confidence": 0.7830182909965515,
+      "latencyMs": 104.572
+    },
+    {
+      "id": "6c1833266247",
+      "truth": "low",
+      "prediction": "low",
+      "confidence": 0.8060946464538574,
+      "latencyMs": 123.588
+    },
+    {
+      "id": "5e57145335d9",
+      "truth": "low",
+      "prediction": "low",
+      "confidence": 0.8456717729568481,
+      "latencyMs": 113.109
+    },
+    {
+      "id": "455ff08d1ab0",
+      "truth": "low",
+      "prediction": "low",
+      "confidence": 0.9916043877601624,
+      "latencyMs": 104.352
+    },
+    {
+      "id": "20ebcc3399b7",
+      "truth": "low",
+      "prediction": "low",
+      "confidence": 0.8356452584266663,
+      "latencyMs": 96.078
+    },
+    {
+      "id": "b5ffc3e4a3fa",
+      "truth": "low",
+      "prediction": "low",
+      "confidence": 0.7259342074394226,
+      "latencyMs": 124.135
+    },
+    {
+      "id": "f733ebb3eef6",
+      "truth": "low",
+      "prediction": "non_flood",
+      "confidence": 0.7569543123245239,
+      "latencyMs": 78.142
+    },
+    {
+      "id": "4f7c35691aa5",
+      "truth": "low",
+      "prediction": "non_flood",
+      "confidence": 0.7745183110237122,
+      "latencyMs": 115.106
+    },
+    {
+      "id": "318bf12787cc",
+      "truth": "low",
+      "prediction": "low",
+      "confidence": 0.7745218873023987,
+      "latencyMs": 121.212
+    },
+    {
+      "id": "1876d0c6db51",
+      "truth": "low",
+      "prediction": "low",
+      "confidence": 0.942572832107544,
+      "latencyMs": 81.147
+    },
+    {
+      "id": "5ebd5f80e996",
+      "truth": "low",
+      "prediction": "low",
+      "confidence": 0.9629199504852295,
+      "latencyMs": 66.828
+    },
+    {
+      "id": "1b2cee727552",
+      "truth": "low",
+      "prediction": "medium",
+      "confidence": 0.7849445343017578,
+      "latencyMs": 202.048
+    },
+    {
+      "id": "73a5d8ea67b6",
+      "truth": "low",
+      "prediction": "medium",
+      "confidence": 0.4273391366004944,
+      "latencyMs": 66.732
+    },
+    {
+      "id": "0f0e98905536",
+      "truth": "low",
+      "prediction": "medium",
+      "confidence": 0.4275282621383667,
+      "latencyMs": 130.051
+    },
+    {
+      "id": "009ae0bc9006",
+      "truth": "low",
+      "prediction": "low",
+      "confidence": 0.530758798122406,
+      "latencyMs": 58.782
+    },
+    {
+      "id": "87ab56ca3488",
+      "truth": "low",
+      "prediction": "medium",
+      "confidence": 0.5460026264190674,
+      "latencyMs": 51.485
+    },
+    {
+      "id": "0985041ecba8",
+      "truth": "low",
+      "prediction": "low",
+      "confidence": 0.9866140484809875,
+      "latencyMs": 55.925
+    },
+    {
+      "id": "3d484240a5f8",
+      "truth": "low",
+      "prediction": "low",
+      "confidence": 0.49448758363723755,
+      "latencyMs": 82.513
+    },
+    {
+      "id": "96240588d081",
+      "truth": "low",
+      "prediction": "low",
+      "confidence": 0.8823544383049011,
+      "latencyMs": 70.888
+    },
+    {
+      "id": "3fec734e7555",
+      "truth": "low",
+      "prediction": "low",
+      "confidence": 0.9385320544242859,
+      "latencyMs": 74.258
+    },
+    {
+      "id": "bf9728346799",
+      "truth": "low",
+      "prediction": "low",
+      "confidence": 0.8747569918632507,
+      "latencyMs": 77.254
+    },
+    {
+      "id": "e9ea404b3c64",
+      "truth": "low",
+      "prediction": "low",
+      "confidence": 0.8365916013717651,
+      "latencyMs": 68.277
+    },
+    {
+      "id": "dcd36d4bbf94",
+      "truth": "low",
+      "prediction": "low",
+      "confidence": 0.9188854098320007,
+      "latencyMs": 69.653
+    },
+    {
+      "id": "c6c0fce438c7",
+      "truth": "low",
+      "prediction": "low",
+      "confidence": 0.5884098410606384,
+      "latencyMs": 68.466
+    },
+    {
+      "id": "33a39a59cebb",
+      "truth": "low",
+      "prediction": "non_flood",
+      "confidence": 0.6448723673820496,
+      "latencyMs": 85.784
+    },
+    {
+      "id": "46237f64a210",
+      "truth": "low",
+      "prediction": "medium",
+      "confidence": 0.4179495573043823,
+      "latencyMs": 81.72
+    },
+    {
+      "id": "043f87ca1760",
+      "truth": "low",
+      "prediction": "non_flood",
+      "confidence": 0.6772345304489136,
+      "latencyMs": 59.505
+    },
+    {
+      "id": "bcbb81a66143",
+      "truth": "low",
+      "prediction": "medium",
+      "confidence": 0.7471418380737305,
+      "latencyMs": 78.726
+    },
+    {
+      "id": "142d42bae974",
+      "truth": "low",
+      "prediction": "medium",
+      "confidence": 0.9322509169578552,
+      "latencyMs": 62.191
+    },
+    {
+      "id": "d5abbb74a5f9",
+      "truth": "low",
+      "prediction": "low",
+      "confidence": 0.6959718465805054,
+      "latencyMs": 67.537
+    },
+    {
+      "id": "eba998b8b1a9",
+      "truth": "low",
+      "prediction": "non_flood",
+      "confidence": 0.5692232847213745,
+      "latencyMs": 56.66
+    },
+    {
+      "id": "f03f789f2013",
+      "truth": "low",
+      "prediction": "medium",
+      "confidence": 0.41753390431404114,
+      "latencyMs": 80.587
+    },
+    {
+      "id": "311c20c07851",
+      "truth": "low",
+      "prediction": "medium",
+      "confidence": 0.6733402609825134,
+      "latencyMs": 70.109
+    },
+    {
+      "id": "c11dc48d43c1",
+      "truth": "low",
+      "prediction": "low",
+      "confidence": 0.8342313766479492,
+      "latencyMs": 73.256
+    },
+    {
+      "id": "a1fd90f82129",
+      "truth": "low",
+      "prediction": "medium",
+      "confidence": 0.8828854560852051,
+      "latencyMs": 106.441
+    },
+    {
+      "id": "b4303e3c39e7",
+      "truth": "low",
+      "prediction": "non_flood",
+      "confidence": 0.33264461159706116,
+      "latencyMs": 74.586
+    },
+    {
+      "id": "fa0b56144df5",
+      "truth": "medium",
+      "prediction": "non_flood",
+      "confidence": 0.6630616784095764,
+      "latencyMs": 99.959
+    },
+    {
+      "id": "6ec1c8cc4ff4",
+      "truth": "medium",
+      "prediction": "medium",
+      "confidence": 0.8197713494300842,
+      "latencyMs": 88.321
+    },
+    {
+      "id": "a28569c7a723",
+      "truth": "medium",
+      "prediction": "low",
+      "confidence": 0.6632930636405945,
+      "latencyMs": 59.929
+    },
+    {
+      "id": "50289f5554c7",
+      "truth": "medium",
+      "prediction": "low",
+      "confidence": 0.5246292352676392,
+      "latencyMs": 108.534
+    },
+    {
+      "id": "7bde4e0aab60",
+      "truth": "medium",
+      "prediction": "high",
+      "confidence": 0.6558806300163269,
+      "latencyMs": 62.736
+    },
+    {
+      "id": "66a4ea86fa43",
+      "truth": "medium",
+      "prediction": "medium",
+      "confidence": 0.9696646928787231,
+      "latencyMs": 166.312
+    },
+    {
+      "id": "c47d05d2767b",
+      "truth": "medium",
+      "prediction": "medium",
+      "confidence": 0.7186590433120728,
+      "latencyMs": 106.019
+    },
+    {
+      "id": "79bcb4a2a4b7",
+      "truth": "medium",
+      "prediction": "medium",
+      "confidence": 0.8136373162269592,
+      "latencyMs": 216.985
+    },
+    {
+      "id": "eb9fbef03599",
+      "truth": "medium",
+      "prediction": "medium",
+      "confidence": 0.8509939908981323,
+      "latencyMs": 99.635
+    },
+    {
+      "id": "246c79b73f79",
+      "truth": "medium",
+      "prediction": "low",
+      "confidence": 0.792381227016449,
+      "latencyMs": 72.987
+    },
+    {
+      "id": "4c661bf7e535",
+      "truth": "medium",
+      "prediction": "medium",
+      "confidence": 0.9497401118278503,
+      "latencyMs": 123.757
+    },
+    {
+      "id": "3937d0bb32dc",
+      "truth": "medium",
+      "prediction": "medium",
+      "confidence": 0.9917017817497253,
+      "latencyMs": 181.578
+    },
+    {
+      "id": "287e80295207",
+      "truth": "medium",
+      "prediction": "low",
+      "confidence": 0.9065849781036377,
+      "latencyMs": 59.468
+    },
+    {
+      "id": "73e69a7f59f8",
+      "truth": "medium",
+      "prediction": "medium",
+      "confidence": 0.9714321494102478,
+      "latencyMs": 115.255
+    },
+    {
+      "id": "094ce43ffad7",
+      "truth": "medium",
+      "prediction": "high",
+      "confidence": 0.9005313515663147,
+      "latencyMs": 84.21
+    },
+    {
+      "id": "88277c3fc264",
+      "truth": "medium",
+      "prediction": "medium",
+      "confidence": 0.4784282147884369,
+      "latencyMs": 178.065
+    },
+    {
+      "id": "6f40a09efa79",
+      "truth": "medium",
+      "prediction": "medium",
+      "confidence": 0.9161243438720703,
+      "latencyMs": 153.371
+    },
+    {
+      "id": "85ae9b29c05f",
+      "truth": "medium",
+      "prediction": "medium",
+      "confidence": 0.8970486521720886,
+      "latencyMs": 200.53
+    },
+    {
+      "id": "aac2b2d24ec0",
+      "truth": "medium",
+      "prediction": "low",
+      "confidence": 0.4708639085292816,
+      "latencyMs": 68.425
+    },
+    {
+      "id": "6146c9c1ee2e",
+      "truth": "medium",
+      "prediction": "medium",
+      "confidence": 0.9133705496788025,
+      "latencyMs": 138.05
+    },
+    {
+      "id": "f9995cd54e52",
+      "truth": "medium",
+      "prediction": "high",
+      "confidence": 0.6274569630622864,
+      "latencyMs": 127.395
+    },
+    {
+      "id": "f31260a9aa76",
+      "truth": "medium",
+      "prediction": "low",
+      "confidence": 0.9060657024383545,
+      "latencyMs": 132.196
+    },
+    {
+      "id": "24c8abf9dd66",
+      "truth": "medium",
+      "prediction": "medium",
+      "confidence": 0.5682579278945923,
+      "latencyMs": 91.088
+    },
+    {
+      "id": "cb5e498c7242",
+      "truth": "medium",
+      "prediction": "high",
+      "confidence": 0.8784652352333069,
+      "latencyMs": 80.721
+    },
+    {
+      "id": "b9e6befc0344",
+      "truth": "medium",
+      "prediction": "medium",
+      "confidence": 0.8321497440338135,
+      "latencyMs": 90.892
+    },
+    {
+      "id": "33f7a23ef439",
+      "truth": "medium",
+      "prediction": "low",
+      "confidence": 0.7297577261924744,
+      "latencyMs": 58.994
+    },
+    {
+      "id": "6106d81756d9",
+      "truth": "medium",
+      "prediction": "low",
+      "confidence": 0.5959241390228271,
+      "latencyMs": 58.689
+    },
+    {
+      "id": "3a7867433cc5",
+      "truth": "medium",
+      "prediction": "high",
+      "confidence": 0.9738790988922119,
+      "latencyMs": 95.114
+    },
+    {
+      "id": "9a16ed420312",
+      "truth": "medium",
+      "prediction": "medium",
+      "confidence": 0.967420220375061,
+      "latencyMs": 169.55
+    },
+    {
+      "id": "2027f9f8f8b5",
+      "truth": "medium",
+      "prediction": "medium",
+      "confidence": 0.536081075668335,
+      "latencyMs": 50.163
+    },
+    {
+      "id": "f7d1f77e3184",
+      "truth": "medium",
+      "prediction": "low",
+      "confidence": 0.8714379668235779,
+      "latencyMs": 54.068
+    },
+    {
+      "id": "ccd4d02522b6",
+      "truth": "medium",
+      "prediction": "medium",
+      "confidence": 0.8604537844657898,
+      "latencyMs": 85.01
+    },
+    {
+      "id": "e75d5bf91734",
+      "truth": "medium",
+      "prediction": "medium",
+      "confidence": 0.9193511009216309,
+      "latencyMs": 52.88
+    },
+    {
+      "id": "1d1c1ce2c3ef",
+      "truth": "medium",
+      "prediction": "high",
+      "confidence": 0.5881314873695374,
+      "latencyMs": 64.521
+    },
+    {
+      "id": "18b88d0fa74d",
+      "truth": "medium",
+      "prediction": "medium",
+      "confidence": 0.9475303888320923,
+      "latencyMs": 64.872
+    },
+    {
+      "id": "c2a16544c6ff",
+      "truth": "medium",
+      "prediction": "medium",
+      "confidence": 0.9127472043037415,
+      "latencyMs": 66.41
+    },
+    {
+      "id": "91448de3d37a",
+      "truth": "medium",
+      "prediction": "medium",
+      "confidence": 0.5253071188926697,
+      "latencyMs": 105.876
+    },
+    {
+      "id": "f2fdb9bc4e6e",
+      "truth": "medium",
+      "prediction": "medium",
+      "confidence": 0.5237807035446167,
+      "latencyMs": 61.469
+    },
+    {
+      "id": "efef4770bdef",
+      "truth": "medium",
+      "prediction": "high",
+      "confidence": 0.9374867677688599,
+      "latencyMs": 114.115
+    },
+    {
+      "id": "b1f275ea91de",
+      "truth": "medium",
+      "prediction": "medium",
+      "confidence": 0.9551687240600586,
+      "latencyMs": 96.112
+    },
+    {
+      "id": "5b5435778fa1",
+      "truth": "medium",
+      "prediction": "medium",
+      "confidence": 0.8420460224151611,
+      "latencyMs": 58.74
+    },
+    {
+      "id": "eb3d5c63b0a9",
+      "truth": "medium",
+      "prediction": "medium",
+      "confidence": 0.8415746092796326,
+      "latencyMs": 148.645
+    },
+    {
+      "id": "f5f8880cdece",
+      "truth": "medium",
+      "prediction": "medium",
+      "confidence": 0.5733025074005127,
+      "latencyMs": 51.186
+    },
+    {
+      "id": "c8ca66d82460",
+      "truth": "medium",
+      "prediction": "low",
+      "confidence": 0.6354314088821411,
+      "latencyMs": 107.927
+    },
+    {
+      "id": "38ce47ed5577",
+      "truth": "medium",
+      "prediction": "low",
+      "confidence": 0.7171828150749207,
+      "latencyMs": 78.918
+    },
+    {
+      "id": "f72ef7f24a29",
+      "truth": "medium",
+      "prediction": "medium",
+      "confidence": 0.8645270466804504,
+      "latencyMs": 207.105
+    },
+    {
+      "id": "b4bf5fa97d13",
+      "truth": "medium",
+      "prediction": "low",
+      "confidence": 0.9179591536521912,
+      "latencyMs": 78.523
+    },
+    {
+      "id": "153a190ef683",
+      "truth": "medium",
+      "prediction": "medium",
+      "confidence": 0.8611776828765869,
+      "latencyMs": 164.297
+    },
+    {
+      "id": "bf24ae7551c3",
+      "truth": "medium",
+      "prediction": "medium",
+      "confidence": 0.8907994031906128,
+      "latencyMs": 93.585
+    },
+    {
+      "id": "67a6b90dbe7e",
+      "truth": "medium",
+      "prediction": "high",
+      "confidence": 0.9327970147132874,
+      "latencyMs": 112.621
+    },
+    {
+      "id": "472b14f6a963",
+      "truth": "medium",
+      "prediction": "high",
+      "confidence": 0.9788464307785034,
+      "latencyMs": 69.927
+    },
+    {
+      "id": "6ff267f227e5",
+      "truth": "medium",
+      "prediction": "medium",
+      "confidence": 0.9133661985397339,
+      "latencyMs": 109.332
+    },
+    {
+      "id": "0a86e24ac7d6",
+      "truth": "medium",
+      "prediction": "medium",
+      "confidence": 0.7491447925567627,
+      "latencyMs": 85.439
+    },
+    {
+      "id": "1de78c83d4c7",
+      "truth": "medium",
+      "prediction": "high",
+      "confidence": 0.5298596024513245,
+      "latencyMs": 58.792
+    },
+    {
+      "id": "5c82c5704e05",
+      "truth": "medium",
+      "prediction": "medium",
+      "confidence": 0.864406168460846,
+      "latencyMs": 89.466
+    },
+    {
+      "id": "48a6cd0cefa8",
+      "truth": "medium",
+      "prediction": "medium",
+      "confidence": 0.7400690317153931,
+      "latencyMs": 149.684
+    },
+    {
+      "id": "5cd7283ac74b",
+      "truth": "medium",
+      "prediction": "medium",
+      "confidence": 0.9739851951599121,
+      "latencyMs": 90.464
+    },
+    {
+      "id": "473a9c4eb2d2",
+      "truth": "medium",
+      "prediction": "high",
+      "confidence": 0.8402485251426697,
+      "latencyMs": 147.43
+    },
+    {
+      "id": "b09a9259a748",
+      "truth": "medium",
+      "prediction": "medium",
+      "confidence": 0.9923014640808105,
+      "latencyMs": 132.314
+    },
+    {
+      "id": "dcdbd20133ea",
+      "truth": "medium",
+      "prediction": "medium",
+      "confidence": 0.838587760925293,
+      "latencyMs": 62.744
+    },
+    {
+      "id": "35ed8928e22d",
+      "truth": "high",
+      "prediction": "high",
+      "confidence": 0.848635733127594,
+      "latencyMs": 205.154
+    },
+    {
+      "id": "bbebcfc8d347",
+      "truth": "high",
+      "prediction": "high",
+      "confidence": 0.9286503195762634,
+      "latencyMs": 108.292
+    },
+    {
+      "id": "e3a4015b8c5d",
+      "truth": "high",
+      "prediction": "high",
+      "confidence": 0.9979521632194519,
+      "latencyMs": 137.761
+    },
+    {
+      "id": "16ee4989181f",
+      "truth": "high",
+      "prediction": "high",
+      "confidence": 0.7266972661018372,
+      "latencyMs": 113.919
+    },
+    {
+      "id": "4697fbc1a804",
+      "truth": "high",
+      "prediction": "high",
+      "confidence": 0.6047454476356506,
+      "latencyMs": 134.505
+    },
+    {
+      "id": "1a84017c3507",
+      "truth": "high",
+      "prediction": "high",
+      "confidence": 0.9636092782020569,
+      "latencyMs": 109.042
+    },
+    {
+      "id": "16acf78d1786",
+      "truth": "high",
+      "prediction": "high",
+      "confidence": 0.9938242435455322,
+      "latencyMs": 148.68
+    },
+    {
+      "id": "6b9701572eea",
+      "truth": "high",
+      "prediction": "high",
+      "confidence": 0.9876337051391602,
+      "latencyMs": 94.816
+    },
+    {
+      "id": "c5a2c03fd922",
+      "truth": "high",
+      "prediction": "high",
+      "confidence": 0.8781189322471619,
+      "latencyMs": 126.487
+    },
+    {
+      "id": "fdc981f058bb",
+      "truth": "high",
+      "prediction": "high",
+      "confidence": 0.8894266486167908,
+      "latencyMs": 101.682
+    },
+    {
+      "id": "32ed815d9921",
+      "truth": "high",
+      "prediction": "high",
+      "confidence": 0.8609009981155396,
+      "latencyMs": 127.426
+    },
+    {
+      "id": "41497fd38670",
+      "truth": "high",
+      "prediction": "high",
+      "confidence": 0.9552496671676636,
+      "latencyMs": 120.645
+    },
+    {
+      "id": "61f07ddc72d7",
+      "truth": "high",
+      "prediction": "high",
+      "confidence": 0.9626079201698303,
+      "latencyMs": 244.139
+    },
+    {
+      "id": "644e0bb2a32b",
+      "truth": "high",
+      "prediction": "high",
+      "confidence": 0.9958593249320984,
+      "latencyMs": 92.763
+    },
+    {
+      "id": "ba143eabb032",
+      "truth": "high",
+      "prediction": "high",
+      "confidence": 0.6755654811859131,
+      "latencyMs": 141.535
+    },
+    {
+      "id": "0c16255f1849",
+      "truth": "high",
+      "prediction": "high",
+      "confidence": 0.9109140038490295,
+      "latencyMs": 67.275
+    },
+    {
+      "id": "beeb0677db54",
+      "truth": "high",
+      "prediction": "high",
+      "confidence": 0.5223014950752258,
+      "latencyMs": 189.979
+    },
+    {
+      "id": "57d065cd94cf",
+      "truth": "high",
+      "prediction": "high",
+      "confidence": 0.9585031867027283,
+      "latencyMs": 57.075
+    },
+    {
+      "id": "eaf608416b5d",
+      "truth": "high",
+      "prediction": "low",
+      "confidence": 0.5302456617355347,
+      "latencyMs": 121.03
+    },
+    {
+      "id": "5e1fc32b9f16",
+      "truth": "high",
+      "prediction": "low",
+      "confidence": 0.3944515585899353,
+      "latencyMs": 203.409
+    },
+    {
+      "id": "73939b2ff6b1",
+      "truth": "high",
+      "prediction": "high",
+      "confidence": 0.9679035544395447,
+      "latencyMs": 188.442
+    },
+    {
+      "id": "d53d301bfa38",
+      "truth": "high",
+      "prediction": "high",
+      "confidence": 0.9223644137382507,
+      "latencyMs": 107.479
+    },
+    {
+      "id": "93b4147f7245",
+      "truth": "high",
+      "prediction": "high",
+      "confidence": 0.7338754534721375,
+      "latencyMs": 105.73
+    },
+    {
+      "id": "ea83974a76df",
+      "truth": "high",
+      "prediction": "high",
+      "confidence": 0.999289870262146,
+      "latencyMs": 102.632
+    },
+    {
+      "id": "49d6cf95492d",
+      "truth": "high",
+      "prediction": "high",
+      "confidence": 0.6832125782966614,
+      "latencyMs": 100.02
+    },
+    {
+      "id": "a437a0125627",
+      "truth": "high",
+      "prediction": "high",
+      "confidence": 0.76530921459198,
+      "latencyMs": 114.39
+    },
+    {
+      "id": "d4dfd2ca85b1",
+      "truth": "high",
+      "prediction": "high",
+      "confidence": 0.9878517389297485,
+      "latencyMs": 129.744
+    },
+    {
+      "id": "7ae281bec9d7",
+      "truth": "high",
+      "prediction": "medium",
+      "confidence": 0.9755200147628784,
+      "latencyMs": 139.232
+    },
+    {
+      "id": "45336aaf38ed",
+      "truth": "high",
+      "prediction": "medium",
+      "confidence": 0.4932614862918854,
+      "latencyMs": 118.209
+    },
+    {
+      "id": "ab74594e899c",
+      "truth": "high",
+      "prediction": "medium",
+      "confidence": 0.7043218612670898,
+      "latencyMs": 103.897
+    },
+    {
+      "id": "ccdf451ab8a5",
+      "truth": "high",
+      "prediction": "high",
+      "confidence": 0.9758654832839966,
+      "latencyMs": 106.915
+    },
+    {
+      "id": "5c416abd387e",
+      "truth": "high",
+      "prediction": "high",
+      "confidence": 0.9947288632392883,
+      "latencyMs": 92.502
+    },
+    {
+      "id": "125318b44dc5",
+      "truth": "high",
+      "prediction": "high",
+      "confidence": 0.7400004267692566,
+      "latencyMs": 121.541
+    },
+    {
+      "id": "4c3e69c1e111",
+      "truth": "high",
+      "prediction": "high",
+      "confidence": 0.9824642539024353,
+      "latencyMs": 121.693
+    },
+    {
+      "id": "04a8949bfa5e",
+      "truth": "high",
+      "prediction": "high",
+      "confidence": 0.9921903014183044,
+      "latencyMs": 79.02
+    },
+    {
+      "id": "d5a9887e6988",
+      "truth": "high",
+      "prediction": "high",
+      "confidence": 0.47171804308891296,
+      "latencyMs": 147.02
+    },
+    {
+      "id": "1a59e6d2ab41",
+      "truth": "high",
+      "prediction": "high",
+      "confidence": 0.8828091621398926,
+      "latencyMs": 169.82
+    },
+    {
+      "id": "20c3e9837c9c",
+      "truth": "high",
+      "prediction": "high",
+      "confidence": 0.7020606994628906,
+      "latencyMs": 101.797
+    },
+    {
+      "id": "fe206733ae60",
+      "truth": "high",
+      "prediction": "high",
+      "confidence": 0.9550381302833557,
+      "latencyMs": 104.613
+    },
+    {
+      "id": "b9766d4a8851",
+      "truth": "high",
+      "prediction": "high",
+      "confidence": 0.8713226318359375,
+      "latencyMs": 124.692
+    },
+    {
+      "id": "e54df5c9aeda",
+      "truth": "high",
+      "prediction": "high",
+      "confidence": 0.9524238109588623,
+      "latencyMs": 114.063
+    },
+    {
+      "id": "cc9edacaed39",
+      "truth": "high",
+      "prediction": "high",
+      "confidence": 0.4050997793674469,
+      "latencyMs": 77.958
+    },
+    {
+      "id": "33892ffaa74f",
+      "truth": "high",
+      "prediction": "high",
+      "confidence": 0.9197716116905212,
+      "latencyMs": 323.532
+    },
+    {
+      "id": "d6a4d16fea91",
+      "truth": "high",
+      "prediction": "medium",
+      "confidence": 0.45232129096984863,
+      "latencyMs": 90.441
+    },
+    {
+      "id": "f600018daaff",
+      "truth": "high",
+      "prediction": "low",
+      "confidence": 0.34364962577819824,
+      "latencyMs": 137.608
+    },
+    {
+      "id": "98020e1a76d2",
+      "truth": "high",
+      "prediction": "high",
+      "confidence": 0.8444281816482544,
+      "latencyMs": 207.852
+    },
+    {
+      "id": "e3be07653ff2",
+      "truth": "high",
+      "prediction": "high",
+      "confidence": 0.8316345810890198,
+      "latencyMs": 165.997
+    },
+    {
+      "id": "bdde10581727",
+      "truth": "high",
+      "prediction": "high",
+      "confidence": 0.9659103751182556,
+      "latencyMs": 120.451
+    },
+    {
+      "id": "230dbb5586df",
+      "truth": "high",
+      "prediction": "high",
+      "confidence": 0.807793140411377,
+      "latencyMs": 117.313
+    },
+    {
+      "id": "0c34f06791c1",
+      "truth": "high",
+      "prediction": "high",
+      "confidence": 0.950922966003418,
+      "latencyMs": 98.878
+    },
+    {
+      "id": "e0905e864642",
+      "truth": "high",
+      "prediction": "high",
+      "confidence": 0.610249936580658,
+      "latencyMs": 116.436
+    },
+    {
+      "id": "864d2099aa26",
+      "truth": "high",
+      "prediction": "high",
+      "confidence": 0.8924072980880737,
+      "latencyMs": 158.912
+    },
+    {
+      "id": "81ec883eec05",
+      "truth": "high",
+      "prediction": "medium",
+      "confidence": 0.6456254720687866,
+      "latencyMs": 108.83
+    },
+    {
+      "id": "04839cf4fc40",
+      "truth": "high",
+      "prediction": "high",
+      "confidence": 0.9961263537406921,
+      "latencyMs": 269.74
+    },
+    {
+      "id": "b3f7a11ffa2f",
+      "truth": "non_flood",
+      "prediction": "non_flood",
+      "confidence": 0.9861050248146057,
+      "latencyMs": 99.505
+    },
+    {
+      "id": "48c4c6463f33",
+      "truth": "non_flood",
+      "prediction": "non_flood",
+      "confidence": 0.5382265448570251,
+      "latencyMs": 112.963
+    },
+    {
+      "id": "737cb6f3a811",
+      "truth": "non_flood",
+      "prediction": "non_flood",
+      "confidence": 0.9528334140777588,
+      "latencyMs": 202.812
+    },
+    {
+      "id": "f23430d8016d",
+      "truth": "non_flood",
+      "prediction": "non_flood",
+      "confidence": 0.9758018255233765,
+      "latencyMs": 77.258
+    },
+    {
+      "id": "ebe87efb8f16",
+      "truth": "non_flood",
+      "prediction": "non_flood",
+      "confidence": 0.9042389988899231,
+      "latencyMs": 121.82
+    },
+    {
+      "id": "d597fa7d0e77",
+      "truth": "non_flood",
+      "prediction": "non_flood",
+      "confidence": 0.9741417169570923,
+      "latencyMs": 93.349
+    },
+    {
+      "id": "69f3cd3862f9",
+      "truth": "non_flood",
+      "prediction": "non_flood",
+      "confidence": 0.9961031675338745,
+      "latencyMs": 115.552
+    },
+    {
+      "id": "561003d90743",
+      "truth": "non_flood",
+      "prediction": "non_flood",
+      "confidence": 0.969965398311615,
+      "latencyMs": 130.047
+    },
+    {
+      "id": "af90cc3165dd",
+      "truth": "non_flood",
+      "prediction": "non_flood",
+      "confidence": 0.9287566542625427,
+      "latencyMs": 98.408
+    },
+    {
+      "id": "0a7961c72739",
+      "truth": "non_flood",
+      "prediction": "non_flood",
+      "confidence": 0.980795681476593,
+      "latencyMs": 240.386
+    },
+    {
+      "id": "a463431201e8",
+      "truth": "non_flood",
+      "prediction": "low",
+      "confidence": 0.8246386647224426,
+      "latencyMs": 105.851
+    },
+    {
+      "id": "be5eba606aad",
+      "truth": "non_flood",
+      "prediction": "non_flood",
+      "confidence": 0.9812384843826294,
+      "latencyMs": 115.56
+    },
+    {
+      "id": "f9e9505c6b76",
+      "truth": "non_flood",
+      "prediction": "non_flood",
+      "confidence": 0.9381909370422363,
+      "latencyMs": 84.04
+    },
+    {
+      "id": "295b090d811b",
+      "truth": "non_flood",
+      "prediction": "non_flood",
+      "confidence": 0.9701526165008545,
+      "latencyMs": 88.685
+    },
+    {
+      "id": "de9114a822e6",
+      "truth": "non_flood",
+      "prediction": "non_flood",
+      "confidence": 0.9949280023574829,
+      "latencyMs": 69.849
+    },
+    {
+      "id": "983606685329",
+      "truth": "non_flood",
+      "prediction": "non_flood",
+      "confidence": 0.9214387536048889,
+      "latencyMs": 58.315
+    },
+    {
+      "id": "5c26d3afcbf7",
+      "truth": "non_flood",
+      "prediction": "low",
+      "confidence": 0.5347486138343811,
+      "latencyMs": 56.334
+    },
+    {
+      "id": "2e78c705eaa1",
+      "truth": "non_flood",
+      "prediction": "non_flood",
+      "confidence": 0.8869302868843079,
+      "latencyMs": 48.146
+    },
+    {
+      "id": "4ef3d91cc6b3",
+      "truth": "non_flood",
+      "prediction": "non_flood",
+      "confidence": 0.796563982963562,
+      "latencyMs": 76.495
+    },
+    {
+      "id": "ebad4f4a907b",
+      "truth": "non_flood",
+      "prediction": "non_flood",
+      "confidence": 0.9871783256530762,
+      "latencyMs": 59.305
+    },
+    {
+      "id": "a07b2894a2bf",
+      "truth": "non_flood",
+      "prediction": "non_flood",
+      "confidence": 0.9923694133758545,
+      "latencyMs": 79.964
+    },
+    {
+      "id": "b12d52cd3b56",
+      "truth": "non_flood",
+      "prediction": "non_flood",
+      "confidence": 0.9907240271568298,
+      "latencyMs": 43.428
+    },
+    {
+      "id": "37802c6ef222",
+      "truth": "non_flood",
+      "prediction": "non_flood",
+      "confidence": 0.7015659213066101,
+      "latencyMs": 79.291
+    },
+    {
+      "id": "149e5efde86d",
+      "truth": "non_flood",
+      "prediction": "non_flood",
+      "confidence": 0.9413601160049438,
+      "latencyMs": 62.04
+    },
+    {
+      "id": "d8c67b859355",
+      "truth": "non_flood",
+      "prediction": "non_flood",
+      "confidence": 0.9312993288040161,
+      "latencyMs": 53.935
+    },
+    {
+      "id": "6978372dca7e",
+      "truth": "non_flood",
+      "prediction": "non_flood",
+      "confidence": 0.9898423552513123,
+      "latencyMs": 62.43
+    },
+    {
+      "id": "f3e129a7d1af",
+      "truth": "non_flood",
+      "prediction": "non_flood",
+      "confidence": 0.8737567067146301,
+      "latencyMs": 45.248
+    },
+    {
+      "id": "aae563851ded",
+      "truth": "non_flood",
+      "prediction": "non_flood",
+      "confidence": 0.9474764466285706,
+      "latencyMs": 63.292
+    },
+    {
+      "id": "3ca8b0ba497c",
+      "truth": "non_flood",
+      "prediction": "non_flood",
+      "confidence": 0.9970489144325256,
+      "latencyMs": 64.301
+    },
+    {
+      "id": "1d23e37da560",
+      "truth": "non_flood",
+      "prediction": "non_flood",
+      "confidence": 0.9786152839660645,
+      "latencyMs": 71.914
+    },
+    {
+      "id": "22da4848cb56",
+      "truth": "non_flood",
+      "prediction": "non_flood",
+      "confidence": 0.9778771996498108,
+      "latencyMs": 61.283
+    },
+    {
+      "id": "8cc10c473bf2",
+      "truth": "non_flood",
+      "prediction": "non_flood",
+      "confidence": 0.9903475046157837,
+      "latencyMs": 72.966
+    },
+    {
+      "id": "ebf6b46c99ce",
+      "truth": "non_flood",
+      "prediction": "non_flood",
+      "confidence": 0.8735479712486267,
+      "latencyMs": 72.877
+    },
+    {
+      "id": "79c2729a3688",
+      "truth": "non_flood",
+      "prediction": "non_flood",
+      "confidence": 0.9768658876419067,
+      "latencyMs": 66.54
+    },
+    {
+      "id": "935e9ff947cc",
+      "truth": "non_flood",
+      "prediction": "low",
+      "confidence": 0.7482309937477112,
+      "latencyMs": 73.095
+    },
+    {
+      "id": "d3f6487d192e",
+      "truth": "non_flood",
+      "prediction": "non_flood",
+      "confidence": 0.9859809875488281,
+      "latencyMs": 78.997
+    },
+    {
+      "id": "3269ca223c58",
+      "truth": "non_flood",
+      "prediction": "non_flood",
+      "confidence": 0.9932029247283936,
+      "latencyMs": 84.344
+    },
+    {
+      "id": "ca94b67cc068",
+      "truth": "non_flood",
+      "prediction": "non_flood",
+      "confidence": 0.9827671051025391,
+      "latencyMs": 229.533
+    },
+    {
+      "id": "4bd77d8171be",
+      "truth": "non_flood",
+      "prediction": "non_flood",
+      "confidence": 0.8931501507759094,
+      "latencyMs": 90.852
+    },
+    {
+      "id": "fd43eda93354",
+      "truth": "non_flood",
+      "prediction": "non_flood",
+      "confidence": 0.8834988474845886,
+      "latencyMs": 103.638
+    },
+    {
+      "id": "82b7ced3061c",
+      "truth": "non_flood",
+      "prediction": "non_flood",
+      "confidence": 0.990872323513031,
+      "latencyMs": 96.781
+    },
+    {
+      "id": "f07a31492723",
+      "truth": "non_flood",
+      "prediction": "non_flood",
+      "confidence": 0.9965217113494873,
+      "latencyMs": 89.617
+    },
+    {
+      "id": "74382153f615",
+      "truth": "non_flood",
+      "prediction": "non_flood",
+      "confidence": 0.9711235761642456,
+      "latencyMs": 64.592
+    },
+    {
+      "id": "952b62785d01",
+      "truth": "non_flood",
+      "prediction": "non_flood",
+      "confidence": 0.5095627903938293,
+      "latencyMs": 124.241
+    },
+    {
+      "id": "808efe0c53d5",
+      "truth": "non_flood",
+      "prediction": "non_flood",
+      "confidence": 0.9805102348327637,
+      "latencyMs": 100.014
+    },
+    {
+      "id": "9591baf11726",
+      "truth": "non_flood",
+      "prediction": "non_flood",
+      "confidence": 0.9759290814399719,
+      "latencyMs": 105.287
+    },
+    {
+      "id": "eb0b7589f26c",
+      "truth": "non_flood",
+      "prediction": "non_flood",
+      "confidence": 0.955615758895874,
+      "latencyMs": 189.721
+    },
+    {
+      "id": "5a7fbaa8d0ec",
+      "truth": "non_flood",
+      "prediction": "non_flood",
+      "confidence": 0.9388849139213562,
+      "latencyMs": 90.58
+    },
+    {
+      "id": "2147177045ae",
+      "truth": "non_flood",
+      "prediction": "non_flood",
+      "confidence": 0.9917770624160767,
+      "latencyMs": 75.986
+    },
+    {
+      "id": "6b9539a42066",
+      "truth": "non_flood",
+      "prediction": "non_flood",
+      "confidence": 0.9920182824134827,
+      "latencyMs": 80.291
+    },
+    {
+      "id": "4f79940fc32c",
+      "truth": "non_flood",
+      "prediction": "non_flood",
+      "confidence": 0.7342183589935303,
+      "latencyMs": 74.241
+    },
+    {
+      "id": "fcd509ad81f4",
+      "truth": "non_flood",
+      "prediction": "non_flood",
+      "confidence": 0.9961138963699341,
+      "latencyMs": 85.818
+    },
+    {
+      "id": "f9582163f13d",
+      "truth": "non_flood",
+      "prediction": "non_flood",
+      "confidence": 0.9904954433441162,
+      "latencyMs": 55.133
+    },
+    {
+      "id": "290f6a6b9a4d",
+      "truth": "non_flood",
+      "prediction": "non_flood",
+      "confidence": 0.9312645792961121,
+      "latencyMs": 131.12
+    },
+    {
+      "id": "da9fdc34b556",
+      "truth": "non_flood",
+      "prediction": "non_flood",
+      "confidence": 0.8367578387260437,
+      "latencyMs": 77.863
+    },
+    {
+      "id": "303ce7eee47c",
+      "truth": "non_flood",
+      "prediction": "non_flood",
+      "confidence": 0.837708055973053,
+      "latencyMs": 107.845
+    },
+    {
+      "id": "d6da728421b1",
+      "truth": "non_flood",
+      "prediction": "non_flood",
+      "confidence": 0.8220676183700562,
+      "latencyMs": 54.274
+    },
+    {
+      "id": "abeb1fa15753",
+      "truth": "non_flood",
+      "prediction": "non_flood",
+      "confidence": 0.9782892465591431,
+      "latencyMs": 50.243
+    },
+    {
+      "id": "5440a9e5761d",
+      "truth": "non_flood",
+      "prediction": "non_flood",
+      "confidence": 0.9388161897659302,
+      "latencyMs": 75.006
+    },
+    {
+      "id": "d914652dbe17",
+      "truth": "non_flood",
+      "prediction": "non_flood",
+      "confidence": 0.9831286072731018,
+      "latencyMs": 75.865
+    },
+    {
+      "id": "ac731a0fac69",
+      "truth": "non_flood",
+      "prediction": "low",
+      "confidence": 0.4533783197402954,
+      "latencyMs": 64.488
+    },
+    {
+      "id": "4357f9357205",
+      "truth": "non_flood",
+      "prediction": "non_flood",
+      "confidence": 0.983637273311615,
+      "latencyMs": 65.181
+    },
+    {
+      "id": "7ffadaadf204",
+      "truth": "non_flood",
+      "prediction": "low",
+      "confidence": 0.7950747609138489,
+      "latencyMs": 49.228
+    },
+    {
+      "id": "2982738ae074",
+      "truth": "non_flood",
+      "prediction": "non_flood",
+      "confidence": 0.9874764084815979,
+      "latencyMs": 62.997
+    },
+    {
+      "id": "a7b9fc237f31",
+      "truth": "non_flood",
+      "prediction": "non_flood",
+      "confidence": 0.992408275604248,
+      "latencyMs": 155.637
+    },
+    {
+      "id": "0f0378d7e2c9",
+      "truth": "non_flood",
+      "prediction": "non_flood",
+      "confidence": 0.9030374884605408,
+      "latencyMs": 632.254
+    },
+    {
+      "id": "afbfaf2667cc",
+      "truth": "non_flood",
+      "prediction": "non_flood",
+      "confidence": 0.9881558418273926,
+      "latencyMs": 80.664
+    },
+    {
+      "id": "b5f8e1189c06",
+      "truth": "non_flood",
+      "prediction": "non_flood",
+      "confidence": 0.8411219120025635,
+      "latencyMs": 56.476
+    },
+    {
+      "id": "ecb957508ec9",
+      "truth": "non_flood",
+      "prediction": "non_flood",
+      "confidence": 0.9319679141044617,
+      "latencyMs": 50.053
+    },
+    {
+      "id": "c4012ecb7d19",
+      "truth": "non_flood",
+      "prediction": "non_flood",
+      "confidence": 0.9776712656021118,
+      "latencyMs": 55.81
+    },
+    {
+      "id": "88cea5da2d9b",
+      "truth": "non_flood",
+      "prediction": "non_flood",
+      "confidence": 0.9876954555511475,
+      "latencyMs": 44.04
+    },
+    {
+      "id": "88db0501ebeb",
+      "truth": "non_flood",
+      "prediction": "non_flood",
+      "confidence": 0.9644067883491516,
+      "latencyMs": 59.338
+    },
+    {
+      "id": "6fc9e9b90821",
+      "truth": "non_flood",
+      "prediction": "non_flood",
+      "confidence": 0.949633002281189,
+      "latencyMs": 64.847
+    },
+    {
+      "id": "31c81ebaeb3a",
+      "truth": "non_flood",
+      "prediction": "non_flood",
+      "confidence": 0.9603363275527954,
+      "latencyMs": 136.28
+    },
+    {
+      "id": "0d4fc68481b2",
+      "truth": "non_flood",
+      "prediction": "non_flood",
+      "confidence": 0.9849510192871094,
+      "latencyMs": 42.241
+    },
+    {
+      "id": "1cd7af6fdd3c",
+      "truth": "non_flood",
+      "prediction": "non_flood",
+      "confidence": 0.37333500385284424,
+      "latencyMs": 46.212
+    },
+    {
+      "id": "bd0c0df8ee3f",
+      "truth": "non_flood",
+      "prediction": "non_flood",
+      "confidence": 0.7287451028823853,
+      "latencyMs": 64.063
+    },
+    {
+      "id": "91bb1e20db4c",
+      "truth": "non_flood",
+      "prediction": "non_flood",
+      "confidence": 0.9935703277587891,
+      "latencyMs": 59.707
+    },
+    {
+      "id": "2bad6e04fb1f",
+      "truth": "non_flood",
+      "prediction": "non_flood",
+      "confidence": 0.9572092890739441,
+      "latencyMs": 49.246
+    },
+    {
+      "id": "be0cdb54ec8e",
+      "truth": "non_flood",
+      "prediction": "non_flood",
+      "confidence": 0.971487820148468,
+      "latencyMs": 54.412
+    },
+    {
+      "id": "108b381855f9",
+      "truth": "non_flood",
+      "prediction": "non_flood",
+      "confidence": 0.9258778691291809,
+      "latencyMs": 45.486
+    },
+    {
+      "id": "69149bd9be4c",
+      "truth": "non_flood",
+      "prediction": "non_flood",
+      "confidence": 0.758056104183197,
+      "latencyMs": 66.903
+    },
+    {
+      "id": "4d8a9592402a",
+      "truth": "non_flood",
+      "prediction": "non_flood",
+      "confidence": 0.9735773205757141,
+      "latencyMs": 93.114
+    },
+    {
+      "id": "f191d25f3535",
+      "truth": "non_flood",
+      "prediction": "low",
+      "confidence": 0.6801310181617737,
+      "latencyMs": 82.894
+    },
+    {
+      "id": "89811ee296ec",
+      "truth": "non_flood",
+      "prediction": "non_flood",
+      "confidence": 0.9623450636863708,
+      "latencyMs": 66.331
+    },
+    {
+      "id": "62d8f91fde67",
+      "truth": "non_flood",
+      "prediction": "non_flood",
+      "confidence": 0.9222003221511841,
+      "latencyMs": 57.071
+    }
+  ]
+}
