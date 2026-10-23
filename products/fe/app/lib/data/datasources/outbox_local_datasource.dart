@@ -21,6 +21,7 @@ class OutboxLocalDataSource {
   static const _sequenceKey = '_meta:sequence_number';
   static const _serverIdKey = '_meta:server_id';
   static const _serverUrlKey = '_meta:server_url';
+  static const _attachmentCursorKey = '_meta:attachment_cursor';
 
   final Uuid _uuid;
   final Random _random;
@@ -88,6 +89,12 @@ class OutboxLocalDataSource {
 
   String? get serverId => _box!.get(_serverIdKey) as String?;
   String? get serverUrl => _box!.get(_serverUrlKey) as String?;
+
+  String? get lastAttachmentRecordId =>
+      _box!.get(_attachmentCursorKey) as String?;
+
+  Future<void> rememberAttachmentAttempt(String recordId) =>
+      _box!.put(_attachmentCursorKey, recordId);
 
   Future<void> saveServer(String id, String url) =>
       _box!.putAll({_serverIdKey: id, _serverUrlKey: url});

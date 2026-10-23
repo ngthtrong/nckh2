@@ -6,6 +6,17 @@ plugins {
     id("dev.flutter.flutter-gradle-plugin")
 }
 
+val supportedTargetPlatforms = mapOf(
+    "android-arm64" to "arm64-v8a",
+    "android-x64" to "x86_64",
+)
+val targetPlatforms = (project.findProperty("target-platform") as? String)
+    ?.split(",") ?: supportedTargetPlatforms.keys.toList()
+require(targetPlatforms.all { it in supportedTargetPlatforms }) {
+    "ExecuTorch supports only ARM64/x86_64. Build with " +
+        "--target-platform android-arm64 or --target-platform android-arm64,android-x64."
+}
+
 val allowInsecureLan = (project.findProperty("dart-defines") as? String)
     ?.split(",")
     ?.map { String(Base64.getDecoder().decode(it), Charsets.UTF_8) }
@@ -33,6 +44,13 @@ android {
         manifestPlaceholders["networkSecurityConfig"] = if (allowInsecureLan)
             "@xml/network_security_config_lan" else "@xml/network_security_config"
         manifestPlaceholders["appLabel"] = "Cứu hộ khẩn cấp"
+        // NDK filters conflict with Flutter's ABI splits, so apply only to fat APKs/bundles.
+        if (project.findProperty("split-per-abi")?.toString()?.toBoolean() != true) {
+            ndk {
+                abiFilters.clear()
+                abiFilters.addAll(targetPlatforms.map { supportedTargetPlatforms.getValue(it) })
+            }
+        }
     }
 
     buildTypes {

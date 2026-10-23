@@ -65,7 +65,7 @@ class _RegisterScreenState extends State<RegisterScreen> {
       setState(() => _errorMessage = 'Mật khẩu xác nhận không khớp.');
       return false;
     }
-    if (!RegExp(r'^[0-9]{9,11}$').hasMatch(phone.replaceAll(' ', ''))) {
+    if (User.normalizePhone(phone) == null) {
       setState(() => _errorMessage = 'Số điện thoại không hợp lệ (9-11 chữ số).');
       return false;
     }
@@ -83,7 +83,7 @@ class _RegisterScreenState extends State<RegisterScreen> {
     final newUser = User(
       username: _usernameController.text.trim(),
       password: _passwordController.text,
-      phone: _phoneController.text.trim(),
+      phone: User.normalizePhone(_phoneController.text)!,
       address: _addressController.text.trim(),
     );
 

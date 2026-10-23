@@ -1,3 +1,4 @@
+import 'dart:async';
 import 'dart:io';
 import 'dart:typed_data';
 
@@ -12,6 +13,8 @@ import 'package:app/data/models/rescue_record_payload.dart';
 import 'package:app/data/repositories/rescue_repository_impl.dart';
 import 'package:app/domain/entities/rescue_record.dart';
 import 'package:app/domain/entities/sms_delivery.dart';
+import 'package:app/domain/entities/send_mode.dart';
+import 'package:app/domain/usecases/deliver_record.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:hive_ce_flutter/hive_flutter.dart';
 
@@ -91,6 +94,69 @@ class _FakeSender extends SenderRemoteDataSource {
   }
 }
 
+class _HoldingSender extends _FakeSender {
+  final started = Completer<void>();
+  final release = Completer<void>();
+  final imageIds = <String>[];
+  var smsCalls = 0;
+
+  @override
+  Future<UploadResult> upload(
+    RescueRecord rec,
+    Uint8List? image, {
+    required String clientId,
+  }) async {
+    imageIds.add(rec.id);
+    if (rec.id == 'old-image') {
+      if (!started.isCompleted) started.complete();
+      await release.future;
+    }
+    return super.upload(rec, image, clientId: clientId);
+  }
+
+  @override
+  Future<SmsResult> sendSms(RescueRecord record) async {
+    smsCalls++;
+    return const SmsResult(SmsStatus.sent);
+  }
+}
+
+class _HoldingStatusSync extends _FakeSync {
+  _HoldingStatusSync() : super([]);
+  final started = Completer<void>();
+  final release = Completer<void>();
+
+  @override
+  Future<Map<String, String>> fetchStatuses(List<String> ids) async {
+    started.complete();
+    await release.future;
+    return super.fetchStatuses(ids);
+  }
+}
+
+class _SlowFirstImageSender extends _FakeSender {
+  final imageIds = <String>[];
+
+  @override
+  Future<UploadResult> upload(
+    RescueRecord rec,
+    Uint8List? image, {
+    required String clientId,
+  }) async {
+    imageIds.add(rec.id);
+    if (imageIds.length == 1) {
+      await Future<void>.delayed(const Duration(milliseconds: 20100));
+    }
+    return (
+      ok: rec.id != 'large-image',
+      bytesSent: image?.length ?? 0,
+      durationMs: 1,
+      status: rec.id == 'large-image' ? 503 : 201,
+      permanent: false,
+    );
+  }
+}
+
 RescueRecord _record(String id, {String? imagePath}) => RescueRecord(
   id: id,
   createdAt: DateTime.utc(2026, 9, 29),
@@ -124,6 +190,139 @@ void main() {
     senderDataSource: SenderRemoteDataSource(),
     outboxDataSource: outbox,
     syncDataSource: sync,
+  );
+
+  for (final mode in [SendMode.textOnly, SendMode.smsFallback]) {
+    test(
+      'new SOS $mode finishes while an older image upload is blocked',
+      () async {
+        final sender = _HoldingSender();
+        final sync = _FakeSync([]);
+        final r = RescueRepositoryImpl(
+          localDataSource: records,
+          senderDataSource: sender,
+          outboxDataSource: outbox,
+          syncDataSource: sync,
+        );
+        final image = File('${dir.path}/old.jpg');
+        await image.writeAsBytes([0xff, 0xd8, 0xff]);
+        await records.saveRecord(
+          _record(
+            'old-image',
+            imagePath: image.path,
+          ).copyWith(metadataSynced: true, sendMode: 'fullImage'),
+        );
+        final syncing = r.syncPendingRecords();
+        await sender.started.future.timeout(const Duration(seconds: 2));
+        try {
+          final sent = await deliverRecord(
+            r,
+            _record('sos-new'),
+            mode,
+          ).timeout(const Duration(seconds: 2));
+          expect(sender.release.isCompleted, isFalse);
+          if (mode == SendMode.smsFallback) {
+            expect(sent.smsStatus, SmsStatus.sent);
+            expect(sender.smsCalls, 1);
+            expect(outbox.messageForRecord(sent.id), isNotNull);
+          } else {
+            expect(sent.metadataSynced, isTrue);
+            expect(sent.synced, isTrue);
+          }
+        } finally {
+          sender.release.complete();
+          await syncing;
+        }
+        expect(records.getRecord('old-image')!.synced, isTrue);
+      },
+    );
+  }
+
+  test(
+    'slow status response does not block a new SOS or overwrite its ACK',
+    () async {
+      final sync = _HoldingStatusSync();
+      final r = repo(sync);
+      await records.saveRecord(
+        _record('old-report').copyWith(metadataSynced: true, synced: true),
+      );
+      final polling = r.refreshStatuses();
+      await sync.started.future.timeout(const Duration(seconds: 2));
+      try {
+        final sent = await deliverRecord(
+          r,
+          _record('sos-new'),
+          SendMode.textOnly,
+        ).timeout(const Duration(seconds: 2));
+        expect(sent.synced, isTrue);
+      } finally {
+        sync.release.complete();
+        await polling;
+      }
+      expect(records.getRecord('sos-new')!.synced, isTrue);
+      expect(records.getRecord('old-report')!.status, 'dispatched');
+    },
+  );
+
+  test('concurrent sends and sync share the same attachment upload', () async {
+    final sender = _HoldingSender();
+    final r = RescueRepositoryImpl(
+      localDataSource: records,
+      senderDataSource: sender,
+      outboxDataSource: outbox,
+      syncDataSource: _FakeSync([]),
+    );
+    final image = File('${dir.path}/single-upload.jpg');
+    await image.writeAsBytes([0xff, 0xd8, 0xff]);
+    final record = _record(
+      'old-image',
+      imagePath: image.path,
+    ).copyWith(sendMode: 'fullImage');
+    await records.saveRecord(record);
+    final first = r.sendRecord(record);
+    await sender.started.future.timeout(const Duration(seconds: 2));
+    final second = r.sendRecord(record);
+    final syncing = r.syncPendingRecords();
+    await Future<void>.delayed(const Duration(milliseconds: 50));
+    sender.release.complete();
+    await Future.wait([first, second, syncing]);
+    expect(sender.imageIds, ['old-image']);
+    expect(records.getRecord(record.id)!.synced, isTrue);
+  });
+
+  test(
+    'slow failed image rotates behind older images after repository restart',
+    () async {
+      final sender = _SlowFirstImageSender();
+      RescueRepositoryImpl createRepo() => RescueRepositoryImpl(
+        localDataSource: records,
+        senderDataSource: sender,
+        outboxDataSource: outbox,
+        syncDataSource: _FakeSync([]),
+      );
+      final image = File('${dir.path}/rotation.jpg');
+      await image.writeAsBytes([0xff, 0xd8, 0xff]);
+      final old = _record(
+        'small-image',
+        imagePath: image.path,
+      ).copyWith(metadataSynced: true, sendMode: 'fullImage');
+      final recent = old.copyWith(
+        id: 'large-image',
+        createdAt: old.createdAt.add(const Duration(days: 1)),
+      );
+      await records.saveRecord(old);
+      await records.saveRecord(recent);
+      await createRepo().syncPendingRecords();
+      expect(sender.imageIds, ['large-image']);
+      expect(outbox.lastAttachmentRecordId, 'large-image');
+      await Hive.close();
+      await records.init(hivePath: dir.path);
+      await outbox.init(hivePath: dir.path);
+      await createRepo().syncPendingRecords();
+      expect(sender.imageIds, ['large-image', 'small-image', 'large-image']);
+      expect(records.getRecord('small-image')!.synced, isTrue);
+      expect(records.getRecord('large-image')!.synced, isFalse);
+    },
   );
 
   test('contact phone survives restart, updates and offline queue', () async {

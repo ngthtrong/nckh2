@@ -1,4 +1,9 @@
 class User {
+  static String? normalizePhone(String value) {
+    final phone = value.trim().replaceAll(' ', '');
+    return RegExp(r'^[0-9]{9,11}$').hasMatch(phone) ? phone : null;
+  }
+
   final String username;
   final String phone;
   final String address;
