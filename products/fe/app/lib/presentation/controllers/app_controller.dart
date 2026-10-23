@@ -8,7 +8,6 @@ import 'package:flutter/services.dart';
 import 'package:flutter/widgets.dart';
 import 'package:geolocator/geolocator.dart';
 import 'package:image_picker/image_picker.dart';
-import 'package:permission_handler/permission_handler.dart';
 
 import '../../config.dart';
 import '../../data/datasources/user_local_datasource.dart';
@@ -87,6 +86,7 @@ class AppController extends ChangeNotifier with WidgetsBindingObserver {
   // Không có tọa độ mặc định: gửi tọa độ giả sẽ dẫn đội cứu hộ tới sai chỗ.
   double? currentLat;
   double? currentLng;
+  double? currentLocationAccuracyMeters;
   int _locationRequest = 0;
 
   RescueRecord? lastSubmittedPost;
@@ -369,12 +369,7 @@ class AppController extends ChangeNotifier with WidgetsBindingObserver {
       final previousNetwork = networkLabel;
       networkLabel = await networkRepository.getCurrentNetworkType();
       notifyListeners();
-      final hasNet = results.any(
-        (e) =>
-            e == ConnectivityResult.wifi ||
-            e == ConnectivityResult.mobile ||
-            e == ConnectivityResult.ethernet,
-      );
+      final hasNet = results.any((result) => result != ConnectivityResult.none);
       _scheduleStatusPoll();
       _scheduleRetry();
       if (hasNet) {
@@ -518,15 +513,19 @@ class AppController extends ChangeNotifier with WidgetsBindingObserver {
     Duration timeLimit = const Duration(seconds: 5),
   }) async {
     final request = ++_locationRequest;
-    if (requestPermission) {
-      try {
-        await Permission.locationWhenInUse.request();
-      } catch (e) {
-        // permission_handler không hỗ trợ web/desktop; Geolocator tự xin quyền ở đó.
-        debugPrint('Bỏ qua permission_handler cho vị trí: $e');
-      }
-    }
     try {
+      var permission = await Geolocator.checkPermission();
+      if (permission == LocationPermission.denied && requestPermission) {
+        permission = await Geolocator.requestPermission();
+      }
+      if (permission == LocationPermission.denied ||
+          permission == LocationPermission.deniedForever) {
+        throw PermissionDeniedException(
+          permission == LocationPermission.deniedForever
+              ? 'Quyền vị trí bị chặn · mở Cài đặt > Vị trí để cấp lại'
+              : 'Chưa cấp quyền vị trí · vào Cài đặt > Vị trí để cấp quyền',
+        );
+      }
       final pos = await Geolocator.getCurrentPosition(
         locationSettings: LocationSettings(
           accuracy: LocationAccuracy.high,
@@ -536,16 +535,50 @@ class AppController extends ChangeNotifier with WidgetsBindingObserver {
       if (request != _locationRequest || _disposed) return;
       currentLat = pos.latitude;
       currentLng = pos.longitude;
-      locationLabel =
-          '${pos.latitude.toStringAsFixed(4)}° N, ${pos.longitude.toStringAsFixed(4)}° E · GPS';
+      currentLocationAccuracyMeters = pos.accuracy.isFinite && pos.accuracy > 0
+          ? pos.accuracy
+          : null;
+      locationLabel = formatReportLocation(
+        currentLat,
+        currentLng,
+        currentLocationAccuracyMeters,
+      );
     } catch (e) {
       if (request != _locationRequest || _disposed) return;
       debugPrint('Không lấy được GPS: $e');
       currentLat = null;
       currentLng = null;
-      locationLabel = 'Chưa có GPS · trung tâm sẽ xác minh vị trí';
+      currentLocationAccuracyMeters = null;
+      locationLabel = e is PermissionDeniedException
+          ? e.message ?? 'Chưa cấp quyền vị trí'
+          : e is LocationServiceDisabledException
+          ? 'Dịch vụ vị trí đang tắt · vào Cài đặt > Vị trí để bật'
+          : 'Chưa có GPS · trung tâm sẽ xác minh vị trí';
     }
     notifyListeners();
+  }
+
+  Future<void> recoverLocation() async {
+    if (isBusy) return;
+    try {
+      var permission = await Geolocator.checkPermission();
+      // Android may only reveal a permanent denial after a permission request.
+      if (permission == LocationPermission.denied) {
+        permission = await Geolocator.requestPermission();
+      }
+      if (permission == LocationPermission.deniedForever) {
+        await Geolocator.openAppSettings();
+        return;
+      }
+      if (permission != LocationPermission.denied &&
+          !await Geolocator.isLocationServiceEnabled()) {
+        await Geolocator.openLocationSettings();
+        return;
+      }
+      await refreshLocation();
+    } catch (error) {
+      debugPrint('Không mở được cài đặt vị trí: $error');
+    }
   }
 
   @override
@@ -574,7 +607,11 @@ class AppController extends ChangeNotifier with WidgetsBindingObserver {
         sendMode: SendMode.queuedOffline,
         locate: () async {
           await refreshLocation(timeLimit: const Duration(seconds: 3));
-          return (lat: currentLat, lng: currentLng);
+          return (
+            lat: currentLat,
+            lng: currentLng,
+            accuracyMeters: currentLocationAccuracyMeters,
+          );
         },
         chooseMode: () => _decideSendMode(hasImage: false, confidence: 0),
       );
@@ -632,6 +669,7 @@ class AppController extends ChangeNotifier with WidgetsBindingObserver {
         contactPhone: currentUser?.phone,
         lat: currentLat,
         lng: currentLng,
+        locationAccuracyMeters: currentLocationAccuracyMeters,
         imagePath: imagePath,
         images: imagePath != null ? [imagePath] : [],
         aiTags: aiTags,

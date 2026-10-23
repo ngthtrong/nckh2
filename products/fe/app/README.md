@@ -95,6 +95,8 @@ flutter install --flavor user --release -d DEVICE_ID
 Sau khi cài:
 
 1. Cấp quyền vị trí; mở form tạo báo cáo để PTE bắt đầu nạp bất đồng bộ.
+   Nếu đã từ chối quyền hoặc tắt dịch vụ vị trí, vào **Cài đặt > Vị trí** để
+   xin lại quyền/mở cài đặt hệ thống. SOS vẫn gửi được khi chưa có GPS.
 2. Gửi một báo cáo thử và kiểm tra báo cáo xuất hiện trên dashboard server.
 3. Tắt Wi-Fi/data, gửi thêm báo cáo; xác nhận bản ghi nằm trong hàng đợi.
 4. Bật lại Wi-Fi; xác nhận báo cáo được đồng bộ và hàng đợi giảm.
@@ -130,6 +132,11 @@ có hiệu lực khi mở lại app. Sau 30 giây có thể tạo SOS mới. G�
 cùng mã báo cáo; WorkManager không tự gửi SMS. Wi-Fi có kết nối nhưng server không
 nhận được metadata sẽ thử SMS một lần; lỗi từ chối vĩnh viễn hoặc metadata đã ACK
 không kích hoạt SMS. Nội dung SMS có dấu hiệu nguy cấp và khả năng di chuyển.
+Sai số vị trí được lưu cùng báo cáo và gửi qua data (`locationAccuracyMeters`)
+hoặc SMS (`acc`, đơn vị mét, làm tròn lên). App hiển thị sai số và cảnh báo
+**vị trí gần đúng** khi lớn hơn 100 m; không tự coi vị trí đó là GPS chính xác.
+Bluetooth, VPN và các kết nối khác cũng được thử gửi data; khả năng tới được
+backend được xác định bằng yêu cầu thực tế thay vì chỉ dựa vào loại kết nối.
 Xếp hàng, gửi metadata và SMS của SOS không phải chờ ảnh của báo cáo khác hoặc
 lượt hỏi trạng thái đang chạy. Các yêu cầu upload cùng một báo cáo dùng chung
 một lượt upload để tránh gửi ảnh trùng.

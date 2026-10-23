@@ -7,6 +7,14 @@ import 'package:flutter_test/flutter_test.dart';
 
 class _Controller extends Fake implements AppController {
   User? saved;
+  int locationRequests = 0;
+  @override
+  String get locationLabel => 'Chưa cấp quyền vị trí';
+  @override
+  Future<void> recoverLocation() async {
+    locationRequests++;
+  }
+
   @override
   User get currentUser =>
       const User(username: 'user', phone: '0901234567', address: 'Nhà A');
@@ -34,6 +42,22 @@ class _Controller extends Fake implements AppController {
 }
 
 void main() {
+  testWidgets('settings offers a location permission recovery action', (
+    tester,
+  ) async {
+    final controller = _Controller();
+    await tester.pumpWidget(
+      MaterialApp(
+        home: Scaffold(body: SettingsScreen(controller: controller)),
+      ),
+    );
+    final location = find.text('Vị trí');
+    await tester.ensureVisible(location);
+    await tester.tap(location);
+    await tester.pump();
+    expect(controller.locationRequests, 1);
+    expect(tester.takeException(), isNull);
+  });
   test(
     'phone normalization accepts only 9 to 11 digits and removes spaces',
     () {

@@ -502,6 +502,23 @@ class DashboardApiTest(unittest.TestCase):
         self.assertEqual(merged["contactPhone"], "+84900000001")
         self.assertEqual([e["kind"] for e in storage.get_report_events(rid)], ["received"])
 
+    def test_location_accuracy_survives_sms_and_sync(self):
+        main.SMS_GATEWAY_TOKEN = "gw-secret"
+        rid = "sos-location-accuracy"
+        response = self.sms({"from": "0900", "text": f"SOS|id:{rid}|pos:10,106|trapped:1|injured:0|acc:2000"})
+        self.assertEqual(response.status_code, 201, response.text)
+        self.assertEqual(storage.get_report_by_id(rid)["payload"]["locationAccuracyMeters"], 2000)
+        result = self.sync(_message(1, "CREATE_RESCUE_RECORD", _report(rid, lat=10, lng=106, locationAccuracyMeters=2000)))
+        self.assertEqual(result[0]["status"], "accepted")
+        self.assertEqual(storage.get_report_by_id(rid)["payload"]["locationAccuracyMeters"], 2000)
+
+    def test_invalid_location_accuracy_is_rejected(self):
+        for value in (-1, 0, True, "wide", float("inf"), float("nan")):
+            with self.subTest(value=value), self.assertRaises(storage.StatusUpdateError):
+                storage.validate_report_payload(_report("invalid-accuracy", locationAccuracyMeters=value))
+        with self.assertRaises(storage.StatusUpdateError):
+            storage.validate_report_payload(_report("missing-coordinates", lat=None, lng=None, locationAccuracyMeters=10))
+
     def test_free_text_sms_goes_to_review(self):
         main.SMS_GATEWAY_TOKEN = "gw-secret"
         res = self.client.post("/api/sms/inbound?token=gw-secret",

@@ -796,6 +796,14 @@ class _SettingsScreenState extends State<SettingsScreen> {
 
                       _buildSectionLabel('KẾT NỐI SERVER'),
                       ListTile(
+                        leading: const Icon(Icons.location_on_outlined),
+                        title: const Text('Vị trí'),
+                        subtitle: Text(
+                          '${c.locationLabel}\nChạm để cấp quyền hoặc bật vị trí',
+                        ),
+                        onTap: c.recoverLocation,
+                      ),
+                      ListTile(
                         contentPadding: const EdgeInsets.symmetric(
                           horizontal: 4,
                         ),

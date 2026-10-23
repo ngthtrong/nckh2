@@ -302,7 +302,10 @@ class RescueRepositoryImpl implements RescueRepository {
         priorityRecordId: priorityRecordId,
       );
       if (batch.isEmpty) return;
-      if (serverLocator != null && !await serverLocator!.ensureConnected()) {
+      if (serverLocator != null &&
+          !await serverLocator!.ensureConnected(
+            force: priorityRecordId != null,
+          )) {
         return;
       }
 

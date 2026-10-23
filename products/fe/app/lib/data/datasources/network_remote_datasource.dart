@@ -33,6 +33,11 @@ class NetworkRemoteDataSource {
     if (results.contains(ConnectivityResult.wifi)) return 'WiFi';
     if (results.contains(ConnectivityResult.mobile)) return '4G/5G';
     if (results.contains(ConnectivityResult.ethernet)) return 'Ethernet';
+    if (results.contains(ConnectivityResult.bluetooth)) return 'Bluetooth';
+    if (results.contains(ConnectivityResult.vpn)) return 'VPN';
+    if (results.any((result) => result != ConnectivityResult.none)) {
+      return 'Kết nối khác';
+    }
     return 'none';
   }
 

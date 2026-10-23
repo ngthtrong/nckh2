@@ -680,6 +680,9 @@ def validate_report_payload(meta: Any) -> None:
         invalid("lat và lng phải cùng có giá trị hoặc cùng null")
     if lat is not None and not (_is_number(lat) and _is_number(lng) and abs(lat) <= 90 and abs(lng) <= 180):
         invalid("lat/lng phải là số trong phạm vi [-90, 90] / [-180, 180]")
+    accuracy = meta.get("locationAccuracyMeters")
+    if accuracy is not None and not (lat is not None and _is_number(accuracy) and accuracy > 0):
+        invalid("locationAccuracyMeters phải là số dương hữu hạn đi kèm lat/lng")
     for name in ("trappedCount", "injuredCount"):
         if meta.get(name) is not None and not _is_count(meta[name]):
             invalid(f"{name} phải là số nguyên 0-{PEOPLE_MAX}")
