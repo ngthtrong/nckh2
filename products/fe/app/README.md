@@ -39,8 +39,11 @@ flutter build apk --flavor user --release --split-per-abi --target-platform andr
 ```
 
 Lệnh trên tạo riêng APK ARM64 cho Redmi Note 11/13:
-`build/app/outputs/flutter-apk/app-arm64-v8a-user-release.apk`. Nếu cần cả ARM32 và
-x86_64, bỏ tùy chọn `--target-platform android-arm64`.
+`build/app/outputs/flutter-apk/app-arm64-v8a-user-release.apk`. Nếu cần thêm
+x86_64, dùng `--target-platform android-arm64,android-x64`. ExecuTorch AAR chỉ có
+`arm64-v8a` và `x86_64`; không hỗ trợ ARM32 (`android-arm`/`armeabi-v7a`). Luôn
+chỉ định `--target-platform` khi build bằng Flutter; mặc định của Flutter còn
+gồm ARM32 nên Gradle sẽ từ chối để tránh tạo APK thiếu runtime PTE.
 
 Thay `TEN_MIEN_BACKEND` bằng tên miền HTTPS thực tế có chứng chỉ hợp lệ. Bản mặc
 định chỉ dùng địa chỉ này, không dò LAN hoặc dùng lại địa chỉ HTTP đã lưu.
@@ -92,6 +95,8 @@ flutter install --flavor user --release -d DEVICE_ID
 Sau khi cài:
 
 1. Cấp quyền vị trí; mở form tạo báo cáo để PTE bắt đầu nạp bất đồng bộ.
+   Nếu đã từ chối quyền hoặc tắt dịch vụ vị trí, vào **Cài đặt > Vị trí** để
+   xin lại quyền/mở cài đặt hệ thống. SOS vẫn gửi được khi chưa có GPS.
 2. Gửi một báo cáo thử và kiểm tra báo cáo xuất hiện trên dashboard server.
 3. Tắt Wi-Fi/data, gửi thêm báo cáo; xác nhận bản ghi nằm trong hàng đợi.
 4. Bật lại Wi-Fi; xác nhận báo cáo được đồng bộ và hàng đợi giảm.
@@ -108,6 +113,8 @@ cho đến lần mở tiếp theo; cần kiểm tra thêm hạn chế pin riêng
 Các lần tìm LAN tự động thất bại chờ 1 → 2 → 5 phút, tiếp tục giới hạn 5 phút.
 Luôn thử địa chỉ đã biết trước; gửi mới, bấm tìm lại hoặc đổi loại kết nối có thể
 tìm lại ngay. Worker nền chỉ thử địa chỉ đã biết, không quét LAN.
+Kiểm tra địa chỉ cấu hình/đã lưu chờ tối đa 5 giây kết nối và 5 giây phản hồi;
+quét từng IP LAN giữ mức 400 ms kết nối và 700 ms phản hồi.
 Tin quá hạn chưa gửi được chờ ít nhất 30 giây trước lần thử tự động kế tiếp;
 không hẹn retry khi app ra nền hoặc không có mạng. Tránh vòng lặp 0 giây khi
 server mất kết nối nhưng thời điểm retry của message chưa được cập nhật.
@@ -125,6 +132,14 @@ có hiệu lực khi mở lại app. Sau 30 giây có thể tạo SOS mới. G�
 cùng mã báo cáo; WorkManager không tự gửi SMS. Wi-Fi có kết nối nhưng server không
 nhận được metadata sẽ thử SMS một lần; lỗi từ chối vĩnh viễn hoặc metadata đã ACK
 không kích hoạt SMS. Nội dung SMS có dấu hiệu nguy cấp và khả năng di chuyển.
+Sai số vị trí được lưu cùng báo cáo và gửi qua data (`locationAccuracyMeters`)
+hoặc SMS (`acc`, đơn vị mét, làm tròn lên). App hiển thị sai số và cảnh báo
+**vị trí gần đúng** khi lớn hơn 100 m; không tự coi vị trí đó là GPS chính xác.
+Bluetooth, VPN và các kết nối khác cũng được thử gửi data; khả năng tới được
+backend được xác định bằng yêu cầu thực tế thay vì chỉ dựa vào loại kết nối.
+Xếp hàng, gửi metadata và SMS của SOS không phải chờ ảnh của báo cáo khác hoặc
+lượt hỏi trạng thái đang chạy. Các yêu cầu upload cùng một báo cáo dùng chung
+một lượt upload để tránh gửi ảnh trùng.
 Khi SMS đã xác nhận lỗi, nút **Thử lại SMS cho SOS đã lưu** ở Trang chủ cho phép
 gửi lại cùng mã sau ít nhất 30 giây và xác nhận phí/tin nhiều phần. SMS chưa rõ
 kết quả không có nút gửi lại tự động để tránh trùng tin.
@@ -144,8 +159,10 @@ Trong bản `admin`, benchmark tập test được tải theo yêu cầu, không
 đăng nhập bằng tài khoản có quyền `admin` trên server. Model PTE được đóng gói
 trong APK để AI chạy offline; ONNX và tập benchmark chỉ tải sau khi admin
 đăng nhập. App kiểm tra SHA-256 ONNX theo manifest đi kèm PTE trước khi nạp.
-Gói benchmark lưu trong bộ nhớ riêng của app, có thể xóa ở mục benchmark và
-chạy offline sau khi tải.
+Gói benchmark lưu trong bộ nhớ riêng của app, có thể xóa ở mục benchmark.
+Trước mỗi lần chạy, app phải gọi `/api/auth/me` qua mạng để xác thực lại quyền
+admin, kể cả khi model và gói benchmark đã tải. Sau bước này, phép đo dùng dữ
+liệu/model trên máy; không thể bắt đầu benchmark khi offline.
 
 Ở cả hai bản, trong Cài đặt → Khác, bấm **Dọn ONNX và dữ liệu benchmark đã tải**
 để giải phóng dung lượng. Bản admin còn có nút xóa trong mục Benchmark.
@@ -183,6 +200,9 @@ nếu runtime hoặc loại kết quả thay đổi, phép đo bị hủy để 
 Ảnh đính kèm được chép vào vùng lưu lâu dài trước khi xếp hàng. Nếu ảnh cũ bị
 mất/không đọc được, app giữ trạng thái chưa gửi xong và báo lỗi ảnh; ACK nội dung
 đã nhận được lưu riêng để không tạo lại message mỗi lần thử gửi ảnh.
+Lỗi HTTP 408/429/5xx và lỗi kết nối được thử lại; HTTP 4xx còn lại được ghi lỗi
+vĩnh viễn thay vì tạo message mới vô hạn. HTTP 413 được thử bằng batch nhỏ hơn;
+nếu một message riêng vẫn quá lớn, chỉ báo cáo đó nhận lỗi `REQUEST_TOO_LARGE`.
 Đăng xuất chỉ xóa trạng thái đăng nhập, giữ tài khoản/hồ sơ local để đăng nhập lại.
 
 Form giới hạn mỗi mục số người từ 0 đến 10.000; mô tả tối đa 300 từ và 2.000
@@ -190,9 +210,10 @@ ký tự Unicode, từ được tách bằng khoảng trắng/xuống dòng. B�
 giới hạn; vượt giới hạn thì không gửi. Luồng tạo báo cáo cũng kiểm tra lại trước
 khi chép ảnh/lưu dữ liệu. Ảnh không đọc/lưu được sẽ hiện lỗi trên form, giữ nội
 dung để người dùng bỏ ảnh hoặc chọn lại; chưa tạo báo cáo trong trường hợp này.
-Mô tả dài có thể tạo nhiều phần SMS và phát sinh phí; callback chỉ xác nhận khi
-mọi phần đã gửi. Gateway backend giữ đủ mô tả 2.000 ký tự cộng các trường SOS;
-cần cập nhật/rebuild backend cùng bản app này nếu đang dùng gateway SMS.
+SMS dự phòng chỉ gửi tóm tắt gồm mã báo cáo, vị trí, số người và các trường nguy
+cấp; không gửi mô tả tự do. Mô tả đầy đủ và ảnh được giữ để đồng bộ khi có mạng.
+Các trường khẩn cấp vẫn có thể tạo SMS nhiều phần và phát sinh phí; callback chỉ
+xác nhận khi mọi phần đã gửi. Gateway vẫn nhận được mô tả từ SMS của app cũ.
 
 SOS/báo cáo mới chụp số điện thoại từ hồ sơ local vào record, giữ qua lần mở lại
 app và gửi `contactPhone` cùng metadata. Khách chưa có hồ sơ và báo cáo cũ không
@@ -202,6 +223,9 @@ báo cáo cũ.
 Metadata đã ACK nhưng ảnh còn chờ thì foreground hẹn thử lại sau 30 giây, kể cả
 outbox metadata đã trống. Timer dừng khi offline/app ra nền hoặc đã gửi xong;
 WorkManager tiếp tục phụ trách lịch nền như trên.
+Outbox lưu mã báo cáo có ảnh vừa được thử gửi để luân phiên lượt tiếp theo,
+kể cả khi worker khởi động lại; ảnh chậm không đứng đầu mọi lượt. Ngân sách
+20 giây vẫn được kiểm tra giữa các thao tác, không ngắt upload đang chạy.
 
 Foreground giữ quyền sở hữu Hive suốt phiên; Workmanager nhờ foreground đồng bộ
 hoặc chỉ tự mở Hive khi không có chủ sở hữu. Nếu khởi động báo tác vụ cũ còn giữ

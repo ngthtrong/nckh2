@@ -247,12 +247,14 @@ class _SettingsScreenState extends State<SettingsScreen> {
                           elevation: 0,
                         ),
                         onPressed: () async {
-                          final phone = phoneController.text.trim();
+                          final phone = User.normalizePhone(
+                            phoneController.text,
+                          );
                           final address = addressController.text.trim();
-                          if (phone.isEmpty) {
+                          if (phone == null) {
                             setModalState(
-                              () =>
-                                  errorMessage = 'Vui lòng nhập số điện thoại.',
+                              () => errorMessage =
+                                  'Số điện thoại không hợp lệ (9-11 chữ số).',
                             );
                             return;
                           }
@@ -831,6 +833,14 @@ class _SettingsScreenState extends State<SettingsScreen> {
                       const SizedBox(height: 20),
 
                       _buildSectionLabel('KẾT NỐI SERVER'),
+                      ListTile(
+                        leading: const Icon(Icons.location_on_outlined),
+                        title: const Text('Vị trí'),
+                        subtitle: Text(
+                          '${c.locationLabel}\nChạm để cấp quyền hoặc bật vị trí',
+                        ),
+                        onTap: c.recoverLocation,
+                      ),
                       ListTile(
                         contentPadding: const EdgeInsets.symmetric(
                           horizontal: 4,

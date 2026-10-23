@@ -3,10 +3,10 @@
 App gửi SMS dự phòng khi không có data, dạng (xem ``smsBody`` trong
 ``fe/app/lib/data/datasources/sender_remote_datasource.dart``)::
 
-    SOS|id:<id>|pos:<lat>,<lng>|trapped:<n>|injured:<n>|vuln:<a,b>|immobile:1|severe:<a,b>|note:<mô tả>
+    SOS|id:<id>|pos:<lat>,<lng>|trapped:<n>|injured:<n>|acc:<sai số mét>|vuln:<a,b>|immobile:1|severe:<a,b>
 
-``pos`` là ``unknown`` khi không có GPS; ``vuln`` và ``note`` có thể vắng; ``note`` luôn
-đứng cuối nên được phép chứa ``|``. Tin theo định dạng này dùng đúng id của app, nên
+``pos`` là ``unknown`` khi không có GPS; ``acc`` và các trường tùy chọn có thể vắng.
+App cũ có thể gửi ``note`` ở cuối, cho phép chứa ``|``. Tin dùng đúng id của app, nên
 khi app có mạng và đồng bộ lại, hai bản gộp thành một báo cáo (server chỉ điền trường
 còn trống). Tin nhắn tự do (người dân nhắn tay) thành báo cáo mới không có vị trí, vào
 hàng cần xác minh.
@@ -15,6 +15,7 @@ from __future__ import annotations
 
 import hashlib
 import logging
+import math
 import secrets
 from datetime import datetime, timezone
 from typing import Any, Dict, Optional, Tuple
@@ -51,6 +52,12 @@ def parse_sos(text: str) -> Optional[Dict[str, Any]]:
             meta["lat"], meta["lng"] = lat, lng
     except ValueError:
         pass  # "unknown" hoặc tọa độ hỏng: để trống, điều phối viên xác minh
+    try:
+        accuracy = float(fields.get("acc", ""))
+        if "lat" in meta and math.isfinite(accuracy) and accuracy > 0:
+            meta["locationAccuracyMeters"] = accuracy
+    except ValueError:
+        pass
     for key, name in (("trapped", "trappedCount"), ("injured", "injuredCount")):
         if fields.get(key, "").isdigit() and int(fields[key]) <= storage.PEOPLE_MAX:
             meta[name] = int(fields[key])
