@@ -5,6 +5,8 @@ import 'package:app/domain/repositories/network_repository.dart';
 import 'package:app/domain/repositories/rescue_repository.dart';
 import 'package:app/domain/entities/rescue_record.dart';
 import 'package:app/domain/entities/user.dart';
+import 'package:app/data/models/rescue_record_payload.dart';
+import 'package:app/data/datasources/sender_remote_datasource.dart';
 import 'package:app/presentation/controllers/app_controller.dart';
 import 'package:app/presentation/widgets/emergency_call.dart';
 import 'package:flutter/material.dart';
@@ -51,16 +53,42 @@ class _Rescue extends Fake implements RescueRepository {
 
 class _Location extends GeolocatorPlatform {
   Future<Position> Function() read = () async => _position(10);
+  LocationPermission permission = LocationPermission.whileInUse;
+  LocationPermission grant = LocationPermission.whileInUse;
+  bool enabled = true;
+  int requests = 0, appSettings = 0, locationSettings = 0;
+  @override
+  Future<LocationPermission> checkPermission() async => permission;
+  @override
+  Future<LocationPermission> requestPermission() async {
+    requests++;
+    return permission = grant;
+  }
+
+  @override
+  Future<bool> isLocationServiceEnabled() async => enabled;
+  @override
+  Future<bool> openAppSettings() async {
+    appSettings++;
+    return true;
+  }
+
+  @override
+  Future<bool> openLocationSettings() async {
+    locationSettings++;
+    return true;
+  }
+
   @override
   Future<Position> getCurrentPosition({LocationSettings? locationSettings}) =>
       read();
 }
 
-Position _position(double latitude) => Position(
+Position _position(double latitude, {double accuracy = 1}) => Position(
   longitude: 106,
   latitude: latitude,
   timestamp: DateTime.now(),
-  accuracy: 1,
+  accuracy: accuracy,
   altitude: 0,
   altitudeAccuracy: 1,
   heading: 0,
@@ -71,6 +99,76 @@ Position _position(double latitude) => Position(
 
 void main() {
   final binding = TestWidgetsFlutterBinding.ensureInitialized();
+
+  test(
+    'denied GPS never blocks SOS; recovery requests permission and keeps accuracy',
+    () async {
+      final original = GeolocatorPlatform.instance;
+      final location = _Location()..permission = LocationPermission.denied;
+      GeolocatorPlatform.instance = location;
+      addTearDown(() => GeolocatorPlatform.instance = original);
+      final rescue = _Rescue();
+      final controller = AppController(
+        rescueRepository: rescue,
+        inferenceRepository: _Inference(),
+        networkRepository: _Network(),
+      );
+      addTearDown(controller.dispose);
+      final sos = await controller.sendSos();
+      expect(sos?.synced, isTrue);
+      expect(sos?.lat, isNull);
+      expect(location.requests, 0);
+      expect(controller.locationLabel, contains('Chưa cấp quyền'));
+
+      location.read = () async => _position(10, accuracy: 2000);
+      await controller.recoverLocation();
+      expect(location.requests, 1);
+      expect(controller.locationLabel, contains('±2000 m'));
+      expect(controller.locationLabel, contains('vị trí gần đúng'));
+      final post = await controller.submitPost(
+        trappedCount: 1,
+        injuredCount: 0,
+        vulnerableGroups: [],
+        cannotMove: false,
+        severeSigns: [],
+        description: 'Cần cứu hộ',
+        imagePath: null,
+        aiTags: [],
+      );
+      expect(post?.locationAccuracyMeters, 2000);
+      expect(rescueRecordPayload(post!)['locationAccuracyMeters'], 2000);
+      expect(smsBody(post), contains('|acc:2000'));
+      expect(post.locationText, contains('vị trí gần đúng'));
+    },
+  );
+
+  test('blocked permission and disabled GPS open the right settings', () async {
+    final original = GeolocatorPlatform.instance;
+    final location = _Location()..permission = LocationPermission.deniedForever;
+    GeolocatorPlatform.instance = location;
+    addTearDown(() => GeolocatorPlatform.instance = original);
+    final controller = AppController(
+      rescueRepository: _Rescue(),
+      inferenceRepository: _Inference(),
+      networkRepository: _Network(),
+    );
+    addTearDown(controller.dispose);
+    await controller.refreshLocation(requestPermission: true);
+    expect(controller.currentLat, isNull);
+    expect(controller.locationLabel, contains('bị chặn'));
+    await controller.recoverLocation();
+    expect(location.appSettings, 1);
+    expect(location.requests, 0);
+    location.permission = LocationPermission.denied;
+    location.grant = LocationPermission.deniedForever;
+    await controller.recoverLocation();
+    expect(location.requests, 1);
+    expect(location.appSettings, 2);
+    location.permission = LocationPermission.whileInUse;
+    location.enabled = false;
+    await controller.recoverLocation();
+    expect(location.locationSettings, 1);
+  });
 
   test(
     'controller snapshots profile phone for SOS and ordinary reports',

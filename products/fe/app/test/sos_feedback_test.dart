@@ -89,7 +89,7 @@ void main() {
       'sent by SMS',
       _record(sendMode: 'smsFallback', smsStatus: SmsStatus.sent),
       'Đã gửi SMS; chưa xác nhận tiếp nhận.',
-      'Đã gửi SMS; chưa xác nhận tiếp nhận. SOS sẽ đồng bộ khi có mạng.',
+      smsStatusMessage(SmsStatus.sent),
     ),
     (
       'SMS result unknown',

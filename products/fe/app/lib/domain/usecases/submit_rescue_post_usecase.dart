@@ -38,6 +38,7 @@ class SubmitRescuePostUseCase {
   Future<RescueRecord> call({
     required double? lat,
     required double? lng,
+    double? locationAccuracyMeters,
     String? imagePath,
     List<String> images = const [],
     List<AiTag> aiTags = const [],
@@ -78,6 +79,7 @@ class SubmitRescuePostUseCase {
       createdAt: DateTime.now(),
       lat: lat,
       lng: lng,
+      locationAccuracyMeters: locationAccuracyMeters,
       imagePath: savedImages[imagePath],
       images: images.map((path) => savedImages[path]!).toList(),
       aiTags: aiTags,

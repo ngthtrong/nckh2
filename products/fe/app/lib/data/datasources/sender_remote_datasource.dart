@@ -195,7 +195,8 @@ class SenderRemoteDataSource {
 }
 
 /// Nội dung SMS: gọn, đủ để tổng đài điều phối; `id` để khớp với bản ghi đồng
-/// bộ sau này khi có mạng.
+/// bộ sau này khi có mạng. Ghi chú tự do chỉ đi qua data để tránh SMS dài và
+/// tránh ghi chú cắt ngắn trên gateway che mất mô tả đầy đủ khi gộp bản ghi.
 String smsBody(RescueRecord r) {
   final lat = r.lat, lng = r.lng;
   final pos = lat != null && lng != null
@@ -204,8 +205,8 @@ String smsBody(RescueRecord r) {
   final vulnerable = r.vulnerableGroups.join(',');
   String safe(String text) => text.replaceAll('|', '/').replaceAll('\n', ' ');
   return 'SOS|id:${r.id}|pos:$pos|trapped:${r.trappedCount}|injured:${r.injuredCount}'
+      '${r.locationAccuracyMeters != null ? '|acc:${r.locationAccuracyMeters!.ceil()}' : ''}'
       '${vulnerable.isNotEmpty ? '|vuln:${safe(vulnerable)}' : ''}'
       '${r.cannotMove ? '|immobile:1' : ''}'
-      '${r.severeSigns.isNotEmpty ? '|severe:${r.severeSigns.map(canonicalSevereSign).map(safe).join(',')}' : ''}'
-      '${r.description.isNotEmpty ? '|note:${r.description}' : ''}';
+      '${r.severeSigns.isNotEmpty ? '|severe:${r.severeSigns.map(canonicalSevereSign).map(safe).join(',')}' : ''}';
 }

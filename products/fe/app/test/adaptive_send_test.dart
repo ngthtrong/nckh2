@@ -1,4 +1,5 @@
 import 'package:app/data/datasources/sender_remote_datasource.dart';
+import 'package:app/data/models/rescue_record_payload.dart';
 import 'package:app/domain/entities/ai_tag.dart';
 import 'package:app/domain/entities/rescue_record.dart';
 import 'package:app/domain/entities/rescue_status.dart';
@@ -233,7 +234,7 @@ void main() {
   test('SMS chứa id, vị trí và số người; thiếu GPS ghi unknown', () {
     expect(
       smsBody(_record()),
-      'SOS|id:post-1|pos:16.05000,108.20000|trapped:3|injured:0|note:Nước dâng',
+      'SOS|id:post-1|pos:16.05000,108.20000|trapped:3|injured:0',
     );
     expect(smsBody(_record(lat: null)), contains('|pos:unknown|'));
   });
@@ -248,7 +249,7 @@ void main() {
     expect(r.maxAiConfidence, 0.8);
     expect(_record().maxAiConfidence, 0);
   });
-  test('severe-only SMS keeps mobility and canonical signs before note', () {
+  test('summary SMS keeps mobility and canonical signs without free text', () {
     final text = smsBody(
       _record().copyWith(
         cannotMove: true,
@@ -258,10 +259,29 @@ void main() {
     );
     expect(
       text,
-      contains('|immobile:1|severe:active_convulsions,heavy_bleeding|note:'),
+      contains('|immobile:1|severe:active_convulsions,heavy_bleeding'),
     );
-    expect(text, endsWith('x|trapped:999'));
+    expect(text, isNot(contains('note:')));
+    expect(text, isNot(contains('trapped:999')));
   });
+  test(
+    'a 2000-character note never expands SMS or changes the data payload',
+    () {
+      final description = 'cứu ' * 299 + 'x' * 804;
+      expect(description.runes.length, 2000);
+      final record = _record().copyWith(
+        description: description,
+        cannotMove: true,
+        severeSigns: ['heavy_bleeding'],
+        vulnerableGroups: ['Người già', 'Trẻ em'],
+      );
+      expect(smsBody(record), smsBody(record.copyWith(description: '')));
+      expect(smsBody(record), contains('|vuln:Người già,Trẻ em'));
+      expect(smsBody(record), contains('|immobile:1|severe:heavy_bleeding'));
+      expect(rescueRecordPayload(record)['description'], description);
+      expect(record.description, description);
+    },
+  );
   test('SMS retry is explicit, delayed, and keeps its report ID', () async {
     final repo = _FakeRepo(sendOk: false, smsOk: true);
     final firstAttempt = DateTime.utc(2026, 10, 22);

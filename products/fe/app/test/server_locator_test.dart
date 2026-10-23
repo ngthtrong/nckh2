@@ -1,3 +1,4 @@
+import 'dart:async';
 import 'dart:io';
 
 import 'package:app/config.dart';
@@ -21,6 +22,98 @@ void main() {
     await Hive.deleteFromDisk();
     await dir.delete(recursive: true);
   });
+
+  for (final savedServer in [false, true]) {
+    test(
+      '${savedServer ? 'saved' : 'configured'} server may take over 700ms to answer health',
+      () async {
+        final server = await HttpServer.bind(InternetAddress.loopbackIPv4, 0);
+        addTearDown(() => server.close(force: true));
+        server.listen((request) async {
+          await Future<void>.delayed(const Duration(milliseconds: 900));
+          request.response.headers.contentType = ContentType.json;
+          request.response.write(
+            '{"status":"ok","serverId":"abcdef0123456789"}',
+          );
+          await request.response.close();
+        });
+        final url = 'http://127.0.0.1:${server.port}';
+        if (savedServer) await outbox.saveServer('abcdef0123456789', url);
+        final locator = ServerLocator(
+          allowInsecureLan: true,
+          allowLanScan: false,
+          configuredUrl: savedServer ? '' : url,
+        );
+
+        expect(await locator.init(outbox), isTrue);
+        expect(locator.connectedUrl, url);
+        expect(outbox.serverId, 'abcdef0123456789');
+      },
+    );
+  }
+
+  test(
+    'known server health timeout still finishes with no connection',
+    () async {
+      final server = await HttpServer.bind(InternetAddress.loopbackIPv4, 0);
+      addTearDown(() => server.close(force: true));
+      server.listen((_) {});
+      final locator = ServerLocator(
+        allowInsecureLan: true,
+        allowLanScan: false,
+        configuredUrl: 'http://127.0.0.1:${server.port}',
+      );
+
+      expect(
+        await locator.init(outbox).timeout(const Duration(seconds: 8)),
+        isFalse,
+      );
+      expect(locator.connectedUrl, isNull);
+      expect(outbox.serverId, isNull);
+    },
+  );
+
+  test('LAN discovery retains a short health timeout', () async {
+    final server = await HttpServer.bind(InternetAddress.loopbackIPv4, 0);
+    addTearDown(() => server.close(force: true));
+    server.listen((_) {});
+    final locator = ServerLocator(
+      allowInsecureLan: true,
+      configuredUrl: '',
+      candidates: (_) async => ['http://127.0.0.1:${server.port}'],
+    );
+
+    expect(
+      await locator.init(outbox).timeout(const Duration(seconds: 2)),
+      isFalse,
+    );
+  });
+
+  test(
+    'concurrent connection requests share the same identity probe',
+    () async {
+      final response = Completer<String?>();
+      var probes = 0;
+      final locator = ServerLocator(
+        configuredUrl: 'https://rescue.example',
+        probe: (_) {
+          probes++;
+          return response.future;
+        },
+      );
+      locator.attach(outbox);
+
+      final first = locator.ensureConnected();
+      final second = locator.ensureConnected(force: true);
+      expect(probes, 1);
+      response.complete('abcdef0123456789');
+
+      expect(await Future.wait([first, second]), [true, true]);
+      expect(locator.connectedUrl, 'https://rescue.example');
+      expect(await locator.ensureConnected(force: true), isTrue);
+      expect(probes, 2);
+    },
+  );
 
   test(
     'failed LAN scans back off 1/2/5 minutes; manual reconnect bypasses delay',

@@ -1,5 +1,7 @@
+import 'dart:async';
 import 'dart:io';
 import 'dart:typed_data';
+import 'package:dio/dio.dart';
 
 import 'package:app/config.dart';
 import 'package:app/data/datasources/outbox_local_datasource.dart';
@@ -12,6 +14,8 @@ import 'package:app/data/models/rescue_record_payload.dart';
 import 'package:app/data/repositories/rescue_repository_impl.dart';
 import 'package:app/domain/entities/rescue_record.dart';
 import 'package:app/domain/entities/sms_delivery.dart';
+import 'package:app/domain/entities/send_mode.dart';
+import 'package:app/domain/usecases/deliver_record.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:hive_ce_flutter/hive_flutter.dart';
 
@@ -69,6 +73,37 @@ class _CountingRecords extends RecordLocalDataSource {
   }
 }
 
+class _HttpSync extends _FakeSync {
+  _HttpSync({this.status, this.maxBatchSize = 50, this.oversizedId})
+    : super([]);
+  final int? status;
+  final int maxBatchSize;
+  final String? oversizedId;
+  final requests = <List<SyncMessageModel>>[];
+
+  @override
+  Future<List<Map<String, dynamic>>> sendBatch(
+    List<SyncMessageModel> messages,
+  ) {
+    requests.add(List.of(messages));
+    final code =
+        status ??
+        (messages.length > maxBatchSize ||
+                messages.any((m) => m.payload['id'] == oversizedId)
+            ? 413
+            : null);
+    if (code != null) {
+      final options = RequestOptions(path: '/sync/messages');
+      throw DioException(
+        requestOptions: options,
+        response: Response<Object?>(requestOptions: options, statusCode: code),
+        type: DioExceptionType.badResponse,
+      );
+    }
+    return super.sendBatch(messages);
+  }
+}
+
 class _FakeSender extends SenderRemoteDataSource {
   _FakeSender({this.status = 201});
   final int status;
@@ -87,6 +122,69 @@ class _FakeSender extends SenderRemoteDataSource {
       durationMs: 1,
       status: status,
       permanent: isPermanentUploadFailure(status, null),
+    );
+  }
+}
+
+class _HoldingSender extends _FakeSender {
+  final started = Completer<void>();
+  final release = Completer<void>();
+  final imageIds = <String>[];
+  var smsCalls = 0;
+
+  @override
+  Future<UploadResult> upload(
+    RescueRecord rec,
+    Uint8List? image, {
+    required String clientId,
+  }) async {
+    imageIds.add(rec.id);
+    if (rec.id == 'old-image') {
+      if (!started.isCompleted) started.complete();
+      await release.future;
+    }
+    return super.upload(rec, image, clientId: clientId);
+  }
+
+  @override
+  Future<SmsResult> sendSms(RescueRecord record) async {
+    smsCalls++;
+    return const SmsResult(SmsStatus.sent);
+  }
+}
+
+class _HoldingStatusSync extends _FakeSync {
+  _HoldingStatusSync() : super([]);
+  final started = Completer<void>();
+  final release = Completer<void>();
+
+  @override
+  Future<Map<String, String>> fetchStatuses(List<String> ids) async {
+    started.complete();
+    await release.future;
+    return super.fetchStatuses(ids);
+  }
+}
+
+class _SlowFirstImageSender extends _FakeSender {
+  final imageIds = <String>[];
+
+  @override
+  Future<UploadResult> upload(
+    RescueRecord rec,
+    Uint8List? image, {
+    required String clientId,
+  }) async {
+    imageIds.add(rec.id);
+    if (imageIds.length == 1) {
+      await Future<void>.delayed(const Duration(milliseconds: 20100));
+    }
+    return (
+      ok: rec.id != 'large-image',
+      bytesSent: image?.length ?? 0,
+      durationMs: 1,
+      status: rec.id == 'large-image' ? 503 : 201,
+      permanent: false,
     );
   }
 }
@@ -124,6 +222,139 @@ void main() {
     senderDataSource: SenderRemoteDataSource(),
     outboxDataSource: outbox,
     syncDataSource: sync,
+  );
+
+  for (final mode in [SendMode.textOnly, SendMode.smsFallback]) {
+    test(
+      'new SOS $mode finishes while an older image upload is blocked',
+      () async {
+        final sender = _HoldingSender();
+        final sync = _FakeSync([]);
+        final r = RescueRepositoryImpl(
+          localDataSource: records,
+          senderDataSource: sender,
+          outboxDataSource: outbox,
+          syncDataSource: sync,
+        );
+        final image = File('${dir.path}/old.jpg');
+        await image.writeAsBytes([0xff, 0xd8, 0xff]);
+        await records.saveRecord(
+          _record(
+            'old-image',
+            imagePath: image.path,
+          ).copyWith(metadataSynced: true, sendMode: 'fullImage'),
+        );
+        final syncing = r.syncPendingRecords();
+        await sender.started.future.timeout(const Duration(seconds: 2));
+        try {
+          final sent = await deliverRecord(
+            r,
+            _record('sos-new'),
+            mode,
+          ).timeout(const Duration(seconds: 2));
+          expect(sender.release.isCompleted, isFalse);
+          if (mode == SendMode.smsFallback) {
+            expect(sent.smsStatus, SmsStatus.sent);
+            expect(sender.smsCalls, 1);
+            expect(outbox.messageForRecord(sent.id), isNotNull);
+          } else {
+            expect(sent.metadataSynced, isTrue);
+            expect(sent.synced, isTrue);
+          }
+        } finally {
+          sender.release.complete();
+          await syncing;
+        }
+        expect(records.getRecord('old-image')!.synced, isTrue);
+      },
+    );
+  }
+
+  test(
+    'slow status response does not block a new SOS or overwrite its ACK',
+    () async {
+      final sync = _HoldingStatusSync();
+      final r = repo(sync);
+      await records.saveRecord(
+        _record('old-report').copyWith(metadataSynced: true, synced: true),
+      );
+      final polling = r.refreshStatuses();
+      await sync.started.future.timeout(const Duration(seconds: 2));
+      try {
+        final sent = await deliverRecord(
+          r,
+          _record('sos-new'),
+          SendMode.textOnly,
+        ).timeout(const Duration(seconds: 2));
+        expect(sent.synced, isTrue);
+      } finally {
+        sync.release.complete();
+        await polling;
+      }
+      expect(records.getRecord('sos-new')!.synced, isTrue);
+      expect(records.getRecord('old-report')!.status, 'dispatched');
+    },
+  );
+
+  test('concurrent sends and sync share the same attachment upload', () async {
+    final sender = _HoldingSender();
+    final r = RescueRepositoryImpl(
+      localDataSource: records,
+      senderDataSource: sender,
+      outboxDataSource: outbox,
+      syncDataSource: _FakeSync([]),
+    );
+    final image = File('${dir.path}/single-upload.jpg');
+    await image.writeAsBytes([0xff, 0xd8, 0xff]);
+    final record = _record(
+      'old-image',
+      imagePath: image.path,
+    ).copyWith(sendMode: 'fullImage');
+    await records.saveRecord(record);
+    final first = r.sendRecord(record);
+    await sender.started.future.timeout(const Duration(seconds: 2));
+    final second = r.sendRecord(record);
+    final syncing = r.syncPendingRecords();
+    await Future<void>.delayed(const Duration(milliseconds: 50));
+    sender.release.complete();
+    await Future.wait([first, second, syncing]);
+    expect(sender.imageIds, ['old-image']);
+    expect(records.getRecord(record.id)!.synced, isTrue);
+  });
+
+  test(
+    'slow failed image rotates behind older images after repository restart',
+    () async {
+      final sender = _SlowFirstImageSender();
+      RescueRepositoryImpl createRepo() => RescueRepositoryImpl(
+        localDataSource: records,
+        senderDataSource: sender,
+        outboxDataSource: outbox,
+        syncDataSource: _FakeSync([]),
+      );
+      final image = File('${dir.path}/rotation.jpg');
+      await image.writeAsBytes([0xff, 0xd8, 0xff]);
+      final old = _record(
+        'small-image',
+        imagePath: image.path,
+      ).copyWith(metadataSynced: true, sendMode: 'fullImage');
+      final recent = old.copyWith(
+        id: 'large-image',
+        createdAt: old.createdAt.add(const Duration(days: 1)),
+      );
+      await records.saveRecord(old);
+      await records.saveRecord(recent);
+      await createRepo().syncPendingRecords();
+      expect(sender.imageIds, ['large-image']);
+      expect(outbox.lastAttachmentRecordId, 'large-image');
+      await Hive.close();
+      await records.init(hivePath: dir.path);
+      await outbox.init(hivePath: dir.path);
+      await createRepo().syncPendingRecords();
+      expect(sender.imageIds, ['large-image', 'small-image', 'large-image']);
+      expect(records.getRecord('small-image')!.synced, isTrue);
+      expect(records.getRecord('large-image')!.synced, isFalse);
+    },
   );
 
   test('contact phone survives restart, updates and offline queue', () async {
@@ -450,6 +681,62 @@ void main() {
     expect(kServerBaseUrl, url);
   });
 
+  test(
+    'new send bypasses failed LAN discovery backoff; worker does not',
+    () async {
+      const url = 'http://192.168.1.20:8000';
+      var serverUp = false;
+      var scans = 0;
+      final locator = ServerLocator(
+        allowInsecureLan: true,
+        configuredUrl: '',
+        candidates: (_) async {
+          scans++;
+          return [url];
+        },
+        probe: (_) async => serverUp ? 'abcdef0123456789' : null,
+      );
+      await locator.init(outbox);
+      expect(scans, 1);
+      final sync = _FakeSync([]);
+      final r = RescueRepositoryImpl(
+        localDataSource: records,
+        senderDataSource: SenderRemoteDataSource(),
+        outboxDataSource: outbox,
+        syncDataSource: sync,
+        serverLocator: locator,
+      );
+      final record = _record('sos-lan-recovered');
+      await r.saveRecord(record);
+      await r.queueRecord(record);
+      serverUp = true;
+      await r.syncPendingRecords(immediate: false);
+      expect(scans, 1);
+      expect(sync.batches, isEmpty);
+      final sent = await r.sendRecord(record);
+      expect(scans, 2);
+      expect(sent.metadataSynced, isTrue);
+      expect(sent.synced, isTrue);
+      expect(sync.batches, hasLength(1));
+    },
+  );
+
+  test(
+    'location accuracy survives local storage and reaches the outbox',
+    () async {
+      final record = _record(
+        'accurate-location',
+      ).copyWith(locationAccuracyMeters: 250);
+      await records.saveRecord(record);
+      await records.init(hivePath: dir.path);
+      final stored = records.getRecord(record.id)!;
+      expect(stored.locationAccuracyMeters, 250);
+      expect(stored.copyWith(status: 'dispatched').locationAccuracyMeters, 250);
+      final message = await outbox.enqueueCreate(rescueRecordPayload(stored));
+      expect(message.payload['locationAccuracyMeters'], 250);
+    },
+  );
+
   test('metadata đã ACK nhưng ảnh chỉ gửi sau khi xác minh IP mới', () async {
     const oldUrl = 'https://rescue-old.example';
     const newUrl = 'https://rescue-new.example';
@@ -582,12 +869,148 @@ void main() {
   test('dead-letter do vận chuyển được tạo lại; do nội dung thì không', () {
     expect(isRecoverableDeadLetter('SEQUENCE_REUSED'), isTrue);
     expect(isRecoverableDeadLetter('ID_REUSED_WITH_DIFFERENT_PAYLOAD'), isTrue);
-    expect(isRecoverableDeadLetter('HTTP_400'), isTrue);
+    for (final code in [
+      'HTTP_400',
+      'HTTP_401',
+      'HTTP_403',
+      'HTTP_404',
+      'HTTP_413',
+      'HTTP_422',
+      'HTTP_600',
+      'HTTP_null',
+      'HTTP_bad',
+    ]) {
+      expect(isRecoverableDeadLetter(code), isFalse, reason: code);
+    }
+    for (final code in [
+      'HTTP_408',
+      'HTTP_429',
+      'HTTP_500',
+      'HTTP_503',
+      'HTTP_599',
+    ]) {
+      expect(isRecoverableDeadLetter(code), isTrue, reason: code);
+    }
     expect(isRecoverableDeadLetter('INVALID_PAYLOAD'), isFalse);
     expect(isRecoverableDeadLetter('REPORT_ID_CONFLICT'), isFalse);
     expect(isRecoverableDeadLetter('REQUEST_TOO_LARGE'), isFalse);
     expect(isRecoverableDeadLetter(null), isFalse);
   });
+
+  for (final status in [400, 401, 403, 404, 413, 422]) {
+    test(
+      'HTTP $status finishes permanently without SMS or new messages',
+      () async {
+        final sync = _HttpSync(status: status);
+        final sender = _HoldingSender();
+        final r = RescueRepositoryImpl(
+          localDataSource: records,
+          senderDataSource: sender,
+          outboxDataSource: outbox,
+          syncDataSource: sync,
+        );
+        final sent = await deliverRecord(
+          r,
+          _record('http-$status'),
+          SendMode.textOnly,
+        );
+        expect(
+          sent.syncError,
+          status == 413 ? 'REQUEST_TOO_LARGE' : 'HTTP_$status',
+        );
+        expect(sent.synced, isFalse);
+        expect(r.getPendingCount(), 0);
+        expect(sender.smsCalls, 0);
+        final message = outbox.messageForRecord(sent.id)!;
+        await r.syncPendingRecords();
+        await r.syncPendingRecords();
+        expect(sync.requests, hasLength(1));
+        expect(outbox.messageForRecord(sent.id)!.messageId, message.messageId);
+        expect(records.getRecord(sent.id)!.syncError, sent.syncError);
+      },
+    );
+  }
+
+  for (final status in [408, 429, 500, 503]) {
+    test('HTTP $status retries with the same message ID and backoff', () async {
+      final sync = _HttpSync(status: status);
+      final r = repo(sync);
+      await r.saveRecord(_record('retry-http-$status'));
+      final sent = await r.sendRecord(_record('retry-http-$status'));
+      expect(sent.syncError, isNull);
+      final message = outbox.messageForRecord(sent.id)!;
+      expect(message.deliveryStatus, 'pending');
+      expect(message.attemptCount, 1);
+      await r.syncPendingRecords();
+      final retried = outbox.messageForRecord(sent.id)!;
+      expect(retried.messageId, message.messageId);
+      expect(retried.attemptCount, 2);
+      expect(sync.requests, hasLength(2));
+    });
+  }
+
+  test(
+    'old permanent HTTP dead-letter is surfaced instead of recreated',
+    () async {
+      final sync = _HttpSync();
+      final r = repo(sync);
+      final record = _record('old-http-error');
+      await r.saveRecord(record);
+      await r.queueRecord(record);
+      final message = outbox.messageForRecord(record.id)!;
+      await outbox.markDeadLetter(message.messageId, 'HTTP_400');
+      await Hive.close();
+      await records.init(hivePath: dir.path);
+      await outbox.init(hivePath: dir.path);
+      await r.syncPendingRecords();
+      expect(records.getRecord(record.id)!.syncError, 'HTTP_400');
+      expect(outbox.messageForRecord(record.id)!.messageId, message.messageId);
+      expect(sync.requests, isEmpty);
+      expect(r.getPendingCount(), 0);
+    },
+  );
+
+  test('413 shrinks batches while preserving every message ID', () async {
+    final sync = _HttpSync(maxBatchSize: 2);
+    final r = repo(sync);
+    final originalIds = <String, String>{};
+    for (var i = 0; i < 5; i++) {
+      final record = _record('split-$i');
+      await r.saveRecord(record);
+      await r.queueRecord(record);
+      originalIds[record.id] = outbox.messageForRecord(record.id)!.messageId;
+    }
+    await r.syncPendingRecords();
+    expect(sync.requests.map((batch) => batch.length), [5, 3, 2, 2, 1]);
+    for (final message in sync.requests.expand((batch) => batch)) {
+      expect(message.messageId, originalIds[message.payload['id']]);
+    }
+    expect(sync.batches.expand((batch) => batch), hasLength(5));
+    expect(r.getAllRecords().every((record) => record.synced), isTrue);
+    expect(outbox.readyMessages(), isEmpty);
+  });
+
+  test(
+    '413 for one oversized message does not reject its smaller neighbours',
+    () async {
+      final sync = _HttpSync(oversizedId: 'oversized');
+      final r = repo(sync);
+      for (final id in ['oversized', 'small-1', 'small-2']) {
+        final record = _record(id);
+        await r.saveRecord(record);
+        await r.queueRecord(record);
+      }
+      await r.syncPendingRecords();
+      expect(records.getRecord('oversized')!.syncError, 'REQUEST_TOO_LARGE');
+      expect(records.getRecord('small-1')!.synced, isTrue);
+      expect(records.getRecord('small-2')!.synced, isTrue);
+      expect(r.getPendingCount(), 0);
+      expect(
+        sync.batches.expand((batch) => batch).map((m) => m.payload['id']),
+        ['small-1', 'small-2'],
+      );
+    },
+  );
 
   test(
     'missing attachment stays pending and retries without resending metadata',

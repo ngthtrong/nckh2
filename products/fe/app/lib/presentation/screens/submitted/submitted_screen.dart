@@ -175,9 +175,10 @@ class SubmittedScreen extends StatelessWidget {
                     ),
                     const SizedBox(height: 24),
 
-                    // Status Tracker
-                    StatusTracker(currentStatus: record.status),
-                    const SizedBox(height: 24),
+                    if (record.metadataSynced || record.synced) ...[
+                      StatusTracker(currentStatus: record.status),
+                      const SizedBox(height: 24),
+                    ],
 
                     // Quick Call Panel
                     const QuickCallPanel(),

@@ -8,6 +8,14 @@ String canonicalSevereSign(String sign) => switch (sign) {
   _ => sign,
 };
 
+String formatReportLocation(double? lat, double? lng, double? accuracyMeters) {
+  if (lat == null || lng == null) return 'Chưa có GPS · trung tâm sẽ xác minh';
+  final coordinates = '${lat.toStringAsFixed(4)}, ${lng.toStringAsFixed(4)}';
+  if (accuracyMeters == null) return coordinates;
+  return '$coordinates · sai số ±${accuracyMeters.ceil()} m'
+      '${accuracyMeters > 100 ? ' · vị trí gần đúng' : ''}';
+}
+
 class RescueRecord {
   final String id;
   final DateTime createdAt;
@@ -15,6 +23,7 @@ class RescueRecord {
   /// Null khi không lấy được GPS: server đưa báo cáo vào hàng cần xem xét thủ công.
   final double? lat;
   final double? lng;
+  final double? locationAccuracyMeters;
   final String? imagePath;
   final List<String> images;
   final String? aiLabel;
@@ -48,6 +57,7 @@ class RescueRecord {
     required this.createdAt,
     required this.lat,
     required this.lng,
+    this.locationAccuracyMeters,
     this.imagePath,
     this.images = const [],
     this.aiLabel,
@@ -82,15 +92,15 @@ class RescueRecord {
   );
 
   /// Vị trí dạng hiển thị, hoặc thông báo khi báo cáo không có GPS.
-  String get locationText => lat != null && lng != null
-      ? '${lat!.toStringAsFixed(4)}, ${lng!.toStringAsFixed(4)}'
-      : 'Chưa có GPS · trung tâm sẽ xác minh';
+  String get locationText =>
+      formatReportLocation(lat, lng, locationAccuracyMeters);
 
   RescueRecord copyWith({
     String? id,
     DateTime? createdAt,
     double? lat,
     double? lng,
+    double? locationAccuracyMeters,
     String? imagePath,
     List<String>? images,
     String? aiLabel,
@@ -121,6 +131,8 @@ class RescueRecord {
       createdAt: createdAt ?? this.createdAt,
       lat: lat ?? this.lat,
       lng: lng ?? this.lng,
+      locationAccuracyMeters:
+          locationAccuracyMeters ?? this.locationAccuracyMeters,
       imagePath: imagePath ?? this.imagePath,
       images: images ?? this.images,
       aiLabel: aiLabel ?? this.aiLabel,

@@ -94,15 +94,17 @@ class RescueRepositoryImpl implements RescueRepository {
       updateBackgroundSync(hasSyncWork(getAllRecords()));
 
   bool _scheduleDirty = false;
+  bool _syncing = false;
+  Future<void>? _syncWork;
+  Future<List<RescueRecord>>? _statusWork;
+  final _settling = <String, Future<RescueRecord>>{};
 
   Future<void> _saveLocalRecord(RescueRecord record) async {
     await localDataSource.saveRecord(record);
     _scheduleDirty = true;
   }
 
-  /// Gửi, đồng bộ và cập nhật trạng thái cùng đọc-ghi outbox và bản ghi: chạy lần
-  /// lượt để hai luồng (người dùng bấm gửi, có mạng trở lại, hẹn giờ 15 s) không
-  /// gửi trùng message hay ghi đè bản ghi của nhau.
+  /// Serialize metadata/outbox writes; slow image/status requests cannot hold up SOS.
   Future<void> _lock = Future.value();
 
   Future<T> _serial<T>(Future<T> Function() action) {
@@ -110,7 +112,7 @@ class RescueRepositoryImpl implements RescueRepository {
       try {
         return await action();
       } finally {
-        if (_scheduleDirty) {
+        if (_scheduleDirty && !_syncing) {
           _scheduleDirty = false;
           await _updateSchedule();
         }
@@ -127,36 +129,62 @@ class RescueRepositoryImpl implements RescueRepository {
   });
 
   @override
-  Future<RescueRecord> sendRecord(RescueRecord record) => _serial(() async {
-    // Dead-letter do vận chuyển (vd. SEQUENCE_REUSED) được tạo message mới và gửi lại ngay một lần.
-    for (var attempt = 0; attempt < 2; attempt++) {
-      await _enqueue(record);
-      _preparingRecords.remove(record.id);
-      await _flushOutbox(priorityRecordId: record.id);
-      if (!_hasRecoverableDeadLetter(record)) break;
-    }
+  Future<RescueRecord> sendRecord(RescueRecord record) async {
+    await _serial(() async {
+      // Recoverable transport rejection gets one new message and immediate retry.
+      for (var attempt = 0; attempt < 2; attempt++) {
+        await _enqueue(record);
+        _preparingRecords.remove(record.id);
+        await _flushOutbox(priorityRecordId: record.id);
+        if (!_hasRecoverableDeadLetter(record)) break;
+      }
+    });
     return _settle(record);
-  });
+  }
 
   @override
   DateTime? get nextRetryAt => outboxDataSource.nextAttemptAt;
 
   @override
-  Future<void> syncPendingRecords({bool immediate = true}) => _serial(() async {
+  Future<void> syncPendingRecords({bool immediate = true}) =>
+      _syncWork ??= _syncPendingRecords(
+        immediate: immediate,
+      ).whenComplete(() => _syncWork = null);
+
+  Future<void> _syncPendingRecords({required bool immediate}) async {
     final elapsed = Stopwatch()..start();
-    if (immediate) await outboxDataSource.makePendingReady();
-    final pending = getAllRecords()
-        .where((r) => r.awaitingSync && !_preparingRecords.contains(r.id))
-        .toList();
-    for (final record in pending) {
-      await _enqueue(record);
+    _syncing = true;
+    try {
+      final pending = await _serial(() async {
+        if (immediate) await outboxDataSource.makePendingReady();
+        final pending = getAllRecords()
+            .where((r) => r.awaitingSync && !_preparingRecords.contains(r.id))
+            .toList();
+        for (final record in pending) {
+          await _enqueue(record);
+        }
+        await _flushOutbox(maxBatches: 20, budget: elapsed);
+        return pending;
+      });
+      final cursor = pending.indexWhere(
+        (record) => record.id == outboxDataSource.lastAttachmentRecordId,
+      );
+      for (var i = 0; i < pending.length; i++) {
+        if (elapsed.elapsed >= const Duration(seconds: 20)) break;
+        final record = pending[(cursor + 1 + i) % pending.length];
+        if (record.imagePath?.isNotEmpty == true) {
+          // Persist before upload so a timed-out image cannot lead every worker run.
+          await _serial(
+            () => outboxDataSource.rememberAttachmentAttempt(record.id),
+          );
+        }
+        await _settle(record);
+      }
+    } finally {
+      _syncing = false;
+      await _serial(() async {});
     }
-    await _flushOutbox(maxBatches: 20, budget: elapsed);
-    for (final record in pending) {
-      if (elapsed.elapsed >= const Duration(seconds: 20)) break;
-      await _settle(record);
-    }
-  });
+  }
 
   bool _hasRecoverableDeadLetter(RescueRecord record) {
     final message = outboxDataSource.messageForRecord(record.id);
@@ -167,20 +195,31 @@ class RescueRepositoryImpl implements RescueRepository {
 
   /// Chốt kết quả gửi: server từ chối vĩnh viễn → ghi `syncError` để bản ghi không
   /// nằm mãi trong "chờ gửi"; metadata đã ACK và xong ảnh → `synced`.
-  Future<RescueRecord> _settle(RescueRecord record) async {
-    record = localDataSource.getRecord(record.id) ?? record;
-    final message = outboxDataSource.messageForRecord(record.id);
-    if (message != null &&
-        message.deliveryStatus == 'dead_letter' &&
-        !isRecoverableDeadLetter(message.lastError)) {
-      final failed = record.copyWith(
-        syncError: message.lastError ?? 'REJECTED',
-      );
-      await _saveLocalRecord(failed);
-      return localDataSource.getRecord(failed.id) ?? failed;
+  Future<RescueRecord> _settle(RescueRecord record) =>
+      _settling[record.id] ??= _settleOnce(record).whenComplete(() {
+        _settling.remove(record.id);
+      });
+
+  Future<RescueRecord> _settleOnce(RescueRecord record) async {
+    var current = await _serial(() async {
+      final latest = localDataSource.getRecord(record.id) ?? record;
+      final message = outboxDataSource.messageForRecord(record.id);
+      if (message != null &&
+          message.deliveryStatus == 'dead_letter' &&
+          !isRecoverableDeadLetter(message.lastError)) {
+        final failed = latest.copyWith(
+          syncError: message.lastError ?? 'REJECTED',
+        );
+        await _saveLocalRecord(failed);
+        return localDataSource.getRecord(failed.id) ?? failed;
+      }
+      return message != null ? latest : latest.copyWith(metadataSynced: true);
+    });
+    if (!current.metadataSynced ||
+        current.synced ||
+        current.syncError != null) {
+      return current;
     }
-    if (message != null) return record;
-    var current = record.copyWith(metadataSynced: true);
     try {
       final done = await _finishAttachment(current);
       current = current.copyWith(synced: done, clearAttachmentError: true);
@@ -188,8 +227,10 @@ class RescueRepositoryImpl implements RescueRepository {
       debugPrint('Không đọc/gửi được ảnh ${record.id}: $error');
       current = current.copyWith(attachmentError: 'ATTACHMENT_UNAVAILABLE');
     }
-    await _saveLocalRecord(current);
-    return localDataSource.getRecord(current.id) ?? current;
+    return _serial(() async {
+      await _saveLocalRecord(current);
+      return localDataSource.getRecord(current.id) ?? current;
+    });
   }
 
   @override
@@ -197,7 +238,10 @@ class RescueRepositoryImpl implements RescueRepository {
       senderDataSource.sendSms(record);
 
   @override
-  Future<List<RescueRecord>> refreshStatuses() => _serial(() async {
+  Future<List<RescueRecord>> refreshStatuses() =>
+      _statusWork ??= _refreshStatuses().whenComplete(() => _statusWork = null);
+
+  Future<List<RescueRecord>> _refreshStatuses() async {
     // Hỏi cả báo cáo đã có metadata trên server (hết message trong outbox) nhưng
     // ảnh còn chờ gửi: điều phối viên đã thấy và có thể đã điều đội.
     final tracked = getAllRecords()
@@ -219,16 +263,19 @@ class RescueRepositoryImpl implements RescueRepository {
       final statuses = await syncDataSource.fetchStatuses([
         for (final record in chunk) record.id,
       ]);
-      for (final record in chunk) {
-        final next = advancedStatus(record.status, statuses[record.id]);
-        if (next == null) continue;
-        final updated = record.copyWith(status: next);
-        await _saveLocalRecord(updated);
-        changed.add(updated);
-      }
+      await _serial(() async {
+        for (final record in chunk) {
+          final latest = localDataSource.getRecord(record.id) ?? record;
+          final next = advancedStatus(latest.status, statuses[record.id]);
+          if (next == null) continue;
+          final updated = latest.copyWith(status: next);
+          await _saveLocalRecord(updated);
+          changed.add(localDataSource.getRecord(updated.id) ?? updated);
+        }
+      });
     }
     return changed;
-  });
+  }
 
   Future<void> _enqueue(RescueRecord record) async {
     record = localDataSource.getRecord(record.id) ?? record;
@@ -243,6 +290,7 @@ class RescueRepositoryImpl implements RescueRepository {
     Stopwatch? budget,
   }) async {
     final elapsed = budget ?? (Stopwatch()..start());
+    var batchLimit = 50;
     // Bound worker time and leave retries to backoff rather than a tight loop.
     for (
       var i = 0;
@@ -250,10 +298,14 @@ class RescueRepositoryImpl implements RescueRepository {
       i++
     ) {
       var batch = outboxDataSource.readyMessages(
+        limit: batchLimit,
         priorityRecordId: priorityRecordId,
       );
       if (batch.isEmpty) return;
-      if (serverLocator != null && !await serverLocator!.ensureConnected()) {
+      if (serverLocator != null &&
+          !await serverLocator!.ensureConnected(
+            force: priorityRecordId != null,
+          )) {
         return;
       }
 
@@ -306,10 +358,19 @@ class RescueRepositoryImpl implements RescueRepository {
           }
         }
       } on DioException catch (error) {
-        retryLater = true;
         final status = error.response?.statusCode;
+        if (status == 413 && batch.length > 1) {
+          await outboxDataSource.releaseInFlight(batch);
+          batchLimit = (batch.length + 1) ~/ 2;
+          i--; // Splitting is bounded by batch size; only sent batches use the pass limit.
+          continue;
+        }
         final retryable =
-            status == null || status == 408 || status == 429 || status >= 500;
+            status == null ||
+            status == 408 ||
+            status == 429 ||
+            (status >= 500 && status < 600);
+        retryLater = retryable;
         for (final message in batch) {
           if (retryable) {
             await outboxDataSource.scheduleRetry(
@@ -319,7 +380,7 @@ class RescueRepositoryImpl implements RescueRepository {
           } else {
             await outboxDataSource.markDeadLetter(
               message.messageId,
-              'HTTP_$status',
+              status == 413 ? 'REQUEST_TOO_LARGE' : 'HTTP_$status',
             );
           }
         }
