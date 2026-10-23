@@ -83,8 +83,7 @@ class _HomeScreenState extends State<HomeScreen> {
         SnackBar(
           content: Text(switch (state) {
             SosState.accepted => 'Máy chủ đã tiếp nhận SOS.',
-            SosState.sms =>
-              'Đã gửi SMS; chưa xác nhận tiếp nhận. SOS sẽ đồng bộ khi có mạng.',
+            SosState.sms => smsStatusMessage(SmsStatus.sent),
             SosState.smsUnknown => smsStatusMessage(SmsStatus.unknown),
             SosState.smsFailed => smsStatusMessage(SmsStatus.failed),
             SosState.queued => 'SOS trong hàng đợi, sẽ gửi khi có mạng.',

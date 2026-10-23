@@ -290,6 +290,7 @@ class RescueRepositoryImpl implements RescueRepository {
     Stopwatch? budget,
   }) async {
     final elapsed = budget ?? (Stopwatch()..start());
+    var batchLimit = 50;
     // Bound worker time and leave retries to backoff rather than a tight loop.
     for (
       var i = 0;
@@ -297,6 +298,7 @@ class RescueRepositoryImpl implements RescueRepository {
       i++
     ) {
       var batch = outboxDataSource.readyMessages(
+        limit: batchLimit,
         priorityRecordId: priorityRecordId,
       );
       if (batch.isEmpty) return;
@@ -353,10 +355,19 @@ class RescueRepositoryImpl implements RescueRepository {
           }
         }
       } on DioException catch (error) {
-        retryLater = true;
         final status = error.response?.statusCode;
+        if (status == 413 && batch.length > 1) {
+          await outboxDataSource.releaseInFlight(batch);
+          batchLimit = (batch.length + 1) ~/ 2;
+          i--; // Splitting is bounded by batch size; only sent batches use the pass limit.
+          continue;
+        }
         final retryable =
-            status == null || status == 408 || status == 429 || status >= 500;
+            status == null ||
+            status == 408 ||
+            status == 429 ||
+            (status >= 500 && status < 600);
+        retryLater = retryable;
         for (final message in batch) {
           if (retryable) {
             await outboxDataSource.scheduleRetry(
@@ -366,7 +377,7 @@ class RescueRepositoryImpl implements RescueRepository {
           } else {
             await outboxDataSource.markDeadLetter(
               message.messageId,
-              'HTTP_$status',
+              status == 413 ? 'REQUEST_TOO_LARGE' : 'HTTP_$status',
             );
           }
         }
