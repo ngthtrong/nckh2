@@ -681,6 +681,62 @@ void main() {
     expect(kServerBaseUrl, url);
   });
 
+  test(
+    'new send bypasses failed LAN discovery backoff; worker does not',
+    () async {
+      const url = 'http://192.168.1.20:8000';
+      var serverUp = false;
+      var scans = 0;
+      final locator = ServerLocator(
+        allowInsecureLan: true,
+        configuredUrl: '',
+        candidates: (_) async {
+          scans++;
+          return [url];
+        },
+        probe: (_) async => serverUp ? 'abcdef0123456789' : null,
+      );
+      await locator.init(outbox);
+      expect(scans, 1);
+      final sync = _FakeSync([]);
+      final r = RescueRepositoryImpl(
+        localDataSource: records,
+        senderDataSource: SenderRemoteDataSource(),
+        outboxDataSource: outbox,
+        syncDataSource: sync,
+        serverLocator: locator,
+      );
+      final record = _record('sos-lan-recovered');
+      await r.saveRecord(record);
+      await r.queueRecord(record);
+      serverUp = true;
+      await r.syncPendingRecords(immediate: false);
+      expect(scans, 1);
+      expect(sync.batches, isEmpty);
+      final sent = await r.sendRecord(record);
+      expect(scans, 2);
+      expect(sent.metadataSynced, isTrue);
+      expect(sent.synced, isTrue);
+      expect(sync.batches, hasLength(1));
+    },
+  );
+
+  test(
+    'location accuracy survives local storage and reaches the outbox',
+    () async {
+      final record = _record(
+        'accurate-location',
+      ).copyWith(locationAccuracyMeters: 250);
+      await records.saveRecord(record);
+      await records.init(hivePath: dir.path);
+      final stored = records.getRecord(record.id)!;
+      expect(stored.locationAccuracyMeters, 250);
+      expect(stored.copyWith(status: 'dispatched').locationAccuracyMeters, 250);
+      final message = await outbox.enqueueCreate(rescueRecordPayload(stored));
+      expect(message.payload['locationAccuracyMeters'], 250);
+    },
+  );
+
   test('metadata đã ACK nhưng ảnh chỉ gửi sau khi xác minh IP mới', () async {
     const oldUrl = 'https://rescue-old.example';
     const newUrl = 'https://rescue-new.example';

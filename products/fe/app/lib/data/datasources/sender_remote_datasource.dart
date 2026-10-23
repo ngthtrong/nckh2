@@ -205,6 +205,7 @@ String smsBody(RescueRecord r) {
   final vulnerable = r.vulnerableGroups.join(',');
   String safe(String text) => text.replaceAll('|', '/').replaceAll('\n', ' ');
   return 'SOS|id:${r.id}|pos:$pos|trapped:${r.trappedCount}|injured:${r.injuredCount}'
+      '${r.locationAccuracyMeters != null ? '|acc:${r.locationAccuracyMeters!.ceil()}' : ''}'
       '${vulnerable.isNotEmpty ? '|vuln:${safe(vulnerable)}' : ''}'
       '${r.cannotMove ? '|immobile:1' : ''}'
       '${r.severeSigns.isNotEmpty ? '|severe:${r.severeSigns.map(canonicalSevereSign).map(safe).join(',')}' : ''}';

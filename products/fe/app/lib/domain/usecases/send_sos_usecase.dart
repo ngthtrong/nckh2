@@ -18,7 +18,8 @@ class SendSosUseCase {
     required double? lng,
     required SendMode sendMode,
     String? contactPhone,
-    Future<({double? lat, double? lng})> Function()? locate,
+    Future<({double? lat, double? lng, double? accuracyMeters})> Function()?
+    locate,
     Future<SendMode> Function()? chooseMode,
   }) async {
     final createdAt = now();
@@ -55,7 +56,11 @@ class SendSosUseCase {
     try {
       if (locate != null) {
         final position = await locate();
-        record = record.copyWith(lat: position.lat, lng: position.lng);
+        record = record.copyWith(
+          lat: position.lat,
+          lng: position.lng,
+          locationAccuracyMeters: position.accuracyMeters,
+        );
         await repository.saveRecord(record);
       }
       return await deliverRecord(

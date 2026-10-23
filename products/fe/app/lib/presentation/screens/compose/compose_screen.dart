@@ -555,7 +555,10 @@ class _ComposeScreenState extends State<ComposeScreen> {
       onPopInvokedWithResult: (didPop, result) {
         if (!didPop && !_isSubmitting) widget.onBack();
       },
-      child: scaffold,
+      child: AbsorbPointer(
+        absorbing: _isSubmitting,
+        child: ExcludeFocus(excluding: _isSubmitting, child: scaffold),
+      ),
     );
   }
 }

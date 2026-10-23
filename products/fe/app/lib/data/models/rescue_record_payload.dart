@@ -5,6 +5,8 @@ Map<String, dynamic> rescueRecordPayload(RescueRecord record) => {
   'createdAt': record.createdAt.toUtc().toIso8601String(),
   'lat': record.lat,
   'lng': record.lng,
+  if (record.locationAccuracyMeters != null)
+    'locationAccuracyMeters': record.locationAccuracyMeters,
   'trappedCount': record.trappedCount,
   'injuredCount': record.injuredCount,
   'vulnerableGroups': record.vulnerableGroups,

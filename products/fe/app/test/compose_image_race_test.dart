@@ -109,6 +109,51 @@ void main() {
     expect(tester.takeException(), isNull);
   });
 
+  testWidgets('pending submit locks input and restores editing on failure', (
+    tester,
+  ) async {
+    final controller = Controller()..submission = Completer<RescueRecord?>();
+    await show(tester, controller);
+    final description = find.byType(TextField).last;
+    await tester.enterText(description, 'Cần cứu hộ');
+    await tester.pump();
+    await tester.tap(find.text('Gửi ngay'));
+    await tester.pump();
+
+    final addPerson = find.widgetWithIcon(IconButton, Icons.add).first;
+    await tester.ensureVisible(addPerson);
+    await tester.tap(addPerson, warnIfMissed: false);
+    await tester.pump();
+    expect(
+      tester.widget<TextField>(find.byType(TextField).first).controller!.text,
+      '0',
+    );
+
+    final gallery = find.text('Chọn từ máy');
+    await tester.ensureVisible(gallery);
+    await tester.tap(gallery, warnIfMissed: false);
+    await tester.pump();
+    expect(controller.analyses, isEmpty);
+    final editor = tester.widget<EditableText>(find.byType(EditableText).last);
+    editor.focusNode.requestFocus();
+    await tester.pump();
+    expect(editor.focusNode.hasFocus, isFalse);
+
+    controller.submission!.complete(null);
+    await tester.pump();
+    await tester.enterText(description, 'Cần xuồng');
+    expect(tester.widget<TextField>(description).controller!.text, 'Cần xuồng');
+    await tester.ensureVisible(addPerson);
+    await tester.tap(addPerson);
+    await tester.pump();
+    expect(
+      tester.widget<TextField>(find.byType(TextField).first).controller!.text,
+      '1',
+    );
+    expect(controller.submissions, 1);
+    expect(tester.takeException(), isNull);
+  });
+
   testWidgets('finishing submit after form disposal is safe', (tester) async {
     final controller = Controller()..submission = Completer<RescueRecord?>();
     await show(tester, controller);

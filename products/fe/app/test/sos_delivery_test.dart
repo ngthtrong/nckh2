@@ -77,7 +77,7 @@ void main() {
           expect(repo.records, isNotEmpty);
           expect(repo.records.values.last.lat, isNull);
           locationReads++;
-          return (lat: 10.0, lng: 106.0);
+          return (lat: 10.0, lng: 106.0, accuracyMeters: 25.0);
         },
         chooseMode: () async {
           expect(repo.records.values.last.lat, 10.0);
@@ -86,6 +86,7 @@ void main() {
       );
       final first = await send(SendSosUseCase(repo, now: () => clock));
       expect(first.contactPhone, '0900000000');
+      expect(first.locationAccuracyMeters, 25);
       clock = clock.add(const Duration(seconds: 2));
       for (var i = 0; i < 5; i++) {
         final again = await send(SendSosUseCase(repo, now: () => clock));
@@ -112,7 +113,8 @@ void main() {
           lat: null,
           lng: null,
           sendMode: SendMode.textOnly,
-          locate: () async => (lat: lat, lng: lat == null ? null : 106.0),
+          locate: () async =>
+              (lat: lat, lng: lat == null ? null : 106.0, accuracyMeters: null),
         );
         expect(result.lat, lat);
         expect(result.lng, lat == null ? null : 106.0);

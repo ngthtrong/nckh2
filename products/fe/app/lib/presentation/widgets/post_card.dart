@@ -34,19 +34,28 @@ class PostCard extends StatelessWidget {
           children: [
             Row(
               children: [
-                Text(
-                  '#$idShort',
-                  style: const TextStyle(
-                    color: Color(0xFF374151),
-                    fontWeight: FontWeight.w800,
-                    fontSize: 13,
+                Expanded(
+                  child: Text(
+                    '#$idShort',
+                    style: const TextStyle(
+                      color: Color(0xFF374151),
+                      fontWeight: FontWeight.w800,
+                      fontSize: 13,
+                    ),
                   ),
                 ),
-                const Spacer(),
-                StatusBadge(status: record.status),
+                const SizedBox(width: 8),
+                StatusBadge(record: record),
               ],
             ),
             const SizedBox(height: 8),
+            if (record.syncError != null) ...[
+              Text(
+                'Máy chủ từ chối báo cáo (${record.syncError}); app không tự gửi lại. Hãy gọi 112 hoặc tổng đài cứu hộ.',
+                style: const TextStyle(color: Color(0xFFDC2626)),
+              ),
+              const SizedBox(height: 8),
+            ],
             if (record.smsStatus != SmsStatus.notAttempted) ...[
               Text(
                 smsStatusMessage(record.smsStatus),
@@ -69,12 +78,14 @@ class PostCard extends StatelessWidget {
                   color: Color(0xFF9CA3AF),
                 ),
                 const SizedBox(width: 4),
-                Text(
-                  timeStr,
-                  style: const TextStyle(
-                    color: Color(0xFF6B7280),
-                    fontSize: 12,
-                    fontWeight: FontWeight.w600,
+                Expanded(
+                  child: Text(
+                    timeStr,
+                    style: const TextStyle(
+                      color: Color(0xFF6B7280),
+                      fontSize: 12,
+                      fontWeight: FontWeight.w600,
+                    ),
                   ),
                 ),
               ],
@@ -88,12 +99,14 @@ class PostCard extends StatelessWidget {
                   color: Color(0xFFDC2626),
                 ),
                 const SizedBox(width: 4),
-                Text(
-                  record.locationText,
-                  style: const TextStyle(
-                    color: Color(0xFF374151),
-                    fontSize: 12,
-                    fontWeight: FontWeight.w600,
+                Expanded(
+                  child: Text(
+                    record.locationText,
+                    style: const TextStyle(
+                      color: Color(0xFF374151),
+                      fontSize: 12,
+                      fontWeight: FontWeight.w600,
+                    ),
                   ),
                 ),
               ],
