@@ -1,11 +1,15 @@
+// Màn hình cài đặt: tài khoản, model/benchmark và công cụ E2E Android dành riêng cho admin.
 import 'package:flutter/material.dart';
+import 'package:flutter/foundation.dart' show kIsWeb, defaultTargetPlatform;
 import '../../../config.dart';
 
 import '../../../core/constants/app_colors.dart';
 import '../../../domain/entities/ai_model_type.dart';
 import '../../../domain/entities/user.dart';
+import '../../../domain/services/mobile_e2e_runner.dart' show mobileE2eEnabled;
 import '../../controllers/app_controller.dart';
 import '../../widgets/model_benchmark_card.dart';
+import '../../widgets/mobile_e2e_card.dart';
 import '../../widgets/admin_login_button.dart';
 import '../../widgets/admin_model_download_button.dart';
 
@@ -725,69 +729,103 @@ class _SettingsScreenState extends State<SettingsScreen> {
                             child: const Text('Đăng xuất admin'),
                           ),
                         ),
-                        // Section: MÔ HÌNH AI ON-DEVICE (EDGE AI)
-                        _buildSectionLabel('MÔ HÌNH AI ON-DEVICE (EDGE AI)'),
-                        const SizedBox(height: 8),
-                        Container(
-                          decoration: BoxDecoration(
-                            color: const Color(0xFFF9FAFB),
-                            borderRadius: BorderRadius.circular(20),
-                            border: Border.all(color: const Color(0xFFE5E7EB)),
+                        if (mobileE2eEnabled &&
+                            !kIsWeb &&
+                            defaultTargetPlatform ==
+                                TargetPlatform.android) ...[
+                          Card(
+                            child: ExpansionTile(
+                              key: const Key('admin-e2e-section'),
+                              maintainState: true,
+                              dense: true,
+                              leading: const Icon(Icons.route_outlined),
+                              title: const Text('Thực nghiệm E2E'),
+                              children: [MobileE2eCard(controller: c)],
+                            ),
                           ),
-                          padding: const EdgeInsets.all(16),
-                          child: Column(
-                            crossAxisAlignment: CrossAxisAlignment.start,
+                          const SizedBox(height: 8),
+                        ],
+                        Card(
+                          child: ExpansionTile(
+                            key: const Key('admin-model-section'),
+                            maintainState: true,
+                            dense: true,
+                            leading: const Icon(Icons.science_outlined),
+                            title: const Text('Thực nghiệm model'),
+                            childrenPadding: const EdgeInsets.all(12),
                             children: [
-                              AdminModelDownloadButton(controller: c),
-                              ...AiModelType.values.map((model) {
-                                final available = model == AiModelType.onnx
-                                    ? c.isOnnxReady
-                                    : c.isPteReady;
-                                final selected = c.currentModel == model;
-                                return ListTile(
-                                  contentPadding: EdgeInsets.zero,
-                                  onTap: available && !c.isBenchmarking
-                                      ? () => c.switchAiModel(model)
-                                      : null,
-                                  title: Text(model.name),
-                                  subtitle: Text(
-                                    available
-                                        ? model.description
-                                        : 'Runtime chưa sẵn sàng trên thiết bị này',
-                                  ),
-                                  trailing: Icon(
-                                    selected
-                                        ? Icons.radio_button_checked
-                                        : Icons.radio_button_off,
-                                    color: selected
-                                        ? AppColors.primaryRed
-                                        : const Color(0xFF9CA3AF),
-                                  ),
-                                );
-                              }),
-                              const Divider(height: 16),
-                              SwitchListTile.adaptive(
-                                contentPadding: EdgeInsets.zero,
-                                title: const Text('So sánh ONNX và PTE thật'),
-                                subtitle: const Text(
-                                  'Chạy cả hai runtime trên cùng tensor đầu vào',
-                                ),
-                                value: c.isDualComparison,
-                                onChanged:
-                                    c.isPteReady &&
-                                        c.isOnnxReady &&
-                                        !c.isBenchmarking
-                                    ? c.toggleDualComparison
-                                    : null,
+                              _buildSectionLabel(
+                                'MÔ HÌNH AI ON-DEVICE (EDGE AI)',
                               ),
+                              const SizedBox(height: 8),
+                              Container(
+                                decoration: BoxDecoration(
+                                  color: const Color(0xFFF9FAFB),
+                                  borderRadius: BorderRadius.circular(20),
+                                  border: Border.all(
+                                    color: const Color(0xFFE5E7EB),
+                                  ),
+                                ),
+                                padding: const EdgeInsets.all(16),
+                                child: Column(
+                                  crossAxisAlignment: CrossAxisAlignment.start,
+                                  children: [
+                                    AdminModelDownloadButton(controller: c),
+                                    ...AiModelType.values.map((model) {
+                                      final available =
+                                          model == AiModelType.onnx
+                                          ? c.isOnnxReady
+                                          : c.isPteReady;
+                                      final selected = c.currentModel == model;
+                                      return ListTile(
+                                        contentPadding: EdgeInsets.zero,
+                                        onTap: available && !c.isBenchmarking
+                                            ? () => c.switchAiModel(model)
+                                            : null,
+                                        title: Text(model.name),
+                                        subtitle: Text(
+                                          available
+                                              ? model.description
+                                              : 'Runtime chưa sẵn sàng trên thiết bị này',
+                                        ),
+                                        trailing: Icon(
+                                          selected
+                                              ? Icons.radio_button_checked
+                                              : Icons.radio_button_off,
+                                          color: selected
+                                              ? AppColors.primaryRed
+                                              : const Color(0xFF9CA3AF),
+                                        ),
+                                      );
+                                    }),
+                                    const Divider(height: 16),
+                                    SwitchListTile.adaptive(
+                                      contentPadding: EdgeInsets.zero,
+                                      title: const Text(
+                                        'So sánh ONNX và PTE thật',
+                                      ),
+                                      subtitle: const Text(
+                                        'Chạy cả hai runtime trên cùng tensor đầu vào',
+                                      ),
+                                      value: c.isDualComparison,
+                                      onChanged:
+                                          c.isPteReady &&
+                                              c.isOnnxReady &&
+                                              !c.isBenchmarking
+                                          ? c.toggleDualComparison
+                                          : null,
+                                    ),
+                                  ],
+                                ),
+                              ),
+
+                              const SizedBox(height: 20),
+                              _buildSectionLabel('BENCHMARK TRÊN ĐIỆN THOẠI'),
+                              const SizedBox(height: 8),
+                              ModelBenchmarkCard(controller: c),
                             ],
                           ),
                         ),
-
-                        const SizedBox(height: 20),
-                        _buildSectionLabel('BENCHMARK TRÊN ĐIỆN THOẠI'),
-                        const SizedBox(height: 8),
-                        ModelBenchmarkCard(controller: c),
                       ],
 
                       const SizedBox(height: 20),
