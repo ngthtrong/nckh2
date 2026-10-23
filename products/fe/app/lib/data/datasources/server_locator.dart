@@ -13,26 +13,33 @@ class ServerLocator {
       followRedirects: false,
     ),
   );
+  static final Dio _knownServerDio = Dio(
+    BaseOptions(
+      connectTimeout: const Duration(seconds: 5),
+      receiveTimeout: const Duration(seconds: 5),
+      followRedirects: false,
+    ),
+  );
 
   ServerLocator({
     Future<List<String>> Function(int port)? candidates,
-    Future<String?> Function(String url)? probe,
+    this._probe,
     DateTime Function()? now,
     this.allowInsecureLan = kAllowInsecureLan,
     this.allowLanScan = true,
     this.configuredUrl = kConfiguredServerUrl,
   }) : _candidates = candidates ?? lanCandidates,
-       _now = now ?? DateTime.now,
-       _probe = probe ?? _probeServer;
+       _now = now ?? DateTime.now;
 
   final Future<List<String>> Function(int port) _candidates;
-  final Future<String?> Function(String url) _probe;
+  final Future<String?> Function(String url)? _probe;
   final DateTime Function() _now;
   final bool allowInsecureLan;
   final bool allowLanScan;
   final String configuredUrl;
   OutboxLocalDataSource? _outbox;
   String? _connectedUrl;
+  Future<bool>? _connecting;
   DateTime? _nextScan;
   int _failedScans = 0;
 
@@ -49,7 +56,12 @@ class ServerLocator {
     return ensureConnected(force: true);
   }
 
-  Future<bool> ensureConnected({bool force = false}) async {
+  Future<bool> ensureConnected({bool force = false}) =>
+      _connecting ??= _ensureConnected(force: force).whenComplete(() {
+        _connecting = null;
+      });
+
+  Future<bool> _ensureConnected({required bool force}) async {
     final outbox = _outbox!;
     final expectedId = outbox.serverId;
     final hints = <String>{
@@ -57,7 +69,7 @@ class ServerLocator {
       configuredUrl,
     };
     for (final url in hints) {
-      final id = await _identity(url);
+      final id = await _identity(url, knownServer: true);
       if (id != null && (expectedId == null || id == expectedId)) {
         await _connect(outbox, id, url);
         return true;
@@ -107,12 +119,13 @@ class ServerLocator {
     return false;
   }
 
-  Future<String?> _identity(String url) async {
+  Future<String?> _identity(String url, {bool knownServer = false}) async {
     if (!isAllowedServerUrl(url, allowInsecureLan: allowInsecureLan)) {
       return null;
     }
     try {
-      return await _probe(url);
+      return await (_probe?.call(url) ??
+          _probeServer(url, knownServer: knownServer));
     } catch (_) {
       return null;
     }
@@ -130,8 +143,12 @@ class ServerLocator {
     setServerBaseUrl(url);
   }
 
-  static Future<String?> _probeServer(String url) async {
-    final response = await _dio.get<Map<String, dynamic>>('$url/healthz');
+  static Future<String?> _probeServer(
+    String url, {
+    required bool knownServer,
+  }) async {
+    final dio = knownServer ? _knownServerDio : _dio;
+    final response = await dio.get<Map<String, dynamic>>('$url/healthz');
     final data = response.data;
     final id = data?['serverId'];
     if (data?['status'] != 'ok' || id is! String) return null;

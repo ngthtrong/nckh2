@@ -2,7 +2,7 @@ import 'package:flutter/material.dart';
 
 class ScreenHeader extends StatelessWidget {
   final String title;
-  final VoidCallback onBack;
+  final VoidCallback? onBack;
   final Widget? action;
 
   const ScreenHeader({

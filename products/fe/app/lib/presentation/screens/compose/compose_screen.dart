@@ -130,14 +130,14 @@ class _ComposeScreenState extends State<ComposeScreen> {
         !_isSubmitting &&
         inputError == null;
 
-    return Scaffold(
+    final scaffold = Scaffold(
       backgroundColor: Colors.white,
       body: SafeArea(
         child: Column(
           children: [
             ScreenHeader(
               title: 'Gửi bài cứu hộ',
-              onBack: widget.onBack,
+              onBack: _isSubmitting ? null : widget.onBack,
               action: ElevatedButton(
                 onPressed: canSubmit ? _handleSubmit : null,
                 style: ElevatedButton.styleFrom(
@@ -549,6 +549,13 @@ class _ComposeScreenState extends State<ComposeScreen> {
           ],
         ),
       ),
+    );
+    return PopScope(
+      canPop: false,
+      onPopInvokedWithResult: (didPop, result) {
+        if (!didPop && !_isSubmitting) widget.onBack();
+      },
+      child: scaffold,
     );
   }
 }
