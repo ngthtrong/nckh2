@@ -193,6 +193,9 @@ nếu runtime hoặc loại kết quả thay đổi, phép đo bị hủy để 
 Ảnh đính kèm được chép vào vùng lưu lâu dài trước khi xếp hàng. Nếu ảnh cũ bị
 mất/không đọc được, app giữ trạng thái chưa gửi xong và báo lỗi ảnh; ACK nội dung
 đã nhận được lưu riêng để không tạo lại message mỗi lần thử gửi ảnh.
+Lỗi HTTP 408/429/5xx và lỗi kết nối được thử lại; HTTP 4xx còn lại được ghi lỗi
+vĩnh viễn thay vì tạo message mới vô hạn. HTTP 413 được thử bằng batch nhỏ hơn;
+nếu một message riêng vẫn quá lớn, chỉ báo cáo đó nhận lỗi `REQUEST_TOO_LARGE`.
 Đăng xuất chỉ xóa trạng thái đăng nhập, giữ tài khoản/hồ sơ local để đăng nhập lại.
 
 Form giới hạn mỗi mục số người từ 0 đến 10.000; mô tả tối đa 300 từ và 2.000
@@ -200,9 +203,10 @@ ký tự Unicode, từ được tách bằng khoảng trắng/xuống dòng. B�
 giới hạn; vượt giới hạn thì không gửi. Luồng tạo báo cáo cũng kiểm tra lại trước
 khi chép ảnh/lưu dữ liệu. Ảnh không đọc/lưu được sẽ hiện lỗi trên form, giữ nội
 dung để người dùng bỏ ảnh hoặc chọn lại; chưa tạo báo cáo trong trường hợp này.
-Mô tả dài có thể tạo nhiều phần SMS và phát sinh phí; callback chỉ xác nhận khi
-mọi phần đã gửi. Gateway backend giữ đủ mô tả 2.000 ký tự cộng các trường SOS;
-cần cập nhật/rebuild backend cùng bản app này nếu đang dùng gateway SMS.
+SMS dự phòng chỉ gửi tóm tắt gồm mã báo cáo, vị trí, số người và các trường nguy
+cấp; không gửi mô tả tự do. Mô tả đầy đủ và ảnh được giữ để đồng bộ khi có mạng.
+Các trường khẩn cấp vẫn có thể tạo SMS nhiều phần và phát sinh phí; callback chỉ
+xác nhận khi mọi phần đã gửi. Gateway vẫn nhận được mô tả từ SMS của app cũ.
 
 SOS/báo cáo mới chụp số điện thoại từ hồ sơ local vào record, giữ qua lần mở lại
 app và gửi `contactPhone` cùng metadata. Khách chưa có hồ sơ và báo cáo cũ không

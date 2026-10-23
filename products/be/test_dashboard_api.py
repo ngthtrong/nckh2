@@ -487,6 +487,21 @@ class DashboardApiTest(unittest.TestCase):
         self.assertEqual((merged["contactPhone"], merged["description"]), ("+84900000001", "Nước tới mái | cần xuồng"))
         self.assertEqual([e["kind"] for e in storage.get_report_events(rid)], ["received"])
 
+    def test_summary_sms_receives_full_description_from_later_sync(self):
+        main.SMS_GATEWAY_TOKEN = "gw-secret"
+        rid = "sos-summary-full-description"
+        text = f"SOS|id:{rid}|pos:16.05000,108.20000|trapped:3|injured:1|immobile:1|severe:heavy_bleeding"
+        response = self.sms({"from": "+84900000001", "text": text})
+        self.assertEqual(response.status_code, 201, response.text)
+        self.assertFalse(storage.get_report_by_id(rid)["description"])
+        description = "cứu " * 299 + "x" * 804
+        result = self.sync(_message(1, "CREATE_RESCUE_RECORD", _report(rid, description=description)))
+        self.assertEqual(result[0]["status"], "accepted")
+        merged = storage.get_report_by_id(rid)
+        self.assertEqual(merged["description"], description)
+        self.assertEqual(merged["contactPhone"], "+84900000001")
+        self.assertEqual([e["kind"] for e in storage.get_report_events(rid)], ["received"])
+
     def test_free_text_sms_goes_to_review(self):
         main.SMS_GATEWAY_TOKEN = "gw-secret"
         res = self.client.post("/api/sms/inbound?token=gw-secret",

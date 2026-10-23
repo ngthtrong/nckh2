@@ -7,13 +7,20 @@ import '../../core/sync/payload_hash.dart';
 import '../models/sync_message_model.dart';
 
 /// Dead-letter không do nội dung báo cáo mà do message/vận chuyển (trùng số thứ tự
-/// khi hai tiến trình cùng ghi outbox, message hỏng, request cả batch bị từ chối):
-/// tạo message mới (message_id và sequence_number mới) là gửi được. Các mã khác
+/// khi hai tiến trình cùng ghi outbox, message hỏng): tạo message mới với ID và
+/// sequence mới. HTTP chỉ phục hồi với 408/429/5xx của dữ liệu cũ. Các mã khác
 /// (`INVALID_PAYLOAD`, `EXPIRED`, `REPORT_ID_CONFLICT`...) là từ chối vĩnh viễn.
-bool isRecoverableDeadLetter(String? code) =>
-    code == 'SEQUENCE_REUSED' ||
-    code == 'ID_REUSED_WITH_DIFFERENT_PAYLOAD' ||
-    (code != null && code.startsWith('HTTP_'));
+bool isRecoverableDeadLetter(String? code) {
+  if (code == 'SEQUENCE_REUSED' || code == 'ID_REUSED_WITH_DIFFERENT_PAYLOAD') {
+    return true;
+  }
+  final status = code != null && code.startsWith('HTTP_')
+      ? int.tryParse(code.substring(5))
+      : null;
+  return status == 408 ||
+      status == 429 ||
+      (status != null && status >= 500 && status < 600);
+}
 
 class OutboxLocalDataSource {
   static const boxName = 'sync_outbox';
@@ -159,6 +166,17 @@ class OutboxLocalDataSource {
       for (final message in messages)
         message.messageId: message
             .copyWith(deliveryStatus: 'in_flight')
+            .toStorageJson(),
+    });
+  }
+
+  /// A rejected batch can be retried in smaller pieces with the same message IDs.
+  Future<void> releaseInFlight(Iterable<SyncMessageModel> messages) async {
+    final now = DateTime.now().toUtc();
+    await _box!.putAll({
+      for (final message in messages)
+        message.messageId: message
+            .copyWith(deliveryStatus: 'pending', nextAttemptAt: now)
             .toStorageJson(),
     });
   }
