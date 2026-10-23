@@ -4,7 +4,7 @@
 
 Trang chủ app hiện chỉ hiển thị mạng và hàng đợi, không còn hiển thị thông báo “Bản web không chạy AI on-device”. Nếu thiếu thông báo này, runner ghi **CHƯA CÓ** cho tiêu chí giải thích trạng thái AI trên web, không ghi PASS. Tiêu chí này đo khoảng trống giao diện; các kiểm tra SOS, chế độ gửi ảnh, upload, GPS và đồng bộ vẫn ghi FAIL khi không đạt. Trạng thái runtime trong phần cài đặt quản trị không thay thế thông báo cho người dùng khách.
 
-Runner kiểm tra luồng app Flutter web → backend → dashboard với Playwright. Backend được nạp một bộ báo cáo bán tổng hợp từ `thucnghiem/data/gold/run_NNN/algorithm_input.json`. `run_manifest.json` của cùng run dùng để xác nhận danh tính, seed và xuất xứ bộ dữ liệu; nó **không** chứa các báo cáo được nạp. Ảnh của bài cứu hộ đến từ **một dòng** `split=val`, `label=high`, JPG/JPEG trong `../split_val_mobilenetv3_large.csv`; mặc định lấy dòng hợp lệ đầu tiên theo thứ tự CSV, kiểm tra MD5 rồi dùng cùng ảnh cho các chế độ mạng. Đây là phạm vi kiểm tra của runner E2E gốc, không phải đánh giá hết 257 ảnh validation.
+Runner kiểm tra luồng app Flutter web → backend → dashboard với Playwright. Backend được nạp một bộ báo cáo bán tổng hợp từ `thucnghiem/data/gold/run_NNN/algorithm_input.json`. `run_manifest.json` của cùng run dùng để xác nhận danh tính, seed và xuất xứ bộ dữ liệu; nó **không** chứa các báo cáo được nạp. Ảnh của bài cứu hộ đến từ **một dòng** `split=val`, `label=high` hoặc `medium`, JPG/JPEG trong `../split_val_mobilenetv3_large.csv`. Mặc định run_001/run_002 lấy ảnh đã khóa trong `run_images.json`, kiểm tra nhãn, MD5 và SHA-256 rồi dùng cùng ảnh trong các chế độ mạng của mỗi run. Run khác vẫn mặc định lấy ảnh high hợp lệ đầu tiên. Đây là phạm vi kiểm tra của runner E2E gốc, không phải đánh giá hết 257 ảnh validation.
 
 ## File và thư mục
 
@@ -93,7 +93,7 @@ Thông thường chỉ chạy lệnh `e2e_system.py --run`; runner tự gọi Do
 
 `docker/fe.Dockerfile` trong thư mục thực nghiệm xóa `.dart_tool` và cấu hình plugin được chép từ Windows rồi tạo lại package config bằng Flutter SDK Linux trong container. Nếu đã chạy Docker trước khi có thay đổi này, chạy lại lệnh E2E ở trên để build lại image. Thông báo `docker compose ps` không có container sau khi build lỗi là bình thường: dịch vụ chưa được tạo. Stack demo cũ dùng cổng 8000/8080/8081; E2E dùng 18000/18080/18081 nên không cần tắt stack đó.
 
-Chọn run khác bằng `--seed-run N` với N từ 1 đến 80; ví dụ `--seed-run 40`. Mỗi lệnh `--run` sinh một `RUN_ID` và Docker volume riêng. Khi muốn chọn ảnh khác, `--image-relative-path "high/ten_anh.jpg"` chỉ chấp nhận một dòng high/JPG thuộc **chính CSV validation**. Các đường dẫn cần thay đổi về sau được ghi rõ ở đầu `e2e_system.py`: `GOLD_DIR`, `CSV_PATH`, `IMAGE_ROOT`, `LOGS_DIR`, `RESULTS_DIR`, `CHECKPOINTS_DIR`, `DATA_DIR`, `UPLOADS_DIR`.
+Chọn run khác bằng `--seed-run N` với N từ 1 đến 80; ví dụ `--seed-run 40`. Mỗi lệnh `--run` sinh một `RUN_ID` và Docker volume riêng. Khi muốn chọn ảnh khác, `--image-relative-path "medium/flood_6286.jpg"` cho phép ghi đè ảnh mặc định bằng một dòng high/medium JPG/JPEG thuộc **chính CSV validation**; vẫn kiểm tra MD5 và khóa hash trong manifest của lượt mới. Các đường dẫn cần thay đổi về sau được ghi rõ ở đầu `e2e_system.py`: `GOLD_DIR`, `CSV_PATH`, `IMAGE_ROOT`, `LOGS_DIR`, `RESULTS_DIR`, `CHECKPOINTS_DIR`, `DATA_DIR`, `UPLOADS_DIR`.
 
 Chạy 40 hay 80 gold run là quyết định thiết kế đánh giá của nhóm; runner không tự chạy hàng loạt và hiện chưa có kết quả của 40/80 run. Một run chỉ cho thấy chức năng E2E hoạt động trong một kịch bản seed. Nếu báo cáo nghiên cứu muốn đánh giá độ ổn định trên nhiều bộ dữ liệu bán tổng hợp, cần chạy nhiều run và tổng hợp tỷ lệ PASS/FAIL theo run; đừng diễn giải một run như kết quả của cả 80.
 
@@ -129,3 +129,12 @@ uploads/<GOLD_RUN>__<RUN_ID>/        # ảnh server nhận ở chế độ full/
 Thư mục kết quả có dạng `results/run_001__e2e-<thời_gian>/`, nên tên đã thể hiện gold run nào được dùng; `RUN_ID` vẫn được dùng cho log, checkpoint, snapshot dữ liệu và lệnh resume. `summary.json` chỉ tính các kịch bản **đã hoàn tất**. Muốn kết luận một lần chạy đạt toàn bộ, cần `status=complete`, `stage_count=5`, mọi stage có mặt và `FAIL=0`; `CHƯA CÓ` là chức năng còn thiếu được tách riêng. Số `46/46` trong đối chiếu trước là số tiêu chí lịch sử, không tự động là kết quả của runner này; phải đọc `checks.csv` thực tế của lần chạy và ghi rõ gold run, ảnh, code, môi trường. Không sử dụng `--check-inputs` như bằng chứng E2E đạt.
 
 Dataset gold chứa **báo cáo JSON bán tổng hợp** được seed vào DB; `has_image`/`image_id` trong gold là mô tả giả định và không tạo bitmap ảnh. Ảnh validation là đầu vào độc lập dùng riêng cho bước upload qua app. Vì vậy hãy ghi hai nguồn dữ liệu riêng trong báo cáo.
+
+## Ảnh mặc định theo run — cập nhật 22/10/2026
+
+| Run | Nhãn trong CSV | Ảnh trong Dataset_Flood |
+|---|---|---|
+| run_001 | high | `high/flood_4800.jpg` |
+| run_002 | medium | `medium/flood_6286.jpg` |
+
+Cấu hình dùng chung cho runner web hiện tại và gói Android theo plan là `run_images.json`. Ảnh giữ tại Dataset_Flood, không sửa `algorithm_input.json`, `run_manifest.json` hay nhãn dataset. Dùng `--check-inputs --seed-run 1` / `--seed-run 2` để xem lựa chọn mà không chạy Docker. Muốn có kết quả cho ảnh mới phải chạy `--run` mới; không đổi ảnh trong summary/checkpoint cũ. Runner/hash cấu hình đã đổi nên checkpoint từ phiên bản cũ không được resume bằng mã mới; giữ snapshot cũ nếu cần tái lập.

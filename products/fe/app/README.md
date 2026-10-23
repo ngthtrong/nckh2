@@ -207,3 +207,15 @@ Foreground giữ quyền sở hữu Hive suốt phiên; Workmanager nhờ foregr
 hoặc chỉ tự mở Hive khi không có chủ sở hữu. Nếu khởi động báo tác vụ cũ còn giữ
 dữ liệu, bấm Thử lại; nếu isolate cũ đã chết nhưng mapping còn tồn tại, đóng hẳn
 và mở lại app. App không cưỡng đoạt quyền khi hết thời gian chờ.
+
+## Thực nghiệm E2E mobile (hai run trong APK)
+
+Bản admin có sẵn công cụ E2E, dữ liệu run_001/run_002 nằm tại `assets/benchmarks/mobile/`; model nhận diện vẫn là PTE seed1024 pruning. Chuẩn bị lại bằng `python ../experiment_mobile/prepare_assets.py` khi dữ liệu/model đổi, rồi build Flutter tại thư mục app như bình thường. Không cần tạo benchmark trước khi build.
+
+Ví dụ cho hotspot máy tính:
+
+```powershell
+flutter build apk --flavor admin --release --target-platform android-arm64 --dart-define=ALLOW_INSECURE_LAN=true --dart-define=SERVER_URL=http://192.168.137.1:18101
+```
+
+APK: `build/app/outputs/flutter-apk/app-admin-release.apk`. Trên điện thoại đăng nhập Admin → Thực nghiệm E2E → Chọn run → Tải gói benchmark. Gói mở từ assets; proxy trên máy tính vẫn cần chạy để kiểm thử gửi bài/mạng yếu. Xem [hướng dẫn mobile trong fe](../experiment_mobile/README.md).
