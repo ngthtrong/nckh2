@@ -10,6 +10,7 @@ import android.os.Build
 import android.os.Handler
 import android.os.Looper
 import android.telephony.SmsManager
+import android.util.Log
 import androidx.core.content.ContextCompat
 import io.flutter.embedding.android.FlutterActivity
 import io.flutter.embedding.engine.FlutterEngine
@@ -20,7 +21,14 @@ import org.pytorch.executorch.Tensor
 import java.net.Inet4Address
 import java.net.NetworkInterface
 import java.util.UUID
+import java.util.concurrent.ExecutorService
 import java.util.concurrent.Executors
+
+internal fun shutdownPte(executor: ExecutorService, closeModule: () -> Unit) {
+    // Native inference must finish before disposal; do not interrupt it on teardown.
+    executor.execute(closeModule)
+    executor.shutdown()
+}
 
 internal class SmsPartResults(totalParts: Int) {
     private val results = arrayOfNulls<Boolean>(totalParts)
@@ -113,6 +121,10 @@ class MainActivity : FlutterActivity() {
 
         MethodChannel(flutterEngine.dartExecutor.binaryMessenger, "rescue/executorch")
             .setMethodCallHandler { call, result ->
+                if (pteExecutor.isShutdown) {
+                    result.error("pte_unavailable", "PTE activity has been destroyed", null)
+                    return@setMethodCallHandler
+                }
                 when (call.method) {
                     "load" -> {
                         val modelPath = call.argument<String>("modelPath")
@@ -123,6 +135,7 @@ class MainActivity : FlutterActivity() {
                         pteExecutor.execute {
                             try {
                                 pteModule?.close()
+                                pteModule = null
                                 pteModule = Module.load(modelPath)
                                 runOnUiThread { result.success(true) }
                             } catch (error: Exception) {
@@ -134,17 +147,19 @@ class MainActivity : FlutterActivity() {
                     }
                     "forward" -> {
                         val input = call.argument<FloatArray>("input")
-                        val module = pteModule
                         if (input == null || input.size != 1 * 3 * 256 * 256) {
                             result.error("invalid_input", "Expected Float32[1,3,256,256]", null)
                             return@setMethodCallHandler
                         }
-                        if (module == null) {
-                            result.error("pte_not_loaded", "PTE model is not loaded", null)
-                            return@setMethodCallHandler
-                        }
                         pteExecutor.execute {
                             try {
+                                val module = pteModule
+                                if (module == null) {
+                                    runOnUiThread {
+                                        result.error("pte_not_loaded", "PTE model is not loaded", null)
+                                    }
+                                    return@execute
+                                }
                                 val tensor = Tensor.fromBlob(
                                     input,
                                     longArrayOf(1, 3, 256, 256),
@@ -337,8 +352,15 @@ class MainActivity : FlutterActivity() {
         pendingSms?.let { finishSms(it, "unknown", "ACTIVITY_DESTROYED") }
         pendingBenchmarkExport?.let { finishBenchmarkExport(it, false) }
         benchmarkExportExecutor.shutdown()
-        pteModule?.close()
-        pteExecutor.shutdownNow()
+        shutdownPte(pteExecutor) {
+            try {
+                pteModule?.close()
+            } catch (error: Exception) {
+                Log.w("RescuePte", "Failed to close PTE model", error)
+            } finally {
+                pteModule = null
+            }
+        }
         super.onDestroy()
     }
 }

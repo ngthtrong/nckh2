@@ -22,3 +22,32 @@ Future<String> preserveLocalFile(String path, String name) async {
   await saved.writeAsBytes(bytes, flush: true);
   return saved.path;
 }
+
+/// Only generated compose copies in the app's attachment directory are disposable.
+Future<void> cleanupComposeImages({
+  required Iterable<String> keepPaths,
+  String? onlyPath,
+}) async {
+  final documents = await getApplicationDocumentsDirectory();
+  final directory = Directory('${documents.path}/rescue_attachments');
+  if (await FileSystemEntity.type(directory.path, followLinks: false) !=
+      FileSystemEntityType.directory) {
+    return;
+  }
+  String key(String path) {
+    final uri = File(path).absolute.uri.normalizePath().toString();
+    return Platform.isWindows ? uri.toLowerCase() : uri;
+  }
+
+  final keep = keepPaths.map(key).toSet();
+  final target = onlyPath == null ? null : key(onlyPath);
+  final ownedName = RegExp(r'^compose-image-[0-9]+-[a-f0-9]{12}$');
+  await for (final entry in directory.list(followLinks: false)) {
+    if (entry is! File || !ownedName.hasMatch(entry.uri.pathSegments.last)) {
+      continue;
+    }
+    final path = key(entry.path);
+    if ((target != null && path != target) || keep.contains(path)) continue;
+    await entry.delete();
+  }
+}

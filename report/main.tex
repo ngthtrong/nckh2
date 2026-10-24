@@ -38,10 +38,19 @@
 \include{appendices/supplementary-results}
 \ifReportFull
   \input{build/evidence.tex}
-  \addchap{Minh chứng sản phẩm nhóm IV}
-  \input{deliverables/content/bulletin-vi}
-  \clearpage\input{deliverables/content/bulletin-en}
-  \clearpage\input{deliverables/content/summary-vi}
-  \clearpage\input{deliverables/content/summary-en}
+\else
+  \clearpage\phantomsection\addcontentsline{toc}{chapter}{Minh chứng sản phẩm}
+  \EvidencePDF[section]{Ứng dụng di động hỗ trợ cứu hộ thiên tai}{evidence/products/mobile-app.pdf}
+  \EvidencePDF[section]{Website quản lý thông tin cứu hộ}{evidence/products/dashboard.pdf}
+  \EvidencePDF[section]{Bộ mô hình AI đã huấn luyện}{evidence/products/ai-models.pdf}
 \fi
+\clearpage\phantomsection\addcontentsline{toc}{section}{Bản tin và báo cáo tóm tắt}
+\addcontentsline{toc}{subsection}{Bản tin tiếng Việt}
+\input{deliverables/content/bulletin-vi}
+\clearpage\phantomsection\addcontentsline{toc}{subsection}{Bản tin tiếng Anh}
+\input{deliverables/content/bulletin-en}
+\clearpage\phantomsection\addcontentsline{toc}{subsection}{Báo cáo tóm tắt tiếng Việt}
+\input{deliverables/content/summary-vi}
+\clearpage\phantomsection\addcontentsline{toc}{subsection}{Báo cáo tóm tắt tiếng Anh}
+\input{deliverables/content/summary-en}
 \end{document}

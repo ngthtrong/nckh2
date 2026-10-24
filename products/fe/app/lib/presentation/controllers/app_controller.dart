@@ -11,12 +11,14 @@ import 'package:image_picker/image_picker.dart';
 
 import '../../config.dart';
 import '../../data/datasources/user_local_datasource.dart';
+import '../../data/datasources/compose_draft_local_datasource.dart';
 import '../../data/datasources/admin_session.dart';
 import '../../data/datasources/admin_model_download.dart';
 import '../../core/platform/local_file.dart';
 import '../../core/platform/sync_isolate_guard.dart';
 import '../../domain/entities/ai_model_type.dart';
 import '../../domain/entities/ai_tag.dart';
+import '../../domain/entities/record_id.dart';
 import '../../domain/entities/rescue_record.dart';
 import '../../domain/entities/send_mode.dart';
 import '../../domain/services/adaptive_send_policy.dart';
@@ -38,6 +40,7 @@ class AppController extends ChangeNotifier with WidgetsBindingObserver {
   final InferenceRepository inferenceRepository;
   final NetworkRepository networkRepository;
   final UserLocalDataSource userLocalDataSource;
+  final ComposeDraftLocalDataSource composeDraftLocalDataSource;
   final AdminSession adminSession;
   CancelToken? _modelDownload;
   bool isDownloadingOnnx = false;
@@ -62,7 +65,7 @@ class AppController extends ChangeNotifier with WidgetsBindingObserver {
   Future<UrgencyLogisticModel?>? _urgencyModelFuture;
   UrgencyLogisticModel? _urgencyModel;
 
-  final ImagePicker _picker = ImagePicker();
+  final ImagePicker _picker;
   StreamSubscription<List<ConnectivityResult>>? _connSub;
   Timer? _statusTimer;
 
@@ -110,8 +113,13 @@ class AppController extends ChangeNotifier with WidgetsBindingObserver {
     required this.inferenceRepository,
     required this.networkRepository,
     UserLocalDataSource? userLocalDataSource,
+    ComposeDraftLocalDataSource? composeDraftLocalDataSource,
+    ImagePicker? picker,
     AdminSession? adminSession,
   }) : userLocalDataSource = userLocalDataSource ?? UserLocalDataSource(),
+       composeDraftLocalDataSource =
+           composeDraftLocalDataSource ?? ComposeDraftLocalDataSource(),
+       _picker = picker ?? ImagePicker(),
        adminSession = adminSession ?? AdminSession() {
     this.adminSession.addListener(_adminChanged);
     _sendSosUseCase = SendSosUseCase(rescueRepository);
@@ -353,6 +361,8 @@ class AppController extends ChangeNotifier with WidgetsBindingObserver {
     await waitForBackgroundSync();
     await rescueRepository.init();
     await userLocalDataSource.init();
+    await composeDraftLocalDataSource.init();
+    await recoverPickerDraft();
     currentUser = userLocalDataSource.isSignedIn
         ? userLocalDataSource.getUser()
         : null;
@@ -715,7 +725,85 @@ class AppController extends ChangeNotifier with WidgetsBindingObserver {
     }
   }
 
+  Map<String, dynamic>? get composeDraft => composeDraftLocalDataSource.read();
+
+  Future<void> saveComposeDraft(Map<String, dynamic> draft) =>
+      composeDraftLocalDataSource.save(draft);
+
+  Future<void> clearComposeDraft() => composeDraftLocalDataSource.clear();
+
+  Future<void> discardComposeImage(String? path) async {
+    if (path != null) await _cleanupComposeImages(onlyPath: path);
+  }
+
+  Future<void> _cleanupComposeImages({String? onlyPath}) async {
+    try {
+      final draftPath = composeDraft?['imagePath'];
+      await cleanupComposeImages(
+        onlyPath: onlyPath,
+        keepPaths: {
+          if (draftPath is String) draftPath,
+          for (final record in rescueRepository.getAllRecords()) ...[
+            ?record.imagePath,
+            ...record.images,
+          ],
+        },
+      );
+    } catch (error) {
+      // A busy file can be reclaimed on the next startup without failing a report.
+      debugPrint('Chưa dọn được ảnh tạm của form: $error');
+    }
+  }
+
+  Future<void> recoverPickerDraft() async {
+    await _recoverPickerDraft();
+    await _cleanupComposeImages();
+  }
+
+  Future<void> _recoverPickerDraft() async {
+    if (kIsWeb || defaultTargetPlatform != TargetPlatform.android) {
+      await clearComposeDraft();
+      return;
+    }
+    try {
+      final lost = await _picker.retrieveLostData();
+      if (lost.isEmpty) {
+        await clearComposeDraft();
+        return;
+      }
+      final draft = composeDraft ?? <String, dynamic>{};
+      final files = lost.files ?? [?lost.file];
+      if (files.isNotEmpty) {
+        // Store the recoverable cache path before attempting the durable copy.
+        draft['imagePath'] = files.first.path;
+        await saveComposeDraft(draft);
+        draft['imagePath'] = await preserveLocalFile(
+          files.first.path,
+          newRecordId('compose-image'),
+        );
+        draft.remove('recoveryError');
+      } else {
+        draft['recoveryError'] =
+            'Chưa khôi phục được ảnh. Nội dung bản nháp được giữ; hãy chọn lại ảnh.';
+      }
+      await saveComposeDraft(draft);
+    } catch (error) {
+      debugPrint('Chưa khôi phục được ảnh/bản nháp: $error');
+      final draft = composeDraft;
+      if (draft != null) {
+        draft['recoveryError'] =
+            'Chưa lưu được ảnh khôi phục. Nội dung bản nháp được giữ; hãy chọn lại ảnh nếu ảnh không còn.';
+        try {
+          await saveComposeDraft(draft);
+        } catch (saveError) {
+          debugPrint('Không ghi được cảnh báo khôi phục bản nháp: $saveError');
+        }
+      }
+    }
+  }
+
   Future<String?> pickImage({required ImageSource source}) async {
+    String? copiedPath;
     try {
       final picked = await _picker.pickImage(
         source: source,
@@ -723,9 +811,30 @@ class AppController extends ChangeNotifier with WidgetsBindingObserver {
         maxHeight: 1200,
         imageQuality: 80,
       );
-      return picked?.path;
+      if (picked == null) return null;
+      final draft = composeDraft ?? <String, dynamic>{};
+      draft['imagePath'] = picked.path;
+      await saveComposeDraft(draft);
+      final path = await preserveLocalFile(
+        picked.path,
+        newRecordId('compose-image'),
+      );
+      copiedPath = path;
+      draft['imagePath'] = path;
+      await saveComposeDraft(draft);
+      return path;
     } catch (_) {
-      return null;
+      if (copiedPath != null && composeDraft?['imagePath'] == copiedPath) {
+        try {
+          await clearComposeDraft();
+        } catch (_) {
+          debugPrint('Chưa xóa được snapshot của ảnh chọn lỗi.');
+        }
+      }
+      await discardComposeImage(copiedPath);
+      throw const FormatException(
+        'Không lưu được ảnh đã chọn. Bản nháp vẫn được giữ; hãy chọn lại ảnh.',
+      );
     }
   }
 

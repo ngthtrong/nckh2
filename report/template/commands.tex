@@ -20,9 +20,9 @@
 \newcommand{\CoverTitle}{%
   {\fontsize{16bp}{20bp}\selectfont\bfseries\ProjectTitle\par}
   \vspace{6mm}\textbf{Mã số đề tài: \ProjectCode}\par}
-\newcommand{\EvidencePDF}[2]{%
-  \clearpage\phantomsection\addcontentsline{toc}{chapter}{#1}
-  \includepdf[pages=-,fitpaper=true,pagecommand={}]{#2}}
+\newcommand{\EvidencePDF}[3][chapter]{%
+  \clearpage\phantomsection\addcontentsline{toc}{#1}{#2}
+  \includepdf[pages=-,fitpaper=true,pagecommand={}]{#3}}
 \newwrite\ReportMetricsFile
 \AtBeginDocument{\immediate\openout\ReportMetricsFile=\jobname.metrics}
 \newcommand{\ReportMetric}[2]{\immediate\write\ReportMetricsFile{#1=#2}}

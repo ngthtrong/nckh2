@@ -345,6 +345,13 @@ class RescueRepositoryImpl implements RescueRepository {
               result?['code'] as String?,
             );
           } else if (result != null) {
+            final details = result['result'];
+            final nextSequence = details is Map
+                ? details['next_sequence_number']
+                : null;
+            if (result['code'] == 'SEQUENCE_REUSED' && nextSequence is int) {
+              await outboxDataSource.reconcileSequence(nextSequence);
+            }
             await outboxDataSource.markDeadLetter(
               message.messageId,
               result['code'] as String?,

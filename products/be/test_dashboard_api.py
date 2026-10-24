@@ -361,6 +361,31 @@ class DashboardApiTest(unittest.TestCase):
         self.sync(_message(1, "CREATE_RESCUE_RECORD", _report("r1", status="resolved")))
         self.assertEqual(storage.get_report_by_id("r1")["status"], "processing")
 
+    def test_restored_sender_reconciles_sequence_and_keeps_attachment_ownership(self):
+        self.sync(_message(1, "CREATE_RESCUE_RECORD", _report("old-report")))
+        self.sync(_message(1000, "CREATE_RESCUE_RECORD", _report("latest-report")))
+        # Another client must not raise this sender's recovery floor.
+        other = _message(9000, "CREATE_RESCUE_RECORD", _report("other-report"))
+        other["client_id"] = "device-2"
+        self.sync(other)
+        restored = _message(1, "CREATE_RESCUE_RECORD", _report("restored-sos"), message_id="restored-m1")
+        rejected = self.sync(restored)[0]
+        self.assertEqual((rejected["status"], rejected["code"]), ("rejected", "SEQUENCE_REUSED"))
+        self.assertEqual(rejected["result"], {"next_sequence_number": 1001})
+        self.assertIsNone(storage.get_report_by_id("restored-sos"))
+
+        retry = {**restored, "message_id": "restored-m1001", "sequence_number": 1001}
+        self.assertEqual(self.sync(retry)[0]["status"], "accepted")
+        self.assertEqual(self.sync(retry)[0]["status"], "duplicate")
+        self.assertEqual(storage.report_owner("restored-sos"), (True, "device-1"))
+        # The original sender still owns both pre-restore and new reports.
+        for report_id in ("old-report", "restored-sos"):
+            res = self.client.post("/api/reports", headers=V1,
+                                   files={"image": ("photo.jpg", JPEG, "image/jpeg")},
+                                   data={"meta": json.dumps(_with_image(_report(report_id), JPEG))})
+            self.assertEqual(res.status_code, 201, res.text)
+            self.assertIsNotNone(storage.get_report_by_id(report_id)["imageUrl"])
+
     def test_same_id_fills_blanks_but_never_overwrites(self):
         self.sync(_message(1, "CREATE_RESCUE_RECORD", _report("r1", lat=None, lng=None, description="")))
         first = storage.get_report_by_id("r1")

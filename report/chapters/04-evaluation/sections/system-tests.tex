@@ -53,6 +53,22 @@ Trong ba lần gọi PTE có ảnh của run\_001, nhãn chuẩn \texttt{high} �
 
 Lịch sử run\_002 còn ghi một lần Case 5 FAIL vì chưa từ chối quyền Vị trí; sau khi đáp ứng tiền điều kiện, chạy lại đạt PASS. Bảng giữ lịch sử thử lại và ghi rõ phần đánh giá bổ sung, không xóa lần thử lỗi. Các xác nhận giao diện có mã bài nhưng trường tên tệp bằng chứng còn trống, nên không xem JSON là hồ sơ ảnh/video tự động đầy đủ. Hai lượt trên một máy hỗ trợ kiểm chứng các tình huống đã thử, chưa phải mẫu độc lập để suy ra tỷ lệ tin cậy tổng quát, độ ổn định trên bốn điện thoại hoặc khả năng gửi SMS thành công.
 
+\subsection{Kết quả kiểm thử lịch sử}
+Bảng~\ref{tab:historical-tests} giữ kết quả lịch sử ngày 27/09/2026, được dẫn trong sổ đối chiếu nguồn. Các con số này thuộc phiên kiểm thử riêng, không cộng hoặc thay thế kết quả ngày 24/10/2026. Việc tạo APK xác nhận khả năng đóng gói, không thay thế kiểm thử chức năng.
+
+\begin{table}[htbp]\centering\small
+\caption{Tổng hợp kết quả kiểm thử chức năng của hệ thống phần mềm}
+\label{tab:historical-tests}
+\begin{tabularx}{\textwidth}{P{.32\textwidth}P{.16\textwidth}X}
+\toprule Bộ kiểm thử & Kết quả ghi nhận & Phạm vi \\\midrule
+Backend unit test & 44/44 & Quy tắc trao đổi dữ liệu, migration, hash, cụm, dashboard \\
+Flutter unit test & 26/26 & Chính sách gửi, SMS, trạng thái, hash \\
+Trao đổi dữ liệu trên container & Đạt các ca & App/server message và multipart \\
+E2E Chromium headless & 46/46 & App web tới backend/dashboard, mạng giả lập \\
+APK debug & Hoàn thành & Tạo gói cài đặt Android APK phục vụ kiểm thử \\
+\bottomrule\end{tabularx}
+\end{table}
+
 \subsection{Kiểm thử E2E bổ sung trên web giả lập}\label{sec:web-e2e-results}
 Hai lượt web ngày 24/10/2026 kiểm tra luồng ứng dụng Flutter web $\rightarrow$ backend $\rightarrow$ dashboard theo thiết lập tại Mục~\ref{sec:web-e2e-setup}. Mỗi lượt hoàn tất năm kịch bản: dashboard; ứng dụng online/offline; mạng 300 kbit/s; mạng 20 kbit/s; từ chối quyền GPS. Đây là bằng chứng bổ sung cho kiểm thử Android thật, không thay thế AI native, SMS hoặc thao tác giao diện trên điện thoại.
 
