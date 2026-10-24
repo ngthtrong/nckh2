@@ -1,5 +1,16 @@
 # Đối chiếu hướng dẫn và biểu mẫu — 08/10/2026
 
+## Sửa hình thức theo đối chiếu ngày 24/10/2026
+
+- Theo yêu cầu bám sát tuyệt đối mẫu sau đợt sửa đầu, các phần có mẫu chuyển sang `template/forms.tex`. Chín đầu trang dùng nguyên vector và font nhúng từ PDF Word mẫu; hai khung bìa cũng lấy nguyên vector. Đã đối chiếu tọa độ đầu trang với sai lệch dưới 0,01 pt trên bản kiểm tra riêng. Phần nội dung điền giữ nguyên ý và số liệu, được xuống dòng theo dung lượng thực tế.
+- Font biểu mẫu và bảng công bố theo mẫu riêng, thay lựa chọn cỡ 13 đồng loạt ở bước trước; thân bài và bảng khoa học giữ cỡ 13. Bảng công bố giữ sáu cột, độ rộng cột và nét kẻ theo mẫu, tên tạp chí được phép ngắt dòng. Ô ảnh, chữ ký và các trường thông tin đặt theo tọa độ đo từ mẫu; không thêm logo vào mẫu không có logo.
+- Giữ tiêu đề chương **KẾT LUẬN VÀ HƯỚNG PHÁT TRIỂN** theo xác nhận mới; bổ sung mục Kiến nghị về bàn giao, điều kiện thí điểm và trách nhiệm phối hợp.
+- Header hợp đồng dữ liệu được phép ngắt dòng; bảng LaTeX dùng cỡ thân bài 13, gồm bảng sinh tự động và bảng công bố. Bảng công bố giữ trạng thái đã chấp nhận, đang chuẩn bị xuất bản.
+- Rút các đoạn trùng trong thông tin kết quả tiếng Việt, giữ đủ tám mục và số liệu; đoạn cuối cùng khối ký nằm trong trang nội dung. Khi ghép PDF minh chứng, tắt số trang của quyển tại trang chèn để không chồng số trang nguồn.
+- `scripts/build.py content` tự dựng lại bốn PDF bản tin/tóm tắt; Tectonic giữ log theo tên đích. Bản dựng kiểm tra có 156 trang, 107 trang nội dung. Bản tin Việt/Anh mỗi bản một trang, tóm tắt Việt/Anh mỗi bản hai trang; văn bản của cả bốn bản riêng khớp phần tương ứng trong quyển.
+- Chín kiểm thử build/highlight đạt; kiểm tra bản nháp đạt bằng pypdf thay hai lệnh đọc PDF trong môi trường thiếu pdftotext. Nguồn/hash của 12 hình đạt; log năm đầu ra không còn tràn khung hoặc tham chiếu chưa giải quyết. Môi trường Tectonic vẫn báo Fontconfig, đọc font Windows và phiên bản PDF nhúng.
+- Thuyết minh phê duyệt, nhận xét GVHD và các xác nhận được người dùng hẹn bổ sung sau; không tự điền hoặc bật cờ xác nhận. Hai đơn vị phối hợp giữ theo report. Ngày sinh trong file gốc đã cập nhật thành 06/10/2005.
+
 ## Cập nhật theo yêu cầu ngày 22/10/2026
 
 - Tên Việt/Anh và thời gian 05/2026–10/2026 đồng bộ với `resource/Thuyết minh NCKH -THS2026-68.pdf` và xác nhận của người dùng; thay các mốc 03/2026–08/2026 trước đây.

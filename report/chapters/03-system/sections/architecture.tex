@@ -45,7 +45,7 @@ Việc chọn chế độ gửi được thực hiện khi có ảnh và đượ
 Địa điểm báo cáo có thể null. Màn hình trung tâm cần có danh sách cho báo cáo thiếu vị trí ngoài bản đồ, bởi một bản ghi không xuất hiện trên bản đồ không có nghĩa không cần xử lý. Vị trí được nhập thủ công có nguồn \texttt{manual}; khi GPS thiết bị đến sau, quy tắc cập nhật dữ liệu xác định cách bổ sung/thay thế để giữ nguồn gốc.
 
 \subsection{Quy tắc trao đổi dữ liệu giữa ứng dụng và máy chủ}
-Ứng dụng và máy chủ trao đổi dữ liệu theo cùng một bộ quy tắc. Header \texttt{X-Message-Contract-Version} cho biết phiên bản quy tắc đang sử dụng, hiện là phiên bản 1. Metadata truyền qua \texttt{POST /sync/messages}; ảnh qua \texttt{POST /api/reports} dạng multipart với phần JSON \texttt{meta}. Batch có tối đa 50 message và 256 KiB; mỗi message có phản hồi riêng để app biết message nào nhận, trùng hoặc bị từ chối.
+Ứng dụng và máy chủ trao đổi dữ liệu theo cùng một bộ quy tắc. Header \path{X-Message-Contract-Version} cho biết phiên bản quy tắc đang sử dụng, hiện là phiên bản 1. Metadata truyền qua \texttt{POST /sync/messages}; ảnh qua \texttt{POST /api/reports} dạng multipart với phần JSON \texttt{meta}. Batch có tối đa 50 message và 256 KiB; mỗi message có phản hồi riêng để app biết message nào nhận, trùng hoặc bị từ chối.
 
 Payload hash dùng SHA-256 của JSON chuẩn tắc RFC 8785 \citep{rfc8785}. Phần chuẩn tắc phải tạo cùng byte ở Dart và Python, nhất là biểu diễn số và thứ tự thuộc tính. Hash ở đây kiểm tra nội dung phù hợp định danh, không tự chứng minh danh tính người gửi hoặc sự thật của hiện trường.
 

@@ -1,6 +1,6 @@
 \chapter{Kết quả và tư liệu bổ sung}\label{chap:supplementary}
 \section{Danh mục dữ liệu và kết quả thực nghiệm}
-Bảng~\ref{tab:source-register} tóm tắt các nhóm dữ liệu và phạm vi đánh giá. Quy trình tái lập được trình bày ở Phụ lục~\ref{chap:reproducibility}; kết quả chi tiết trên điện thoại ở Mục~\ref{sec:phone-full-results}.
+Bảng~\ref{tab:source-register} tóm tắt các nhóm dữ liệu và phạm vi đánh giá. Thông tin bổ sung về thực nghiệm được trình bày ở Phụ lục~\ref{chap:reproducibility}; kết quả chi tiết trên điện thoại ở Mục~\ref{sec:phone-full-results}.
 
 \begin{longtable}{P{.22\textwidth}P{.39\textwidth}P{.28\textwidth}}
 \caption{Các nhóm dữ liệu và phạm vi đánh giá}\label{tab:source-register}\\
@@ -13,26 +13,6 @@ Nhận diện trên điện thoại & Hai seed 159/1024, mô hình gốc và c�
 Phân cụm RQ1 & Generator 3.0; đối chứng và thử nghiệm với nhiễu, bản sao & 40 lần chạy kiểm thử; 1.400 lượt phân cụm trong thử nghiệm nhiễu \\
 Xếp hạng RQ2 & Candidate 4.1; chất lượng và độ ổn định điểm ưu tiên & 40 seed kiểm thử \\
 Điều phối RQ3 & Candidate 4.1; ba điều kiện nguồn lực & So sánh theo 40 seed, lấy trung bình điều kiện trong mỗi seed \\
-\bottomrule
-\end{longtable}
-
-\section{Sổ đối chiếu nguồn số liệu}
-\begin{longtable}{P{.24\textwidth}P{.42\textwidth}P{.23\textwidth}}
-\caption{Nguồn được dùng và phạm vi}\label{tab:source-provenance-register}\\
-\toprule Nội dung & Nguồn trong repo & Phạm vi \\\midrule\endfirsthead
-\toprule Nội dung & Nguồn trong repo & Phạm vi \\\midrule\endhead
-Nhóm, mã đề tài & Hồ sơ đề tài đã lưu & Nguồn ưu tiên thông tin nhóm \\
-Mục tiêu, tiến độ, sản phẩm & Thuyết minh NCKH (bản Markdown) & Văn bản trong repo, chưa thay bản ký \\
-Số lượng/chia ảnh & Split CSV trong thư mục mô hình biên & Snapshot 1.702 ảnh \\
-Metric/runtime FP32 & \RuntimeBenchmarkSource{} & 256 ảnh test, CPU \\
-Benchmark bốn điện thoại & CSV tổng hợp và JSON nguồn của seed 159/1024 & 32 cấu hình; số liệu đầy đủ ở Mục~\ref{sec:phone-full-results} \\
-Nén/cắt tỉa & \QuantizationBenchmarkSource{}; \PruningBenchmarkSource{} & Cùng test; khác phiên timing \\
-LR khẩn cấp & Gói mô hình khẩn cấp có cấu trúc & SOURCE FINAL v5, tổng hợp \\
-RQ1 đối chứng cơ sở & Thư mục kết quả đối chứng cơ sở & Generator 3.0, 40 test run \\
-RQ1 stress & Thư mục kết quả stress & Nguồn chính, 1.400 fit \\
-RQ2/RQ3 & Thư mục kết quả RQ2 và RQ3 & Candidate 4.1, 40 seed \\
-Hợp đồng/DB & Tài liệu hợp đồng kết nối và cơ sở dữ liệu & Đối chiếu cùng mã hiện tại \\
-Test lịch sử & Tài liệu đối chiếu nghiệm thu & Ngày 27/09/2026 \\
 \bottomrule
 \end{longtable}
 
