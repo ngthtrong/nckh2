@@ -4,6 +4,17 @@ from highlight_results import highlight_results
 
 
 class HighlightResultsTest(unittest.TestCase):
+    def test_runtime_comparison_is_within_each_phone(self):
+        rows = [['A', 'ONNX', '20,00', '100,00'],
+                ['A', 'PTE', '10,00', '90,00'],
+                ['B', 'ONNX', '40,00', '110,00'],
+                ['B', 'PTE', '50,00', '120,00']]
+        result = highlight_results('phone-selected-runtimes', rows)
+        self.assertEqual(result[0][2:], ['20,00', '100,00'])
+        self.assertEqual(result[1][2:], [r'\textbf{10,00}', r'\textbf{90,00}'])
+        self.assertEqual(result[2][2:], [r'\textbf{40,00}', r'\textbf{110,00}'])
+        self.assertEqual(result[3][2:], ['50,00', '120,00'])
+
     def test_column_directions_ties_and_decimal_comma(self):
         rows = [['A', '80,00', '75,00', '2', '4,00', '20,00'],
                 ['B', '80,00', '76,00', '3', '4,50', '10,00']]

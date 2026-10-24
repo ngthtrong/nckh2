@@ -27,7 +27,6 @@ def highlight_results(name, rows):
         'rq2-sensitivity': {2: 'min'},
         'phone-model-quality': {1: 'max', 2: 'max', 3: 'max', 4: 'max'},
         'phone-model-tradeoffs': {1: 'max', 2: 'max', 3: 'min', 4: 'min', 5: 'min'},
-        'phone-selected-devices': {1: 'max', 2: 'min'},
     }
     for c, direction in columns.get(name, {}).items():
         best([(r, c) for r in range(len(rows))], direction)
@@ -42,8 +41,8 @@ def highlight_results(name, rows):
         for r in range(len(rows)):
             for c in [1, 3, 5]:
                 best([(r, c), (r, c + 1)], 'min')
-    if name == 'phone-selected-devices':
-        for r in range(len(rows)):
-            for c in [3, 5]:
-                best([(r, c), (r, c + 1)], 'min')
+    if name == 'phone-selected-runtimes':
+        for start in range(0, len(rows), 2):
+            for c in [2, 3]:
+                best([(start, c), (start + 1, c)], 'min')
     return rows

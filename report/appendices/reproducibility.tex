@@ -45,8 +45,10 @@ make -C report figures
 \end{verbatim}
 Các file hình đã có trong repo nên build nội dung thường không cần cài matplotlib. Khi nguồn thực nghiệm đổi, cần xuất lại bảng và hình để giữ đồng bộ. Bộ kiểm tra report đối chiếu hash hình/nguồn và sẽ báo nếu hình đã lỗi thời.
 
-\subsection{Nguồn benchmark ứng dụng lịch sử}\label{sec:historical-app-benchmark}
-Nguồn này được giữ để truy vết, không dùng trong phần kết quả chính hoặc lựa chọn model/runtime. Tệp samsung21se.json là hai JSON object nối tiếp, không phải một JSON object hay mảng JSON hợp lệ cho \texttt{json.load}. Module xử lý bằng chứng ứng dụng dùng raw decoding để tách hai khối mà không sửa tệp gốc. Nó nối ID theo cách đóng gói package, kiểm tra nhãn/số mẫu, ma trận/metric và mean/P50/P95 theo nearest-rank. Đây là kiểm tra artifact, không chạy lại suy luận trên điện thoại.
+\subsection{Nguồn benchmark nhận diện trên điện thoại}\label{sec:phone-benchmark-evidence}
+Bộ benchmark hiện tại được đo trên bốn mẫu điện thoại: realme 15, Redmi Note 11, Redmi Note 13 và Samsung S10e. Mỗi máy được đánh giá với MobileNetV3-Large seed 159 và seed 1024, hai biến thể baseline/cắt tỉa và hai runtime ONNX/ExecuTorch, tổng cộng 32 cấu hình. Mỗi cấu hình thực hiện năm lượt warmup rồi xử lý 256 ảnh test. Phương án triển khai được lựa chọn là seed 1024 cắt tỉa chạy ExecuTorch/PTE; các cấu hình còn lại cung cấp đối chứng về chất lượng và độ trễ.
+
+Kết quả từng phiên ghi thông tin thiết bị, model, nhãn dự đoán, confidence và thời gian xử lý từng ảnh. Các bảng được đối chiếu với dự đoán gốc, ma trận nhầm lẫn và hash model; Accuracy, macro-F1, sai lệch mức ngập và mean/P50/P95 được tổng hợp theo từng cấu hình. Thời gian bao gồm giải mã, tiền xử lý và suy luận tại điện thoại, không gồm truyền bài lên backend. Kết quả chính ở Mục~\ref{sec:phone-benchmark-results}; bảng chi tiết ở Mục~\ref{sec:phone-full-results}. Việc tổng hợp báo cáo sử dụng các phiên đã đo, không chạy suy luận lại.
 
 \section{Tái lập RQ1 và stress}
 Đánh giá phân cụm RQ1 cần đúng snapshot \texttt{6ac75c2} và notebook tương ứng. Bộ dữ liệu giữ split run 1--20/21--40/41--80. Cấu hình chọn có trong tệp cấu hình đã lưu kèm kết quả. Stress dùng các cấu hình này không tuning lại.
@@ -70,7 +72,10 @@ FE_BUILD_TARGET=prebuilt docker compose up -d --build
 \end{verbatim}
 Thao tác này tạo môi trường demo và có thể nạp dữ liệu bán tổng hợp nếu volume trống. Không dùng dữ liệu nạp này như yêu cầu cứu hộ thực. Đối với test backend cục bộ, đặt database/uploads ở vùng tạm trước import \texttt{main}, vì khởi tạo module có thể tạo/migrate database.
 
-Kiểm thử backend và Flutter được hướng dẫn ở tài liệu README của sản phẩm; E2E nằm ở script kiểm thử tích hợp trong thư mục demo. Kiểm thử E2E có ghi báo cáo vào server đang chạy, nên cần môi trường demo riêng. Điện thoại Android cần URL có thể truy cập từ thiết bị và asset đã stage; số SMS cần cấu hình theo nơi tiếp nhận của phiên kiểm tra.
+Kiểm thử backend và Flutter được hướng dẫn trong tài liệu sản phẩm. Kiểm thử luồng xử lý và giao diện được thực hiện trên điện thoại Android thật, kết hợp coordinator, backend và dashboard. Điện thoại cần truy cập được máy chủ và có bộ dữ liệu/model đúng phiên; các bài thử được phân biệt bằng tên lượt và ID. Thử SMS cần cấu hình số tiếp nhận của phiên kiểm tra.
 
 \section{Những gì chưa tái lập trong bản sơ bộ}
-Bản sơ bộ chưa chạy lại huấn luyện MobileNet, các runtime ảnh, toàn bộ notebook Colab, E2E Docker hay điện thoại Android. Kết quả test lịch sử được dẫn rõ ngày và nguồn. Kiểm tra mới chỉ xác nhận tính nhất quán dữ liệu đầu vào bảng và khả năng biên dịch báo cáo. Phân biệt này giúp người đọc biết phần nào là kết quả nghiên cứu đã lưu và phần nào là kiểm tra biên soạn.
+Việc biên soạn báo cáo không chạy lại huấn luyện MobileNet hoặc toàn bộ notebook. Kết quả nghiên cứu đã lưu gồm benchmark model/runtime trên bốn mẫu điện thoại và hai kịch bản kiểm thử chức năng trên điện thoại thật; thời điểm, cấu hình và nguồn được trình bày ở phần thực nghiệm. Kiểm tra khi biên soạn đối chiếu các tệp kết quả, hash nguồn và khả năng biên dịch báo cáo, không được tính là lượt thực nghiệm mới.
+
+\section{Hồ sơ kiểm thử ứng dụng di động ngày 24/10/2026}
+Nguồn chính là hai bộ JSON/CSV và \texttt{manifest.json} dưới \RepoPath{products/fe/experiment_mobile/results/SM-G970U/}, cùng tiền tố \RepoPath{2026-10-24_10-28-41-463525_mobile_run_001}; bộ run\_002 có thêm hậu tố \texttt{\_run\_002}. Chọn theo \texttt{goldRun}/\texttt{seedRun} trong manifest, không suy từ riêng tên thư mục. JSON giữ trạng thái hiện tại, lịch sử lần thử và quan sát backend; \texttt{loi\_thu\_cong.csv} giữ lỗi được người chạy ghi nhận. Bản trích nguồn và hash dùng cho các bảng nằm tại \RepoPath{report/generated/mobile-system/source-audit.json}. Các lượt ngày 23/10 được giữ làm lịch sử, không cộng thành lần lặp độc lập của hai lượt chính.

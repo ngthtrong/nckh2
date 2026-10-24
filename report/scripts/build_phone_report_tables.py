@@ -1,4 +1,4 @@
-"""Validate saved phone evidence and render three main/four appendix tables."""
+"""Validate saved phone evidence and render main and appendix tables."""
 import csv
 import hashlib
 import json
@@ -45,7 +45,10 @@ def table(name, caption, label, headers, rows, long=False):
         lines += [r'\begin{table}[htbp]\centering\small\setlength{\tabcolsep}{4pt}',
                   r'\caption{' + caption + r'}\label{' + label + '}',
                   r'\begin{tabular}{' + spec + '}', r'\toprule ' + header + r' \midrule']
-    lines += [' & '.join(str(v) for v in row) + r' \\' for row in rows]
+    for index, row in enumerate(rows):
+        lines.append(' & '.join(str(v) for v in row) + r' \\')
+        if name == 'phone-selected-runtimes' and index % 2 == 1 and index < len(rows) - 1:
+            lines.append(r'\midrule')
     lines += [r'\end{longtable}\endgroup' if long else r'\bottomrule\end{tabular}\end{table}', '']
     (OUT / (name + '.tex')).write_text('\n'.join(lines), encoding='utf-8')
 
@@ -97,15 +100,15 @@ def main():
           'tab:phone-model-quality', ['Phương án', 'Acc.', 'P macro', 'R macro', 'F1 macro'], quality)
     table('phone-model-tradeoffs', 'Đánh đổi phát hiện ngập cao và sai lệch mức ngập', 'tab:phone-model-tradeoffs',
           ['Phương án', r'P high (\%)', r'R high (\%)', 'MAE', 'RMSE', 'Lỗi nặng TB'], tradeoff)
-    selected = []
+    runtimes = []
     for device in DEVICE:
         a, b = [next(r for r in ordered if (r['seed'], r['variant'], r['device'], r['runtime']) == ('1024', 'pruning', device, t)) for t in ['onnx', 'pte']]
         pa, pb = [{x['id']: x['prediction'] for x in predictions if x['source_json'] == r['source_json']} for r in [a, b]]
         assert pa == pb
-        selected.append([NAMES[device], fmt(100*float(a['macro_f1'])), fmt(float(a['ordinal_mae']), 4)] +
-                        [fmt(float(r[k])) for k in ['p50_ms', 'p95_ms'] for r in [a, b]])
-    table('phone-selected-devices', 'Seed 1024 cắt tỉa trên từng điện thoại: chất lượng và độ trễ (ms)', 'tab:phone-selected-devices',
-          ['Điện thoại', r'F1 (\%)', 'MAE', 'O P50', 'T P50', 'O P95', 'T P95'], selected)
+        for runtime, record in [('ONNX', a), ('PTE', b)]:
+            runtimes.append([NAMES[device], runtime, fmt(float(record['p50_ms'])), fmt(float(record['p95_ms']))])
+    table('phone-selected-runtimes', 'So sánh ONNX Runtime và ExecuTorch/PTE trên cùng điện thoại, model seed 1024 cắt tỉa', 'tab:phone-selected-runtimes',
+          ['Điện thoại', 'Runtime', 'P50 (ms)', 'P95 (ms)'], runtimes)
 
     table('phone-full-quality', 'Chất lượng phân loại của đủ 32 cấu hình điện thoại (\%)', 'tab:phone-full-quality',
           ['Cấu hình', 'Acc.', 'P macro', 'R macro', 'F1 macro'],

@@ -1,0 +1,76 @@
+<mxfile host="Electron" agent="Antigravity">
+  <diagram id="diag-1" name="Luu-do-07-Tiep-nhan-Tong-dai-va-Gan-Vi-tri">
+    <mxGraphModel dx="1633" dy="907" grid="0" gridSize="10" guides="1" tooltips="1" connect="1" arrows="1" fold="1" page="1" pageScale="1" pageWidth="850" pageHeight="890" math="0" shadow="0">
+      <root>
+        <mxCell id="0" />
+        <mxCell id="1" parent="0" />
+        <mxCell id="start" parent="1" style="ellipse;whiteSpace=wrap;html=1;fontStyle=1;fontFamily=Helvetica;fontSize=15;" value="&lt;div style=&quot;line-height:1;&quot;&gt;Bắt đầu&lt;/div&gt;" vertex="1">
+          <mxGeometry height="40" width="100" x="390" y="40" as="geometry" />
+        </mxCell>
+        <mxCell id="recv_call" parent="1" style="rounded=1;whiteSpace=wrap;html=1;fontSize=15;fontFamily=Helvetica;" value="&lt;div style=&quot;line-height:1;&quot;&gt;Điều phối viên tiếp nhận:&#xa;Cuộc gọi cứu nạn hotline hoặc SMS Gateway&lt;/div&gt;" vertex="1">
+          <mxGeometry height="55" width="240" x="320" y="110" as="geometry" />
+        </mxCell>
+        <mxCell id="open_modal" parent="1" style="rounded=1;whiteSpace=wrap;html=1;fontSize=15;fontFamily=Helvetica;" value="&lt;div style=&quot;line-height:1;&quot;&gt;Mở modal &#39;Nhập báo cáo thủ công&#39;&#xa;trên giao diện Web Dashboard&lt;/div&gt;" vertex="1">
+          <mxGeometry height="50" width="220" x="330" y="195" as="geometry" />
+        </mxCell>
+        <mxCell id="enter_info" parent="1" style="rounded=1;whiteSpace=wrap;html=1;fontSize=15;fontFamily=Helvetica;" value="&lt;div style=&quot;line-height:1;&quot;&gt;Nhập thông tin người gọi:&#xa;Tên, SĐT, mô tả, số người kẹt, nhóm yếu thế&lt;/div&gt;" vertex="1">
+          <mxGeometry height="55" width="240" x="320" y="275" as="geometry" />
+        </mxCell>
+        <mxCell id="loc_dec" parent="1" style="rhombus;whiteSpace=wrap;html=1;fontSize=15;fontFamily=Helvetica;" value="&lt;div style=&quot;line-height:1;&quot;&gt;Người gọi có cung cấp&#xa;địa chỉ / tọa độ?&lt;/div&gt;" vertex="1">
+          <mxGeometry height="70" width="180" x="350" y="360" as="geometry" />
+        </mxCell>
+        <mxCell id="pick_map" parent="1" style="rounded=1;whiteSpace=wrap;html=1;fontSize=15;fontFamily=Helvetica;" value="&lt;div style=&quot;line-height:1;&quot;&gt;XÁC ĐỊNH ĐƯỢC VỊ TRÍ:&#xa;Chấm vị trí trên bản đồ Leaflet&#xa;hoặc nhập địa chỉ cụ thể&lt;/div&gt;" vertex="1">
+          <mxGeometry height="60" width="230" x="550" y="452.5" as="geometry" />
+        </mxCell>
+        <mxCell id="no_loc" parent="1" style="rounded=1;whiteSpace=wrap;html=1;fontSize=15;fontFamily=Helvetica;" value="&lt;div style=&quot;line-height:1;&quot;&gt;CHƯA RÕ VỊ TRÍ:&#xa;Đặt lat/lng = null&#xa;Đưa vào Hàng xem xét (Review Queue)&lt;/div&gt;" vertex="1">
+          <mxGeometry height="75" width="230" x="146" y="445" as="geometry" />
+        </mxCell>
+        <mxCell id="submit_api" parent="1" style="rounded=1;whiteSpace=wrap;html=1;fontSize=15;fontFamily=Helvetica;" value="&lt;div style=&quot;line-height:1;&quot;&gt;Gọi POST /api/reports/manual:&#xa;- Gán source = &#39;manual&#39;&#xa;- Ghi operator_id thực hiện&lt;/div&gt;" vertex="1">
+          <mxGeometry height="60" width="220" x="330" y="555" as="geometry" />
+        </mxCell>
+        <mxCell id="log_event" parent="1" style="shape=cylinder3;whiteSpace=wrap;html=1;boundedLbl=1;backgroundOutline=1;size=10;fontSize=15;fontFamily=Helvetica;" value="&lt;div style=&quot;line-height:1;&quot;&gt;Ghi nhật ký vào report_events&#xa;(Actor: operator, action: create_manual)&lt;/div&gt;" vertex="1">
+          <mxGeometry height="87" width="200" x="340" y="633" as="geometry" />
+        </mxCell>
+        <mxCell id="auto_cluster" parent="1" style="rounded=1;whiteSpace=wrap;html=1;fontSize=15;fontFamily=Helvetica;" value="&lt;div style=&quot;line-height:1;&quot;&gt;Cập nhật dữ liệu hoạt động&#xa;-&amp;gt; Kích hoạt phân cụm tự động&lt;/div&gt;" vertex="1">
+          <mxGeometry height="50" width="220" x="330" y="745" as="geometry" />
+        </mxCell>
+        <mxCell id="end" parent="1" style="ellipse;whiteSpace=wrap;html=1;fontStyle=1;fontFamily=Helvetica;fontSize=15;" value="&lt;div style=&quot;line-height:1;&quot;&gt;Kết thúc&lt;/div&gt;" vertex="1">
+          <mxGeometry height="40" width="100" x="390" y="825" as="geometry" />
+        </mxCell>
+        <mxCell id="e1" edge="1" parent="1" source="start" style="endArrow=classic;html=1;strokeWidth=1.3;fontSize=15;fontFamily=Helvetica;" target="recv_call" value="">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="e2" edge="1" parent="1" source="recv_call" style="endArrow=classic;html=1;strokeWidth=1.3;fontSize=15;fontFamily=Helvetica;" target="open_modal" value="">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="e3" edge="1" parent="1" source="open_modal" style="endArrow=classic;html=1;strokeWidth=1.3;fontSize=15;fontFamily=Helvetica;" target="enter_info" value="">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="e4" edge="1" parent="1" source="enter_info" style="endArrow=classic;html=1;strokeWidth=1.3;fontSize=15;fontFamily=Helvetica;" target="loc_dec" value="">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="e5" edge="1" parent="1" source="loc_dec" style="endArrow=classic;html=1;strokeWidth=1.3;fontSize=15;fontFamily=Helvetica;fontColor=#172B4D;labelBackgroundColor=#FFFFFF;entryX=0.5;entryY=0;entryDx=0;entryDy=0;" target="pick_map" value="Có địa chỉ">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="e6" edge="1" parent="1" source="loc_dec" style="endArrow=classic;html=1;strokeWidth=1.3;fontSize=15;fontFamily=Helvetica;fontColor=#172B4D;labelBackgroundColor=#FFFFFF;entryX=0.5;entryY=0;entryDx=0;entryDy=0;" target="no_loc" value="Chưa rõ">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="e7" edge="1" parent="1" source="pick_map" style="endArrow=classic;html=1;strokeWidth=1.3;fontSize=15;fontFamily=Helvetica;exitX=0.5;exitY=1;exitDx=0;exitDy=0;" target="submit_api" value="">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="e8" edge="1" parent="1" source="no_loc" style="endArrow=classic;html=1;strokeWidth=1.3;fontSize=15;fontFamily=Helvetica;exitX=0.5;exitY=1;exitDx=0;exitDy=0;" target="submit_api" value="">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="e9" edge="1" parent="1" source="submit_api" style="endArrow=classic;html=1;strokeWidth=1.3;fontSize=15;fontFamily=Helvetica;" target="log_event" value="">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="e10" edge="1" parent="1" source="log_event" style="endArrow=classic;html=1;strokeWidth=1.3;fontSize=15;fontFamily=Helvetica;" target="auto_cluster" value="">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="e11" edge="1" parent="1" source="auto_cluster" style="endArrow=classic;html=1;strokeWidth=1.3;fontSize=15;fontFamily=Helvetica;" target="end" value="">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+      </root>
+    </mxGraphModel>
+  </diagram>
+</mxfile>

@@ -1,0 +1,105 @@
+<mxfile host="Electron" agent="Antigravity">
+  <diagram id="diag-1" name="Luu-do-04-Theo-doi-Tien-trinh-Cuu-ho">
+    <mxGraphModel dx="1633" dy="907" grid="1" gridSize="10" guides="1" tooltips="1" connect="1" arrows="1" fold="1" page="1" pageScale="1" pageWidth="900" pageHeight="890" math="0" shadow="0">
+      <root>
+        <mxCell id="0" />
+        <mxCell id="1" parent="0" />
+        <mxCell id="start" parent="1" style="ellipse;whiteSpace=wrap;html=1;fontStyle=1;fontFamily=Helvetica;fontSize=15;" value="&lt;div style=&quot;line-height:1;&quot;&gt;Bắt đầu&lt;/div&gt;" vertex="1">
+          <mxGeometry height="40" width="100" x="390" y="20" as="geometry" />
+        </mxCell>
+        <mxCell id="open_view" parent="1" style="rounded=1;whiteSpace=wrap;html=1;fontSize=15;fontFamily=Helvetica;" value="&lt;div style=&quot;line-height:1;&quot;&gt;Người dùng mở màn hình&#xa;&#39;Theo dõi Cứu hộ&#39;&lt;/div&gt;" vertex="1">
+          <mxGeometry height="45" width="200" x="340" y="90" as="geometry" />
+        </mxCell>
+        <mxCell id="net_check" parent="1" style="rhombus;whiteSpace=wrap;html=1;fontSize=15;fontFamily=Helvetica;" value="&lt;div style=&quot;line-height:1;&quot;&gt;Có kết nối&#xa;mạng?&lt;/div&gt;" vertex="1">
+          <mxGeometry height="65" width="140" x="370" y="165" as="geometry" />
+        </mxCell>
+        <mxCell id="read_local" parent="1" style="shape=cylinder3;whiteSpace=wrap;html=1;boundedLbl=1;backgroundOutline=1;size=10;fontSize=15;fontFamily=Helvetica;" value="&lt;div style=&quot;line-height:1;&quot;&gt;MẤT MẠNG:&#xa;Đọc trạng thái lưu trong&#xa;Hive Local Storage&lt;/div&gt;" vertex="1">
+          <mxGeometry height="70" width="200" x="130" y="255" as="geometry" />
+        </mxCell>
+        <mxCell id="call_api" parent="1" style="rounded=1;whiteSpace=wrap;html=1;fontSize=15;fontFamily=Helvetica;" value="&lt;div style=&quot;line-height:1;&quot;&gt;CÓ MẠNG:&#xa;Gọi GET /api/reports/status&#xa;(truyền danh sách report_ids)&lt;/div&gt;" vertex="1">
+          <mxGeometry height="55" width="200" x="540" y="260" as="geometry" />
+        </mxCell>
+        <mxCell id="update_store" parent="1" style="rounded=1;whiteSpace=wrap;html=1;fontSize=15;fontFamily=Helvetica;" value="&lt;div style=&quot;line-height:1;&quot;&gt;Cập nhật CSDL cục bộ Hive&#xa;(Chỉ nhận trạng thái tiến, không lùi)&lt;/div&gt;" vertex="1">
+          <mxGeometry height="55" width="200" x="340" y="350" as="geometry" />
+        </mxCell>
+        <mxCell id="status_dec" parent="1" style="rhombus;whiteSpace=wrap;html=1;fontSize=15;fontFamily=Helvetica;" value="&lt;div style=&quot;line-height:1;&quot;&gt;Phân loại trạng thái&#xa;nghiệp vụ hiện tại?&lt;/div&gt;" vertex="1">
+          <mxGeometry height="70" width="180" x="350" y="430" as="geometry" />
+        </mxCell>
+        <mxCell id="st_proc" parent="1" style="rounded=1;whiteSpace=wrap;html=1;fontSize=15;fontFamily=Helvetica;" value="&lt;div style=&quot;line-height:1;&quot;&gt;processing:&#xa;&#39;Đang tiếp nhận &amp;amp; phân loại&#39;&#xa;(Chờ gán đội)&lt;/div&gt;" vertex="1">
+          <mxGeometry height="60" width="180" x="40" y="560" as="geometry" />
+        </mxCell>
+        <mxCell id="st_disp" parent="1" style="rounded=1;whiteSpace=wrap;html=1;fontSize=15;fontFamily=Helvetica;" value="&lt;div style=&quot;line-height:1;&quot;&gt;dispatched:&#xa;&#39;Đội cứu hộ đã xuất phát&#39;&#xa;(Hiển thị tên đội &amp;amp; liên hệ)&lt;/div&gt;" vertex="1">
+          <mxGeometry height="60" width="190" x="245" y="560" as="geometry" />
+        </mxCell>
+        <mxCell id="st_res" parent="1" style="rounded=1;whiteSpace=wrap;html=1;fontSize=15;fontFamily=Helvetica;" value="&lt;div style=&quot;line-height:1;&quot;&gt;resolved:&#xa;&#39;Đã cứu hộ thành công&#39;&#xa;(Nạn nhân đã an toàn)&lt;/div&gt;" vertex="1">
+          <mxGeometry height="60" width="180" x="460" y="560" as="geometry" />
+        </mxCell>
+        <mxCell id="st_canc" parent="1" style="rounded=1;whiteSpace=wrap;html=1;fontSize=15;fontFamily=Helvetica;" value="&lt;div style=&quot;line-height:1;&quot;&gt;cancelled:&#xa;&#39;Yêu cầu cứu trợ đã đóng&#39;&#xa;(Hiển thị lý do hủy ca)&lt;/div&gt;" vertex="1">
+          <mxGeometry height="60" width="185" x="665" y="560" as="geometry" />
+        </mxCell>
+        <mxCell id="render_ui" parent="1" style="rounded=1;whiteSpace=wrap;html=1;fontSize=15;fontFamily=Helvetica;" value="&lt;div style=&quot;line-height:1;&quot;&gt;Cập nhật thanh tiến trình giao diện&#xa;(Timeline trực quan cho người dân)&lt;/div&gt;" vertex="1">
+          <mxGeometry height="50" width="250" x="315" y="690" as="geometry" />
+        </mxCell>
+        <mxCell id="timer_loop" parent="1" style="rounded=1;whiteSpace=wrap;html=1;fontSize=15;fontFamily=Helvetica;" value="&lt;div style=&quot;line-height:1;&quot;&gt;Đặt lịch Polling chu kỳ 15s tiếp theo&lt;/div&gt;" vertex="1">
+          <mxGeometry height="40" width="200" x="340" y="760" as="geometry" />
+        </mxCell>
+        <mxCell id="end" parent="1" style="ellipse;whiteSpace=wrap;html=1;fontStyle=1;fontFamily=Helvetica;fontSize=15;" value="&lt;div style=&quot;line-height:1;&quot;&gt;Kết thúc&lt;/div&gt;" vertex="1">
+          <mxGeometry height="40" width="100" x="390" y="830" as="geometry" />
+        </mxCell>
+        <mxCell id="e1" edge="1" parent="1" source="start" style="endArrow=classic;html=1;strokeWidth=1.3;fontSize=15;fontFamily=Helvetica;" target="open_view" value="">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="e2" edge="1" parent="1" source="open_view" style="endArrow=classic;html=1;strokeWidth=1.3;fontSize=15;fontFamily=Helvetica;" target="net_check" value="">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="e3" edge="1" parent="1" source="net_check" style="endArrow=classic;html=1;strokeWidth=1.3;fontSize=15;fontFamily=Helvetica;fontColor=#172B4D;labelBackgroundColor=#FFFFFF;" target="read_local" value="Mất mạng">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="e4" edge="1" parent="1" source="net_check" style="endArrow=classic;html=1;strokeWidth=1.3;fontSize=15;fontFamily=Helvetica;fontColor=#172B4D;labelBackgroundColor=#FFFFFF;" target="call_api" value="Có mạng">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="e5" edge="1" parent="1" source="read_local" style="endArrow=classic;html=1;strokeWidth=1.3;fontSize=15;fontFamily=Helvetica;" target="update_store" value="">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="e6" edge="1" parent="1" source="call_api" style="endArrow=classic;html=1;strokeWidth=1.3;fontSize=15;fontFamily=Helvetica;" target="update_store" value="">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="e7" edge="1" parent="1" source="update_store" style="endArrow=classic;html=1;strokeWidth=1.3;fontSize=15;fontFamily=Helvetica;entryX=0.5;entryY=0;entryDx=0;entryDy=0;" target="status_dec" value="">
+          <mxGeometry relative="1" as="geometry">
+            <mxPoint x="440" y="435" as="targetPoint" />
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="e8" edge="1" parent="1" source="status_dec" style="endArrow=classic;html=1;strokeWidth=1.3;fontSize=15;fontFamily=Helvetica;fontColor=#172B4D;labelBackgroundColor=#FFFFFF;" target="st_proc" value="processing">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="e9" edge="1" parent="1" source="status_dec" style="endArrow=classic;html=1;strokeWidth=1.3;fontSize=15;fontFamily=Helvetica;fontColor=#172B4D;labelBackgroundColor=#FFFFFF;" target="st_disp" value="dispatched">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="e10" edge="1" parent="1" source="status_dec" style="endArrow=classic;html=1;strokeWidth=1.3;fontSize=15;fontFamily=Helvetica;fontColor=#172B4D;labelBackgroundColor=#FFFFFF;" target="st_res" value="resolved">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="e11" edge="1" parent="1" source="status_dec" style="endArrow=classic;html=1;strokeWidth=1.3;fontSize=15;fontFamily=Helvetica;fontColor=#172B4D;labelBackgroundColor=#FFFFFF;" target="st_canc" value="cancelled">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="e12" edge="1" parent="1" source="st_proc" style="endArrow=classic;html=1;strokeWidth=1.3;fontSize=15;fontFamily=Helvetica;exitX=0.5;exitY=1;exitDx=0;exitDy=0;" target="render_ui" value="">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="e13" edge="1" parent="1" source="st_disp" style="endArrow=classic;html=1;strokeWidth=1.3;fontSize=15;fontFamily=Helvetica;" target="render_ui" value="">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="e14" edge="1" parent="1" source="st_res" style="endArrow=classic;html=1;strokeWidth=1.3;fontSize=15;fontFamily=Helvetica;" target="render_ui" value="">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="e15" edge="1" parent="1" source="st_canc" style="endArrow=classic;html=1;strokeWidth=1.3;fontSize=15;fontFamily=Helvetica;exitX=0.5;exitY=1;exitDx=0;exitDy=0;" target="render_ui" value="">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="e16" edge="1" parent="1" source="render_ui" style="endArrow=classic;html=1;strokeWidth=1.3;fontSize=15;fontFamily=Helvetica;" target="timer_loop" value="">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="e17" edge="1" parent="1" source="timer_loop" style="endArrow=classic;html=1;strokeWidth=1.3;fontSize=15;fontFamily=Helvetica;" target="end" value="">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+      </root>
+    </mxGraphModel>
+  </diagram>
+</mxfile>

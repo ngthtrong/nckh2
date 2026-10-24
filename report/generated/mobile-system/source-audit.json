@@ -1,0 +1,666 @@
+{
+  "scope": "Kiểm thử luồng xử lý và giao diện trên Samsung S10e; trạng thái cuối cùng, giữ lịch sử lỗi.",
+  "runs": [
+    {
+      "goldRun": "run_001",
+      "sessionId": "2026-10-24_10-28-41-463525_mobile_run_001",
+      "sources": [
+        {
+          "path": "products/fe/experiment_mobile/results/SM-G970U/2026-10-24_10-28-41-463525_mobile_run_001/2026-10-24_10-28-41-463525_mobile_run_001.json",
+          "sha256": "4a81326f696a50109ab1a9539d94ff6da750fca8b6ded440ce259d0c274c791d"
+        },
+        {
+          "path": "products/fe/experiment_mobile/results/SM-G970U/2026-10-24_10-28-41-463525_mobile_run_001/manifest.json",
+          "sha256": "a25ba5e48be8277b1f4b161423eea9e409ee0577d94be8e58a5dee4e94503395"
+        },
+        {
+          "path": "products/fe/experiment_mobile/results/SM-G970U/2026-10-24_10-28-41-463525_mobile_run_001/2026-10-24_10-28-41-463525_mobile_run_001.csv",
+          "sha256": "29cc15ede93b190df4516be3b1d6f36a0b2f9c0e80a72496ee7c12c11b9b5858"
+        },
+        {
+          "path": "products/fe/experiment_mobile/benchmarks/2026-10-24_10-28-41-463525_mobile_run_001/dashboard-checks.json",
+          "sha256": "0ab24c73e897a7750a269a07244ba8e1558309f057240cda21146f8d11c2dcc3"
+        },
+        {
+          "path": "products/fe/experiment_mobile/results/SM-G970U/2026-10-24_10-28-41-463525_mobile_run_001/loi_thu_cong.csv",
+          "sha256": "ab7b1c70e5be8e2ad7d00d27a731304e5c4acb9d606dd99f53855da313e6b343"
+        }
+      ],
+      "recordedAtUtc": "2026-10-24T03:41:45.838795+00:00",
+      "environment": {
+        "device": {
+          "manufacturer": "samsung",
+          "model": "SM-G970U",
+          "androidRelease": "12",
+          "androidSdk": 31,
+          "supportedAbis": [
+            "arm64-v8a",
+            "armeabi-v7a",
+            "armeabi"
+          ]
+        },
+        "app": {
+          "packageName": "com.example.app.admin",
+          "versionName": "0.1.0",
+          "versionCode": 1
+        },
+        "model": {
+          "runtime": "pte",
+          "seed": 1024,
+          "variant": "pruning",
+          "sha256": "6d4ca447127556041f603e84b32be7828c95e45bca0afcfb2793e19501a9c433"
+        },
+        "actualPteSha256": "6d4ca447127556041f603e84b32be7828c95e45bca0afcfb2793e19501a9c433",
+        "platform": "android"
+      },
+      "packageManifest": {
+        "schemaVersion": 2,
+        "goldRun": "run_001",
+        "goldInputSha256": "a8ecc9907926ad62c2947fd1e7778a14d52a1baa3701fbd34f723e3822191f1b",
+        "goldReportCount": 316,
+        "splitCsvSha256": "cdef5620b7e4d6d7ec48c18f06bab9323e76f4360c9847120f4e02684865c497",
+        "imageSelectionSha256": "8f36baf8fd2e1fc00e2a56614f8b85c97a82eeef16b9a28f487ee1e48c6988b5",
+        "image": {
+          "relativePath": "high/flood_4800.jpg",
+          "label": "high",
+          "length": 162727,
+          "sha256": "0fcf65f440f4bb571ef8372897e08b4598b0e90023bb6700f222a036752a070e"
+        },
+        "model": {
+          "runtime": "pte",
+          "seed": 1024,
+          "variant": "pruning",
+          "sha256": "6d4ca447127556041f603e84b32be7828c95e45bca0afcfb2793e19501a9c433"
+        },
+        "stages": [
+          "online",
+          "offline_recovery",
+          "adaptive_300",
+          "adaptive_20",
+          "no_gps",
+          "feedback"
+        ]
+      },
+      "counts": {
+        "PASS": 8,
+        "FAIL": 1,
+        "NOT_RUN": 0
+      },
+      "status": "failed",
+      "checks": [
+        {
+          "stage": "online",
+          "status": "PASS",
+          "detail": "PTE thật; báo cáo post-1792812816655-6048212cae00; profile=online, probe=7944 kbit/s, mode=fullImage.",
+          "method": "app"
+        },
+        {
+          "stage": "offline_recovery",
+          "status": "PASS",
+          "detail": "Chặn đường dữ liệu HTTP → giữ outbox → mở lại → server nhận đúng một báo cáo, outbox=0. Không phải tắt Wi-Fi/4G vật lý.",
+          "method": "app"
+        },
+        {
+          "stage": "adaptive_300",
+          "status": "PASS",
+          "detail": "PTE thật; báo cáo post-1792812824634-c12725143707; profile=300, probe=240 kbit/s, mode=compressedImage.",
+          "method": "app"
+        },
+        {
+          "stage": "adaptive_20",
+          "status": "PASS",
+          "detail": "PTE thật; báo cáo post-1792812834485-964efa9dc0f1; profile=20, probe=18 kbit/s, mode=textOnly.",
+          "method": "app"
+        },
+        {
+          "stage": "no_gps",
+          "status": "PASS",
+          "detail": "Quyền Android bị từ chối; app gửi không có tọa độ; server đưa vào hàng xem xét.",
+          "method": "app"
+        },
+        {
+          "stage": "feedback",
+          "status": "PASS",
+          "detail": "Backend điều phối post-1792812816655-6048212cae00; refreshStatuses của app nhận dispatched. Giao diện Lịch sử cần xác nhận thủ công riêng.",
+          "method": "app"
+        },
+        {
+          "stage": "manual_android_ui",
+          "status": "PASS",
+          "detail": "Đã kiểm tra và lưu bằng chứng (người chạy ghi nhận lúc 2026-10-24T03:37:06.423197Z).",
+          "method": "manual"
+        },
+        {
+          "stage": "manual_physical_network",
+          "status": "FAIL",
+          "detail": "khi chọn gửi bài lúc tắt wifi thì ứng dụng bị thoát đăng nhập lại cũng không được, bật wifi lại thì được (người chạy ghi nhận lúc 2026-10-24T03:39:15.400497Z).",
+          "method": "manual"
+        },
+        {
+          "stage": "dashboard",
+          "status": "PASS",
+          "method": "coordinator",
+          "detail": "Playwright đối chiếu bài benchmark trên flood-rescue"
+        }
+      ],
+      "reports": {
+        "online": "post-1792812816655-6048212cae00",
+        "offline_recovery": "post-1792812821262-7ecdd67ed7ee",
+        "adaptive_300": "post-1792812824634-c12725143707",
+        "adaptive_20": "post-1792812834485-964efa9dc0f1",
+        "no_gps": "post-1792812844298-c0811dc7c1aa"
+      },
+      "inference": {
+        "online": {
+          "truth": "high",
+          "prediction": "medium",
+          "confidence": 0.7801905274391174,
+          "durationMs": 64,
+          "runtime": "pte"
+        },
+        "adaptive_300": {
+          "truth": "high",
+          "prediction": "medium",
+          "confidence": 0.7801905274391174,
+          "durationMs": 37,
+          "runtime": "pte"
+        },
+        "adaptive_20": {
+          "truth": "high",
+          "prediction": "medium",
+          "confidence": 0.7801905274391174,
+          "durationMs": 33,
+          "runtime": "pte"
+        }
+      },
+      "evidence": {
+        "online_policy": {
+          "throughputKbps": 7944,
+          "sendMode": "fullImage"
+        },
+        "online": {
+          "profile": "online",
+          "throughputKbps": 7944,
+          "sendMode": "fullImage",
+          "imageUrlPresent": true,
+          "reportId": "post-1792812816655-6048212cae00",
+          "attachmentVerification": {
+            "method": "sha256",
+            "sha256": "0fcf65f440f4bb571ef8372897e08b4598b0e90023bb6700f222a036752a070e",
+            "bytes": 162727
+          }
+        },
+        "online_timing": {
+          "startedAtUtc": "2026-10-24T03:33:36.293811Z",
+          "finishedAtUtc": "2026-10-24T03:33:37.507355Z"
+        },
+        "offline_recovery_policy": {
+          "throughputKbps": null,
+          "sendMode": "queuedOffline"
+        },
+        "offlineObserved": {
+          "reportId": "post-1792812821262-7ecdd67ed7ee",
+          "observedAtUtc": "2026-10-24T03:33:41.435515Z",
+          "method": "proxy HTTP 503 on data endpoints; control remains online"
+        },
+        "offline_recovery_timing": {
+          "startedAtUtc": "2026-10-24T03:33:40.960734Z",
+          "finishedAtUtc": "2026-10-24T03:33:42.126695Z"
+        },
+        "adaptive_300_policy": {
+          "throughputKbps": 240,
+          "sendMode": "compressedImage"
+        },
+        "adaptive_300": {
+          "profile": "300",
+          "throughputKbps": 240,
+          "sendMode": "compressedImage",
+          "imageUrlPresent": true,
+          "reportId": "post-1792812824634-c12725143707",
+          "attachmentVerification": {
+            "method": "decoded_rgb_sample_width64_mae_le20",
+            "pixelMae": 0.7960069444444444,
+            "sha256": "3f54aa1f55904e91c98f9ecf873d72e83e60258a736ee5310b7db0f739943311",
+            "bytes": 71909
+          }
+        },
+        "adaptive_300_timing": {
+          "startedAtUtc": "2026-10-24T03:33:44.349286Z",
+          "finishedAtUtc": "2026-10-24T03:33:52.083148Z"
+        },
+        "adaptive_20_policy": {
+          "throughputKbps": 18,
+          "sendMode": "textOnly"
+        },
+        "adaptive_20": {
+          "profile": "20",
+          "throughputKbps": 18,
+          "sendMode": "textOnly",
+          "imageUrlPresent": false,
+          "reportId": "post-1792812834485-964efa9dc0f1",
+          "attachmentVerification": null
+        },
+        "adaptive_20_timing": {
+          "startedAtUtc": "2026-10-24T03:33:54.208579Z",
+          "finishedAtUtc": "2026-10-24T03:34:01.612898Z"
+        },
+        "no_gps_policy": {
+          "throughputKbps": null,
+          "sendMode": "textOnly"
+        },
+        "gpsPermission": "denied",
+        "no_gps_timing": {
+          "startedAtUtc": "2026-10-24T03:34:04.081029Z",
+          "finishedAtUtc": "2026-10-24T03:34:04.652291Z"
+        },
+        "feedback_timing": {
+          "startedAtUtc": "2026-10-24T03:34:11.921092Z",
+          "finishedAtUtc": "2026-10-24T03:34:12.160940Z"
+        },
+        "manualChecks": [
+          {
+            "id": "manual_android_ui-1792813011070036",
+            "atUtc": "2026-10-24T03:36:51.070036Z",
+            "stage": "manual_android_ui",
+            "status": "PASS",
+            "detail": "Đã kiểm tra và lưu bằng chứng",
+            "reportId": "#63258BEB",
+            "evidenceFile": ""
+          },
+          {
+            "id": "manual_android_ui-1792813026423197",
+            "atUtc": "2026-10-24T03:37:06.423197Z",
+            "stage": "manual_android_ui",
+            "status": "PASS",
+            "detail": "Đã kiểm tra và lưu bằng chứng",
+            "reportId": "#63258BEB",
+            "evidenceFile": ""
+          },
+          {
+            "id": "manual_physical_network-1792813155400497",
+            "atUtc": "2026-10-24T03:39:15.400497Z",
+            "stage": "manual_physical_network",
+            "status": "FAIL",
+            "detail": "khi chọn gửi bài lúc tắt wifi thì ứng dụng bị thoát đăng nhập lại cũng không được, bật wifi lại thì được",
+            "reportId": "",
+            "evidenceFile": ""
+          }
+        ]
+      },
+      "priorFailures": [],
+      "dashboard": {
+        "checks": [
+          {
+            "status": "PASS",
+            "detail": "Dashboard hiển thị đúng bài Android: post-1792812844298-c0811dc7c1aa"
+          },
+          {
+            "status": "PASS",
+            "detail": "Dashboard hiển thị đúng bài Android: post-1792812834485-964efa9dc0f1"
+          },
+          {
+            "status": "PASS",
+            "detail": "Dashboard hiển thị đúng bài Android: post-1792812824634-c12725143707"
+          },
+          {
+            "status": "PASS",
+            "detail": "Dashboard hiển thị đúng bài Android: post-1792812821262-7ecdd67ed7ee"
+          },
+          {
+            "status": "PASS",
+            "detail": "Dashboard hiển thị đúng bài Android: post-1792812816655-6048212cae00"
+          }
+        ],
+        "atUtc": "2026-10-24T03:41:35.020342+00:00",
+        "mobileReportIds": [
+          "post-1792812844298-c0811dc7c1aa",
+          "post-1792812834485-964efa9dc0f1",
+          "post-1792812824634-c12725143707",
+          "post-1792812821262-7ecdd67ed7ee",
+          "post-1792812816655-6048212cae00"
+        ],
+        "status": "PASS"
+      }
+    },
+    {
+      "goldRun": "run_002",
+      "sessionId": "2026-10-24_10-28-41-463525_mobile_run_001_run_002",
+      "sources": [
+        {
+          "path": "products/fe/experiment_mobile/results/SM-G970U/2026-10-24_10-28-41-463525_mobile_run_001_run_002/2026-10-24_10-28-41-463525_mobile_run_001_run_002.json",
+          "sha256": "def650fbcd8289f48b9fe18202dadc756546ba6d9c16d52f9ae1df8ca4edb72a"
+        },
+        {
+          "path": "products/fe/experiment_mobile/results/SM-G970U/2026-10-24_10-28-41-463525_mobile_run_001_run_002/manifest.json",
+          "sha256": "b69ace4cefc1ff3cefc9dd9066d47ba91af9742f4f794b7b9b5b4c2628d43521"
+        },
+        {
+          "path": "products/fe/experiment_mobile/results/SM-G970U/2026-10-24_10-28-41-463525_mobile_run_001_run_002/2026-10-24_10-28-41-463525_mobile_run_001_run_002.csv",
+          "sha256": "24bd72de269e8c0361e21745d8ceed864ae9df9f95bffd119eeaeea4d256aa25"
+        },
+        {
+          "path": "products/fe/experiment_mobile/benchmarks/2026-10-24_10-28-41-463525_mobile_run_001_run_002/dashboard-checks.json",
+          "sha256": "467eec3a0fc2fb2c93c09cc77924746acf59c655be2b0634c867f524a6f70a4c"
+        },
+        {
+          "path": "products/fe/experiment_mobile/results/SM-G970U/2026-10-24_10-28-41-463525_mobile_run_001_run_002/loi_thu_cong.csv",
+          "sha256": "ad3a619a6811cac17641748be312747984ee2c8bab83374fb1825eca9e15e8aa"
+        }
+      ],
+      "recordedAtUtc": "2026-10-24T04:41:05.979001+00:00",
+      "environment": {
+        "device": {
+          "manufacturer": "samsung",
+          "model": "SM-G970U",
+          "androidRelease": "12",
+          "androidSdk": 31,
+          "supportedAbis": [
+            "arm64-v8a",
+            "armeabi-v7a",
+            "armeabi"
+          ]
+        },
+        "app": {
+          "packageName": "com.example.app.admin",
+          "versionName": "0.1.0",
+          "versionCode": 1
+        },
+        "model": {
+          "runtime": "pte",
+          "seed": 1024,
+          "variant": "pruning",
+          "sha256": "6d4ca447127556041f603e84b32be7828c95e45bca0afcfb2793e19501a9c433"
+        },
+        "actualPteSha256": "6d4ca447127556041f603e84b32be7828c95e45bca0afcfb2793e19501a9c433",
+        "platform": "android"
+      },
+      "packageManifest": {
+        "schemaVersion": 2,
+        "goldRun": "run_002",
+        "goldInputSha256": "6f64941d36259c7df3587111de4fe1422f89e27ba0a9a2d68c8031f89d37d932",
+        "goldReportCount": 334,
+        "splitCsvSha256": "cdef5620b7e4d6d7ec48c18f06bab9323e76f4360c9847120f4e02684865c497",
+        "imageSelectionSha256": "8f36baf8fd2e1fc00e2a56614f8b85c97a82eeef16b9a28f487ee1e48c6988b5",
+        "image": {
+          "relativePath": "medium/flood_6286.jpg",
+          "label": "medium",
+          "length": 38779,
+          "sha256": "eaeee6cb6978717c20f2879f549380c6c27c3bdc8baadc397bd2060fedbf7c44"
+        },
+        "model": {
+          "runtime": "pte",
+          "seed": 1024,
+          "variant": "pruning",
+          "sha256": "6d4ca447127556041f603e84b32be7828c95e45bca0afcfb2793e19501a9c433"
+        },
+        "stages": [
+          "online",
+          "offline_recovery",
+          "adaptive_300",
+          "adaptive_20",
+          "no_gps",
+          "feedback"
+        ]
+      },
+      "counts": {
+        "PASS": 9,
+        "FAIL": 0,
+        "NOT_RUN": 0
+      },
+      "status": "complete",
+      "checks": [
+        {
+          "stage": "online",
+          "status": "PASS",
+          "detail": "PTE thật; báo cáo post-1792816485830-56c38ce441f6; profile=online, probe=15420 kbit/s, mode=fullImage.",
+          "method": "app"
+        },
+        {
+          "stage": "offline_recovery",
+          "status": "PASS",
+          "detail": "Chặn đường dữ liệu HTTP → giữ outbox → mở lại → server nhận đúng một báo cáo, outbox=0. Không phải tắt Wi-Fi/4G vật lý.",
+          "method": "app"
+        },
+        {
+          "stage": "adaptive_300",
+          "status": "PASS",
+          "detail": "PTE thật; báo cáo post-1792816494177-224e6bdd8e6d; profile=300, probe=238 kbit/s, mode=compressedImage.",
+          "method": "app"
+        },
+        {
+          "stage": "adaptive_20",
+          "status": "PASS",
+          "detail": "PTE thật; báo cáo post-1792816504693-8e1d51821067; profile=20, probe=18 kbit/s, mode=textOnly.",
+          "method": "app"
+        },
+        {
+          "stage": "no_gps",
+          "status": "PASS",
+          "detail": "Quyền Android bị từ chối; app gửi không có tọa độ; server đưa vào hàng xem xét.",
+          "method": "app"
+        },
+        {
+          "stage": "feedback",
+          "status": "PASS",
+          "detail": "Backend điều phối post-1792816485830-56c38ce441f6; refreshStatuses của app nhận dispatched. Giao diện Lịch sử cần xác nhận thủ công riêng.",
+          "method": "app"
+        },
+        {
+          "stage": "manual_android_ui",
+          "status": "PASS",
+          "detail": "Đã kiểm tra và lưu bằng chứng (người chạy ghi nhận lúc 2026-10-24T04:38:19.954532Z).",
+          "method": "manual"
+        },
+        {
+          "stage": "manual_physical_network",
+          "status": "PASS",
+          "detail": "Đã kiểm tra và lưu bằng chứng (người chạy ghi nhận lúc 2026-10-24T04:40:19.988167Z).",
+          "method": "manual"
+        },
+        {
+          "stage": "dashboard",
+          "status": "PASS",
+          "method": "coordinator",
+          "detail": "Playwright đối chiếu bài benchmark trên flood-rescue"
+        }
+      ],
+      "reports": {
+        "online": "post-1792816485830-56c38ce441f6",
+        "offline_recovery": "post-1792816488428-e06860240840",
+        "adaptive_300": "post-1792816494177-224e6bdd8e6d",
+        "adaptive_20": "post-1792816504693-8e1d51821067",
+        "no_gps": "post-1792816547062-d3ef42d56b6b"
+      },
+      "inference": {
+        "online": {
+          "truth": "medium",
+          "prediction": "high",
+          "confidence": 0.6460651159286499,
+          "durationMs": 30,
+          "runtime": "pte"
+        },
+        "adaptive_300": {
+          "truth": "medium",
+          "prediction": "high",
+          "confidence": 0.6460651159286499,
+          "durationMs": 40,
+          "runtime": "pte"
+        },
+        "adaptive_20": {
+          "truth": "medium",
+          "prediction": "high",
+          "confidence": 0.6460651159286499,
+          "durationMs": 37,
+          "runtime": "pte"
+        }
+      },
+      "evidence": {
+        "online_policy": {
+          "throughputKbps": 15420,
+          "sendMode": "fullImage"
+        },
+        "online": {
+          "profile": "online",
+          "throughputKbps": 15420,
+          "sendMode": "fullImage",
+          "imageUrlPresent": true,
+          "reportId": "post-1792816485830-56c38ce441f6",
+          "attachmentVerification": {
+            "method": "sha256",
+            "sha256": "eaeee6cb6978717c20f2879f549380c6c27c3bdc8baadc397bd2060fedbf7c44",
+            "bytes": 38779
+          }
+        },
+        "online_timing": {
+          "startedAtUtc": "2026-10-24T04:34:44.073574Z",
+          "finishedAtUtc": "2026-10-24T04:34:46.996908Z"
+        },
+        "offline_recovery_policy": {
+          "throughputKbps": null,
+          "sendMode": "queuedOffline"
+        },
+        "offlineObserved": {
+          "reportId": "post-1792816488428-e06860240840",
+          "observedAtUtc": "2026-10-24T04:34:48.573337Z",
+          "method": "proxy HTTP 503 on data endpoints; control remains online"
+        },
+        "offline_recovery_timing": {
+          "startedAtUtc": "2026-10-24T04:34:48.079177Z",
+          "finishedAtUtc": "2026-10-24T04:34:49.083062Z"
+        },
+        "adaptive_300_policy": {
+          "throughputKbps": 238,
+          "sendMode": "compressedImage"
+        },
+        "adaptive_300": {
+          "profile": "300",
+          "throughputKbps": 238,
+          "sendMode": "compressedImage",
+          "imageUrlPresent": true,
+          "reportId": "post-1792816494177-224e6bdd8e6d",
+          "attachmentVerification": {
+            "method": "decoded_rgb_sample_width64_mae_le20",
+            "pixelMae": 1.0407986111111112,
+            "sha256": "347f9facfcd71a2b78a561e2bb965a353b4c3130ad985606eb4add1383ce1c33",
+            "bytes": 33862
+          }
+        },
+        "adaptive_300_timing": {
+          "startedAtUtc": "2026-10-24T04:34:50.912468Z",
+          "finishedAtUtc": "2026-10-24T04:34:59.502740Z"
+        },
+        "adaptive_20_policy": {
+          "throughputKbps": 18,
+          "sendMode": "textOnly"
+        },
+        "adaptive_20": {
+          "profile": "20",
+          "throughputKbps": 18,
+          "sendMode": "textOnly",
+          "imageUrlPresent": false,
+          "reportId": "post-1792816504693-8e1d51821067",
+          "attachmentVerification": null
+        },
+        "adaptive_20_timing": {
+          "startedAtUtc": "2026-10-24T04:35:01.378878Z",
+          "finishedAtUtc": "2026-10-24T04:35:11.815814Z"
+        },
+        "attemptStartedAtUtc": "2026-10-24T04:35:46.553413Z",
+        "no_gps_policy": {
+          "throughputKbps": null,
+          "sendMode": "textOnly"
+        },
+        "gpsPermission": "denied",
+        "no_gps_timing": {
+          "startedAtUtc": "2026-10-24T04:35:46.751488Z",
+          "finishedAtUtc": "2026-10-24T04:35:47.534408Z"
+        },
+        "feedback_timing": {
+          "startedAtUtc": "2026-10-24T04:35:49.536607Z",
+          "finishedAtUtc": "2026-10-24T04:35:49.735525Z"
+        },
+        "manualChecks": [
+          {
+            "id": "manual_android_ui-1792816699954532",
+            "atUtc": "2026-10-24T04:38:19.954532Z",
+            "stage": "manual_android_ui",
+            "status": "PASS",
+            "detail": "Đã kiểm tra và lưu bằng chứng",
+            "reportId": "#148B7BA3",
+            "evidenceFile": ""
+          },
+          {
+            "id": "manual_physical_network-1792816792993755",
+            "atUtc": "2026-10-24T04:39:52.993755Z",
+            "stage": "manual_physical_network",
+            "status": "PASS",
+            "detail": "Đã kiểm tra và lưu bằng chứng",
+            "reportId": "#11F944B0",
+            "evidenceFile": ""
+          },
+          {
+            "id": "manual_physical_network-1792816819988167",
+            "atUtc": "2026-10-24T04:40:19.988167Z",
+            "stage": "manual_physical_network",
+            "status": "PASS",
+            "detail": "Đã kiểm tra và lưu bằng chứng",
+            "reportId": "#11F944B0",
+            "evidenceFile": ""
+          }
+        ]
+      },
+      "priorFailures": [
+        {
+          "stage": "no_gps",
+          "status": "FAIL",
+          "detail": "Bad state: Vào Cài đặt Android → quyền của Cứu hộ Admin → từ chối Vị trí rồi quay lại chạy bước này.",
+          "method": "app"
+        }
+      ],
+      "dashboard": {
+        "checks": [
+          {
+            "status": "PASS",
+            "detail": "Dashboard hiển thị đúng bài Android: post-1792816547062-d3ef42d56b6b"
+          },
+          {
+            "status": "PASS",
+            "detail": "Dashboard hiển thị đúng bài Android: post-1792816504693-8e1d51821067"
+          },
+          {
+            "status": "PASS",
+            "detail": "Dashboard hiển thị đúng bài Android: post-1792816494177-224e6bdd8e6d"
+          },
+          {
+            "status": "PASS",
+            "detail": "Dashboard hiển thị đúng bài Android: post-1792816488428-e06860240840"
+          },
+          {
+            "status": "PASS",
+            "detail": "Dashboard hiển thị đúng bài Android: post-1792816485830-56c38ce441f6"
+          }
+        ],
+        "atUtc": "2026-10-24T04:40:56.477995+00:00",
+        "mobileReportIds": [
+          "post-1792816547062-d3ef42d56b6b",
+          "post-1792816504693-8e1d51821067",
+          "post-1792816494177-224e6bdd8e6d",
+          "post-1792816488428-e06860240840",
+          "post-1792816485830-56c38ce441f6"
+        ],
+        "status": "PASS"
+      }
+    }
+  ],
+  "reportReassessments": [
+    {
+      "goldRun": "run_001",
+      "stage": "manual_physical_network",
+      "originalRecordedStatus": "FAIL",
+      "reportStatus": "PASS_WITH_NOTE",
+      "basis": "Người chạy xác nhận bổ sung trong hội thoại: khi tắt mạng bấm gửi bị thoát app, nhưng khi có Wi-Fi bài vẫn được gửi đi.",
+      "scope": "Lưu bài và phục hồi gửi khi có mạng; không xác nhận lỗi thoát app đã được sửa hoặc kiểm chứng chống trùng bổ sung.",
+      "rawArtifactsModified": false
+    }
+  ]
+}

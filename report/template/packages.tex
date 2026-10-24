@@ -1,6 +1,11 @@
 \usepackage{graphicx}
 \graphicspath{{assets/figures/}{assets/diagrams/}}
 \usepackage{booktabs,longtable,tabularx,array}
+\usepackage{flafter}
+\usepackage[section]{placeins}
+% Keep each float with its source paragraph, before later discussion begins.
+\AddToHook{env/figure/after}{\FloatBarrier}
+\AddToHook{env/table/after}{\FloatBarrier}
 \newcolumntype{P}[1]{>{\raggedright\arraybackslash}p{#1}}
 \usepackage{amsmath}
 \usepackage{tikz}
