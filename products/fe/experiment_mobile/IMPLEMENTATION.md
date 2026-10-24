@@ -7,3 +7,5 @@
 - Dashboard/collect có --run 1/2; JSON/CSV dùng ngày giờ Việt Nam + tên benchmark. Không lưu token/mật khẩu.
 - Nguồn Python chính và tests chuyển vào products/fe/experiment_mobile. Entry point cũ chỉ chuyển tiếp; giữ nguyên runtime artifacts cũ.
 - Gói/checkpoint schema 1 vẫn đọc được để kiểm thử tương thích, nhưng app mới chỉ chọn các gói schema 2 trong assets.
+
+- Phạm vi: Case 1–6 kiểm thử luồng xử lý bằng cách gọi hàm trong app, không điều khiển giao diện Android; PASS không yêu cầu dự đoán đúng nhãn chuẩn. Case 7–8 kiểm thử thao tác trên giao diện thật do người chạy thực hiện; Case 9 kiểm tra giao diện dashboard bằng Playwright. Chưa phải E2E tự động toàn bộ giao diện Android.

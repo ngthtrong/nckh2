@@ -76,6 +76,10 @@ Trên điện thoại cùng mạng, mở `http://192.168.137.1:18101/healthz`. P
 4. Bấm **Chạy / Tiếp tục** cho từng case. Chọn run còn lại rồi mở gói để thực nghiệm run đó; tiến độ hai run tách riêng.
 
 
+### Mục “1. Kiểm thử luồng xử lý” trên app
+
+App gọi trực tiếp các hàm xử lý trên điện thoại: nhận diện bằng PTE, gửi bài và đồng bộ với backend thật. Bộ chạy không tự chọn ảnh hay bấm Gửi trên các màn hình. PASS nghĩa là các điều kiện kiểm tra của case đã đạt; không chứng minh toàn bộ giao diện hoạt động đúng. Với case có ảnh, kết quả nhận diện được lưu nhưng PASS không yêu cầu nhãn dự đoán trùng nhãn chuẩn; độ chính xác model được đánh giá riêng.
+
 | Case             | Thao tác                                                                                                                                              |
 | ------------------ | -------------------------------------------------------------------------------------------------------------------------------------------------------- |
 | online           | Mạng hoạt động bình thường; PTE nhận diện và gửi bài thật.                                                                                |
@@ -87,11 +91,11 @@ Trên điện thoại cùng mạng, mở `http://192.168.137.1:18101/healthz`. P
 
 FAIL có thể thử lại case, hoặc chạy lại toàn bộ run; lần thử trước được giữ trong lịch sử. Bỏ qua giữ NOT_RUN, không tính PASS. Một bước có thể mất khoảng 90 giây.
 
-### Mục “2. Kiểm tra thủ công” trên app
+### Mục “2. Kiểm thử thao tác trên giao diện thật” trên app
 
-Sáu case tự động ở trên kiểm tra luồng AI/gửi bài/đồng bộ. Phần này cần bạn **thao tác trực tiếp và quan sát trên điện thoại** để kiểm tra giao diện thật và mất kết nối Wi-Fi/data thật. Nên làm sau các case tự động, khi cửa sổ coordinator vẫn mở và profile đã về online.
+Sáu case ở trên kiểm tra luồng xử lý. Phần này cần bạn **thao tác trực tiếp và quan sát trên điện thoại** để kiểm tra nút bấm, nội dung hiển thị và trạng thái khi mất kết nối Wi-Fi/data thật. Case 7 dùng mạng bình thường để kiểm tra đường đi qua giao diện, không lặp lại phép kiểm tra hàm của Case 1. Nút ghi kết quả chỉ lưu xác nhận của người chạy. Nên làm sau các case luồng xử lý, khi coordinator vẫn mở và profile đã về online.
 
-**Case 7 — Giao diện Android**
+**Case 7 — Thao tác trên giao diện Android**
 
 **Bấm theo thứ tự:** Trang chủ → Gửi bài cứu hộ → chọn ảnh/nhập mô tả → Gửi → Lịch sử → mở bài → đối chiếu dashboard → Cài đặt → Thực nghiệm E2E → Ghi kết quả Case 7.
 
@@ -111,9 +115,13 @@ Sáu case tự động ở trên kiểm tra luồng AI/gửi bài/đồng bộ. 
 4. Tìm bài trên dashboard; xác nhận có **đúng một báo cáo** tương ứng, không phát sinh bản trùng. Lưu ảnh hàng đợi trước/sau phục hồi và bài trên dashboard.
 5. Quay lại đúng run, bấm **Ghi kết quả Case 8 → Đạt (PASS)** nếu đạt, hoặc **Có lỗi (FAIL)** và nhập mô tả nếu gặp lỗi.
 
-Case `offline_recovery` tự động chỉ dùng HTTP 503 nên **không thay thế Case 8**. Bài gửi thủ công cũng không thay thế các ID báo cáo của sáu case tự động.
+Case luồng xử lý `offline_recovery` chỉ dùng HTTP 503 nên **không thay thế Case 8**. Bài gửi thủ công cũng không thay thế các ID báo cáo của sáu case luồng xử lý.
+
+### Mục “3. Kiểm thử hiển thị trên dashboard” trên app
 
 **Case 9 — Dashboard**
+
+Công cụ Playwright trên máy tính kiểm tra giao diện dashboard. Đây là kiểm tra giao diện web riêng, không phải thao tác thủ công trên điện thoại.
 
 1. Trên máy tính, ở gốc repo, chạy `python -X utf8 products/fe/experiment_mobile/coordinator.py dashboard --run 1 --headed` (đổi thành `--run 2` nếu đang thử run 2). Dùng đúng môi trường Python đã cài thư viện và mật khẩu admin hiện có.
 2. Chờ công cụ kiểm tra xong. Quay lại **Cài đặt → Thực nghiệm E2E**, mở đúng run.
@@ -187,3 +195,7 @@ flutter test --flavor admin test/mobile_e2e_bundle_test.dart test/mobile_e2e_run
 ```
 
 Kiểm thử code không thay thế lượt chạy E2E trên điện thoại thật.
+
+## Cách mô tả phạm vi trong báo cáo
+
+Phân biệt **kiểm thử luồng xử lý trên Android đến backend** (Case 1–6), **kiểm thử thao tác trên giao diện Android thật** (Case 7–8, do người chạy thực hiện) và **kiểm thử hiển thị trên dashboard** (Case 9, bằng Playwright). Tự động/thủ công chỉ mô tả cách thực hiện, không phải phạm vi kiểm thử. Bộ chạy hiện tại chưa tự động thao tác toàn bộ giao diện Android từ chọn ảnh đến xem trạng thái, nên không gọi là E2E tự động toàn bộ giao diện Android.

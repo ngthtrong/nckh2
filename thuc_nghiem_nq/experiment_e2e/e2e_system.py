@@ -339,12 +339,16 @@ def test_app(browser) -> None:
 
     tap(page, "Trang chủ")
     page.wait_for_timeout(1500)
+    # SOS trong 30 giây được tái sử dụng; ca offline phải tạo yêu cầu mới.
+    if sos:
+        page.wait_for_timeout(max(0, 31 - age_seconds(sos[0])) * 1000)
     known = report_ids()
     ctx.set_offline(True)
     page.wait_for_timeout(2500)
     tap(page, "SOS")
     page.wait_for_timeout(4000)
     check("1 bản ghi" in screen_text(page), "mất mạng: SOS nằm trong hàng đợi của app")
+    shot(page, "app_offline_queued.png")
     check(not wait_new("sos-", known, timeout=3), "mất mạng: server chưa nhận")
     ctx.set_offline(False)
     late = wait_new("sos-", known, timeout=40)

@@ -1,5 +1,7 @@
 # Thực nghiệm end to end
 
+Kết quả chạy lại ngày 24/10/2026 với hai ảnh mới được tổng hợp trong [RESULTS.md](RESULTS.md). Mỗi run đã hoàn tất đủ năm kịch bản: 45 PASS, 0 FAIL và 1 CHƯA CÓ.
+
 Đây là bản sao riêng của runner demo; code, CSV, ảnh và 80 gold run ở vị trí gốc vẫn được giữ nguyên. Trạng thái thực tế của mỗi lần chạy nằm trong `results/<GOLD_RUN>__<RUN_ID>/summary.json`.
 
 Trang chủ app hiện chỉ hiển thị mạng và hàng đợi, không còn hiển thị thông báo “Bản web không chạy AI on-device”. Nếu thiếu thông báo này, runner ghi **CHƯA CÓ** cho tiêu chí giải thích trạng thái AI trên web, không ghi PASS. Tiêu chí này đo khoảng trống giao diện; các kiểm tra SOS, chế độ gửi ảnh, upload, GPS và đồng bộ vẫn ghi FAIL khi không đạt. Trạng thái runtime trong phần cài đặt quản trị không thay thế thông báo cho người dùng khách.

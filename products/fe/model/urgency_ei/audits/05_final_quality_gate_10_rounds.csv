@@ -1,0 +1,11 @@
+﻿round,check,status,detail
+1,Source registry resolution,PASS,"7 verified reference records with explicit authority, role and URL."
+2,Canonical feature/source alignment,PASS,"Model feature order=['unresponsive', 'respiratory_distress_or_cyanosis', 'heavy_bleeding', 'active_convulsions', 'high_risk_trauma']."
+3,Old/ambiguous train features removed,PASS,"seizure, major_trauma, cannot_move, injured_count and severe_condition are absent from final train CSV."
+4,Master provenance/label basis/source IDs completeness,PASS,"Every master row contains label_basis, source_ids, generation_method, builder hash and explicit non-LLM/non-clinical flags."
+5,Deterministic rebuild equivalence,PASS,Independent reconstruction matches all 32 ordered profiles and labels.
+6,Training script executable,PASS,Return code=0; model artifact regenerated successfully=True.
+7,Coefficient sign and symmetry sanity,PASS,All 5 coefficients positive; max-min=0.000e+00.
+8,E_i monotonicity and threshold separation,PASS,80 one-bit 0->1 transitions checked; min delta=0.021878; negative=0.257683; min positive=0.512681.
+9,DOCX render and visual QA,PASS,Both final DOCX reports rendered to PDF/PNG and were visually inspected for clipping/overlap.
+10,Archive integrity preflight,PASS,Temporary full-package ZIP passed CRC/integrity test before final packaging.

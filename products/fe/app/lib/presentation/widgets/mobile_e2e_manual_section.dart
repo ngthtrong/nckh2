@@ -58,7 +58,7 @@ class _MobileE2eManualDialogState extends State<MobileE2eManualDialog> {
 
   @override
   Widget build(BuildContext context) => AlertDialog(
-    title: const Text('Ghi kết quả kiểm tra thủ công'),
+    title: const Text('Ghi kết quả thao tác trên giao diện'),
     content: SingleChildScrollView(
       child: Column(
         mainAxisSize: MainAxisSize.min,
@@ -134,14 +134,17 @@ class MobileE2eManualSection extends StatelessWidget {
     crossAxisAlignment: CrossAxisAlignment.start,
     children: [
       const Text(
-        '2. Kiểm tra thủ công',
+        '2. Kiểm thử thao tác trên giao diện thật',
         style: TextStyle(fontWeight: FontWeight.bold),
+      ),
+      const Text(
+        'Bạn tự chọn ảnh, bấm Gửi và kiểm tra màn hình Lịch sử. Nút ghi kết quả chỉ lưu xác nhận của bạn; không chạy lại các hàm thay bạn thao tác.',
       ),
       for (final stage in mobileManualGuides.keys) ...[
         const SizedBox(height: 12),
         Text(
           stage == 'manual_android_ui'
-              ? 'Case 7. Giao diện Android: ${checks[stage]!['status']}'
+              ? 'Case 7. Thao tác trên giao diện Android: ${checks[stage]!['status']}'
               : 'Case 8. Tắt/bật mạng vật lý: ${checks[stage]!['status']}',
         ),
         Text(mobileManualGuides[stage]!),
@@ -160,6 +163,10 @@ class MobileE2eManualSection extends StatelessWidget {
         ),
       ],
       const SizedBox(height: 12),
+      const Text(
+        '3. Kiểm thử hiển thị trên dashboard',
+        style: TextStyle(fontWeight: FontWeight.bold),
+      ),
       Text('Case 9. Dashboard: ${checks['dashboard']!['status']}'),
       const Text(
         'Máy tính: chạy lệnh bên dưới → quay lại app → bấm Xác nhận đã chạy dashboard. Kết quả lấy từ máy tính.',

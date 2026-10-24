@@ -1,0 +1,11 @@
+﻿round,check,status,detail
+1,Schema and required columns,PASS,"Columns=['profile_id', 'unresponsive', 'respiratory_distress_or_cyanosis', 'heavy_bleeding', 'active_convulsions', 'high_risk_trauma', 'urgency_label']"
+2,Missing values and binary domains,PASS,missing_rows=0; binary_domains=True
+3,Row count equals complete 2^5 state space,PASS,rows=32 expected=32
+4,Unique feature profiles / duplicate audit,PASS,unique_profiles=32/32
+5,Exhaustive feature-profile coverage,PASS,All 32 Boolean combinations present exactly once.
+6,Label-rule consistency,PASS,urgency_label = OR of five selected source-mapped RED signs for every row.
+7,Target leakage / irrelevant-feature exclusion,PASS,"Excluded from train CSV: ['cannot_move', 'description', 'injured_count', 'reference_triage_class', 'scenario_text_vi', 'severe_condition']"
+8,Master provenance + label basis + source IDs,PASS,master_complete=True; source_trace=True
+9,Deterministic rebuild equivalence,PASS,Builder logic reproduces the same ordered 32 protocol states and labels.
+10,"Class imbalance is explicit, not hidden duplicate balancing",PASS,"class_counts={0: 1, 1: 31}; training script uses class_weight='balanced' instead of duplicating negative rows."

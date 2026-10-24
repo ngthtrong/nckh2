@@ -367,11 +367,14 @@ class _MobileE2eCardState extends State<MobileE2eCard> {
               ),
               const SizedBox(height: 16),
               const Text(
-                '1. Chạy các case thực nghiệm',
+                '1. Kiểm thử luồng xử lý',
                 style: TextStyle(fontWeight: FontWeight.bold),
               ),
+              const Text(
+                'App gọi trực tiếp hàm nhận diện, gửi bài và đồng bộ; không tự thao tác các màn hình. PASS xác nhận các điều kiện của luồng xử lý, không xác nhận nhãn nhận diện đúng hay giao diện hoạt động đúng.',
+              ),
               Text(
-                'Đã xử lý ${mobileE2eStages.where((s) => runner.state.checks[s]!['status'] == 'PASS' || runner.state.skipped.contains(s)).length}/${mobileE2eStages.length} case tự động',
+                'Đã xử lý ${mobileE2eStages.where((s) => runner.state.checks[s]!['status'] == 'PASS' || runner.state.skipped.contains(s)).length}/${mobileE2eStages.length} case luồng xử lý',
               ),
               for (final (index, stage) in mobileE2eStages.indexed)
                 Container(
@@ -431,7 +434,7 @@ class _MobileE2eCardState extends State<MobileE2eCard> {
                 ),
               if (runner.state.nextStage == null)
                 const Text(
-                  'Đã hết case tự động. Có thể chạy lại từng case hoặc toàn bộ run.',
+                  'Đã hết case luồng xử lý. Có thể chạy lại từng case hoặc toàn bộ run.',
                 ),
               OutlinedButton.icon(
                 key: const Key('mobile-e2e-restart'),
