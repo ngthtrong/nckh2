@@ -10,6 +10,16 @@ Trang PDF đính kèm giữ khổ giấy gốc với `fitpaper=true`, không th�
 
 ## Danh sách sơ bộ theo thuyết minh trong repo
 
-Manifest đã ghi ba cam kết nhóm III ở mục 17: ứng dụng di động (3.1), website quản lý (3.2) và bộ mô hình AI đa phương thức đã tối ưu (3.3). Nhóm I/II ghi không đăng ký nên không tạo mục lấp chỗ; bản thảo ISDS 2026 được mô tả là sản phẩm bổ sung trong nội dung.
+Manifest ghi ba cam kết nhóm III ở mục 16 của thuyết minh DOCX: ứng dụng di động (3.1), website quản lý (3.2) và bộ mô hình AI đa phương thức đã tối ưu (3.3). Nhóm I/II không đăng ký nên không tạo mục lấp chỗ.
 
-Các đường dẫn `products/mobile-app.pdf`, `products/dashboard.pdf`, `products/ai-models.pdf` và `approved-proposal.pdf` **chỉ là vị trí dành cho minh chứng sẽ cung cấp**, chưa có tệp. Danh sách hiện tham chiếu bản thuyết minh Markdown, chưa đối chiếu bản ký/dấu; vì vậy mọi cờ xác nhận giữ `false`. Chỉ đổi cờ và ghép khi có hồ sơ thật đã được kiểm tra.
+Ba PDF `products/mobile-app.pdf`, `products/dashboard.pdf` và `products/ai-models.pdf` được biên soạn từ các nguồn TeX cùng tên. Hai PDF đầu dùng ảnh giao diện đã có trong báo cáo; PDF mô hình liệt kê bốn tệp ONNX/PTE trong `products/fe/model/Edge Ai/seed1024/export/{baseline,pruning_st}/`, với kích thước và SHA-256 đối chiếu manifest. Phần mô hình chỉ minh chứng nhận diện ảnh, không xác nhận đã hoàn thành mô hình phân tích tin nhắn tiếng Việt.
+
+Bản `content` ghép ba PDF này sau phụ lục và trước sản phẩm nhóm IV. Bản `full` dùng danh sách minh chứng đã xác nhận, bao gồm thuyết minh phê duyệt trước các sản phẩm. Các cờ xác nhận vẫn giữ `false` cho đến khi hồ sơ được kiểm tra; không dùng ảnh giao diện để xác nhận nghiệm thu hoặc chữ ký/dấu. `approved-proposal.pdf` vẫn cần bản có ký và đóng dấu.
+
+Khi sửa nguồn minh chứng, biên dịch từ thư mục `report/` trước khi build báo cáo:
+
+```powershell
+rtk proxy ./tectonic.exe -Z search-path=. -o evidence/products evidence/products/mobile-app.tex
+rtk proxy ./tectonic.exe -Z search-path=. -o evidence/products evidence/products/dashboard.tex
+rtk proxy ./tectonic.exe -Z search-path=. -o evidence/products evidence/products/ai-models.tex
+```

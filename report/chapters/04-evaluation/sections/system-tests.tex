@@ -6,9 +6,9 @@ Bảng~\ref{tab:historical-tests} tổng hợp kết quả kiểm thử chức n
 \label{tab:historical-tests}
 \begin{tabularx}{\textwidth}{P{.32\textwidth}P{.16\textwidth}X}
 \toprule Bộ kiểm thử & Kết quả ghi nhận & Phạm vi \\\midrule
-Backend unit test & 44/44 & Hợp đồng, migration, hash, cụm, dashboard \\
+Backend unit test & 44/44 & Quy tắc trao đổi dữ liệu, migration, hash, cụm, dashboard \\
 Flutter unit test & 26/26 & Chính sách gửi, SMS, trạng thái, hash \\
-Hợp đồng trên container & Đạt các ca & App/server message và multipart \\
+Trao đổi dữ liệu trên container & Đạt các ca & App/server message và multipart \\
 E2E Chromium headless & 46/46 & App web tới backend/dashboard, mạng giả lập \\
 APK debug & Hoàn thành & Tạo gói cài đặt Android APK phục vụ kiểm thử \\
 \bottomrule\end{tabularx}
@@ -40,4 +40,4 @@ SMS rồi HTTP cùng report & Gộp một ca và giữ các nguồn & Gateway/HT
 \bottomrule
 \end{longtable}
 
-Quy trình kiểm thử phân tầng từ kiểm thử đơn vị, kiểm thử tích hợp API đến kiểm thử đầu cuối trên thiết bị di động giúp phát hiện sớm các xung đột hợp đồng dữ liệu, đảm bảo tính ổn định và độ tin cậy của toàn bộ hệ thống cứu hộ trong môi trường vận hành thực tế.
+Quy trình kiểm thử phân tầng từ kiểm thử đơn vị, kiểm thử tích hợp API đến kiểm thử đầu cuối trên thiết bị di động giúp phát hiện sớm các sai khác giữa ứng dụng và máy chủ trong xử lý dữ liệu, đảm bảo tính ổn định và độ tin cậy của toàn bộ hệ thống cứu hộ trong môi trường vận hành thực tế.
