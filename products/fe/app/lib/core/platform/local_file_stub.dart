@@ -13,3 +13,8 @@ Future<Uint8List> readLocalFile(String path) async {
 Future<String> preserveLocalFile(String path, String name) async {
   throw UnsupportedError('Local file access is unavailable on this platform.');
 }
+
+Future<void> cleanupComposeImages({
+  required Iterable<String> keepPaths,
+  String? onlyPath,
+}) async {}

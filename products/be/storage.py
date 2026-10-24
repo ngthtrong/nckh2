@@ -1238,7 +1238,11 @@ def _process_message(
     ).fetchone()
     if existing_seq and existing_seq["message_id"] != msg_id:
         logger.warning(f"[SYNC][REJECTED] msg={msg_id} code=SEQUENCE_REUSED")
-        return _ack(msg_id, "rejected", "SEQUENCE_REUSED")
+        next_sequence = conn.execute(
+            "SELECT MAX(sequence_number) + 1 FROM messages_dedup WHERE client_id = ?",
+            (client_id,),
+        ).fetchone()[0]
+        return _ack(msg_id, "rejected", "SEQUENCE_REUSED", {"next_sequence_number": next_sequence})
 
     # 5. Xử lý nghiệp vụ theo operation_type
     if op_type == "CREATE_RESCUE_RECORD":

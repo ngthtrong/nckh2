@@ -18,3 +18,8 @@ Future<String> preserveLocalFile(String path, String name) async {
   if (bytes.isEmpty) throw StateError('Ảnh đã chọn trống. Vui lòng chọn lại.');
   return 'data:application/octet-stream;base64,${base64Encode(bytes)}';
 }
+
+Future<void> cleanupComposeImages({
+  required Iterable<String> keepPaths,
+  String? onlyPath,
+}) async {}

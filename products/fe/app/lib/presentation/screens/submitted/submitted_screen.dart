@@ -218,23 +218,31 @@ class SubmittedScreen extends StatelessWidget {
 
   Widget _summaryRow(String label, String value, {bool isMono = false}) {
     return Row(
-      mainAxisAlignment: MainAxisAlignment.spaceBetween,
+      crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        Text(
-          label,
-          style: const TextStyle(
-            color: Color(0xFF6B7280),
-            fontSize: 12,
-            fontWeight: FontWeight.w600,
+        Expanded(
+          flex: 2,
+          child: Text(
+            label,
+            style: const TextStyle(
+              color: Color(0xFF6B7280),
+              fontSize: 12,
+              fontWeight: FontWeight.w600,
+            ),
           ),
         ),
-        Text(
-          value,
-          style: TextStyle(
-            color: const Color(0xFF1F2937),
-            fontSize: 13,
-            fontWeight: FontWeight.w800,
-            fontFamily: isMono ? 'monospace' : null,
+        const SizedBox(width: 12),
+        Expanded(
+          flex: 3,
+          child: Text(
+            value,
+            textAlign: TextAlign.right,
+            style: TextStyle(
+              color: const Color(0xFF1F2937),
+              fontSize: 13,
+              fontWeight: FontWeight.w800,
+              fontFamily: isMono ? 'monospace' : null,
+            ),
           ),
         ),
       ],

@@ -35,6 +35,9 @@ flutter pub get
 flutter analyze
 flutter test --flavor user
 flutter test --flavor admin test/admin_model_access_test.dart test/ai_model_test.dart test/model_benchmark_test.dart test/model_download_cleanup_test.dart
+Push-Location .\android
+.\gradlew.bat :app:testUserDebugUnitTest -Ptarget-platform=android-arm64 --no-daemon
+Pop-Location
 flutter build apk --flavor user --release --split-per-abi --target-platform android-arm64 --dart-define-from-file=.env.local --dart-define=SERVER_URL=https://TEN_MIEN_BACKEND
 ```
 
@@ -44,6 +47,10 @@ x86_64, dùng `--target-platform android-arm64,android-x64`. ExecuTorch AAR ch�
 `arm64-v8a` và `x86_64`; không hỗ trợ ARM32 (`android-arm`/`armeabi-v7a`). Luôn
 chỉ định `--target-platform` khi build bằng Flutter; mặc định của Flutter còn
 gồm ARM32 nên Gradle sẽ từ chối để tránh tạo APK thiếu runtime PTE.
+
+`flutter test` chạy test Dart/Flutter. Lệnh Gradle ở trên chạy thêm test Kotlin
+cho callback SMS nhiều phần (thành công, lỗi một phần, thiếu/trùng callback).
+Các test này không thay cho thử SIM và callback Android trên điện thoại thật.
 
 Thay `TEN_MIEN_BACKEND` bằng tên miền HTTPS thực tế có chứng chỉ hợp lệ. Bản mặc
 định chỉ dùng địa chỉ này, không dò LAN hoặc dùng lại địa chỉ HTTP đã lưu.
@@ -160,6 +167,8 @@ Trong bản `admin`, benchmark tập test được tải theo yêu cầu, không
 trong APK để AI chạy offline; ONNX và tập benchmark chỉ tải sau khi admin
 đăng nhập. App kiểm tra SHA-256 ONNX theo manifest đi kèm PTE trước khi nạp.
 Gói benchmark lưu trong bộ nhớ riêng của app, có thể xóa ở mục benchmark.
+Nếu không nhận thêm dữ liệu trong 60 giây khi tải gói benchmark, app kết thúc
+lượt tải và mở lại các nút để người dùng thử tải lại hoặc dọn tài nguyên.
 Trước mỗi lần chạy, app phải gọi `/api/auth/me` qua mạng để xác thực lại quyền
 admin, kể cả khi model và gói benchmark đã tải. Sau bước này, phép đo dùng dữ
 liệu/model trên máy; không thể bắt đầu benchmark khi offline.
@@ -203,7 +212,27 @@ mất/không đọc được, app giữ trạng thái chưa gửi xong và báo 
 Lỗi HTTP 408/429/5xx và lỗi kết nối được thử lại; HTTP 4xx còn lại được ghi lỗi
 vĩnh viễn thay vì tạo message mới vô hạn. HTTP 413 được thử bằng batch nhỏ hơn;
 nếu một message riêng vẫn quá lớn, chỉ báo cáo đó nhận lỗi `REQUEST_TOO_LARGE`.
+Khi khôi phục backup cũ, app giữ ID người gửi để không mất quyền với báo cáo/ảnh
+đã có trên server. Nếu số thứ tự bị trùng, backend mới trả mốc số tiếp theo; app
+lưu mốc này trước khi tạo lại message. Backend cũ vẫn tương thích nhưng chưa có
+gợi ý để phục hồi nhanh, vì vậy cần cập nhật backend cùng tính năng này.
 Đăng xuất chỉ xóa trạng thái đăng nhập, giữ tài khoản/hồ sơ local để đăng nhập lại.
+
+Trước khi mở camera/thư viện, form lưu bản nháp riêng gồm số người, mô tả và các
+lựa chọn khẩn cấp. Ảnh chọn xong được chép ra khỏi cache và lưu vào bản nháp.
+Khi Android đóng tiến trình lúc chọn ảnh, lần mở sau gọi `retrieveLostData()` và
+mở lại form từ bản nháp; ảnh khôi phục được phân tích AI lại. Nếu không lấy lại
+được ảnh, app giữ nội dung và yêu cầu chọn lại. Bản nháp không tự đồng bộ hoặc
+gửi SMS. Bản lưu tạm chỉ phục vụ khôi phục trình chọn ảnh: xóa khi quay lại form
+và trước khi gửi. Mở app bình thường mà không có kết quả picker bị gián đoạn
+sẽ xóa bản lưu tạm, không mở lại form cũ. Báo cáo đã gửi vẫn được lưu riêng.
+Ảnh tạm do form tạo được dọn khi thay/bỏ ảnh, đóng form hoặc lưu báo cáo thành
+công. Hủy chọn ảnh hoặc gửi thất bại khi form còn mở vẫn giữ ảnh để thử lại.
+Khi khởi động, app dọn thêm ảnh tạm còn sót, giữ ảnh của snapshot đang khôi phục
+và mọi ảnh được báo cáo đã lưu tham chiếu. Chỉ dọn file ảnh tạm do app tạo trong
+thư mục riêng; không xóa ảnh gốc trong camera/thư viện hoặc ảnh của báo cáo.
+Luồng picker dùng giao diện hệ
+thống, không yêu cầu quyền đọc toàn bộ bộ nhớ/ảnh.
 
 Form giới hạn mỗi mục số người từ 0 đến 10.000; mô tả tối đa 300 từ và 2.000
 ký tự Unicode, từ được tách bằng khoảng trắng/xuống dòng. Bộ đếm hiển thị cả hai

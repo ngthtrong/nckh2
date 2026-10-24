@@ -94,4 +94,5 @@ dependencies {
     implementation("com.facebook.soloader:nativeloader:0.10.5")
     implementation("androidx.core:core-ktx:1.13.1")
     implementation("org.jetbrains.kotlin:kotlin-stdlib:1.9.23")
+    testImplementation("junit:junit:4.13.2")
 }
