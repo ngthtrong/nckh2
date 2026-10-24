@@ -1,6 +1,9 @@
 \section{Kết quả và bàn luận}\label{sec:04-evaluation-results}
 Các kết quả được trình bày lần lượt theo danh mục thực nghiệm: TN01 chất lượng ảnh; TN02 confidence; TN03 chuyển đổi runtime; TN04 benchmark app; TN05 lượng tử hóa; TN06 cắt tỉa; TN07 khẩn cấp LR; TN08--TN09 phân cụm cơ sở và stress; TN10--TN12 xếp hạng, robustness và độ nhạy hệ số; TN13 điều phối; TN14 kiểm thử hệ thống và truyền tải. Benchmark nhận diện trên nhiều mẫu điện thoại được trình bày riêng theo ba bước lựa chọn mô hình và runtime, kèm số liệu đầy đủ trong phụ lục. Hai lượt E2E web và bộ đo mạng yếu mới được trình bày riêng với khảo sát chức năng lịch sử, để giữ rõ nguồn và phạm vi từng phép đo.
 
+
+Trong các bảng so sánh, \textbf{chữ đậm} đánh dấu giá trị mô tả tốt nhất của từng chỉ số trong nhóm có thể so sánh; các giá trị đồng hạng đều được in đậm. Accuracy, Precision, Recall, F1, ARI và NDCG càng cao càng tốt; lỗi, MAE/RMSE, dung lượng, độ trễ và độ biến động càng thấp càng tốt. Bảng cắt tỉa so sánh trước/sau trong cùng runtime; bảng stress so sánh các phương pháp trong từng điều kiện; bảng robustness so sánh R/L theo từng cặp chỉ số. Bảng điện thoại so sánh F1/MAE giữa các máy, còn độ trễ so sánh O/T trong cùng máy; bảng mạng yếu so sánh các chế độ trong cùng cấu hình mạng. Chữ đậm không khẳng định khác biệt có ý nghĩa thống kê. Cỡ mẫu, ma trận đếm, khoảng tin cậy, đường kính cụm và $p$-value không được xếp hạng như chỉ số hiệu quả; bảng RQ3 trình bày các tương phản với đối chứng khác nhau nên giữ nguyên cách đọc theo dấu $\Delta$.
+
 \subsection{Chất lượng phân loại ảnh FP32}
 Model mới được dùng cho các hình phân loại là MobileNetV3-Large với seed 1024. Trên 256 ảnh test, artifact ghi Accuracy \NewImageAccuracy\%, macro-F1 \NewImageMacroFOne\% và balanced accuracy 73,87\%. Bảng~\ref{tab:confusion} và \ref{tab:image-classes} đã được tính đối chiếu từ ma trận với JSON metric của chính model này.
 \input{generated/tables/confusion}
@@ -196,8 +199,8 @@ Theo thiết lập ở Mục~\ref{sec:web-e2e-setup}, hai lượt E2E ngày 19/1
 \begin{tabular}{lrrrrl}
 \toprule Kịch bản gold & Báo cáo đầu vào & PASS & FAIL & CHƯA CÓ & Stage hoàn tất \\
 \midrule
-run\_001 & 316 & 45 & 0 & 1 & 5/5 \\
-run\_002 & 334 & 45 & 0 & 1 & 5/5 \\
+run\_001 & 316 & \textbf{45} & \textbf{0} & \textbf{1} & \textbf{5/5} \\
+run\_002 & 334 & \textbf{45} & \textbf{0} & \textbf{1} & \textbf{5/5} \\
 \bottomrule
 \end{tabular}
 \end{table}
@@ -220,14 +223,14 @@ Bên cạnh kiểm tra hành vi chọn chế độ, lượt \texttt{20261005-102
 \begin{tabular}{llrrrr}
 \toprule Mạng & Chế độ & Thành công & Tỷ lệ (\%) & Median (s) & P95 (s) \\
 \midrule
-2G & Metadata & 257/257 & 100,00 & 1,488 & 1,524 \\
-2G & Ảnh nén & 257/257 & 100,00 & 5,666 & 25,230 \\
+2G & Metadata & \textbf{257/257} & \textbf{100,00} & \textbf{1,488} & \textbf{1,524} \\
+2G & Ảnh nén & \textbf{257/257} & \textbf{100,00} & 5,666 & 25,230 \\
 2G & Ảnh gốc & 230/257 & 89,49 & 5,526 & 38,973 \\
-3G & Metadata & 257/257 & 100,00 & 0,476 & 0,495 \\
-3G & Ảnh nén & 257/257 & 100,00 & 1,056 & 3,798 \\
+3G & Metadata & \textbf{257/257} & \textbf{100,00} & \textbf{0,476} & \textbf{0,495} \\
+3G & Ảnh nén & \textbf{257/257} & \textbf{100,00} & 1,056 & 3,798 \\
 3G & Ảnh gốc & 255/257 & 99,22 & 1,350 & 14,117 \\
-4G & Metadata & 257/257 & 100,00 & 0,145 & 0,165 \\
-4G & Ảnh nén & 257/257 & 100,00 & 0,211 & 0,532 \\
+4G & Metadata & \textbf{257/257} & \textbf{100,00} & \textbf{0,145} & \textbf{0,165} \\
+4G & Ảnh nén & \textbf{257/257} & \textbf{100,00} & 0,211 & 0,532 \\
 4G & Ảnh gốc & 256/257 & 99,61 & 0,259 & 1,762 \\
 \bottomrule
 \end{tabular}

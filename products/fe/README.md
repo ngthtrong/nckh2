@@ -299,3 +299,7 @@ flutter build windows
 - Không commit secret, token hoặc thông tin kết nối production vào source code.
 - Với production, dùng HTTPS và xác thực request ở server.
 - Kiểm tra lại mapping class giữa dataset, ONNX output và `labels.json`; sai mapping sẽ cho kết quả hiển thị sai dù model vẫn chạy.
+
+## Thực nghiệm E2E mobile
+
+Công cụ và hướng dẫn ở [experiment_mobile/README.md](experiment_mobile/README.md). App admin đóng sẵn cả hai run trong `app/assets/benchmarks/mobile/`, giữ model PTE seed1024; build bằng Flutter ngay tại `app/`.

@@ -197,6 +197,12 @@ void main() {
         return;
       }
       expect(controller.isAdmin, isTrue);
+      expect(find.text('Thực nghiệm model'), findsOneWidget);
+      expect(find.byType(ModelBenchmarkCard), findsNothing);
+      final modelSection = find.byKey(const Key('admin-model-section'));
+      await tester.ensureVisible(modelSection);
+      await tester.tap(find.text('Thực nghiệm model'));
+      await tester.pumpAndSettle();
       expect(find.byType(ModelBenchmarkCard), findsOneWidget);
       expect(find.text('So sánh ONNX và PTE thật'), findsOneWidget);
       controller.isModelLoading = false;
