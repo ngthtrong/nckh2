@@ -27,6 +27,7 @@ EXPERIMENT_DIR = Path(__file__).resolve().parent
 REPO_ROOT = EXPERIMENT_DIR.parents[1]
 GOLD_DIR = REPO_ROOT / "thucnghiem/data/gold"  # 80 run giữ nguyên tại nguồn
 CSV_PATH = EXPERIMENT_DIR.parent / "split_val_mobilenetv3_large.csv"
+RUN_IMAGES_FILE = EXPERIMENT_DIR / "run_images.json"
 IMAGE_ROOT = REPO_ROOT / "products/fe/model/Dataset_Flood"
 COMPOSE_FILE = EXPERIMENT_DIR / "docker-compose.yml"
 LOGS_DIR = EXPERIMENT_DIR / "logs"
@@ -55,7 +56,7 @@ def parse_args(argv=None):
     actions.add_argument("--run", action="store_true", help="bắt đầu lần E2E mới")
     actions.add_argument("--resume", metavar="RUN_ID", help="tiếp tục từ checkpoint")
     parser.add_argument("--seed-run", type=int, default=1, help="run gold 1..80 (chỉ cho --run/--check-inputs)")
-    parser.add_argument("--image-relative-path", help="chọn một ảnh high JPG trong CSV; mặc định ảnh hợp lệ đầu tiên")
+    parser.add_argument("--image-relative-path", help="chọn ảnh high/medium JPG trong CSV val; mặc định theo run_images.json, run khác dùng ảnh high đầu tiên")
     parser.add_argument("--be-port", type=int, default=18000)
     parser.add_argument("--dashboard-port", type=int, default=18080)
     parser.add_argument("--fe-port", type=int, default=18081)
@@ -338,12 +339,16 @@ def test_app(browser) -> None:
 
     tap(page, "Trang chủ")
     page.wait_for_timeout(1500)
+    # SOS trong 30 giây được tái sử dụng; ca offline phải tạo yêu cầu mới.
+    if sos:
+        page.wait_for_timeout(max(0, 31 - age_seconds(sos[0])) * 1000)
     known = report_ids()
     ctx.set_offline(True)
     page.wait_for_timeout(2500)
     tap(page, "SOS")
     page.wait_for_timeout(4000)
     check("1 bản ghi" in screen_text(page), "mất mạng: SOS nằm trong hàng đợi của app")
+    shot(page, "app_offline_queued.png")
     check(not wait_new("sos-", known, timeout=3), "mất mạng: server chưa nhận")
     ctx.set_offline(False)
     late = wait_new("sos-", known, timeout=40)
@@ -439,7 +444,7 @@ def atomic_json(path: Path, payload: dict) -> None:
 
 
 def select_inputs(seed_run: int, csv_path: Path, requested_image: str | None) -> dict:
-    """Kiểm tra gold và chọn đúng một ảnh high/JPEG trong split=val của CSV."""
+    """Kiểm tra gold và chọn ảnh high/medium JPEG từ CSV val, mặc định theo run."""
     if not 1 <= seed_run <= 80:
         raise ValueError("--seed-run phải từ 1 đến 80")
     csv_path = csv_path.resolve(strict=True)
@@ -449,6 +454,12 @@ def select_inputs(seed_run: int, csv_path: Path, requested_image: str | None) ->
     inputs = json.loads(algorithm.read_text(encoding="utf-8"))
     origin = json.loads(gold_manifest.read_text(encoding="utf-8"))
     expected_name = f"run_{seed_run:03d}"
+    image_config = json.loads(RUN_IMAGES_FILE.read_text(encoding="utf-8"))
+    if image_config.get("schema_version") != 1 or not isinstance(image_config.get("runs"), dict):
+        raise ValueError("Cấu hình run_images.json không hợp lệ")
+    preset = image_config["runs"].get(expected_name) if requested_image is None else None
+    if preset is not None:
+        requested_image = preset["relative_path"]
     if inputs.get("dataset_id") != expected_name or origin.get("dataset_id") != expected_name:
         raise ValueError(f"dataset_id không khớp {expected_name}")
     reports = inputs.get("reports")
@@ -469,13 +480,16 @@ def select_inputs(seed_run: int, csv_path: Path, requested_image: str | None) ->
                 continue
             val_count += 1
             rel = Path(row["relative_path"])
-            if row["label"] == "high" and rel.suffix.lower() in {".jpg", ".jpeg"}:
+            if row["label"] in {"high", "medium"} and rel.suffix.lower() in {".jpg", ".jpeg"}:
                 candidates.append(row)
     if not candidates:
-        raise ValueError("CSV không có ảnh high JPG trong tập val")
-    selected = next((r for r in candidates if r["relative_path"] == requested_image), None) if requested_image else candidates[0]
+        raise ValueError("CSV không có ảnh high/medium JPG trong tập val")
+    selected = (next((r for r in candidates if r["relative_path"] == requested_image), None)
+                if requested_image else next((r for r in candidates if r["label"] == "high"), None))
     if selected is None:
-        raise ValueError("--image-relative-path phải là ảnh high JPG thuộc split=val trong CSV")
+        raise ValueError("Ảnh phải là high/medium JPG thuộc split=val trong CSV")
+    if preset is not None and selected["label"] != preset["label"]:
+        raise ValueError("Nhãn ảnh không khớp cấu hình run")
     rel = Path(selected["relative_path"])
     if rel.is_absolute() or ".." in rel.parts:
         raise ValueError("relative_path của ảnh không an toàn")
@@ -484,17 +498,20 @@ def select_inputs(seed_run: int, csv_path: Path, requested_image: str | None) ->
         raise ValueError("Ảnh nằm ngoài IMAGE_ROOT")
     if selected["md5"] and digest(image, "md5") != selected["md5"].lower():
         raise ValueError(f"MD5 không khớp CSV: {rel}")
+    if preset is not None and digest(image) != preset["sha256"]:
+        raise ValueError("SHA-256 ảnh không khớp cấu hình run")
     hashes = {
         "csv": digest(csv_path), "image": digest(image),
         "gold_input": digest(algorithm), "gold_manifest": digest(gold_manifest),
         "runner": digest(Path(__file__)), "compose": digest(COMPOSE_FILE),
+        "image_selection": digest(RUN_IMAGES_FILE),
     }
     hashes.update({name: digest(path) for name, path in SUPPORT_FILES.items()})
     return {
         "seed_run": seed_run, "gold_name": expected_name,
         "report_count": len(reports), "report_ids": [f"sim-r{seed_run:03d}-{r['event_id']}" for r in reports],
         "csv": str(csv_path), "csv_val_count": val_count, "image_candidates": len(candidates),
-        "image_relative_path": selected["relative_path"], "image": str(image),
+        "image_relative_path": selected["relative_path"], "image_label": selected["label"], "image": str(image),
         "image_bytes": image.stat().st_size,
         "gold_input": str(algorithm), "gold_manifest": str(gold_manifest),
         "sha256": hashes,
@@ -611,6 +628,7 @@ def write_summary(manifest: dict, state: dict) -> None:
         "seed_report_count": manifest["inputs"]["report_count"],
         "csv_val_count": manifest["inputs"]["csv_val_count"],
         "image_relative_path": manifest["inputs"]["image_relative_path"],
+        "image_label": manifest["inputs"]["image_label"],
         "status": state["status"], "completed_stages": list(state["completed"]),
         "failed_stage": state.get("failed_stage"), "last_error": state.get("last_error"),
         "failed_attempt_checks": state.get("failed_checks", []),
