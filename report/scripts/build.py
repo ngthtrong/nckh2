@@ -16,6 +16,12 @@ def has_package(name):
     tool = shutil.which('kpsewhich')
     return bool(tool and subprocess.run([tool, name], capture_output=True, text=True).stdout.strip())
 
+
+def build_deliverables(target, bibliography):
+    if target == 'content':
+        for name in ['bulletin-vi', 'bulletin-en', 'summary-vi', 'summary-en']:
+            run([sys.executable, 'scripts/build.py', name, '--bibliography', bibliography])
+
 def main():
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument('target', choices=['content', 'full', 'smoke', 'bulletin-vi', 'bulletin-en', 'summary-vi', 'summary-en'])
@@ -62,22 +68,15 @@ def main():
         print(f'Building {args.target} via Tectonic...', flush=True)
         driver = out / f'_{job}_driver.tex'
         driver.write_text(definitions + f'\\input{{{source}}}\n', encoding='utf-8')
-        tectonic_cmd = [tectonic_bin, '-Z', 'search-path=.', '-o', str(out.relative_to(ROOT)), str(driver.relative_to(ROOT))]
+        tectonic_cmd = [tectonic_bin, '--keep-logs', '-Z', 'search-path=.', '-o', str(out.relative_to(ROOT)), str(driver.relative_to(ROOT))]
         env = os.environ.copy()
         run(tectonic_cmd, env)
-        pdf_out = out / f'_{job}_driver.pdf'
-        if pdf_out.exists():
-            target_pdf = out / f'{job}.pdf'
-            if target_pdf.exists():
-                target_pdf.unlink()
-            shutil.move(str(pdf_out), str(target_pdf))
-        metrics_out = out / f'_{job}_driver.metrics'
-        if metrics_out.exists():
-            target_metrics = out / f'{job}.metrics'
-            if target_metrics.exists():
-                target_metrics.unlink()
-            shutil.move(str(metrics_out), str(target_metrics))
+        for suffix in ['pdf', 'metrics', 'log']:
+            artifact = out / f'_{job}_driver.{suffix}'
+            if artifact.exists():
+                artifact.replace(out / f'{job}.{suffix}')
         print('PDF: ' + str((out / f'{job}.pdf').relative_to(ROOT)))
+        build_deliverables(args.target, args.bibliography)
         return
 
     cmd = ['xelatex', '-interaction=nonstopmode', '-halt-on-error', '-file-line-error',
@@ -118,6 +117,7 @@ def main():
     if args.target == 'full':
         run([sys.executable, 'scripts/check_report.py', '--release', '--build-dir', str(out.relative_to(ROOT))])
     print('PDF: ' + str((out / f'{job}.pdf').relative_to(ROOT)))
+    build_deliverables(args.target, args.bibliography)
 
 if __name__ == '__main__':
     try:

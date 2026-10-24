@@ -21,8 +21,13 @@
   {\fontsize{16bp}{20bp}\selectfont\bfseries\ProjectTitle\par}
   \vspace{6mm}\textbf{Mã số đề tài: \ProjectCode}\par}
 \newcommand{\EvidencePDF}[3][chapter]{%
-  \clearpage\phantomsection\addcontentsline{toc}{#1}{#2}
-  \includepdf[pages=-,fitpaper=true,pagecommand={}]{#3}}
+  \clearpage
+  \if\relax\detokenize{#1}\relax
+    \pdfbookmark[1]{#2}{evidence.#3}%
+  \else
+    \phantomsection\addcontentsline{toc}{#1}{#2}%
+  \fi
+  \includepdf[pages=-,fitpaper=true,pagecommand={\thispagestyle{empty}}]{#3}}
 \newwrite\ReportMetricsFile
 \AtBeginDocument{\immediate\openout\ReportMetricsFile=\jobname.metrics}
 \newcommand{\ReportMetric}[2]{\immediate\write\ReportMetricsFile{#1=#2}}
@@ -77,3 +82,4 @@
   \end{minipage}\hfill\begin{minipage}[t]{.48\textwidth}\centering\vspace{0pt}
   Ngày \ldots\ tháng \ldots\ năm \ldots\\\textbf{#1}\par\vspace{20mm}\textbf{#2}\par
   \end{minipage}\par}
+\input{template/forms}

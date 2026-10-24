@@ -1,6 +1,11 @@
 \usepackage{graphicx}
 \graphicspath{{assets/figures/}{assets/diagrams/}}
 \usepackage{booktabs,longtable,tabularx,array}
+% Keep table text at the required body size, including generated tables.
+\newcommand{\ReportTableFont}{\normalsize}
+\AddToHook{env/tabular/begin}{\ReportTableFont}
+\AddToHook{env/tabularx/begin}{\ReportTableFont}
+\AddToHook{env/longtable/begin}{\ReportTableFont}
 \usepackage{flafter}
 \usepackage[section]{placeins}
 % Keep each float with its source paragraph, before later discussion begins.
