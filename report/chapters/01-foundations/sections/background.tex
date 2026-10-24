@@ -1,4 +1,4 @@
-\section{Nền tảng khoa học}\label{sec:01-foundations-background}
+\section{Các khái niệm và kỹ thuật liên quan}\label{sec:01-foundations-background}
 \subsection{Thông tin cứu hộ đa phương thức}
 Một báo cáo cứu hộ có thể chứa ảnh, mô tả, tọa độ, thời gian và các trường khai báo có cấu trúc. Mỗi phương thức có mức quan sát khác nhau: ảnh phản ánh vùng nhìn thấy, tọa độ phản ánh vị trí thiết bị hoặc vị trí được nhập, còn số người mắc kẹt là một khai báo. Kết hợp dữ liệu đòi hỏi giữ lại nguồn gốc từng trường để người điều phối biết giá trị nào được đo, được mô hình suy ra hay do người dùng nhập.
 
@@ -11,7 +11,7 @@ Edge AI đưa quá trình suy luận trí tuệ nhân tạo trực tiếp về t
 
 Kiến trúc MobileNetV3 \citep{howard2019mobilenetv3} được tối ưu hóa cho bộ xử lý thiết bị di động, phù hợp để phân loại các mức độ ngập lụt tại hiện trường. Việc chuyển đổi mô hình từ PyTorch sang định dạng ONNX hoặc ExecuTorch giúp tối ưu kích thước gói cài đặt và tăng tốc độ thực thi trên thiết bị nhúng. Các kỹ thuật tối ưu hóa như lượng tử hóa sau huấn luyện (PTQ) hay cắt tỉa mạng nơ-ron tiếp tục được khảo sát nhằm cân bằng giữa độ chính xác và tài nguyên phần cứng.
 
-\subsection{Lưu bền vững và truyền trong mạng gián đoạn}
+\subsection{Lưu trữ và truyền dữ liệu khi mất kết nối}
 Trong bối cảnh thiên tai bão lũ, hạ tầng mạng viễn thông thường xuyên bị gián đoạn. Nếu không có cơ chế xử lý phù hợp, việc gửi lại yêu cầu cứu hộ có thể gây trùng lặp dữ liệu hoặc thất lạc thông tin. Hệ thống giải quyết thách thức này thông qua định danh giao dịch duy nhất, hàng đợi lưu trữ cục bộ, kiểm tra mã băm toàn vẹn payload và cơ chế xác thực phản hồi (ACK) từng bản tin.
 
 Cơ chế lưu trữ và chuyển tiếp (\emph{store-and-forward}) trên ứng dụng di động đảm bảo bản tin cứu hộ được lưu an toàn tại bộ nhớ cục bộ và tự động truyền tải về máy chủ ngay khi có kết nối trở lại. Đối với các vùng bị cô lập hoàn toàn, mô hình mạng chịu trễ (\emph{Delay-Tolerant Networking} - DTN) theo nguyên lý \emph{store-carry-forward} qua các tiếp xúc cơ hội hoặc trạm trung chuyển (như phương tiện cơ động, UAV) là hướng mở rộng giàu tiềm năng. Trong phạm vi hiện tại, hệ thống tập trung hoàn thiện quy trình lưu truyền bền vững giữa thiết bị và máy chủ trung tâm.

@@ -73,6 +73,30 @@ class _CountingRecords extends RecordLocalDataSource {
   }
 }
 
+class _AheadSync extends _FakeSync {
+  _AheadSync() : super([]);
+
+  @override
+  Future<List<Map<String, dynamic>>> sendBatch(
+    List<SyncMessageModel> messages,
+  ) async {
+    if (messages.any((m) => m.sequenceNumber <= 1000)) {
+      batches.add(List.of(messages));
+      return [
+        for (final message in messages)
+          {
+            'message_id': message.messageId,
+            'status': 'rejected',
+            'code': 'SEQUENCE_REUSED',
+            'retryable': false,
+            'result': {'next_sequence_number': 1001},
+          },
+      ];
+    }
+    return super.sendBatch(messages);
+  }
+}
+
 class _HttpSync extends _FakeSync {
   _HttpSync({this.status, this.maxBatchSize = 50, this.oversizedId})
     : super([]);
@@ -810,6 +834,67 @@ void main() {
     expect(second.payloadHash, first.payloadHash);
     expect(outbox.messageForRecord('sos-2'), isNull);
   });
+
+  test(
+    'restored sender jumps past the server sequence without changing owner',
+    () async {
+      final sync = _AheadSync();
+      final r = repo(sync);
+      final clientId = outbox.clientId;
+      final sent = await r.sendRecord(_record('restored-sos'));
+      expect(sent.synced, isTrue);
+      expect(sync.batches, hasLength(2));
+      final first = sync.batches.first.single;
+      final recovered = sync.batches.last.single;
+      expect(first.sequenceNumber, 1);
+      expect(recovered.sequenceNumber, 1001);
+      expect(recovered.clientId, clientId);
+      expect(recovered.messageId, isNot(first.messageId));
+      expect(recovered.payloadHash, first.payloadHash);
+      expect(recovered.payload, first.payload);
+
+      await Hive.close();
+      await records.init(hivePath: dir.path);
+      await outbox.init(hivePath: dir.path);
+      final next = await outbox.enqueueCreate(
+        rescueRecordPayload(_record('next-sos')),
+      );
+      expect(next.sequenceNumber, 1002);
+      expect(next.clientId, clientId);
+    },
+  );
+
+  test(
+    'sequence reconciliation survives restart without changing queued data',
+    () async {
+      final firstPayload = rescueRecordPayload(_record('restored-first'));
+      final secondPayload = rescueRecordPayload(_record('restored-second'));
+      final first = await outbox.enqueueCreate(firstPayload);
+      final second = await outbox.enqueueCreate(secondPayload);
+      await outbox.reconcileSequence(1001);
+      await outbox.markDeadLetter(first.messageId, 'SEQUENCE_REUSED');
+
+      await Hive.close();
+      await records.init(hivePath: dir.path);
+      await outbox.init(hivePath: dir.path);
+      final recovered = await outbox.enqueueCreate(firstPayload);
+      expect(recovered.sequenceNumber, 1001);
+      expect(recovered.clientId, first.clientId);
+      expect(recovered.payloadHash, first.payloadHash);
+      expect(recovered.payload, first.payload);
+      expect(
+        outbox.messageForRecord('restored-second')!.toStorageJson(),
+        second.toStorageJson(),
+      );
+      for (final staleHint in [0, -1, 2, 1001]) {
+        await outbox.reconcileSequence(staleHint);
+      }
+      final next = await outbox.enqueueCreate(
+        rescueRecordPayload(_record('new-report')),
+      );
+      expect(next.sequenceNumber, 1002);
+    },
+  );
 
   test('gửi và đồng bộ cùng lúc chạy lần lượt, không gửi trùng', () async {
     final sync = _FakeSync([]);

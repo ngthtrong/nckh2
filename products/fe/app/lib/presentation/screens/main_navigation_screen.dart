@@ -56,6 +56,9 @@ class _MainNavigationScreenState extends State<MainNavigationScreen> {
     });
     try {
       await widget.controller.init();
+      if (mounted && widget.controller.composeDraft != null) {
+        _viewMode = AppViewMode.compose;
+      }
     } catch (error) {
       if (mounted) setState(() => _initError = error.toString());
     } finally {
@@ -113,7 +116,9 @@ class _MainNavigationScreenState extends State<MainNavigationScreen> {
           controller: widget.controller,
           onGoLogin: () => setState(() => _authMode = AuthViewMode.login),
           onRegisterSuccess: () => setState(() {
-            _viewMode = AppViewMode.tabs;
+            _viewMode = widget.controller.composeDraft != null
+                ? AppViewMode.compose
+                : AppViewMode.tabs;
             _currentTab = 0;
           }),
         );
@@ -122,7 +127,9 @@ class _MainNavigationScreenState extends State<MainNavigationScreen> {
         controller: widget.controller,
         onGoRegister: () => setState(() => _authMode = AuthViewMode.register),
         onLoginSuccess: () => setState(() {
-          _viewMode = AppViewMode.tabs;
+          _viewMode = widget.controller.composeDraft != null
+              ? AppViewMode.compose
+              : AppViewMode.tabs;
           _currentTab = 0;
         }),
       );
