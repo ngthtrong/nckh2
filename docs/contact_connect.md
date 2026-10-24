@@ -525,6 +525,11 @@ có thể khác nhau giữa Dart và Python.
 - Message đến muộn vẫn được xử lý nếu `message_id` chưa tồn tại.
 - Cặp `(client_id, sequence_number)` không được tái sử dụng. Nếu cùng cặp này
   xuất hiện với `message_id` khác, server trả `SEQUENCE_REUSED` và không retry.
+- Khi trả `SEQUENCE_REUSED`, server bổ sung `result.next_sequence_number` bằng
+  số thứ tự lớn nhất đã lưu của chính `client_id` đó cộng 1. App nâng bộ đếm
+  local trước khi tạo message mới, giữ nguyên `client_id`, ID/nội dung báo cáo
+  và quyền gửi ảnh. Field này tùy chọn để app vẫn đọc được phản hồi server cũ;
+  server cũ không có gợi ý thì app tiếp tục cơ chế thử lại có giới hạn hiện tại.
 - `sequence_number` phục vụ quan sát, phát hiện mất message và sắp xếp; chống
   trùng vẫn dựa trên `message_id`.
 - Nếu app bị cài lại và không khôi phục được bộ đếm, app phải tạo `client_id` mới.

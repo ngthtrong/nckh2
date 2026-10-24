@@ -18,20 +18,23 @@ import 'benchmark_report_export_button.dart';
 
 class ModelBenchmarkCard extends StatefulWidget {
   final AppController controller;
+  final Dio? dio;
 
-  const ModelBenchmarkCard({super.key, required this.controller});
+  const ModelBenchmarkCard({super.key, required this.controller, this.dio});
 
   @override
   State<ModelBenchmarkCard> createState() => _ModelBenchmarkCardState();
 }
 
 class _ModelBenchmarkCardState extends State<ModelBenchmarkCard> {
-  final _dio = Dio(
-    BaseOptions(
-      connectTimeout: const Duration(seconds: 8),
-      followRedirects: false,
-    ),
-  );
+  late final _dio =
+      widget.dio ??
+      Dio(
+        BaseOptions(
+          connectTimeout: const Duration(seconds: 8),
+          followRedirects: false,
+        ),
+      );
   bool _running = false;
   bool _downloading = false;
   bool _loadingCachedPackage = false;
@@ -180,7 +183,10 @@ class _ModelBenchmarkCardState extends State<ModelBenchmarkCard> {
         '$_server/api/benchmark/package',
         partialPath,
         cancelToken: _downloadCancel,
-        options: Options(headers: {'Authorization': 'Bearer $token'}),
+        options: Options(
+          receiveTimeout: const Duration(seconds: 60),
+          headers: {'Authorization': 'Bearer $token'},
+        ),
         onReceiveProgress: (received, total) {
           if (mounted && total > 0) {
             setState(() => _downloadProgress = received / total);
@@ -206,12 +212,15 @@ class _ModelBenchmarkCardState extends State<ModelBenchmarkCard> {
         setState(() => _message = 'Gói benchmark tải về không hợp lệ: $e');
       }
     } finally {
-      if (partialPath != null) {
-        await _deleteIfExists(partialPath);
-      }
-      widget.controller.setPreparingBenchmark(false);
-      if (mounted) {
-        setState(() => _downloading = false);
+      try {
+        if (partialPath != null) {
+          await _deleteIfExists(partialPath);
+        }
+      } finally {
+        widget.controller.setPreparingBenchmark(false);
+        if (mounted) {
+          setState(() => _downloading = false);
+        }
       }
     }
   }

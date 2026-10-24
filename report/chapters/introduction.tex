@@ -12,7 +12,7 @@ Song song với nghiên cứu phân tích dữ liệu đa phương thức, trí 
 
 Đối với bài toán tổng hợp các yêu cầu cứu hộ, thuật toán phân cụm và phát hiện cộng đồng có thể được sử dụng để xác định những báo cáo có liên quan đến cùng một sự kiện. Louvain và Leiden khai thác cấu trúc cộng đồng trong đồ thị để tìm các nhóm đối tượng có mức độ liên kết cao \citep{blondel2008louvain,traag2019leiden}. Trong khi đó, DBSCAN là phương pháp phân cụm dựa trên mật độ, có thể sử dụng làm phương pháp đối chứng trong thực nghiệm \citep{ester1996dbscan}. Tuy nhiên, chất lượng phân cụm không chỉ phụ thuộc vào thuật toán mà còn chịu ảnh hưởng của cách xác định độ tương đồng, thông tin không gian, thời gian và khả năng xử lý các báo cáo thiếu dữ liệu. Một phương pháp có chỉ số phân cụm tốt vẫn có thể tạo ra những nhóm sự kiện không phù hợp với yêu cầu điều phối, chẳng hạn như gộp các tình huống độc lập hoặc tạo ra điểm đến không tương ứng với sự kiện thực tế. Do đó, việc đánh giá cần xem xét cả chất lượng phân hoạch và ảnh hưởng của sai lệch phân cụm đến quá trình điều phối.
 
-Trong lĩnh vực logistics nhân đạo, việc phân bổ nguồn lực cứu hộ cần cân nhắc đồng thời hiệu quả, tính công bằng và khả năng đáp ứng các nhu cầu khẩn cấp \citep{gralla2014review}. Từ những vấn đề trên, nghiên cứu không chỉ tập trung vào phân loại và phân cụm thông tin mà còn xem xét quá trình xếp hạng mức độ ưu tiên và hệ quả của kết quả phân cụm đối với việc lập lịch điều phối. Ba câu hỏi nghiên cứu được đặt ra nhằm so sánh các phương pháp phân cụm đồ thị (RQ1), đánh giá tính ổn định của điểm ưu tiên trước dữ liệu trùng lặp (RQ2) và khảo sát ảnh hưởng của sai lệch phân cụm đến kết quả điều phối (RQ3).
+Trong công tác cứu trợ thiên tai, việc phân bổ nguồn lực cứu hộ cần cân nhắc đồng thời hiệu quả, tính công bằng và khả năng đáp ứng các nhu cầu khẩn cấp \citep{gralla2014review}. Từ những vấn đề trên, nghiên cứu không chỉ tập trung vào phân loại và phân cụm thông tin mà còn xem xét quá trình xếp hạng mức độ ưu tiên và hệ quả của kết quả phân cụm đối với việc lập lịch điều phối. Ba câu hỏi nghiên cứu được đặt ra nhằm so sánh các phương pháp phân cụm đồ thị (RQ1), đánh giá tính ổn định của điểm ưu tiên trước dữ liệu trùng lặp (RQ2) và khảo sát ảnh hưởng của sai lệch phân cụm đến kết quả điều phối (RQ3).
 
 Các kết quả thực nghiệm cũng cho thấy những giới hạn của các phương pháp được khảo sát. Phương pháp phân cụm sử dụng cổng không gian dạng tích chưa chứng minh được ưu thế tổng quát so với phương pháp dạng cộng. Điểm ưu tiên có chặn chưa cho thấy sự phù hợp nhất quán với lợi ích được xác định độc lập trong mô phỏng. Đồng thời, những đặc tính toán học của từng thành phần chưa đủ để khẳng định khả năng cải thiện kết quả điều phối. Các kết quả này giúp làm rõ điều kiện áp dụng của từng phương pháp và những vấn đề cần tiếp tục nghiên cứu khi phát triển hệ thống hỗ trợ cứu hộ.
 
@@ -34,20 +34,14 @@ Xuất phát từ những vấn đề thực tiễn và kỹ thuật nêu trên,
 
 \addsec{Mục tiêu đề tài}
 
-Mục tiêu chung của đề tài là xây dựng hệ thống ứng dụng trí tuệ nhân tạo trên thiết bị di động nhằm hỗ trợ tiếp nhận, phân tích và xử lý thông tin cứu hộ bão lũ trong điều kiện kết nối mạng không ổn định. Hệ thống kết hợp phân tích dữ liệu đa phương thức gồm hình ảnh, văn bản và vị trí địa lý với kỹ thuật xử lý tại biên, đồng thời nghiên cứu phương pháp phân cụm các sự kiện cứu hộ và đánh giá mức độ khẩn cấp nhằm hỗ trợ quá trình ra quyết định và điều phối nguồn lực.
-
-Việc rút ngắn thời gian phản ứng và giảm thiểu thiệt hại về người, tài sản là định hướng ứng dụng của đề tài. Trong phạm vi nghiên cứu, mức độ đạt được của các mục tiêu được xem xét thông qua kết quả thực nghiệm đối với từng thành phần của hệ thống, không đồng nhất với hiệu quả cứu hộ trong điều kiện thực tế.
+Mục tiêu chung là xây dựng hệ thống ứng dụng trí tuệ nhân tạo trên thiết bị di động để tiếp nhận, phân tích thông tin và hỗ trợ ra quyết định cứu hộ bão lũ trong điều kiện mạng không ổn định, hướng tới giảm thiểu thiệt hại về người và tài sản.
 
 Các mục tiêu cụ thể bao gồm:
 
 \begin{enumerate}
-    \item Xây dựng và chuẩn hóa dữ liệu phục vụ phân tích thông tin cứu hộ, tập trung vào dữ liệu hình ảnh và văn bản trong bối cảnh bão lũ.
-    \item Nghiên cứu, huấn luyện và đánh giá mô hình học sâu để phân loại hình ảnh ngập lụt; khảo sát các kỹ thuật tối ưu hóa mô hình nhằm hỗ trợ triển khai trên thiết bị di động.
-    \item Xây dựng cơ chế lưu trữ báo cáo cục bộ, truyền dữ liệu tối giản và đồng bộ thông tin khi kết nối mạng bị gián đoạn hoặc khôi phục.
-    \item Nghiên cứu phương pháp phân cụm các báo cáo cứu hộ dựa trên thông tin không gian, thời gian và ngữ cảnh nhằm nhận diện những báo cáo liên quan đến cùng một sự kiện.
-    \item Xây dựng và đánh giá phương pháp tính điểm ưu tiên dựa trên các thông tin về tình trạng ngập lụt, nhu cầu hỗ trợ và những yếu tố liên quan đến mức độ khẩn cấp.
-    \item Phát triển ứng dụng di động, hệ thống backend và dashboard bản đồ để tiếp nhận, quản lý, tổng hợp và trực quan hóa thông tin cứu hộ.
-    \item Thực hiện các thí nghiệm đánh giá chất lượng mô hình AI, thuật toán phân cụm, phương pháp xếp hạng ưu tiên và khả năng hoạt động của hệ thống trong những điều kiện thử nghiệm xác định.
+    \item Nâng cao khả năng nhận diện và phân tích tình huống cứu hộ từ văn bản và hình ảnh.
+    \item Duy trì hoạt động khi mạng yếu hoặc gián đoạn bằng xử lý tại thiết bị và truyền dữ liệu tối giản.
+    \item Đánh giá mức độ khẩn cấp và gom nhóm các tình huống cứu hộ để hỗ trợ ra quyết định, điều phối nguồn lực.
 \end{enumerate}
 
 Đối với phần nghiên cứu thuật toán, ba câu hỏi nghiên cứu được đặt ra như sau:
@@ -65,62 +59,38 @@ Các kết quả đánh giá được phân tích theo từng tầng chức năn
 
 \addsec{Phương pháp nghiên cứu}
 
-Đề tài kết hợp nghiên cứu tài liệu, phân tích và thiết kế hệ thống, xây dựng mô hình học máy và thực nghiệm định lượng. Quá trình nghiên cứu được tổ chức theo các thành phần chính gồm phân tích dữ liệu đa phương thức, tối ưu hóa mô hình AI, phân cụm sự kiện, xếp hạng ưu tiên và phát triển phần mềm hỗ trợ cứu hộ.
+Đề tài kết hợp nghiên cứu tài liệu, xử lý dữ liệu, thiết kế hệ thống và so sánh thực nghiệm qua các bước sau:
 
-Trước hết, các công trình liên quan đến xử lý hình ảnh, phân tích văn bản, Edge AI, phân cụm dữ liệu không gian và logistics nhân đạo được khảo sát nhằm xác định những phương pháp phù hợp với bài toán. Các yêu cầu về chức năng, hiệu năng, khả năng lưu trữ và truyền dữ liệu trong điều kiện mạng không ổn định được sử dụng làm cơ sở thiết kế kiến trúc hệ thống. Quá trình phát triển phần mềm được kết hợp với thực nghiệm để kiểm tra các chức năng đã cài đặt và đánh giá khả năng đáp ứng những yêu cầu đặt ra.
+\begin{enumerate}
+    \item \textbf{Thu thập và xử lý dữ liệu:} Khảo sát các nghiên cứu về nhận diện ảnh, phân tích văn bản, Edge AI và phân cụm; chuẩn hóa, gán nhãn dữ liệu phục vụ huấn luyện và đánh giá.
+    \item \textbf{Phân tích yêu cầu và thiết kế hệ thống:} Xác định chức năng, yêu cầu hiệu năng và khả năng hoạt động khi mạng gián đoạn; thiết kế kiến trúc, cơ sở dữ liệu và luồng trao đổi giữa ứng dụng với máy chủ.
+    \item \textbf{Huấn luyện và tối ưu mô hình:} Huấn luyện MobileNetV3-Large; so sánh chuyển đổi định dạng, lượng tử hóa và cắt tỉa trên cùng tập kiểm thử theo độ chính xác, kích thước và độ trễ. Kết quả CPU máy tính và điện thoại được phân tích riêng.
+    \item \textbf{Phân cụm và xếp hạng:} Xây dựng đồ thị từ vị trí, thời gian và ngữ cảnh; so sánh chất lượng phân cụm, độ ổn định điểm ưu tiên và kết quả điều phối mô phỏng khi có dữ liệu thiếu, nhiễu hoặc trùng lặp. Cấu hình được chọn trên tập hiệu chỉnh trước khi đánh giá trên tập kiểm thử; các phương pháp dùng cùng điều kiện nhiễu trong mỗi lần chạy.
+    \item \textbf{Phát triển và kiểm thử phần mềm:} Xây dựng ứng dụng Flutter, backend Python và dashboard; kiểm tra tạo, lưu, gửi, đồng bộ báo cáo và khả năng truyền dữ liệu dưới mạng yếu giả lập.
+    \item \textbf{Đánh giá kết quả:} Đối chiếu dự đoán, cấu hình và bảng số liệu đã lưu; sử dụng bootstrap, kiểm định Wilcoxon và hiệu chỉnh Holm cho các so sánh ghép cặp theo seed. Đơn vị đánh giá là ảnh, lần chạy RQ1, seed RQ2/RQ3 hoặc ca kiểm thử tương ứng với từng bài toán.
+\end{enumerate}
 
-Đối với bài toán phân loại hình ảnh, dữ liệu được chuẩn hóa và sử dụng để huấn luyện, đánh giá mô hình MobileNetV3-Large. Kết quả được kiểm tra trên một tập dữ liệu kiểm thử cố định. Các phương án chuyển đổi định dạng, lượng tử hóa và cắt tỉa mô hình được so sánh trên cùng dữ liệu đánh giá nhằm xem xét sự thay đổi về độ chính xác, kích thước mô hình và hiệu năng suy luận. Kết quả trên CPU máy tính được phân tích riêng với kết quả đo trên thiết bị di động để tránh đồng nhất hai môi trường thực thi có đặc điểm phần cứng và phần mềm khác nhau.
-
-Đối với bài toán phân cụm sự kiện, nghiên cứu sử dụng dữ liệu báo cáo có thông tin về vị trí, thời gian và ngữ cảnh để xây dựng đồ thị tương đồng. Các phương pháp phân cụm được đánh giá và so sánh trên những tập dữ liệu phát triển, hiệu chỉnh và kiểm thử được phân tách. Việc lựa chọn cấu hình được thực hiện trước khi đánh giá trên tập kiểm thử nhằm hạn chế ảnh hưởng của quá trình điều chỉnh tham số đến kết quả cuối cùng.
-
-Bên cạnh đánh giá chất lượng phân hoạch, các thí nghiệm còn xem xét ảnh hưởng của dữ liệu thiếu và nhiễu đến kết quả phân cụm. Những phương pháp được so sánh sử dụng cùng điều kiện nhiễu trong từng lần chạy, đồng thời giữ nguyên cấu hình đã lựa chọn. Cách thực hiện này giúp phân tích sự khác biệt giữa các phương pháp khi dữ liệu đầu vào thay đổi.
-
-Đối với bài toán xếp hạng ưu tiên và mô phỏng điều phối, nghiên cứu sử dụng các tình huống được xây dựng theo những điều kiện xác định để kiểm tra tính ổn định của điểm ưu tiên, ảnh hưởng của dữ liệu trùng lặp và hệ quả của sai lệch phân cụm. Các phép so sánh được thực hiện theo từng seed tương ứng, sau đó tổng hợp bằng phương pháp bootstrap, kiểm định Wilcoxon và hiệu chỉnh Holm. Những phương pháp thống kê này được sử dụng để đánh giá độ ổn định và mức độ khác biệt của kết quả trong phạm vi dữ liệu thực nghiệm.
-
-Một yêu cầu quan trọng trong quá trình đánh giá là bảo đảm sự tách biệt giữa thông tin đầu vào của thuật toán và thông tin dùng làm nhãn tham chiếu. Dữ liệu đưa vào thuật toán được giới hạn trong tệp \texttt{algorithm\_input.json}; các thông tin như nhãn sự kiện, lợi ích mô phỏng, thời hạn xử lý và mức thiệt hại được sử dụng ở giai đoạn đánh giá sau khi thuật toán đã tạo ra kết quả.
-
-Trong thí nghiệm RQ2, nhóm sự kiện tham chiếu (oracle) được sử dụng như một điều kiện chẩn đoán nhằm đánh giá riêng tầng xếp hạng, giảm sự ảnh hưởng của sai lệch từ tầng phân cụm. Đây là điều kiện thực nghiệm có chủ đích, không phải thông tin sẵn có trong quá trình vận hành thực tế của ứng dụng.
-
-Đối với phần mềm, nghiên cứu tập trung kiểm tra luồng tạo báo cáo, lưu trữ cục bộ, gửi dữ liệu, đồng bộ khi kết nối được khôi phục và hiển thị thông tin trên dashboard. Các kết quả kiểm thử được xem xét cùng với thiết kế hệ thống và những giới hạn của môi trường triển khai.
-
-Các kết luận thực nghiệm được xây dựng từ kết quả dự đoán, tệp cấu hình, bảng số liệu và thông tin kiểm thử đã được lưu lại. Việc đối chiếu được thực hiện nhằm kiểm tra sự nhất quán giữa dữ liệu đầu vào, kết quả tính toán và những chỉ số được báo cáo. Những phép kiểm tra này không được xem là kết quả của một lần huấn luyện mới hoặc thử nghiệm mới trên thiết bị.
-
+Thông tin đầu vào thuật toán trong \texttt{algorithm\_input.json} được tách khỏi nhãn sự kiện, lợi ích mô phỏng, thời hạn xử lý và mức thiệt hại dùng để đánh giá. Riêng RQ2 sử dụng nhóm sự kiện tham chiếu để đánh giá riêng tầng xếp hạng, không coi đây là thông tin sẵn có khi vận hành. Việc tổng hợp, đối chiếu các kết quả đã lưu không được tính là một lần huấn luyện hoặc thử nghiệm thiết bị mới.
 
 \addsec{Đối tượng nghiên cứu}
 
-Đối tượng nghiên cứu của đề tài là các phương pháp và thành phần công nghệ phục vụ việc tiếp nhận, phân tích, tổng hợp và quản lý thông tin cứu hộ bão lũ trong điều kiện kết nối mạng không ổn định.
+\begin{itemize}
+    \item Dữ liệu ảnh ngập lụt bốn lớp, thông tin cứu hộ tiếng Việt và các trường vị trí, thời gian, mức độ khẩn cấp; báo cáo mô phỏng phục vụ phân cụm, xếp hạng và điều phối.
+    \item Mô hình MobileNetV3-Large, các định dạng PyTorch, ONNX, ExecuTorch và kỹ thuật tối ưu cho điện thoại; mô hình đánh giá khẩn cấp từ 32 trạng thái có cấu trúc, không phải tập tin nhắn cứu hộ thực tế.
+    \item Phương pháp xây dựng đồ thị tương đồng, phân cụm sự kiện và tính điểm ưu tiên cứu hộ.
+    \item Ứng dụng Flutter, backend, cơ sở dữ liệu SQLite, dashboard và cơ chế lưu trữ, truyền, đồng bộ thông tin.
+\end{itemize}
 
-Đối với dữ liệu và mô hình trí tuệ nhân tạo, nghiên cứu tập trung vào bộ dữ liệu hình ảnh gồm bốn lớp biểu diễn tình trạng ngập lụt, mô hình MobileNetV3-Large và các phiên bản mô hình được chuyển đổi sang PyTorch, ONNX và ExecuTorch. Các phương án tối ưu hóa mô hình được khảo sát nhằm đánh giá khả năng triển khai trên thiết bị có tài nguyên hạn chế.
-
-Đối với phân tích mức độ khẩn cấp, nghiên cứu sử dụng bảng tham chiếu tổng hợp gồm 32 trạng thái có cấu trúc để khảo sát phương pháp xác định mức ưu tiên từ những dấu hiệu liên quan đến nhu cầu cứu hộ. Dữ liệu này được sử dụng trong thực nghiệm và không đại diện cho một bộ dữ liệu văn bản cứu hộ tiếng Việt đã được thu thập, gán nhãn từ tình huống thực tế.
-
-Đối với bài toán tổng hợp sự kiện, đối tượng nghiên cứu gồm các báo cáo mô phỏng chứa thông tin vị trí, thời gian và ngữ cảnh; phương pháp xây dựng đồ thị tương đồng; thuật toán phân cụm và phát hiện cộng đồng; cùng các phương pháp tính điểm ưu tiên dựa trên những nhóm bằng chứng liên quan.
-
-Ở tầng hệ thống, nghiên cứu tập trung vào ứng dụng di động Flutter, cơ chế lưu trữ và đồng bộ dữ liệu, hệ thống backend, cơ sở dữ liệu SQLite và dashboard phục vụ quản lý, trực quan hóa các báo cáo cứu hộ. Các thành phần này được xem xét cả về chức năng độc lập và khả năng phối hợp trong quá trình tiếp nhận, xử lý thông tin.
-
-Đơn vị đánh giá được xác định tùy theo từng bài toán. Một ảnh là đơn vị đánh giá của mô hình phân loại; một lần chạy thực nghiệm được sử dụng trong RQ1; một seed là đơn vị so sánh thống kê trong RQ2 và RQ3; còn một ca kiểm thử được sử dụng để đánh giá chức năng phần mềm.
-
-Người dân có nhu cầu gửi thông tin cầu cứu và lực lượng thực hiện công tác cứu hộ là những nhóm người dùng mà hệ thống hướng đến. Tuy nhiên, nghiên cứu chưa thực hiện khảo sát thực địa với các nhóm người dùng này để đánh giá đầy đủ tính khả dụng và hiệu quả xã hội của hệ thống.
-
+Hệ thống hướng đến người dân gửi yêu cầu và lực lượng cứu hộ; nghiên cứu chưa khảo sát thực địa với các nhóm người dùng này.
 
 \addsec{Phạm vi nghiên cứu}
 
-Đề tài được thực hiện trong thời gian 06 tháng, từ tháng 05/2026 đến tháng 10/2026. Nội dung nghiên cứu tập trung vào việc ứng dụng trí tuệ nhân tạo tại biên để phân tích thông tin cứu hộ, xây dựng cơ chế tiếp nhận dữ liệu trong điều kiện mạng không ổn định và nghiên cứu phương pháp phân cụm sự kiện hỗ trợ điều phối.
+\begin{itemize}
+    \item \textbf{Thời gian:} 06 tháng, từ tháng 05/2026 đến tháng 10/2026.
+    \item \textbf{Nội dung và nền tảng:} Phân tích thông tin cứu hộ bằng AI tại thiết bị; tạo, lưu và gửi báo cáo qua HTTP hoặc SMS gateway; đồng bộ khi có mạng; phân cụm, xếp hạng và hiển thị trên ứng dụng di động, web. Phân cụm xử lý các tập báo cáo hiện có, dashboard cập nhật theo chu kỳ; quyết định điều phối vẫn do con người thực hiện.
+    \item \textbf{Dữ liệu:} Ảnh ngập lụt đã chuẩn hóa, thông tin mô tả nhu cầu cứu hộ và các trường liên quan. RQ1 dùng dữ liệu bán tổng hợp Generator 3.0; RQ2/RQ3 dùng dữ liệu tổng hợp Candidate 4.1. Đây là các bộ dữ liệu riêng, không phải báo cáo cứu hộ thực tế hoặc một chuỗi kiểm chứng trên cùng tập mẫu.
+    \item \textbf{Phân tích ảnh và văn bản:} Đánh giá riêng mô hình nhận diện mức ngập và các phương án tối ưu trên CPU, điện thoại; không khái quát hiệu năng cho mọi thiết bị. Xử lý văn bản hiện dùng từ khóa ở backend và Logistic Regression từ các dấu hiệu có cấu trúc, chưa thay thế mô hình phân tích trực tiếp tin nhắn cứu hộ tiếng Việt.
+    \item \textbf{Mạng và giới hạn ứng dụng:} Tập trung lưu báo cáo và gửi lại khi có kết nối với máy chủ. DTN qua thiết bị trung gian, phương tiện mang dữ liệu hoặc UAV mới là định hướng, chưa được kiểm chứng. Nghiên cứu không đi sâu vào dự báo khí tượng--thủy văn hoặc điều hành cứu hộ tự động.
+\end{itemize}
 
-Về phạm vi dữ liệu, nghiên cứu tập trung vào hình ảnh ngập lụt, thông tin mô tả nhu cầu cứu hộ và các trường dữ liệu liên quan đến vị trí, thời gian, mức độ khẩn cấp. Mô hình phân loại ảnh được đánh giá trên dữ liệu đã được thu thập, chuẩn hóa và gán nhãn. Đối với phân cụm, xếp hạng và mô phỏng điều phối, nghiên cứu sử dụng các bộ dữ liệu tổng hợp và bán tổng hợp được xây dựng theo những điều kiện thực nghiệm xác định.
-
-Bộ dữ liệu Generator 3.0 sử dụng trong RQ1 là dữ liệu bán tổng hợp có bối cảnh địa lý. Trong khi đó, Candidate 4.1 được sử dụng cho RQ2 và RQ3 là bộ dữ liệu tổng hợp riêng, phục vụ đánh giá xếp hạng và điều phối. Các bộ dữ liệu này không đại diện cho những báo cáo cứu hộ thực tế và không tạo thành một chuỗi kiểm chứng liên tục trên cùng một tập mẫu. Vì vậy, kết quả ở từng bài toán được phân tích theo điều kiện và phạm vi dữ liệu tương ứng.
-
-Về phạm vi kỹ thuật, hệ thống được phát triển trên nền tảng ứng dụng di động và web. Các chức năng được nghiên cứu gồm suy luận hình ảnh tại thiết bị, tạo và lưu trữ báo cáo cục bộ, truyền dữ liệu qua HTTP hoặc SMS gateway, đồng bộ khi kết nối được khôi phục, phân cụm các báo cáo đã tiếp nhận và hiển thị kết quả trên dashboard.
-
-Việc phân cụm được thực hiện trên các tập báo cáo hiện có, trong khi dashboard hỗ trợ cập nhật và theo dõi thông tin theo chu kỳ. Hoạt động xác minh, lựa chọn và điều phối nguồn lực vẫn cần sự tham gia của con người. Hệ thống không được thiết kế để tự động thay thế quyết định chuyên môn của lực lượng cứu hộ.
-
-Đối với khả năng phân tích đa phương thức, mô hình phân loại hình ảnh được nghiên cứu và đánh giá riêng. Thành phần xử lý văn bản hiện sử dụng quy tắc từ khóa ở backend và mô hình Logistic Regression dựa trên các dấu hiệu có cấu trúc. Các phương pháp này chưa thay thế hoàn toàn mục tiêu xây dựng mô hình ngôn ngữ tiếng Việt có khả năng phân tích trực tiếp nội dung các tin nhắn cầu cứu.
-
-Các kết quả tối ưu hóa mô hình ảnh được đánh giá chủ yếu trong môi trường CPU máy tính, bên cạnh một nguồn số liệu benchmark ứng dụng đã được lưu. Do thông tin về thiết bị và phiên bản mô hình sử dụng trong nguồn benchmark ứng dụng chưa đầy đủ, những kết quả này được phân tích riêng, không dùng để khẳng định hiệu năng triển khai trên mọi thiết bị di động.
-
-Về khả năng truyền dữ liệu khi mạng gián đoạn, hệ thống tập trung vào cơ chế lưu báo cáo và gửi lại khi thiết bị có kết nối với máy chủ. Những phương án truyền dữ liệu theo mạng chịu trễ hoặc gián đoạn (Delay-Tolerant Networking -- DTN), chẳng hạn truyền qua các thiết bị trung gian, data mule hoặc UAV, mới được xem xét ở mức định hướng thiết kế và chưa được kiểm chứng trong phiên bản ứng dụng hiện tại.
-
-Nghiên cứu không đi sâu vào bài toán dự báo khí tượng, thủy văn hoặc xây dựng hệ thống điều hành cứu hộ tự động. Các kết quả thực nghiệm tập trung đánh giá tính khả thi của phương pháp, chất lượng của từng thành phần và ảnh hưởng của các sai lệch đến quá trình xử lý thông tin cứu hộ.
-
-Việc đánh giá hiệu quả thực tế về thời gian phản ứng, mức độ giảm thiệt hại và khả năng triển khai trong môi trường thiên tai cần được thực hiện thông qua những nghiên cứu thực địa và thử nghiệm với các đơn vị chuyên môn trong giai đoạn tiếp theo.
+Các thực nghiệm đánh giá từng thành phần trong điều kiện đã xác định. Hiệu quả về thời gian phản ứng, giảm thiệt hại và khả năng triển khai trong thiên tai cần được kiểm chứng thêm qua thử nghiệm thực địa với đơn vị chuyên môn.

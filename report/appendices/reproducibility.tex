@@ -1,6 +1,6 @@
 \chapter{Tái lập thực nghiệm}\label{chap:reproducibility}
 \section{Nguồn và phiên bản}
-Bản sơ bộ được tổng hợp từ trạng thái repo hiện tại; commit đầu vào được ghi bằng SHA đầy đủ trong tệp provenance sinh tự động. Commit này mô tả nguồn trước chỉnh sửa nội dung báo cáo, không bao gồm các chỉnh sửa chưa commit. Script xuất bảng ghi SHA-256 từng JSON/CSV trực tiếp được dùng, cho phép kiểm tra bảng có còn khớp nguồn khi artifact thay đổi.
+Các bảng kết quả được tổng hợp từ dữ liệu thực nghiệm đã lưu; commit đầu vào được ghi bằng SHA đầy đủ trong tệp provenance sinh tự động. Commit này mô tả nguồn trước chỉnh sửa nội dung báo cáo, không bao gồm các chỉnh sửa chưa commit. Script xuất bảng ghi SHA-256 từng JSON/CSV trực tiếp được dùng, cho phép kiểm tra bảng có còn khớp nguồn khi artifact thay đổi.
 
 Hai snapshot lịch sử của mã nguồn phục vụ tái lập độc lập các bước sinh dữ liệu và đánh giá phân cụm:
 \begin{itemize}
@@ -57,7 +57,7 @@ Nguồn stress chính gồm protocol, manifest, selected configs, checkpoint t�
 
 Có 1.400 fit ở full batch. Smoke một run không chứng minh full batch hoàn thành. Nếu chạy lại, giữ kết quả trong thư mục riêng và so sánh với nguồn chính; không gộp với \texttt{rq1\_results\_v2} hoặc chọn bản có kết quả tốt hơn.
 
-\section{RQ2/RQ3 và kiểm tra evidence}
+\section{Tái lập và kiểm chứng kết quả RQ2/RQ3}
 Nguồn RQ2 chứa summary, alignment, robustness, paired comparisons và sensitivity. Nguồn RQ3 chứa bảng theo điều kiện, bảng theo seed, destination assignments, partition losses và provenance tái phân tích. Bản theo seed là nguồn suy luận chính cho RQ3.
 
 Script kiểm tra artifact và số liệu manuscript đã được lưu kèm theo môi trường khóa phiên bản. Cần môi trường biệt lập có đúng phiên bản được pin trước khi dùng script; không xem việc thiếu dependency là bằng chứng artifact sai. Bản báo cáo này xuất từ artifact đã lưu, không tuyên bố đã chạy lại bộ verifier trong môi trường khác.
@@ -74,8 +74,8 @@ Thao tác này tạo môi trường demo và có thể nạp dữ liệu bán t�
 
 Kiểm thử backend và Flutter được hướng dẫn trong tài liệu sản phẩm. Kiểm thử luồng xử lý và giao diện được thực hiện trên điện thoại Android thật, kết hợp coordinator, backend và dashboard. Điện thoại cần truy cập được máy chủ và có bộ dữ liệu/model đúng phiên; các bài thử được phân biệt bằng tên lượt và ID. Thử SMS cần cấu hình số tiếp nhận của phiên kiểm tra.
 
-\section{Những gì chưa tái lập trong bản sơ bộ}
-Việc biên soạn báo cáo không chạy lại huấn luyện MobileNet hoặc toàn bộ notebook. Kết quả nghiên cứu đã lưu gồm benchmark model/runtime trên bốn mẫu điện thoại và hai kịch bản kiểm thử chức năng trên điện thoại thật; thời điểm, cấu hình và nguồn được trình bày ở phần thực nghiệm. Kiểm tra khi biên soạn đối chiếu các tệp kết quả, hash nguồn và khả năng biên dịch báo cáo, không được tính là lượt thực nghiệm mới.
+\section{Phạm vi kiểm chứng}
+Quá trình biên soạn không thực hiện lại huấn luyện MobileNet, suy luận ảnh, notebook Colab hoặc kiểm thử E2E trên Docker và Android; các kết quả được tổng hợp từ những phiên thực nghiệm đã lưu. Kết quả test lịch sử được dẫn rõ ngày và nguồn. Kiểm tra mới chỉ xác nhận tính nhất quán dữ liệu đầu vào bảng và khả năng biên dịch báo cáo. Phân biệt này giúp người đọc biết phần nào là kết quả nghiên cứu đã lưu và phần nào là kiểm tra biên soạn.
 
 \section{Hồ sơ kiểm thử ứng dụng di động ngày 24/10/2026}
 Nguồn chính là hai bộ JSON/CSV và \texttt{manifest.json} dưới \RepoPath{products/fe/experiment_mobile/results/SM-G970U/}, cùng tiền tố \RepoPath{2026-10-24_10-28-41-463525_mobile_run_001}; bộ run\_002 có thêm hậu tố \texttt{\_run\_002}. Chọn theo \texttt{goldRun}/\texttt{seedRun} trong manifest, không suy từ riêng tên thư mục. JSON giữ trạng thái hiện tại, lịch sử lần thử và quan sát backend; \texttt{loi\_thu\_cong.csv} giữ lỗi được người chạy ghi nhận. Bản trích nguồn và hash dùng cho các bảng nằm tại \RepoPath{report/generated/mobile-system/source-audit.json}. Các lượt ngày 23/10 được giữ làm lịch sử, không cộng thành lần lặp độc lập của hai lượt chính.

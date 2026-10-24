@@ -94,6 +94,14 @@ class OutboxLocalDataSource {
   /// ID thiết bị gửi kèm mọi message; server dùng làm chủ báo cáo.
   String get clientId => _box!.get(_clientIdKey) as String;
 
+  /// A restored backup can lag behind the server; retain report ownership.
+  Future<void> reconcileSequence(int nextSequenceNumber) async {
+    final current = (_box!.get(_sequenceKey) as num?)?.toInt() ?? 0;
+    if (nextSequenceNumber > current + 1) {
+      await _box!.put(_sequenceKey, nextSequenceNumber - 1);
+    }
+  }
+
   String? get serverId => _box!.get(_serverIdKey) as String?;
   String? get serverUrl => _box!.get(_serverUrlKey) as String?;
 

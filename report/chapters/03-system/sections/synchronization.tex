@@ -1,6 +1,6 @@
 \section{Thiết kế đồng bộ và truy vết báo cáo}\label{sec:synchronization-design}
 \subsection{Ba định danh và hai loại trạng thái}
-Một ca cứu hộ cần giữ định danh ổn định ngay khi được tạo cục bộ. Trong hợp đồng hiện tại, \texttt{payload.id} định danh báo cáo; \texttt{message\_id} định danh thao tác; cặp \texttt{client\_id/sequence\_number} kiểm soát việc tái sử dụng chuỗi thao tác của một client. Retry cùng thao tác phải giữ nguyên message và hash. Nếu bổ sung nội dung bằng một thao tác mới, message mới vẫn tham chiếu báo cáo cũ. Nhờ vậy, một ca có thể có nhiều thao tác nhưng không bị biến thành nhiều ca chỉ vì mất kết nối.
+Một ca cứu hộ cần giữ định danh ổn định ngay khi được tạo cục bộ. Theo quy tắc trao đổi dữ liệu hiện tại, \texttt{payload.id} định danh báo cáo; \texttt{message\_id} định danh thao tác; cặp \texttt{client\_id/sequence\_number} kiểm soát việc tái sử dụng chuỗi thao tác của một client. Retry cùng thao tác phải giữ nguyên message và hash. Nếu bổ sung nội dung bằng một thao tác mới, message mới vẫn tham chiếu báo cáo cũ. Nhờ vậy, một ca có thể có nhiều thao tác nhưng không bị biến thành nhiều ca chỉ vì mất kết nối.
 
 Trạng thái outbox mô tả việc truyền: \texttt{pending}, \texttt{in\_flight}, ACK và dead-letter. Trạng thái báo cáo mô tả nghiệp vụ: \texttt{processing}, \texttt{dispatched}, \texttt{resolved}, \texttt{cancelled}. Backend đã nhận dữ liệu chỉ xác nhận đồng bộ. Việc đội cứu hộ đã được cử đi hoặc ca đã hoàn tất phải được cập nhật bằng thao tác nghiệp vụ có quyền. Giao diện cần giúp người dùng đọc được cả hai thông tin này.
 
@@ -12,7 +12,7 @@ Trạng thái outbox mô tả việc truyền: \texttt{pending}, \texttt{in\_fli
 \end{figure}
 
 \subsection{Mất ACK sau commit và xử lý idempotency}
-Hình~\ref{fig:sync-sequence} mô tả ca mà server đã ghi dữ liệu nhưng ACK bị mất. Đây là một trường hợp khiến hệ thống chỉ ``gửi lại khi lỗi'' dễ tạo trùng nếu không giữ định danh. Theo hợp đồng, ghi nghiệp vụ và ghi chống trùng nằm trong transaction của cùng message; gửi lại đúng message/hash trả kết quả duplicate. Khả năng retry kết hợp với kiểm tra định danh giữ tính nhất quán cho thao tác đã được server ghi.
+Hình~\ref{fig:sync-sequence} mô tả ca mà server đã ghi dữ liệu nhưng ACK bị mất. Đây là một trường hợp khiến hệ thống chỉ ``gửi lại khi lỗi'' dễ tạo trùng nếu không giữ định danh. Theo quy tắc xử lý bản tin, ghi nghiệp vụ và ghi chống trùng nằm trong transaction của cùng message; gửi lại đúng message/hash trả kết quả duplicate. Khả năng retry kết hợp với kiểm tra định danh giữ tính nhất quán cho thao tác đã được server ghi.
 
 \begin{figure}[htbp]\centering
 \begin{tikzpicture}[>=Stealth,font=\footnotesize]
@@ -36,7 +36,7 @@ Hình~\ref{fig:sync-sequence} mô tả ca mà server đã ghi dữ liệu nhưng
 \label{fig:sync-sequence}
 \end{figure}
 
-Hash payload là SHA-256 sau chuẩn tắc hóa JSON theo hợp đồng RFC 8785 \citep{rfc8785}. Hash hỗ trợ phát hiện cùng ID được dùng cho nội dung khác; không xác minh danh tính người tạo tin. Ảnh multipart có hash riêng và kiểm tra byte/định dạng ở server. Hai loại hash phục vụ toàn vẹn của dữ liệu, không phải đánh giá độ thật của hiện trường.
+Hash payload là SHA-256 sau chuẩn tắc hóa JSON theo chuẩn RFC 8785 \citep{rfc8785}. Hash hỗ trợ phát hiện cùng ID được dùng cho nội dung khác; không xác minh danh tính người tạo tin. Ảnh multipart có hash riêng và kiểm tra byte/định dạng ở server. Hai loại hash phục vụ toàn vẹn của dữ liệu, không phải đánh giá độ thật của hiện trường.
 
 \begin{figure}[htbp]
 \centering
@@ -49,7 +49,7 @@ Hash payload là SHA-256 sau chuẩn tắc hóa JSON theo hợp đồng RFC 8785
 \begin{table}[htbp]\centering\small
 \caption{Xử lý phản hồi của đường đồng bộ JSON}\label{tab:sync-outcomes}
 \begin{tabularx}{\textwidth}{P{.24\textwidth}P{.30\textwidth}X}
-\toprule Phản hồi/tình huống & Ý nghĩa & Hành động client theo hợp đồng \\\midrule
+\toprule Phản hồi/tình huống & Ý nghĩa & Cách xử lý của ứng dụng \\\midrule
 accepted & Thao tác đã được commit & Hoàn tất message khỏi outbox \\
 duplicate cùng hash & Server đã có thao tác & Dùng ACK/kết quả cũ; hoàn tất message \\
 retry\_later & Lỗi tạm thời theo message & Giữ pending, đặt lịch retry \\

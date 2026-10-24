@@ -24,7 +24,7 @@ Hàm tạo mô hình trong notebook giữ backbone của torchvision, thay Dropo
 \draw[->] (input)--(prep);\draw[->] (prep)--(backbone);
 \draw[->] (backbone)--(head);\draw[->] (head)--(out);
 \end{tikzpicture}
-\caption{Hợp đồng suy luận ảnh và vị trí đầu phân loại được thay trong mô hình}
+\caption{Quy trình nhận diện ảnh và vị trí thay thế đầu phân loại trong mô hình}
 \label{fig:image-model-design}
 \end{figure}
 
@@ -33,7 +33,7 @@ Với logit $z_c$, xác suất của lớp $c$ và nhãn dự đoán là
  p_c=\frac{\exp(z_c)}{\sum_{j=1}^{4}\exp(z_j)},\qquad \widehat y=\arg\max_c p_c.
  \label{eq:softmax}
 \end{equation}
-Xác suất softmax được dùng làm confidence trong ứng dụng. Đây là đầu ra của mô hình phân loại, cần kiểm tra calibration trước khi diễn giải như xác suất đúng, và không phải điểm $Q_i$ của công thức xếp hạng. Các script export bọc mô hình bằng softmax để xuất xác suất, nên nơi nhận phải biết output là probabilities hay logits, tránh áp softmax hai lần. Manifest là hợp đồng đi cùng asset; tên tệp giống nhau không đủ xác nhận hai runtime dùng cùng trọng số. Khi kiểm tra parity phải giữ cả thứ tự lớp, tiền xử lý và loại output.
+Xác suất softmax được dùng làm confidence trong ứng dụng. Đây là đầu ra của mô hình phân loại, cần kiểm tra calibration trước khi diễn giải như xác suất đúng, và không phải điểm $Q_i$ của công thức xếp hạng. Các script export bọc mô hình bằng softmax để xuất xác suất, nên nơi nhận phải biết output là probabilities hay logits, tránh áp softmax hai lần. Tệp manifest mô tả cấu hình và các yêu cầu sử dụng mô hình; tên tệp giống nhau không đủ xác nhận hai runtime dùng cùng trọng số. Khi kiểm tra parity phải giữ cả thứ tự lớp, tiền xử lý và loại output.
 
 \subsection{Tăng cường dữ liệu và hàm mục tiêu}
 Notebook dùng tăng cường nhẹ trên tập train: lật ngang với xác suất 0,5; affine trong khoảng $\pm4^\circ$, dịch tối đa 3\% và scale 0,95--1,05; jitter brightness và contrast 0,12, saturation 0,08, hue 0,02. Validation và test chỉ chuyển tensor và chuẩn hóa sau bước EXIF--RGB--letterbox; các phép biến đổi không được thêm vào test khi tính metric cuối. Chúng tạo biến thể thị giác để huấn luyện, không tạo thêm hiện trường độc lập.
