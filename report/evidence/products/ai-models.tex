@@ -1,0 +1,34 @@
+\documentclass{template/ctu-report}
+\input{config/profiles}
+\input{config/metadata}
+\input{template/typography}
+\input{template/packages}
+\input{template/commands}
+\begin{document}
+\pagestyle{plain}
+\addchap{Bộ mô hình AI đã huấn luyện}
+Bộ mô hình bàn giao sử dụng MobileNetV3-Large, seed 1024, gồm mô hình gốc trong thư mục \RepoPath{baseline/} và mô hình cắt tỉa có cấu trúc trong \RepoPath{pruning_st/}. Mỗi bộ có hai định dạng ONNX và ExecuTorch/PTE để triển khai trên thiết bị di động.
+
+\noindent\textbf{Thư mục bàn giao:} \RepoPath{products/fe/model/Edge Ai/seed1024/export/}.
+
+\begin{table}[htbp]\centering\small
+\caption{Các tệp mô hình trong bộ bàn giao seed 1024}
+\begin{tabular}{llrP{.35\textwidth}}
+\toprule Phiên bản & Định dạng & MiB & SHA-256 (16 ký tự đầu) \\\midrule
+Gốc & ONNX & 16.04 & \texttt{f74c99b479b6fc55} \\
+Gốc & PTE & 16.06 & \texttt{ca2b36efd541295e} \\
+Cắt tỉa & ONNX & 15.81 & \texttt{2ec932a12e473081} \\
+Cắt tỉa & PTE & 15.83 & \texttt{6d4ca44712755604} \\
+\bottomrule
+\end{tabular}
+\end{table}
+
+Trong mỗi thư mục, tệp mô hình có tên \RepoPath{flood_mobilenetv3_large.onnx} và \RepoPath{flood_mobilenetv3_large.pte}. Tệp \RepoPath{model_manifest.json} ghi cấu hình, thứ tự lớp và mã SHA-256 đầy đủ; bộ gốc có thêm \RepoPath{model_metadata.json} mô tả cấu hình PTE. Mã SHA-256 của cả bốn tệp đã được đối chiếu với manifest khi lập phần minh chứng.
+
+\noindent\textbf{Đầu vào và đầu ra:} ảnh RGB được giữ tỷ lệ và đệm về $256\times256$, màu đệm $(124,116,104)$; chuẩn hóa theo ImageNet. Thứ tự bốn lớp là \texttt{low}, \texttt{medium}, \texttt{high}, \texttt{non\_flood}. Manifest ghi ExecuTorch runtime 1.4.1.
+
+\noindent\textbf{Tối ưu mô hình:} mô hình gốc có 4.207.156 tham số; mô hình cắt tỉa còn 4.145.694 tham số. Bộ cắt tỉa giữ thông tin mã băm của checkpoint nguồn để đối chiếu với mô hình gốc.
+
+\noindent\textbf{Phạm vi minh chứng:} các tệp trên là mô hình nhận diện mức ngập từ ảnh. Kết quả chất lượng và tốc độ trên điện thoại được trình bày trong phần thực nghiệm; các tệp này không phải minh chứng cho mô hình phân tích tin nhắn tiếng Việt.
+
+\end{document}

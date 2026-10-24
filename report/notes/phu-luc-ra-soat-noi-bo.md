@@ -1,0 +1,33 @@
+# Ghi chú rà soát nội bộ
+
+Nội dung dưới đây được tách khỏi phụ lục bản nộp; không phải xác nhận trạng thái hiện tại của sản phẩm hoặc hồ sơ.
+
+```tex
+\section{Những khác biệt phiên bản cần giữ khi rà soát}
+\begin{longtable}{P{.29\textwidth}P{.30\textwidth}P{.30\textwidth}}
+\caption{Đối chiếu tài liệu cũ với artifact hiện tại}\label{tab:version-findings}\\
+\toprule Hạng mục & Thông tin cũ & Thông tin dùng trong bản sơ bộ \\\midrule\endfirsthead
+\toprule Hạng mục & Thông tin cũ & Thông tin dùng trong bản sơ bộ \\\midrule\endhead
+Ảnh & README 1.621; lần chạy cũ 1.625 & Split hiện tại 1.702; MD5 khớp đủ \\
+Test & 244 ảnh; 73,77\% accuracy & Seed 42: 256 ảnh, 76,17\%; seed 1024: 256 ảnh, 75,78\%; chưa xác nhận trùng split \\
+Đầu vào ảnh & 224, preprocessing cũ & 256, EXIF--RGB--letterbox--NCHW theo artifact hiện tại \\
+Asset & Tài liệu 27/09 ghi thiếu ONNX/manifest & Có export trong Edge Ai; app vẫn cần stage \\
+Tối ưu & Tài liệu cũ ghi chưa có INT8 & Có PTQ/QAT/pruning và kết quả âm \\
+Khẩn cấp & Quy tắc từ khóa ở backend & LR cấu trúc ở app; adapter vẫn dùng từ khóa/urgency \\
+SMS & Tài liệu cũ ghi chưa có server intake & Có gateway endpoint; chưa có log viễn thông thật \\
+RQ3 & 120 hàng seed--điều kiện & Suy luận chính 40 cặp seed \\
+Renderer khác & Có bảng short ID/OOD & Không dùng ghép vào protocol bản thảo dài \\
+\bottomrule
+\end{longtable}
+
+\section{Checklist bằng chứng cho đợt thử thiết bị tiếp theo}
+Để kiểm chứng luồng thiết bị, một phiên thử cần ghi mã thiết bị, hệ điều hành, APK/commit, hash asset và URL backend. Các tình huống gồm tạo khi offline, đóng/mở lại app, khôi phục kết nối, gửi lại khi mất ACK, ảnh có/không EXIF, thiếu GPS, trạng thái đi tiến, SMS qua gateway và đồng bộ nền. Với mỗi ca, ghi kỳ vọng, hành vi quan sát, log thiết bị/server và thời gian thực tế.
+
+Phép đo hiệu năng cần tách tải model, tiền xử lý, suy luận, tạo payload, chờ mạng và ACK. Phép đo mạng cần nhiều lượt cho mỗi profile/ảnh, ghi kích thước thực, tỷ lệ thành công và hàng đợi còn lại. Những mục này là kế hoạch bổ sung minh chứng, chưa phải kết quả đã đạt trong báo cáo.
+
+\section{Nội dung hành chính còn chờ xác nhận}
+Các trường giới tính, dân tộc, ngành, năm học và số năm đào tạo của chủ nhiệm đã được cập nhật theo thông tin xác nhận ngày 06/10/2026 trong hồ sơ đề tài và tệp cấu hình metadata; phần này không còn chờ điền metadata. Đã đối chiếu cấu trúc các mẫu bổ sung ngày 08/10/2026; còn chờ ảnh chủ nhiệm, thành tích học tập, nhận xét GVHD và xác nhận ký/dấu. Năm sinh và thời gian thực hiện trong mẫu mới có mâu thuẫn với metadata đã xác nhận; xem sổ đối chiếu biểu mẫu trong report. Thuyết minh Markdown không thay bản phê duyệt có chữ ký/dấu.
+
+Manifest hồ sơ giữ cờ xác nhận false cho các minh chứng chưa được cung cấp. Nội dung sơ bộ của bản tin/tóm tắt Việt--Anh đã soạn có thể dùng để điền mẫu chính thức, nhưng không xác nhận thủ tục nộp. Video chưa được tạo trong công việc này. Bản đầy đủ cần đối chiếu danh sách cam kết, mẫu, bản phê duyệt và từng minh chứng thật.
+
+```

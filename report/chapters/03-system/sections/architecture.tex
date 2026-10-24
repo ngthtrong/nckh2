@@ -42,10 +42,10 @@ Khi tạo báo cáo, ứng dụng ghi bản ghi và dữ liệu cần đồng b�
 
 Việc chọn chế độ gửi được thực hiện khi có ảnh và được xem xét lại khi hàng đợi gửi sau gián đoạn. Không nên dùng nguyên đánh giá mạng cũ cho một lần đồng bộ mới. Workmanager định kỳ khoảng 15 phút trên nền tảng hỗ trợ; controller còn kích hoạt đồng bộ theo trạng thái kết nối. Chu kỳ khai báo không bảo đảm hệ điều hành sẽ thực thi đúng thời điểm trong mọi điều kiện nền hoặc tiết kiệm pin.
 
-Địa điểm báo cáo có thể null. Màn hình trung tâm cần có danh sách cho báo cáo thiếu vị trí ngoài bản đồ, bởi một bản ghi không xuất hiện trên bản đồ không có nghĩa không cần xử lý. Vị trí được nhập thủ công có nguồn \texttt{manual}; khi GPS thiết bị đến sau, hợp đồng quy định cách bổ sung/thay thế để giữ nguồn gốc.
+Địa điểm báo cáo có thể null. Màn hình trung tâm cần có danh sách cho báo cáo thiếu vị trí ngoài bản đồ, bởi một bản ghi không xuất hiện trên bản đồ không có nghĩa không cần xử lý. Vị trí được nhập thủ công có nguồn \texttt{manual}; khi GPS thiết bị đến sau, quy tắc cập nhật dữ liệu xác định cách bổ sung/thay thế để giữ nguồn gốc.
 
-\subsection{Hợp đồng truyền thông}
-Hợp đồng phiên bản 1 được xác nhận bằng header \texttt{X-Message-Contract-Version}. Metadata truyền qua \texttt{POST /sync/messages}; ảnh qua \texttt{POST /api/reports} dạng multipart với phần JSON \texttt{meta}. Batch có tối đa 50 message và 256 KiB; mỗi message có phản hồi riêng để app biết message nào nhận, trùng hoặc bị từ chối.
+\subsection{Quy tắc trao đổi dữ liệu giữa ứng dụng và máy chủ}
+Ứng dụng và máy chủ trao đổi dữ liệu theo cùng một bộ quy tắc. Header \texttt{X-Message-Contract-Version} cho biết phiên bản quy tắc đang sử dụng, hiện là phiên bản 1. Metadata truyền qua \texttt{POST /sync/messages}; ảnh qua \texttt{POST /api/reports} dạng multipart với phần JSON \texttt{meta}. Batch có tối đa 50 message và 256 KiB; mỗi message có phản hồi riêng để app biết message nào nhận, trùng hoặc bị từ chối.
 
 Payload hash dùng SHA-256 của JSON chuẩn tắc RFC 8785 \citep{rfc8785}. Phần chuẩn tắc phải tạo cùng byte ở Dart và Python, nhất là biểu diễn số và thứ tự thuộc tính. Hash ở đây kiểm tra nội dung phù hợp định danh, không tự chứng minh danh tính người gửi hoặc sự thật của hiện trường.
 
@@ -84,7 +84,7 @@ SQLite giữ bảng \texttt{reports}, \texttt{messages\_dedup}, \texttt{report\_
 
 Transaction theo từng message giúp lỗi của một phần batch không hủy các phần hợp lệ khác. Chế độ WAL cho phép dashboard đọc khi app ghi. \texttt{server\_meta} giữ sequence thay đổi, epoch và version đầu vào cụm. Migration bổ sung cột/bảng và chuẩn hóa trạng thái legacy khi khởi tạo, giữ dữ liệu hiện có.
 
-Cùng report ID được gửi lại để bổ sung ảnh hoặc dữ liệu sau mất ACK được xử lý theo quy tắc gộp. Backend giữ ảnh đầu tiên, thời điểm nhận đầu và các trường đã có; số bằng không là dữ liệu hợp lệ, không xem như trường trống. \texttt{owner\_client\_id} tham gia kiểm tra quyền gộp. Quyền sở hữu dựa trên client ID giúp chống sửa chéo theo hợp đồng hiện tại, nhưng không tự thay thế xác thực danh tính người gửi.
+Cùng report ID được gửi lại để bổ sung ảnh hoặc dữ liệu sau mất ACK được xử lý theo quy tắc gộp. Backend giữ ảnh đầu tiên, thời điểm nhận đầu và các trường đã có; số bằng không là dữ liệu hợp lệ, không xem như trường trống. \texttt{owner\_client\_id} tham gia kiểm tra quyền gộp. Quyền sở hữu dựa trên client ID giúp chống sửa chéo theo quy tắc trao đổi dữ liệu hiện tại, nhưng không tự thay thế xác thực danh tính người gửi.
 
 \begin{figure}[htbp]
 \centering
