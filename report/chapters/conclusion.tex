@@ -1,6 +1,6 @@
 \addchap{KẾT LUẬN VÀ HƯỚNG PHÁT TRIỂN}\label{chap:conclusion}
 \addsec{Kết luận}
-Đề tài đã nghiên cứu và phát triển thành công nguyên mẫu hệ thống ứng dụng trí tuệ nhân tạo hỗ trợ tiếp nhận, xử lý và điều phối thông tin cứu hộ bão lũ trong điều kiện mạng gián đoạn. Hệ thống tích hợp toàn diện ba phân hệ: ứng dụng di động Flutter hỗ trợ suy luận AI tại biên, máy chủ FastAPI tích hợp giải thuật gom cụm sự cố và bàn điều phối Web GIS trực quan hóa bản đồ thời gian thực. Các cơ chế lưu trữ cục bộ, gửi dữ liệu thích ứng và khử trùng lặp giao dịch đã chứng minh khả năng đảm bảo tính toàn vẹn thông tin cứu nạn trong môi trường viễn thông khắc nghiệt.
+Đề tài đã xây dựng nguyên mẫu hệ thống hỗ trợ tiếp nhận, xử lý và điều phối thông tin cứu hộ bão lũ, kết nối ứng dụng Flutter có suy luận AI tại biên, máy chủ FastAPI thực hiện phân cụm và bàn điều phối Web GIS. Hai kịch bản kiểm thử trên điện thoại thật đạt các tiêu chí luồng xử lý và giao diện đã công bố, gồm nhận diện, gửi bài, phục hồi đồng bộ, xử lý thiếu GPS và cập nhật trạng thái. Riêng Case 8 run\_001 đạt về giữ bài và gửi lại sau khi có Wi-Fi; hiện tượng thoát app khi gửi lúc mất mạng vẫn được ghi nhận để xử lý. Kết quả hỗ trợ khả năng lưu và phục hồi truyền báo cáo trong các điều kiện đã thử, chưa đại diện cho mọi tình huống mạng viễn thông ngoài thực địa.
 
 Đối với mô hình thị giác máy tính, kiến trúc MobileNetV3-Large đạt độ chính xác Accuracy \NewImageAccuracy\% và macro-F1 \NewImageMacroFOne\% trên tập ảnh kiểm tra độc lập. Quá trình tối ưu hóa mô hình sang các định dạng thực thi biên (ONNX Runtime, ExecuTorch) duy trì sự đồng thuận dự đoán cao, đồng thời kỹ thuật lượng tử hóa giúp giảm đáng kể kích thước mô hình, đáp ứng yêu cầu triển khai hiệu quả trên thiết bị di động.
 
@@ -14,6 +14,29 @@ Các đóng góp chính của đề tài bao gồm:
 \item Đề xuất và kiểm chứng giải thuật gom cụm đồ thị không gian--thời gian và hàm ưu tiên cứu nạn đa tiêu chí;
 \item Thiết kế phương thức truyền nhận thích ứng và lưu trữ bền vững hỗ trợ mạng gián đoạn, góp phần nâng cao tính chủ động và hiệu quả tác chiến trong công tác cứu nạn thiên tai.
 \end{enumerate}
+
+\addsec{Đối chiếu mức độ hoàn thành mục tiêu}\label{sec:goal-completion}
+Bảng~\ref{tab:goal-status} tổng hợp các kết quả đã thực hiện theo các nhóm mục tiêu chính của đề tài.
+\begingroup
+\setcounter{table}{0}
+\renewcommand{\thetable}{KL.\arabic{table}}
+\renewcommand{\theHtable}{conclusion.\arabic{table}}
+\begin{longtable}{P{.28\textwidth}P{.61\textwidth}}
+\caption{Đối chiếu mục tiêu và kết quả thực hiện}\label{tab:goal-status}\\
+\toprule Nhóm mục tiêu & Kết quả thực hiện \\\midrule\endfirsthead
+\toprule Nhóm mục tiêu & Kết quả thực hiện \\\midrule\endhead
+Nhận diện ảnh tại biên & Xây dựng mô hình phân loại bốn mức; đánh giá FP32, lượng tử hóa và cắt tỉa; benchmark 32 cấu hình trên bốn mẫu điện thoại để lựa chọn model/runtime. \\
+Ước lượng khẩn cấp & Xây dựng mô hình hồi quy logistic từ các dấu hiệu có cấu trúc và kiểm tra trên 32 tổ hợp trạng thái tổng hợp. \\
+Phân cụm, xếp hạng và điều phối & Xây dựng lõi thuật toán và thực hiện các thực nghiệm đối chứng RQ1--RQ3, làm rõ hiệu quả và điều kiện áp dụng của các phương án. \\
+Ứng dụng di động & Triển khai nhận diện tại thiết bị, lưu cục bộ, gửi thích ứng và cập nhật trạng thái; hai run kiểm thử trên điện thoại thật đạt các tiêu chí đã công bố, kèm chú thích Case 8 run\_001 ở phần kết quả. \\
+Backend và dashboard & Xây dựng API tiếp nhận, lưu trữ, phân cụm, bản đồ, quản lý báo cáo và cập nhật trạng thái điều phối. \\
+Truyền dữ liệu khi mạng yếu & Đo 2.313 lượt truyền dưới mạng giả lập và kiểm thử gửi thích ứng, lưu hàng đợi, phục hồi kết nối trên điện thoại thật. \\
+\bottomrule
+\end{longtable}
+\endgroup
+
+\addsec{Hạn chế của đề tài}
+Phần xử lý văn bản tiếng Việt chưa được hoàn thiện thành mô hình phân tích tin nhắn cứu hộ tự do; thông tin khẩn cấp hiện được khai thác từ các lựa chọn có cấu trúc và quy tắc hỗ trợ. Hệ thống cũng chưa được đánh giá trong vận hành cứu hộ thực địa với người sử dụng và đơn vị chuyên môn. Luồng SMS đã có thành phần hỗ trợ, nhưng tỷ lệ giao tin và độ trễ qua mạng viễn thông/gateway thực tế chưa được kiểm chứng đầy đủ.
 
 \addsec{Hướng phát triển}
 Trên cơ sở các kết quả đạt được, các hướng phát triển tiếp theo của đề tài bao gồm:

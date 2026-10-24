@@ -75,10 +75,10 @@ Trên điện thoại cùng mạng, mở `http://192.168.137.1:18101/healthz`. P
 3. Bấm **Tải gói benchmark**. App mở dữ liệu từ assets, kiểm tra hash/model và ghép với lượt tương ứng trên máy tính. Không tải ảnh/gói E2E từ server; server chỉ cấp thông tin lượt và điều khiển bài thử.
 4. Bấm **Chạy / Tiếp tục** cho từng case. Chọn run còn lại rồi mở gói để thực nghiệm run đó; tiến độ hai run tách riêng.
 
-
 ### Mục “1. Kiểm thử luồng xử lý” trên app
 
 App gọi trực tiếp các hàm xử lý trên điện thoại: nhận diện bằng PTE, gửi bài và đồng bộ với backend thật. Bộ chạy không tự chọn ảnh hay bấm Gửi trên các màn hình. PASS nghĩa là các điều kiện kiểm tra của case đã đạt; không chứng minh toàn bộ giao diện hoạt động đúng. Với case có ảnh, kết quả nhận diện được lưu nhưng PASS không yêu cầu nhãn dự đoán trùng nhãn chuẩn; độ chính xác model được đánh giá riêng.
+
 
 | Case             | Thao tác                                                                                                                                              |
 | ------------------ | -------------------------------------------------------------------------------------------------------------------------------------------------------- |

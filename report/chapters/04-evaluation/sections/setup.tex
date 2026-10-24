@@ -2,20 +2,22 @@
 \subsection{Phạm vi các phép đo}
 Chương này tổng hợp kết quả đã lưu trong repo. Các bảng được xuất từ JSON/CSV, giữ số mẫu, split, cấu hình và đơn vị thống kê. Bộ xuất đối chiếu summary với CSV dự đoán; các sai khác, nếu có, được công bố ở phần kết quả. Mỗi nhóm benchmark mang nhãn seed riêng. Không có phép đo mới về điện thoại, mạng viễn thông hoặc người dùng trong lần biên soạn. Kiểm tra bổ sung của báo cáo là kiểm tra tệp ảnh/hash/split và tính nhất quán bảng số liệu.
 
-\begin{longtable}{P{.18\textwidth}P{.31\textwidth}P{.40\textwidth}}
-\caption{Thiết lập và nguồn kết quả theo nhóm thực nghiệm}\label{tab:experiment-map}\\
-\toprule Nhóm & Dữ liệu và đơn vị & Nguồn kết quả chính \\\midrule\endfirsthead
-\toprule Nhóm & Dữ liệu và đơn vị & Nguồn kết quả chính \\\midrule\endhead
-Ảnh FP32 & \ImageTest{} ảnh test, model seed \BenchmarkSeed{} & \RuntimeBenchmarkSource{} \\
-PTQ/QAT & Cùng \ImageTest{} ảnh test, seed \QuantizationSeed{} & \QuantizationBenchmarkSource{} \\
-Cắt tỉa & Cùng \ImageTest{} ảnh test, seed \PruningSeed{} & \PruningBenchmarkSource{} \\
-Benchmark app & 32 cấu hình; 256 ảnh/runtime, seed 159/1024 & JSON có provenance của bốn điện thoại; xem Mục~\ref{sec:phone-benchmark-setup} \\
-Khẩn cấp LR & 32 profile trạng thái; sanity giữ profile dương & JSON mô hình và các bảng kiểm tra \\
-RQ1 cơ sở & 40 run test Generator 3.0 & Thư mục kết quả đối chứng cơ sở \\
-RQ1 stress & 40 run, 7 điều kiện, 5 phương pháp & Thư mục kết quả tổng hợp stress \\
-RQ2 & 40 seed test Candidate 4.1 & Thư mục kết quả RQ2 \\
-RQ3 & 40 seed; trung bình 3 điều kiện trong seed & CSV so sánh ghép cặp RQ3 \\
-Phần mềm & Ca test lịch sử ngày 27/09/2026 & Tài liệu đối chiếu nghiệm thu \\
+\begin{longtable}{P{.28\textwidth}P{.30\textwidth}P{.31\textwidth}}
+\caption{Các nhóm thực nghiệm, dữ liệu và chỉ tiêu đánh giá}\label{tab:experiment-map}\\
+\toprule Nhóm thực nghiệm & Dữ liệu và đơn vị đánh giá & Chỉ tiêu hoặc kết quả kiểm tra \\\midrule\endfirsthead
+\toprule Nhóm thực nghiệm & Dữ liệu và đơn vị đánh giá & Chỉ tiêu hoặc kết quả kiểm tra \\\midrule\endhead
+Phân loại ảnh và đối chiếu runtime FP32 & \ImageTest{} ảnh test, seed \BenchmarkSeed{} & Accuracy, macro-F1, độ trễ và đồng thuận dự đoán \\
+Lượng tử hóa sau huấn luyện và khi tinh chỉnh (PTQ/QAT) & Cùng \ImageTest{} ảnh test, seed \QuantizationSeed{} & Chất lượng phân loại, dung lượng và độ trễ \\
+Cắt tỉa có cấu trúc & Cùng \ImageTest{} ảnh test, seed \PruningSeed{} & Chất lượng phân loại, số tham số, dung lượng và độ trễ \\
+Nhận diện ảnh trên điện thoại thật & 32 cấu hình; 256 ảnh/runtime; bốn mẫu điện thoại & Accuracy, macro-F1, lỗi mức ngập, thời gian xử lý ảnh \\
+Luồng xử lý và giao diện ứng dụng di động & Hai run, chín case/run trên một điện thoại & PASS/FAIL/NOT\_RUN; chế độ gửi và tính toàn vẹn bài nhận \\
+Truyền dữ liệu dưới mạng yếu giả lập & 257 ảnh, ba cấu hình mạng, ba chế độ gửi & Tỷ lệ thành công, median/P95 độ trễ và số byte \\
+Ước lượng khẩn cấp bằng hồi quy logistic & 32 tổ hợp trạng thái tổng hợp & Độ khớp nhãn thay thế và kiểm tra tính đơn điệu \\
+Phân cụm cơ sở (RQ1) & 40 lần chạy test dữ liệu tổng hợp & Chất lượng phân hoạch và đối chiếu phương pháp \\
+Phân cụm dưới nhiễu và bản sao (RQ1) & 40 lần chạy, bảy điều kiện, năm phương pháp & Chất lượng phân cụm và độ biến động dưới nhiễu \\
+Xếp hạng ưu tiên cứu hộ (RQ2) & 40 seed test dữ liệu tổng hợp & Mức phù hợp với lợi ích mô phỏng, độ ổn định và độ nhạy \\
+Hệ quả điều phối (RQ3) & 40 seed; ba điều kiện/seed & Harm, trễ hạn và so sánh ghép cặp chính sách \\
+E2E bổ sung trên web giả lập & Hai run, một ảnh/run, năm kịch bản/run & PASS/FAIL/CHƯA CÓ; hàng đợi, truyền ảnh và trạng thái \\
 \bottomrule
 \end{longtable}
 
@@ -29,13 +31,13 @@ Latency chỉ tính lời gọi suy luận, không bao gồm đọc ảnh, tiề
 Benchmark trên điện thoại đo lời gọi \texttt{classifyImage}, gồm giải mã, tiền xử lý và suy luận, nên có phạm vi rộng hơn predict CPU. Không dùng chênh lệch thời gian giữa hai phạm vi này để tính speedup. Thiết lập được mô tả ở Mục~\ref{sec:phone-benchmark-setup}; kết quả và lựa chọn model/runtime ở Mục~\ref{sec:phone-benchmark-results}.
 
 \subsection{Thiết lập đánh giá mô hình nhận diện trên điện thoại}\label{sec:phone-benchmark-setup}
-Phép đo trên ứng dụng Android chỉ đánh giá mô hình nhận diện mức ngập: chất lượng phân loại và thời gian xử lý ảnh của ONNX/ExecuTorch trên từng điện thoại. Đây không phải thực nghiệm E2E Android; không dùng benchmark này để đánh giá gửi SOS, GPS, đồng bộ nền hoặc SMS. Bộ JSON có provenance này là nguồn đánh giá điện thoại trong phần kết quả chính; nguồn benchmark ứng dụng lịch sử được giữ riêng trong phụ lục để truy vết.
+Phép đo trên ứng dụng Android chỉ đánh giá mô hình nhận diện mức ngập: chất lượng phân loại và thời gian xử lý ảnh của ONNX/ExecuTorch trên từng điện thoại. Đây không phải thực nghiệm E2E Android; không dùng benchmark này để đánh giá gửi SOS, GPS, đồng bộ nền hoặc SMS. Nguồn kết quả chính là các phiên benchmark đã lưu trên bốn mẫu điện thoại, có thông tin thiết bị và hash model để đối chiếu.
 
 \begin{table}[htbp]\centering
-\caption{Thiết bị trong bộ benchmark nhận diện có provenance}
+\caption{Các mẫu điện thoại dùng đánh giá mô hình nhận diện}
 \label{tab:phone-benchmark-devices}
 \begin{tabular}{P{.27\textwidth}P{.24\textwidth}P{.18\textwidth}P{.18\textwidth}}
-\toprule Tên theo thư mục đo & Mã máy ghi trong JSON & Android / SDK & ABI được hỗ trợ \\
+\toprule Mẫu điện thoại & Mã thiết bị & Android / SDK & ABI được hỗ trợ \\
 \midrule
 realme 15 & RMX5106 & 16 / 36 & ARM64 \\
 Redmi Note 11 & 2201116TG & 13 / 33 & ARM64, ARM32 \\
@@ -44,25 +46,41 @@ Samsung S10e & SM-G970U & 12 / 31 & ARM64, ARM32 \\
 \bottomrule
 \end{tabular}
 \end{table}
-Tên máy dễ đọc lấy theo thư mục lưu kết quả; mã máy, Android và SDK lấy trực tiếp từ metadata của từng phiên. ARM64 tương ứng \texttt{arm64-v8a}; ARM32 ở ba máy tương ứng các mục \texttt{armeabi-v7a} và \texttt{armeabi}. Đây là danh sách ABI thiết bị hỗ trợ, không phải bằng chứng tất cả ABI đã được chạy. App ghi package \texttt{com.example.app}, phiên bản 0.1.0, versionCode 2001. Hồ sơ chưa ghi SoC, RAM, nhiệt độ, mức pin, hash APK hay commit build; không tự điền các thông số đó theo tên thương mại.
+Thông tin thiết bị và phiên bản Android được ghi nhận trong từng phiên đo. ARM64 tương ứng \texttt{arm64-v8a}; ARM32 ở ba máy tương ứng các mục \texttt{armeabi-v7a} và \texttt{armeabi}. Đây là danh sách ABI thiết bị hỗ trợ, không phải bằng chứng tất cả ABI đã được chạy. App ghi phiên bản 0.1.0, versionCode 2001. Hồ sơ chưa ghi SoC, RAM, nhiệt độ, mức pin, hash APK hay commit build.
 
 Mô hình được đóng gói trong app dưới tên \texttt{model.onnx} và \texttt{model.pte}. Có bốn bộ MobileNetV3-Large: seed 159 baseline, seed 159 cắt tỉa có cấu trúc, seed 1024 baseline và seed 1024 cắt tỉa có cấu trúc. Tên thư mục seed 159 cắt tỉa được lưu là \texttt{seed159-prunning}; khi xuất CSV chỉ chuẩn hóa nhãn biến thể thành \texttt{pruning}, giữ nguyên đường dẫn nguồn. Mỗi JSON ghi version, hash checkpoint, ONNX/PTE và hash artifact thực chạy; việc nhận diện bộ model dựa trên cả thư mục và metadata, không chỉ tên asset chung trong APK.
 
-Dữ liệu là 256 ảnh test của Dataset\_Flood, lấy từ \RepoPath{products/fe/model/Edge Ai/split_train_val_test_mobilenetv3_large.csv}; không dùng 257 ảnh validation của phép đo mạng yếu. Nhãn gồm low, medium, high và non\_flood. Hash SHA-256 của split được đối chiếu với provenance; từng sample ID được nối với SHA-1 rút gọn của đường dẫn tương đối để kiểm tra đủ ảnh và đúng nhãn. Metadata model ghi đầu vào 256, letterbox RGB với màu đệm $(124,116,104)$ và thứ tự bốn lớp trên.
+Dữ liệu là 256 ảnh test của Dataset\_Flood theo bộ chia tập đã lưu; tách biệt với 257 ảnh validation của phép đo mạng yếu. Nhãn gồm low, medium, high và non\_flood. Hash SHA-256 của split được đối chiếu với provenance; từng sample ID được nối với SHA-1 rút gọn của đường dẫn tương đối để kiểm tra đủ ảnh và đúng nhãn. Metadata model ghi đầu vào 256, letterbox RGB với màu đệm $(124,116,104)$ và thứ tự bốn lớp trên.
 
 Mỗi tổ hợp máy--model--runtime thực hiện năm lượt warmup rồi đánh giá từng ảnh test. Đồng hồ bao quanh lời gọi \texttt{classifyImage}, gồm giải mã, tiền xử lý và suy luận, không gồm đọc ảnh từ package. Chỉ số gồm Accuracy, macro-F1, precision/recall/F1 từng lớp, ma trận nhầm lẫn, mean, P50 và P95 thời gian; P50/P95 dùng nearest-rank theo app. Đây là một phiên đã lưu cho mỗi tổ hợp, chưa phải đo lặp nhiều phiên để suy luận độ ổn định hiệu năng.
 
-Nguồn ở \RepoPath{products/fe/reports/seed159/mobile/} và \RepoPath{products/fe/reports/seed1024/mobile/}. Các phiên thuộc ngày 20--21/10/2026 theo giờ Việt Nam; CSV giữ nguyên timestamp UTC từ JSON để truy vết. Hiện có đủ 32 trên 32 tổ hợp dự kiến ($4$ máy $\times 2$ seed $\times 2$ biến thể $\times 2$ runtime), bao gồm ONNX của seed 1024 cắt tỉa trên Redmi Note 13. Mỗi tổ hợp có đủ 256 dự đoán test; toàn bộ JSON đã được kiểm tra tính nhất quán trước khi xuất CSV. CSV đánh giá được xuất riêng tại \RepoPath{report/generated/phone-benchmarks/}; kết quả và kết luận lựa chọn trên các mẫu máy được trình bày ở Mục~\ref{sec:phone-benchmark-results}.
+Kết quả được lưu riêng theo seed và thiết bị. Các phiên thuộc ngày 20--21/10/2026 theo giờ Việt Nam; CSV giữ nguyên timestamp UTC từ JSON để truy vết. Hiện có đủ 32 trên 32 tổ hợp dự kiến ($4$ máy $\times 2$ seed $\times 2$ biến thể $\times 2$ runtime), bao gồm ONNX của seed 1024 cắt tỉa trên Redmi Note 13. Mỗi tổ hợp có đủ 256 dự đoán test; toàn bộ JSON đã được kiểm tra tính nhất quán trước khi xuất CSV. Bảng tổng hợp được đối chiếu với kết quả từng phiên; kết quả và kết luận lựa chọn trên các mẫu máy được trình bày ở Mục~\ref{sec:phone-benchmark-results}.
 
-\subsection{Thiết lập E2E trên giao diện web giả lập}\label{sec:web-e2e-setup}
-Thực nghiệm dùng Playwright/Chromium để thao tác giao diện Flutter web và dashboard, đối chiếu với API và dữ liệu backend. Docker Compose tách ba dịch vụ backend, dashboard và web app, với cơ sở dữ liệu riêng cho kịch bản. Runner là \RepoPath{thuc_nghiem_nq/experiment_e2e/e2e_system.py}, cấu hình tại \RepoPath{thuc_nghiem_nq/experiment_e2e/docker-compose.yml}. Đây là kiểm thử luồng phần mềm trong môi trường web được điều khiển tự động, không chạy mô hình nhận diện native ONNX/PTE như benchmark điện thoại và không đo Accuracy/F1 của mô hình.
+\subsection{Thiết lập kiểm thử tích hợp đầu cuối trên Android thật}\label{sec:mobile-system-setup}
+Kiểm thử được thực hiện trên \textbf{Samsung S10e, mã SM-G970U, Android 12 (SDK 31)}, theo metadata của hai lượt ngày 24/10/2026. Ứng dụng Android bản quản trị có phiên bản 0.1.0, versionCode 1. Model chạy native ExecuTorch/PTE là MobileNetV3-Large seed 1024 cắt tỉa; hash PTE thực chạy khớp manifest trong cả hai lượt. Đây là kiểm tra chức năng trên một thiết bị thật, tách khỏi benchmark chất lượng và tốc độ model trên bốn điện thoại ở Mục~\ref{sec:phone-benchmark-setup}.
 
-Dữ liệu đầu vào gồm \texttt{algorithm\_input.json} của hai kịch bản gold: run\_001 có 316 báo cáo, run\_002 có 334 báo cáo. Danh sách chọn ảnh là \RepoPath{thuc_nghiem_nq/split_val_mobilenetv3_large.csv} gồm 257 ảnh validation của Dataset\_Flood; mỗi lượt E2E thực tế chỉ dùng ảnh \texttt{high/floods\_cambodia\_avid\_w.jpg}. Do đó, 257 là số ảnh trong danh sách đầu vào, không phải số ảnh đã đánh giá qua giao diện; hai kịch bản cũng không phải 80 lần lặp độc lập.
+Điện thoại kết nối Wi-Fi hotspot của máy tính, truy cập backend qua công cụ điều phối và proxy cổng 18101. Backend và dashboard dùng Docker \texttt{flood-rescue} hiện có, chung cơ sở dữ liệu; dữ liệu thử nghiệm được phân biệt theo tên lượt trong cơ sở dữ liệu dùng chung. Công cụ điều phối chạy trên máy tính; app đóng gói hai bộ dữ liệu \texttt{run\_001} và \texttt{run\_002}. Manifest truy vết hai kịch bản gold tương ứng 316 và 334 báo cáo, nhưng đây không phải số bài được điện thoại gửi trong phép thử. Mỗi bộ chỉ có một ảnh minh họa: một ảnh có nhãn ngập cao cho run\_001 và một ảnh có nhãn ngập vừa cho run\_002; các case có ảnh dùng lại ảnh của run đó. Bài thử được phân biệt bằng tên benchmark và ID, không đánh giá lại chất lượng phân cụm của toàn bộ DB dùng chung.
 
-Hai lượt lưu ngày 19/10/2026 là \texttt{run\_001\_\_e2e-20261019-162957-186810} và \texttt{run\_002\_\_e2e-20261019-170303-022823}, trong \RepoPath{thuc_nghiem_nq/experiment_e2e/results/}. Mỗi lượt có năm stage: dashboard, app, adaptive\_300, adaptive\_20 và no\_gps. Các ca kiểm tra bao gồm thao tác điều phối, gửi/đồng bộ báo cáo, chọn chế độ gửi ở mức 300/20 kbit/s và xử lý thiếu GPS. Runner ghi từng tiêu chí vào \texttt{checks.csv}, tổng hợp trong \texttt{summary.json} và lưu checkpoint để tiếp tục khi bị gián đoạn. Đánh giá dựa trên trạng thái complete, đủ năm stage và số PASS/FAIL/CHƯA CÓ; không tính CHƯA CÓ thành PASS. Các mức throttling này kiểm tra hành vi chọn chế độ, tách khỏi phép đo định lượng mạng yếu dưới đây.
+Phạm vi kiểm thử được chia thành ba nhóm:
+\begin{itemize}
+\item \textbf{Kiểm thử luồng xử lý (Case 1--6):} app gọi trực tiếp hàm nhận diện, gửi bài, lưu hàng đợi và nhận trạng thái; không tự bấm các màn hình Android. Case 1 dùng mạng bình thường; Case 2 chặn đường dữ liệu bằng HTTP 503 rồi phục hồi; Case 3--4 giới hạn 300/20 kbit/s, RTT 150 ms; Case 5 yêu cầu người chạy từ chối quyền Vị trí trước khi gửi; Case 6 đổi trạng thái bài ở backend rồi kiểm tra app nhận lại.
+\item \textbf{Kiểm thử thao tác trên giao diện thật (Case 7--8):} người chạy chọn ảnh, nhập nội dung, gửi và xem Lịch sử; sau đó thử tắt Wi-Fi/dữ liệu di động, giữ bài trong hàng đợi và bật mạng lại để kiểm tra phục hồi. Kết quả được người chạy ghi nhận; nút xác nhận không tự điều khiển giao diện.
+\item \textbf{Kiểm thử hiển thị dashboard (Case 9):} Playwright trên máy tính đối chiếu các ID bài thuộc benchmark với giao diện dashboard. Phần này kiểm tra hiển thị bài nhận từ Android, không tự động hóa toàn bộ giao diện điện thoại.
+\end{itemize}
+
+Chỉ tiêu chính là PASS/FAIL/NOT\_RUN theo từng case. Các case gửi bài đối chiếu ID và metadata với backend; ảnh gốc được kiểm tra hash, ảnh nén được kiểm tra nội dung ảnh giải mã, chế độ chỉ văn bản yêu cầu không có ảnh tải lên. Case phục hồi bằng HTTP 503 yêu cầu nhận đúng một bài và hết hàng đợi; case thiếu GPS yêu cầu tọa độ rỗng và bài thuộc hàng xem xét. PASS của luồng xử lý không yêu cầu nhãn model trùng nhãn chuẩn, nên không dùng số PASS để suy ra Accuracy/F1. Băng thông probe, chế độ gửi và số byte ảnh được ghi để giải thích hành vi; thời gian một case gồm cả xử lý/chờ/đối chiếu, không đồng nhất với độ trễ mạng. HTTP 503 ở Case 2 cũng không thay thế mất kết nối vật lý ở Case 8.
+
+Hai lượt chính được lưu ngày 24/10/2026, với kết quả từng case, thông tin thiết bị, model, lịch sử thử lại và quan sát backend. Lỗi thao tác được người chạy ghi nhận riêng. Thông tin truy vết tệp nguồn và hash được lưu trong hồ sơ tái lập, thay vì dùng tên thư mục làm tên thực nghiệm. Các lượt ngày 23/10 được giữ làm lịch sử, không cộng thành lần lặp độc lập của hai lượt chính.
+
+\subsection{Thiết lập kiểm thử E2E bổ sung trên web giả lập}\label{sec:web-e2e-setup}
+Runner Playwright trong \RepoPath{thuc_nghiem_nq/experiment_e2e/e2e_system.py} thao tác ứng dụng Flutter web và dashboard, đối chiếu dữ liệu với backend. Docker Compose tách ba dịch vụ, mỗi lượt có cơ sở dữ liệu và volume riêng. Hai lượt ngày 24/10/2026 dùng Flutter 3.47.5, Dart 3.13.4, Python 3.11.0 và Playwright 1.63.0; bản web được build mới rồi đóng gói bằng target prebuilt. Đây là kiểm thử web trên máy tính, không chạy AI on-device hoặc gửi SMS thật.
+
+Run\_001 nạp 316 báo cáo seed và dùng ảnh \texttt{high/flood\_4800.jpg}; run\_002 nạp 334 báo cáo seed và dùng ảnh \texttt{medium/flood\_6286.jpg}. Hai ảnh thuộc tập validation, được khóa nhãn và SHA-256 trong \RepoPath{thuc_nghiem_nq/experiment_e2e/run_images.json}; các báo cáo seed đến từ hai gold run tương ứng và là nguồn dữ liệu riêng với ảnh upload. Số báo cáo seed không phải số bài được ứng dụng tạo trong phép thử.
+
+Năm kịch bản gồm dashboard, ứng dụng online/offline, gửi ở 300 kbit/s, gửi ở 20 kbit/s và từ chối GPS. Trước ca SOS offline, runner chờ hết cửa sổ chống gửi trùng 30 giây để kiểm tra một yêu cầu mới. Mỗi run lưu 46 tiêu chí PASS/FAIL/CHƯA CÓ, manifest, checkpoint, snapshot đầu vào và ảnh minh chứng; thiếu thông báo giải thích trạng thái AI được ghi CHƯA CÓ. Kết quả từng lượt chỉ được kết luận hoàn tất khi đủ năm kịch bản và không có tiêu chí FAIL. Các ID lượt và đường dẫn bằng chứng được tổng hợp tại \RepoPath{thuc_nghiem_nq/experiment_e2e/RESULTS.md}.
 
 \subsection{Thiết lập phép đo truyền tải dưới mạng yếu giả lập}\label{sec:weak-network-setup}
-Phép đo dùng proxy giới hạn băng thông/RTT và backend riêng trên máy tính, không dùng mạng viễn thông thực và không đo trên điện thoại. Runner là \RepoPath{thuc_nghiem_nq/experiment_weak_network/weak_network.py}; lượt được chọn có ID \texttt{20261005-102040}, với CSV, bản tổng hợp, checkpoint và manifest/log cùng ID trong thư mục thực nghiệm. Manifest ghi Python 3.11.0 trên Windows và backend \texttt{127.0.0.1:8001}.
+Phép đo dùng proxy giới hạn băng thông/RTT và backend riêng trên máy tính, không dùng mạng viễn thông thực và không đo trên điện thoại. Công cụ đo truyền tải chạy trên máy tính; lượt được chọn có ID \texttt{20261005-102040}, với CSV, bản tổng hợp, checkpoint và manifest/log cùng ID trong thư mục thực nghiệm. Manifest ghi Python 3.11.0 trên Windows và backend \texttt{127.0.0.1:8001}.
 
 \begin{table}[htbp]\centering
 \caption{Ba cấu hình proxy của lượt đo mạng yếu}
@@ -76,7 +94,7 @@ Phép đo dùng proxy giới hạn băng thông/RTT và backend riêng trên má
 \bottomrule
 \end{tabular}
 \end{table}
-Dữ liệu gồm toàn bộ 257 ảnh validation trong \RepoPath{thuc_nghiem_nq/split_val_mobilenetv3_large.csv}, đọc từ Dataset\_Flood. Mỗi ảnh được thử tuần tự với ba cấu hình mạng và ba chế độ: chỉ metadata, ảnh nén và ảnh gốc; mỗi tổ hợp đo một lần, tổng cộng $257\times3\times3=2.313$ lượt. Metadata là payload cố định; nhãn ảnh chỉ dùng truy vết. Runner không chạy MobileNetV3 hay Flutter và không tự quyết định chế độ gửi bằng confidence của mô hình.
+Dữ liệu gồm toàn bộ 257 ảnh thuộc tập validation của Dataset\_Flood theo danh sách chia tập đã lưu. Mỗi ảnh được thử tuần tự với ba cấu hình mạng và ba chế độ: chỉ metadata, ảnh nén và ảnh gốc; mỗi tổ hợp đo một lần, tổng cộng $257\times3\times3=2.313$ lượt. Metadata là payload cố định; nhãn ảnh chỉ dùng truy vết. Runner không chạy MobileNetV3 hay Flutter và không tự quyết định chế độ gửi bằng confidence của mô hình.
 
 Ảnh gốc giữ nguyên byte. Ảnh nén dùng JPEG quality 60, giảm cạnh ngắn về 1.024 pixel khi đủ lớn và không phóng to ảnh nhỏ. Timeout metadata là 30 giây, upload ảnh là 60 giây. Chỉ số gồm tỷ lệ thành công trên mọi lượt, median/P95 của lượt thành công, số byte truyền và phân loại lỗi. Byte proxy có header HTTP nhưng không bao gồm toàn bộ overhead TCP/IP. Phải đọc độ trễ cùng tỷ lệ thành công; không loại thất bại hay lỗi định dạng để làm đẹp kết quả. Các trường tải hệ thống không thu được trên Windows được để trống, không gán bằng 0.
 

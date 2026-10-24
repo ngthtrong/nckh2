@@ -85,7 +85,7 @@ App chỉ chấp nhận cập nhật đi tiến theo quy tắc domain, giúp ph�
 
 \begin{figure}[htbp]
 \centering
-\includegraphics[width=.95\textwidth]{flow_08_dispatch_lifecycle.pdf}
+\includegraphics[width=.95\textwidth,height=.78\textheight,keepaspectratio]{flow_08_dispatch_lifecycle.pdf}
 \caption{Lưu đồ vòng đời nhiệm vụ cứu hộ từ tiếp nhận, điều phối đến đóng ca}
 \label{fig:flow-dispatch-lifecycle}
 \end{figure}
@@ -97,7 +97,7 @@ Phía máy chủ cung cấp endpoint webhook tiếp nhận từ SMS gateway nh�
 
 \begin{figure}[htbp]
 \centering
-\includegraphics[width=.95\textwidth]{flow_07_manual_intake_location.pdf}
+\includegraphics[width=.95\textwidth,height=.78\textheight,keepaspectratio]{flow_07_manual_intake_location.pdf}
 \caption{Quy trình tiếp nhận thông tin cứu hộ qua tổng đài và định vị thủ công}
 \label{fig:flow-manual-intake}
 \end{figure}
@@ -107,4 +107,4 @@ Backend dùng tài khoản admin/operator, mật khẩu PBKDF2 và phiên có to
 
 Hệ thống ghi nhận nhật ký thao tác (\emph{audit trail}) gắn liền với danh tính điều phối viên (actor) phục vụ công tác giám sát, phân quyền và hậu kiểm. Đối với các yêu cầu cứu nạn gửi từ cộng đồng, quy trình nghiệp vụ yêu cầu điều phối viên xác minh thông tin trước khi ra quyết định xuất quân, hạn chế nguy cơ bị phân tán nguồn lực bởi các thông tin thiếu chính xác.
 
-Kết quả kiểm thử chức năng, các kịch bản tích hợp và ma trận kiểm chứng được trình bày tại Mục~\ref{sec:system-testing}.
+Kết quả kiểm thử tích hợp và truyền tải của hệ thống được trình bày tại Mục~\ref{sec:system-testing}.
