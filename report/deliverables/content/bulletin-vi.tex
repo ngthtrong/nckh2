@@ -1,7 +1,5 @@
-\begin{officialform}
-\FormLogo
-\FormAgencyLogoVI
-\FormTitle{BẢN TIN ĐỀ TÀI\\NGHIÊN CỨU KHOA HỌC CỦA SINH VIÊN}
+\begin{officialform}[BulletinVI]
+\FormHeading
 \FormLine{Mã số đề tài: \ProjectCode}
 \FormLine{Tên đề tài: \ProjectTitle}
 \FormLine{Thời gian thực hiện: \ProjectPeriod}
@@ -10,17 +8,17 @@
 \FormLine{Thành viên tham gia nghiên cứu: Nguyễn Thanh Trọng, Cao Tường Hưng, Nguyễn Như Quỳnh, Ngô Hưng Thịnh.}
 \FormLine{Cán bộ hướng dẫn: \SupervisorName\ (\SupervisorEmail)}
 
-\FormLine{Tính cấp thiết: Tin cứu hộ trùng lặp, thiếu vị trí và đến muộn khi mạng gián đoạn gây khó khăn cho tiếp nhận và điều phối.}
+\FormLine{Tính cấp thiết: Trong thiên tai bão lũ, thông tin cầu cứu thường phân tán, trùng lặp và thiếu dữ liệu cần thiết, gây khó khăn cho việc xác minh và điều phối. Hạ tầng viễn thông có thể quá tải hoặc gián đoạn, hạn chế khả năng gửi hình ảnh và tiếp nhận yêu cầu kịp thời. Vì vậy, cần nghiên cứu hệ thống phân tích thông tin ngay trên thiết bị, truyền dữ liệu tối giản và tổng hợp các báo cáo liên quan để hỗ trợ lực lượng cứu hộ nắm bắt tình hình.}
 
-\FormLine{Mục tiêu: Xây dựng nguyên mẫu phân tích ảnh tại biên, truyền thông tin gọn và gom nhóm sự kiện cứu hộ trên bản đồ.}
+\FormLine{Mục tiêu: Xây dựng hệ thống hỗ trợ tiếp nhận, phân tích và tổng hợp thông tin cứu hộ bão lũ trong điều kiện mạng không ổn định. Kết hợp xử lý AI trên thiết bị di động, truyền dữ liệu tối giản và phân cụm sự kiện nhằm hỗ trợ xác minh, xác định mức độ ưu tiên và trực quan hóa yêu cầu cứu hộ trên bản đồ.}
 
-\FormLine{Phương pháp nghiên cứu: Huấn luyện MobileNetV3-Large; đánh giá từng thành phần ảnh, phân cụm, xếp hạng và điều phối bằng artifact và dữ liệu mô phỏng riêng.}
+\FormLine{Phương pháp nghiên cứu: Kết hợp nghiên cứu tài liệu, xây dựng và chuẩn hóa dữ liệu, huấn luyện và tối ưu mô hình AI cho thiết bị di động. Thiết kế ứng dụng, máy chủ và giao diện quản lý; thực nghiệm đánh giá chất lượng nhận diện, phân cụm, xếp hạng ưu tiên, tốc độ xử lý và khả năng truyền dữ liệu trong điều kiện mạng yếu giả lập.}
 
 \FormLine{Nội dung nghiên cứu: AI ảnh, khẩn cấp có cấu trúc, outbox/gửi lại, đồng bộ và dashboard; kiểm tra chặn cạnh và bất biến bản sao có điều kiện.}
 
 \FormLine{Kết quả đạt được: Mô hình gốc seed 1024 đạt Accuracy \NewImageAccuracy\%, macro-F1 \NewImageMacroFOne\% trên 256 ảnh kiểm thử trong phép đo CPU, có 3 lỗi nặng. Chuyển đổi định dạng, lượng tử hóa và cắt tỉa được đánh giá riêng; lượng tử hóa giảm dung lượng nhưng cũng giảm độ chính xác. Đã đánh giá 32 cấu hình trên bốn điện thoại và xây dựng ứng dụng Flutter, backend FastAPI/SQLite cùng dashboard.}
 
-\FormLine{Ý nghĩa: Hỗ trợ đào tạo và nghiên cứu quy trình tiếp nhận--điều phối; RQ1--RQ3 chưa chứng minh ưu thế chung hay lợi ích cứu hộ thực địa.}
+\FormLine{Ý nghĩa: Cung cấp cơ sở thực nghiệm cho việc kết hợp Edge AI, truyền dữ liệu tối giản và phân cụm thông tin trong hệ thống hỗ trợ cứu hộ bão lũ. Sản phẩm phục vụ học tập, nghiên cứu và diễn tập quy trình tiếp nhận, tổng hợp thông tin cứu hộ.}
 
-\FormLine{Khả năng ứng dụng: Nguyên mẫu dùng trình diễn. Cần mô hình văn bản, tích hợp khẩn cấp, provenance/đo lặp Android, mạng/SMS thật và xác nhận chuyên gia trước triển khai nghiệp vụ.}
+\FormLine{Khả năng ứng dụng: Sử dụng trong giảng dạy, nghiên cứu và trình diễn quy trình quản lý thông tin cứu hộ. Hệ thống là cơ sở để tiếp tục hoàn thiện, phối hợp với đơn vị chuyên môn thử nghiệm và đánh giá trước khi áp dụng thực tế.}
 \end{officialform}

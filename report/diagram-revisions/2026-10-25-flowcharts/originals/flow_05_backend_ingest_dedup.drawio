@@ -1,0 +1,135 @@
+<mxfile host="Electron" agent="Antigravity">
+  <diagram id="diag-1" name="Luu-do-Tiep-nhan-va-Chong-trung-Backend">
+    <mxGraphModel dx="2348" dy="1304" grid="0" gridSize="10" guides="1" tooltips="1" connect="1" arrows="1" fold="1" page="1" pageScale="1" pageWidth="900" pageHeight="1080" math="0" shadow="0">
+      <root>
+        <mxCell id="0" />
+        <mxCell id="1" parent="0" />
+        <mxCell id="bd_start" parent="1" style="ellipse;whiteSpace=wrap;html=1;fontStyle=1;fontFamily=Helvetica;fontSize=15;" value="&lt;div style=&quot;line-height:1;&quot;&gt;Nhận Request tới Backend&#xa;(Sync batch / Multipart / SMS)&lt;/div&gt;" vertex="1">
+          <mxGeometry height="45" width="223" x="308.5" y="17" as="geometry" />
+        </mxCell>
+        <mxCell id="bd_header" parent="1" style="rhombus;whiteSpace=wrap;html=1;fontSize=15;fontFamily=Helvetica;" value="&lt;div style=&quot;line-height:1;&quot;&gt;Kiểm tra header bắt buộc:&#xa;X-Message-Contract-Version: 1&lt;/div&gt;" vertex="1">
+          <mxGeometry height="79" width="190" x="325" y="78" as="geometry" />
+        </mxCell>
+        <mxCell id="bd_bounds" parent="1" style="rhombus;whiteSpace=wrap;html=1;fontSize=15;fontFamily=Helvetica;" value="&lt;div style=&quot;line-height:1;&quot;&gt;Kiểm tra giới hạn kích thước:&#xa;- Batch &amp;lt;= 50 messages&#xa;- Tổng request &amp;lt;= 256 KiB&#xa;- Meta &amp;lt;= 64 KiB, Ảnh &amp;lt;= 15 MB&lt;/div&gt;" vertex="1">
+          <mxGeometry height="110" width="290" x="275" y="194" as="geometry" />
+        </mxCell>
+        <mxCell id="bd_jcs" parent="1" style="rounded=1;whiteSpace=wrap;html=1;fontSize=15;fontFamily=Helvetica;" value="&lt;div style=&quot;line-height:1;&quot;&gt;Chuẩn tắc hóa JSON theo RFC 8785&#xa;&amp;amp; Tính mã băm SHA-256 payload&lt;/div&gt;" vertex="1">
+          <mxGeometry height="50" width="240" x="298" y="341" as="geometry" />
+        </mxCell>
+        <mxCell id="bd_lookup" parent="1" style="rounded=1;whiteSpace=wrap;html=1;fontSize=15;fontFamily=Helvetica;" value="&lt;div style=&quot;line-height:1;&quot;&gt;Tra cứu bảng messages_dedup&#xa;theo message_id &amp;amp; client_id&lt;/div&gt;" vertex="1">
+          <mxGeometry height="50" width="190" x="323" y="417" as="geometry" />
+        </mxCell>
+        <mxCell id="bd_dedup_check" parent="1" style="rhombus;whiteSpace=wrap;html=1;fontSize=15;fontFamily=Helvetica;" value="&lt;div style=&quot;line-height:1;&quot;&gt;Kết quả đối chiếu&#xa;chống trùng lặp?&lt;/div&gt;" vertex="1">
+          <mxGeometry height="70" width="170" x="333" y="490" as="geometry" />
+        </mxCell>
+        <mxCell id="bd_dup_ok" parent="1" style="rounded=1;whiteSpace=wrap;html=1;fontSize=15;fontFamily=Helvetica;" value="&lt;div style=&quot;line-height:1;&quot;&gt;TRÙNG MESSAGE_ID &amp;amp; HASH:&#xa;- Phát hiện mất ACK sau commit&#xa;- Trả duplicate + kết quả cũ&#xa;- Không sửa đổi CSDL (Idempotent)&lt;/div&gt;" vertex="1">
+          <mxGeometry height="131" width="210" x="26" y="521" as="geometry" />
+        </mxCell>
+        <mxCell id="bd_err_conflict" parent="1" style="rounded=1;whiteSpace=wrap;html=1;fontSize=15;fontFamily=Helvetica;" value="&lt;div style=&quot;line-height:1;&quot;&gt;TRÙNG ID KHÁC HASH HOẶC TÁI DÙNG SEQ:&#xa;- Trả lỗi 409 Conflict&#xa;- Mã ID_REUSED_WITH_DIFFERENT_PAYLOAD&#xa;  hoặc SEQUENCE_REUSED&lt;/div&gt;" vertex="1">
+          <mxGeometry height="79" width="346" x="583" y="560" as="geometry" />
+        </mxCell>
+        <mxCell id="bd_new_tx" parent="1" style="rounded=1;whiteSpace=wrap;html=1;fontSize=15;fontFamily=Helvetica;" value="&lt;div style=&quot;line-height:1;&quot;&gt;THAO TÁC HỢP LỆ (MỚI):&#xa;Mở SQLite Database Transaction&#xa;Kiểm tra quyền sở hữu report_owner&lt;/div&gt;" vertex="1">
+          <mxGeometry height="65" width="244" x="296" y="614" as="geometry" />
+        </mxCell>
+        <mxCell id="bd_merge_check" parent="1" style="rhombus;whiteSpace=wrap;html=1;fontSize=15;fontFamily=Helvetica;" value="&lt;div style=&quot;line-height:1;&quot;&gt;Báo cáo đã có trong DB?&lt;/div&gt;" vertex="1">
+          <mxGeometry height="65" width="150" x="343" y="705" as="geometry" />
+        </mxCell>
+        <mxCell id="bd_merge_apply" parent="1" style="rounded=1;whiteSpace=wrap;html=1;fontSize=15;fontFamily=Helvetica;" value="&lt;div style=&quot;line-height:1;&quot;&gt;Báo cáo cũ (gộp dữ liệu):&#xa;- Chỉ bổ sung trường còn trống&#xa;- Gắn ảnh nếu trước đó chưa có ảnh&#xa;- Giữ nguyên ảnh đầu tiên và ngày tạo&lt;/div&gt;" vertex="1">
+          <mxGeometry height="65" width="259" x="111" y="796" as="geometry" />
+        </mxCell>
+        <mxCell id="bd_create_apply" parent="1" style="rounded=1;whiteSpace=wrap;html=1;fontSize=15;fontFamily=Helvetica;" value="&lt;div style=&quot;line-height:1;&quot;&gt;Báo cáo mới hoàn toàn:&#xa;- Tạo bản ghi mới trong bảng reports&#xa;- Trạng thái khởi tạo: processing&#xa;- Lưu file ảnh vật lý (nếu có)&lt;/div&gt;" vertex="1">
+          <mxGeometry height="65" width="259" x="442" y="796" as="geometry" />
+        </mxCell>
+        <mxCell id="bd_commit" parent="1" style="shape=cylinder3;whiteSpace=wrap;html=1;boundedLbl=1;backgroundOutline=1;size=10;fontSize=15;fontFamily=Helvetica;" value="&lt;div style=&quot;line-height:1;&quot;&gt;Commit Transaction:&#xa;- Ghi vết bảng messages_dedup&#xa;- Ghi nhật ký vào report_events&#xa;- Tăng server_meta version (báo cụm stale)&lt;/div&gt;" vertex="1">
+          <mxGeometry height="135" width="200" x="318" y="916" as="geometry" />
+        </mxCell>
+        <mxCell id="bd_ack" parent="1" style="rounded=1;whiteSpace=wrap;html=1;fontSize=15;fontFamily=Helvetica;" value="&lt;div style=&quot;line-height:1;&quot;&gt;Trả phản hồi HTTP cho Client&#xa;(accepted / 201 Created)&lt;/div&gt;" vertex="1">
+          <mxGeometry height="45" width="200" x="320" y="1096" as="geometry" />
+        </mxCell>
+        <mxCell id="bd_end" parent="1" style="ellipse;whiteSpace=wrap;html=1;fontStyle=1;fontFamily=Helvetica;fontSize=15;" value="&lt;div style=&quot;line-height:1;&quot;&gt;Kết thúc xử lý&lt;/div&gt;" vertex="1">
+          <mxGeometry height="57" width="114" x="363" y="1179" as="geometry" />
+        </mxCell>
+        <mxCell id="bd_err_bad" parent="1" style="rounded=1;whiteSpace=wrap;html=1;fontSize=15;fontFamily=Helvetica;" value="&lt;div style=&quot;line-height:1;&quot;&gt;Trả lỗi 400 Bad Request&#xa;(UNSUPPORTED_CONTRACT_VERSION&#xa;hoặc REQUEST_TOO_LARGE)&lt;/div&gt;" vertex="1">
+          <mxGeometry height="60" width="309" x="658" y="92.5" as="geometry" />
+        </mxCell>
+        <mxCell id="bde_1" edge="1" parent="1" source="bd_start" style="endArrow=classic;html=1;strokeWidth=1.3;fontSize=15;fontFamily=Helvetica;" target="bd_header" value="">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="bde_2" edge="1" parent="1" source="bd_header" style="endArrow=classic;html=1;strokeWidth=1.3;fontSize=15;fontFamily=Helvetica;fontColor=#172B4D;labelBackgroundColor=#FFFFFF;" target="bd_err_bad" value="Sai version">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="bde_3" edge="1" parent="1" source="bd_header" style="endArrow=classic;html=1;strokeWidth=1.3;fontSize=15;fontFamily=Helvetica;fontColor=#172B4D;labelBackgroundColor=#FFFFFF;" target="bd_bounds" value="Đúng version">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="bde_4" edge="1" parent="1" source="bd_bounds" style="endArrow=classic;html=1;strokeWidth=1.3;fontSize=15;fontFamily=Helvetica;fontColor=#172B4D;labelBackgroundColor=#FFFFFF;" target="bd_err_bad" value="Vượt kích thước">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="bde_5" edge="1" parent="1" source="bd_bounds" style="endArrow=classic;html=1;strokeWidth=1.3;fontSize=15;fontFamily=Helvetica;fontColor=#172B4D;labelBackgroundColor=#FFFFFF;" target="bd_jcs" value="Hợp lệ">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="bde_6" edge="1" parent="1" source="bd_jcs" style="endArrow=classic;html=1;strokeWidth=1.3;fontSize=15;fontFamily=Helvetica;" target="bd_lookup" value="">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="bde_7" edge="1" parent="1" source="bd_lookup" style="endArrow=classic;html=1;strokeWidth=1.3;fontSize=15;fontFamily=Helvetica;exitX=0.5;exitY=1;exitDx=0;exitDy=0;" target="bd_dedup_check" value="">
+          <mxGeometry relative="1" as="geometry">
+            <mxPoint x="419.99999999999955" y="491" as="sourcePoint" />
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="bde_8" edge="1" parent="1" source="bd_dedup_check" style="endArrow=classic;html=1;strokeWidth=1.3;fontSize=15;fontFamily=Helvetica;fontColor=#172B4D;labelBackgroundColor=#FFFFFF;exitX=0;exitY=0.5;exitDx=0;exitDy=0;" target="bd_dup_ok" value="Duplicate">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="bde_9" edge="1" parent="1" source="bd_dedup_check" style="endArrow=classic;html=1;strokeWidth=1.3;fontSize=15;fontFamily=Helvetica;fontColor=#172B4D;labelBackgroundColor=#FFFFFF;exitX=1;exitY=0.5;exitDx=0;exitDy=0;entryX=0.5;entryY=0;entryDx=0;entryDy=0;" target="bd_err_conflict" value="Xung đột">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="bde_10" edge="1" parent="1" source="bd_dedup_check" style="endArrow=classic;html=1;strokeWidth=1.3;fontSize=15;fontFamily=Helvetica;fontColor=#172B4D;labelBackgroundColor=#FFFFFF;" target="bd_new_tx" value="Hợp lệ">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="bde_11" edge="1" parent="1" source="bd_new_tx" style="endArrow=classic;html=1;strokeWidth=1.3;fontSize=15;fontFamily=Helvetica;" target="bd_merge_check" value="">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="bde_12" edge="1" parent="1" source="bd_merge_check" style="endArrow=classic;html=1;strokeWidth=1.3;fontSize=15;fontFamily=Helvetica;fontColor=#172B4D;labelBackgroundColor=#FFFFFF;" target="bd_merge_apply" value="Đã có id">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="bde_13" edge="1" parent="1" source="bd_merge_check" style="endArrow=classic;html=1;strokeWidth=1.3;fontSize=15;fontFamily=Helvetica;fontColor=#172B4D;labelBackgroundColor=#FFFFFF;" target="bd_create_apply" value="Chưa có">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="bde_14" edge="1" parent="1" source="bd_merge_apply" style="endArrow=classic;html=1;strokeWidth=1.3;fontSize=15;fontFamily=Helvetica;" target="bd_commit" value="">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="bde_15" edge="1" parent="1" source="bd_create_apply" style="endArrow=classic;html=1;strokeWidth=1.3;fontSize=15;fontFamily=Helvetica;" target="bd_commit" value="">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="bde_16" edge="1" parent="1" source="bd_commit" style="endArrow=classic;html=1;strokeWidth=1.3;fontSize=15;fontFamily=Helvetica;" target="bd_ack" value="">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="bde_17" edge="1" parent="1" source="bd_ack" style="endArrow=classic;html=1;strokeWidth=1.3;fontSize=15;fontFamily=Helvetica;" target="bd_end" value="">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="bde_18" edge="1" parent="1" source="bd_dup_ok" style="endArrow=classic;html=1;strokeWidth=1.3;fontSize=15;fontFamily=Helvetica;exitX=0.25;exitY=1;exitDx=0;exitDy=0;" target="bd_end" value="">
+          <mxGeometry relative="1" x="-0.1167" as="geometry">
+            <Array as="points">
+              <mxPoint x="78.5" y="1207.5" />
+            </Array>
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="bde_19" edge="1" parent="1" source="bd_err_conflict" style="endArrow=classic;html=1;strokeWidth=1.3;fontSize=15;fontFamily=Helvetica;edgeStyle=orthogonalEdgeStyle;" target="bd_end" value="">
+          <mxGeometry relative="1" x="-0.0235" as="geometry">
+            <Array as="points">
+              <mxPoint x="840.8" y="1214.5" />
+            </Array>
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="bde_20" edge="1" parent="1" style="endArrow=classic;html=1;strokeWidth=1.3;fontSize=15;fontFamily=Helvetica;exitX=1;exitY=0.5;exitDx=0;exitDy=0;edgeStyle=orthogonalEdgeStyle;" value="">
+          <mxGeometry relative="1" x="0.0289" as="geometry">
+            <Array as="points">
+              <mxPoint x="953.89" y="123" />
+              <mxPoint x="953.89" y="1231.2" />
+            </Array>
+            <mxPoint x="943.89" y="123" as="sourcePoint" />
+            <mxPoint x="429.9964948310759" y="1231.1999999999998" as="targetPoint" />
+          </mxGeometry>
+        </mxCell>
+      </root>
+    </mxGraphModel>
+  </diagram>
+</mxfile>

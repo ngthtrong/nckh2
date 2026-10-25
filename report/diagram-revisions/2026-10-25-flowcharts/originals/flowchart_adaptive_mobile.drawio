@@ -1,0 +1,117 @@
+<mxfile host="Electron" agent="Antigravity">
+  <diagram id="diag-1" name="Luu-do-Gui-Bao-cao-Thich-ung-App">
+    <mxGraphModel dx="1633" dy="907" grid="0" gridSize="10" guides="1" tooltips="1" connect="1" arrows="1" fold="1" page="1" pageScale="1" pageWidth="1000" pageHeight="1050" math="0" shadow="0">
+      <root>
+        <mxCell id="0" />
+        <mxCell id="1" parent="0" />
+        <mxCell id="am_start" parent="1" style="ellipse;whiteSpace=wrap;html=1;fontStyle=1;fontFamily=Helvetica;fontSize=15;" value="&lt;div style=&quot;line-height:1;&quot;&gt;Khởi tạo Báo cáo&#xa;(SOS / Post)&lt;/div&gt;" vertex="1">
+          <mxGeometry height="45" width="160" x="438" y="21" as="geometry" />
+        </mxCell>
+        <mxCell id="am_img_dec" parent="1" style="rhombus;whiteSpace=wrap;html=1;fontSize=15;fontFamily=Helvetica;" value="&lt;div style=&quot;line-height:1;&quot;&gt;Người dùng có&#xa;đính kèm ảnh?&lt;/div&gt;" vertex="1">
+          <mxGeometry height="65" width="140" x="448" y="86" as="geometry" />
+        </mxCell>
+        <mxCell id="am_ai" parent="1" style="rounded=1;whiteSpace=wrap;html=1;fontSize=15;fontFamily=Helvetica;" value="&lt;div style=&quot;line-height:1;&quot;&gt;Edge AI MobileNetV3 suy luận:&#xa;- Nhãn ngập: non/low/med/high&#xa;- Confidence score&lt;/div&gt;" vertex="1">
+          <mxGeometry height="55" width="257" x="196" y="160" as="geometry" />
+        </mxCell>
+        <mxCell id="am_no_img" parent="1" style="rounded=1;whiteSpace=wrap;html=1;fontSize=15;fontFamily=Helvetica;" value="&lt;div style=&quot;line-height:1;&quot;&gt;Không có ảnh:&#xa;Gán nhãn non_flood mặc định&lt;/div&gt;" vertex="1">
+          <mxGeometry height="45" width="180" x="614" y="160" as="geometry" />
+        </mxCell>
+        <mxCell id="am_fields" parent="1" style="rounded=1;whiteSpace=wrap;html=1;fontSize=15;fontFamily=Helvetica;" value="&lt;div style=&quot;line-height:1;&quot;&gt;Nhập thông tin cứu hộ:&#xa;- Tọa độ GPS (hoặc để trống/nhập tay)&#xa;- Số người kẹt, số người bị thương&#xa;- Nhóm yếu thế (người già, trẻ nhỏ...)&#xa;- Tự động tính Urgency Score&lt;/div&gt;" vertex="1">
+          <mxGeometry height="89" width="307" x="364.5" y="226" as="geometry" />
+        </mxCell>
+        <mxCell id="am_hive" parent="1" style="shape=cylinder3;whiteSpace=wrap;html=1;boundedLbl=1;backgroundOutline=1;size=10;fontSize=15;fontFamily=Helvetica;" value="&lt;div style=&quot;line-height:1;&quot;&gt;Ghi ngay vào Hive Outbox&#xa;(Store-and-forward cục bộ)&#xa;Trạng thái: pending&lt;/div&gt;" vertex="1">
+          <mxGeometry height="100" width="150" x="443" y="336" as="geometry" />
+        </mxCell>
+        <mxCell id="am_probe" parent="1" style="rounded=1;whiteSpace=wrap;html=1;fontSize=15;fontFamily=Helvetica;" value="&lt;div style=&quot;line-height:1;&quot;&gt;Gọi GET /probe (64 KB)&#xa;Đo thông lượng mạng thực tế (kbps)&lt;/div&gt;" vertex="1">
+          <mxGeometry height="50" width="180" x="428" y="453" as="geometry" />
+        </mxCell>
+        <mxCell id="am_net_eval" parent="1" style="rhombus;whiteSpace=wrap;html=1;fontSize=15;fontFamily=Helvetica;" value="&lt;div style=&quot;line-height:1;&quot;&gt;Phân loại thông lượng&#xa;&amp;amp; Điều kiện gửi?&lt;/div&gt;" vertex="1">
+          <mxGeometry height="75" width="180" x="428" y="519" as="geometry" />
+        </mxCell>
+        <mxCell id="am_sms" parent="1" style="rounded=1;whiteSpace=wrap;html=1;fontSize=15;fontFamily=Helvetica;" value="&lt;div style=&quot;line-height:1;&quot;&gt;MẤT MẠNG HOÀN TOÀN:&#xa;- Kiểm tra số hotline SMS Android&#xa;- Gửi tin SOS|id:... qua SMS&#xa;- Giữ bản ghi trong Outbox chờ mạng&lt;/div&gt;" vertex="1">
+          <mxGeometry height="100" width="200" x="49" y="506.5" as="geometry" />
+        </mxCell>
+        <mxCell id="am_meta" parent="1" style="rounded=1;whiteSpace=wrap;html=1;fontSize=15;fontFamily=Helvetica;" value="&lt;div style=&quot;line-height:1;&quot;&gt;MẠNG YẾU (&amp;lt;50 kbps)&#xa;hoặc (Mạnh &amp;amp; Conf &amp;gt;= 0.90):&#xa;- Gửi metadata JSON qua&#xa;  POST /sync/messages (&amp;lt;=256 KB)&lt;/div&gt;" vertex="1">
+          <mxGeometry height="92" width="224.5" x="234" y="650" as="geometry" />
+        </mxCell>
+        <mxCell id="am_comp" parent="1" style="rounded=1;whiteSpace=wrap;html=1;fontSize=15;fontFamily=Helvetica;" value="&lt;div style=&quot;line-height:1;&quot;&gt;MẠNG TRUNG BÌNH (50-1000 kbps):&#xa;- JPEG q=60, cạnh ngắn 1024px&#xa;- Gửi multipart qua POST /api/reports&lt;/div&gt;" vertex="1">
+          <mxGeometry height="92" width="232" x="588" y="650" as="geometry" />
+        </mxCell>
+        <mxCell id="am_orig" parent="1" style="rounded=1;whiteSpace=wrap;html=1;fontSize=15;fontFamily=Helvetica;" value="&lt;div style=&quot;line-height:1;&quot;&gt;MẠNG MẠNH (&amp;gt;=1000 kbps &amp;amp; Conf&amp;lt;0.9):&#xa;- Giữ nguyên ảnh gốc&#xa;- Gửi multipart POST /api/reports&lt;/div&gt;" vertex="1">
+          <mxGeometry height="85" width="210" x="770" y="514" as="geometry" />
+        </mxCell>
+        <mxCell id="am_res" parent="1" style="rounded=1;whiteSpace=wrap;html=1;fontSize=15;fontFamily=Helvetica;" value="&lt;div style=&quot;line-height:1;&quot;&gt;Nhận phản hồi từ Server:&#xa;- accepted: Xóa khỏi Outbox, synced=true&#xa;- duplicate: Dùng kết quả cũ, synced=true&#xa;- retry_later / lỗi mạng: Backoff retry&#xa;- rejected: Chuyển dead-letter&lt;/div&gt;" vertex="1">
+          <mxGeometry height="80" width="326" x="361" y="759" as="geometry" />
+        </mxCell>
+        <mxCell id="am_poll" parent="1" style="rounded=1;whiteSpace=wrap;html=1;fontSize=15;fontFamily=Helvetica;" value="&lt;div style=&quot;line-height:1;&quot;&gt;Khởi động Timer Polling 15s:&#xa;Gọi GET /api/reports/status&#xa;để nhận cập nhật tiến trình điều phối&lt;/div&gt;" vertex="1">
+          <mxGeometry height="75" width="257" x="395.5" y="862" as="geometry" />
+        </mxCell>
+        <mxCell id="am_end" parent="1" style="ellipse;whiteSpace=wrap;html=1;fontStyle=1;fontFamily=Helvetica;fontSize=15;" value="&lt;div style=&quot;line-height:1;&quot;&gt;Hoàn tất luồng client&lt;/div&gt;" vertex="1">
+          <mxGeometry height="40" width="100" x="474" y="964" as="geometry" />
+        </mxCell>
+        <mxCell id="ae_1" edge="1" parent="1" source="am_start" style="endArrow=classic;html=1;strokeWidth=1.3;fontSize=15;fontFamily=Helvetica;" target="am_img_dec" value="">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="ae_2" edge="1" parent="1" source="am_img_dec" style="endArrow=classic;html=1;strokeWidth=1.3;fontSize=15;fontFamily=Helvetica;fontColor=#172B4D;labelBackgroundColor=#FFFFFF;" target="am_ai" value="Có ảnh">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="ae_3" edge="1" parent="1" source="am_img_dec" style="endArrow=classic;html=1;strokeWidth=1.3;fontSize=15;fontFamily=Helvetica;fontColor=#172B4D;labelBackgroundColor=#FFFFFF;" target="am_no_img" value="Không ảnh">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="ae_4" edge="1" parent="1" source="am_ai" style="endArrow=classic;html=1;strokeWidth=1.3;fontSize=15;fontFamily=Helvetica;" target="am_fields" value="">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="ae_5" edge="1" parent="1" source="am_no_img" style="endArrow=classic;html=1;strokeWidth=1.3;fontSize=15;fontFamily=Helvetica;" target="am_fields" value="">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="ae_6" edge="1" parent="1" source="am_fields" style="endArrow=classic;html=1;strokeWidth=1.3;fontSize=15;fontFamily=Helvetica;" target="am_hive" value="">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="ae_7" edge="1" parent="1" source="am_hive" style="endArrow=classic;html=1;strokeWidth=1.3;fontSize=15;fontFamily=Helvetica;" target="am_probe" value="">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="ae_8" edge="1" parent="1" source="am_probe" style="endArrow=classic;html=1;strokeWidth=1.3;fontSize=15;fontFamily=Helvetica;" target="am_net_eval" value="">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="ae_9" edge="1" parent="1" source="am_net_eval" style="endArrow=classic;html=1;strokeWidth=1.3;fontSize=15;fontFamily=Helvetica;fontColor=#172B4D;labelBackgroundColor=#FFFFFF;" target="am_sms" value="Mất data">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="ae_10" edge="1" parent="1" source="am_net_eval" style="endArrow=classic;html=1;strokeWidth=1.3;fontSize=15;fontFamily=Helvetica;fontColor=#172B4D;labelBackgroundColor=#FFFFFF;" target="am_meta" value="&amp;lt;50 kbps">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="ae_11" edge="1" parent="1" source="am_net_eval" style="endArrow=classic;html=1;strokeWidth=1.3;fontSize=15;fontFamily=Helvetica;fontColor=#172B4D;labelBackgroundColor=#FFFFFF;" target="am_comp" value="50-1000 kbps">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="ae_12" edge="1" parent="1" source="am_net_eval" style="endArrow=classic;html=1;strokeWidth=1.3;fontSize=15;fontFamily=Helvetica;fontColor=#172B4D;labelBackgroundColor=#FFFFFF;" target="am_orig" value="&amp;gt;=1000 kbps">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="ae_13" edge="1" parent="1" source="am_sms" style="endArrow=classic;html=1;strokeWidth=1.3;fontSize=15;fontFamily=Helvetica;edgeStyle=orthogonalEdgeStyle;" target="am_res" value="">
+          <mxGeometry relative="1" as="geometry">
+            <Array as="points">
+              <mxPoint x="149" y="802" />
+            </Array>
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="ae_14" edge="1" parent="1" source="am_meta" style="endArrow=classic;html=1;strokeWidth=1.3;fontSize=15;fontFamily=Helvetica;" target="am_res" value="">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="ae_15" edge="1" parent="1" source="am_comp" style="endArrow=classic;html=1;strokeWidth=1.3;fontSize=15;fontFamily=Helvetica;" target="am_res" value="">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="ae_16" edge="1" parent="1" source="am_orig" style="endArrow=classic;html=1;strokeWidth=1.3;fontSize=15;fontFamily=Helvetica;edgeStyle=orthogonalEdgeStyle;" target="am_res" value="">
+          <mxGeometry relative="1" as="geometry">
+            <Array as="points">
+              <mxPoint x="886.7" y="802" />
+            </Array>
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="ae_17" edge="1" parent="1" source="am_res" style="endArrow=classic;html=1;strokeWidth=1.3;fontSize=15;fontFamily=Helvetica;" target="am_poll" value="">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="ae_18" edge="1" parent="1" source="am_poll" style="endArrow=classic;html=1;strokeWidth=1.3;fontSize=15;fontFamily=Helvetica;" target="am_end" value="">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+      </root>
+    </mxGraphModel>
+  </diagram>
+</mxfile>

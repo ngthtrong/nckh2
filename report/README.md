@@ -6,6 +6,10 @@ Bản sơ bộ đã có Mở đầu đủ sáu mục, bốn chương khoa học,
 
 ## Biên dịch
 
+Build `content`/`full` tự xuất lại PDF cho các file `.drawio` mới sửa trong `assets/diagrams/` trước khi biên dịch (cần cài draw.io Desktop). LaTeX chèn file `.pdf`, không đọc trực tiếp `.drawio`; chỉ lưu sơ đồ rồi chạy LaTeX riêng sẽ vẫn dùng PDF cũ. Từ gốc repo, dùng `python report/scripts/build.py content`; có thể xuất hình riêng bằng `python report/scripts/export_drawio_diagrams.py`. Không chạy `generate_drawio_diagrams.py` để cập nhật hình đã sửa tay vì script đó tạo lại nguồn sơ đồ. Hình đặt `width=\textwidth` sẽ luôn vừa bề ngang trang: phóng to toàn bộ sơ đồ đồng đều không làm hình trong báo cáo lớn hơn, cần tăng cỡ chữ/ô tương đối hoặc đổi bố cục.
+
+`python scripts/build.py content` dựng quyển và tự dựng lại cả bốn PDF bản tin/tóm tắt Việt–Anh từ cùng nguồn. Quy tắc này áp dụng cho cả XeLaTeX và Tectonic, kể cả bản hai mặt. Tectonic lưu log mới theo tên đích, ví dụ `build/content/content.log`.
+
 Từ thư mục gốc repo:
 
 ```bash
@@ -43,6 +47,8 @@ Các số liệu chính dùng snapshot ảnh **1.702 mẫu, test 256 ảnh, đ�
 **Điểm cần rà soát số liệu:** PTQ/QAT summary chưa khớp hoàn toàn CSV dự đoán. QAT summary ghi Accuracy 52,34%, CSV tính ra 51,17%. Báo cáo giữ cả hai nguồn và bảng đối chiếu, chưa xem metric nén là số liệu đã chốt. FP32/pruning khớp CSV; ảnh khớp MD5/split. Mã backend chưa đọc `E_i` mà app gửi khi chuyển sang thuật toán; điều này được ghi như khoảng trống tích hợp, không sửa sản phẩm trong công việc soạn báo cáo.
 
 ## Hình thức và hồ sơ
+
+Các phần có biểu mẫu dùng bố cục riêng trong `template/forms.tex`: hai bìa, thông tin kết quả Việt–Anh, trang nhận xét GVHD, phiếu chủ nhiệm, bản tin và tóm tắt Việt–Anh. Đầu trang, logo và khung bìa lấy nguyên vector từ PDF mẫu trong `guideline/`; các phần ghi chú hướng dẫn và ô trống nội dung của mẫu không được đưa vào đầu ra. Font biểu mẫu theo đúng từng mẫu (12; 12,96; 14,04 và 18 pt), không áp cỡ thân bài khoa học 13 cho mọi biểu mẫu. Nguồn và mã SHA-256 lưu ở `generated/template-layout-provenance.json`. Nội dung điền dài hơn mẫu trống được xuống dòng và tiếp trang, không tự rút nội dung hoặc giảm font.
 
 Thân bài A4, Times New Roman 13 bp, giãn dòng 1,3; lề trái 30 mm, phải/trên/dưới 20 mm. Hai bìa dùng khung đôi, nội dung căn giữa riêng. Phần đầu đánh La Mã; Mở đầu bắt đầu số Ả Rập. Các chương không ép mở ở trang lẻ; hai mặt giữ lề vật lý quy định. Hình/bảng/công thức dùng nhãn và tham chiếu. Trích dẫn IEEE dùng số trong ngoặc vuông và một danh mục theo thứ tự xuất hiện. Các dòng nguồn nội bộ đã bỏ khỏi PDF theo yêu cầu; provenance giữ trong generated/.
 
