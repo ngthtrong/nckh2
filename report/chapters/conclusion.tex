@@ -4,7 +4,7 @@
 
 Đối với mô hình thị giác máy tính, kiến trúc MobileNetV3-Large đạt độ chính xác Accuracy \NewImageAccuracy\% và macro-F1 \NewImageMacroFOne\% trên tập ảnh kiểm tra độc lập. Quá trình tối ưu hóa mô hình sang các định dạng thực thi biên (ONNX Runtime, ExecuTorch) duy trì sự đồng thuận dự đoán cao, đồng thời kỹ thuật lượng tử hóa giúp giảm đáng kể kích thước mô hình, đáp ứng yêu cầu triển khai hiệu quả trên thiết bị di động.
 
-Mô hình ước lượng mức độ khẩn cấp dựa trên các đặc trưng nhân khẩu và dấu hiệu lâm sàng cơ bản cung cấp cơ chế tính điểm minh bạch, có thể giải thích được và dễ dàng cấu hình, hỗ trợ đắc lực cho khâu tiền lọc dữ liệu cứu hộ tại hiện trường.
+Mô hình ước lượng mức độ khẩn cấp sử dụng năm cờ dấu hiệu nguy cấp có cấu trúc: không phản ứng, khó thở hoặc tím tái, chảy máu nhiều, co giật và chấn thương nguy cơ cao. Các cờ được đưa vào Logistic Regression để tính điểm khẩn cấp tại ứng dụng; hệ số mô hình được lưu trong tệp JSON để đối chiếu và giải thích cách tính.
 
 Về mặt giải thuật, các thực nghiệm đối chứng đa dạng trên đồ thị không gian--thời gian đã làm sáng tỏ ưu thế cũng như giới hạn của các phương pháp phân cụm cộng và tích (RQ1), đánh giá tính ổn định của hàm điểm ưu tiên đa tiêu chí trước các biến thể dữ liệu trùng lặp (RQ2), và phân tích định lượng hệ quả của các sai số phân hoạch đối với bài toán lập lịch điều phối nguồn lực cứu trợ (RQ3).
 
