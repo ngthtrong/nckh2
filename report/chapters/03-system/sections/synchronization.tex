@@ -4,12 +4,15 @@ Một ca cứu hộ cần giữ định danh ổn định ngay khi được tạ
 
 Trạng thái outbox mô tả việc truyền: \texttt{pending}, \texttt{in\_flight}, ACK và dead-letter. Trạng thái báo cáo mô tả nghiệp vụ: \texttt{processing}, \texttt{dispatched}, \texttt{resolved}, \texttt{cancelled}. Backend đã nhận dữ liệu chỉ xác nhận đồng bộ. Việc đội cứu hộ đã được cử đi hoặc ca đã hoàn tất phải được cập nhật bằng thao tác nghiệp vụ có quyền. Giao diện cần giúp người dùng đọc được cả hai thông tin này.
 
-\begin{figure}[htbp]
+\begin{landscape}
+\begin{figure}[p]
 \centering
-\includegraphics[width=\textwidth]{flow_04_track_rescue_status.pdf}
+\setlength{\abovecaptionskip}{4pt}
+\includegraphics[width=\linewidth]{flow_04_track_rescue_status.pdf}
 \caption{Quy trình tra cứu và đồng bộ tiến trình cứu hộ 4 trạng thái giữa ứng dụng và máy chủ}
 \label{fig:flow-track-status}
 \end{figure}
+\end{landscape}
 
 \subsection{Mất ACK sau commit và xử lý idempotency}
 Hình~\ref{fig:sync-sequence} mô tả ca mà server đã ghi dữ liệu nhưng ACK bị mất. Đây là một trường hợp khiến hệ thống chỉ ``gửi lại khi lỗi'' dễ tạo trùng nếu không giữ định danh. Theo quy tắc xử lý bản tin, ghi nghiệp vụ và ghi chống trùng nằm trong transaction của cùng message; gửi lại đúng message/hash trả kết quả duplicate. Khả năng retry kết hợp với kiểm tra định danh giữ tính nhất quán cho thao tác đã được server ghi.
@@ -99,9 +102,12 @@ Luồng trên cho thấy phân cụm và xếp hạng là thông tin hỗ trợ 
 \label{fig:flow-sos-one-touch}
 \end{figure}
 
-\begin{figure}[htbp]
+\begin{landscape}
+\begin{figure}[p]
 \centering
-\includegraphics[width=.95\textwidth,height=.78\textheight,keepaspectratio]{flow_02_create_report_edge_ai.pdf}
+\setlength{\abovecaptionskip}{4pt}
+\includegraphics[width=\linewidth]{flow_02_create_report_edge_ai.pdf}
 \caption{Quy trình tạo báo cáo chi tiết kèm ảnh hiện trường và suy luận On-device Edge AI}
 \label{fig:flow-create-report}
 \end{figure}
+\end{landscape}

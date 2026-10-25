@@ -271,6 +271,12 @@ def schema():
 
 
 def erd():
+    # ERDs use standard monochrome Crow's Foot notation, without decorative icons.
+    from build_readable_report_diagrams import erd as standard_erd
+    return standard_erd()
+
+
+def _superseded_icon_erd():
     d=Diagram("database_erd",418,"2.5 · Lược đồ đầy đủ và các liên hệ logic của backend",width=W)
     data=schema();d.schema_data=data
     # Every column in the actual DDL is represented exactly once.

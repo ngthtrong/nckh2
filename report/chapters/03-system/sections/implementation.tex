@@ -4,12 +4,15 @@ Hệ thống phần mềm được tổ chức thành các phân hệ chuyên bi
 
 Hạ tầng máy chủ được đóng gói thành ba dịch vụ chính bằng Docker Compose (Hình~\ref{fig:deployment-infrastructure}): dịch vụ backend (FastAPI), dịch vụ bảng điều phối tác chiến (Dashboard) và dịch vụ Web ứng dụng. Các dịch vụ sử dụng cơ chế ánh xạ cổng mạng linh hoạt và lưu trữ dữ liệu bền vững qua Docker volume, cho phép dễ dàng cấu hình các biến môi trường lưu trữ cơ sở dữ liệu và thư mục hình ảnh hiện trường.
 
-\begin{figure}[htbp]
+\begin{landscape}
+\begin{figure}[p]
 \centering
-\includegraphics[width=\textwidth]{deployment_infrastructure.pdf}
+\setlength{\abovecaptionskip}{4pt}
+\includegraphics[width=\linewidth]{deployment_infrastructure.pdf}
 \caption{Sơ đồ triển khai hạ tầng các dịch vụ trong môi trường Docker Compose}
 \label{fig:deployment-infrastructure}
 \end{figure}
+\end{landscape}
 
 \subsection{Nạp mô hình và kiểm tra asset}
 Mô hình học sâu MobileNetV3 sau khi tối ưu hóa được đóng gói trong thư mục tài nguyên (\texttt{assets}) của ứng dụng di động dưới định dạng ExecuTorch (PTE), phục vụ nhận diện ngoại tuyến mặc định. Quản trị viên đã đăng nhập có thể tải mô hình ONNX từ máy chủ để so sánh với PTE. Quá trình tải và nạp đối chiếu mã SHA-256 với manifest để bảo đảm hai mô hình thuộc cùng bộ trọng số; đầu vào và thứ tự lớp được giữ theo cấu hình triển khai.
@@ -33,50 +36,21 @@ Có data nhưng dưới 50 kbit/s & Chỉ thông tin \\
 
 Trong chế độ nén, ứng dụng dùng JPEG quality 60 với tham số \texttt{minWidth} và \texttt{minHeight} đều bằng 1.024 pixel. Khi ảnh đủ lớn, thư viện giữ tỷ lệ khung hình và giảm cạnh ngắn về 1.024 pixel; ảnh nhỏ không được phóng to. Cạnh dài có thể lớn hơn 1.024 pixel. Ảnh định dạng không phù hợp endpoint có thể được đổi sang JPEG. Cơ chế này giảm lượng dữ liệu ảnh cần truyền trong điều kiện mạng hạn chế.
 
-\begin{figure}[htbp]
+\begin{landscape}
+\begin{figure}[p]
 \centering
-\includegraphics[width=\textwidth]{flow_03_adaptive_network_send.pdf}
+\setlength{\abovecaptionskip}{4pt}
+\includegraphics[width=\linewidth]{flow_03_adaptive_network_send.pdf}
 \caption{Lưu đồ quyết định chế độ gửi thích ứng theo thông lượng mạng và độ tin cậy AI}
 \label{fig:flow-adaptive-send}
 \end{figure}
+\end{landscape}
 
 \subsection{Trạng thái cứu hộ và phản hồi}
 Báo cáo mới ở backend luôn bắt đầu \texttt{processing}, bất kể status client gửi. Chu trình chuyển trạng thái được chuẩn hóa theo mô hình máy trạng thái (Hình~\ref{fig:status-flow}): các chuyển chính là \texttt{processing} tới \texttt{dispatched}, rồi \texttt{resolved}; từ trạng thái chưa kết thúc có thể đóng \texttt{cancelled} kèm lý do. \texttt{resolved} và \texttt{cancelled} là trạng thái cuối. Version trạng thái tăng khi có cập nhật hợp lệ.
 
 \begin{figure}[htbp]\centering
-\begin{tikzpicture}[>=Stealth,
-  node distance=16mm and 18mm,
-  st/.style={draw=black!85, rounded corners=3pt, align=center, font=\small, minimum height=12mm, text width=26mm, fill=gray!3},
-  final_st/.style={draw=black!85, rounded corners=3pt, align=center, font=\small, minimum height=12mm, text width=26mm, fill=gray!8, double, double distance=1pt},
-  initial/.style={circle, fill=black, inner sep=0pt, minimum size=4.5mm},
-  final_dot/.style={circle, draw=black, line width=0.8pt, inner sep=0pt, minimum size=5.5mm, path picture={\fill[black] (path picture bounding box.center) circle (1.8mm);}}
-]
-
-% Điểm bắt đầu
-\node[initial] (init) at (-1.8, 0) {};
-
-% Các trạng thái
-\node[st, right=10mm of init] (p) {\textbf{processing}\\\scriptsize (tiếp nhận/chờ)};
-\node[st, right=20mm of p] (d) {\textbf{dispatched}\\\scriptsize (đã điều phối)};
-\node[final_st, right=20mm of d] (r) {\textbf{resolved}\\\scriptsize (hoàn tất)};
-\node[final_st, below=16mm of d] (c) {\textbf{cancelled}\\\scriptsize (đã đóng)};
-
-% Điểm kết thúc
-\node[final_dot, right=10mm of r] (end_r) {};
-\node[final_dot, right=10mm of c] (end_c) {};
-
-% Chuyển trạng thái chính
-\draw[->, line width=0.7pt] (init) -- node[above, font=\scriptsize]{tạo ca} (p);
-\draw[->, line width=0.7pt] (p) -- node[above, font=\scriptsize]{điều phối} node[below, font=\fontsize{6.5bp}{7.5bp}\selectfont, text=gray!40!black]{(PATCH status)} (d);
-\draw[->, line width=0.7pt] (d) -- node[above, font=\scriptsize]{hoàn thành} node[below, font=\fontsize{6.5bp}{7.5bp}\selectfont, text=gray!40!black]{(hiện trường)} (r);
-\draw[->, line width=0.7pt] (r) -- (end_r);
-
-% Đóng ca / Hủy ca (kèm close_reason bắt buộc)
-\draw[->, line width=0.7pt] (p.south) |- node[pos=0.7, above, font=\scriptsize]{đóng ca} node[pos=0.7, below, font=\fontsize{6.5bp}{7.5bp}\selectfont, text=gray!40!black]{[kèm lý do]} (c.west);
-\draw[->, line width=0.7pt] (d) -- node[right, font=\scriptsize]{đóng ca} node[left, font=\fontsize{6.5bp}{7.5bp}\selectfont, text=gray!40!black]{[kèm lý do]} (c);
-\draw[->, line width=0.7pt] (c) -- (end_c);
-
-\end{tikzpicture}
+\includegraphics[width=\textwidth]{status_machine.pdf}
 \caption{Biểu đồ chuyển trạng thái nghiệp vụ của ca cứu hộ do backend kiểm soát}
 \label{fig:status-flow}
 \end{figure}
