@@ -1,7 +1,7 @@
 \clearpage
 \section{Giao diện ứng dụng theo tác nhân}\label{sec:user-interfaces}
 
-Phần này trình bày các màn hình minh họa theo ba nhóm tác nhân: người dân gửi yêu cầu cứu hộ, quản trị viên ứng dụng di động và điều phối viên trên dashboard web. Các ảnh được sắp xếp theo luồng thao tác; ký hiệu (a), (b), (c) liên kết từng màn hình với phần mô tả bên dưới. Trạng thái, nhãn AI và số liệu trên ảnh chỉ phản ánh thời điểm chụp; các màn hình dashboard sử dụng dữ liệu giả lập, không phải số liệu cứu hộ thực tế.
+Phần này trình bày các màn hình minh họa theo hai nhóm tác nhân: người dân gửi yêu cầu cứu hộ và điều phối viên trên dashboard web. Các ảnh được sắp xếp theo luồng thao tác; ký hiệu (a), (b), (c) liên kết từng màn hình với phần mô tả bên dưới. Trạng thái, nhãn AI và số liệu trên ảnh chỉ phản ánh thời điểm chụp; các màn hình dashboard sử dụng dữ liệu giả lập, không phải số liệu cứu hộ thực tế.
 
 \subsection{Người dân gửi yêu cầu cứu hộ}
 
@@ -86,29 +86,6 @@ Phần này trình bày các màn hình minh họa theo ba nhóm tác nhân: ng�
 \noindent\textbf{Hình~\ref{fig:ui-4}(b).} Hộp chỉnh sửa cho phép cập nhật số điện thoại và địa chỉ; tên đăng nhập được hiển thị là không thay đổi. Nút Lưu thay đổi xác nhận nội dung cập nhật.
 
 \noindent\textbf{Hình~\ref{fig:ui-4}(c).} Hộp Đổi mật khẩu yêu cầu mật khẩu hiện tại, mật khẩu mới và xác nhận mật khẩu mới, kèm điều khiển hiện hoặc ẩn nội dung nhập.
-
-\clearpage
-
-\subsection{Quản trị viên ứng dụng di động}
-
-\begin{figure}[!htbp]\centering
-\begin{minipage}[t]{.31\textwidth}\centering
-\includegraphics[width=\linewidth,height=.40\textheight,keepaspectratio]{UI/admin_da_loc/admin/01_cai_dat_quan_tri.jpg}
-\par\small (a)\end{minipage}\hfill
-\begin{minipage}[t]{.31\textwidth}\centering
-\includegraphics[width=\linewidth,height=.40\textheight,keepaspectratio]{UI/admin_da_loc/admin/02_cau_hinh_mo_hinh_AI.jpg}
-\par\small (b)\end{minipage}\hfill
-\begin{minipage}[t]{.31\textwidth}\centering
-\includegraphics[width=\linewidth,height=.40\textheight,keepaspectratio]{UI/admin_da_loc/admin/03_benchmark_AI_tren_dien_thoai.jpg}
-\par\small (c)\end{minipage}\hfill
-\caption{Cấu hình quản trị, mô hình Edge AI và benchmark điện thoại}\label{fig:ui-5}
-\end{figure}
-
-\noindent\textbf{Hình~\ref{fig:ui-5}(a).} Màn hình Cài đặt hiển thị phiên quản trị cùng chức năng đăng xuất admin và tải, nạp ONNX để so sánh. Phiên quản trị được hiển thị riêng với tài khoản người gửi yêu cầu cứu hộ.
-
-\noindent\textbf{Hình~\ref{fig:ui-5}(b).} Khối mô hình AI cho phép chọn ONNX Runtime hoặc ExecuTorch Mobile và bật so sánh ONNX/PTE trên cùng tensor đầu vào. Trạng thái trong ảnh cho biết ExecuTorch đang được chọn và ONNX chưa sẵn sàng.
-
-\noindent\textbf{Hình~\ref{fig:ui-5}(c).} Khối benchmark hiển thị tập test gồm 256 ảnh, bốn lớp; quản trị viên có thể chọn ONNX, PTE hoặc cả hai, chạy benchmark và xóa các gói đã tải. Đây là thông tin giao diện, không thay thế số liệu và giao thức thực nghiệm ở Chương~\ref{chap:04-evaluation}.
 
 \clearpage
 

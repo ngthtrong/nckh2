@@ -94,7 +94,7 @@ Cùng report ID được gửi lại để bổ sung ảnh hoặc dữ liệu sa
 \end{figure}
 
 \subsection{Dịch vụ phân cụm và hàng xem xét}
-Adapter \texttt{to\_report\_v2} chuyển báo cáo lưu trữ sang tuple thuật toán. Nhãn ngập được ánh xạ \texttt{non\_flood}$\mapsto0$, \texttt{low}$\mapsto0{,}33$, \texttt{medium}$\mapsto0{,}66$, \texttt{high}$\mapsto1$. Nếu payload có \texttt{flood}, dùng trường này. Điểm khẩn cấp đọc \texttt{urgency} hoặc suy từ mô tả. $N$ hiện là số mắc kẹt cộng số bị thương; $V$ là số nhóm yếu thế được chọn khi không có trường trực tiếp.
+Adapter \texttt{to\_report\_v2} chuyển báo cáo lưu trữ sang tuple thuật toán. Nhãn ngập được ánh xạ \texttt{non\_flood}$\mapsto0$, \texttt{low}$\mapsto0{,}33$, \texttt{medium}$\mapsto0{,}66$, \texttt{high}$\mapsto1$. Nếu payload có \texttt{flood}, dùng trường này. Theo thiết kế tích hợp, đầu vào khẩn cấp kết hợp điểm \texttt{E\_i} do mô hình LR trên ứng dụng gửi lên với thông tin \texttt{urgency} do backend xác định. $N$ hiện là số mắc kẹt cộng số bị thương; $V$ là số nhóm yếu thế được chọn khi không có trường trực tiếp.
 
 Các ánh xạ chuyển thông tin định tính thành các đại lượng số học phục vụ giải thuật. Trọng số và tham số phân cụm, xếp hạng được cấu hình trong mã nguồn backend. Điều phối viên sử dụng kết quả trên dashboard để xem xét báo cáo, xác minh thông tin, giao đội và cập nhật trạng thái cứu hộ.
 
@@ -105,7 +105,7 @@ Dashboard là HTML, ES module và CSS phục vụ từ backend hoặc nginx. Lea
 
 Điều phối viên có thể lọc theo trạng thái/cụm, xem chi tiết, gán đội, ghi chú, cập nhật vị trí và chuyển trạng thái. API quản trị hỗ trợ quản lý tài khoản và sao lưu. Nhật ký \texttt{report\_events} ghi actor, nguồn và thời gian thao tác để theo dõi quá trình xử lý. Ứng dụng di động định kỳ đồng bộ trạng thái báo cáo từ máy chủ để hiển thị phản hồi kịp thời cho người dân.
 
-\subsection{Ranh giới phân tách dữ liệu và hỗ trợ ra quyết định}
+\subsection{Luồng xử lý dữ liệu và hỗ trợ điều phối}
 Sơ đồ tại Hình~\ref{fig:research-pipeline} thể hiện ranh giới phân tách dữ liệu của hệ thống: các trường thông tin quan sát trực tiếp được đưa vào giải thuật gom cụm đồ thị và xếp hạng ưu tiên; các báo cáo thiếu thông tin vị trí được chuyển vào hàng đợi xem xét riêng; trong khi nhãn thực tế được bảo toàn độc lập phục vụ kiểm chứng thực nghiệm. Trên hệ thống vận hành thực tế, danh sách ưu tiên đóng vai trò hỗ trợ điều phối viên ra quyết định phân bổ nguồn lực, đảm bảo tính linh hoạt và an toàn trong tác chiến cứu hộ.
 \begin{figure}[htbp]
 \centering\includegraphics[width=\textwidth]{../paper/figures/pipeline_v2.pdf}

@@ -10,7 +10,7 @@ JSON lưu $\xi_0=-1{,}0580446217$ và cả năm hệ số $\xi_j=1{,}1087792041$
 
 Trên toàn bộ 32 trạng thái, nhãn ở threshold 0,5 khớp quy tắc OR. Khi không có cờ, điểm bằng khoảng 0,2577; với một cờ, điểm nhỏ nhất của trạng thái dương khoảng 0,5127. Quy tắc OR trực tiếp là baseline chính xác cho định nghĩa nhãn này. Độ khớp toàn bảng và sanity test không chứng minh Logistic Regression tốt hơn quy tắc hoặc có hiệu quả lâm sàng.
 
-Trong ứng dụng, điểm được tính từ các lựa chọn có cấu trúc và lưu ở trường \texttt{E\_i}. Mã backend hiện tại chưa dùng trường này khi chuyển sang \texttt{ReportV2}: adapter đọc \texttt{urgency} nếu có, nếu không thì dùng từ khóa mô tả. Vì vậy báo cáo phân biệt $E_i^{\mathrm{LR}}$ tại ứng dụng với $E_i$ đang thực sự đi vào phân cụm demo. Kết quả RQ2 và RQ3 không phải kết quả đánh giá mô hình LR.
+Trong ứng dụng, Logistic Regression tính điểm $E_i^{\mathrm{LR}}$ từ các dấu hiệu khẩn cấp được người dùng lựa chọn và gửi đến máy chủ trong trường \texttt{E\_i}. Theo thiết kế tích hợp, máy chủ kết hợp điểm này với thông tin \texttt{urgency} do backend xác định để tạo đầu vào khẩn cấp phục vụ phân cụm và xếp hạng. Mô hình LR không phân tích trực tiếp văn bản tự do.
 
 \subsection{Biểu diễn báo cáo và điều kiện tiếp nhận}
 Bản thảo nghiên cứu định nghĩa

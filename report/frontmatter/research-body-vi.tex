@@ -19,7 +19,7 @@ Bên cạnh đó, việc kết hợp thông tin vị trí, thời gian và nội
 \FormSection{4. Kết quả nghiên cứu:}
 Đối với bài toán phân loại hình ảnh, mô hình được đánh giá trên tập kiểm thử gồm 256 ảnh. Với cấu hình seed 1024, mô hình đạt Accuracy \NewImageAccuracy\% và macro-F1 \NewImageMacroFOne\%, ghi nhận 3 lỗi nghiêm trọng. Thử nghiệm cắt tỉa mô hình đạt Accuracy \PruningAccuracy\% với \PruningCriticalCount{} lỗi nghiêm trọng.
 
-Các nội dung về phân tích văn bản, phân cụm sự kiện, đồng bộ dữ liệu và hoạt động trong điều kiện mạng yếu được xác định theo mục tiêu nghiên cứu của đề tài. Hiệu quả của từng thành phần cần được đánh giá bằng các kết quả thực nghiệm tương ứng.
+Tại thiết bị, hệ thống kết hợp hai nhánh phân tích: phân loại mức ngập từ hình ảnh và ước lượng mức độ khẩn cấp bằng Logistic Regression từ các thông tin do người dùng lựa chọn trên biểu mẫu. Kết quả của hai nhánh được gửi đến máy chủ để tổng hợp, phân cụm và xếp hạng ưu tiên các báo cáo cứu hộ. Đề tài đồng thời nghiên cứu đồng bộ dữ liệu và hoạt động của hệ thống trong điều kiện mạng không ổn định.
 
 Trong thử nghiệm mạng yếu giả lập với băng thông 50 kbit/s và độ trễ khứ hồi 600 ms, chế độ chỉ gửi thông tin cơ bản và chế độ gửi ảnh nén đều thành công ở 257/257 lượt (100\%), trong khi gửi ảnh gốc đạt 230/257 lượt (89,49\%). Kết quả cho thấy hai chế độ gửi ít dữ liệu hơn có tỷ lệ truyền thành công cao hơn gửi ảnh gốc trong điều kiện thử nghiệm. Các phép đo được thực hiện riêng cho từng chế độ trên máy tính; khả năng truyền qua mạng di động thực tế cần được kiểm chứng thêm.
 

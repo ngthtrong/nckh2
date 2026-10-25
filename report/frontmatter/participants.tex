@@ -1,8 +1,10 @@
+% Restore the page builder as well as margins after the custom cover geometry.
+\clearpage\restoregeometry
 \addchap{Danh sách thành viên nghiên cứu và đơn vị phối hợp chính}
 
 \begingroup
 \fontsize{13pt}{16pt}\selectfont
-\setstretch{1.3}
+\setstretch{1.0}
 
 \begin{longtable}{P{.05\textwidth}P{.31\textwidth}P{.29\textwidth}P{.22\textwidth}}
 \toprule
@@ -34,6 +36,7 @@ STT & Họ và tên & Đơn vị & Vai trò \\
 \end{longtable}
 
 \vspace{4mm}
+\noindent\begin{minipage}{\textwidth}
 \noindent
 \textbf{GIẢNG VIÊN HƯỚNG DẪN:} \SupervisorName
 \par
@@ -42,6 +45,7 @@ STT & Họ và tên & Đơn vị & Vai trò \\
 \begin{itemize}
     \setlength{\itemsep}{2pt}
     \setlength{\topsep}{2pt}
+    \setlength{\parsep}{0pt}
 
     \item[--] MSCB: \SupervisorCode
 
@@ -51,6 +55,7 @@ STT & Họ và tên & Đơn vị & Vai trò \\
 
     \item[--] Email: \SupervisorEmail
 \end{itemize}
+\end{minipage}
 
 \vspace{4mm}
 \noindent
@@ -61,6 +66,7 @@ STT & Họ và tên & Đơn vị & Vai trò \\
 \begin{itemize}
     \setlength{\itemsep}{2pt}
     \setlength{\topsep}{2pt}
+    \setlength{\parsep}{0pt}
 
     \item[--] Trường Công nghệ Thông tin và Truyền thông,
     Đại học Cần Thơ.

@@ -16,11 +16,11 @@ Instead of relying entirely on centralized server processing, the proposed syste
 Furthermore, the integration of location, time and rescue information for identifying and grouping related events is intended to reduce duplicate reports and support visualization of rescue situations on a digital map.
 
 \FormSection{4. Research results:}
-The research investigates the development of flood rescue datasets, deep learning-based image and text analysis, AI model optimization for mobile devices, and the design of a rescue information management and event clustering system.
+The research investigates the development of flood rescue datasets, deep learning-based image classification, urgency estimation using Logistic Regression from structured user selections, AI model optimization for mobile devices, and the design of a rescue information management and event clustering system.
 
 For image classification, the model was evaluated on a test set of 256 images. Using seed 1024, the model achieved \NewImageAccuracy\% accuracy and \NewImageMacroFOne\% macro-F1, with three critical errors. The structured pruning experiment achieved \PruningAccuracy\% accuracy, with \PruningCriticalCount{} critical errors.
 
-The research also addresses Vietnamese rescue-message analysis, event clustering, data synchronization and system operation under unstable network conditions. These components require separate experimental evaluation to establish their performance.
+On the mobile device, image classification and urgency estimation from structured form selections provide complementary information. Their outputs are sent to the server for aggregation, event clustering and priority ranking. The research also examines data synchronization and system operation under unstable network conditions.
 
 In weak-network simulations with bandwidth of 50 kbit/s and a round-trip time of 600 ms, both metadata-only and compressed-image modes succeeded in 257/257 attempts (100\%), compared with 230/257 (89.49\%) for original images. The two modes transmitting less data achieved higher transmission success rates than original images under the tested conditions. Each mode was measured separately on a computer; transmission over real mobile networks requires further validation.
 
