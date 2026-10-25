@@ -45,7 +45,7 @@ Việc chọn chế độ gửi được thực hiện khi có ảnh và đượ
 Địa điểm báo cáo có thể null. Màn hình trung tâm cần có danh sách cho báo cáo thiếu vị trí ngoài bản đồ, bởi một bản ghi không xuất hiện trên bản đồ không có nghĩa không cần xử lý. Vị trí được nhập thủ công có nguồn \texttt{manual}; khi GPS thiết bị đến sau, quy tắc cập nhật dữ liệu xác định cách bổ sung/thay thế để giữ nguồn gốc.
 
 \subsection{Quy tắc trao đổi dữ liệu giữa ứng dụng và máy chủ}
-Ứng dụng và máy chủ trao đổi dữ liệu theo cùng một bộ quy tắc. Header \texttt{X-Message-Contract-Version} cho biết phiên bản quy tắc đang sử dụng, hiện là phiên bản 1. Metadata truyền qua \texttt{POST /sync/messages}; ảnh qua \texttt{POST /api/reports} dạng multipart với phần JSON \texttt{meta}. Batch có tối đa 50 message và 256 KiB; mỗi message có phản hồi riêng để app biết message nào nhận, trùng hoặc bị từ chối.
+Ứng dụng và máy chủ trao đổi dữ liệu theo cùng một bộ quy tắc. Header \texttt{X-Message-\allowbreak Contract-\allowbreak Version} cho biết phiên bản quy tắc đang sử dụng, hiện là phiên bản 1. Metadata truyền qua \texttt{POST /sync/messages}; ảnh qua \texttt{POST /api/reports} dạng multipart với phần JSON \texttt{meta}. Batch có tối đa 50 message và 256 KiB; mỗi message có phản hồi riêng để app biết message nào nhận, trùng hoặc bị từ chối.
 
 Payload hash dùng SHA-256 của JSON chuẩn tắc RFC 8785 \citep{rfc8785}. Phần chuẩn tắc phải tạo cùng byte ở Dart và Python, nhất là biểu diễn số và thứ tự thuộc tính. Hash ở đây kiểm tra nội dung phù hợp định danh, không tự chứng minh danh tính người gửi hoặc sự thật của hiện trường.
 
@@ -96,7 +96,7 @@ Cùng report ID được gửi lại để bổ sung ảnh hoặc dữ liệu sa
 \subsection{Dịch vụ phân cụm và hàng xem xét}
 Adapter \texttt{to\_report\_v2} chuyển báo cáo lưu trữ sang tuple thuật toán. Nhãn ngập được ánh xạ \texttt{non\_flood}$\mapsto0$, \texttt{low}$\mapsto0{,}33$, \texttt{medium}$\mapsto0{,}66$, \texttt{high}$\mapsto1$. Nếu payload có \texttt{flood}, dùng trường này. Điểm khẩn cấp đọc \texttt{urgency} hoặc suy từ mô tả. $N$ hiện là số mắc kẹt cộng số bị thương; $V$ là số nhóm yếu thế được chọn khi không có trường trực tiếp.
 
-Các ánh xạ tham số được chuẩn hóa nhằm chuyển đổi thông tin định tính thành các đại lượng số học phục vụ giải thuật. Trong quá trình vận hành, hệ thống cho phép điều phối viên can thiệp trực tiếp để hiệu chỉnh các trọng số này nếu phát hiện sai lệch so với tình hình thực tế.
+Các ánh xạ chuyển thông tin định tính thành các đại lượng số học phục vụ giải thuật. Trọng số và tham số phân cụm, xếp hạng được cấu hình trong mã nguồn backend. Điều phối viên sử dụng kết quả trên dashboard để xem xét báo cáo, xác minh thông tin, giao đội và cập nhật trạng thái cứu hộ.
 
 Báo cáo resolved/cancelled được loại khỏi cụm đang hoạt động. Cụm được tính lại khi version dữ liệu liên quan thay đổi; nếu một lần tính kéo dài, dịch vụ có cơ chế cập nhật nền. \texttt{clusterId} có thể đổi giữa lần chạy, còn \texttt{clusterKey} dùng ID nhỏ nhất trong cụm để hỗ trợ giữ lựa chọn trên giao diện. Khóa này cũng có thể đổi khi thành viên thay đổi; các thao tác điều phối cần xác nhận danh sách hiện tại.
 

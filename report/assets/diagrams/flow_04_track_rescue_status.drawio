@@ -16,7 +16,7 @@
         <mxCell id="read_local" parent="1" style="shape=cylinder3;whiteSpace=wrap;html=1;boundedLbl=1;backgroundOutline=1;size=10;fontSize=15;fontFamily=Helvetica;" value="&lt;div style=&quot;line-height:1;&quot;&gt;MẤT MẠNG:&#xa;Đọc trạng thái lưu trong&#xa;Hive Local Storage&lt;/div&gt;" vertex="1">
           <mxGeometry height="70" width="200" x="130" y="255" as="geometry" />
         </mxCell>
-        <mxCell id="call_api" parent="1" style="rounded=1;whiteSpace=wrap;html=1;fontSize=15;fontFamily=Helvetica;" value="&lt;div style=&quot;line-height:1;&quot;&gt;CÓ MẠNG:&#xa;Gọi GET /api/reports/status&#xa;(truyền danh sách report_ids)&lt;/div&gt;" vertex="1">
+        <mxCell id="call_api" parent="1" style="rounded=1;whiteSpace=wrap;html=1;fontSize=15;fontFamily=Helvetica;" value="&lt;div style=&quot;line-height:1;&quot;&gt;CÓ MẠNG:&#xa;Gọi GET /api/reports/status&#xa;(truyền danh sách ids)&lt;/div&gt;" vertex="1">
           <mxGeometry height="55" width="200" x="540" y="260" as="geometry" />
         </mxCell>
         <mxCell id="update_store" parent="1" style="rounded=1;whiteSpace=wrap;html=1;fontSize=15;fontFamily=Helvetica;" value="&lt;div style=&quot;line-height:1;&quot;&gt;Cập nhật CSDL cục bộ Hive&#xa;(Chỉ nhận trạng thái tiến, không lùi)&lt;/div&gt;" vertex="1">
@@ -25,16 +25,16 @@
         <mxCell id="status_dec" parent="1" style="rhombus;whiteSpace=wrap;html=1;fontSize=15;fontFamily=Helvetica;" value="&lt;div style=&quot;line-height:1;&quot;&gt;Phân loại trạng thái&#xa;nghiệp vụ hiện tại?&lt;/div&gt;" vertex="1">
           <mxGeometry height="70" width="180" x="350" y="430" as="geometry" />
         </mxCell>
-        <mxCell id="st_proc" parent="1" style="rounded=1;whiteSpace=wrap;html=1;fontSize=15;fontFamily=Helvetica;" value="&lt;div style=&quot;line-height:1;&quot;&gt;processing:&#xa;&#39;Đang tiếp nhận &amp;amp; phân loại&#39;&#xa;(Chờ gán đội)&lt;/div&gt;" vertex="1">
+        <mxCell id="st_proc" parent="1" style="rounded=1;whiteSpace=wrap;html=1;fontSize=15;fontFamily=Helvetica;" value="&lt;div style=&quot;line-height:1;&quot;&gt;processing:&#xa;&#x27;Đã nhận&#x27;&#xa;(Trạng thái tiếp nhận)&lt;/div&gt;" vertex="1">
           <mxGeometry height="60" width="180" x="40" y="560" as="geometry" />
         </mxCell>
-        <mxCell id="st_disp" parent="1" style="rounded=1;whiteSpace=wrap;html=1;fontSize=15;fontFamily=Helvetica;" value="&lt;div style=&quot;line-height:1;&quot;&gt;dispatched:&#xa;&#39;Đội cứu hộ đã xuất phát&#39;&#xa;(Hiển thị tên đội &amp;amp; liên hệ)&lt;/div&gt;" vertex="1">
+        <mxCell id="st_disp" parent="1" style="rounded=1;whiteSpace=wrap;html=1;fontSize=15;fontFamily=Helvetica;" value="&lt;div style=&quot;line-height:1;&quot;&gt;dispatched:&#xa;&#x27;Đang đến&#x27;&#xa;(Đã điều phối cứu hộ)&lt;/div&gt;" vertex="1">
           <mxGeometry height="60" width="190" x="245" y="560" as="geometry" />
         </mxCell>
-        <mxCell id="st_res" parent="1" style="rounded=1;whiteSpace=wrap;html=1;fontSize=15;fontFamily=Helvetica;" value="&lt;div style=&quot;line-height:1;&quot;&gt;resolved:&#xa;&#39;Đã cứu hộ thành công&#39;&#xa;(Nạn nhân đã an toàn)&lt;/div&gt;" vertex="1">
+        <mxCell id="st_res" parent="1" style="rounded=1;whiteSpace=wrap;html=1;fontSize=15;fontFamily=Helvetica;" value="&lt;div style=&quot;line-height:1;&quot;&gt;resolved:&#xa;&#x27;Hoàn thành&#x27;&#xa;(Ca cứu hộ đã hoàn tất)&lt;/div&gt;" vertex="1">
           <mxGeometry height="60" width="180" x="460" y="560" as="geometry" />
         </mxCell>
-        <mxCell id="st_canc" parent="1" style="rounded=1;whiteSpace=wrap;html=1;fontSize=15;fontFamily=Helvetica;" value="&lt;div style=&quot;line-height:1;&quot;&gt;cancelled:&#xa;&#39;Yêu cầu cứu trợ đã đóng&#39;&#xa;(Hiển thị lý do hủy ca)&lt;/div&gt;" vertex="1">
+        <mxCell id="st_canc" parent="1" style="rounded=1;whiteSpace=wrap;html=1;fontSize=15;fontFamily=Helvetica;" value="&lt;div style=&quot;line-height:1;&quot;&gt;cancelled:&#xa;&#x27;Báo cáo đã đóng&#x27;&#xa;(Thông báo trạng thái đóng ca)&lt;/div&gt;" vertex="1">
           <mxGeometry height="60" width="185" x="665" y="560" as="geometry" />
         </mxCell>
         <mxCell id="render_ui" parent="1" style="rounded=1;whiteSpace=wrap;html=1;fontSize=15;fontFamily=Helvetica;" value="&lt;div style=&quot;line-height:1;&quot;&gt;Cập nhật thanh tiến trình giao diện&#xa;(Timeline trực quan cho người dân)&lt;/div&gt;" vertex="1">

@@ -505,7 +505,7 @@ def generate_flowchart_adaptive_mobile():
     
     nodes.append(add_cell("am_sms", "MẤT MẠNG HOÀN TOÀN:\n- Kiểm tra số hotline SMS Android\n- Gửi tin SOS|id:... qua SMS\n- Giữ bản ghi trong Outbox chờ mạng", STYLE_WARN, x=40, y=670, w=200, h=65))
     nodes.append(add_cell("am_meta", "MẠNG YẾU (<50 kbps)\nhoặc (Mạnh & Conf >= 0.90):\n- Gửi metadata JSON qua\n  POST /sync/messages (<=256 KB)", STYLE_ACT, x=265, y=670, w=190, h=65))
-    nodes.append(add_cell("am_comp", "MẠNG TRUNG BÌNH (50-1000 kbps):\n- Nén JPEG (max 1024px, q=60)\n- Gửi multipart qua POST /api/reports", "rounded=1;whiteSpace=wrap;html=1;fillColor=#FFF8E1;strokeColor=#F57C00;fontSize=11;fontFamily=Helvetica;", x=480, y=670, w=200, h=65))
+    nodes.append(add_cell("am_comp", "MẠNG TRUNG BÌNH (50-1000 kbps):\n- JPEG q=60, cạnh ngắn 1024px\n- Gửi multipart qua POST /api/reports", "rounded=1;whiteSpace=wrap;html=1;fillColor=#FFF8E1;strokeColor=#F57C00;fontSize=11;fontFamily=Helvetica;", x=480, y=670, w=200, h=65))
     nodes.append(add_cell("am_orig", "MẠNG MẠNH (>=1000 kbps & Conf<0.9):\n- Giữ nguyên ảnh gốc\n- Gửi multipart POST /api/reports", STYLE_OK, x=705, y=670, w=210, h=65))
 
     nodes.append(add_cell("am_res", "Nhận phản hồi từ Server:\n- accepted: Xóa khỏi Outbox, synced=true\n- duplicate: Dùng kết quả cũ, synced=true\n- retry_later / lỗi mạng: Backoff retry\n- rejected: Chuyển dead-letter", STYLE_ACT, x=330, y=775, w=220, h=75))
@@ -1247,7 +1247,7 @@ def generate_flow_03():
     # 4 Adaptive branches matching Table 3.2
     nodes.append(add_cell("mode_sms", "1. MẤT DATA HOÀN TOÀN:\n- Gửi tin SMS SOS tóm tắt\n- Giữ Outbox chờ mạng", STYLE_WARN, x=40, y=460, w=190, h=65))
     nodes.append(add_cell("mode_meta", "2. MẠNG YẾU (<50 kbps)\nhoặc (Mạnh & Conf >= 0.90):\n- Gửi metadata JSON\n  POST /sync/messages", STYLE_ACT, x=255, y=460, w=200, h=65))
-    nodes.append(add_cell("mode_comp", "3. MẠNG TRUNG BÌNH (50-1000 kbps):\n- Nén JPEG (max 1024px, q=60)\n- Gửi multipart POST /api/reports", "rounded=1;whiteSpace=wrap;html=1;fillColor=#FFF8E1;strokeColor=#F57C00;fontSize=11;fontFamily=Helvetica;", x=480, y=460, w=215, h=65))
+    nodes.append(add_cell("mode_comp", "3. MẠNG TRUNG BÌNH (50-1000 kbps):\n- JPEG q=60, cạnh ngắn 1024px\n- Gửi multipart POST /api/reports", "rounded=1;whiteSpace=wrap;html=1;fillColor=#FFF8E1;strokeColor=#F57C00;fontSize=11;fontFamily=Helvetica;", x=480, y=460, w=215, h=65))
     nodes.append(add_cell("mode_orig", "4. MẠNG MẠNH (>=1000 kbps & Conf<0.9):\n- Giữ nguyên ảnh gốc\n- Gửi multipart POST /api/reports", STYLE_OK, x=720, y=460, w=220, h=65))
 
     # Merge
@@ -1292,16 +1292,16 @@ def generate_flow_04():
     nodes.append(add_cell("net_check", "Có kết nối\nmạng?", STYLE_DEC, x=370, y=185, w=140, h=65))
 
     nodes.append(add_cell("read_local", "MẤT MẠNG:\nĐọc trạng thái lưu trong\nHive Local Storage", STYLE_DB, x=150, y=280, w=190, h=55))
-    nodes.append(add_cell("call_api", "CÓ MẠNG:\nGọi GET /api/reports/status\n(truyền danh sách report_ids)", STYLE_ACT, x=540, y=280, w=200, h=55))
+    nodes.append(add_cell("call_api", "CÓ MẠNG:\nGọi GET /api/reports/status\n(truyền danh sách ids)", STYLE_ACT, x=540, y=280, w=200, h=55))
 
     nodes.append(add_cell("update_store", "Cập nhật CSDL cục bộ Hive\n(Chỉ nhận trạng thái tiến, không lùi)", STYLE_ACT, x=340, y=370, w=200, h=55))
     nodes.append(add_cell("status_dec", "Phân loại trạng thái\nnghiệp vụ hiện tại?", STYLE_DEC, x=350, y=455, w=180, h=70))
 
     # 4 Status states
-    nodes.append(add_cell("st_proc", "processing:\n'Đang tiếp nhận & phân loại'\n(Chờ gán đội)", STYLE_ACT, x=40, y=560, w=180, h=60))
-    nodes.append(add_cell("st_disp", "dispatched:\n'Đội cứu hộ đã xuất phát'\n(Hiển thị tên đội & liên hệ)", STYLE_OK, x=245, y=560, w=190, h=60))
-    nodes.append(add_cell("st_res", "resolved:\n'Đã cứu hộ thành công'\n(Nạn nhân đã an toàn)", STYLE_OK, x=460, y=560, w=180, h=60))
-    nodes.append(add_cell("st_canc", "cancelled:\n'Yêu cầu cứu trợ đã đóng'\n(Hiển thị lý do hủy ca)", STYLE_WARN, x=665, y=560, w=185, h=60))
+    nodes.append(add_cell("st_proc", "processing:\n'Đã nhận'\n(Trạng thái tiếp nhận)", STYLE_ACT, x=40, y=560, w=180, h=60))
+    nodes.append(add_cell("st_disp", "dispatched:\n'Đang đến'\n(Đã điều phối cứu hộ)", STYLE_OK, x=245, y=560, w=190, h=60))
+    nodes.append(add_cell("st_res", "resolved:\n'Hoàn thành'\n(Ca cứu hộ đã hoàn tất)", STYLE_OK, x=460, y=560, w=180, h=60))
+    nodes.append(add_cell("st_canc", "cancelled:\n'Báo cáo đã đóng'\n(Thông báo trạng thái đóng ca)", STYLE_WARN, x=665, y=560, w=185, h=60))
 
     # Merge
     nodes.append(add_cell("render_ui", "Cập nhật thanh tiến trình giao diện\n(Timeline trực quan cho người dân)", STYLE_ACT, x=340, y=655, w=200, h=50))
@@ -1485,18 +1485,18 @@ def generate_flow_09():
     # --- ROW 1: Data Preparation & Architecture (Left to Right ->) ---
     nodes.append(add_cell("start", "Bắt đầu", STYLE_START, x=50, y=78, w=70, h=38))
     nodes.append(add_cell("dataset", "Tập dữ liệu ảnh bão lũ cứu hộ:\n1.702 mẫu ảnh (4 mức ngập:\nnon_flood, low, medium, high)", STYLE_DB, x=140, y=65, w=200, h=65))
-    nodes.append(add_cell("strat_split", "Phân chia Stratified Split (Seed 42):\n- Train Set (70%): ~1.192 ảnh\n- Validation Set (15%): ~254 ảnh\n- Test Set độc lập (15%): 256 ảnh", STYLE_ACT, x=370, y=65, w=220, h=65))
+    nodes.append(add_cell("strat_split", "Chia tập cố định theo CSV:\n- Train: 1.189 ảnh\n- Validation: 257 ảnh\n- Test độc lập: 256 ảnh", STYLE_ACT, x=370, y=65, w=220, h=65))
     nodes.append(add_cell("augment", "Tiền xử lý & Tăng cường ảnh:\n- Letterbox Resize 256x256 RGB\n- RandomHorizontalFlip, ColorJitter\n- Normalization ImageNet stats", STYLE_ACT, x=620, y=65, w=220, h=65))
     nodes.append(add_cell("init_arch", "MobileNetV3-Large Backbone\nThay thế Classifier Head tùy biến:\nDropout(0.25) -> Linear(1280, 4)", STYLE_AI, x=870, y=65, w=220, h=65))
 
     # --- ROW 2: Training & Checkpoint Selection (Right to Left <-) ---
     nodes.append(add_cell("phase1", "Pha 1: Khóa Backbone (eval mode)\nHuấn luyện Classifier Head\n(3 epoch khởi tạo)", STYLE_ACT, x=870, y=200, w=220, h=65))
-    nodes.append(add_cell("phase2", "Pha 2: Mở toàn bộ mạng\nFine-tuning AdamW + CosineAnnealing\nLoss: CrossEntropy + 0.1 SeverityLoss", STYLE_AI, x=620, y=200, w=220, h=65))
-    nodes.append(add_cell("val_check", "Đánh giá Validation Set:\nVal Loss & Tỷ lệ lỗi nặng\n(Early Stopping patience=7)?", STYLE_DEC, x=380, y=200, w=200, h=65))
-    nodes.append(add_cell("best_ckpt", "Lưu Checkpoint tối ưu nhất\n(Accuracy: ~75.78%,\nMacro-F1: ~74.26%)", STYLE_OK, x=140, y=200, w=200, h=65))
+    nodes.append(add_cell("phase2", "Pha 2: Mở toàn bộ mạng\nAdamW; ReduceLROnPlateau\nLoss: CrossEntropy + 0.1 SeverityLoss", STYLE_AI, x=620, y=200, w=220, h=65))
+    nodes.append(add_cell("val_check", "Validation:\nAccuracy, lỗi nặng\nPatience 7", STYLE_DEC, x=380, y=200, w=200, h=65))
+    nodes.append(add_cell("best_ckpt", "Lưu checkpoint theo validation:\nƯu tiên Accuracy;\nphân xử bằng lỗi nặng", STYLE_OK, x=140, y=200, w=200, h=65))
 
     # --- ROW 3: Test Evaluation, Compression & Dual Export (Left to Right ->) ---
-    nodes.append(add_cell("test_eval", "Đánh giá trên Test Set độc lập:\n- 256 ảnh kiểm định độc lập\n- Confusion Matrix & Macro-F1\n- Kiểm tra tỷ lệ lỗi nghiêm trọng", STYLE_ACT, x=140, y=335, w=200, h=65))
+    nodes.append(add_cell("test_eval", "Đánh giá test: 256 ảnh\nFP32 seed 1024:\nAccuracy 75,78%; F1 74,26%\n3 lỗi lệch từ hai mức", STYLE_ACT, x=140, y=335, w=200, h=65))
     nodes.append(add_cell("pruning_opt", "Tối ưu hóa nén mô hình:\n- Cắt tỉa kênh L1 Pruning (tỷ lệ 1%)\n- Lượng tử hóa INT8 (PTQ/QAT QDQ)", STYLE_ACT, x=370, y=335, w=220, h=65))
     nodes.append(add_cell("export_dual", "Xuất định dạng Runtime di động kép:\n1) ONNX Model (.onnx) qua onnxruntime\n2) ExecuTorch Program (.pte) di động", STYLE_OK, x=620, y=335, w=220, h=65))
     nodes.append(add_cell("mobile_deploy", "Tích hợp Flutter Edge App:\nSuy luận On-device thời gian thực\n(Hoạt động hoàn toàn Offline)", STYLE_ACT, x=870, y=335, w=155, h=65))

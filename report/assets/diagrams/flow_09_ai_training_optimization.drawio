@@ -19,7 +19,7 @@
         <mxCell id="dataset" parent="1" style="shape=cylinder3;whiteSpace=wrap;html=1;boundedLbl=1;backgroundOutline=1;size=10;fontSize=13;fontFamily=Helvetica;" value="&lt;div style=&quot;line-height:1;&quot;&gt;Tập dữ liệu ảnh bão lũ cứu hộ:&#xa;1.702 mẫu ảnh (4 mức ngập:&#xa;non_flood, low, medium, high)&lt;/div&gt;" vertex="1">
           <mxGeometry height="65" width="200" x="140" y="65" as="geometry" />
         </mxCell>
-        <mxCell id="strat_split" parent="1" style="rounded=1;whiteSpace=wrap;html=1;fontSize=13;fontFamily=Helvetica;" value="&lt;div style=&quot;line-height:1;&quot;&gt;Phân chia Stratified Split (Seed 42):&#xa;- Train Set (70%): ~1.192 ảnh&#xa;- Validation Set (15%): ~254 ảnh&#xa;- Test Set độc lập (15%): 256 ảnh&lt;/div&gt;" vertex="1">
+        <mxCell id="strat_split" parent="1" style="rounded=1;whiteSpace=wrap;html=1;fontSize=13;fontFamily=Helvetica;" value="&lt;div style=&quot;line-height:1;&quot;&gt;Chia tập cố định theo CSV:&#xa;- Train: 1.189 ảnh&#xa;- Validation: 257 ảnh&#xa;- Test độc lập: 256 ảnh&lt;/div&gt;" vertex="1">
           <mxGeometry height="65" width="220" x="370" y="65" as="geometry" />
         </mxCell>
         <mxCell id="augment" parent="1" style="rounded=1;whiteSpace=wrap;html=1;fontSize=13;fontFamily=Helvetica;" value="&lt;div style=&quot;line-height:1;&quot;&gt;Tiền xử lý &amp;amp; Tăng cường ảnh:&#xa;- Letterbox Resize 256x256 RGB&#xa;- RandomHorizontalFlip, ColorJitter&#xa;- Normalization ImageNet stats&lt;/div&gt;" vertex="1">
@@ -31,16 +31,16 @@
         <mxCell id="phase1" parent="1" style="rounded=1;whiteSpace=wrap;html=1;fontSize=13;fontFamily=Helvetica;" value="&lt;div style=&quot;line-height:1;&quot;&gt;Pha 1: Khóa Backbone (eval mode)&#xa;Huấn luyện Classifier Head&#xa;(3 epoch khởi tạo)&lt;/div&gt;" vertex="1">
           <mxGeometry height="65" width="220" x="870" y="200" as="geometry" />
         </mxCell>
-        <mxCell id="phase2" parent="1" style="rounded=1;whiteSpace=wrap;html=1;fontSize=13;fontFamily=Helvetica;" value="&lt;div style=&quot;line-height:1;&quot;&gt;Pha 2: Mở toàn bộ mạng&#xa;Fine-tuning AdamW + CosineAnnealing&#xa;Loss: CrossEntropy + 0.1 SeverityLoss&lt;/div&gt;" vertex="1">
+        <mxCell id="phase2" parent="1" style="rounded=1;whiteSpace=wrap;html=1;fontSize=13;fontFamily=Helvetica;" value="&lt;div style=&quot;line-height:1;&quot;&gt;Pha 2: Mở toàn bộ mạng&#xa;AdamW; ReduceLROnPlateau&#xa;Loss: CrossEntropy + 0.1 SeverityLoss&lt;/div&gt;" vertex="1">
           <mxGeometry height="65" width="220" x="620" y="200" as="geometry" />
         </mxCell>
-        <mxCell id="val_check" parent="1" style="rhombus;whiteSpace=wrap;html=1;fontSize=13;fontFamily=Helvetica;" value="&lt;div style=&quot;line-height:1;&quot;&gt;Đánh giá Validation Set:&#xa;Val Loss &amp;amp; Tỷ lệ lỗi nặng&#xa;(Early Stopping patience=7)?&lt;/div&gt;" vertex="1">
+        <mxCell id="val_check" parent="1" style="rhombus;whiteSpace=wrap;html=1;fontSize=13;fontFamily=Helvetica;" value="&lt;div style=&quot;line-height:1;&quot;&gt;Validation:&#xa;Accuracy, lỗi nặng&#xa;Patience 7&lt;/div&gt;" vertex="1">
           <mxGeometry height="65" width="213" x="367" y="200" as="geometry" />
         </mxCell>
-        <mxCell id="best_ckpt" parent="1" style="rounded=1;whiteSpace=wrap;html=1;fontSize=13;fontFamily=Helvetica;" value="&lt;div style=&quot;line-height:1;&quot;&gt;Lưu Checkpoint tối ưu nhất&#xa;(Accuracy: ~75.78%,&#xa;Macro-F1: ~74.26%)&lt;/div&gt;" vertex="1">
+        <mxCell id="best_ckpt" parent="1" style="rounded=1;whiteSpace=wrap;html=1;fontSize=13;fontFamily=Helvetica;" value="&lt;div style=&quot;line-height:1;&quot;&gt;Lưu checkpoint theo validation:&#xa;Ưu tiên Accuracy;&#xa;phân xử bằng lỗi nặng&lt;/div&gt;" vertex="1">
           <mxGeometry height="65" width="200" x="73" y="200" as="geometry" />
         </mxCell>
-        <mxCell id="test_eval" parent="1" style="rounded=1;whiteSpace=wrap;html=1;fontSize=13;fontFamily=Helvetica;" value="&lt;div style=&quot;line-height:1;&quot;&gt;Đánh giá trên Test Set độc lập:&#xa;- 256 ảnh kiểm định độc lập&#xa;- Confusion Matrix &amp;amp; Macro-F1&#xa;- Kiểm tra tỷ lệ lỗi nghiêm trọng&lt;/div&gt;" vertex="1">
+        <mxCell id="test_eval" parent="1" style="rounded=1;whiteSpace=wrap;html=1;fontSize=13;fontFamily=Helvetica;" value="&lt;div style=&quot;line-height:1;&quot;&gt;Đánh giá test: 256 ảnh&#xa;FP32 seed 1024:&#xa;Accuracy 75,78%; F1 74,26%&#xa;3 lỗi lệch từ hai mức&lt;/div&gt;" vertex="1">
           <mxGeometry height="65" width="200" x="73" y="335" as="geometry" />
         </mxCell>
         <mxCell id="pruning_opt" parent="1" style="rounded=1;whiteSpace=wrap;html=1;fontSize=13;fontFamily=Helvetica;" value="&lt;div style=&quot;line-height:1;&quot;&gt;Tối ưu hóa nén mô hình:&#xa;- Cắt tỉa kênh L1 Pruning (tỷ lệ 1%)&#xa;- Lượng tử hóa INT8 (PTQ/QAT QDQ)&lt;/div&gt;" vertex="1">
