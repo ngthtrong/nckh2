@@ -52,6 +52,7 @@
   \def\FormHeading{\FormReferenceHeader{6}{70}}}
 \newcommand{\FormSetupSummaryEN}{%
   \FormGeometry{85.70}{49.68}{189.07}{12.96}%
+  \fontsize{12.96bp}{19.44bp}\selectfont
   \setlength{\parskip}{7.54bp}%
   \def\FormHeading{\FormReferenceHeader{7}{70}}}
 \renewenvironment{officialform}[1][VI]{%
@@ -76,10 +77,10 @@
   Ngày \ldots\ tháng \ldots\ năm \ldots\\\textbf{#1}\par
   \vspace{59.8bp}\textbf{#2}\par\end{minipage}\par}
 \newcommand{\FormReviewSignature}{%
-  \FormTextAt{365.11}{178.21}{12}{Ngày \ldots\ tháng \ldots\ năm \ldots}%
+  \FormTextAt{424.60}{178.21}{12}{\makebox[0pt][c]{Ngày \ldots\ tháng \ldots\ năm \ldots}}%
   \FormTextAt{103.10}{192.01}{12}{\bfseries Xác nhận của Đại học Cần Thơ}%
-  \FormTextAt{377.60}{192.01}{12}{\bfseries Người hướng dẫn}%
-  \FormTextAt{385.51}{302.41}{12}{\bfseries\SupervisorName}}
+  \FormTextAt{424.60}{192.01}{12}{\makebox[0pt][c]{\bfseries Người hướng dẫn}}%
+  \FormTextAt{424.60}{302.41}{12}{\makebox[0pt][c]{\bfseries\SupervisorName}}}
 \newcommand{\StudentPhoto}{%
   \AddToShipoutPictureFG*{\AtPageUpperLeft{%
     \put(\LenToUnit{417bp},\LenToUnit{-156.15bp}){%
