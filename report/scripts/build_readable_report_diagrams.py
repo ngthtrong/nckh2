@@ -411,9 +411,13 @@ def research_pipeline():
 
 
 def main():
+    import build_requested_figure_revisions as revised
     REVIEW.mkdir(parents=True,exist_ok=True)
     results={};errors=[];combined=ET.Element('mxfile',host='app.diagrams.net')
-    for factory in [erd,usecase_overall,usecase_mobile,usecase_dashboard,tracking,compose,deployment,adaptive,status_machine,training,clustering,research_pipeline]:
+    for factory in [revised.erd,usecase_overall,usecase_mobile,usecase_dashboard,
+                    revised.tracking,revised.compose,revised.deployment,revised.adaptive,
+                    status_machine,revised.training,clustering,revised.research_pipeline,
+                    revised.overview,revised.ingestion,revised.lifecycle]:
         d=factory()
         try:results[d.name]=d.save(ROOT/'assets/diagrams',REVIEW/'previews')
         except ValueError as exc:errors.append(str(exc));continue

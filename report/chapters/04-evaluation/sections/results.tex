@@ -113,14 +113,12 @@ Model cắt tỉa đạt Accuracy \PruningAccuracy\% và macro-F1 \PruningMacroF
 
 Độ trễ trước/sau cắt tỉa phải được so trong cùng runtime và cùng phiên. Ít tham số hơn không bảo đảm runtime nhanh hơn, vì kernel, bố trí graph và backend có thể khác. Một phiên đo CPU chưa đủ để khẳng định ưu thế hiệu năng tổng quát hoặc tốc độ trên điện thoại.
 
-\begin{landscape}
 \begin{figure}[p]\centering
 \setlength{\abovecaptionskip}{4pt}
-\includegraphics[width=\linewidth]{compression-tradeoffs.pdf}
+\includegraphics[width=\textwidth]{compression-tradeoffs.pdf}
 \caption{Đánh đổi dung lượng--accuracy theo summary nén và độ trễ trước/sau cắt tỉa}
 \label{fig:compression-tradeoffs}
 \end{figure}
-\end{landscape}
 
 \subsection{Khẩn cấp LR: độ khớp nhãn thay thế}
 JSON v5 ghi fidelity trên 32 trạng thái tại threshold 0,5 bằng 1,0. Bảng so sánh với quy tắc cho thấy tất cả profile khớp nhãn OR. Các audit dataset/final gate ghi kiểm tra integrity; audit nguồn giữ các trạng thái có điều kiện và thay đổi sau rà soát, không chuyển mọi hạng mục thành một phát biểu ``pass'' vô điều kiện.

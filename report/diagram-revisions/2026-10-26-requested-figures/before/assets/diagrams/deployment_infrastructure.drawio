@@ -1,0 +1,127 @@
+<?xml version='1.0' encoding='utf-8'?>
+<mxfile host="app.diagrams.net" version="26.0.0">
+  <diagram id="deployment_infrastructure" name="Triển khai Docker Compose">
+    <mxGraphModel page="1" pageScale="1" pageWidth="728.503937007874" pageHeight="405" math="0" grid="0" shadow="0">
+      <root>
+        <mxCell id="0" />
+        <mxCell id="1" parent="0" />
+        <mxCell id="node1" parent="1" vertex="1" style="rounded=0;fillColor=#FFFFFF;strokeColor=#111111;strokeWidth=0.9;dashed=0;">
+          <mxGeometry x="225" y="20" width="335" height="330" as="geometry" />
+        </mxCell>
+        <mxCell id="text2" parent="1" vertex="1" value="&lt;div&gt;«device» HOST DOCKER COMPOSE&lt;/div&gt;" style="text;html=1;whiteSpace=wrap;align=left;verticalAlign=middle;fontFamily=DejaVu Sans;fontSize=11;fontStyle=1;fontColor=#111111;spacing=0;overflow=visible;">
+          <mxGeometry x="234.0" y="28.599999999999966" width="213.41000000000008" height="12.799999999999955" as="geometry" />
+        </mxCell>
+        <mxCell id="node3" parent="1" vertex="1" style="rounded=1;fillColor=#FFFFFF;strokeColor=#111111;strokeWidth=0.9;dashed=0;">
+          <mxGeometry x="244" y="69" width="295" height="62" as="geometry" />
+        </mxCell>
+        <mxCell id="text4" parent="1" vertex="1" value="&lt;div&gt;«container» be · FastAPI / Uvicorn&lt;br&gt;rescue_core; Louvain và ưu tiên&lt;br&gt;Mặc định :8000 → container :8000&lt;/div&gt;" style="text;html=1;whiteSpace=wrap;align=center;verticalAlign=middle;fontFamily=DejaVu Sans;fontSize=10;fontStyle=0;fontColor=#111111;spacing=0;overflow=visible;">
+          <mxGeometry x="305.045" y="82.43437499999999" width="172.91000000000003" height="35.13125000000002" as="geometry" />
+        </mxCell>
+        <mxCell id="node5" parent="1" vertex="1" style="rounded=1;fillColor=#FFFFFF;strokeColor=#111111;strokeWidth=0.9;dashed=0;">
+          <mxGeometry x="244" y="163" width="139" height="60" as="geometry" />
+        </mxCell>
+        <mxCell id="text6" parent="1" vertex="1" value="&lt;div&gt;«container» dashboard&lt;br&gt;Nginx · HTML/JS/Leaflet&lt;br&gt;:8080 → :80&lt;/div&gt;" style="text;html=1;whiteSpace=wrap;align=center;verticalAlign=middle;fontFamily=DejaVu Sans;fontSize=10;fontStyle=0;fontColor=#111111;spacing=0;overflow=visible;">
+          <mxGeometry x="254.405" y="175.69199999999998" width="118.18999999999997" height="34.615999999999985" as="geometry" />
+        </mxCell>
+        <mxCell id="node7" parent="1" vertex="1" style="rounded=1;fillColor=#FFFFFF;strokeColor=#111111;strokeWidth=0.9;dashed=0;">
+          <mxGeometry x="400" y="163" width="139" height="60" as="geometry" />
+        </mxCell>
+        <mxCell id="text8" parent="1" vertex="1" value="&lt;div&gt;«container» fe&lt;br&gt;Nginx · Flutter Web&lt;br&gt;:8081 → :80&lt;/div&gt;" style="text;html=1;whiteSpace=wrap;align=center;verticalAlign=middle;fontFamily=DejaVu Sans;fontSize=10;fontStyle=0;fontColor=#111111;spacing=0;overflow=visible;">
+          <mxGeometry x="420.30500000000006" y="175.69199999999998" width="98.38999999999999" height="34.615999999999985" as="geometry" />
+        </mxCell>
+        <mxCell id="node9" parent="1" vertex="1" style="rounded=1;fillColor=#FFFFFF;strokeColor=#111111;strokeWidth=0.9;dashed=0;">
+          <mxGeometry x="244" y="267" width="295" height="65" as="geometry" />
+        </mxCell>
+        <mxCell id="text10" parent="1" vertex="1" value="&lt;div&gt;«volume» be-data → /var/lib/rescue&lt;br&gt;SQLite WAL: rescue_reports.db&lt;br&gt;Ảnh: uploads/; backup: backups/&lt;/div&gt;" style="text;html=1;whiteSpace=wrap;align=center;verticalAlign=middle;fontFamily=DejaVu Sans;fontSize=10;fontStyle=0;fontColor=#111111;spacing=0;overflow=visible;">
+          <mxGeometry x="301.985" y="280.91878125" width="179.03000000000003" height="37.16243750000001" as="geometry" />
+        </mxCell>
+        <mxCell id="node11" parent="1" vertex="1" style="rounded=1;fillColor=#FFFFFF;strokeColor=#111111;strokeWidth=0.9;dashed=0;">
+          <mxGeometry x="10" y="70" width="177" height="62" as="geometry" />
+        </mxCell>
+        <mxCell id="text12" parent="1" vertex="1" value="&lt;div&gt;«device» Android&lt;br&gt;GPS, Camera, Hive&lt;br&gt;ONNX / ExecuTorch tại biên&lt;/div&gt;" style="text;html=1;whiteSpace=wrap;align=center;verticalAlign=middle;fontFamily=DejaVu Sans;fontSize=10;fontStyle=0;fontColor=#111111;spacing=0;overflow=visible;">
+          <mxGeometry x="29.369999999999997" y="83.69199999999995" width="138.26000000000002" height="34.615999999999985" as="geometry" />
+        </mxCell>
+        <mxCell id="node13" parent="1" vertex="1" style="rounded=1;fillColor=#FFFFFF;strokeColor=#111111;strokeWidth=0.9;dashed=0;">
+          <mxGeometry x="10" y="174" width="177" height="60" as="geometry" />
+        </mxCell>
+        <mxCell id="text14" parent="1" vertex="1" value="&lt;div&gt;«device» máy điều phối&lt;br&gt;Trình duyệt Web GIS&lt;br&gt;HTTP :8080&lt;/div&gt;" style="text;html=1;whiteSpace=wrap;align=center;verticalAlign=middle;fontFamily=DejaVu Sans;fontSize=10;fontStyle=0;fontColor=#111111;spacing=0;overflow=visible;">
+          <mxGeometry x="37.695" y="185.94499999999996" width="121.61000000000004" height="36.110000000000014" as="geometry" />
+        </mxCell>
+        <mxCell id="node15" parent="1" vertex="1" style="rounded=1;fillColor=#FFFFFF;strokeColor=#111111;strokeWidth=0.9;dashed=0;">
+          <mxGeometry x="10" y="278" width="177" height="60" as="geometry" />
+        </mxCell>
+        <mxCell id="text16" parent="1" vertex="1" value="&lt;div&gt;«device» trình duyệt thử&lt;br&gt;Ứng dụng Flutter Web&lt;br&gt;HTTP :8081&lt;/div&gt;" style="text;html=1;whiteSpace=wrap;align=center;verticalAlign=middle;fontFamily=DejaVu Sans;fontSize=10;fontStyle=0;fontColor=#111111;spacing=0;overflow=visible;">
+          <mxGeometry x="35.805" y="289.313875" width="125.39000000000001" height="37.37225000000001" as="geometry" />
+        </mxCell>
+        <mxCell id="node17" parent="1" vertex="1" style="rounded=1;fillColor=#FFFFFF;strokeColor=#111111;strokeWidth=0.9;dashed=0;">
+          <mxGeometry x="584" y="70" width="134" height="62" as="geometry" />
+        </mxCell>
+        <mxCell id="text18" parent="1" vertex="1" value="&lt;div&gt;«external system»&lt;br&gt;SMS gateway&lt;br&gt;/api/sms/inbound&lt;/div&gt;" style="text;html=1;whiteSpace=wrap;align=center;verticalAlign=middle;fontFamily=DejaVu Sans;fontSize=10;fontStyle=0;fontColor=#111111;spacing=0;overflow=visible;">
+          <mxGeometry x="603.695" y="83.69199999999995" width="94.61000000000001" height="34.615999999999985" as="geometry" />
+        </mxCell>
+        <mxCell id="text19" parent="1" vertex="1" value="&lt;div&gt;HTTP&lt;/div&gt;" style="text;html=1;whiteSpace=wrap;align=center;verticalAlign=middle;fontFamily=DejaVu Sans;fontSize=9;fontStyle=0;fontColor=#111111;spacing=0;overflow=visible;">
+          <mxGeometry x="202.435" y="80.32" width="25.129999999999995" height="11.359999999999957" as="geometry" />
+        </mxCell>
+        <mxCell id="edge20" parent="1" edge="1" style="html=1;rounded=0;strokeColor=#111111;strokeWidth=0.9;dashed=0;endArrow=classic;startArrow=none;exitX=1.0;exitY=0.5;entryX=0.0;entryY=0.5161290322580645;" source="node11" target="node3">
+          <mxGeometry relative="1" as="geometry">
+            <mxPoint x="187" y="101" as="sourcePoint" />
+            <mxPoint x="244" y="101" as="targetPoint" />
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="edge21" parent="1" edge="1" style="html=1;rounded=0;strokeColor=#111111;strokeWidth=0.9;dashed=0;endArrow=classic;startArrow=none;exitX=1.0;exitY=0.5;entryX=0.0;entryY=0.5;" source="node13" target="node5">
+          <mxGeometry relative="1" as="geometry">
+            <mxPoint x="187" y="204" as="sourcePoint" />
+            <mxPoint x="244" y="193" as="targetPoint" />
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="edge22" parent="1" edge="1" style="html=1;rounded=0;strokeColor=#111111;strokeWidth=0.9;dashed=0;endArrow=classic;startArrow=none;exitX=1.0;exitY=0.5;entryX=0.5035971223021583;entryY=1.0;" source="node15" target="node7">
+          <mxGeometry relative="1" as="geometry">
+            <mxPoint x="187" y="308" as="sourcePoint" />
+            <mxPoint x="470" y="223" as="targetPoint" />
+            <Array as="points">
+              <mxPoint x="211" y="308" />
+              <mxPoint x="211" y="236" />
+              <mxPoint x="470" y="236" />
+            </Array>
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="edge23" parent="1" edge="1" style="html=1;rounded=0;strokeColor=#111111;strokeWidth=0.9;dashed=0;endArrow=classic;startArrow=none;exitX=0.0;exitY=0.5;entryX=1.0;entryY=0.5161290322580645;" source="node17" target="node3">
+          <mxGeometry relative="1" as="geometry">
+            <mxPoint x="584" y="101" as="sourcePoint" />
+            <mxPoint x="539" y="101" as="targetPoint" />
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="edge24" parent="1" edge="1" style="html=1;rounded=0;strokeColor=#111111;strokeWidth=0.9;dashed=0;endArrow=classic;startArrow=none;exitX=0.49640287769784175;exitY=0.0;entryX=0.23389830508474577;entryY=1.0;" source="node5" target="node3">
+          <mxGeometry relative="1" as="geometry">
+            <mxPoint x="313" y="163" as="sourcePoint" />
+            <mxPoint x="313" y="131" as="targetPoint" />
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="edge25" parent="1" edge="1" style="html=1;rounded=0;strokeColor=#111111;strokeWidth=0.9;dashed=0;endArrow=classic;startArrow=none;exitX=0.5035971223021583;exitY=0.0;entryX=0.7661016949152543;entryY=1.0;" source="node7" target="node3">
+          <mxGeometry relative="1" as="geometry">
+            <mxPoint x="470" y="163" as="sourcePoint" />
+            <mxPoint x="470" y="131" as="targetPoint" />
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="text26" parent="1" vertex="1" value="&lt;div&gt;Proxy API → be:8000&lt;/div&gt;" style="text;html=1;whiteSpace=wrap;align=center;verticalAlign=middle;fontFamily=DejaVu Sans;fontSize=9;fontStyle=0;fontColor=#111111;spacing=0;overflow=visible;">
+          <mxGeometry x="342.875" y="141.31999999999994" width="94.25" height="11.360000000000014" as="geometry" />
+        </mxCell>
+        <mxCell id="edge27" parent="1" edge="1" style="html=1;rounded=0;strokeColor=#111111;strokeWidth=0.9;dashed=0;endArrow=classic;startArrow=none;exitX=0.5016949152542373;exitY=1.0;entryX=0.5016949152542373;entryY=0.0;" source="node3" target="node9">
+          <mxGeometry relative="1" as="geometry">
+            <mxPoint x="392" y="131" as="sourcePoint" />
+            <mxPoint x="392" y="267" as="targetPoint" />
+            <Array as="points">
+              <mxPoint x="392" y="251" />
+            </Array>
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="text28" parent="1" vertex="1" value="&lt;div&gt;Cổng là giá trị mặc định, có thể cấu hình qua biến môi trường. Volume giữ dữ liệu khi container được tạo lại.&lt;/div&gt;" style="text;html=1;whiteSpace=wrap;align=left;verticalAlign=middle;fontFamily=DejaVu Sans;fontSize=9.5;fontStyle=0;fontColor=#111111;spacing=0;overflow=visible;">
+          <mxGeometry x="9.0" y="374.96" width="522.3800000000001" height="12.079999999999984" as="geometry" />
+        </mxCell>
+        <mxCell id="text29" parent="1" vertex="1" value="&lt;div&gt;SMS cần gateway token; điện thoại thật phải truy cập được backend. Không đồng nhất Flutter Web với suy luận native Android.&lt;/div&gt;" style="text;html=1;whiteSpace=wrap;align=left;verticalAlign=middle;fontFamily=DejaVu Sans;fontSize=9;fontStyle=0;fontColor=#111111;spacing=0;overflow=visible;">
+          <mxGeometry x="9.0" y="392.00499999999994" width="577.5500000000002" height="11.990000000000009" as="geometry" />
+        </mxCell>
+      </root>
+    </mxGraphModel>
+  </diagram>
+</mxfile>
