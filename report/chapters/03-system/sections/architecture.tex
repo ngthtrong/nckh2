@@ -105,7 +105,7 @@ Dashboard là HTML, ES module và CSS phục vụ từ backend hoặc nginx. Lea
 
 Điều phối viên có thể lọc theo trạng thái/cụm, xem chi tiết, gán đội, ghi chú, cập nhật vị trí và chuyển trạng thái. API quản trị hỗ trợ quản lý tài khoản và sao lưu. Nhật ký \texttt{report\_events} ghi actor, nguồn và thời gian thao tác để theo dõi quá trình xử lý. Ứng dụng di động định kỳ đồng bộ trạng thái báo cáo từ máy chủ để hiển thị phản hồi kịp thời cho người dân.
 
-\subsection{Ranh giới phân tách dữ liệu và hỗ trợ ra quyết định}
+\subsection{Luồng xử lý dữ liệu và hỗ trợ điều phối}
 Sơ đồ tại Hình~\ref{fig:research-pipeline} thể hiện ranh giới phân tách dữ liệu của hệ thống: các trường thông tin quan sát trực tiếp được đưa vào giải thuật gom cụm đồ thị và xếp hạng ưu tiên; các báo cáo thiếu thông tin vị trí được chuyển vào hàng đợi xem xét riêng; trong khi nhãn thực tế được bảo toàn độc lập phục vụ kiểm chứng thực nghiệm. Trên hệ thống vận hành thực tế, danh sách ưu tiên đóng vai trò hỗ trợ điều phối viên ra quyết định phân bổ nguồn lực, đảm bảo tính linh hoạt và an toàn trong tác chiến cứu hộ.
 \begin{figure}[htbp]
 \centering\includegraphics[width=\textwidth]{../paper/figures/pipeline_v2.pdf}
