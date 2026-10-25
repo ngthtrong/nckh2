@@ -14,7 +14,7 @@ Hạ tầng máy chủ được đóng gói thành ba dịch vụ chính bằng 
 \subsection{Nạp mô hình và kiểm tra asset}
 Mô hình học sâu MobileNetV3 sau khi tối ưu hóa được đóng gói trong thư mục tài nguyên (\texttt{assets}) của ứng dụng di động dưới định dạng ExecuTorch (PTE), phục vụ nhận diện ngoại tuyến mặc định. Quản trị viên đã đăng nhập có thể tải mô hình ONNX từ máy chủ để so sánh với PTE. Quá trình tải và nạp đối chiếu mã SHA-256 với manifest để bảo đảm hai mô hình thuộc cùng bộ trọng số; đầu vào và thứ tự lớp được giữ theo cấu hình triển khai.
 
-Ứng dụng di động nạp và thực thi mô hình ONNX qua thư viện ONNX Runtime native, và gọi mô hình ExecuTorch thông qua cầu nối Android MethodChannel. Đối với mô hình đánh giá mức độ khẩn cấp, ứng dụng đọc cấu hình hệ số từ tệp cấu hình JSON; bộ phân tích cú pháp xác thực tính hợp lệ của lược đồ, các trọng số và năm dấu hiệu khẩn cấp được người dùng lựa chọn. Điểm LR được gửi trong trường \texttt{E\_i}; theo thiết kế, backend kết hợp điểm này với thông tin \texttt{urgency} để phục vụ tính toán khẩn cấp. Trường hợp mô hình AI chưa sẵn sàng hoặc gặp lỗi trong quá trình khởi tạo, hệ thống tự động kích hoạt cơ chế dự phòng an toàn (fallback), cho phép người dùng tiếp tục gửi báo cáo với các thông tin nhập liệu thông thường mà không làm gián đoạn quy trình cứu nạn.
+Ứng dụng di động nạp và thực thi mô hình ONNX qua thư viện ONNX Runtime native, và gọi mô hình ExecuTorch thông qua cầu nối Android MethodChannel. Đối với mô hình đánh giá mức độ khẩn cấp, ứng dụng đọc cấu hình hệ số từ tệp cấu hình JSON; bộ phân tích cú pháp xác thực tính hợp lệ của lược đồ, các trọng số và năm dấu hiệu khẩn cấp được người dùng lựa chọn. Điểm LR được gửi trong trường \texttt{E\_i}; adapter backend hiện chưa đọc trường này, mà lấy \texttt{urgency} hoặc suy từ mô tả như đã nêu ở Mục~\ref{sec:03-system-architecture}. Trường hợp mô hình AI chưa sẵn sàng hoặc gặp lỗi trong quá trình khởi tạo, hệ thống tự động kích hoạt cơ chế dự phòng an toàn (fallback), cho phép người dùng tiếp tục gửi báo cáo với các thông tin nhập liệu thông thường mà không làm gián đoạn quy trình cứu nạn.
 
 \subsection{Chọn chế độ gửi thích ứng}
 Ứng dụng đo throughput qua \texttt{/probe}, endpoint khoảng 64 KiB. Ngân sách probe ở chính sách gửi là 6 giây và có thể dùng số byte đọc một phần để ước lượng. Cấu hình hiện tại dùng ngưỡng mạng mạnh 1.000 kbit/s, mức còn phù hợp ảnh nén 50 kbit/s và confidence cao 0,90.
@@ -67,7 +67,7 @@ Báo cáo mới ở backend luôn bắt đầu \texttt{processing}, bất kể s
 
 % Chuyển trạng thái chính
 \draw[->, line width=0.7pt] (init) -- node[above, font=\scriptsize]{tạo ca} (p);
-\draw[->, line width=0.7pt] (p) -- node[above, font=\scriptsize]{giao đội} node[below, font=\fontsize{6.5bp}{7.5bp}\selectfont, text=gray!40!black]{(assign\_team)} (d);
+\draw[->, line width=0.7pt] (p) -- node[above, font=\scriptsize]{điều phối} node[below, font=\fontsize{6.5bp}{7.5bp}\selectfont, text=gray!40!black]{(PATCH status)} (d);
 \draw[->, line width=0.7pt] (d) -- node[above, font=\scriptsize]{hoàn thành} node[below, font=\fontsize{6.5bp}{7.5bp}\selectfont, text=gray!40!black]{(hiện trường)} (r);
 \draw[->, line width=0.7pt] (r) -- (end_r);
 
@@ -83,12 +83,17 @@ Báo cáo mới ở backend luôn bắt đầu \texttt{processing}, bất kể s
 
 App chỉ chấp nhận cập nhật đi tiến theo quy tắc domain, giúp phản hồi đến muộn không làm trạng thái lùi. Điều phối viên cập nhật qua API yêu cầu phiên đăng nhập; thay đổi trạng thái qua message sync cũng cần quyền dashboard. Luồng công khai tạo báo cáo không có quyền tự kết thúc ca cứu hộ.
 
-\begin{figure}[htbp]
+\begin{landscape}
+\begin{figure}[p]
 \centering
-\includegraphics[width=.95\textwidth,height=.78\textheight,keepaspectratio]{flow_08_dispatch_lifecycle.pdf}
-\caption{Lưu đồ vòng đời nhiệm vụ cứu hộ từ tiếp nhận, điều phối đến đóng ca}
+\setlength{\abovecaptionskip}{4pt}
+\includegraphics[width=\linewidth]{flow_08_dispatch_lifecycle.pdf}
+\caption{Vòng đời tác nghiệp, thao tác API và kiểm soát trạng thái cứu hộ}
 \label{fig:flow-dispatch-lifecycle}
 \end{figure}
+\end{landscape}
+
+Hình~\ref{fig:flow-dispatch-lifecycle} thể hiện quy trình tác nghiệp thông thường. API giao đội và API đổi trạng thái là hai thao tác riêng; giao đội không tự chuyển ca sang \texttt{dispatched}. Bổ sung vị trí phục vụ xác minh, nhưng không phải điều kiện chặn bắt buộc trong hai API này. Ca chưa hoàn tất tiếp tục được theo dõi; lỗi truyền tải không tự làm ca chuyển sang \texttt{cancelled}. Backend kiểm tra version tăng và thứ hạng trạng thái không đi lùi; sơ đồ không khẳng định mọi ca đều bắt buộc đi qua từng trạng thái trung gian.
 
 \subsection{SMS, tổng đài và bổ sung thông tin}
 Ứng dụng Android có đường gửi SMS khi mất data và có số tiếp nhận hợp lệ qua cấu hình build. Báo cáo vẫn có thể nằm trong outbox để đồng bộ đầy đủ sau đó. Backend có \texttt{POST /api/sms/inbound} cho gateway có token và \texttt{POST /api/reports/manual} cho nhập tổng đài. Cùng report ID cần được gộp để SMS trước và HTTP sau không tạo hai ca.

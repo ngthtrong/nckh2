@@ -8,6 +8,8 @@ Bản sơ bộ đã có Mở đầu đủ sáu mục, bốn chương khoa học,
 
 Build `content`/`full` tự xuất lại PDF cho các file `.drawio` mới sửa trong `assets/diagrams/` trước khi biên dịch (cần cài draw.io Desktop). LaTeX chèn file `.pdf`, không đọc trực tiếp `.drawio`; chỉ lưu sơ đồ rồi chạy LaTeX riêng sẽ vẫn dùng PDF cũ. Từ gốc repo, dùng `python report/scripts/build.py content`; có thể xuất hình riêng bằng `python report/scripts/export_drawio_diagrams.py`. Không chạy `generate_drawio_diagrams.py` để cập nhật hình đã sửa tay vì script đó tạo lại nguồn sơ đồ. Hình đặt `width=\textwidth` sẽ luôn vừa bề ngang trang: phóng to toàn bộ sơ đồ đồng đều không làm hình trong báo cáo lớn hơn, cần tăng cỡ chữ/ô tương đối hoặc đổi bố cục.
 
+Sáu sơ đồ hệ thống 2.1, 2.2, 2.3, 2.5, 2.12 và 2.19 dùng A4 ngang, có icon vector và bố cục chi tiết. Sinh PDF/SVG/Draw.io bằng `make -C report system-diagrams`, sau đó `make -C report content`. Script không chạy sản phẩm hoặc thay dữ liệu; bảng ERD lấy đầy đủ cột từ DDL SQLite trong mã. File gộp sáu trang, bản trước sửa, ảnh kiểm tra và manifest nằm tại [diagram-revisions/2026-10-25-six-system-diagrams/](diagram-revisions/2026-10-25-six-system-diagrams/). Chỉ chạy lại script khi muốn tái tạo bố cục Python; chỉnh Draw.io bằng tay vẫn theo quy trình xuất PDF ở trên.
+
 `python scripts/build.py content` dựng quyển và tự dựng lại cả bốn PDF bản tin/tóm tắt Việt–Anh từ cùng nguồn. Quy tắc này áp dụng cho cả XeLaTeX và Tectonic, kể cả bản hai mặt. Tectonic lưu log mới theo tên đích, ví dụ `build/content/content.log`.
 
 Từ thư mục gốc repo:
