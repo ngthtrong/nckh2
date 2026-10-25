@@ -14,7 +14,7 @@ Manifest ghi ba cam kết nhóm III ở mục 16 của thuyết minh DOCX: ứng
 
 Ba PDF `products/mobile-app.pdf`, `products/dashboard.pdf` và `products/ai-models.pdf` được biên soạn từ các nguồn TeX cùng tên. Hai PDF đầu dùng ảnh giao diện đã có trong báo cáo; PDF mô hình liệt kê bốn tệp ONNX/PTE trong `products/fe/model/Edge Ai/seed1024/export/{baseline,pruning_st}/`, với kích thước và SHA-256 đối chiếu manifest. Phần mô hình chỉ minh chứng nhận diện ảnh, không xác nhận đã hoàn thành mô hình phân tích tin nhắn tiếng Việt.
 
-Bản `content` ghép ba PDF này sau phụ lục, trong mục chung **Minh chứng sản phẩm**, cùng cấp với mục **Bản tin và báo cáo tóm tắt**. Các bản Việt/Anh là mục con của phần bản tin và tóm tắt. Bản `full` giữ cùng cách chia mục, đặt thuyết minh phê duyệt trước phần minh chứng sản phẩm. Các cờ xác nhận vẫn giữ `false` cho đến khi hồ sơ được kiểm tra; không dùng ảnh giao diện để xác nhận nghiệm thu hoặc chữ ký/dấu. `approved-proposal.pdf` vẫn cần bản có ký và đóng dấu.
+Bản `content` ghép ba PDF này sau phụ lục, trong mục chung **Minh chứng sản phẩm**, cùng cấp với mục **Bản tin và báo cáo tóm tắt**. Các bản Việt/Anh là mục con của phần bản tin và tóm tắt. Phần minh chứng không hiện trong mục lục in; các bookmark vẫn được giữ để điều hướng PDF. Bản `full` giữ cùng cách chia mục, đặt thuyết minh phê duyệt trước phần minh chứng sản phẩm. Các cờ xác nhận vẫn giữ `false` cho đến khi hồ sơ được kiểm tra; không dùng ảnh giao diện để xác nhận nghiệm thu hoặc chữ ký/dấu. `approved-proposal.pdf` vẫn cần bản có ký và đóng dấu.
 
 Khi sửa nguồn minh chứng, biên dịch từ thư mục `report/` trước khi build báo cáo:
 

@@ -1,0 +1,118 @@
+% Coordinates and type sizes measured from the supplied Word-exported templates.
+\newcommand{\FormTextAt}[4]{%
+  \AddToShipoutPictureFG*{\AtPageUpperLeft{%
+    \put(\LenToUnit{#1bp},\LenToUnit{-#2bp}){%
+      {\fontsize{#3bp}{#3bp}\selectfont #4}}}}}
+\newcommand{\FormCenteredAt}[3]{%
+  \AddToShipoutPictureFG*{\AtPageUpperLeft{%
+    \put(\LenToUnit{294.12bp},\LenToUnit{-#1bp}){%
+      \makebox[0pt][c]{{\fontsize{#2bp}{#2bp}\selectfont\bfseries #3}}}}}}
+% Compensate cropped-PDF placement in XeTeX against the source page coordinates.
+\newcommand{\FormHeaderCorrection}[1]{%
+  \ifcase#1 0\or .5129\or .5165\or .6287\or .6548\or .5279\or .4344\or .3895\or .7250\or .7623\fi}
+\newcommand{\FormReferenceHeader}[2]{%
+  \AddToShipoutPictureFG*{\AtPageUpperLeft{%
+    \put(0,\LenToUnit{\dimexpr-#2bp-\FormHeaderCorrection{#1}bp\relax}){%
+      \raisebox{-\height}{\includegraphics[page=#1]{assets/template-headers.pdf}}}}}}
+\newcounter{officialsection}
+\newcommand{\FormGeometry}[4]{%
+  \newgeometry{left=#1bp,right=#2bp,top=56.7bp,bottom=56.7bp,headheight=22bp,footskip=10mm}%
+  \def\FormFirstSkip{\dimexpr#3bp-56.7bp\relax}%
+  \fontsize{#4bp}{\dimexpr#4bp*115/100\relax}\selectfont
+  \setlength{\topskip}{#4bp}}
+\newcommand{\FormSetupVI}{%
+  \FormGeometry{76.70}{49.68}{119.79}{12}%
+  \def\FormPublicationOffset{-1.676bp}\def\FormPublicationFirst{14.156bp}\def\FormPublicationIssue{51.39bp}%
+  \def\FormMixedSizes{1}\setlength{\parskip}{3.96bp}%
+  \def\FormHeading{\FormReferenceHeader{3}{0}}}
+\newcommand{\FormSetupEN}{%
+  \FormGeometry{49.68}{49.68}{118.03}{12.96}%
+  \setlength{\parskip}{7.54bp}%
+  \def\FormHeading{\FormReferenceHeader{4}{0}}}
+\newcommand{\FormSetupStudent}{%
+  \FormGeometry{49.68}{49.68}{150.39}{12}%
+  \setlength{\parskip}{6.24bp}%
+  \def\FormHeading{\FormReferenceHeader{5}{0}}}
+\newcommand{\FormSetupBulletinVI}{%
+  \FormGeometry{68.54}{41.26}{154.31}{12}%
+  \setlength{\parskip}{6.84bp}%
+  \def\FormHeading{\FormReferenceHeader{1}{0}}%
+  \renewcommand{\FormLine}[1]{\par\noindent\hangindent=14.16bp\hangafter=1
+    \makebox[14.16bp][l]{\textminus}##1\par}}
+\newcommand{\FormSetupBulletinEN}{%
+  \FormGeometry{68.54}{41.26}{152.03}{12}%
+  \setlength{\parskip}{6.84bp}%
+  \def\FormHeading{\FormReferenceHeader{2}{70}}%
+  \renewcommand{\FormLine}[1]{\par\noindent\hangindent=14.16bp\hangafter=1
+    \makebox[14.16bp][l]{\textminus}##1\par}}
+\newcommand{\FormSetupSummaryVI}{%
+  \FormGeometry{76.70}{49.68}{177.15}{12}%
+  \def\FormPublicationOffset{-.236bp}\def\FormPublicationFirst{14.276bp}\def\FormPublicationIssue{51.27bp}%
+  \def\FormMixedSizes{1}\setlength{\parskip}{3.96bp}%
+  \def\FormHeading{\FormReferenceHeader{6}{70}}}
+\newcommand{\FormSetupSummaryEN}{%
+  \FormGeometry{85.70}{49.68}{189.07}{12.96}%
+  \setlength{\parskip}{7.54bp}%
+  \def\FormHeading{\FormReferenceHeader{7}{70}}}
+\renewenvironment{officialform}[1][VI]{%
+  \clearpage\begingroup\pagestyle{empty}\setstretch{1}%
+  \setcounter{officialsection}{0}\def\FormMixedSizes{0}%
+  \setlength{\parindent}{0pt}%
+  \renewcommand{\FormLine}[1]{\par\noindent - ##1\par}%
+  \csname FormSetup#1\endcsname
+  \renewcommand{\ReportTableFont}{\fontsize{12bp}{13.8bp}\selectfont}%
+  \vspace*{\dimexpr\FormFirstSkip-\parskip-\baselineskip\relax}%
+}{\clearpage\restoregeometry\endgroup}
+\renewcommand{\FormSection}[1]{%
+  \par\stepcounter{officialsection}%
+  \ifnum\FormMixedSizes=1
+    \ifnum\value{officialsection}>4 \fontsize{12.96bp}{14.904bp}\selectfont\fi
+  \fi
+  \noindent\textbf{#1}\par\nopagebreak[4]}
+\renewcommand{\FormIndented}[1]{\par\begingroup\leftskip=28.10bp\noindent #1\par\endgroup}
+\renewcommand{\FormSignature}[2]{%
+  \par\noindent\hfill\begin{minipage}{242bp}\centering
+  \fontsize{12.96bp}{14.904bp}\selectfont
+  Ngày \ldots\ tháng \ldots\ năm \ldots\\\textbf{#1}\par
+  \vspace{59.8bp}\textbf{#2}\par\end{minipage}\par}
+\newcommand{\FormReviewSignature}{%
+  \FormTextAt{365.11}{178.21}{12}{Ngày \ldots\ tháng \ldots\ năm \ldots}%
+  \FormTextAt{103.10}{192.01}{12}{\bfseries Xác nhận của Đại học Cần Thơ}%
+  \FormTextAt{377.60}{192.01}{12}{\bfseries Người hướng dẫn}%
+  \FormTextAt{385.51}{302.41}{12}{\bfseries\SupervisorName}}
+\newcommand{\StudentPhoto}{%
+  \AddToShipoutPictureFG*{\AtPageUpperLeft{%
+    \put(\LenToUnit{417bp},\LenToUnit{-156.15bp}){%
+      \setlength{\fboxsep}{0pt}\setlength{\fboxrule}{.5bp}%
+      \raisebox{-\height}{\fbox{\parbox[t][95.25bp][t]{78.25bp}{\centering
+        \fontsize{12bp}{13.8bp}\selectfont\vspace{4.03bp}Ảnh 4 x 6\\
+        \href{https://drive.google.com/file/d/1l94xrw48SyKZvul8le54HbLgO0nCEPG_/view}{%
+          \textcolor{blue}{CHÈN FILE\\ẢNH\\VÀO Ô\\NÀY}}}}}}}}}
+\newcommand{\StudentSignature}{%
+  \FormTextAt{387.31}{553.49}{12}{Ngày \ldots\ tháng \ldots\ năm \ldots}%
+  \FormTextAt{125.20}{567.29}{12}{\bfseries Xác nhận của Đại học Cần Thơ}%
+  \FormTextAt{400.80}{567.29}{12}{\bfseries Chủ nhiệm đề tài}%
+  \FormTextAt{407.20}{663.89}{12}{\bfseries\PrincipalName}}
+\renewenvironment{reportcover}[1][Main]{%
+  \clearpage\begingroup\def\CoverKind{#1}%
+  \def\CoverIsSub{0}\def\CoverTop{419.14}\def\CoverLeft{69.12}\def\CoverRight{76.16}%
+  \def\CoverSubName{Sub}\ifx\CoverKind\CoverSubName
+    \def\CoverIsSub{1}\def\CoverTop{412.18}\def\CoverLeft{85.7}\def\CoverRight{92.74}\fi
+  \newgeometry{left=\CoverLeft bp,right=\CoverRight bp,top=\CoverTop bp,bottom=56.7bp,headheight=22bp,footskip=10mm}%
+  \thispagestyle{empty}\setstretch{1}\fontsize{18bp}{20.7bp}\selectfont
+  \setlength{\topskip}{18bp}\setlength{\parskip}{0pt}%
+}{\clearpage\restoregeometry\endgroup}
+\renewcommand{\CoverFrame}{%
+  \AddToShipoutPictureBG*{\AtPageUpperLeft{%
+    \raisebox{-\height}{\includegraphics[page=\number\numexpr1+\CoverIsSub\relax]{assets/cover-frame.pdf}}}}}
+\renewcommand{\CoverHeading}[1][0mm]{%
+  \ifnum\CoverIsSub=1
+    \FormReferenceHeader{9}{70}%
+    \FormCenteredAt{727.91}{14.04}{Cần Thơ, \ReportDate}%
+  \else
+    \FormReferenceHeader{8}{70}%
+    \FormCenteredAt{716.39}{14.04}{Cần Thơ, \ReportDate}%
+  \fi}
+\renewcommand{\CoverTitle}{%
+  {\bfseries\MakeUppercase{\ProjectTitle}\par}%
+  \vspace{20.72bp}\textbf{Mã số đề tài: \ProjectCode}\par}

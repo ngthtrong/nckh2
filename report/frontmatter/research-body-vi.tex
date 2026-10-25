@@ -17,8 +17,6 @@ Thay vì phụ thuộc hoàn toàn vào máy chủ, hệ thống hướng tới 
 Bên cạnh đó, việc kết hợp thông tin vị trí, thời gian và nội dung cứu hộ để phát hiện, gom nhóm các yêu cầu liên quan giúp hạn chế thông tin trùng lặp và hỗ trợ trực quan hóa tình huống cứu hộ trên bản đồ số.
 
 \FormSection{4. Kết quả nghiên cứu:}
-Đề tài tập trung nghiên cứu quy trình xây dựng dữ liệu cứu hộ bão lũ, phân tích hình ảnh và văn bản bằng học sâu, tối ưu hóa mô hình AI cho thiết bị di động và thiết kế hệ thống tiếp nhận, phân cụm thông tin cứu hộ.
-
 Đối với bài toán phân loại hình ảnh, mô hình được đánh giá trên tập kiểm thử gồm 256 ảnh. Với cấu hình seed 1024, mô hình đạt Accuracy \NewImageAccuracy\% và macro-F1 \NewImageMacroFOne\%, ghi nhận 3 lỗi nghiêm trọng. Thử nghiệm cắt tỉa mô hình đạt Accuracy \PruningAccuracy\% với \PruningCriticalCount{} lỗi nghiêm trọng.
 
 Các nội dung về phân tích văn bản, phân cụm sự kiện, đồng bộ dữ liệu và hoạt động trong điều kiện mạng yếu được xác định theo mục tiêu nghiên cứu của đề tài. Hiệu quả của từng thành phần cần được đánh giá bằng các kết quả thực nghiệm tương ứng.
@@ -41,10 +39,12 @@ Các kết quả hiện có phản ánh khả năng triển khai và đánh giá
 % The conference year is not a confirmed publication year; volume/year await
 % the publisher's announcement. This body is shared with the Vietnamese summary.
 \begingroup
-\fontsize{11bp}{13bp}\selectfont
-\setlength{\tabcolsep}{3bp}
-\renewcommand{\arraystretch}{1.15}
-\noindent\begin{tabularx}{\linewidth}{|>{\centering\arraybackslash}p{5mm}|>{\raggedright\arraybackslash}X|P{36mm}|P{30mm}|P{17mm}|P{17mm}|}
+\fontsize{12bp}{13.8bp}\selectfont
+\setlength{\tabcolsep}{5.4bp}
+\setlength{\arrayrulewidth}{.48bp}
+\renewcommand{\arraystretch}{1}
+\noindent\hspace*{\FormPublicationOffset}%
+\begin{tabular}{|>{\centering\arraybackslash}p{\FormPublicationFirst}|P{135.03bp}|P{68.30bp}|P{63.24bp}|P{\FormPublicationIssue}|P{59.28bp}|}
 \hline
 \multicolumn{1}{|c|}{\textbf{Stt}} &
 \multicolumn{1}{c|}{\textbf{Tên bài báo}} &
@@ -56,28 +56,16 @@ Các kết quả hiện có phản ánh khả năng triển khai và đánh giá
 1. &
 Stress-Testing Product-Gated Clustering and Bounded Priority Ranking for Flood-Rescue Reports: A Synthetic Study &
 Thanh-Trong Nguyen;\newline Ngoc-Anh Le;\newline Nhu-Quynh Nguyen;\newline Tuong-Hung Cao;\newline Hung-Thinh Ngo;\newline Xuan-Phuong Chau;\newline Lan Phuong Phan;\newline Thanh-Khoa Nguyen &
-Communications in Computer and Information Science (CCIS), Springer; kỷ yếu ISDS 2026 (Scopus Q3) &
+\foreignlanguage{english}{Com\-mu\-ni\-ca\-tions in Computer and Information Science (CCIS)}, Springer; kỷ yếu ISDS 2026 (Scopus Q3) &
 Chưa công bố &
 Chưa công bố \\
 \hline
-\end{tabularx}\par
+\end{tabular}\par
 \endgroup
 \noindent\textit{Bài báo đã được chấp nhận tại ISDS 2026 và đang chuẩn bị xuất bản. CCIS là bộ sách kỷ yếu hội nghị; số tập và năm xuất bản sẽ được cập nhật theo thông tin chính thức của nhà xuất bản.}
 
 \FormSection{7. Đóng góp về mặt kinh tế -- xã hội, giáo dục và đào tạo, an ninh, quốc phòng và khả năng áp dụng của đề tài:}
-Về giáo dục và đào tạo, đề tài tạo điều kiện để sinh viên vận dụng kiến thức về học sâu, xử lý dữ liệu đa phương thức, Edge AI, phát triển ứng dụng di động và hệ thống thông tin vào bài toán thực tiễn.
-
-Về khoa học và công nghệ, nghiên cứu góp phần khảo sát khả năng xử lý thông tin cứu hộ tại biên, tối ưu hóa mô hình học sâu và kết hợp phân cụm sự kiện với trực quan hóa dữ liệu không gian.
-
-Về kinh tế -- xã hội, hệ thống có tiềm năng hỗ trợ tiếp nhận, tổng hợp và phân loại thông tin cứu hộ trong điều kiện hạ tầng mạng bị hạn chế, qua đó góp phần nâng cao khả năng hỗ trợ ra quyết định và điều phối nguồn lực khi xảy ra thiên tai.
-
-Các lợi ích thực tế về thời gian cứu hộ, chi phí vận hành và mức độ giảm thiệt hại cần được kiểm chứng trong những nghiên cứu và thử nghiệm triển khai tiếp theo.
+Sản phẩm phục vụ đào tạo và nghiên cứu về Edge AI, tối ưu mô hình và quản lý thông tin cứu hộ. Hệ thống có tiềm năng hỗ trợ tiếp nhận, tổng hợp và phân loại yêu cầu khi mạng hạn chế; lợi ích về thời gian cứu hộ, chi phí và giảm thiệt hại chưa được kiểm chứng thực địa.
 
 \FormSection{8. Hiệu quả, phương thức chuyển giao kết quả nghiên cứu và khả năng áp dụng:}
-Các sản phẩm của đề tài dự kiến được đóng gói và chuyển giao cho Trường Công nghệ Thông tin và Truyền thông, Đại học Cần Thơ để phục vụ lưu trữ, giảng dạy, học tập và nghiên cứu.
-
-Kết quả nghiên cứu có thể làm cơ sở để phát triển các ứng dụng hỗ trợ tiếp nhận và quản lý thông tin cứu hộ thiên tai, đặc biệt trong môi trường kết nối mạng hạn chế.
-
-Để triển khai thực tế, hệ thống cần tiếp tục hoàn thiện khả năng phân tích đa phương thức, tối ưu hóa mô hình trên thiết bị di động, kiểm thử trong điều kiện mạng yếu và đánh giá độ tin cậy của quá trình phân cụm, đồng bộ dữ liệu.
-
-Việc ứng dụng vào công tác cứu hộ thực tế cần có thêm thử nghiệm, xác nhận chuyên môn và sự phối hợp với các cơ quan chức năng.
+Các sản phẩm dự kiến được đóng gói và chuyển giao cho Trường Công nghệ Thông tin và Truyền thông, Đại học Cần Thơ để lưu trữ, giảng dạy và nghiên cứu. Trước khi ứng dụng thực tế, cần hoàn thiện phân tích đa phương thức, kiểm thử thiết bị và mạng thực, đánh giá phân cụm, đồng bộ dữ liệu và phối hợp với đơn vị cứu hộ chuyên môn.

@@ -39,18 +39,18 @@
 \ifReportFull
   \input{build/evidence.tex}
 \else
-  \clearpage\phantomsection\addcontentsline{toc}{chapter}{Minh chứng sản phẩm}
-  \EvidencePDF[section]{Ứng dụng di động hỗ trợ cứu hộ thiên tai}{evidence/products/mobile-app.pdf}
-  \EvidencePDF[section]{Website quản lý thông tin cứu hộ}{evidence/products/dashboard.pdf}
-  \EvidencePDF[section]{Bộ mô hình AI đã huấn luyện}{evidence/products/ai-models.pdf}
+  \clearpage\pdfbookmark[0]{Minh chứng sản phẩm}{product-evidence}
+  \EvidencePDF[]{Ứng dụng di động hỗ trợ cứu hộ thiên tai}{evidence/products/mobile-app.pdf}
+  \EvidencePDF[]{Website quản lý thông tin cứu hộ}{evidence/products/dashboard.pdf}
+  \EvidencePDF[]{Bộ mô hình AI đã huấn luyện}{evidence/products/ai-models.pdf}
 \fi
-\clearpage\phantomsection\addcontentsline{toc}{section}{Bản tin và báo cáo tóm tắt}
-\addcontentsline{toc}{subsection}{Bản tin tiếng Việt}
+\clearpage\pdfbookmark[1]{Bản tin và báo cáo tóm tắt}{product-bulletins}
+\pdfbookmark[2]{Bản tin tiếng Việt}{product-bulletin-vi}
 \input{deliverables/content/bulletin-vi}
-\clearpage\phantomsection\addcontentsline{toc}{subsection}{Bản tin tiếng Anh}
+\clearpage\pdfbookmark[2]{Bản tin tiếng Anh}{product-bulletin-en}
 \input{deliverables/content/bulletin-en}
-\clearpage\phantomsection\addcontentsline{toc}{subsection}{Báo cáo tóm tắt tiếng Việt}
+\clearpage\pdfbookmark[2]{Báo cáo tóm tắt tiếng Việt}{product-summary-vi}
 \input{deliverables/content/summary-vi}
-\clearpage\phantomsection\addcontentsline{toc}{subsection}{Báo cáo tóm tắt tiếng Anh}
+\clearpage\pdfbookmark[2]{Báo cáo tóm tắt tiếng Anh}{product-summary-en}
 \input{deliverables/content/summary-en}
 \end{document}

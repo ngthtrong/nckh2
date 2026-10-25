@@ -1,0 +1,50 @@
+
+draw.io 32.6.1
+
+Usage: drawio [options] [input file/folder]...
+
+Options:
+  -V, --version                                   output the version number
+  -c, --create                                    creates a new empty file if no file is passed
+  -k, --check                                     does not overwrite existing files
+  -x, --export                                    export the input files/folders based on the given options. Besides draw.io files, vsdx, csv and Mermaid (.mmd/.mermaid) inputs are also supported
+  -r, --recursive                                 for a folder input, recursively convert all files in sub-folders also
+  --timeout <seconds>                             fails the export of a file that takes longer than the given number of seconds and continues with the next file (default: 0, no limit)
+  -o, --output <output file/folder>               specify the output file/folder. If omitted, the input file name is used for output with the specified format as extension
+  -f, --format <format>                           if output file name extension is specified, this option is ignored (file type is determined from output extension, possible export formats are pdf, png, jpg, svg, xml, and html)
+  --layout <name|json>                            run a layout on the diagram after opening it (applies on open and before export). Either a preset name (verticalFlow, horizontalFlow, verticalTree, horizontalTree, radialTree, organic) or a custom-layout JSON array as used by the Layout dialog, e.g. [{"layout":"elkLayered","config":{"elk.direction":"RIGHT"}}], for layout sequences and per-layout options
+  --normalize                                     repair the model before anything else touches it (applies on open and before export): file each edge at the nearest common ancestor of its terminals, give an edge written without a geometry the standard one so it renders, and grow a container that would clip its children. Never moves or shrinks what the author placed. Useful for generated diagrams, and for files that are about to be laid out with --layout
+  --mermaid-image <true/false>                    open Mermaid (.mmd/.mermaid) files as a static image instead of an editable diagram (default: false)
+  -q, --quality <quality>                         output image quality for JPEG (default: 90)
+  -t, --transparent                               set transparent background for PNG and SVG
+  -e, --embed-diagram                             includes a copy of the diagram (for PNG, SVG and PDF formats only)
+  --embed-svg-images                              Embed Images in SVG file (for SVG format only)
+  --embed-svg-fonts <true/false>                  Embed Fonts in SVG file (for SVG format only). Default is true
+  --embed-svg-metadata                            Embed Cell Metadata (shape and connector properties as data-meta-* attributes) in SVG file (for SVG format only)
+  -b, --border <border>                           sets the border width around the diagram (default: 0)
+  -s, --scale <scale>                             scales the diagram size
+  --width <width>                                 fits the generated image/pdf into the specified width, preserves aspect ratio.
+  --height <height>                               fits the generated image/pdf into the specified height, preserves aspect ratio.
+  --crop                                          crops PDF to diagram size
+  --size <size>                                   export size mode (for png, jpg and svg formats): diagram [default] crops the output to the diagram content, page exports the full page(s) the diagram is on, as with the Size option in the export dialog
+  -a, --all-pages                                 export all pages (for PDF and HTML formats)
+  -p, --page-index <pageIndex>                    selects a specific page (1-based); if not specified and the format is an image, the first page is selected
+  -l, --layers <comma separated layer indexes>    selects which layers to export (applies to all pages), if not specified, all layers are selected
+  -g, --page-range <from>..<to>                   selects a page range (1-based, for PDF format only)
+  -u, --uncompressed                              Uncompressed XML output (for XML and SVG format only)
+  -z, --zoom <zoom>                               scales the application interface
+  --theme <theme>                                 Theme of the exported image (dark, light, auto [default]); applies to svg, png, jpeg and pdf. auto keeps SVG adaptive to the viewer and renders other formats light
+  --svg-theme <theme>                             Deprecated, use --theme. Theme of the exported SVG image (dark, light, auto [default])
+  --svg-links-target <target>                     Target of links in the exported SVG image (auto [default], new-win, same-win)
+  --html-theme <theme>                            Theme of the HTML viewer (dark, light, auto [default])
+  --html-zoom <true/false>                        Show zoom controls in HTML viewer (default: true)
+  --html-lightbox <true/false>                    Enable lightbox in HTML viewer (default: true)
+  --html-layers <true/false>                      Show layers toolbar in HTML viewer (default: true)
+  --html-tags <true/false>                        Show tags toolbar in HTML viewer (default: true)
+  --html-fit <true/false>                         Responsive fit to container width in HTML viewer (default: true)
+  --html-link-target <target>                     Link target in HTML viewer (auto [default], blank, self)
+  --html-link-color <color>                       Link highlight color in HTML viewer (default: #0000ff)
+  --html-edit-link <url>                          URL for edit button in HTML viewer
+  --disable-update                                disable auto-update
+  --no-silent-update                              prompt before downloading updates instead of updating silently
+  -h, --help                                      display help for command
