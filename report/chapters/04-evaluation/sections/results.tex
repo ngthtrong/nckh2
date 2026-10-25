@@ -118,7 +118,7 @@ JSON v5 ghi fidelity trên 32 trạng thái tại threshold 0,5 bằng 1,0. Bả
 
 Sanity 10 vòng giữ một số profile dương để kiểm tra khả năng dự đoán trạng thái chưa có trong train của vòng đó. Có vòng recall 0,75 hoặc 0,667, nên không nên diễn giải kết quả toàn bảng là tổng quát hoàn hảo khi huấn luyện thiếu profile. Đây là kiểm tra kỹ thuật trong không gian tổng hợp hữu hạn. Mô hình không được đánh giá trên người bệnh, tin nhắn tự do hoặc dữ liệu điều phối thực.
 
-Phần app đã có loader và score từ cờ có cấu trúc, nhưng backend vẫn dùng trường \texttt{urgency}/từ khóa khi phân cụm. Vì vậy, mức hoàn thành của gói LR là có dữ liệu, mô hình, audit và đường tính tại app; chuỗi app--adapter--đồ thị dùng $E_i^{\mathrm{LR}}$ cần thêm kiểm thử tích hợp. Đây cũng là lý do không gọi hệ thống hiện tại đã hoàn tất mô hình văn bản đa phương thức.
+Ứng dụng đã có chức năng nạp mô hình và tính điểm LR từ các dấu hiệu khẩn cấp được người dùng lựa chọn. Thiết kế tích hợp sử dụng trường \texttt{E\_i} gửi lên máy chủ, kết hợp với thông tin \texttt{urgency} do backend xác định để phục vụ phân cụm và xếp hạng. Kết quả hiện có gồm dữ liệu, mô hình và bước tính điểm tại ứng dụng. Đây là mô hình dùng đầu vào có cấu trúc, không phải mô hình phân tích tin nhắn tiếng Việt.
 
 \subsection{RQ1: chất lượng phân cụm cơ sở}
 \input{generated/tables/rq1-benchmark}

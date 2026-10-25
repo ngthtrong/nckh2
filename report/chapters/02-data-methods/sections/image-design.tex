@@ -67,7 +67,7 @@ Weighted sampler, class-weight loss & Tắt \\
 \bottomrule\end{tabular}
 \end{table}
 
-Mã chọn checkpoint ưu tiên accuracy validation. Nếu accuracy nằm trong vùng sai số 0,005 so với cực đại đã thấy, checkpoint có tỷ lệ lỗi nặng thấp hơn có thể được chọn. Do đó checkpoint được giữ không nhất thiết là epoch có accuracy cao nhất đơn thuần. Test là bước đánh giá sau lựa chọn, không được đưa vào scheduler hoặc quy tắc chọn checkpoint.
+Checkpoint được lựa chọn ưu tiên theo accuracy trên tập validation. Nếu accuracy nằm trong vùng sai số 0,005 so với cực đại đã thấy, checkpoint có tỷ lệ lỗi nặng thấp hơn có thể được chọn. Do đó checkpoint được giữ không nhất thiết là epoch có accuracy cao nhất đơn thuần. Test là bước đánh giá sau lựa chọn, không được đưa vào scheduler hoặc quy tắc chọn checkpoint.
 
 Hình huấn luyện trong báo cáo được cập nhật từ config và artifact seed \BenchmarkSeed{}. Notebook được dùng để giải thích cơ chế; benchmark runtime được chọn thuộc seed \BenchmarkSeed{}, lượng tử hóa seed \QuantizationSeed{} và benchmark mobile của phương án triển khai dùng seed 1024. Các cấu hình mobile seed 159 được giữ làm đối chứng trong phần so sánh mô hình. Seed huấn luyện không tự xác nhận manifest chia tập của phiên mới.
 \begin{figure}[htbp]\centering
