@@ -63,7 +63,7 @@ Một request có thể mất ACK sau khi transaction thành công. Khi app gử
 \subsection{Lưu trữ backend}
 SQLite giữ bảng \texttt{reports}, \texttt{messages\_dedup}, \texttt{report\_events}, \texttt{teams}, \texttt{operators}, \texttt{sessions} và \texttt{server\_meta}. Ảnh nằm ngoài CSDL; bản ghi lưu tên, URL, hash và kích thước. Bảng báo cáo giữ payload gốc để bảo toàn những trường nghiên cứu chưa có cột riêng.
 
-Hình~\ref{fig:database-erd-detailed} liệt kê đầy đủ các cột trong DDL của bảy bảng. Ký hiệu PK là khóa chính, NN là \texttt{NOT NULL}, UQ là \texttt{UNIQUE} và CI là đối chiếu chuỗi \texttt{NOCASE}. Sơ đồ dùng Crow's Foot; REF đánh dấu tham chiếu logic. Nét đứt là quan hệ không định danh vì khóa chính của thực thể con độc lập với khóa của thực thể cha; DDL hiện chưa khai báo ràng buộc FOREIGN KEY. Nullability của cột được giữ theo DDL, gồm trường operator\_id trong sessions. Trong bảng chống trùng, ràng buộc duy nhất áp dụng cho cặp \texttt{(client\_id, sequence\_number)}, không áp dụng riêng từng cột. Bảng \texttt{messages\_dedup} không có khóa ngoại trực tiếp đến \texttt{reports}; trường \texttt{actor} của nhật ký lưu tên người thao tác.
+Hình~\ref{fig:database-erd-detailed} trình bày ERD ở mức thiết kế nghiệp vụ, gồm người gửi/thiết bị, báo cáo cứu hộ, đội cứu hộ, điều phối viên và sự kiện xử lý. Sơ đồ dùng tên tiếng Anh và ký hiệu Crow's Foot, thể hiện định danh, thuộc tính tùy chọn và số lượng tham gia quan hệ. Vị trí, đánh giá tình huống và ảnh lưu trữ được tách thành ba đối tượng giá trị (\emph{value object}) thuộc báo cáo, không hàm ý tạo thêm bảng SQLite. Người gửi/thiết bị là thực thể khái niệm, không hàm ý có bảng người dùng di động riêng; sự kiện tự động có thể không gắn với điều phối viên. Các bảng kỹ thuật như chống trùng, phiên đăng nhập và metadata máy chủ được mô tả ở phần lưu trữ.
 
 \begin{figure}[htbp]
 \centering
@@ -102,7 +102,7 @@ Cùng report ID được gửi lại để bổ sung ảnh hoặc dữ liệu sa
 \centering
 \setlength{\abovecaptionskip}{4pt}
 \includegraphics[width=\linewidth]{database_erd.pdf}
-\caption{Lược đồ đầy đủ các bảng SQLite và liên hệ do mã ứng dụng kiểm soát}
+\caption{ERD chi tiết các thực thể và quan hệ nghiệp vụ của hệ thống cứu hộ}
 \label{fig:database-erd-detailed}
 \end{figure}
 \end{landscape}
