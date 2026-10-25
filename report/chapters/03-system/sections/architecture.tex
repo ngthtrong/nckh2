@@ -94,7 +94,7 @@ Cùng report ID được gửi lại để bổ sung ảnh hoặc dữ liệu sa
 \end{figure}
 
 \subsection{Dịch vụ phân cụm và hàng xem xét}
-Adapter \texttt{to\_report\_v2} chuyển báo cáo lưu trữ sang tuple thuật toán. Nhãn ngập được ánh xạ \texttt{non\_flood}$\mapsto0$, \texttt{low}$\mapsto0{,}33$, \texttt{medium}$\mapsto0{,}66$, \texttt{high}$\mapsto1$. Nếu payload có \texttt{flood}, dùng trường này. Điểm khẩn cấp đọc \texttt{urgency} hoặc suy từ mô tả. $N$ hiện là số mắc kẹt cộng số bị thương; $V$ là số nhóm yếu thế được chọn khi không có trường trực tiếp.
+Adapter \texttt{to\_report\_v2} chuyển báo cáo lưu trữ sang tuple thuật toán. Nhãn ngập được ánh xạ \texttt{non\_flood}$\mapsto0$, \texttt{low}$\mapsto0{,}33$, \texttt{medium}$\mapsto0{,}66$, \texttt{high}$\mapsto1$. Nếu payload có \texttt{flood}, dùng trường này. Theo thiết kế tích hợp, đầu vào khẩn cấp kết hợp điểm \texttt{E\_i} do mô hình LR trên ứng dụng gửi lên với thông tin \texttt{urgency} do backend xác định. $N$ hiện là số mắc kẹt cộng số bị thương; $V$ là số nhóm yếu thế được chọn khi không có trường trực tiếp.
 
 Các ánh xạ tham số được chuẩn hóa nhằm chuyển đổi thông tin định tính thành các đại lượng số học phục vụ giải thuật. Trong quá trình vận hành, hệ thống cho phép điều phối viên can thiệp trực tiếp để hiệu chỉnh các trọng số này nếu phát hiện sai lệch so với tình hình thực tế.
 

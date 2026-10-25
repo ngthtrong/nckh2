@@ -19,3 +19,21 @@ Xếp hạng RQ2 & Candidate 4.1; chất lượng và độ ổn định điểm
 Các bộ dữ liệu phân cụm, xếp hạng và điều phối là dữ liệu tổng hợp hoặc bán tổng hợp. Kết quả trên các bộ dữ liệu này được phân tích riêng với kết quả nhận diện ảnh và kiểm thử phần mềm.
 
 \input{appendices/phone-benchmarks}
+
+\section{Đối chiếu nội dung nghiên cứu với thuyết minh}\label{sec:proposal-comparison}
+Thuyết minh (mục 15.2) liệt kê các hoạt động nghiên cứu. Bảng~\ref{tab:proposal-map} cho biết hoạt động nào được trình bày ở đâu và phần nào khác so với dự kiến.
+
+\begin{longtable}{P{.20\textwidth}P{.48\textwidth}P{.20\textwidth}}
+\caption{Đối chiếu nội dung nghiên cứu với thuyết minh}\label{tab:proposal-map}\\
+\toprule Hoạt động & Nội dung thực hiện và khác biệt so với dự kiến & Nơi trình bày \\\midrule\endfirsthead
+\toprule Hoạt động & Nội dung thực hiện và khác biệt so với dự kiến & Nơi trình bày \\\midrule\endhead
+Thu thập và xử lý dữ liệu & Bộ ảnh do nhóm thu thập và gán nhãn bốn mức ngập; FloodNet và CrisisMMD chỉ dùng trong tổng quan, không dùng để huấn luyện. Chưa khai thác mạng xã hội. Dữ liệu phân cụm và xếp hạng là bán tổng hợp/tổng hợp & Mục~\ref{sec:02-data-methods-data} \\
+Phân tích yêu cầu & Yêu cầu chức năng và phi chức năng của ứng dụng, đồng bộ và phía trung tâm & Chương~\ref{chap:03-system} \\
+Thiết kế hệ thống & Kiến trúc, quy tắc trao đổi dữ liệu, đồng bộ và cơ sở dữ liệu & Chương~\ref{chap:03-system} \\
+Học máy và tối ưu hóa & MobileNetV3-Large cho ảnh; PTQ, QAT và cắt tỉa. Logistic Regression ước lượng mức độ khẩn cấp từ các lựa chọn có cấu trúc & Mục~\ref{sec:image-design}, Mục~\ref{sec:02-urgency-lr} \\
+Phát triển phần mềm & Ứng dụng Flutter, backend Python và dashboard bản đồ & Chương~\ref{chap:03-system} \\
+Kiểm thử & Accuracy, macro-F1 trên tập test; kiểm thử chức năng và tích hợp & Mục~\ref{sec:02-evaluation-design}, Chương~\ref{chap:04-evaluation} \\
+Thực nghiệm mạng yếu & Giả lập băng thông bằng proxy và công cụ trình duyệt trên máy tính; chưa đo trên điện thoại thật trong 2G/3G & Chương~\ref{chap:04-evaluation} \\
+Đánh giá & Ba câu hỏi nghiên cứu RQ1--RQ3 và các thước đo ở Bảng~\ref{tab:method-map} & Mục~\ref{sec:02-evaluation-design}, Chương~\ref{chap:04-evaluation} \\
+\bottomrule
+\end{longtable}
