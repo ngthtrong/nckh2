@@ -38,12 +38,17 @@ Hình~\ref{fig:sync-sequence} mô tả ca mà server đã ghi dữ liệu nhưng
 
 Hash payload là SHA-256 sau chuẩn tắc hóa JSON theo chuẩn RFC 8785 \citep{rfc8785}. Hash hỗ trợ phát hiện cùng ID được dùng cho nội dung khác; không xác minh danh tính người tạo tin. Ảnh multipart có hash riêng và kiểm tra byte/định dạng ở server. Hai loại hash phục vụ toàn vẹn của dữ liệu, không phải đánh giá độ thật của hiện trường.
 
-\begin{figure}[htbp]
+Hình~\ref{fig:flow-backend-dedup} đối chiếu ba đường tiếp nhận JSON sync, multipart và SMS. Với JSON \texttt{/sync/messages}, lỗi hợp đồng hoặc cấu trúc request được trả ở mức HTTP; vượt dung lượng trả mã 413. Khi request hợp lệ, kết quả từng message nằm trong \texttt{results} của phản hồi HTTP 200, gồm \texttt{accepted}, \texttt{duplicate}, \texttt{rejected} hoặc \texttt{retry\_later}. Xung đột ID/hash hoặc tái sử dụng sequence là lỗi của từng message. Đường multipart chống gửi lại bằng report ID, quyền bổ sung và hash ảnh; đường SMS dùng token gateway, giữ ID của SOS hoặc sinh ID theo nội dung tin, rồi tạo/gộp qua quy tắc lưu báo cáo. Tệp ảnh nằm ngoài transaction SQLite; không đồng nhất việc lưu tệp với commit của message JSON.
+
+\begin{landscape}
+\begin{figure}[p]
 \centering
-\includegraphics[width=\textwidth]{flow_05_backend_ingest_dedup.pdf}
-\caption{Quy trình tiếp nhận, chuẩn tắc hóa RFC 8785 JSON, kiểm tra băm SHA-256 và chống gửi trùng lặp phía backend}
+\setlength{\abovecaptionskip}{4pt}
+\includegraphics[width=\linewidth]{flow_05_backend_ingest_dedup.pdf}
+\caption{Các đường tiếp nhận JSON sync, ảnh multipart và SMS gateway}
 \label{fig:flow-backend-dedup}
 \end{figure}
+\end{landscape}
 
 \subsection{Phân loại phản hồi và giới hạn retry}
 \begin{table}[htbp]\centering\small

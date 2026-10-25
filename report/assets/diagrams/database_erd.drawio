@@ -1,257 +1,517 @@
-<mxfile host="Electron" agent="Antigravity">
-  <diagram id="diag-1" name="So-do-Thuc-the-Lien-ket-CSDL-ERD">
-    <mxGraphModel dx="3363" dy="1079" grid="0" gridSize="10" guides="1" tooltips="1" connect="1" arrows="1" fold="1" page="1" pageScale="1" pageWidth="1420" pageHeight="960" math="0" shadow="0">
+<?xml version='1.0' encoding='utf-8'?>
+<mxfile host="app.diagrams.net" version="26.0.0">
+  <diagram id="database_erd" name="2.5 · Lược đồ đầy đủ và các liên hệ logic của backend">
+    <mxGraphModel page="1" pageScale="1" pageWidth="728.503937007874" pageHeight="418" math="0" grid="0" shadow="0">
       <root>
         <mxCell id="0" />
         <mxCell id="1" parent="0" />
-        <mxCell id="t_reports" parent="1" style="shape=swimlane;fontStyle=1;align=center;verticalAlign=top;childLayout=stackLayout;horizontal=1;startSize=30;horizontalStack=0;resizeParent=1;resizeParentMax=0;resizeLast=0;collapsible=0;marginBottom=0;whiteSpace=wrap;html=1;fontFamily=Helvetica;fontSize=15;fillColor=#DCE8F5;strokeColor=#526B88;swimlaneFillColor=#F7F9FC;fontColor=#172B4D;" value="Table: reports (Báo cáo cứu hộ khẩn cấp)" vertex="1">
-          <mxGeometry height="720" width="431" x="459" y="19" as="geometry" />
+        <mxCell id="text1" parent="1" vertex="1" value="&lt;div&gt;SCHEMA SQLITE · TẤT CẢ CỘT TRONG DDL&lt;/div&gt;" style="text;html=1;whiteSpace=wrap;align=left;verticalAlign=middle;fontFamily=DejaVu Sans;fontSize=10;fontStyle=1;fontColor=#203B50;spacing=0;overflow=visible;">
+          <mxGeometry x="9.0" y="2.5200000000000387" width="239.69000000000008" height="14.95999999999998" as="geometry" />
         </mxCell>
-        <mxCell id="t_reports_c1" parent="t_reports" style="text;strokeColor=#526B88;strokeWidth=0.5;fillColor=#EDF3FA;align=left;verticalAlign=middle;spacingLeft=8;spacingRight=4;overflow=hidden;points=[[0,0.5],[1,0.5]];portConstraint=eastwest;rotatable=0;whiteSpace=wrap;html=1;fontStyle=1;fontSize=15;fontFamily=Helvetica;fontColor=#172B4D;" value="&lt;div style=&quot;line-height:1;&quot;&gt;PK  id : TEXT PRIMARY KEY (Mã SOS duy nhất)&lt;/div&gt;" vertex="1">
-          <mxGeometry height="30" width="431" y="30" as="geometry" />
+        <mxCell id="node2" parent="1" vertex="1" style="rounded=0;fillColor=#FFFFFF;strokeColor=#587489;strokeWidth=0.9;dashed=0;">
+          <mxGeometry x="10" y="27" width="255" height="317.40000000000003" as="geometry" />
         </mxCell>
-        <mxCell id="t_reports_c2" parent="t_reports" style="text;strokeColor=#526B88;strokeWidth=0.5;fillColor=#EDF3FA;align=left;verticalAlign=middle;spacingLeft=8;spacingRight=4;overflow=hidden;points=[[0,0.5],[1,0.5]];portConstraint=eastwest;rotatable=0;whiteSpace=wrap;html=1;fontSize=15;fontFamily=Helvetica;fontColor=#172B4D;" value="&lt;div style=&quot;line-height:1;&quot;&gt;    server_received_at : TEXT NOT NULL (ISO-8601 UTC)&lt;/div&gt;" vertex="1">
-          <mxGeometry height="30" width="431" y="60" as="geometry" />
+        <mxCell id="node3" parent="1" vertex="1" style="rounded=0;fillColor=#EDF4FA;strokeColor=#587489;strokeWidth=0.9;dashed=0;">
+          <mxGeometry x="10" y="27" width="255" height="20" as="geometry" />
         </mxCell>
-        <mxCell id="t_reports_c3" parent="t_reports" style="text;strokeColor=#526B88;strokeWidth=0.5;fillColor=#EDF3FA;align=left;verticalAlign=middle;spacingLeft=8;spacingRight=4;overflow=hidden;points=[[0,0.5],[1,0.5]];portConstraint=eastwest;rotatable=0;whiteSpace=wrap;html=1;fontSize=15;fontFamily=Helvetica;fontColor=#172B4D;" value="&lt;div style=&quot;line-height:1;&quot;&gt;    created_at : TEXT (Thời điểm tạo tại client)&lt;/div&gt;" vertex="1">
-          <mxGeometry height="30" width="431" y="90" as="geometry" />
+        <mxCell id="node4" parent="1" vertex="1" style="rounded=0;fillColor=#FFFFFF;strokeColor=#587489;strokeWidth=0.9;dashed=0;">
+          <mxGeometry x="16.65" y="31.95" width="11.700000000000001" height="9.1" as="geometry" />
         </mxCell>
-        <mxCell id="t_reports_c4" parent="t_reports" style="text;strokeColor=#526B88;strokeWidth=0.5;fillColor=#EDF3FA;align=left;verticalAlign=middle;spacingLeft=8;spacingRight=4;overflow=hidden;points=[[0,0.5],[1,0.5]];portConstraint=eastwest;rotatable=0;whiteSpace=wrap;html=1;fontSize=15;fontFamily=Helvetica;fontColor=#172B4D;" value="&lt;div style=&quot;line-height:1;&quot;&gt;    lat, lng : REAL (Tọa độ WGS84 GPS hiện trường)&lt;/div&gt;" vertex="1">
-          <mxGeometry height="30" width="431" y="120" as="geometry" />
+        <mxCell id="ellipse5" parent="1" vertex="1" style="ellipse;fillColor=#FFFFFF;strokeColor=#587489;">
+          <mxGeometry x="16.65" y="30.0" width="11.700000000000001" height="3.9000000000000004" as="geometry" />
         </mxCell>
-        <mxCell id="t_reports_c5" parent="t_reports" style="text;strokeColor=#526B88;strokeWidth=0.5;fillColor=#EDF3FA;align=left;verticalAlign=middle;spacingLeft=8;spacingRight=4;overflow=hidden;points=[[0,0.5],[1,0.5]];portConstraint=eastwest;rotatable=0;whiteSpace=wrap;html=1;fontSize=15;fontFamily=Helvetica;fontColor=#172B4D;" value="&lt;div style=&quot;line-height:1;&quot;&gt;    trapped_count : INTEGER DEFAULT 0 (Số người mắc kẹt)&lt;/div&gt;" vertex="1">
-          <mxGeometry height="30" width="431" y="150" as="geometry" />
+        <mxCell id="ellipse6" parent="1" vertex="1" style="ellipse;fillColor=#FFFFFF;strokeColor=#587489;">
+          <mxGeometry x="16.65" y="34.55" width="11.700000000000001" height="3.9000000000000004" as="geometry" />
         </mxCell>
-        <mxCell id="t_reports_c6" parent="t_reports" style="text;strokeColor=#526B88;strokeWidth=0.5;fillColor=#EDF3FA;align=left;verticalAlign=middle;spacingLeft=8;spacingRight=4;overflow=hidden;points=[[0,0.5],[1,0.5]];portConstraint=eastwest;rotatable=0;whiteSpace=wrap;html=1;fontSize=15;fontFamily=Helvetica;fontColor=#172B4D;" value="&lt;div style=&quot;line-height:1;&quot;&gt;    injured_count : INTEGER DEFAULT 0 (Số người bị thương)&lt;/div&gt;" vertex="1">
-          <mxGeometry height="30" width="431" y="180" as="geometry" />
+        <mxCell id="ellipse7" parent="1" vertex="1" style="ellipse;fillColor=#FFFFFF;strokeColor=#587489;">
+          <mxGeometry x="16.65" y="39.1" width="11.700000000000001" height="3.9000000000000004" as="geometry" />
         </mxCell>
-        <mxCell id="t_reports_c7" parent="t_reports" style="text;strokeColor=#526B88;strokeWidth=0.5;fillColor=#EDF3FA;align=left;verticalAlign=middle;spacingLeft=8;spacingRight=4;overflow=hidden;points=[[0,0.5],[1,0.5]];portConstraint=eastwest;rotatable=0;whiteSpace=wrap;html=1;fontSize=15;fontFamily=Helvetica;fontColor=#172B4D;" value="&lt;div style=&quot;line-height:1;&quot;&gt;    vulnerable_groups : TEXT (JSON: trẻ em, người già...)&lt;/div&gt;" vertex="1">
-          <mxGeometry height="30" width="431" y="210" as="geometry" />
+        <mxCell id="text8" parent="1" vertex="1" value="&lt;div&gt;reports&lt;/div&gt;" style="text;html=1;whiteSpace=wrap;align=left;verticalAlign=middle;fontFamily=DejaVu Sans;fontSize=9.8;fontStyle=1;fontColor=#203B50;spacing=0;overflow=visible;">
+          <mxGeometry x="34.0" y="30.960000000000036" width="42.77000000000001" height="12.079999999999984" as="geometry" />
         </mxCell>
-        <mxCell id="t_reports_c8" parent="t_reports" style="text;strokeColor=#526B88;strokeWidth=0.5;fillColor=#EDF3FA;align=left;verticalAlign=middle;spacingLeft=8;spacingRight=4;overflow=hidden;points=[[0,0.5],[1,0.5]];portConstraint=eastwest;rotatable=0;whiteSpace=wrap;html=1;fontSize=15;fontFamily=Helvetica;fontColor=#172B4D;" value="&lt;div style=&quot;line-height:1;&quot;&gt;    description : TEXT (Mô tả hiện trường / khẩn cấp)&lt;/div&gt;" vertex="1">
-          <mxGeometry height="30" width="431" y="240" as="geometry" />
+        <mxCell id="text9" parent="1" vertex="1" value="&lt;div&gt;id TEXT PK&lt;/div&gt;" style="text;html=1;whiteSpace=wrap;align=left;verticalAlign=middle;fontFamily=DejaVu Sans;fontSize=9;fontStyle=0;fontColor=#203B50;spacing=0;overflow=visible;">
+          <mxGeometry x="16.0" y="49.32000000000005" width="50.15000000000002" height="11.360000000000014" as="geometry" />
         </mxCell>
-        <mxCell id="t_reports_c9" parent="t_reports" style="text;strokeColor=#526B88;strokeWidth=0.5;fillColor=#EDF3FA;align=left;verticalAlign=middle;spacingLeft=8;spacingRight=4;overflow=hidden;points=[[0,0.5],[1,0.5]];portConstraint=eastwest;rotatable=0;whiteSpace=wrap;html=1;fontSize=15;fontFamily=Helvetica;fontColor=#172B4D;" value="&lt;div style=&quot;line-height:1;&quot;&gt;    ai_tags : TEXT (JSON kết quả Edge AI on-device)&lt;/div&gt;" vertex="1">
-          <mxGeometry height="30" width="431" y="270" as="geometry" />
+        <mxCell id="text10" parent="1" vertex="1" value="&lt;div&gt;server_received_at TEXT NN&lt;/div&gt;" style="text;html=1;whiteSpace=wrap;align=left;verticalAlign=middle;fontFamily=DejaVu Sans;fontSize=9;fontStyle=0;fontColor=#203B50;spacing=0;overflow=visible;">
+          <mxGeometry x="16.0" y="60.72000000000003" width="129.62000000000003" height="11.360000000000014" as="geometry" />
         </mxCell>
-        <mxCell id="t_reports_c10" parent="t_reports" style="text;strokeColor=#526B88;strokeWidth=0.5;fillColor=#EDF3FA;align=left;verticalAlign=middle;spacingLeft=8;spacingRight=4;overflow=hidden;points=[[0,0.5],[1,0.5]];portConstraint=eastwest;rotatable=0;whiteSpace=wrap;html=1;fontSize=15;fontFamily=Helvetica;fontColor=#172B4D;" value="&lt;div style=&quot;line-height:1;&quot;&gt;    send_mode : TEXT (Chế độ gửi: HTTP, Sync, SMS)&lt;/div&gt;" vertex="1">
-          <mxGeometry height="30" width="431" y="300" as="geometry" />
+        <mxCell id="text11" parent="1" vertex="1" value="&lt;div&gt;created_at TEXT&lt;/div&gt;" style="text;html=1;whiteSpace=wrap;align=left;verticalAlign=middle;fontFamily=DejaVu Sans;fontSize=9;fontStyle=0;fontColor=#203B50;spacing=0;overflow=visible;">
+          <mxGeometry x="16.0" y="72.12" width="75.89000000000003" height="11.360000000000014" as="geometry" />
         </mxCell>
-        <mxCell id="t_reports_c11" parent="t_reports" style="text;strokeColor=#526B88;strokeWidth=0.5;fillColor=#EDF3FA;align=left;verticalAlign=middle;spacingLeft=8;spacingRight=4;overflow=hidden;points=[[0,0.5],[1,0.5]];portConstraint=eastwest;rotatable=0;whiteSpace=wrap;html=1;fontSize=15;fontFamily=Helvetica;fontColor=#172B4D;" value="&lt;div style=&quot;line-height:1;&quot;&gt;    status : TEXT DEFAULT &#39;processing&#39;&lt;/div&gt;" vertex="1">
-          <mxGeometry height="30" width="431" y="330" as="geometry" />
+        <mxCell id="text12" parent="1" vertex="1" value="&lt;div&gt;lat REAL&lt;/div&gt;" style="text;html=1;whiteSpace=wrap;align=left;verticalAlign=middle;fontFamily=DejaVu Sans;fontSize=9;fontStyle=0;fontColor=#203B50;spacing=0;overflow=visible;">
+          <mxGeometry x="16.0" y="83.52000000000004" width="39.62000000000002" height="11.360000000000014" as="geometry" />
         </mxCell>
-        <mxCell id="t_reports_c12" parent="t_reports" style="text;strokeColor=#526B88;strokeWidth=0.5;fillColor=#EDF3FA;align=left;verticalAlign=middle;spacingLeft=8;spacingRight=4;overflow=hidden;points=[[0,0.5],[1,0.5]];portConstraint=eastwest;rotatable=0;whiteSpace=wrap;html=1;fontSize=15;fontFamily=Helvetica;fontColor=#172B4D;" value="&lt;div style=&quot;line-height:1;&quot;&gt;    status_version : INTEGER DEFAULT 1 (Phiên bản đồng bộ)&lt;/div&gt;" vertex="1">
-          <mxGeometry height="30" width="431" y="360" as="geometry" />
+        <mxCell id="text13" parent="1" vertex="1" value="&lt;div&gt;lng REAL&lt;/div&gt;" style="text;html=1;whiteSpace=wrap;align=left;verticalAlign=middle;fontFamily=DejaVu Sans;fontSize=9;fontStyle=0;fontColor=#203B50;spacing=0;overflow=visible;">
+          <mxGeometry x="16.0" y="94.91999999999996" width="41.960000000000015" height="11.360000000000014" as="geometry" />
         </mxCell>
-        <mxCell id="t_reports_c13" parent="t_reports" style="text;strokeColor=#526B88;strokeWidth=0.5;fillColor=#EDF3FA;align=left;verticalAlign=middle;spacingLeft=8;spacingRight=4;overflow=hidden;points=[[0,0.5],[1,0.5]];portConstraint=eastwest;rotatable=0;whiteSpace=wrap;html=1;fontSize=15;fontFamily=Helvetica;fontColor=#172B4D;" value="&lt;div style=&quot;line-height:1;&quot;&gt;    image_sha256 : TEXT (SHA-256 hash ảnh hiện trường)&lt;/div&gt;" vertex="1">
-          <mxGeometry height="30" width="431" y="390" as="geometry" />
+        <mxCell id="text14" parent="1" vertex="1" value="&lt;div&gt;trapped_count INTEGER =0&lt;/div&gt;" style="text;html=1;whiteSpace=wrap;align=left;verticalAlign=middle;fontFamily=DejaVu Sans;fontSize=9;fontStyle=0;fontColor=#203B50;spacing=0;overflow=visible;">
+          <mxGeometry x="16.0" y="106.32" width="126.11000000000004" height="11.360000000000014" as="geometry" />
         </mxCell>
-        <mxCell id="t_reports_c14" parent="t_reports" style="text;strokeColor=#526B88;strokeWidth=0.5;fillColor=#EDF3FA;align=left;verticalAlign=middle;spacingLeft=8;spacingRight=4;overflow=hidden;points=[[0,0.5],[1,0.5]];portConstraint=eastwest;rotatable=0;whiteSpace=wrap;html=1;fontSize=15;fontFamily=Helvetica;fontColor=#172B4D;" value="&lt;div style=&quot;line-height:1;&quot;&gt;    image_size_bytes : INTEGER (Dung lượng ảnh byte)&lt;/div&gt;" vertex="1">
-          <mxGeometry height="30" width="431" y="420" as="geometry" />
+        <mxCell id="text15" parent="1" vertex="1" value="&lt;div&gt;injured_count INTEGER =0&lt;/div&gt;" style="text;html=1;whiteSpace=wrap;align=left;verticalAlign=middle;fontFamily=DejaVu Sans;fontSize=9;fontStyle=0;fontColor=#203B50;spacing=0;overflow=visible;">
+          <mxGeometry x="16.0" y="117.72000000000003" width="121.88000000000005" height="11.360000000000014" as="geometry" />
         </mxCell>
-        <mxCell id="t_reports_c15" parent="t_reports" style="text;strokeColor=#526B88;strokeWidth=0.5;fillColor=#EDF3FA;align=left;verticalAlign=middle;spacingLeft=8;spacingRight=4;overflow=hidden;points=[[0,0.5],[1,0.5]];portConstraint=eastwest;rotatable=0;whiteSpace=wrap;html=1;fontSize=15;fontFamily=Helvetica;fontColor=#172B4D;" value="&lt;div style=&quot;line-height:1;&quot;&gt;    image_filename, image_url : TEXT (Tên file &amp;amp; URL xem ảnh)&lt;/div&gt;" vertex="1">
-          <mxGeometry height="30" width="431" y="450" as="geometry" />
+        <mxCell id="text16" parent="1" vertex="1" value="&lt;div&gt;vulnerable_groups TEXT&lt;/div&gt;" style="text;html=1;whiteSpace=wrap;align=left;verticalAlign=middle;fontFamily=DejaVu Sans;fontSize=9;fontStyle=0;fontColor=#203B50;spacing=0;overflow=visible;">
+          <mxGeometry x="16.0" y="129.12" width="110.81000000000003" height="11.360000000000014" as="geometry" />
         </mxCell>
-        <mxCell id="t_reports_c16" parent="t_reports" style="text;strokeColor=#526B88;strokeWidth=0.5;fillColor=#EDF3FA;align=left;verticalAlign=middle;spacingLeft=8;spacingRight=4;overflow=hidden;points=[[0,0.5],[1,0.5]];portConstraint=eastwest;rotatable=0;whiteSpace=wrap;html=1;fontSize=15;fontFamily=Helvetica;fontColor=#172B4D;" value="&lt;div style=&quot;line-height:1;&quot;&gt;    raw_payload : TEXT NOT NULL (Canonical RFC 8785)&lt;/div&gt;" vertex="1">
-          <mxGeometry height="30" width="431" y="480" as="geometry" />
+        <mxCell id="text17" parent="1" vertex="1" value="&lt;div&gt;description TEXT&lt;/div&gt;" style="text;html=1;whiteSpace=wrap;align=left;verticalAlign=middle;fontFamily=DejaVu Sans;fontSize=9;fontStyle=0;fontColor=#203B50;spacing=0;overflow=visible;">
+          <mxGeometry x="16.0" y="140.51999999999998" width="77.87000000000003" height="11.360000000000014" as="geometry" />
         </mxCell>
-        <mxCell id="t_reports_c17" parent="t_reports" style="text;strokeColor=#526B88;strokeWidth=0.5;fillColor=#EDF3FA;align=left;verticalAlign=middle;spacingLeft=8;spacingRight=4;overflow=hidden;points=[[0,0.5],[1,0.5]];portConstraint=eastwest;rotatable=0;whiteSpace=wrap;html=1;fontStyle=2;fontSize=15;fontFamily=Helvetica;fontColor=#172B4D;" value="&lt;div style=&quot;line-height:1;&quot;&gt;FK  assigned_team_id : INTEGER [Ref: teams.id]&lt;/div&gt;" vertex="1">
-          <mxGeometry height="30" width="431" y="510" as="geometry" />
+        <mxCell id="text18" parent="1" vertex="1" value="&lt;div&gt;ai_tags TEXT&lt;/div&gt;" style="text;html=1;whiteSpace=wrap;align=left;verticalAlign=middle;fontFamily=DejaVu Sans;fontSize=9;fontStyle=0;fontColor=#203B50;spacing=0;overflow=visible;">
+          <mxGeometry x="16.0" y="151.92000000000002" width="59.87000000000002" height="11.360000000000014" as="geometry" />
         </mxCell>
-        <mxCell id="t_reports_c18" parent="t_reports" style="text;strokeColor=#526B88;strokeWidth=0.5;fillColor=#EDF3FA;align=left;verticalAlign=middle;spacingLeft=8;spacingRight=4;overflow=hidden;points=[[0,0.5],[1,0.5]];portConstraint=eastwest;rotatable=0;whiteSpace=wrap;html=1;fontSize=15;fontFamily=Helvetica;fontColor=#172B4D;" value="&lt;div style=&quot;line-height:1;&quot;&gt;    location_source : TEXT (&#39;device&#39; GPS | &#39;manual&#39;)&lt;/div&gt;" vertex="1">
-          <mxGeometry height="30" width="431" y="540" as="geometry" />
+        <mxCell id="text19" parent="1" vertex="1" value="&lt;div&gt;send_mode TEXT&lt;/div&gt;" style="text;html=1;whiteSpace=wrap;align=left;verticalAlign=middle;fontFamily=DejaVu Sans;fontSize=9;fontStyle=0;fontColor=#203B50;spacing=0;overflow=visible;">
+          <mxGeometry x="16.0" y="163.32" width="79.49000000000002" height="11.359999999999985" as="geometry" />
         </mxCell>
-        <mxCell id="t_reports_c19" parent="t_reports" style="text;strokeColor=#526B88;strokeWidth=0.5;fillColor=#EDF3FA;align=left;verticalAlign=middle;spacingLeft=8;spacingRight=4;overflow=hidden;points=[[0,0.5],[1,0.5]];portConstraint=eastwest;rotatable=0;whiteSpace=wrap;html=1;fontSize=15;fontFamily=Helvetica;fontColor=#172B4D;" value="&lt;div style=&quot;line-height:1;&quot;&gt;    owner_client_id : TEXT (Client ID thiết bị sở hữu)&lt;/div&gt;" vertex="1">
-          <mxGeometry height="30" width="431" y="570" as="geometry" />
+        <mxCell id="text20" parent="1" vertex="1" value="&lt;div&gt;status TEXT =&amp;#x27;processing&amp;#x27;&lt;/div&gt;" style="text;html=1;whiteSpace=wrap;align=left;verticalAlign=middle;fontFamily=DejaVu Sans;fontSize=9;fontStyle=0;fontColor=#203B50;spacing=0;overflow=visible;">
+          <mxGeometry x="16.0" y="174.72" width="119.54000000000005" height="11.360000000000014" as="geometry" />
         </mxCell>
-        <mxCell id="t_reports_c20" parent="t_reports" style="text;strokeColor=#526B88;strokeWidth=0.5;fillColor=#EDF3FA;align=left;verticalAlign=middle;spacingLeft=8;spacingRight=4;overflow=hidden;points=[[0,0.5],[1,0.5]];portConstraint=eastwest;rotatable=0;whiteSpace=wrap;html=1;fontSize=15;fontFamily=Helvetica;fontColor=#172B4D;" value="&lt;div style=&quot;line-height:1;&quot;&gt;    close_reason : TEXT (Lý do khi status=&#39;cancelled&#39;)&lt;/div&gt;" vertex="1">
-          <mxGeometry height="30" width="431" y="600" as="geometry" />
+        <mxCell id="text21" parent="1" vertex="1" value="&lt;div&gt;status_version INTEGER =1&lt;/div&gt;" style="text;html=1;whiteSpace=wrap;align=left;verticalAlign=middle;fontFamily=DejaVu Sans;fontSize=9;fontStyle=0;fontColor=#203B50;spacing=0;overflow=visible;">
+          <mxGeometry x="16.0" y="186.12000000000003" width="125.75000000000003" height="11.360000000000014" as="geometry" />
         </mxCell>
-        <mxCell id="t_reports_c21" parent="t_reports" style="text;strokeColor=#526B88;strokeWidth=0.5;fillColor=#EDF3FA;align=left;verticalAlign=middle;spacingLeft=8;spacingRight=4;overflow=hidden;points=[[0,0.5],[1,0.5]];portConstraint=eastwest;rotatable=0;whiteSpace=wrap;html=1;fontSize=15;fontFamily=Helvetica;fontColor=#172B4D;" value="&lt;div style=&quot;line-height:1;&quot;&gt;    first_received_at : TEXT (Thời điểm nhận đầu tính SLA)&lt;/div&gt;" vertex="1">
-          <mxGeometry height="30" width="431" y="630" as="geometry" />
+        <mxCell id="text22" parent="1" vertex="1" value="&lt;div&gt;image_filename TEXT&lt;/div&gt;" style="text;html=1;whiteSpace=wrap;align=left;verticalAlign=middle;fontFamily=DejaVu Sans;fontSize=9;fontStyle=0;fontColor=#203B50;spacing=0;overflow=visible;">
+          <mxGeometry x="16.0" y="197.52" width="99.83000000000003" height="11.360000000000014" as="geometry" />
         </mxCell>
-        <mxCell id="t_reports_c22" parent="t_reports" style="text;strokeColor=#526B88;strokeWidth=0.5;fillColor=#EDF3FA;align=left;verticalAlign=middle;spacingLeft=8;spacingRight=4;overflow=hidden;points=[[0,0.5],[1,0.5]];portConstraint=eastwest;rotatable=0;whiteSpace=wrap;html=1;fontSize=15;fontFamily=Helvetica;fontColor=#172B4D;" value="&lt;div style=&quot;line-height:1;&quot;&gt;    status_updated_at : TEXT (Lần đổi trạng thái gần nhất)&lt;/div&gt;" vertex="1">
-          <mxGeometry height="30" width="431" y="660" as="geometry" />
+        <mxCell id="text23" parent="1" vertex="1" value="&lt;div&gt;image_local_path TEXT&lt;/div&gt;" style="text;html=1;whiteSpace=wrap;align=left;verticalAlign=middle;fontFamily=DejaVu Sans;fontSize=9;fontStyle=0;fontColor=#203B50;spacing=0;overflow=visible;">
+          <mxGeometry x="16.0" y="208.92000000000002" width="106.49000000000004" height="11.359999999999985" as="geometry" />
         </mxCell>
-        <mxCell id="t_reports_c23" parent="t_reports" style="text;strokeColor=#526B88;strokeWidth=0.5;fillColor=#EDF3FA;align=left;verticalAlign=middle;spacingLeft=8;spacingRight=4;overflow=hidden;points=[[0,0.5],[1,0.5]];portConstraint=eastwest;rotatable=0;whiteSpace=wrap;html=1;fontSize=15;fontFamily=Helvetica;fontColor=#172B4D;" value="&lt;div style=&quot;line-height:1;&quot;&gt;    updated_seq : INTEGER DEFAULT 0 (Seq counter delta)&lt;/div&gt;" vertex="1">
-          <mxGeometry height="30" width="431" y="690" as="geometry" />
+        <mxCell id="text24" parent="1" vertex="1" value="&lt;div&gt;image_url TEXT&lt;/div&gt;" style="text;html=1;whiteSpace=wrap;align=left;verticalAlign=middle;fontFamily=DejaVu Sans;fontSize=9;fontStyle=0;fontColor=#203B50;spacing=0;overflow=visible;">
+          <mxGeometry x="16.0" y="220.32" width="72.29000000000002" height="11.360000000000014" as="geometry" />
         </mxCell>
-        <mxCell id="t_dedup" parent="1" style="shape=swimlane;fontStyle=1;align=center;verticalAlign=top;childLayout=stackLayout;horizontal=1;startSize=36;horizontalStack=0;resizeParent=1;resizeParentMax=0;resizeLast=0;collapsible=0;marginBottom=0;whiteSpace=wrap;html=1;fontFamily=Helvetica;fontSize=15;fillColor=#DCE8F5;strokeColor=#526B88;swimlaneFillColor=#F7F9FC;fontColor=#172B4D;" value="Table: messages_dedup (Chống trùng lặp Outbox)" vertex="1">
-          <mxGeometry height="366" width="477" x="-139" y="12" as="geometry" />
+        <mxCell id="text25" parent="1" vertex="1" value="&lt;div&gt;image_sha256 TEXT&lt;/div&gt;" style="text;html=1;whiteSpace=wrap;align=left;verticalAlign=middle;fontFamily=DejaVu Sans;fontSize=9;fontStyle=0;fontColor=#203B50;spacing=0;overflow=visible;">
+          <mxGeometry x="16.0" y="231.72000000000003" width="93.44000000000003" height="11.359999999999985" as="geometry" />
         </mxCell>
-        <mxCell id="t_dedup_c1" parent="t_dedup" style="text;strokeColor=#526B88;strokeWidth=0.5;fillColor=#EDF3FA;align=left;verticalAlign=middle;spacingLeft=8;spacingRight=4;overflow=hidden;points=[[0,0.5],[1,0.5]];portConstraint=eastwest;rotatable=0;whiteSpace=wrap;html=1;fontStyle=1;fontSize=15;fontFamily=Helvetica;fontColor=#172B4D;" value="&lt;div style=&quot;line-height:1;&quot;&gt;PK  message_id : TEXT PRIMARY KEY (UUID outbox)&lt;/div&gt;" vertex="1">
-          <mxGeometry height="30" width="477" y="36" as="geometry" />
+        <mxCell id="text26" parent="1" vertex="1" value="&lt;div&gt;image_size_bytes INTEGER&lt;/div&gt;" style="text;html=1;whiteSpace=wrap;align=left;verticalAlign=middle;fontFamily=DejaVu Sans;fontSize=9;fontStyle=0;fontColor=#203B50;spacing=0;overflow=visible;">
+          <mxGeometry x="16.0" y="243.12" width="123.86000000000004" height="11.360000000000014" as="geometry" />
         </mxCell>
-        <mxCell id="t_dedup_c2" parent="t_dedup" style="text;strokeColor=#526B88;strokeWidth=0.5;fillColor=#EDF3FA;align=left;verticalAlign=middle;spacingLeft=8;spacingRight=4;overflow=hidden;points=[[0,0.5],[1,0.5]];portConstraint=eastwest;rotatable=0;whiteSpace=wrap;html=1;fontStyle=1;fontSize=15;fontFamily=Helvetica;fontColor=#172B4D;" value="&lt;div style=&quot;line-height:1;&quot;&gt;UQ  client_id : TEXT NOT NULL (Định danh thiết bị)&lt;/div&gt;" vertex="1">
-          <mxGeometry height="30" width="477" y="66" as="geometry" />
+        <mxCell id="text27" parent="1" vertex="1" value="&lt;div&gt;raw_payload TEXT NN&lt;/div&gt;" style="text;html=1;whiteSpace=wrap;align=left;verticalAlign=middle;fontFamily=DejaVu Sans;fontSize=9;fontStyle=0;fontColor=#203B50;spacing=0;overflow=visible;">
+          <mxGeometry x="16.0" y="254.52000000000004" width="101.18000000000004" height="11.359999999999957" as="geometry" />
         </mxCell>
-        <mxCell id="t_dedup_c3" parent="t_dedup" style="text;strokeColor=#526B88;strokeWidth=0.5;fillColor=#EDF3FA;align=left;verticalAlign=middle;spacingLeft=8;spacingRight=4;overflow=hidden;points=[[0,0.5],[1,0.5]];portConstraint=eastwest;rotatable=0;whiteSpace=wrap;html=1;fontStyle=1;fontSize=15;fontFamily=Helvetica;fontColor=#172B4D;" value="&lt;div style=&quot;line-height:1;&quot;&gt;UQ  sequence_number : INTEGER NOT NULL (Tuần tự tăng dần)&lt;/div&gt;" vertex="1">
-          <mxGeometry height="30" width="477" y="96" as="geometry" />
+        <mxCell id="text28" parent="1" vertex="1" value="&lt;div&gt;first_received_at TEXT&lt;/div&gt;" style="text;html=1;whiteSpace=wrap;align=left;verticalAlign=middle;fontFamily=DejaVu Sans;fontSize=9;fontStyle=0;fontColor=#203B50;spacing=0;overflow=visible;">
+          <mxGeometry x="16.0" y="265.92" width="102.35000000000004" height="11.360000000000014" as="geometry" />
         </mxCell>
-        <mxCell id="t_dedup_c4" parent="t_dedup" style="text;strokeColor=#526B88;strokeWidth=0.5;fillColor=#EDF3FA;align=left;verticalAlign=middle;spacingLeft=8;spacingRight=4;overflow=hidden;points=[[0,0.5],[1,0.5]];portConstraint=eastwest;rotatable=0;whiteSpace=wrap;html=1;fontSize=15;fontFamily=Helvetica;fontColor=#172B4D;" value="&lt;div style=&quot;line-height:1;&quot;&gt;    operation_type : TEXT NOT NULL (CREATE_REPORT...)&lt;/div&gt;" vertex="1">
-          <mxGeometry height="30" width="477" y="126" as="geometry" />
+        <mxCell id="text29" parent="1" vertex="1" value="&lt;div&gt;updated_seq INTEGER =0&lt;/div&gt;" style="text;html=1;whiteSpace=wrap;align=left;verticalAlign=middle;fontFamily=DejaVu Sans;fontSize=9;fontStyle=0;fontColor=#203B50;spacing=0;overflow=visible;">
+          <mxGeometry x="16.0" y="277.32" width="118.82000000000005" height="11.360000000000014" as="geometry" />
         </mxCell>
-        <mxCell id="t_dedup_c6" parent="t_dedup" style="text;strokeColor=#526B88;strokeWidth=0.5;fillColor=#EDF3FA;align=left;verticalAlign=middle;spacingLeft=8;spacingRight=4;overflow=hidden;points=[[0,0.5],[1,0.5]];portConstraint=eastwest;rotatable=0;whiteSpace=wrap;html=1;fontSize=15;fontFamily=Helvetica;fontColor=#172B4D;" value="&lt;div style=&quot;line-height:1;&quot;&gt;    status : TEXT NOT NULL (PROCESSED, DUPLICATE...)&lt;/div&gt;" vertex="1">
-          <mxGeometry height="30" width="477" y="156" as="geometry" />
+        <mxCell id="text30" parent="1" vertex="1" value="&lt;div&gt;assigned_team_id INTEGER&lt;/div&gt;" style="text;html=1;whiteSpace=wrap;align=left;verticalAlign=middle;fontFamily=DejaVu Sans;fontSize=9;fontStyle=0;fontColor=#203B50;spacing=0;overflow=visible;">
+          <mxGeometry x="16.0" y="288.72" width="125.39000000000004" height="11.359999999999957" as="geometry" />
         </mxCell>
-        <mxCell id="t_dedup_c5" parent="t_dedup" style="text;strokeColor=#526B88;strokeWidth=0.5;fillColor=#EDF3FA;align=left;verticalAlign=middle;spacingLeft=8;spacingRight=4;overflow=hidden;points=[[0,0.5],[1,0.5]];portConstraint=eastwest;rotatable=0;whiteSpace=wrap;html=1;fontSize=15;fontFamily=Helvetica;fontColor=#172B4D;" value="&lt;div style=&quot;line-height:1;&quot;&gt;    payload_hash : TEXT NOT NULL (RFC 8785 SHA-256)&lt;/div&gt;" vertex="1">
-          <mxGeometry height="30" width="477" y="186" as="geometry" />
+        <mxCell id="text31" parent="1" vertex="1" value="&lt;div&gt;location_source TEXT&lt;/div&gt;" style="text;html=1;whiteSpace=wrap;align=left;verticalAlign=middle;fontFamily=DejaVu Sans;fontSize=9;fontStyle=0;fontColor=#203B50;spacing=0;overflow=visible;">
+          <mxGeometry x="16.0" y="300.12" width="98.03000000000003" height="11.360000000000014" as="geometry" />
         </mxCell>
-        <mxCell id="t_dedup_c7" parent="t_dedup" style="text;strokeColor=#526B88;strokeWidth=0.5;fillColor=#EDF3FA;align=left;verticalAlign=middle;spacingLeft=8;spacingRight=4;overflow=hidden;points=[[0,0.5],[1,0.5]];portConstraint=eastwest;rotatable=0;whiteSpace=wrap;html=1;fontSize=15;fontFamily=Helvetica;fontColor=#172B4D;" value="&lt;div style=&quot;line-height:1;&quot;&gt;    error_code : TEXT (Mã lỗi nếu bị từ chối)&lt;/div&gt;" vertex="1">
-          <mxGeometry height="30" width="477" y="216" as="geometry" />
+        <mxCell id="text32" parent="1" vertex="1" value="&lt;div&gt;close_reason TEXT&lt;/div&gt;" style="text;html=1;whiteSpace=wrap;align=left;verticalAlign=middle;fontFamily=DejaVu Sans;fontSize=9;fontStyle=0;fontColor=#203B50;spacing=0;overflow=visible;">
+          <mxGeometry x="16.0" y="311.52" width="86.06000000000003" height="11.360000000000014" as="geometry" />
         </mxCell>
-        <mxCell id="t_dedup_c8" parent="t_dedup" style="text;strokeColor=#526B88;strokeWidth=0.5;fillColor=#EDF3FA;align=left;verticalAlign=middle;spacingLeft=8;spacingRight=4;overflow=hidden;points=[[0,0.5],[1,0.5]];portConstraint=eastwest;rotatable=0;whiteSpace=wrap;html=1;fontSize=15;fontFamily=Helvetica;fontColor=#172B4D;" value="&lt;div style=&quot;line-height:1;&quot;&gt;    result_data : TEXT (JSON: record_id, ack token)&lt;/div&gt;" vertex="1">
-          <mxGeometry height="30" width="477" y="246" as="geometry" />
+        <mxCell id="text33" parent="1" vertex="1" value="&lt;div&gt;status_updated_at TEXT&lt;/div&gt;" style="text;html=1;whiteSpace=wrap;align=left;verticalAlign=middle;fontFamily=DejaVu Sans;fontSize=9;fontStyle=0;fontColor=#203B50;spacing=0;overflow=visible;">
+          <mxGeometry x="16.0" y="322.92" width="110.99000000000004" height="11.360000000000014" as="geometry" />
         </mxCell>
-        <mxCell id="t_dedup_c9" parent="t_dedup" style="text;strokeColor=#526B88;strokeWidth=0.5;fillColor=#EDF3FA;align=left;verticalAlign=middle;spacingLeft=8;spacingRight=4;overflow=hidden;points=[[0,0.5],[1,0.5]];portConstraint=eastwest;rotatable=0;whiteSpace=wrap;html=1;fontSize=15;fontFamily=Helvetica;fontColor=#172B4D;" value="&lt;div style=&quot;line-height:1;&quot;&gt;    processed_at : TEXT NOT NULL (Thời điểm server xử lý)&lt;/div&gt;" vertex="1">
-          <mxGeometry height="30" width="477" y="276" as="geometry" />
+        <mxCell id="text34" parent="1" vertex="1" value="&lt;div&gt;owner_client_id TEXT&lt;/div&gt;" style="text;html=1;whiteSpace=wrap;align=left;verticalAlign=middle;fontFamily=DejaVu Sans;fontSize=9;fontStyle=0;fontColor=#203B50;spacing=0;overflow=visible;">
+          <mxGeometry x="16.0" y="334.32000000000005" width="97.67000000000003" height="11.359999999999957" as="geometry" />
+        </mxCell>
+        <mxCell id="node35" parent="1" vertex="1" style="rounded=0;fillColor=#FFFFFF;strokeColor=#587489;strokeWidth=0.9;dashed=0;">
+          <mxGeometry x="292" y="27" width="205" height="146.4" as="geometry" />
+        </mxCell>
+        <mxCell id="node36" parent="1" vertex="1" style="rounded=0;fillColor=#F4F5F6;strokeColor=#587489;strokeWidth=0.9;dashed=0;">
+          <mxGeometry x="292" y="27" width="205" height="20" as="geometry" />
+        </mxCell>
+        <mxCell id="edge37" parent="1" edge="1" style="html=1;rounded=0;strokeColor=#587489;strokeWidth=0.9;dashed=0;endArrow=none;startArrow=none;">
+          <mxGeometry relative="1" as="geometry">
+            <mxPoint x="299.95" y="30.0" as="sourcePoint" />
+            <mxPoint x="299.95" y="30.0" as="targetPoint" />
+            <Array as="points">
+              <mxPoint x="306.45" y="30.0" />
+              <mxPoint x="309.7" y="33.25" />
+              <mxPoint x="309.7" y="43.0" />
+              <mxPoint x="299.95" y="43.0" />
+            </Array>
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="edge38" parent="1" edge="1" style="html=1;rounded=0;strokeColor=#587489;strokeWidth=0.9;dashed=0;endArrow=none;startArrow=none;">
+          <mxGeometry relative="1" as="geometry">
+            <mxPoint x="301.9" y="35.2" as="sourcePoint" />
+            <mxPoint x="307.75" y="35.2" as="targetPoint" />
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="edge39" parent="1" edge="1" style="html=1;rounded=0;strokeColor=#587489;strokeWidth=0.9;dashed=0;endArrow=none;startArrow=none;">
+          <mxGeometry relative="1" as="geometry">
+            <mxPoint x="301.9" y="37.8" as="sourcePoint" />
+            <mxPoint x="307.75" y="37.8" as="targetPoint" />
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="edge40" parent="1" edge="1" style="html=1;rounded=0;strokeColor=#587489;strokeWidth=0.9;dashed=0;endArrow=none;startArrow=none;">
+          <mxGeometry relative="1" as="geometry">
+            <mxPoint x="301.9" y="40.4" as="sourcePoint" />
+            <mxPoint x="307.75" y="40.4" as="targetPoint" />
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="text41" parent="1" vertex="1" value="&lt;div&gt;messages_dedup&lt;/div&gt;" style="text;html=1;whiteSpace=wrap;align=left;verticalAlign=middle;fontFamily=DejaVu Sans;fontSize=9.8;fontStyle=1;fontColor=#203B50;spacing=0;overflow=visible;">
+          <mxGeometry x="316.00000000000006" y="30.960000000000036" width="96.41000000000003" height="12.079999999999984" as="geometry" />
         </mxCell>
-        <mxCell id="t_dedup_c10" parent="t_dedup" style="text;strokeColor=#526B88;strokeWidth=0.5;fillColor=#EDF3FA;align=left;verticalAlign=middle;spacingLeft=8;spacingRight=4;overflow=hidden;points=[[0,0.5],[1,0.5]];portConstraint=eastwest;rotatable=0;whiteSpace=wrap;html=1;fontSize=15;fontFamily=Helvetica;fontColor=#172B4D;" value="&lt;div style=&quot;line-height:1;letter-spacing:-0.8px;white-space:nowrap;&quot;&gt;    created_at : TEXT NOT NULL (Thời điểm tạo client)&lt;/div&gt;" vertex="1">
-          <mxGeometry height="30" width="477" y="306" as="geometry" />
+        <mxCell id="text42" parent="1" vertex="1" value="&lt;div&gt;message_id TEXT PK&lt;/div&gt;" style="text;html=1;whiteSpace=wrap;align=left;verticalAlign=middle;fontFamily=DejaVu Sans;fontSize=9;fontStyle=0;fontColor=#203B50;spacing=0;overflow=visible;">
+          <mxGeometry x="298.00000000000006" y="49.32000000000005" width="95.24000000000001" height="11.360000000000014" as="geometry" />
         </mxCell>
-        <mxCell id="t_dedup_c11" parent="t_dedup" style="text;strokeColor=#526B88;strokeWidth=0.5;fillColor=#EDF3FA;align=left;verticalAlign=middle;spacingLeft=8;spacingRight=4;overflow=hidden;points=[[0,0.5],[1,0.5]];portConstraint=eastwest;rotatable=0;whiteSpace=wrap;html=1;fontSize=15;fontFamily=Helvetica;fontColor=#172B4D;" value="&lt;div style=&quot;line-height:1;&quot;&gt;    expires_at : TEXT (Thời điểm hết hạn lưu trữ)&lt;/div&gt;" vertex="1">
-          <mxGeometry height="30" width="477" y="336" as="geometry" />
+        <mxCell id="text43" parent="1" vertex="1" value="&lt;div&gt;client_id TEXT NN&lt;/div&gt;" style="text;html=1;whiteSpace=wrap;align=left;verticalAlign=middle;fontFamily=DejaVu Sans;fontSize=9;fontStyle=0;fontColor=#203B50;spacing=0;overflow=visible;">
+          <mxGeometry x="298.00000000000006" y="60.72000000000003" width="81.74000000000001" height="11.360000000000014" as="geometry" />
         </mxCell>
-        <mxCell id="t_events" parent="1" style="shape=swimlane;fontStyle=1;align=center;verticalAlign=top;childLayout=stackLayout;horizontal=1;startSize=45;horizontalStack=0;resizeParent=1;resizeParentMax=0;resizeLast=0;collapsible=0;marginBottom=0;whiteSpace=wrap;html=1;fontFamily=Helvetica;fontSize=15;fillColor=#DCE8F5;strokeColor=#526B88;swimlaneFillColor=#F7F9FC;fontColor=#172B4D;" value="Table: report_events (Nhật ký kiểm toán truy vết)" vertex="1">
-          <mxGeometry height="375" width="379" x="996" y="19" as="geometry" />
+        <mxCell id="text44" parent="1" vertex="1" value="&lt;div&gt;sequence_number INTEGER NN&lt;/div&gt;" style="text;html=1;whiteSpace=wrap;align=left;verticalAlign=middle;fontFamily=DejaVu Sans;fontSize=9;fontStyle=0;fontColor=#203B50;spacing=0;overflow=visible;">
+          <mxGeometry x="298.00000000000006" y="72.12" width="143.93" height="11.360000000000014" as="geometry" />
         </mxCell>
-        <mxCell id="t_events_c1" parent="t_events" style="text;strokeColor=#526B88;strokeWidth=0.5;fillColor=#EDF3FA;align=left;verticalAlign=middle;spacingLeft=8;spacingRight=4;overflow=hidden;points=[[0,0.5],[1,0.5]];portConstraint=eastwest;rotatable=0;whiteSpace=wrap;html=1;fontStyle=1;fontSize=15;fontFamily=Helvetica;fontColor=#172B4D;" value="&lt;div style=&quot;line-height:1;&quot;&gt;PK  id : INTEGER PRIMARY KEY AUTOINCREMENT&lt;/div&gt;" vertex="1">
-          <mxGeometry height="30" width="379" y="45" as="geometry" />
+        <mxCell id="text45" parent="1" vertex="1" value="&lt;div&gt;operation_type TEXT NN&lt;/div&gt;" style="text;html=1;whiteSpace=wrap;align=left;verticalAlign=middle;fontFamily=DejaVu Sans;fontSize=9;fontStyle=0;fontColor=#203B50;spacing=0;overflow=visible;">
+          <mxGeometry x="298.00000000000006" y="83.52000000000004" width="111.88999999999999" height="11.360000000000014" as="geometry" />
         </mxCell>
-        <mxCell id="t_events_c2" parent="t_events" style="text;strokeColor=#526B88;strokeWidth=0.5;fillColor=#EDF3FA;align=left;verticalAlign=middle;spacingLeft=8;spacingRight=4;overflow=hidden;points=[[0,0.5],[1,0.5]];portConstraint=eastwest;rotatable=0;whiteSpace=wrap;html=1;fontStyle=2;fontSize=15;fontFamily=Helvetica;fontColor=#172B4D;" value="&lt;div style=&quot;line-height:1;&quot;&gt;FK  report_id : TEXT NOT NULL [Ref: reports.id]&lt;/div&gt;" vertex="1">
-          <mxGeometry height="30" width="379" y="75" as="geometry" />
+        <mxCell id="text46" parent="1" vertex="1" value="&lt;div&gt;payload_hash TEXT NN&lt;/div&gt;" style="text;html=1;whiteSpace=wrap;align=left;verticalAlign=middle;fontFamily=DejaVu Sans;fontSize=9;fontStyle=0;fontColor=#203B50;spacing=0;overflow=visible;">
+          <mxGeometry x="298.00000000000006" y="94.91999999999996" width="106.13" height="11.360000000000014" as="geometry" />
+        </mxCell>
+        <mxCell id="text47" parent="1" vertex="1" value="&lt;div&gt;status TEXT NN&lt;/div&gt;" style="text;html=1;whiteSpace=wrap;align=left;verticalAlign=middle;fontFamily=DejaVu Sans;fontSize=9;fontStyle=0;fontColor=#203B50;spacing=0;overflow=visible;">
+          <mxGeometry x="298.00000000000006" y="106.32" width="71.75" height="11.360000000000014" as="geometry" />
+        </mxCell>
+        <mxCell id="text48" parent="1" vertex="1" value="&lt;div&gt;error_code TEXT&lt;/div&gt;" style="text;html=1;whiteSpace=wrap;align=left;verticalAlign=middle;fontFamily=DejaVu Sans;fontSize=9;fontStyle=0;fontColor=#203B50;spacing=0;overflow=visible;">
+          <mxGeometry x="298.00000000000006" y="117.72000000000003" width="75.88999999999999" height="11.360000000000014" as="geometry" />
+        </mxCell>
+        <mxCell id="text49" parent="1" vertex="1" value="&lt;div&gt;result_data TEXT&lt;/div&gt;" style="text;html=1;whiteSpace=wrap;align=left;verticalAlign=middle;fontFamily=DejaVu Sans;fontSize=9;fontStyle=0;fontColor=#203B50;spacing=0;overflow=visible;">
+          <mxGeometry x="298.00000000000006" y="129.12" width="78.13999999999999" height="11.360000000000014" as="geometry" />
+        </mxCell>
+        <mxCell id="text50" parent="1" vertex="1" value="&lt;div&gt;created_at TEXT NN&lt;/div&gt;" style="text;html=1;whiteSpace=wrap;align=left;verticalAlign=middle;fontFamily=DejaVu Sans;fontSize=9;fontStyle=0;fontColor=#203B50;spacing=0;overflow=visible;">
+          <mxGeometry x="298.00000000000006" y="140.51999999999998" width="92.26999999999998" height="11.360000000000014" as="geometry" />
+        </mxCell>
+        <mxCell id="text51" parent="1" vertex="1" value="&lt;div&gt;expires_at TEXT&lt;/div&gt;" style="text;html=1;whiteSpace=wrap;align=left;verticalAlign=middle;fontFamily=DejaVu Sans;fontSize=9;fontStyle=0;fontColor=#203B50;spacing=0;overflow=visible;">
+          <mxGeometry x="298.00000000000006" y="151.92000000000002" width="74.0" height="11.360000000000014" as="geometry" />
+        </mxCell>
+        <mxCell id="text52" parent="1" vertex="1" value="&lt;div&gt;processed_at TEXT NN&lt;/div&gt;" style="text;html=1;whiteSpace=wrap;align=left;verticalAlign=middle;fontFamily=DejaVu Sans;fontSize=9;fontStyle=0;fontColor=#203B50;spacing=0;overflow=visible;">
+          <mxGeometry x="298.00000000000006" y="163.32" width="103.69999999999999" height="11.359999999999985" as="geometry" />
+        </mxCell>
+        <mxCell id="node53" parent="1" vertex="1" style="rounded=0;fillColor=#FFFFFF;strokeColor=#587489;strokeWidth=0.9;dashed=0;">
+          <mxGeometry x="292" y="221" width="205" height="135.0" as="geometry" />
+        </mxCell>
+        <mxCell id="node54" parent="1" vertex="1" style="rounded=0;fillColor=#EDF4FA;strokeColor=#587489;strokeWidth=0.9;dashed=0;">
+          <mxGeometry x="292" y="221" width="205" height="20" as="geometry" />
+        </mxCell>
+        <mxCell id="edge55" parent="1" edge="1" style="html=1;rounded=0;strokeColor=#587489;strokeWidth=0.9;dashed=0;endArrow=none;startArrow=none;">
+          <mxGeometry relative="1" as="geometry">
+            <mxPoint x="299.95" y="224.0" as="sourcePoint" />
+            <mxPoint x="299.95" y="224.0" as="targetPoint" />
+            <Array as="points">
+              <mxPoint x="306.45" y="224.0" />
+              <mxPoint x="309.7" y="227.25" />
+              <mxPoint x="309.7" y="237.0" />
+              <mxPoint x="299.95" y="237.0" />
+            </Array>
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="edge56" parent="1" edge="1" style="html=1;rounded=0;strokeColor=#587489;strokeWidth=0.9;dashed=0;endArrow=none;startArrow=none;">
+          <mxGeometry relative="1" as="geometry">
+            <mxPoint x="301.9" y="229.2" as="sourcePoint" />
+            <mxPoint x="307.75" y="229.2" as="targetPoint" />
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="edge57" parent="1" edge="1" style="html=1;rounded=0;strokeColor=#587489;strokeWidth=0.9;dashed=0;endArrow=none;startArrow=none;">
+          <mxGeometry relative="1" as="geometry">
+            <mxPoint x="301.9" y="231.8" as="sourcePoint" />
+            <mxPoint x="307.75" y="231.8" as="targetPoint" />
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="edge58" parent="1" edge="1" style="html=1;rounded=0;strokeColor=#587489;strokeWidth=0.9;dashed=0;endArrow=none;startArrow=none;">
+          <mxGeometry relative="1" as="geometry">
+            <mxPoint x="301.9" y="234.4" as="sourcePoint" />
+            <mxPoint x="307.75" y="234.4" as="targetPoint" />
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="text59" parent="1" vertex="1" value="&lt;div&gt;report_events&lt;/div&gt;" style="text;html=1;whiteSpace=wrap;align=left;verticalAlign=middle;fontFamily=DejaVu Sans;fontSize=9.8;fontStyle=1;fontColor=#203B50;spacing=0;overflow=visible;">
+          <mxGeometry x="316.00000000000006" y="224.96" width="79.13" height="12.079999999999984" as="geometry" />
         </mxCell>
-        <mxCell id="t_events_c3" parent="t_events" style="text;strokeColor=#526B88;strokeWidth=0.5;fillColor=#EDF3FA;align=left;verticalAlign=middle;spacingLeft=8;spacingRight=4;overflow=hidden;points=[[0,0.5],[1,0.5]];portConstraint=eastwest;rotatable=0;whiteSpace=wrap;html=1;fontSize=15;fontFamily=Helvetica;fontColor=#172B4D;" value="&lt;div style=&quot;line-height:1;&quot;&gt;    kind : TEXT NOT NULL (status/assign/note/loc...)&lt;/div&gt;" vertex="1">
-          <mxGeometry height="30" width="379" y="105" as="geometry" />
+        <mxCell id="text60" parent="1" vertex="1" value="&lt;div&gt;id INTEGER PK&lt;/div&gt;" style="text;html=1;whiteSpace=wrap;align=left;verticalAlign=middle;fontFamily=DejaVu Sans;fontSize=9;fontStyle=0;fontColor=#203B50;spacing=0;overflow=visible;">
+          <mxGeometry x="298.00000000000006" y="243.32" width="66.88999999999999" height="11.360000000000014" as="geometry" />
         </mxCell>
-        <mxCell id="WtRRVcrKLp42j1UeUorm-1" parent="t_events" style="text;strokeColor=#526B88;strokeWidth=0.5;fillColor=#EDF3FA;align=left;verticalAlign=middle;spacingLeft=8;spacingRight=4;overflow=hidden;points=[[0,0.5],[1,0.5]];portConstraint=eastwest;rotatable=0;whiteSpace=wrap;html=1;fontSize=15;fontFamily=Helvetica;fontColor=#172B4D;" value="&lt;div style=&quot;line-height:1;&quot;&gt;    from_value : TEXT (Giá trị trước thao tác)&lt;/div&gt;" vertex="1">
-          <mxGeometry height="30" width="379" y="135" as="geometry" />
-        </mxCell>
-        <mxCell id="t_events_c4" parent="t_events" style="text;strokeColor=#526B88;strokeWidth=0.5;fillColor=#EDF3FA;align=left;verticalAlign=middle;spacingLeft=8;spacingRight=4;overflow=hidden;points=[[0,0.5],[1,0.5]];portConstraint=eastwest;rotatable=0;whiteSpace=wrap;html=1;fontSize=15;fontFamily=Helvetica;fontColor=#172B4D;" value="&lt;div style=&quot;line-height:1;&quot;&gt;    from_value : TEXT (Giá trị trước thao tác)&lt;/div&gt;" vertex="1">
-          <mxGeometry height="30" width="379" y="165" as="geometry" />
-        </mxCell>
-        <mxCell id="t_events_c5" parent="t_events" style="text;strokeColor=#526B88;strokeWidth=0.5;fillColor=#EDF3FA;align=left;verticalAlign=middle;spacingLeft=8;spacingRight=4;overflow=hidden;points=[[0,0.5],[1,0.5]];portConstraint=eastwest;rotatable=0;whiteSpace=wrap;html=1;fontSize=15;fontFamily=Helvetica;fontColor=#172B4D;" value="&lt;div style=&quot;line-height:1;&quot;&gt;    to_value : TEXT (Giá trị sau thao tác)&lt;/div&gt;" vertex="1">
-          <mxGeometry height="30" width="379" y="195" as="geometry" />
-        </mxCell>
-        <mxCell id="t_events_c6" parent="t_events" style="text;strokeColor=#526B88;strokeWidth=0.5;fillColor=#EDF3FA;align=left;verticalAlign=middle;spacingLeft=8;spacingRight=4;overflow=hidden;points=[[0,0.5],[1,0.5]];portConstraint=eastwest;rotatable=0;whiteSpace=wrap;html=1;fontSize=15;fontFamily=Helvetica;fontColor=#172B4D;" value="&lt;div style=&quot;line-height:1;&quot;&gt;    status_version : INTEGER (Phiên bản trạng thái)&lt;/div&gt;" vertex="1">
-          <mxGeometry height="30" width="379" y="225" as="geometry" />
-        </mxCell>
-        <mxCell id="t_events_c7" parent="t_events" style="text;strokeColor=#526B88;strokeWidth=0.5;fillColor=#EDF3FA;align=left;verticalAlign=middle;spacingLeft=8;spacingRight=4;overflow=hidden;points=[[0,0.5],[1,0.5]];portConstraint=eastwest;rotatable=0;whiteSpace=wrap;html=1;fontSize=15;fontFamily=Helvetica;fontColor=#172B4D;" value="&lt;div style=&quot;line-height:1;&quot;&gt;    actor : TEXT (Điều phối viên / App client)&lt;/div&gt;" vertex="1">
-          <mxGeometry height="30" width="379" y="255" as="geometry" />
-        </mxCell>
-        <mxCell id="t_events_c8" parent="t_events" style="text;strokeColor=#526B88;strokeWidth=0.5;fillColor=#EDF3FA;align=left;verticalAlign=middle;spacingLeft=8;spacingRight=4;overflow=hidden;points=[[0,0.5],[1,0.5]];portConstraint=eastwest;rotatable=0;whiteSpace=wrap;html=1;fontSize=15;fontFamily=Helvetica;fontColor=#172B4D;" value="&lt;div style=&quot;line-height:1;&quot;&gt;    source : TEXT NOT NULL (app/sync/sms/dashboard)&lt;/div&gt;" vertex="1">
-          <mxGeometry height="30" width="379" y="285" as="geometry" />
-        </mxCell>
-        <mxCell id="t_events_c9" parent="t_events" style="text;strokeColor=#526B88;strokeWidth=0.5;fillColor=#EDF3FA;align=left;verticalAlign=middle;spacingLeft=8;spacingRight=4;overflow=hidden;points=[[0,0.5],[1,0.5]];portConstraint=eastwest;rotatable=0;whiteSpace=wrap;html=1;fontSize=15;fontFamily=Helvetica;fontColor=#172B4D;" value="&lt;div style=&quot;line-height:1;&quot;&gt;    note : TEXT (Ghi chú điều phối / lý do hủy)&lt;/div&gt;" vertex="1">
-          <mxGeometry height="30" width="379" y="315" as="geometry" />
-        </mxCell>
-        <mxCell id="t_events_c10" parent="t_events" style="text;strokeColor=#526B88;strokeWidth=0.5;fillColor=#EDF3FA;align=left;verticalAlign=middle;spacingLeft=8;spacingRight=4;overflow=hidden;points=[[0,0.5],[1,0.5]];portConstraint=eastwest;rotatable=0;whiteSpace=wrap;html=1;fontSize=15;fontFamily=Helvetica;fontColor=#172B4D;" value="&lt;div style=&quot;line-height:1;&quot;&gt;    created_at : TEXT NOT NULL (ISO-8601 UTC)&lt;/div&gt;" vertex="1">
-          <mxGeometry height="30" width="379" y="345" as="geometry" />
-        </mxCell>
-        <mxCell id="t_teams" parent="1" style="shape=swimlane;fontStyle=1;align=center;verticalAlign=top;childLayout=stackLayout;horizontal=1;startSize=31;horizontalStack=0;resizeParent=1;resizeParentMax=0;resizeLast=0;collapsible=0;marginBottom=0;whiteSpace=wrap;html=1;fontFamily=Helvetica;fontSize=15;fillColor=#DCE8F5;strokeColor=#526B88;swimlaneFillColor=#F7F9FC;fontColor=#172B4D;" value="Table: teams (Đội cứu hộ / Cứu nạn cơ động)" vertex="1">
-          <mxGeometry height="241" width="426" x="454" y="822" as="geometry" />
-        </mxCell>
-        <mxCell id="t_teams_c1" parent="t_teams" style="text;strokeColor=#526B88;strokeWidth=0.5;fillColor=#EDF3FA;align=left;verticalAlign=middle;spacingLeft=8;spacingRight=4;overflow=hidden;points=[[0,0.5],[1,0.5]];portConstraint=eastwest;rotatable=0;whiteSpace=wrap;html=1;fontStyle=1;fontSize=15;fontFamily=Helvetica;fontColor=#172B4D;" value="&lt;div style=&quot;line-height:1;&quot;&gt;PK  id : INTEGER PRIMARY KEY AUTOINCREMENT&lt;/div&gt;" vertex="1">
-          <mxGeometry height="30" width="426" y="31" as="geometry" />
-        </mxCell>
-        <mxCell id="t_teams_c2" parent="t_teams" style="text;strokeColor=#526B88;strokeWidth=0.5;fillColor=#EDF3FA;align=left;verticalAlign=middle;spacingLeft=8;spacingRight=4;overflow=hidden;points=[[0,0.5],[1,0.5]];portConstraint=eastwest;rotatable=0;whiteSpace=wrap;html=1;fontStyle=1;fontSize=15;fontFamily=Helvetica;fontColor=#172B4D;" value="&lt;div style=&quot;line-height:1;&quot;&gt;UQ  name : TEXT NOT NULL UNIQUE (Tên đội thực địa)&lt;/div&gt;" vertex="1">
-          <mxGeometry height="30" width="426" y="61" as="geometry" />
-        </mxCell>
-        <mxCell id="t_teams_c3" parent="t_teams" style="text;strokeColor=#526B88;strokeWidth=0.5;fillColor=#EDF3FA;align=left;verticalAlign=middle;spacingLeft=8;spacingRight=4;overflow=hidden;points=[[0,0.5],[1,0.5]];portConstraint=eastwest;rotatable=0;whiteSpace=wrap;html=1;fontSize=15;fontFamily=Helvetica;fontColor=#172B4D;" value="&lt;div style=&quot;line-height:1;&quot;&gt;    phone : TEXT (Số điện thoại liên lạc chỉ huy)&lt;/div&gt;" vertex="1">
-          <mxGeometry height="30" width="426" y="91" as="geometry" />
-        </mxCell>
-        <mxCell id="t_teams_c4" parent="t_teams" style="text;strokeColor=#526B88;strokeWidth=0.5;fillColor=#EDF3FA;align=left;verticalAlign=middle;spacingLeft=8;spacingRight=4;overflow=hidden;points=[[0,0.5],[1,0.5]];portConstraint=eastwest;rotatable=0;whiteSpace=wrap;html=1;fontSize=15;fontFamily=Helvetica;fontColor=#172B4D;" value="&lt;div style=&quot;line-height:1;&quot;&gt;    members : INTEGER (Số lượng thành viên trong đội)&lt;/div&gt;" vertex="1">
-          <mxGeometry height="30" width="426" y="121" as="geometry" />
-        </mxCell>
-        <mxCell id="t_teams_c5" parent="t_teams" style="text;strokeColor=#526B88;strokeWidth=0.5;fillColor=#EDF3FA;align=left;verticalAlign=middle;spacingLeft=8;spacingRight=4;overflow=hidden;points=[[0,0.5],[1,0.5]];portConstraint=eastwest;rotatable=0;whiteSpace=wrap;html=1;fontSize=15;fontFamily=Helvetica;fontColor=#172B4D;" value="&lt;div style=&quot;line-height:1;&quot;&gt;    note : TEXT (Năng lực, phương tiện xuồng/ca nô)&lt;/div&gt;" vertex="1">
-          <mxGeometry height="30" width="426" y="151" as="geometry" />
-        </mxCell>
-        <mxCell id="t_teams_c6" parent="t_teams" style="text;strokeColor=#526B88;strokeWidth=0.5;fillColor=#EDF3FA;align=left;verticalAlign=middle;spacingLeft=8;spacingRight=4;overflow=hidden;points=[[0,0.5],[1,0.5]];portConstraint=eastwest;rotatable=0;whiteSpace=wrap;html=1;fontSize=15;fontFamily=Helvetica;fontColor=#172B4D;" value="&lt;div style=&quot;line-height:1;&quot;&gt;    active : INTEGER NOT NULL DEFAULT 1 (Sẵn sàng)&lt;/div&gt;" vertex="1">
-          <mxGeometry height="30" width="426" y="181" as="geometry" />
-        </mxCell>
-        <mxCell id="t_teams_c7" parent="t_teams" style="text;strokeColor=#526B88;strokeWidth=0.5;fillColor=#EDF3FA;align=left;verticalAlign=middle;spacingLeft=8;spacingRight=4;overflow=hidden;points=[[0,0.5],[1,0.5]];portConstraint=eastwest;rotatable=0;whiteSpace=wrap;html=1;fontSize=15;fontFamily=Helvetica;fontColor=#172B4D;" value="&lt;div style=&quot;line-height:1;&quot;&gt;    created_at : TEXT NOT NULL (ISO-8601 UTC)&lt;/div&gt;" vertex="1">
-          <mxGeometry height="30" width="426" y="211" as="geometry" />
-        </mxCell>
-        <mxCell id="t_operators" parent="1" style="shape=swimlane;fontStyle=1;align=center;verticalAlign=top;childLayout=stackLayout;horizontal=1;startSize=40;horizontalStack=0;resizeParent=1;resizeParentMax=0;resizeLast=0;collapsible=0;marginBottom=0;whiteSpace=wrap;html=1;fontFamily=Helvetica;fontSize=15;fillColor=#DCE8F5;strokeColor=#526B88;swimlaneFillColor=#F7F9FC;fontColor=#172B4D;" value="Table: operators (Tài khoản điều phối &amp;amp; Quản trị)" vertex="1">
-          <mxGeometry height="310" width="454" x="958.5" y="435" as="geometry" />
-        </mxCell>
-        <mxCell id="t_operators_c1" parent="t_operators" style="text;strokeColor=#526B88;strokeWidth=0.5;fillColor=#EDF3FA;align=left;verticalAlign=middle;spacingLeft=8;spacingRight=4;overflow=hidden;points=[[0,0.5],[1,0.5]];portConstraint=eastwest;rotatable=0;whiteSpace=wrap;html=1;fontStyle=1;fontSize=15;fontFamily=Helvetica;fontColor=#172B4D;" value="&lt;div style=&quot;line-height:1;&quot;&gt;PK  id : INTEGER PRIMARY KEY AUTOINCREMENT&lt;/div&gt;" vertex="1">
-          <mxGeometry height="30" width="454" y="40" as="geometry" />
-        </mxCell>
-        <mxCell id="t_operators_c2" parent="t_operators" style="text;strokeColor=#526B88;strokeWidth=0.5;fillColor=#EDF3FA;align=left;verticalAlign=middle;spacingLeft=8;spacingRight=4;overflow=hidden;points=[[0,0.5],[1,0.5]];portConstraint=eastwest;rotatable=0;whiteSpace=wrap;html=1;fontStyle=1;fontSize=15;fontFamily=Helvetica;fontColor=#172B4D;" value="&lt;div style=&quot;line-height:1;&quot;&gt;UQ  username : TEXT NOT NULL UNIQUE COLLATE NOCASE&lt;/div&gt;" vertex="1">
-          <mxGeometry height="30" width="454" y="70" as="geometry" />
-        </mxCell>
-        <mxCell id="t_operators_c3" parent="t_operators" style="text;strokeColor=#526B88;strokeWidth=0.5;fillColor=#EDF3FA;align=left;verticalAlign=middle;spacingLeft=8;spacingRight=4;overflow=hidden;points=[[0,0.5],[1,0.5]];portConstraint=eastwest;rotatable=0;whiteSpace=wrap;html=1;fontStyle=1;fontSize=15;fontFamily=Helvetica;fontColor=#172B4D;" value="&lt;div style=&quot;line-height:1;&quot;&gt;UQ  display_name : TEXT NOT NULL UNIQUE (Actor log)&lt;/div&gt;" vertex="1">
-          <mxGeometry height="30" width="454" y="100" as="geometry" />
-        </mxCell>
-        <mxCell id="t_operators_c4" parent="t_operators" style="text;strokeColor=#526B88;strokeWidth=0.5;fillColor=#EDF3FA;align=left;verticalAlign=middle;spacingLeft=8;spacingRight=4;overflow=hidden;points=[[0,0.5],[1,0.5]];portConstraint=eastwest;rotatable=0;whiteSpace=wrap;html=1;fontSize=15;fontFamily=Helvetica;fontColor=#172B4D;" value="&lt;div style=&quot;line-height:1;&quot;&gt;    password_hash : TEXT NOT NULL (PBKDF2-SHA256)&lt;/div&gt;" vertex="1">
-          <mxGeometry height="30" width="454" y="130" as="geometry" />
-        </mxCell>
-        <mxCell id="t_operators_c5" parent="t_operators" style="text;strokeColor=#526B88;strokeWidth=0.5;fillColor=#EDF3FA;align=left;verticalAlign=middle;spacingLeft=8;spacingRight=4;overflow=hidden;points=[[0,0.5],[1,0.5]];portConstraint=eastwest;rotatable=0;whiteSpace=wrap;html=1;fontSize=15;fontFamily=Helvetica;fontColor=#172B4D;" value="&lt;div style=&quot;line-height:1;&quot;&gt;    role : TEXT NOT NULL DEFAULT &#39;operator&#39;&lt;/div&gt;" vertex="1">
-          <mxGeometry height="30" width="454" y="160" as="geometry" />
-        </mxCell>
-        <mxCell id="t_operators_c6" parent="t_operators" style="text;strokeColor=#526B88;strokeWidth=0.5;fillColor=#EDF3FA;align=left;verticalAlign=middle;spacingLeft=8;spacingRight=4;overflow=hidden;points=[[0,0.5],[1,0.5]];portConstraint=eastwest;rotatable=0;whiteSpace=wrap;html=1;fontSize=15;fontFamily=Helvetica;fontColor=#172B4D;" value="&lt;div style=&quot;line-height:1;&quot;&gt;    active : INTEGER NOT NULL DEFAULT 1 (Hoạt động)&lt;/div&gt;" vertex="1">
-          <mxGeometry height="30" width="454" y="190" as="geometry" />
-        </mxCell>
-        <mxCell id="t_operators_c7" parent="t_operators" style="text;strokeColor=#526B88;strokeWidth=0.5;fillColor=#EDF3FA;align=left;verticalAlign=middle;spacingLeft=8;spacingRight=4;overflow=hidden;points=[[0,0.5],[1,0.5]];portConstraint=eastwest;rotatable=0;whiteSpace=wrap;html=1;fontSize=15;fontFamily=Helvetica;fontColor=#172B4D;" value="&lt;div style=&quot;line-height:1;&quot;&gt;    must_change_password : INTEGER NOT NULL DEFAULT 0&lt;/div&gt;" vertex="1">
-          <mxGeometry height="30" width="454" y="220" as="geometry" />
-        </mxCell>
-        <mxCell id="t_operators_c8" parent="t_operators" style="text;strokeColor=#526B88;strokeWidth=0.5;fillColor=#EDF3FA;align=left;verticalAlign=middle;spacingLeft=8;spacingRight=4;overflow=hidden;points=[[0,0.5],[1,0.5]];portConstraint=eastwest;rotatable=0;whiteSpace=wrap;html=1;fontSize=15;fontFamily=Helvetica;fontColor=#172B4D;" value="&lt;div style=&quot;line-height:1;&quot;&gt;    created_at : TEXT NOT NULL (ISO-8601 UTC)&lt;/div&gt;" vertex="1">
-          <mxGeometry height="30" width="454" y="250" as="geometry" />
-        </mxCell>
-        <mxCell id="t_operators_c9" parent="t_operators" style="text;strokeColor=#526B88;strokeWidth=0.5;fillColor=#EDF3FA;align=left;verticalAlign=middle;spacingLeft=8;spacingRight=4;overflow=hidden;points=[[0,0.5],[1,0.5]];portConstraint=eastwest;rotatable=0;whiteSpace=wrap;html=1;fontSize=15;fontFamily=Helvetica;fontColor=#172B4D;" value="&lt;div style=&quot;line-height:1;&quot;&gt;    last_login_at : TEXT (Lần đăng nhập gần nhất)&lt;/div&gt;" vertex="1">
-          <mxGeometry height="30" width="454" y="280" as="geometry" />
-        </mxCell>
-        <mxCell id="t_sessions" parent="1" style="shape=swimlane;fontStyle=1;align=center;verticalAlign=top;childLayout=stackLayout;horizontal=1;startSize=39;horizontalStack=0;resizeParent=1;resizeParentMax=0;resizeLast=0;collapsible=0;marginBottom=0;whiteSpace=wrap;html=1;fontFamily=Helvetica;fontSize=15;fillColor=#DCE8F5;strokeColor=#526B88;swimlaneFillColor=#F7F9FC;fontColor=#172B4D;" value="Table: sessions (Phiên đăng nhập Web Dashboard)" vertex="1">
-          <mxGeometry height="189" width="426" x="972.5" y="806" as="geometry" />
-        </mxCell>
-        <mxCell id="t_sessions_c1" parent="t_sessions" style="text;strokeColor=#526B88;strokeWidth=0.5;fillColor=#EDF3FA;align=left;verticalAlign=middle;spacingLeft=8;spacingRight=4;overflow=hidden;points=[[0,0.5],[1,0.5]];portConstraint=eastwest;rotatable=0;whiteSpace=wrap;html=1;fontStyle=1;fontSize=15;fontFamily=Helvetica;fontColor=#172B4D;" value="&lt;div style=&quot;line-height:1;&quot;&gt;PK  token_hash : TEXT PRIMARY KEY (SHA-256 session)&lt;/div&gt;" vertex="1">
-          <mxGeometry height="30" width="426" y="39" as="geometry" />
-        </mxCell>
-        <mxCell id="t_sessions_c2" parent="t_sessions" style="text;strokeColor=#526B88;strokeWidth=0.5;fillColor=#EDF3FA;align=left;verticalAlign=middle;spacingLeft=8;spacingRight=4;overflow=hidden;points=[[0,0.5],[1,0.5]];portConstraint=eastwest;rotatable=0;whiteSpace=wrap;html=1;fontStyle=2;fontSize=15;fontFamily=Helvetica;fontColor=#172B4D;" value="&lt;div style=&quot;line-height:1;&quot;&gt;FK  operator_id : INTEGER [Ref: operators.id]&lt;/div&gt;" vertex="1">
-          <mxGeometry height="30" width="426" y="69" as="geometry" />
-        </mxCell>
-        <mxCell id="t_sessions_c3" parent="t_sessions" style="text;strokeColor=#526B88;strokeWidth=0.5;fillColor=#EDF3FA;align=left;verticalAlign=middle;spacingLeft=8;spacingRight=4;overflow=hidden;points=[[0,0.5],[1,0.5]];portConstraint=eastwest;rotatable=0;whiteSpace=wrap;html=1;fontSize=15;fontFamily=Helvetica;fontColor=#172B4D;" value="&lt;div style=&quot;line-height:1;&quot;&gt;    operator : TEXT NOT NULL (Tên hiển thị lúc login)&lt;/div&gt;" vertex="1">
-          <mxGeometry height="30" width="426" y="99" as="geometry" />
-        </mxCell>
-        <mxCell id="t_sessions_c4" parent="t_sessions" style="text;strokeColor=#526B88;strokeWidth=0.5;fillColor=#EDF3FA;align=left;verticalAlign=middle;spacingLeft=8;spacingRight=4;overflow=hidden;points=[[0,0.5],[1,0.5]];portConstraint=eastwest;rotatable=0;whiteSpace=wrap;html=1;fontSize=15;fontFamily=Helvetica;fontColor=#172B4D;" value="&lt;div style=&quot;line-height:1;&quot;&gt;    created_at : TEXT NOT NULL (Thời điểm cấp phiên)&lt;/div&gt;" vertex="1">
-          <mxGeometry height="30" width="426" y="129" as="geometry" />
-        </mxCell>
-        <mxCell id="t_sessions_c5" parent="t_sessions" style="text;strokeColor=#526B88;strokeWidth=0.5;fillColor=#EDF3FA;align=left;verticalAlign=middle;spacingLeft=8;spacingRight=4;overflow=hidden;points=[[0,0.5],[1,0.5]];portConstraint=eastwest;rotatable=0;whiteSpace=wrap;html=1;fontSize=15;fontFamily=Helvetica;fontColor=#172B4D;" value="&lt;div style=&quot;line-height:1;&quot;&gt;    expires_at : TEXT NOT NULL (Thời điểm hết hạn)&lt;/div&gt;" vertex="1">
-          <mxGeometry height="30" width="426" y="159" as="geometry" />
-        </mxCell>
-        <mxCell id="t_meta" parent="1" style="shape=swimlane;fontStyle=1;align=center;verticalAlign=top;childLayout=stackLayout;horizontal=1;startSize=28;horizontalStack=0;resizeParent=1;resizeParentMax=0;resizeLast=0;collapsible=0;marginBottom=0;whiteSpace=wrap;html=1;fontFamily=Helvetica;fontSize=15;fillColor=#DCE8F5;strokeColor=#526B88;swimlaneFillColor=#F7F9FC;fontColor=#172B4D;" value="Table: server_meta (Metadata đồng bộ hệ thống)" vertex="1">
-          <mxGeometry height="178" width="409" y="455" as="geometry" />
-        </mxCell>
-        <mxCell id="t_meta_c1" parent="t_meta" style="text;strokeColor=#526B88;strokeWidth=0.5;fillColor=#EDF3FA;align=left;verticalAlign=middle;spacingLeft=8;spacingRight=4;overflow=hidden;points=[[0,0.5],[1,0.5]];portConstraint=eastwest;rotatable=0;whiteSpace=wrap;html=1;fontStyle=1;fontSize=15;fontFamily=Helvetica;fontColor=#172B4D;" value="&lt;div style=&quot;line-height:1;&quot;&gt;PK  key : TEXT PRIMARY KEY (&#39;seq&#39;, &#39;epoch&#39;..)&lt;/div&gt;" vertex="1">
-          <mxGeometry height="30" width="409" y="28" as="geometry" />
-        </mxCell>
-        <mxCell id="t_meta_c2" parent="t_meta" style="text;strokeColor=#526B88;strokeWidth=0.5;fillColor=#EDF3FA;align=left;verticalAlign=middle;spacingLeft=8;spacingRight=4;overflow=hidden;points=[[0,0.5],[1,0.5]];portConstraint=eastwest;rotatable=0;whiteSpace=wrap;html=1;fontSize=15;fontFamily=Helvetica;fontColor=#172B4D;" value="&lt;div style=&quot;line-height:1;&quot;&gt;    value : TEXT NOT NULL (Counter / UUID / Rev)&lt;/div&gt;" vertex="1">
-          <mxGeometry height="30" width="409" y="58" as="geometry" />
-        </mxCell>
-        <mxCell id="t_meta_c3" parent="t_meta" style="text;strokeColor=#526B88;strokeWidth=0.5;fillColor=#EDF3FA;align=left;verticalAlign=middle;spacingLeft=8;spacingRight=4;overflow=hidden;points=[[0,0.5],[1,0.5]];portConstraint=eastwest;rotatable=0;whiteSpace=wrap;html=1;fontSize=15;fontStyle=2;fontFamily=Helvetica;fontColor=#172B4D;" value="&lt;div style=&quot;line-height:1;&quot;&gt;    -- seq : Bộ đếm tăng dần cho Polling delta&lt;/div&gt;" vertex="1">
-          <mxGeometry height="30" width="409" y="88" as="geometry" />
-        </mxCell>
-        <mxCell id="t_meta_c4" parent="t_meta" style="text;strokeColor=#526B88;strokeWidth=0.5;fillColor=#EDF3FA;align=left;verticalAlign=middle;spacingLeft=8;spacingRight=4;overflow=hidden;points=[[0,0.5],[1,0.5]];portConstraint=eastwest;rotatable=0;whiteSpace=wrap;html=1;fontSize=15;fontStyle=2;fontFamily=Helvetica;fontColor=#172B4D;" value="&lt;div style=&quot;line-height:1;&quot;&gt;    -- epoch : Đổi khi reset dữ liệu (Hard sync)&lt;/div&gt;" vertex="1">
-          <mxGeometry height="30" width="409" y="118" as="geometry" />
-        </mxCell>
-        <mxCell id="t_meta_c5" parent="t_meta" style="text;strokeColor=#526B88;strokeWidth=0.5;fillColor=#EDF3FA;align=left;verticalAlign=middle;spacingLeft=8;spacingRight=4;overflow=hidden;points=[[0,0.5],[1,0.5]];portConstraint=eastwest;rotatable=0;whiteSpace=wrap;html=1;fontSize=15;fontStyle=2;fontFamily=Helvetica;fontColor=#172B4D;" value="&lt;div style=&quot;line-height:1;&quot;&gt;    -- cluster_rev : Phiên bản đầu vào phân cụm Louvain&lt;/div&gt;" vertex="1">
-          <mxGeometry height="30" width="409" y="148" as="geometry" />
-        </mxCell>
-        <mxCell id="erd_e1" edge="1" parent="1" source="t_teams" style="endArrow=diamondThin;endFill=1;startArrow=none;html=1;strokeColor=#000000;strokeWidth=1.5;fontSize=15;exitX=0.5;exitY=0.0;exitDx=0;exitDy=0;entryX=0.5;entryY=1;entryDx=0;entryDy=0;fontColor=#172B4D;labelBackgroundColor=#FFFFFF;" target="t_reports" value="1 : N (Giao đội: assigned_team_id)">
-          <mxGeometry relative="1" as="geometry" />
-        </mxCell>
-        <mxCell id="erd_e2" edge="1" parent="1" source="t_reports" style="endArrow=diamondThin;endFill=1;startArrow=none;html=1;strokeColor=#000000;strokeWidth=1.5;fontSize=15;exitX=1.0;exitY=0.2;exitDx=0;exitDy=0;entryX=0;entryY=0.5;entryDx=0;entryDy=0;fontColor=#172B4D;labelBackgroundColor=#FFFFFF;" target="t_events_c5" value="1 : N (Events)">
-          <mxGeometry relative="1" as="geometry" />
-        </mxCell>
-        <mxCell id="erd_e3" edge="1" parent="1" source="t_operators" style="endArrow=diamondThin;endFill=1;startArrow=none;html=1;strokeColor=#000000;strokeWidth=1.5;fontSize=15;exitX=0.5;exitY=1.0;exitDx=0;exitDy=0;entryX=0.5;entryY=0.0;entryDx=0;entryDy=0;fontColor=#172B4D;labelBackgroundColor=#FFFFFF;" target="t_sessions" value="1 : N (Phiên làm việc)">
-          <mxGeometry relative="1" as="geometry" />
-        </mxCell>
-        <mxCell id="erd_e4" edge="1" parent="1" source="t_dedup" style="endArrow=diamondThin;endFill=1;startArrow=none;html=1;strokeColor=#000000;strokeWidth=1.5;fontSize=15;exitX=1.0;exitY=0.3;exitDx=0;exitDy=0;entryX=0;entryY=0.5;entryDx=0;entryDy=0;fontColor=#172B4D;labelBackgroundColor=#FFFFFF;" target="t_reports_c3" value="1 : N (Upsert)">
-          <mxGeometry relative="1" as="geometry" />
-        </mxCell>
-        <mxCell id="erd_e5" edge="1" parent="1" source="t_operators" style="endArrow=diamondThin;endFill=1;startArrow=none;html=1;strokeColor=#000000;strokeWidth=1.5;fontSize=15;exitX=0.5;exitY=0.0;exitDx=0;exitDy=0;entryX=0.5;entryY=1.0;entryDx=0;entryDy=0;fontColor=#172B4D;labelBackgroundColor=#FFFFFF;" target="t_events" value="Audit: actor">
-          <mxGeometry relative="1" as="geometry" />
+        <mxCell id="text61" parent="1" vertex="1" value="&lt;div&gt;report_id TEXT NN&lt;/div&gt;" style="text;html=1;whiteSpace=wrap;align=left;verticalAlign=middle;fontFamily=DejaVu Sans;fontSize=9;fontStyle=0;fontColor=#203B50;spacing=0;overflow=visible;">
+          <mxGeometry x="298.00000000000006" y="254.72" width="84.35000000000002" height="11.359999999999985" as="geometry" />
+        </mxCell>
+        <mxCell id="text62" parent="1" vertex="1" value="&lt;div&gt;kind TEXT NN&lt;/div&gt;" style="text;html=1;whiteSpace=wrap;align=left;verticalAlign=middle;fontFamily=DejaVu Sans;fontSize=9;fontStyle=0;fontColor=#203B50;spacing=0;overflow=visible;">
+          <mxGeometry x="298.00000000000006" y="266.12" width="63.29000000000002" height="11.360000000000014" as="geometry" />
+        </mxCell>
+        <mxCell id="text63" parent="1" vertex="1" value="&lt;div&gt;from_value TEXT&lt;/div&gt;" style="text;html=1;whiteSpace=wrap;align=left;verticalAlign=middle;fontFamily=DejaVu Sans;fontSize=9;fontStyle=0;fontColor=#203B50;spacing=0;overflow=visible;">
+          <mxGeometry x="298.00000000000006" y="277.52" width="77.87" height="11.360000000000014" as="geometry" />
+        </mxCell>
+        <mxCell id="text64" parent="1" vertex="1" value="&lt;div&gt;to_value TEXT&lt;/div&gt;" style="text;html=1;whiteSpace=wrap;align=left;verticalAlign=middle;fontFamily=DejaVu Sans;fontSize=9;fontStyle=0;fontColor=#203B50;spacing=0;overflow=visible;">
+          <mxGeometry x="298.00000000000006" y="288.92" width="65.89999999999998" height="11.360000000000014" as="geometry" />
+        </mxCell>
+        <mxCell id="text65" parent="1" vertex="1" value="&lt;div&gt;status_version INTEGER&lt;/div&gt;" style="text;html=1;whiteSpace=wrap;align=left;verticalAlign=middle;fontFamily=DejaVu Sans;fontSize=9;fontStyle=0;fontColor=#203B50;spacing=0;overflow=visible;">
+          <mxGeometry x="298.00000000000006" y="300.32" width="109.55000000000001" height="11.360000000000014" as="geometry" />
+        </mxCell>
+        <mxCell id="text66" parent="1" vertex="1" value="&lt;div&gt;actor TEXT&lt;/div&gt;" style="text;html=1;whiteSpace=wrap;align=left;verticalAlign=middle;fontFamily=DejaVu Sans;fontSize=9;fontStyle=0;fontColor=#203B50;spacing=0;overflow=visible;">
+          <mxGeometry x="298.00000000000006" y="311.72" width="51.05000000000001" height="11.359999999999957" as="geometry" />
+        </mxCell>
+        <mxCell id="text67" parent="1" vertex="1" value="&lt;div&gt;source TEXT NN&lt;/div&gt;" style="text;html=1;whiteSpace=wrap;align=left;verticalAlign=middle;fontFamily=DejaVu Sans;fontSize=9;fontStyle=0;fontColor=#203B50;spacing=0;overflow=visible;">
+          <mxGeometry x="298.00000000000006" y="323.12" width="74.08999999999997" height="11.360000000000014" as="geometry" />
+        </mxCell>
+        <mxCell id="text68" parent="1" vertex="1" value="&lt;div&gt;note TEXT&lt;/div&gt;" style="text;html=1;whiteSpace=wrap;align=left;verticalAlign=middle;fontFamily=DejaVu Sans;fontSize=9;fontStyle=0;fontColor=#203B50;spacing=0;overflow=visible;">
+          <mxGeometry x="298.00000000000006" y="334.52" width="47.99000000000001" height="11.360000000000014" as="geometry" />
+        </mxCell>
+        <mxCell id="text69" parent="1" vertex="1" value="&lt;div&gt;created_at TEXT NN&lt;/div&gt;" style="text;html=1;whiteSpace=wrap;align=left;verticalAlign=middle;fontFamily=DejaVu Sans;fontSize=9;fontStyle=0;fontColor=#203B50;spacing=0;overflow=visible;">
+          <mxGeometry x="298.00000000000006" y="345.9200000000001" width="92.26999999999998" height="11.359999999999957" as="geometry" />
+        </mxCell>
+        <mxCell id="node70" parent="1" vertex="1" style="rounded=0;fillColor=#FFFFFF;strokeColor=#587489;strokeWidth=0.9;dashed=0;">
+          <mxGeometry x="524" y="27" width="194" height="123.60000000000001" as="geometry" />
+        </mxCell>
+        <mxCell id="node71" parent="1" vertex="1" style="rounded=0;fillColor=#F4F5F6;strokeColor=#587489;strokeWidth=0.9;dashed=0;">
+          <mxGeometry x="524" y="27" width="194" height="20" as="geometry" />
+        </mxCell>
+        <mxCell id="edge72" parent="1" edge="1" style="html=1;rounded=0;strokeColor=#587489;strokeWidth=0.9;dashed=0;endArrow=none;startArrow=none;">
+          <mxGeometry relative="1" as="geometry">
+            <mxPoint x="531.95" y="30.0" as="sourcePoint" />
+            <mxPoint x="531.95" y="30.0" as="targetPoint" />
+            <Array as="points">
+              <mxPoint x="538.45" y="30.0" />
+              <mxPoint x="541.7" y="33.25" />
+              <mxPoint x="541.7" y="43.0" />
+              <mxPoint x="531.95" y="43.0" />
+            </Array>
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="edge73" parent="1" edge="1" style="html=1;rounded=0;strokeColor=#587489;strokeWidth=0.9;dashed=0;endArrow=none;startArrow=none;">
+          <mxGeometry relative="1" as="geometry">
+            <mxPoint x="533.9" y="35.2" as="sourcePoint" />
+            <mxPoint x="539.75" y="35.2" as="targetPoint" />
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="edge74" parent="1" edge="1" style="html=1;rounded=0;strokeColor=#587489;strokeWidth=0.9;dashed=0;endArrow=none;startArrow=none;">
+          <mxGeometry relative="1" as="geometry">
+            <mxPoint x="533.9" y="37.8" as="sourcePoint" />
+            <mxPoint x="539.75" y="37.8" as="targetPoint" />
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="edge75" parent="1" edge="1" style="html=1;rounded=0;strokeColor=#587489;strokeWidth=0.9;dashed=0;endArrow=none;startArrow=none;">
+          <mxGeometry relative="1" as="geometry">
+            <mxPoint x="533.9" y="40.4" as="sourcePoint" />
+            <mxPoint x="539.75" y="40.4" as="targetPoint" />
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="text76" parent="1" vertex="1" value="&lt;div&gt;operators&lt;/div&gt;" style="text;html=1;whiteSpace=wrap;align=left;verticalAlign=middle;fontFamily=DejaVu Sans;fontSize=9.8;fontStyle=1;fontColor=#203B50;spacing=0;overflow=visible;">
+          <mxGeometry x="548.0000000000001" y="30.960000000000036" width="56.26999999999998" height="12.079999999999984" as="geometry" />
+        </mxCell>
+        <mxCell id="text77" parent="1" vertex="1" value="&lt;div&gt;id INTEGER PK&lt;/div&gt;" style="text;html=1;whiteSpace=wrap;align=left;verticalAlign=middle;fontFamily=DejaVu Sans;fontSize=9;fontStyle=0;fontColor=#203B50;spacing=0;overflow=visible;">
+          <mxGeometry x="530.0000000000001" y="49.32000000000005" width="66.88999999999999" height="11.360000000000014" as="geometry" />
+        </mxCell>
+        <mxCell id="text78" parent="1" vertex="1" value="&lt;div&gt;username TEXT NN,UQ/CI&lt;/div&gt;" style="text;html=1;whiteSpace=wrap;align=left;verticalAlign=middle;fontFamily=DejaVu Sans;fontSize=9;fontStyle=0;fontColor=#203B50;spacing=0;overflow=visible;">
+          <mxGeometry x="530.0000000000001" y="60.72000000000003" width="117.64999999999998" height="11.360000000000014" as="geometry" />
+        </mxCell>
+        <mxCell id="text79" parent="1" vertex="1" value="&lt;div&gt;display_name TEXT NN,UQ/CI&lt;/div&gt;" style="text;html=1;whiteSpace=wrap;align=left;verticalAlign=middle;fontFamily=DejaVu Sans;fontSize=9;fontStyle=0;fontColor=#203B50;spacing=0;overflow=visible;">
+          <mxGeometry x="530.0000000000001" y="72.12" width="134.75" height="11.360000000000014" as="geometry" />
+        </mxCell>
+        <mxCell id="text80" parent="1" vertex="1" value="&lt;div&gt;password_hash TEXT NN&lt;/div&gt;" style="text;html=1;whiteSpace=wrap;align=left;verticalAlign=middle;fontFamily=DejaVu Sans;fontSize=9;fontStyle=0;fontColor=#203B50;spacing=0;overflow=visible;">
+          <mxGeometry x="530.0000000000001" y="83.52000000000004" width="112.97000000000003" height="11.360000000000014" as="geometry" />
+        </mxCell>
+        <mxCell id="text81" parent="1" vertex="1" value="&lt;div&gt;role TEXT NN,=&amp;#x27;operator&amp;#x27;&lt;/div&gt;" style="text;html=1;whiteSpace=wrap;align=left;verticalAlign=middle;fontFamily=DejaVu Sans;fontSize=9;fontStyle=0;fontColor=#203B50;spacing=0;overflow=visible;">
+          <mxGeometry x="530.0000000000001" y="94.91999999999996" width="115.49000000000001" height="11.360000000000014" as="geometry" />
+        </mxCell>
+        <mxCell id="text82" parent="1" vertex="1" value="&lt;div&gt;active INTEGER NN,=1&lt;/div&gt;" style="text;html=1;whiteSpace=wrap;align=left;verticalAlign=middle;fontFamily=DejaVu Sans;fontSize=9;fontStyle=0;fontColor=#203B50;spacing=0;overflow=visible;">
+          <mxGeometry x="530.0000000000001" y="106.32" width="104.60000000000002" height="11.360000000000014" as="geometry" />
+        </mxCell>
+        <mxCell id="text83" parent="1" vertex="1" value="&lt;div&gt;must_change_password INTEGER NN,=0&lt;/div&gt;" style="text;html=1;whiteSpace=wrap;align=left;verticalAlign=middle;fontFamily=DejaVu Sans;fontSize=9;fontStyle=0;fontColor=#203B50;spacing=0;overflow=visible;">
+          <mxGeometry x="530.0000000000001" y="117.72000000000003" width="184.78999999999996" height="11.360000000000014" as="geometry" />
+        </mxCell>
+        <mxCell id="text84" parent="1" vertex="1" value="&lt;div&gt;created_at TEXT NN&lt;/div&gt;" style="text;html=1;whiteSpace=wrap;align=left;verticalAlign=middle;fontFamily=DejaVu Sans;fontSize=9;fontStyle=0;fontColor=#203B50;spacing=0;overflow=visible;">
+          <mxGeometry x="530.0000000000001" y="129.12" width="92.26999999999998" height="11.360000000000014" as="geometry" />
+        </mxCell>
+        <mxCell id="text85" parent="1" vertex="1" value="&lt;div&gt;last_login_at TEXT&lt;/div&gt;" style="text;html=1;whiteSpace=wrap;align=left;verticalAlign=middle;fontFamily=DejaVu Sans;fontSize=9;fontStyle=0;fontColor=#203B50;spacing=0;overflow=visible;">
+          <mxGeometry x="530.0000000000001" y="140.51999999999998" width="84.07999999999993" height="11.360000000000014" as="geometry" />
+        </mxCell>
+        <mxCell id="node86" parent="1" vertex="1" style="rounded=0;fillColor=#FFFFFF;strokeColor=#587489;strokeWidth=0.9;dashed=0;">
+          <mxGeometry x="524" y="194" width="194" height="78.0" as="geometry" />
+        </mxCell>
+        <mxCell id="node87" parent="1" vertex="1" style="rounded=0;fillColor=#F4F5F6;strokeColor=#587489;strokeWidth=0.9;dashed=0;">
+          <mxGeometry x="524" y="194" width="194" height="20" as="geometry" />
+        </mxCell>
+        <mxCell id="edge88" parent="1" edge="1" style="html=1;rounded=0;strokeColor=#587489;strokeWidth=0.9;dashed=0;endArrow=none;startArrow=none;">
+          <mxGeometry relative="1" as="geometry">
+            <mxPoint x="531.95" y="197.0" as="sourcePoint" />
+            <mxPoint x="531.95" y="197.0" as="targetPoint" />
+            <Array as="points">
+              <mxPoint x="538.45" y="197.0" />
+              <mxPoint x="541.7" y="200.25" />
+              <mxPoint x="541.7" y="210.0" />
+              <mxPoint x="531.95" y="210.0" />
+            </Array>
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="edge89" parent="1" edge="1" style="html=1;rounded=0;strokeColor=#587489;strokeWidth=0.9;dashed=0;endArrow=none;startArrow=none;">
+          <mxGeometry relative="1" as="geometry">
+            <mxPoint x="533.9" y="202.2" as="sourcePoint" />
+            <mxPoint x="539.75" y="202.2" as="targetPoint" />
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="edge90" parent="1" edge="1" style="html=1;rounded=0;strokeColor=#587489;strokeWidth=0.9;dashed=0;endArrow=none;startArrow=none;">
+          <mxGeometry relative="1" as="geometry">
+            <mxPoint x="533.9" y="204.8" as="sourcePoint" />
+            <mxPoint x="539.75" y="204.8" as="targetPoint" />
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="edge91" parent="1" edge="1" style="html=1;rounded=0;strokeColor=#587489;strokeWidth=0.9;dashed=0;endArrow=none;startArrow=none;">
+          <mxGeometry relative="1" as="geometry">
+            <mxPoint x="533.9" y="207.4" as="sourcePoint" />
+            <mxPoint x="539.75" y="207.4" as="targetPoint" />
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="text92" parent="1" vertex="1" value="&lt;div&gt;sessions&lt;/div&gt;" style="text;html=1;whiteSpace=wrap;align=left;verticalAlign=middle;fontFamily=DejaVu Sans;fontSize=9.8;fontStyle=1;fontColor=#203B50;spacing=0;overflow=visible;">
+          <mxGeometry x="548.0000000000001" y="197.96" width="49.25" height="12.079999999999984" as="geometry" />
+        </mxCell>
+        <mxCell id="text93" parent="1" vertex="1" value="&lt;div&gt;token_hash TEXT PK&lt;/div&gt;" style="text;html=1;whiteSpace=wrap;align=left;verticalAlign=middle;fontFamily=DejaVu Sans;fontSize=9;fontStyle=0;fontColor=#203B50;spacing=0;overflow=visible;">
+          <mxGeometry x="530.0000000000001" y="216.32" width="93.07999999999993" height="11.360000000000014" as="geometry" />
+        </mxCell>
+        <mxCell id="text94" parent="1" vertex="1" value="&lt;div&gt;operator TEXT NN&lt;/div&gt;" style="text;html=1;whiteSpace=wrap;align=left;verticalAlign=middle;fontFamily=DejaVu Sans;fontSize=9;fontStyle=0;fontColor=#203B50;spacing=0;overflow=visible;">
+          <mxGeometry x="530.0000000000001" y="227.72000000000003" width="82.81999999999994" height="11.360000000000014" as="geometry" />
+        </mxCell>
+        <mxCell id="text95" parent="1" vertex="1" value="&lt;div&gt;created_at TEXT NN&lt;/div&gt;" style="text;html=1;whiteSpace=wrap;align=left;verticalAlign=middle;fontFamily=DejaVu Sans;fontSize=9;fontStyle=0;fontColor=#203B50;spacing=0;overflow=visible;">
+          <mxGeometry x="530.0000000000001" y="239.12" width="92.26999999999998" height="11.360000000000014" as="geometry" />
+        </mxCell>
+        <mxCell id="text96" parent="1" vertex="1" value="&lt;div&gt;expires_at TEXT NN&lt;/div&gt;" style="text;html=1;whiteSpace=wrap;align=left;verticalAlign=middle;fontFamily=DejaVu Sans;fontSize=9;fontStyle=0;fontColor=#203B50;spacing=0;overflow=visible;">
+          <mxGeometry x="530.0000000000001" y="250.52" width="90.38" height="11.359999999999985" as="geometry" />
+        </mxCell>
+        <mxCell id="text97" parent="1" vertex="1" value="&lt;div&gt;operator_id INTEGER&lt;/div&gt;" style="text;html=1;whiteSpace=wrap;align=left;verticalAlign=middle;fontFamily=DejaVu Sans;fontSize=9;fontStyle=0;fontColor=#203B50;spacing=0;overflow=visible;">
+          <mxGeometry x="530.0000000000001" y="261.92" width="95.95999999999992" height="11.360000000000014" as="geometry" />
+        </mxCell>
+        <mxCell id="node98" parent="1" vertex="1" style="rounded=0;fillColor=#FFFFFF;strokeColor=#587489;strokeWidth=0.9;dashed=0;">
+          <mxGeometry x="524" y="285" width="194" height="100.8" as="geometry" />
+        </mxCell>
+        <mxCell id="node99" parent="1" vertex="1" style="rounded=0;fillColor=#F4F5F6;strokeColor=#587489;strokeWidth=0.9;dashed=0;">
+          <mxGeometry x="524" y="285" width="194" height="20" as="geometry" />
+        </mxCell>
+        <mxCell id="edge100" parent="1" edge="1" style="html=1;rounded=0;strokeColor=#587489;strokeWidth=0.9;dashed=0;endArrow=none;startArrow=none;">
+          <mxGeometry relative="1" as="geometry">
+            <mxPoint x="531.95" y="288.0" as="sourcePoint" />
+            <mxPoint x="531.95" y="288.0" as="targetPoint" />
+            <Array as="points">
+              <mxPoint x="538.45" y="288.0" />
+              <mxPoint x="541.7" y="291.25" />
+              <mxPoint x="541.7" y="301.0" />
+              <mxPoint x="531.95" y="301.0" />
+            </Array>
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="edge101" parent="1" edge="1" style="html=1;rounded=0;strokeColor=#587489;strokeWidth=0.9;dashed=0;endArrow=none;startArrow=none;">
+          <mxGeometry relative="1" as="geometry">
+            <mxPoint x="533.9" y="293.2" as="sourcePoint" />
+            <mxPoint x="539.75" y="293.2" as="targetPoint" />
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="edge102" parent="1" edge="1" style="html=1;rounded=0;strokeColor=#587489;strokeWidth=0.9;dashed=0;endArrow=none;startArrow=none;">
+          <mxGeometry relative="1" as="geometry">
+            <mxPoint x="533.9" y="295.8" as="sourcePoint" />
+            <mxPoint x="539.75" y="295.8" as="targetPoint" />
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="edge103" parent="1" edge="1" style="html=1;rounded=0;strokeColor=#587489;strokeWidth=0.9;dashed=0;endArrow=none;startArrow=none;">
+          <mxGeometry relative="1" as="geometry">
+            <mxPoint x="533.9" y="298.4" as="sourcePoint" />
+            <mxPoint x="539.75" y="298.4" as="targetPoint" />
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="text104" parent="1" vertex="1" value="&lt;div&gt;teams&lt;/div&gt;" style="text;html=1;whiteSpace=wrap;align=left;verticalAlign=middle;fontFamily=DejaVu Sans;fontSize=9.8;fontStyle=1;fontColor=#203B50;spacing=0;overflow=visible;">
+          <mxGeometry x="548.0000000000001" y="288.96000000000004" width="36.01999999999998" height="12.079999999999984" as="geometry" />
+        </mxCell>
+        <mxCell id="text105" parent="1" vertex="1" value="&lt;div&gt;id INTEGER PK&lt;/div&gt;" style="text;html=1;whiteSpace=wrap;align=left;verticalAlign=middle;fontFamily=DejaVu Sans;fontSize=9;fontStyle=0;fontColor=#203B50;spacing=0;overflow=visible;">
+          <mxGeometry x="530.0000000000001" y="307.32000000000005" width="66.88999999999999" height="11.359999999999957" as="geometry" />
+        </mxCell>
+        <mxCell id="text106" parent="1" vertex="1" value="&lt;div&gt;name TEXT NN,UQ&lt;/div&gt;" style="text;html=1;whiteSpace=wrap;align=left;verticalAlign=middle;fontFamily=DejaVu Sans;fontSize=9;fontStyle=0;fontColor=#203B50;spacing=0;overflow=visible;">
+          <mxGeometry x="530.0000000000001" y="318.71999999999997" width="86.24000000000001" height="11.359999999999957" as="geometry" />
+        </mxCell>
+        <mxCell id="text107" parent="1" vertex="1" value="&lt;div&gt;phone TEXT&lt;/div&gt;" style="text;html=1;whiteSpace=wrap;align=left;verticalAlign=middle;fontFamily=DejaVu Sans;fontSize=9;fontStyle=0;fontColor=#203B50;spacing=0;overflow=visible;">
+          <mxGeometry x="530.0000000000001" y="330.12" width="55.819999999999936" height="11.360000000000014" as="geometry" />
+        </mxCell>
+        <mxCell id="text108" parent="1" vertex="1" value="&lt;div&gt;members INTEGER&lt;/div&gt;" style="text;html=1;whiteSpace=wrap;align=left;verticalAlign=middle;fontFamily=DejaVu Sans;fontSize=9;fontStyle=0;fontColor=#203B50;spacing=0;overflow=visible;">
+          <mxGeometry x="530.0000000000001" y="341.52" width="87.13999999999999" height="11.360000000000014" as="geometry" />
+        </mxCell>
+        <mxCell id="text109" parent="1" vertex="1" value="&lt;div&gt;note TEXT&lt;/div&gt;" style="text;html=1;whiteSpace=wrap;align=left;verticalAlign=middle;fontFamily=DejaVu Sans;fontSize=9;fontStyle=0;fontColor=#203B50;spacing=0;overflow=visible;">
+          <mxGeometry x="530.0000000000001" y="352.92" width="47.99000000000001" height="11.359999999999957" as="geometry" />
+        </mxCell>
+        <mxCell id="text110" parent="1" vertex="1" value="&lt;div&gt;active INTEGER NN,=1&lt;/div&gt;" style="text;html=1;whiteSpace=wrap;align=left;verticalAlign=middle;fontFamily=DejaVu Sans;fontSize=9;fontStyle=0;fontColor=#203B50;spacing=0;overflow=visible;">
+          <mxGeometry x="530.0000000000001" y="364.32000000000005" width="104.60000000000002" height="11.359999999999957" as="geometry" />
+        </mxCell>
+        <mxCell id="text111" parent="1" vertex="1" value="&lt;div&gt;created_at TEXT NN&lt;/div&gt;" style="text;html=1;whiteSpace=wrap;align=left;verticalAlign=middle;fontFamily=DejaVu Sans;fontSize=9;fontStyle=0;fontColor=#203B50;spacing=0;overflow=visible;">
+          <mxGeometry x="530.0000000000001" y="375.71999999999997" width="92.26999999999998" height="11.360000000000014" as="geometry" />
+        </mxCell>
+        <mxCell id="node112" parent="1" vertex="1" style="rounded=0;fillColor=#FFFFFF;strokeColor=#587489;strokeWidth=0.9;dashed=0;">
+          <mxGeometry x="10" y="359" width="255" height="43.8" as="geometry" />
+        </mxCell>
+        <mxCell id="node113" parent="1" vertex="1" style="rounded=0;fillColor=#F4F5F6;strokeColor=#587489;strokeWidth=0.9;dashed=0;">
+          <mxGeometry x="10" y="359" width="255" height="20" as="geometry" />
+        </mxCell>
+        <mxCell id="edge114" parent="1" edge="1" style="html=1;rounded=0;strokeColor=#587489;strokeWidth=0.9;dashed=0;endArrow=none;startArrow=none;">
+          <mxGeometry relative="1" as="geometry">
+            <mxPoint x="17.95" y="362.0" as="sourcePoint" />
+            <mxPoint x="17.95" y="362.0" as="targetPoint" />
+            <Array as="points">
+              <mxPoint x="24.450000000000003" y="362.0" />
+              <mxPoint x="27.700000000000003" y="365.25" />
+              <mxPoint x="27.700000000000003" y="375.0" />
+              <mxPoint x="17.95" y="375.0" />
+            </Array>
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="edge115" parent="1" edge="1" style="html=1;rounded=0;strokeColor=#587489;strokeWidth=0.9;dashed=0;endArrow=none;startArrow=none;">
+          <mxGeometry relative="1" as="geometry">
+            <mxPoint x="19.9" y="367.2" as="sourcePoint" />
+            <mxPoint x="25.75" y="367.2" as="targetPoint" />
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="edge116" parent="1" edge="1" style="html=1;rounded=0;strokeColor=#587489;strokeWidth=0.9;dashed=0;endArrow=none;startArrow=none;">
+          <mxGeometry relative="1" as="geometry">
+            <mxPoint x="19.9" y="369.8" as="sourcePoint" />
+            <mxPoint x="25.75" y="369.8" as="targetPoint" />
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="edge117" parent="1" edge="1" style="html=1;rounded=0;strokeColor=#587489;strokeWidth=0.9;dashed=0;endArrow=none;startArrow=none;">
+          <mxGeometry relative="1" as="geometry">
+            <mxPoint x="19.9" y="372.4" as="sourcePoint" />
+            <mxPoint x="25.75" y="372.4" as="targetPoint" />
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="text118" parent="1" vertex="1" value="&lt;div&gt;server_meta&lt;/div&gt;" style="text;html=1;whiteSpace=wrap;align=left;verticalAlign=middle;fontFamily=DejaVu Sans;fontSize=9.8;fontStyle=1;fontColor=#203B50;spacing=0;overflow=visible;">
+          <mxGeometry x="34.0" y="362.96000000000004" width="70.4" height="12.079999999999984" as="geometry" />
+        </mxCell>
+        <mxCell id="text119" parent="1" vertex="1" value="&lt;div&gt;key TEXT PK&lt;/div&gt;" style="text;html=1;whiteSpace=wrap;align=left;verticalAlign=middle;fontFamily=DejaVu Sans;fontSize=9;fontStyle=0;fontColor=#203B50;spacing=0;overflow=visible;">
+          <mxGeometry x="16.0" y="381.32" width="57.62000000000002" height="11.360000000000014" as="geometry" />
+        </mxCell>
+        <mxCell id="text120" parent="1" vertex="1" value="&lt;div&gt;value TEXT NN&lt;/div&gt;" style="text;html=1;whiteSpace=wrap;align=left;verticalAlign=middle;fontFamily=DejaVu Sans;fontSize=9;fontStyle=0;fontColor=#203B50;spacing=0;overflow=visible;">
+          <mxGeometry x="16.0" y="392.71999999999997" width="68.78000000000003" height="11.359999999999957" as="geometry" />
+        </mxCell>
+        <mxCell id="edge121" parent="1" edge="1" style="html=1;rounded=0;strokeColor=#587489;strokeWidth=0.9;dashed=1;endArrow=none;startArrow=none;exitX=1.0;exitY=0.6899810964083175;entryX=0.0;entryY=0.18518518518518517;startArrow=ERone;endArrow=ERzeroToMany;" source="node2" target="node53">
+          <mxGeometry relative="1" as="geometry">
+            <mxPoint x="265" y="246" as="sourcePoint" />
+            <mxPoint x="292" y="246" as="targetPoint" />
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="edge122" parent="1" edge="1" style="html=1;rounded=0;strokeColor=#587489;strokeWidth=0.9;dashed=1;endArrow=none;startArrow=none;exitX=0.5;exitY=1.0922330097087378;entryX=0.5;entryY=0.0;startArrow=ERone;endArrow=ERzeroToMany;" source="node70" target="node86">
+          <mxGeometry relative="1" as="geometry">
+            <mxPoint x="621" y="162" as="sourcePoint" />
+            <mxPoint x="621" y="194" as="targetPoint" />
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="edge123" parent="1" edge="1" style="html=1;rounded=0;strokeColor=#587489;strokeWidth=0.9;dashed=1;endArrow=none;startArrow=none;exitX=1.0;exitY=0.9546313799621927;entryX=0.0;entryY=0.9226190476190477;startArrow=ERzeroToMany;endArrow=ERzeroToOne;" source="node2" target="node98">
+          <mxGeometry relative="1" as="geometry">
+            <mxPoint x="265" y="330" as="sourcePoint" />
+            <mxPoint x="524" y="378" as="targetPoint" />
+            <Array as="points">
+              <mxPoint x="280" y="330" />
+              <mxPoint x="280" y="378" />
+            </Array>
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="text124" parent="1" vertex="1" value="&lt;div&gt;assigned_team_id → teams.id&lt;/div&gt;" style="text;html=1;whiteSpace=wrap;align=center;verticalAlign=middle;fontFamily=DejaVu Sans;fontSize=9;fontStyle=0;fontColor=#203B50;spacing=0;overflow=visible;">
+          <mxGeometry x="321.26500000000004" y="359.32" width="135.47000000000003" height="11.359999999999957" as="geometry" />
+        </mxCell>
+        <mxCell id="node125" parent="1" vertex="1" style="rounded=0;fillColor=#EDF4FA;strokeColor=#587489;strokeWidth=0.9;dashed=0;">
+          <mxGeometry x="292" y="174" width="205" height="18" as="geometry" />
+        </mxCell>
+        <mxCell id="text126" parent="1" vertex="1" value="&lt;div&gt;UQ (client_id, sequence_number)&lt;/div&gt;" style="text;html=1;whiteSpace=wrap;align=left;verticalAlign=middle;fontFamily=DejaVu Sans;fontSize=9;fontStyle=0;fontColor=#203B50;spacing=0;overflow=visible;">
+          <mxGeometry x="298.00000000000006" y="177.32" width="152.03000000000003" height="11.359999999999985" as="geometry" />
+        </mxCell>
+        <mxCell id="text127" parent="1" vertex="1" value="&lt;div&gt;Không FK tới reports (payload/result_data).&lt;/div&gt;" style="text;html=1;whiteSpace=wrap;align=left;verticalAlign=middle;fontFamily=DejaVu Sans;fontSize=9;fontStyle=0;fontColor=#203B50;spacing=0;overflow=visible;">
+          <mxGeometry x="291.00000000000006" y="201.32000000000002" width="195.85999999999996" height="11.359999999999985" as="geometry" />
+        </mxCell>
+        <mxCell id="text128" parent="1" vertex="1" value="&lt;div&gt;PK: khóa chính; NN: NOT NULL; UQ: UNIQUE; CI: NOCASE.&lt;/div&gt;" style="text;html=1;whiteSpace=wrap;align=left;verticalAlign=middle;fontFamily=DejaVu Sans;fontSize=9;fontStyle=0;fontColor=#203B50;spacing=0;overflow=visible;">
+          <mxGeometry x="291.00000000000006" y="390.32" width="261.92" height="11.360000000000014" as="geometry" />
+        </mxCell>
+        <mxCell id="text129" parent="1" vertex="1" value="&lt;div&gt;Nét đứt: liên hệ do mã kiểm soát, DDL chưa khai báo FK. raw_payload lưu JSON; actor lưu tên thao tác.&lt;/div&gt;" style="text;html=1;whiteSpace=wrap;align=left;verticalAlign=middle;fontFamily=DejaVu Sans;fontSize=9;fontStyle=0;fontColor=#203B50;spacing=0;overflow=visible;">
+          <mxGeometry x="9.0" y="404.97124999999994" width="466.94000000000017" height="12.057500000000005" as="geometry" />
         </mxCell>
       </root>
     </mxGraphModel>
