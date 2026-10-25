@@ -9,32 +9,38 @@ Model mới được dùng cho các hình phân loại là MobileNetV3-Large v�
 \input{generated/tables/confusion}
 \input{generated/tables/image-classes}
 \begin{figure}[htbp]\centering
-\includegraphics[width=.86\textwidth]{image-confusion.png}
+\includegraphics[width=.86\textwidth]{image-confusion.pdf}
 \caption{Ma trận nhầm lẫn trên test của MobileNetV3-Large seed 1024}
 \label{fig:image-confusion}
 \end{figure}
 \begin{figure}[htbp]\centering
-\includegraphics[width=.86\textwidth]{image-confusion-normalized.png}
-\caption{Ma trận nhầm lẫn test chuẩn hóa theo lớp thật của model seed 1024}
+\includegraphics[width=.86\textwidth]{image-confusion-normalized.pdf}
+\caption{Ma trận nhầm lẫn test chuẩn hóa theo lớp thật của model seed 1024}\label{fig:image-confusion-normalized}
 \end{figure}
 Recall non\_flood là 90,70\%; recall high là 74,07\%. Trong 54 ảnh high, 12 ảnh bị dự đoán medium và 2 ảnh bị dự đoán low. Có 3 lỗi cách ít nhất hai mức severity (1,17\% test). Đây là chỉ số theo thứ tự mức ngập, chưa đo hệ quả cứu hộ.
 
 Checkpoint seed 1024 chưa lưu hash manifest chia tập của lần train. Các kiểm tra ảnh sạch và lỗi validation ở Chương~\ref{chap:02-data-methods} nhất quán với split dùng chung, nhưng chưa xác nhận toàn bộ phân công mẫu huấn luyện ban đầu. Phiên benchmark seed 1024 chạy lại đã có đủ dự đoán trên test, hash split/config và hash model để đối chiếu. Bằng chứng của phiên đánh giá này không thay thế hồ sơ chia tập còn thiếu của lần train; không dùng riêng chênh lệch Accuracy giữa các phiên để kết luận model cải thiện hoặc suy giảm.
-\begin{figure}[htbp]\centering
-\includegraphics[width=\textwidth]{image-examples.png}
+\begin{landscape}
+\begin{figure}[p]\centering
+\setlength{\abovecaptionskip}{4pt}
+\includegraphics[width=\linewidth]{image-examples.pdf}
 \caption{Các ví dụ phân loại sai trên validation của model seed 1024}
 \label{fig:image-examples}
 \end{figure}
+\end{landscape}
 Trong hình, T là nhãn thật, P là dự đoán, conf là xác suất lớp dự đoán và true\_prob là xác suất nhãn thật. Ảnh minh họa gồm các lỗi validation, không phải ví dụ đúng/sai trên test như hình của phiên cũ. Có lỗi confidence cao; không suy nguyên nhân sai nhãn, góc chụp hay che khuất chỉ từ hình. Các ảnh nguồn Dataset\_Flood giữ tác quyền ban đầu; minh họa nội bộ không xác nhận quyền phát hành lại ngoài báo cáo.
 
 \subsection{Confidence và chính sách gửi metadata}
 Các phân tích confidence dưới đây thuộc benchmark FP32 seed \BenchmarkSeed{} và dùng CSV dự đoán đi kèm. ECE của phiên benchmark là \ImageECE{} và Brier \ImageBrier{}.
 Hình~\ref{fig:confidence-calibration} được tính từ dự đoán FP32 trên 256 ảnh test với bin rộng 0,1. Đường reliability so sánh confidence trung bình với tỷ lệ đúng trong mỗi bin; biểu đồ số mẫu cho biết một điểm trên đường có bao nhiêu quan sát. Đây là phép mô tả trên split hiện tại, không phải kết quả đã hiệu chuẩn lại mô hình. Giá trị ECE nêu trên được lấy theo cấu hình artifact gốc, không tính lại ECE từ các bin minh họa này.
-\begin{figure}[htbp]\centering
-\includegraphics[width=\textwidth]{confidence-calibration.pdf}
+\begin{landscape}
+\begin{figure}[p]\centering
+\setlength{\abovecaptionskip}{4pt}
+\includegraphics[width=\linewidth]{confidence-calibration.pdf}
 \caption{Reliability và số mẫu theo confidence của mô hình FP32 trên tập test}
 \label{fig:confidence-calibration}
 \end{figure}
+\end{landscape}
 
 Ở ngưỡng $p\geq0{,}90$, CSV được chọn có \HighConfidenceCount/\ImageTest{} ảnh (\HighConfidenceCoverage\%), trong đó \HighConfidenceCorrect{} dự đoán đúng. Kết quả này bổ sung thông tin cho chính sách gửi metadata; nó không bảo đảm mọi ảnh camera mới có confidence cao đều đúng. Ngưỡng 0,90 là cấu hình ứng dụng đang có, không được chọn lại từ phân tích này. Nếu dùng tập test để chỉnh ngưỡng, cần tập xác nhận mới để đánh giá quyết định sau điều chỉnh.
 
@@ -107,11 +113,14 @@ Model cắt tỉa đạt Accuracy \PruningAccuracy\% và macro-F1 \PruningMacroF
 
 Độ trễ trước/sau cắt tỉa phải được so trong cùng runtime và cùng phiên. Ít tham số hơn không bảo đảm runtime nhanh hơn, vì kernel, bố trí graph và backend có thể khác. Một phiên đo CPU chưa đủ để khẳng định ưu thế hiệu năng tổng quát hoặc tốc độ trên điện thoại.
 
-\begin{figure}[htbp]\centering
-\includegraphics[width=\textwidth]{compression-tradeoffs.pdf}
+\begin{landscape}
+\begin{figure}[p]\centering
+\setlength{\abovecaptionskip}{4pt}
+\includegraphics[width=\linewidth]{compression-tradeoffs.pdf}
 \caption{Đánh đổi dung lượng--accuracy theo summary nén và độ trễ trước/sau cắt tỉa}
 \label{fig:compression-tradeoffs}
 \end{figure}
+\end{landscape}
 
 \subsection{Khẩn cấp LR: độ khớp nhãn thay thế}
 JSON v5 ghi fidelity trên 32 trạng thái tại threshold 0,5 bằng 1,0. Bảng so sánh với quy tắc cho thấy tất cả profile khớp nhãn OR. Các audit dataset/final gate ghi kiểm tra integrity; audit nguồn giữ các trạng thái có điều kiện và thay đổi sau rà soát, không chuyển mọi hạng mục thành một phát biểu ``pass'' vô điều kiện.
@@ -182,11 +191,14 @@ Phân tích hằng số one-at-a-time có 21 cấu hình trên 40 seed (840 quan
 Trên phân hoạch Product, điểm có chặn làm harm mô phỏng tăng 14,34 so với legacy và giảm tỷ lệ trễ hạn khoảng 1,88 điểm phần trăm. Cả hai tương phản không có ý nghĩa sau Holm: $p=0{,}563$ và $p=0{,}247$. Bảng dùng chiều $\Delta$ cải thiện, nên harm tăng tương ứng hiệu âm.
 
 So với gần nhất trước, score có chặn kém hơn về harm và trễ hạn, với $p_{\mathrm{Holm}}\approx4{,}1\times10^{-5}$ và $1{,}3\times10^{-6}$. Product cũng kém hơn Additive khớp mật độ khi dùng cùng score ở harm ($p_{\mathrm{Holm}}=0{,}000168$). Sai phân hoạch có hệ quả xuống tầng lập lịch, và bảo đảm điểm hữu hạn không loại bỏ hệ quả đó.
-\begin{figure}[htbp]\centering
-\includegraphics[width=\textwidth]{../paper/figures/rq3_dispatch_conditions.pdf}
+\begin{landscape}
+\begin{figure}[p]\centering
+\setlength{\abovecaptionskip}{4pt}
+\includegraphics[width=\linewidth]{../paper/figures/rq3_dispatch_conditions.pdf}
 \caption{Trung bình mô tả theo điều kiện nguồn lực trên phân hoạch Product}
 \label{fig:rq3-conditions-report}
 \end{figure}
+\end{landscape}
 
 Gần nhất trước có harm và trễ hạn trung bình thấp hơn trong mọi điều kiện được thử. Một diễn giải có thể là score theo nhu cầu chưa biểu diễn đủ chi phí đi lại và ràng buộc lịch; đây là giả thuyết giải thích, chưa được cô lập bằng thực nghiệm cơ chế. Kết quả không xác lập gần nhất trước là chính sách thực địa tối ưu.
 

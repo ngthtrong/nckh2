@@ -1,0 +1,115 @@
+\section{Triển khai hệ thống}\label{sec:03-system-implementation}
+\subsection{Cấu trúc mã nguồn và đóng gói}
+Hệ thống phần mềm được tổ chức thành các phân hệ chuyên biệt bao gồm: máy chủ backend (FastAPI), ứng dụng di động phía người dân và lực lượng cứu nạn (Flutter), phân hệ Web GIS điều phối tác chiến và các dịch vụ vùng chứa Docker. Quy trình đóng gói và triển khai được tự động hóa thông qua các kịch bản chuẩn hóa, hỗ trợ triển khai nhanh chóng tại trung tâm điều hành hoặc máy chủ dã chiến.
+
+Hạ tầng máy chủ được đóng gói thành ba dịch vụ chính bằng Docker Compose (Hình~\ref{fig:deployment-infrastructure}): dịch vụ backend (FastAPI), dịch vụ bảng điều phối tác chiến (Dashboard) và dịch vụ Web ứng dụng. Các dịch vụ sử dụng cơ chế ánh xạ cổng mạng linh hoạt và lưu trữ dữ liệu bền vững qua Docker volume, cho phép dễ dàng cấu hình các biến môi trường lưu trữ cơ sở dữ liệu và thư mục hình ảnh hiện trường.
+
+\begin{figure}[htbp]
+\centering
+\includegraphics[width=\textwidth]{deployment_infrastructure.pdf}
+\caption{Sơ đồ triển khai hạ tầng các dịch vụ trong môi trường Docker Compose}
+\label{fig:deployment-infrastructure}
+\end{figure}
+
+\subsection{Nạp mô hình và kiểm tra asset}
+Mô hình học sâu MobileNetV3 sau khi tối ưu hóa được đóng gói trong thư mục tài nguyên (\texttt{assets}) của ứng dụng di động dưới định dạng ExecuTorch (PTE), phục vụ nhận diện ngoại tuyến mặc định. Quản trị viên đã đăng nhập có thể tải mô hình ONNX từ máy chủ để so sánh với PTE. Quá trình tải và nạp đối chiếu mã SHA-256 với manifest để bảo đảm hai mô hình thuộc cùng bộ trọng số; đầu vào và thứ tự lớp được giữ theo cấu hình triển khai.
+
+Ứng dụng di động nạp và thực thi mô hình ONNX qua thư viện ONNX Runtime native, và gọi mô hình ExecuTorch thông qua cầu nối Android MethodChannel. Đối với mô hình đánh giá mức độ khẩn cấp, ứng dụng đọc cấu hình hệ số từ tệp cấu hình JSON; bộ phân tích cú pháp xác thực tính hợp lệ của lược đồ, các trọng số và năm dấu hiệu khẩn cấp được người dùng lựa chọn. Điểm LR được gửi trong trường \texttt{E\_i}; adapter backend hiện chưa đọc trường này, mà lấy \texttt{urgency} hoặc suy từ mô tả như đã nêu ở Mục~\ref{sec:03-system-architecture}. Trường hợp mô hình AI chưa sẵn sàng hoặc gặp lỗi trong quá trình khởi tạo, hệ thống tự động kích hoạt cơ chế dự phòng an toàn (fallback), cho phép người dùng tiếp tục gửi báo cáo với các thông tin nhập liệu thông thường mà không làm gián đoạn quy trình cứu nạn.
+
+\subsection{Chọn chế độ gửi thích ứng}
+Ứng dụng đo throughput qua \texttt{/probe}, endpoint khoảng 64 KiB. Ngân sách probe ở chính sách gửi là 6 giây và có thể dùng số byte đọc một phần để ước lượng. Cấu hình hiện tại dùng ngưỡng mạng mạnh 1.000 kbit/s, mức còn phù hợp ảnh nén 50 kbit/s và confidence cao 0,90.
+
+\begin{table}[htbp]\centering\small
+\caption{Chính sách chọn chế độ gửi trong mã hiện tại}\label{tab:send-policy}
+\begin{tabularx}{\textwidth}{P{.36\textwidth}X}
+\toprule Điều kiện & Chế độ được chọn \\\midrule
+Không có data & Thử SMS; nếu không gửi được thì giữ hàng đợi \\
+Từ 1.000 kbit/s, confidence dưới 0,90 & Ảnh gốc và thông tin \\
+Từ 1.000 kbit/s, confidence từ 0,90 & Chỉ thông tin khi cờ ưu tiên metadata bật \\
+Từ 50 đến dưới 1.000 kbit/s & Ảnh nén và thông tin \\
+Có data nhưng dưới 50 kbit/s & Chỉ thông tin \\
+\bottomrule\end{tabularx}
+\end{table}
+
+Trong chế độ nén, ứng dụng dùng JPEG quality 60 với tham số \texttt{minWidth} và \texttt{minHeight} đều bằng 1.024 pixel. Khi ảnh đủ lớn, thư viện giữ tỷ lệ khung hình và giảm cạnh ngắn về 1.024 pixel; ảnh nhỏ không được phóng to. Cạnh dài có thể lớn hơn 1.024 pixel. Ảnh định dạng không phù hợp endpoint có thể được đổi sang JPEG. Cơ chế này giảm lượng dữ liệu ảnh cần truyền trong điều kiện mạng hạn chế.
+
+\begin{figure}[htbp]
+\centering
+\includegraphics[width=\textwidth]{flow_03_adaptive_network_send.pdf}
+\caption{Lưu đồ quyết định chế độ gửi thích ứng theo thông lượng mạng và độ tin cậy AI}
+\label{fig:flow-adaptive-send}
+\end{figure}
+
+\subsection{Trạng thái cứu hộ và phản hồi}
+Báo cáo mới ở backend luôn bắt đầu \texttt{processing}, bất kể status client gửi. Chu trình chuyển trạng thái được chuẩn hóa theo mô hình máy trạng thái (Hình~\ref{fig:status-flow}): các chuyển chính là \texttt{processing} tới \texttt{dispatched}, rồi \texttt{resolved}; từ trạng thái chưa kết thúc có thể đóng \texttt{cancelled} kèm lý do. \texttt{resolved} và \texttt{cancelled} là trạng thái cuối. Version trạng thái tăng khi có cập nhật hợp lệ.
+
+\begin{figure}[htbp]\centering
+\begin{tikzpicture}[>=Stealth,
+  node distance=16mm and 18mm,
+  st/.style={draw=black!85, rounded corners=3pt, align=center, font=\small, minimum height=12mm, text width=26mm, fill=gray!3},
+  final_st/.style={draw=black!85, rounded corners=3pt, align=center, font=\small, minimum height=12mm, text width=26mm, fill=gray!8, double, double distance=1pt},
+  initial/.style={circle, fill=black, inner sep=0pt, minimum size=4.5mm},
+  final_dot/.style={circle, draw=black, line width=0.8pt, inner sep=0pt, minimum size=5.5mm, path picture={\fill[black] (path picture bounding box.center) circle (1.8mm);}}
+]
+
+% Điểm bắt đầu
+\node[initial] (init) at (-1.8, 0) {};
+
+% Các trạng thái
+\node[st, right=10mm of init] (p) {\textbf{processing}\\\scriptsize (tiếp nhận/chờ)};
+\node[st, right=20mm of p] (d) {\textbf{dispatched}\\\scriptsize (đã điều phối)};
+\node[final_st, right=20mm of d] (r) {\textbf{resolved}\\\scriptsize (hoàn tất)};
+\node[final_st, below=16mm of d] (c) {\textbf{cancelled}\\\scriptsize (đã đóng)};
+
+% Điểm kết thúc
+\node[final_dot, right=10mm of r] (end_r) {};
+\node[final_dot, right=10mm of c] (end_c) {};
+
+% Chuyển trạng thái chính
+\draw[->, line width=0.7pt] (init) -- node[above, font=\scriptsize]{tạo ca} (p);
+\draw[->, line width=0.7pt] (p) -- node[above, font=\scriptsize]{điều phối} node[below, font=\fontsize{6.5bp}{7.5bp}\selectfont, text=gray!40!black]{(PATCH status)} (d);
+\draw[->, line width=0.7pt] (d) -- node[above, font=\scriptsize]{hoàn thành} node[below, font=\fontsize{6.5bp}{7.5bp}\selectfont, text=gray!40!black]{(hiện trường)} (r);
+\draw[->, line width=0.7pt] (r) -- (end_r);
+
+% Đóng ca / Hủy ca (kèm close_reason bắt buộc)
+\draw[->, line width=0.7pt] (p.south) |- node[pos=0.7, above, font=\scriptsize]{đóng ca} node[pos=0.7, below, font=\fontsize{6.5bp}{7.5bp}\selectfont, text=gray!40!black]{[kèm lý do]} (c.west);
+\draw[->, line width=0.7pt] (d) -- node[right, font=\scriptsize]{đóng ca} node[left, font=\fontsize{6.5bp}{7.5bp}\selectfont, text=gray!40!black]{[kèm lý do]} (c);
+\draw[->, line width=0.7pt] (c) -- (end_c);
+
+\end{tikzpicture}
+\caption{Biểu đồ chuyển trạng thái nghiệp vụ của ca cứu hộ do backend kiểm soát}
+\label{fig:status-flow}
+\end{figure}
+
+App chỉ chấp nhận cập nhật đi tiến theo quy tắc domain, giúp phản hồi đến muộn không làm trạng thái lùi. Điều phối viên cập nhật qua API yêu cầu phiên đăng nhập; thay đổi trạng thái qua message sync cũng cần quyền dashboard. Luồng công khai tạo báo cáo không có quyền tự kết thúc ca cứu hộ.
+
+\begin{landscape}
+\begin{figure}[p]
+\centering
+\setlength{\abovecaptionskip}{4pt}
+\includegraphics[width=\linewidth]{flow_08_dispatch_lifecycle.pdf}
+\caption{Vòng đời tác nghiệp, thao tác API và kiểm soát trạng thái cứu hộ}
+\label{fig:flow-dispatch-lifecycle}
+\end{figure}
+\end{landscape}
+
+Hình~\ref{fig:flow-dispatch-lifecycle} thể hiện quy trình tác nghiệp thông thường. API giao đội và API đổi trạng thái là hai thao tác riêng; giao đội không tự chuyển ca sang \texttt{dispatched}. Bổ sung vị trí phục vụ xác minh, nhưng không phải điều kiện chặn bắt buộc trong hai API này. Ca chưa hoàn tất tiếp tục được theo dõi; lỗi truyền tải không tự làm ca chuyển sang \texttt{cancelled}. Backend kiểm tra version tăng và thứ hạng trạng thái không đi lùi; sơ đồ không khẳng định mọi ca đều bắt buộc đi qua từng trạng thái trung gian.
+
+\subsection{SMS, tổng đài và bổ sung thông tin}
+Ứng dụng Android có đường gửi SMS khi mất data và có số tiếp nhận hợp lệ qua cấu hình build. Báo cáo vẫn có thể nằm trong outbox để đồng bộ đầy đủ sau đó. Backend có \texttt{POST /api/sms/inbound} cho gateway có token và \texttt{POST /api/reports/manual} cho nhập tổng đài. Cùng report ID cần được gộp để SMS trước và HTTP sau không tạo hai ca.
+
+Phía máy chủ cung cấp endpoint webhook tiếp nhận từ SMS gateway nhằm hỗ trợ chuyển đổi tin nhắn mạng viễn thông thành bản ghi trên cơ sở dữ liệu. Để đảm bảo độ tin cậy trong môi trường thực địa, quy trình thử nghiệm tiếp theo cần phối hợp cùng các nhà mạng hoặc dịch vụ SMS gateway chuyên dụng nhằm đo lường chính xác tỷ lệ phân phối và độ trễ chuyển tiếp tin nhắn.
+
+\begin{figure}[htbp]
+\centering
+\includegraphics[width=.95\textwidth,height=.78\textheight,keepaspectratio]{flow_07_manual_intake_location.pdf}
+\caption{Quy trình tiếp nhận thông tin cứu hộ qua tổng đài và định vị thủ công}
+\label{fig:flow-manual-intake}
+\end{figure}
+
+\subsection{Xác thực và quản lý thao tác}
+Backend dùng tài khoản admin/operator, mật khẩu PBKDF2 và phiên có token; database lưu hash token phiên. Đăng nhập được giới hạn theo username và IP, và chỉ tin header proxy từ nguồn được cấu hình. Các thao tác quản trị tài khoản, sao lưu và xóa toàn bộ dữ liệu yêu cầu vai trò admin. Ảnh uploads yêu cầu phiên đăng nhập.
+
+Hệ thống ghi nhận nhật ký thao tác (\emph{audit trail}) gắn liền với danh tính điều phối viên (actor) phục vụ công tác giám sát, phân quyền và hậu kiểm. Đối với các yêu cầu cứu nạn gửi từ cộng đồng, quy trình nghiệp vụ yêu cầu điều phối viên xác minh thông tin trước khi ra quyết định xuất quân, hạn chế nguy cơ bị phân tán nguồn lực bởi các thông tin thiếu chính xác.
+
+Kết quả kiểm thử tích hợp và truyền tải của hệ thống được trình bày tại Mục~\ref{sec:system-testing}.

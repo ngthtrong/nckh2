@@ -1,0 +1,132 @@
+#!/usr/bin/env python3
+"""Compile from report/, with separate output directories and grouped bibliography."""
+import argparse
+import os
+from pathlib import Path
+import shutil
+import subprocess
+import sys
+
+ROOT = Path(__file__).resolve().parents[1]
+
+def run(args, env=None):
+    subprocess.run(args, cwd=ROOT, env=env, check=True)
+
+def has_package(name):
+    tool = shutil.which('kpsewhich')
+    return bool(tool and subprocess.run([tool, name], capture_output=True, text=True).stdout.strip())
+
+
+def build_diagrams(target):
+    if target in ['content', 'full']:
+        run([sys.executable, 'scripts/export_drawio_diagrams.py'])
+
+
+def build_deliverables(target, bibliography):
+    if target == 'content':
+        for name in ['bulletin-vi', 'bulletin-en', 'summary-vi', 'summary-en']:
+            run([sys.executable, 'scripts/build.py', name, '--bibliography', bibliography])
+
+def main():
+    parser = argparse.ArgumentParser(description=__doc__)
+    parser.add_argument('target', choices=['content', 'full', 'smoke', 'bulletin-vi', 'bulletin-en', 'summary-vi', 'summary-en'])
+    parser.add_argument('--twoside', action='store_true')
+    parser.add_argument('--bibliography', choices=['auto', 'bibtex', 'biblatex'], default='auto')
+    args = parser.parse_args()
+    has_xelatex = bool(shutil.which('xelatex'))
+    local_tectonic = ROOT / ('tectonic.exe' if sys.platform == 'win32' else 'tectonic')
+    tectonic_bin = str(local_tectonic) if local_tectonic.exists() else ('tectonic' if shutil.which('tectonic') else None)
+    has_tectonic = tectonic_bin is not None
+    if not has_xelatex and not has_tectonic:
+        parser.error('XeLaTeX or Tectonic is required.')
+    os.chdir(ROOT)
+    build_diagrams(args.target)
+
+    if args.target == 'full':
+        draft_cmd = [sys.executable, 'scripts/build.py', 'content', '--bibliography', args.bibliography]
+        if args.twoside:
+            draft_cmd.append('--twoside')
+        run(draft_cmd)
+        run([sys.executable, 'scripts/check_report.py', '--release', '--build-dir',
+             'build/content-twoside' if args.twoside else 'build/content'])
+        run([sys.executable, 'scripts/build_evidence.py'])
+    out = ROOT / 'build' / (args.target + ('-twoside' if args.twoside else ''))
+    out.mkdir(parents=True, exist_ok=True)
+    # TeX's \include auxiliaries retain the source path inside output-directory.
+    for name in ['chapters', 'chapters/01-foundations', 'chapters/02-data-methods',
+                 'chapters/03-system', 'chapters/04-evaluation', 'appendices']:
+        (out / name).mkdir(parents=True, exist_ok=True)
+    report = args.target in ['content', 'full', 'smoke']
+    biber_available = has_package('biblatex.sty') and has_package('ieee.bbx') and bool(shutil.which('biber'))
+    use_biber = report and (args.bibliography == 'biblatex' or (args.bibliography == 'auto' and biber_available))
+    if use_biber and not biber_available:
+        parser.error('biblatex-ieee + biber are required for --bibliography biblatex.')
+    if report and not use_biber and not shutil.which('bibtex') and not has_tectonic:
+        parser.error('BibTeX is missing.')
+    source = 'main.tex' if args.target in ['content', 'full'] else (
+        'template/typography-smoke.tex' if args.target == 'smoke' else f'deliverables/{args.target}.tex')
+    definitions = ('\\def\\FullReport{1}' if args.target == 'full' else '')
+    definitions += '\\def\\TwoSidedReport{1}' if args.twoside else ''
+    definitions += '\\def\\UseBiblatex{1}' if use_biber else '\\def\\UseBibtex{1}'
+    job = args.target
+
+    if not has_xelatex and has_tectonic:
+        print(f'Building {args.target} via Tectonic...', flush=True)
+        driver = out / f'_{job}_driver.tex'
+        driver.write_text(definitions + f'\\input{{{source}}}\n', encoding='utf-8')
+        tectonic_cmd = [tectonic_bin, '--keep-logs', '-Z', 'search-path=.', '-o', str(out.relative_to(ROOT)), str(driver.relative_to(ROOT))]
+        env = os.environ.copy()
+        run(tectonic_cmd, env)
+        for suffix in ['pdf', 'metrics', 'log']:
+            artifact = out / f'_{job}_driver.{suffix}'
+            if artifact.exists():
+                artifact.replace(out / f'{job}.{suffix}')
+        print('PDF: ' + str((out / f'{job}.pdf').relative_to(ROOT)))
+        build_deliverables(args.target, args.bibliography)
+        return
+
+    cmd = ['xelatex', '-interaction=nonstopmode', '-halt-on-error', '-file-line-error',
+           f'-output-directory={out.relative_to(ROOT)}', f'-jobname={job}',
+           definitions + '\\input{' + source + '}']
+    env = os.environ.copy()
+    # Find the target's bbl file in its isolated output directory.
+    env['TEXINPUTS'] = str(out) + os.pathsep + env.get('TEXINPUTS', '') + os.pathsep
+    env['BIBINPUTS'] = str(ROOT) + os.pathsep + env.get('BIBINPUTS', '') + os.pathsep
+    backend = 'biblatex-ieee-grouped-nyt' if use_biber else 'bibtex-grouped-plainurl'
+    marker = out / '.bibliography-backend'
+    previous_aux = out / f'{job}.aux'
+    incompatible_aux = previous_aux.exists() and ('\\abx@aux' in previous_aux.read_text(errors='replace')) != use_biber
+    if incompatible_aux or (marker.exists() and marker.read_text().strip() != backend):
+        for pattern in ['*.aux', '*.bbl', '*.blg', '*.bcf', '*.run.xml', '*.toc', '*.lof', '*.lot', '*.out']:
+            for artifact in out.rglob(pattern):
+                artifact.unlink()
+    marker.write_text(backend + '\n')
+    print(f'Building {args.target}: {"biblatex/biber" if use_biber else "BibTeX/natbib"}', flush=True)
+    run(cmd, env)
+    if report:
+        if use_biber:
+            run(['biber', '--input-directory', str(out), '--output-directory', str(out), job], env)
+        else:
+            run(['bibtex', str((out / job).relative_to(ROOT))], env)
+    run(cmd, env)
+    run(cmd, env)
+    # Resolve longer TOC/float changes until stable, at most three further passes.
+    for _ in range(3):
+        log = (out / f'{job}.log').read_text(errors='replace')
+        if not any(s in log for s in ['Rerun to get', 'Label(s) may have changed', 'Please rerun LaTeX']):
+            break
+        run(cmd, env)
+    log = (out / f'{job}.log').read_text(errors='replace')
+    if any(s in log for s in ['There were undefined references', 'There were undefined citations',
+                              'Rerun to get', 'Label(s) may have changed', 'Please rerun LaTeX']):
+        raise SystemExit('Unresolved references or pagination; inspect ' + str(out / f'{job}.log'))
+    if args.target == 'full':
+        run([sys.executable, 'scripts/check_report.py', '--release', '--build-dir', str(out.relative_to(ROOT))])
+    print('PDF: ' + str((out / f'{job}.pdf').relative_to(ROOT)))
+    build_deliverables(args.target, args.bibliography)
+
+if __name__ == '__main__':
+    try:
+        main()
+    except subprocess.CalledProcessError as exc:
+        sys.exit(exc.returncode)

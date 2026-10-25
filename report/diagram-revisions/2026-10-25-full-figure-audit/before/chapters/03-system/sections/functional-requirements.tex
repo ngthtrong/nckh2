@@ -1,0 +1,31 @@
+\clearpage
+\section{Yêu cầu chức năng}\label{sec:functional-requirements}
+Người gửi tạo SOS hoặc báo cáo có mô tả/ảnh, cung cấp vị trí khi có thể và nhận phản hồi trạng thái. Điều phối viên xem bản đồ, danh sách và hàng xem xét; xác minh thông tin, giao đội và ghi nhận kết quả. Nhóm nghiên cứu chuẩn bị dữ liệu, cấu hình và phân tích artifact mà không đưa nhãn đánh giá vào luồng suy luận.
+
+Một luồng nghiệp vụ tối thiểu bắt đầu bằng tạo báo cáo tại thiết bị, ghi vào lưu trữ cục bộ, chọn chế độ gửi, nhận ACK, đưa báo cáo vào danh sách xử lý và cập nhật phản hồi. Khi mất mạng, báo cáo cần giữ được định danh và payload để tiếp tục ở lần gửi sau. Hệ thống cần chống tạo bản ghi trùng khi gửi lại và từ chối trường hợp cùng định danh nhưng nội dung xung đột. Báo cáo được phép thiếu ảnh hoặc GPS; nếu thiếu GPS, báo cáo được chuyển vào hàng xem xét, không gán tọa độ mặc định.
+
+Khi có ảnh và đủ mô hình, thư viện cần thiết, ứng dụng phân loại mức ngập trực tiếp trên thiết bị. Tùy tốc độ mạng và độ tin cậy của kết quả nhận diện, ứng dụng chọn gửi ảnh gốc, ảnh nén hoặc chỉ các thông tin cơ bản của báo cáo. Máy chủ sử dụng các trường thông tin đã thu nhận để gom nhóm báo cáo cùng sự cố và xếp hạng ưu tiên, hỗ trợ điều phối viên xem xét.
+
+Dashboard cần cho phép lọc báo cáo, xuất dữ liệu ở định dạng CSV/GeoJSON và lưu nhật ký phân công, cập nhật trạng thái. Ngoài báo cáo gửi qua Internet, hệ thống cần tiếp nhận tin nhắn qua SMS gateway có xác thực và cho phép nhân viên tổng đài nhập thông tin thủ công. Khả năng vận hành qua mạng viễn thông cần được kiểm chứng riêng.
+
+\begin{figure}[htbp]
+\centering
+\includegraphics[width=\textwidth]{usecase.pdf}
+\caption{Sơ đồ Use Case tổng thể toàn hệ thống cứu hộ}
+\label{fig:usecase-overall}
+\end{figure}
+
+\begin{figure}[htbp]
+\centering
+\includegraphics[width=\textwidth]{usecase_mobile.pdf}
+\caption{Sơ đồ Use Case phân hệ ứng dụng di động phía người dân và đội cứu hộ}
+\label{fig:usecase-mobile}
+\end{figure}
+
+\begin{figure}[htbp]
+\centering
+\includegraphics[width=\textwidth]{usecase_dashboard.pdf}
+\caption{Sơ đồ Use Case phân hệ Web Dashboard phục vụ điều phối tác chiến}
+\label{fig:usecase-dashboard}
+\end{figure}
+\clearpage

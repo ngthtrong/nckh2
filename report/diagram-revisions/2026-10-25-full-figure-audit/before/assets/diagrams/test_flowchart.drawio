@@ -1,0 +1,202 @@
+<?xml version='1.0' encoding='utf-8'?>
+<mxfile host="Electron" agent="Antigravity">
+  <diagram id="diag-flowchart-clean" name="Luu-do-Quy-trinh-He-thong-4-Lan">
+    <mxGraphModel dx="1600" dy="1100" grid="1" gridSize="10" guides="1" tooltips="1" connect="1" arrows="1" fold="1" page="1" pageScale="1" pageWidth="1820" pageHeight="1360" math="0" shadow="0">
+      <root>
+        <mxCell id="0" style="" />
+        <mxCell id="1" parent="0" style="" />
+        
+        
+        <mxCell id="lane_mob" value="1. ỨNG DỤNG DI ĐỘNG BIÊN (FLUTTER EDGE APP)" style="shape=swimlane;whiteSpace=wrap;html=1;startSize=36;fontStyle=1;fontSize=18.5;fontFamily=Helvetica;fillColor=#DCE8F5;strokeColor=#526B88;strokeWidth=1.8;fontColor=#172B4D;swimlaneFillColor=#F7F9FC;" vertex="1" parent="1">
+          <mxGeometry x="30" y="25" width="410" height="1310" as="geometry" />
+        </mxCell>
+        <mxCell id="lane_srv" value="2. MÁY CHỦ TIẾP NHẬN &amp; DEDUP (FASTAPI / SQLITE)" style="shape=swimlane;whiteSpace=wrap;html=1;startSize=36;fontStyle=1;fontSize=18.5;fontFamily=Helvetica;fillColor=#DCE8F5;strokeColor=#526B88;strokeWidth=1.8;fontColor=#172B4D;swimlaneFillColor=#F7F9FC;" vertex="1" parent="1">
+          <mxGeometry x="470" y="25" width="420" height="1310" as="geometry" />
+        </mxCell>
+        <mxCell id="lane_core" value="3. LÕI PHÂN CỤM &amp; ƯU TIÊN (RESCUE_CORE)" style="shape=swimlane;whiteSpace=wrap;html=1;startSize=36;fontStyle=1;fontSize=18.5;fontFamily=Helvetica;fillColor=#DCE8F5;strokeColor=#526B88;strokeWidth=1.8;fontColor=#172B4D;swimlaneFillColor=#F7F9FC;" vertex="1" parent="1">
+          <mxGeometry x="920" y="25" width="420" height="1310" as="geometry" />
+        </mxCell>
+        <mxCell id="lane_dash" value="4. BÀN ĐIỀU PHỐI TRUNG TÂM (WEB GIS DASHBOARD)" style="shape=swimlane;whiteSpace=wrap;html=1;startSize=36;fontStyle=1;fontSize=18.5;fontFamily=Helvetica;fillColor=#DCE8F5;strokeColor=#526B88;strokeWidth=1.8;fontColor=#172B4D;swimlaneFillColor=#F7F9FC;" vertex="1" parent="1">
+          <mxGeometry x="1370" y="25" width="420" height="1310" as="geometry" />
+        </mxCell>
+
+        
+        <mxCell id="m_start" value="&lt;div style=&quot;line-height:1;&quot;&gt;Bắt đầu (Mở App)&lt;/div&gt;" style="ellipse;whiteSpace=wrap;html=1;fillColor=#EDF3FA;strokeColor=#526B88;strokeWidth=1.5;fontFamily=Helvetica;fontStyle=1;fontColor=#172B4D;fontSize=15;" vertex="1" parent="lane_mob">
+          <mxGeometry x="140" y="70" width="130" height="36" as="geometry" />
+        </mxCell>
+        <mxCell id="m_choose" value="&lt;div style=&quot;line-height:1;&quot;&gt;Chọn: Gửi SOS 1 chạm&#xa;hoặc Tạo báo cáo chi tiết&lt;/div&gt;" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#EDF3FA;strokeColor=#526B88;strokeWidth=1.4;fontFamily=Helvetica;fontSize=15;fontColor=#172B4D;fontStyle=1;" vertex="1" parent="lane_mob">
+          <mxGeometry x="105" y="121" width="200" height="40" as="geometry" />
+        </mxCell>
+        <mxCell id="m_ai" value="&lt;div style=&quot;line-height:1;&quot;&gt;Chụp ảnh -&gt; Edge AI MobileNetV3&#xa;Phân loại 4 mức ngập F &amp; Confidence&lt;/div&gt;" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#EDF3FA;strokeColor=#526B88;strokeWidth=1.5;fontFamily=Helvetica;fontSize=14.5;fontColor=#172B4D;fontStyle=1;" vertex="1" parent="lane_mob">
+          <mxGeometry x="90" y="179" width="230" height="46" as="geometry" />
+        </mxCell>
+        <mxCell id="m_form" value="&lt;div style=&quot;line-height:1;&quot;&gt;Nhập GPS (hoặc để trống), N, V&#xa;Ghi Outbox (Hive) &amp; Canonical JCS Hash&lt;/div&gt;" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#EDF3FA;strokeColor=#526B88;strokeWidth=1.4;fontFamily=Helvetica;fontSize=14.5;fontColor=#172B4D;fontStyle=1;" vertex="1" parent="lane_mob">
+          <mxGeometry x="90" y="243" width="230" height="46" as="geometry" />
+        </mxCell>
+        <mxCell id="m_net_dec" value="&lt;div style=&quot;line-height:1;&quot;&gt;Đánh giá mạng?&lt;/div&gt;" style="rhombus;whiteSpace=wrap;html=1;fillColor=#FFF2CC;strokeColor=#526B88;strokeWidth=1.5;fontFamily=Helvetica;fontSize=16;fontStyle=1;fontColor=#172B4D;" vertex="1" parent="lane_mob">
+          <mxGeometry x="145" y="303" width="120" height="44" as="geometry" />
+        </mxCell>
+        <mxCell id="m_sms" value="&lt;div style=&quot;line-height:1;&quot;&gt;Mất mạng: Gửi SMS SOS&#xa;Dự phòng GSM (chờ sync)&lt;/div&gt;" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#EDF3FA;strokeColor=#526B88;strokeWidth=1.4;fontFamily=Helvetica;fontSize=14;fontColor=#172B4D;fontStyle=1;" vertex="1" parent="lane_mob">
+          <mxGeometry x="15" y="385" width="160" height="44" as="geometry" />
+        </mxCell>
+        <mxCell id="m_rest" value="&lt;div style=&quot;line-height:1;&quot;&gt;Có mạng: REST / Multipart&#xa;POST /sync batch hoặc /api/reports&lt;/div&gt;" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#EDF3FA;strokeColor=#526B88;strokeWidth=1.4;fontFamily=Helvetica;fontSize=14;fontColor=#172B4D;fontStyle=1;" vertex="1" parent="lane_mob">
+          <mxGeometry x="195" y="385" width="195" height="44" as="geometry" />
+        </mxCell>
+        <mxCell id="m_wait_ack" value="&lt;div style=&quot;line-height:1;&quot;&gt;Nhận phản hồi ACK&#xa;Cập nhật Outbox synced=true&lt;/div&gt;" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#EDF3FA;strokeColor=#526B88;strokeWidth=1.4;fontFamily=Helvetica;fontSize=14.5;fontColor=#172B4D;fontStyle=1;" vertex="1" parent="lane_mob">
+          <mxGeometry x="105" y="657" width="200" height="44" as="geometry" />
+        </mxCell>
+        <mxCell id="m_poll_status" value="&lt;div style=&quot;line-height:1;&quot;&gt;Polling GET /api/reports/status&#xa;Nhận cập nhật tiến trình điều phối&lt;/div&gt;" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#EDF3FA;strokeColor=#526B88;strokeWidth=1.4;fontFamily=Helvetica;fontSize=14.5;fontColor=#172B4D;fontStyle=1;" vertex="1" parent="lane_mob">
+          <mxGeometry x="90" y="1041" width="230" height="46" as="geometry" />
+        </mxCell>
+        <mxCell id="m_end" value="&lt;div style=&quot;line-height:1;&quot;&gt;Kết thúc (Được cứu)&lt;/div&gt;" style="ellipse;whiteSpace=wrap;html=1;fillColor=#EDF3FA;strokeColor=#526B88;strokeWidth=1.6;fontFamily=Helvetica;fontStyle=1;fontColor=#172B4D;fontSize=15;" vertex="1" parent="lane_mob">
+          <mxGeometry x="130" y="1264" width="150" height="40" as="geometry" />
+        </mxCell>
+
+        
+        <mxCell id="s_recv" value="&lt;div style=&quot;line-height:1;&quot;&gt;Cổng Tiếp nhận (API Gateway)&#xa;Sync Batch / Multipart / SMS Webhook&lt;/div&gt;" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#EDF3FA;strokeColor=#526B88;strokeWidth=1.6;fontFamily=Helvetica;fontSize=14.5;fontColor=#172B4D;fontStyle=1;" vertex="1" parent="lane_srv">
+          <mxGeometry x="25" y="385" width="220" height="44" as="geometry" />
+        </mxCell>
+        <mxCell id="s_val" value="&lt;div style=&quot;line-height:1;&quot;&gt;Xác thực Hợp đồng &amp; Hash&#xa;Header v1, Canonical JCS SHA-256&lt;/div&gt;" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#EDF3FA;strokeColor=#526B88;strokeWidth=1.4;fontFamily=Helvetica;fontSize=14.5;fontColor=#172B4D;fontStyle=1;" vertex="1" parent="lane_srv">
+          <mxGeometry x="25" y="465" width="220" height="44" as="geometry" />
+        </mxCell>
+        <mxCell id="s_dedup_dec" value="&lt;div style=&quot;line-height:1;&quot;&gt;Tra cứu messages_dedup?&lt;/div&gt;" style="rhombus;whiteSpace=wrap;html=1;fillColor=#FFF2CC;strokeColor=#526B88;strokeWidth=1.5;fontFamily=Helvetica;fontSize=16;fontStyle=1;fontColor=#172B4D;" vertex="1" parent="lane_srv">
+          <mxGeometry x="35" y="525" width="200" height="44" as="geometry" />
+        </mxCell>
+        <mxCell id="s_dup" value="&lt;div style=&quot;line-height:1;&quot;&gt;Trùng ID &amp; Hash&#xa;Trả ACK cũ (Idempotent)&lt;/div&gt;" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#EDF3FA;strokeColor=#526B88;strokeWidth=1.3;fontFamily=Helvetica;fontSize=14;fontColor=#172B4D;fontStyle=1;" vertex="1" parent="lane_srv">
+          <mxGeometry x="270" y="525" width="135" height="44" as="geometry" />
+        </mxCell>
+        <mxCell id="s_tx" value="&lt;div style=&quot;line-height:1;&quot;&gt;Giao dịch SQLite (WAL Mode)&#xa;Lưu reports, dedup, files uploads/&lt;/div&gt;" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#EDF3FA;strokeColor=#526B88;strokeWidth=1.5;fontFamily=Helvetica;fontSize=14.5;fontColor=#172B4D;fontStyle=1;" vertex="1" parent="lane_srv">
+          <mxGeometry x="25" y="593" width="220" height="46" as="geometry" />
+        </mxCell>
+        <mxCell id="s_meta" value="&lt;div style=&quot;line-height:1;&quot;&gt;Tăng cluster_version&#xa;server_meta &amp; Trả HTTP Response&lt;/div&gt;" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#EDF3FA;strokeColor=#526B88;strokeWidth=1.5;fontFamily=Helvetica;fontSize=14.5;fontColor=#172B4D;fontStyle=1;" vertex="1" parent="lane_srv">
+          <mxGeometry x="25" y="657" width="220" height="44" as="geometry" />
+        </mxCell>
+        <mxCell id="s_status_tx" value="&lt;div style=&quot;line-height:1;&quot;&gt;Cập nhật DB &amp; Ghi report_events&#xa;Nhật ký kiểm toán (actor, action, time)&lt;/div&gt;" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#EDF3FA;strokeColor=#526B88;strokeWidth=1.5;fontFamily=Helvetica;fontSize=14.5;fontColor=#172B4D;fontStyle=1;" vertex="1" parent="lane_srv">
+          <mxGeometry x="25" y="1041" width="220" height="46" as="geometry" />
+        </mxCell>
+
+        
+        <mxCell id="c_recv" value="&lt;div style=&quot;line-height:1;&quot;&gt;Tiếp nhận GET /api/clusters&#xa;Kiểm tra header If-None-Match ETag&lt;/div&gt;" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#EDF3FA;strokeColor=#526B88;strokeWidth=1.5;fontFamily=Helvetica;fontSize=14.5;fontColor=#172B4D;fontStyle=1;" vertex="1" parent="lane_core">
+          <mxGeometry x="25" y="385" width="220" height="44" as="geometry" />
+        </mxCell>
+        <mxCell id="c_etag_dec" value="&lt;div style=&quot;line-height:1;&quot;&gt;cluster_version đổi?&lt;/div&gt;" style="rhombus;whiteSpace=wrap;html=1;fillColor=#FFF2CC;strokeColor=#526B88;strokeWidth=1.5;fontFamily=Helvetica;fontSize=16;fontStyle=1;fontColor=#172B4D;" vertex="1" parent="lane_core">
+          <mxGeometry x="40" y="451" width="190" height="44" as="geometry" />
+        </mxCell>
+        <mxCell id="c_304" value="&lt;div style=&quot;line-height:1;&quot;&gt;304 Not Modified&#xa;Giữ nguyên cụm cũ&lt;/div&gt;" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#EDF3FA;strokeColor=#526B88;strokeWidth=1.3;fontFamily=Helvetica;fontSize=14;fontColor=#172B4D;fontStyle=1;" vertex="1" parent="lane_core">
+          <mxGeometry x="275" y="451" width="130" height="44" as="geometry" />
+        </mxCell>
+        <mxCell id="c_fetch" value="&lt;div style=&quot;line-height:1;&quot;&gt;Lấy báo cáo active_only&#xa;Trích xuất [F, U, N, V] qua to_report_v2&lt;/div&gt;" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#EDF3FA;strokeColor=#526B88;strokeWidth=1.4;fontFamily=Helvetica;fontSize=14.5;fontColor=#172B4D;fontStyle=1;" vertex="1" parent="lane_core">
+          <mxGeometry x="25" y="517" width="220" height="44" as="geometry" />
+        </mxCell>
+        <mxCell id="c_split_dec" value="&lt;div style=&quot;line-height:1;&quot;&gt;Tọa độ GPS hợp lệ?&lt;/div&gt;" style="rhombus;whiteSpace=wrap;html=1;fillColor=#FFF2CC;strokeColor=#526B88;strokeWidth=1.5;fontFamily=Helvetica;fontSize=16;fontStyle=1;fontColor=#172B4D;" vertex="1" parent="lane_core">
+          <mxGeometry x="45" y="583" width="180" height="44" as="geometry" />
+        </mxCell>
+        <mxCell id="c_rev" value="&lt;div style=&quot;line-height:1;&quot;&gt;Review Queue&#xa;Tách riêng ca thiếu GPS&lt;/div&gt;" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#EDF3FA;strokeColor=#526B88;strokeWidth=1.4;fontFamily=Helvetica;fontSize=14;fontColor=#172B4D;fontStyle=1;" vertex="1" parent="lane_core">
+          <mxGeometry x="270" y="583" width="140" height="44" as="geometry" />
+        </mxCell>
+        <mxCell id="c_graph" value="&lt;div style=&quot;line-height:1;&quot;&gt;Ma trận C_ij &amp; Cụm Louvain&#xa;Khoảng cách Haversine, ngập, khẩn cấp&lt;/div&gt;" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#EDF3FA;strokeColor=#526B88;strokeWidth=1.5;fontFamily=Helvetica;fontSize=14.5;fontColor=#172B4D;fontStyle=1;" vertex="1" parent="lane_core">
+          <mxGeometry x="25" y="649" width="220" height="46" as="geometry" />
+        </mxCell>
+        <mxCell id="c_score" value="&lt;div style=&quot;line-height:1;&quot;&gt;Tính điểm ưu tiên cụm P(c)&#xa;Khóa clusterKey &amp; Cập nhật ETag mới&lt;/div&gt;" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#EDF3FA;strokeColor=#526B88;strokeWidth=1.5;fontFamily=Helvetica;fontSize=14.5;fontColor=#172B4D;fontStyle=1;" vertex="1" parent="lane_core">
+          <mxGeometry x="25" y="717" width="220" height="46" as="geometry" />
+        </mxCell>
+        <mxCell id="c_resp" value="&lt;div style=&quot;line-height:1;&quot;&gt;Trả JSON Clusters &amp; Review&#xa;Kèm header ETag cho Dashboard&lt;/div&gt;" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#EDF3FA;strokeColor=#526B88;strokeWidth=1.4;fontFamily=Helvetica;fontSize=14.5;fontColor=#172B4D;fontStyle=1;" vertex="1" parent="lane_core">
+          <mxGeometry x="25" y="785" width="220" height="44" as="geometry" />
+        </mxCell>
+
+        
+        <mxCell id="d_login" value="&lt;div style=&quot;line-height:1;&quot;&gt;Đăng nhập Bàn Điều phối&#xa;Khởi tạo phiên làm việc Dispatcher&lt;/div&gt;" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#EDF3FA;strokeColor=#526B88;strokeWidth=1.4;fontFamily=Helvetica;fontSize=14.5;fontColor=#172B4D;fontStyle=1;" vertex="1" parent="lane_dash">
+          <mxGeometry x="110" y="315" width="200" height="40" as="geometry" />
+        </mxCell>
+        <mxCell id="d_poll" value="&lt;div style=&quot;line-height:1;&quot;&gt;Polling định kỳ 5s&#xa;GET /api/reports/changes &amp; /api/clusters&lt;/div&gt;" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#EDF3FA;strokeColor=#526B88;strokeWidth=1.5;fontFamily=Helvetica;fontSize=14.5;fontColor=#172B4D;fontStyle=1;" vertex="1" parent="lane_dash">
+          <mxGeometry x="95" y="385" width="230" height="44" as="geometry" />
+        </mxCell>
+        <mxCell id="d_view" value="&lt;div style=&quot;line-height:1;&quot;&gt;Cập nhật Leaflet GIS &amp; Bảng Cụm&#xa;Hiển thị ranh giới cụm &amp; Hàng xem xét&lt;/div&gt;" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#EDF3FA;strokeColor=#526B88;strokeWidth=1.5;fontFamily=Helvetica;fontSize=14.5;fontColor=#172B4D;fontStyle=1;" vertex="1" parent="lane_dash">
+          <mxGeometry x="95" y="785" width="230" height="44" as="geometry" />
+        </mxCell>
+        <mxCell id="d_branch_dec" value="&lt;div style=&quot;line-height:1;&quot;&gt;Phân loại ca xử lý?&lt;/div&gt;" style="rhombus;whiteSpace=wrap;html=1;fillColor=#FFF2CC;strokeColor=#526B88;strokeWidth=1.5;fontFamily=Helvetica;fontSize=16;fontStyle=1;fontColor=#172B4D;" vertex="1" parent="lane_dash">
+          <mxGeometry x="115" y="910" width="190" height="44" as="geometry" />
+        </mxCell>
+        <mxCell id="d_geocode" value="&lt;div style=&quot;line-height:1;&quot;&gt;Ca thiếu GPS (Review)&#xa;Thẩm tra, gọi &amp; Gán tọa độ&lt;/div&gt;" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#EDF3FA;strokeColor=#526B88;strokeWidth=1.4;fontFamily=Helvetica;fontSize=14;fontColor=#172B4D;fontStyle=1;" vertex="1" parent="lane_dash">
+          <mxGeometry x="15" y="975" width="175" height="44" as="geometry" />
+        </mxCell>
+        <mxCell id="d_pick" value="&lt;div style=&quot;line-height:1;&quot;&gt;Ca đã gom cụm P(c)&#xa;Chọn cụm có độ khẩn cấp cao&lt;/div&gt;" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#EDF3FA;strokeColor=#526B88;strokeWidth=1.4;fontFamily=Helvetica;fontSize=14;fontColor=#172B4D;fontStyle=1;" vertex="1" parent="lane_dash">
+          <mxGeometry x="225" y="975" width="180" height="44" as="geometry" />
+        </mxCell>
+        <mxCell id="d_assign" value="&lt;div style=&quot;line-height:1;&quot;&gt;Giao đội cứu hộ (PUT /team)&#xa;Đổi status -&gt; dispatched (tăng version)&lt;/div&gt;" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#EDF3FA;strokeColor=#526B88;strokeWidth=1.6;fontFamily=Helvetica;fontSize=14.5;fontColor=#172B4D;fontStyle=1;" vertex="1" parent="lane_dash">
+          <mxGeometry x="95" y="1041" width="230" height="46" as="geometry" />
+        </mxCell>
+        <mxCell id="d_rescue" value="&lt;div style=&quot;line-height:1;&quot;&gt;Đội Cứu hộ Thực địa Tác nghiệp&#xa;Tiếp cận hiện trường &amp; Triển khai ứng cứu&lt;/div&gt;" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#EDF3FA;strokeColor=#526B88;strokeWidth=1.4;fontFamily=Helvetica;fontSize=14.5;fontColor=#172B4D;fontStyle=1;" vertex="1" parent="lane_dash">
+          <mxGeometry x="95" y="1109" width="230" height="44" as="geometry" />
+        </mxCell>
+        <mxCell id="d_result_dec" value="&lt;div style=&quot;line-height:1;&quot;&gt;Kết quả cứu hộ?&lt;/div&gt;" style="rhombus;whiteSpace=wrap;html=1;fillColor=#FFF2CC;strokeColor=#526B88;strokeWidth=1.5;fontFamily=Helvetica;fontSize=16;fontStyle=1;fontColor=#172B4D;" vertex="1" parent="lane_dash">
+          <mxGeometry x="115" y="1175" width="190" height="44" as="geometry" />
+        </mxCell>
+        <mxCell id="d_ok" value="&lt;div style=&quot;line-height:1;&quot;&gt;Thành công: resolved&#xa;Cập nhật cứu hộ hoàn tất&lt;/div&gt;" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#EDF3FA;strokeColor=#526B88;strokeWidth=1.4;fontFamily=Helvetica;fontSize=14;fontColor=#172B4D;fontStyle=1;" vertex="1" parent="lane_dash">
+          <mxGeometry x="15" y="1243" width="180" height="42" as="geometry" />
+        </mxCell>
+        <mxCell id="d_cancel" value="&lt;div style=&quot;line-height:1;&quot;&gt;Hủy / Giả: cancelled&#xa;Bắt buộc nhập lý do đóng&lt;/div&gt;" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#EDF3FA;strokeColor=#526B88;strokeWidth=1.4;fontFamily=Helvetica;fontSize=14;fontColor=#172B4D;fontStyle=1;" vertex="1" parent="lane_dash">
+          <mxGeometry x="225" y="1243" width="180" height="42" as="geometry" />
+        </mxCell>
+
+        
+        <mxCell id="e_m1" edge="1" parent="1" source="m_start" target="m_choose" style="endArrow=classic;html=1;strokeColor=#000000;strokeWidth=1.4;;fontSize=12;" ><mxGeometry relative="1" as="geometry" /></mxCell>
+        <mxCell id="e_m2" edge="1" parent="1" source="m_choose" target="m_ai" style="endArrow=classic;html=1;strokeColor=#000000;strokeWidth=1.4;;fontSize=12;" ><mxGeometry relative="1" as="geometry" /></mxCell>
+        <mxCell id="e_m3" edge="1" parent="1" source="m_ai" target="m_form" style="endArrow=classic;html=1;strokeColor=#000000;strokeWidth=1.4;;fontSize=12;" ><mxGeometry relative="1" as="geometry" /></mxCell>
+        <mxCell id="e_m4" edge="1" parent="1" source="m_form" target="m_net_dec" style="endArrow=classic;html=1;strokeColor=#000000;strokeWidth=1.4;;fontSize=12;" ><mxGeometry relative="1" as="geometry" /></mxCell>
+        <mxCell id="e_m5" value="Mất sóng" edge="1" parent="1" source="m_net_dec" target="m_sms" style="endArrow=classic;html=1;strokeColor=#000000;strokeWidth=1.3;fontSize=15;fontColor=#172B4D;labelBackgroundColor=#FFFFFF;" ><mxGeometry relative="1" as="geometry" /></mxCell>
+        <mxCell id="e_m6" value="Có IP data" edge="1" parent="1" source="m_net_dec" target="m_rest" style="endArrow=classic;html=1;strokeColor=#000000;strokeWidth=1.3;fontSize=15;fontColor=#172B4D;labelBackgroundColor=#FFFFFF;" ><mxGeometry relative="1" as="geometry" /></mxCell>
+
+        
+        <mxCell id="e_x1" value="SMS Gateway Webhook" edge="1" parent="1" source="m_sms" target="s_recv" style="endArrow=classic;html=1;strokeColor=#000000;strokeWidth=1.3;dashed=1;fontSize=15;fontColor=#172B4D;edgeStyle=orthogonalEdgeStyle;rounded=0;labelBackgroundColor=#FFFFFF;" ><mxGeometry relative="1" as="geometry" /></mxCell>
+        <mxCell id="e_x2" value="HTTP REST" edge="1" parent="1" source="m_rest" target="s_recv" style="endArrow=classic;html=1;strokeColor=#000000;strokeWidth=1.4;fontSize=15;fontColor=#172B4D;labelBackgroundColor=#FFFFFF;" ><mxGeometry relative="1" as="geometry" /></mxCell>
+
+        
+        <mxCell id="e_s1" edge="1" parent="1" source="s_recv" target="s_val" style="endArrow=classic;html=1;strokeColor=#000000;strokeWidth=1.4;;fontSize=12;" ><mxGeometry relative="1" as="geometry" /></mxCell>
+        <mxCell id="e_s2" edge="1" parent="1" source="s_val" target="s_dedup_dec" style="endArrow=classic;html=1;strokeColor=#000000;strokeWidth=1.4;;fontSize=12;" ><mxGeometry relative="1" as="geometry" /></mxCell>
+        <mxCell id="e_s3" value="Trùng" edge="1" parent="1" source="s_dedup_dec" target="s_dup" style="endArrow=classic;html=1;strokeColor=#000000;strokeWidth=1.3;fontSize=15;fontColor=#172B4D;labelBackgroundColor=#FFFFFF;" ><mxGeometry relative="1" as="geometry" /></mxCell>
+        <mxCell id="e_s4" value="Hợp lệ" edge="1" parent="1" source="s_dedup_dec" target="s_tx" style="endArrow=classic;html=1;strokeColor=#000000;strokeWidth=1.4;fontSize=15;fontColor=#172B4D;labelBackgroundColor=#FFFFFF;" ><mxGeometry relative="1" as="geometry" /></mxCell>
+        <mxCell id="e_s5" edge="1" parent="1" source="s_tx" target="s_meta" style="endArrow=classic;html=1;strokeColor=#000000;strokeWidth=1.4;;fontSize=12;" ><mxGeometry relative="1" as="geometry" /></mxCell>
+
+        
+        <mxCell id="e_s6" value="Trả HTTP 201 / ACK" edge="1" parent="1" source="s_meta" target="m_wait_ack" style="endArrow=classic;html=1;strokeColor=#000000;strokeWidth=1.5;fontSize=15;fontColor=#172B4D;labelBackgroundColor=#FFFFFF;" ><mxGeometry relative="1" as="geometry" /></mxCell>
+        <mxCell id="e_m7" value="Chờ điều phối" edge="1" parent="1" source="m_wait_ack" target="m_poll_status" style="endArrow=classic;html=1;strokeColor=#000000;strokeWidth=1.3;dashed=1;fontSize=15;fontColor=#172B4D;labelBackgroundColor=#FFFFFF;" ><mxGeometry relative="1" as="geometry" /></mxCell>
+        <mxCell id="e_m8" edge="1" parent="1" source="m_poll_status" target="m_end" style="endArrow=classic;html=1;strokeColor=#000000;strokeWidth=1.4;;fontSize=12;" ><mxGeometry relative="1" as="geometry" /></mxCell>
+
+        
+        <mxCell id="e_d1" edge="1" parent="1" source="d_login" target="d_poll" style="endArrow=classic;html=1;strokeColor=#000000;strokeWidth=1.4;;fontSize=12;" ><mxGeometry relative="1" as="geometry" /></mxCell>
+        <mxCell id="e_d2" value="GET /api/clusters (ETag)" edge="1" parent="1" source="d_poll" target="c_recv" style="endArrow=classic;html=1;strokeColor=#000000;strokeWidth=1.4;fontSize=15;fontColor=#172B4D;labelBackgroundColor=#FFFFFF;" ><mxGeometry relative="1" as="geometry" /></mxCell>
+
+        
+        <mxCell id="e_c1" edge="1" parent="1" source="c_recv" target="c_etag_dec" style="endArrow=classic;html=1;strokeColor=#000000;strokeWidth=1.4;;fontSize=12;" ><mxGeometry relative="1" as="geometry" /></mxCell>
+        <mxCell id="e_c2" value="Không đổi" edge="1" parent="1" source="c_etag_dec" target="c_304" style="endArrow=classic;html=1;strokeColor=#000000;strokeWidth=1.3;fontSize=15;fontColor=#172B4D;labelBackgroundColor=#FFFFFF;" ><mxGeometry relative="1" as="geometry" /></mxCell>
+        <mxCell id="e_c3" value="Đổi" edge="1" parent="1" source="c_etag_dec" target="c_fetch" style="endArrow=classic;html=1;strokeColor=#000000;strokeWidth=1.4;fontSize=15;fontColor=#172B4D;labelBackgroundColor=#FFFFFF;" ><mxGeometry relative="1" as="geometry" /></mxCell>
+        <mxCell id="e_c4" edge="1" parent="1" source="c_fetch" target="c_split_dec" style="endArrow=classic;html=1;strokeColor=#000000;strokeWidth=1.4;;fontSize=12;" ><mxGeometry relative="1" as="geometry" /></mxCell>
+        <mxCell id="e_c5" value="Thiếu GPS" edge="1" parent="1" source="c_split_dec" target="c_rev" style="endArrow=classic;html=1;strokeColor=#000000;strokeWidth=1.3;fontSize=15;fontColor=#172B4D;labelBackgroundColor=#FFFFFF;" ><mxGeometry relative="1" as="geometry" /></mxCell>
+        <mxCell id="e_c5b" value="Gộp Review" edge="1" parent="1" source="c_rev" target="c_resp" style="endArrow=classic;html=1;strokeColor=#000000;strokeWidth=1.3;dashed=1;fontSize=15;fontColor=#172B4D;edgeStyle=orthogonalEdgeStyle;rounded=0;labelBackgroundColor=#FFFFFF;" ><mxGeometry relative="1" as="geometry" /></mxCell>
+        <mxCell id="e_c6" value="Có GPS" edge="1" parent="1" source="c_split_dec" target="c_graph" style="endArrow=classic;html=1;strokeColor=#000000;strokeWidth=1.4;fontSize=15;fontColor=#172B4D;labelBackgroundColor=#FFFFFF;" ><mxGeometry relative="1" as="geometry" /></mxCell>
+        <mxCell id="e_c7" edge="1" parent="1" source="c_graph" target="c_score" style="endArrow=classic;html=1;strokeColor=#000000;strokeWidth=1.4;;fontSize=12;" ><mxGeometry relative="1" as="geometry" /></mxCell>
+        <mxCell id="e_c8" edge="1" parent="1" source="c_score" target="c_resp" style="endArrow=classic;html=1;strokeColor=#000000;strokeWidth=1.4;;fontSize=12;" ><mxGeometry relative="1" as="geometry" /></mxCell>
+
+        
+        <mxCell id="e_c9" value="JSON: Cụm P(c) &amp; Review Queue" edge="1" parent="1" source="c_resp" target="d_view" style="endArrow=classic;html=1;strokeColor=#000000;strokeWidth=1.5;fontSize=15;fontColor=#172B4D;labelBackgroundColor=#FFFFFF;" ><mxGeometry relative="1" as="geometry" /></mxCell>
+
+        
+        <mxCell id="e_d3" edge="1" parent="1" source="d_view" target="d_branch_dec" style="endArrow=classic;html=1;strokeColor=#000000;strokeWidth=1.4;;fontSize=12;" ><mxGeometry relative="1" as="geometry" /></mxCell>
+        <mxCell id="e_d4" edge="1" parent="1" source="d_branch_dec" target="d_geocode" style="endArrow=classic;html=1;strokeColor=#000000;strokeWidth=1.3;;fontSize=12;" ><mxGeometry relative="1" as="geometry" /></mxCell>
+        <mxCell id="e_d5" edge="1" parent="1" source="d_branch_dec" target="d_pick" style="endArrow=classic;html=1;strokeColor=#000000;strokeWidth=1.3;;fontSize=12;" ><mxGeometry relative="1" as="geometry" /></mxCell>
+        <mxCell id="e_d6" edge="1" parent="1" source="d_geocode" target="d_assign" style="endArrow=classic;html=1;strokeColor=#000000;strokeWidth=1.3;;fontSize=12;" ><mxGeometry relative="1" as="geometry" /></mxCell>
+        <mxCell id="e_d7" edge="1" parent="1" source="d_pick" target="d_assign" style="endArrow=classic;html=1;strokeColor=#000000;strokeWidth=1.3;;fontSize=12;" ><mxGeometry relative="1" as="geometry" /></mxCell>
+
+        
+        <mxCell id="e_d8" value="PUT /team &amp; PATCH /status" edge="1" parent="1" source="d_assign" target="s_status_tx" style="endArrow=classic;html=1;strokeColor=#000000;strokeWidth=1.5;fontSize=15;fontColor=#172B4D;labelBackgroundColor=#FFFFFF;" ><mxGeometry relative="1" as="geometry" /></mxCell>
+
+        <mxCell id="e_d9" edge="1" parent="1" source="d_assign" target="d_rescue" style="endArrow=classic;html=1;strokeColor=#000000;strokeWidth=1.4;;fontSize=12;" ><mxGeometry relative="1" as="geometry" /></mxCell>
+        <mxCell id="e_d10" edge="1" parent="1" source="d_rescue" target="d_result_dec" style="endArrow=classic;html=1;strokeColor=#000000;strokeWidth=1.4;;fontSize=12;" ><mxGeometry relative="1" as="geometry" /></mxCell>
+        <mxCell id="e_d11" value="Đạt" edge="1" parent="1" source="d_result_dec" target="d_ok" style="endArrow=classic;html=1;strokeColor=#000000;strokeWidth=1.3;fontSize=15;fontColor=#172B4D;labelBackgroundColor=#FFFFFF;" ><mxGeometry relative="1" as="geometry" /></mxCell>
+        <mxCell id="e_d12" value="Hủy" edge="1" parent="1" source="d_result_dec" target="d_cancel" style="endArrow=classic;html=1;strokeColor=#000000;strokeWidth=1.3;fontSize=15;fontColor=#172B4D;labelBackgroundColor=#FFFFFF;" ><mxGeometry relative="1" as="geometry" /></mxCell>
+
+      </root>
+    </mxGraphModel>
+  </diagram>
+</mxfile>

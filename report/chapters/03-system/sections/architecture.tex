@@ -63,7 +63,7 @@ Một request có thể mất ACK sau khi transaction thành công. Khi app gử
 \subsection{Lưu trữ backend}
 SQLite giữ bảng \texttt{reports}, \texttt{messages\_dedup}, \texttt{report\_events}, \texttt{teams}, \texttt{operators}, \texttt{sessions} và \texttt{server\_meta}. Ảnh nằm ngoài CSDL; bản ghi lưu tên, URL, hash và kích thước. Bảng báo cáo giữ payload gốc để bảo toàn những trường nghiên cứu chưa có cột riêng.
 
-Hình~\ref{fig:database-erd-detailed} liệt kê đầy đủ các cột trong DDL của bảy bảng. Ký hiệu PK là khóa chính, NN là \texttt{NOT NULL}, UQ là \texttt{UNIQUE} và CI là đối chiếu chuỗi \texttt{NOCASE}. Nét đứt thể hiện liên hệ được mã ứng dụng kiểm soát; DDL hiện chưa khai báo ràng buộc khóa ngoại cho các liên hệ này. Trong bảng chống trùng, ràng buộc duy nhất áp dụng cho cặp \texttt{(client\_id, sequence\_number)}, không áp dụng riêng từng cột. Bảng \texttt{messages\_dedup} không có khóa ngoại trực tiếp đến \texttt{reports}; trường \texttt{actor} của nhật ký lưu tên người thao tác.
+Hình~\ref{fig:database-erd-detailed} liệt kê đầy đủ các cột trong DDL của bảy bảng. Ký hiệu PK là khóa chính, NN là \texttt{NOT NULL}, UQ là \texttt{UNIQUE} và CI là đối chiếu chuỗi \texttt{NOCASE}. Sơ đồ dùng Crow's Foot; REF đánh dấu tham chiếu logic. Nét đứt là quan hệ không định danh vì khóa chính của thực thể con độc lập với khóa của thực thể cha; DDL hiện chưa khai báo ràng buộc FOREIGN KEY. Nullability của cột được giữ theo DDL, gồm trường operator\_id trong sessions. Trong bảng chống trùng, ràng buộc duy nhất áp dụng cho cặp \texttt{(client\_id, sequence\_number)}, không áp dụng riêng từng cột. Bảng \texttt{messages\_dedup} không có khóa ngoại trực tiếp đến \texttt{reports}; trường \texttt{actor} của nhật ký lưu tên người thao tác.
 
 \begin{figure}[htbp]
 \centering
@@ -121,8 +121,11 @@ Dashboard là HTML, ES module và CSS phục vụ từ backend hoặc nginx. Lea
 
 \subsection{Luồng xử lý dữ liệu và hỗ trợ điều phối}
 Sơ đồ tại Hình~\ref{fig:research-pipeline} thể hiện ranh giới phân tách dữ liệu của hệ thống: các trường thông tin quan sát trực tiếp được đưa vào giải thuật gom cụm đồ thị và xếp hạng ưu tiên; các báo cáo thiếu thông tin vị trí được chuyển vào hàng đợi xem xét riêng; trong khi nhãn thực tế được bảo toàn độc lập phục vụ kiểm chứng thực nghiệm. Trên hệ thống vận hành thực tế, danh sách ưu tiên đóng vai trò hỗ trợ điều phối viên ra quyết định phân bổ nguồn lực, đảm bảo tính linh hoạt và an toàn trong tác chiến cứu hộ.
-\begin{figure}[htbp]
-\centering\includegraphics[width=\textwidth]{../paper/figures/pipeline_v2.pdf}
+\begin{landscape}
+\begin{figure}[p]
+\centering
+\setlength{\abovecaptionskip}{4pt}\includegraphics[width=\linewidth]{research_pipeline_report.pdf}
 \caption{Ranh giới dữ liệu quan sát, hàng xem xét và luồng đánh giá}
 \label{fig:research-pipeline}
 \end{figure}
+\end{landscape}

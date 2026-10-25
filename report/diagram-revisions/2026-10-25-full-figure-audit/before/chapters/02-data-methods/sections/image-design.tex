@@ -1,0 +1,104 @@
+\section{Mô hình phân loại ảnh}\label{sec:image-design}
+\subsection{Đầu vào và tiền xử lý}
+Tiền xử lý là một phần của mô hình: cùng một ảnh gốc có thể cho tensor khác nhau nếu thư viện giải mã hoặc resize khác nhau. Pipeline gồm chuẩn hóa hướng ảnh theo thẻ EXIF, chuyển sang RGB, letterbox về $256\times256$ bằng nội suy song tuyến tính (bilinear) với màu đệm RGB $(124,116,104)$, chuẩn hóa theo ImageNet và sắp xếp tensor $1\times3\times256\times256$ (NCHW). Letterbox giữ tỷ lệ khung hình nên không làm méo vật thể như kéo giãn ảnh. Với giá trị kênh RGB $u_c\in[0,255]$, chuẩn hóa là
+\begin{equation}
+\hat u_c=\frac{u_c/255-\mu_c^{\mathrm{img}}}{\sigma_c^{\mathrm{img}}},\quad
+\mu^{\mathrm{img}}=(0{,}485;0{,}456;0{,}406),\quad
+\sigma^{\mathrm{img}}=(0{,}229;0{,}224;0{,}225).
+\end{equation}
+Khi chuyển môi trường cần kiểm tra thứ tự RGB, hướng EXIF, cách làm tròn kích thước letterbox, vị trí đệm và phép nội suy. Vì vậy, khi nhãn của CPU và ứng dụng khác nhau, bước kiểm tra đầu tiên là parity tensor và mã băm asset; chưa có căn cứ quy lỗi ngay cho ONNX hay ExecuTorch.
+
+\subsection{Backbone, đầu phân loại và đầu ra}
+MobileNetV3 kết hợp depthwise convolution, inverted residual, cơ chế điều tiết kênh squeeze-and-excitation và các hàm kích hoạt được chọn theo kiến trúc \citep{howard2019mobilenetv3}. Việc chọn kiến trúc này là một giả thuyết triển khai cần kiểm chứng bằng dữ liệu của đề tài và runtime được dùng.
+
+Hàm tạo mô hình trong notebook giữ backbone của torchvision, thay Dropout trong classifier thành 0,25 và lớp Linear cuối thành bốn đầu ra (Hình~\ref{fig:image-model-design}). Script xuất mô hình nhận diện layout checkpoint cũ có classifier lồng và layout hiện tại thay trực tiếp lớp cuối, rồi dựng đúng cấu trúc trước khi nạp trọng số. Việc phân biệt này tránh lỗi tên hoặc thứ tự tensor khi chuyển checkpoint sang ONNX hoặc PTE.
+
+\begin{figure}[htbp]\centering
+\begin{tikzpicture}[>=Stealth,node distance=6mm,
+ box/.style={draw,rounded corners=2pt,align=center,text width=105mm,minimum height=10mm,font=\small}]
+\node[box] (input) {Ảnh gốc: hướng EXIF, tỷ lệ khung hình, màu};
+\node[box,below=of input] (prep) {RGB $\rightarrow$ letterbox $256\times256$\\chuẩn hóa ImageNet $\rightarrow$ tensor $1\times3\times256\times256$};
+\node[box,below=of prep] (backbone) {MobileNetV3-Large: backbone trích xuất đặc trưng};
+\node[box,below=of backbone] (head) {Pooling và classifier\\Dropout 0,25 $\rightarrow$ Linear 4 lớp};
+\node[box,below=of head] (out) {Softmax: low, medium, high, non\_flood\\Nhãn top-1 và confidence};
+\draw[->] (input)--(prep);\draw[->] (prep)--(backbone);
+\draw[->] (backbone)--(head);\draw[->] (head)--(out);
+\end{tikzpicture}
+\caption{Quy trình nhận diện ảnh và vị trí thay thế đầu phân loại trong mô hình}
+\label{fig:image-model-design}
+\end{figure}
+
+Với logit $z_c$, xác suất của lớp $c$ và nhãn dự đoán là
+\begin{equation}
+ p_c=\frac{\exp(z_c)}{\sum_{j=1}^{4}\exp(z_j)},\qquad \widehat y=\arg\max_c p_c.
+ \label{eq:softmax}
+\end{equation}
+Xác suất softmax được dùng làm confidence trong ứng dụng. Đây là đầu ra của mô hình phân loại, cần kiểm tra calibration trước khi diễn giải như xác suất đúng, và không phải điểm $Q_i$ của công thức xếp hạng. Các script export bọc mô hình bằng softmax để xuất xác suất, nên nơi nhận phải biết output là probabilities hay logits, tránh áp softmax hai lần. Tệp manifest mô tả cấu hình và các yêu cầu sử dụng mô hình; tên tệp giống nhau không đủ xác nhận hai runtime dùng cùng trọng số. Khi kiểm tra parity phải giữ cả thứ tự lớp, tiền xử lý và loại output.
+
+\subsection{Tăng cường dữ liệu và hàm mục tiêu}
+Notebook dùng tăng cường nhẹ trên tập train: lật ngang với xác suất 0,5; affine trong khoảng $\pm4^\circ$, dịch tối đa 3\% và scale 0,95--1,05; jitter brightness và contrast 0,12, saturation 0,08, hue 0,02. Validation và test chỉ chuyển tensor và chuẩn hóa sau bước EXIF--RGB--letterbox; các phép biến đổi không được thêm vào test khi tính metric cuối. Chúng tạo biến thể thị giác để huấn luyện, không tạo thêm hiện trường độc lập.
+
+Ngoài cross-entropy có label smoothing $\varepsilon=0{,}05$, notebook tính khoảng cách kỳ vọng giữa severity của nhãn thật và các lớp dự đoán. Với thứ tự chỉ số $(\texttt{low},\texttt{medium},\texttt{high},\texttt{non\_flood})$, vector severity là $\rho=(1,2,3,0)$. Với batch kích thước $M$ và xác suất $p_{ic}$ theo Công thức~\ref{eq:softmax}, hàm mục tiêu là
+\begin{align}
+\widetilde y_{ic}&=(1-\varepsilon)\mathbf{1}\{y_i=c\}+\varepsilon/4,\\
+\mathcal L_{\mathrm{CE}}&=-\frac{1}{M}\sum_{i=1}^{M}\sum_{c=1}^{4}\widetilde y_{ic}\log p_{ic},\\
+\mathcal L_{\mathrm{sev}}&=\frac{1}{M}\sum_{i=1}^{M}\sum_{c=1}^{4}p_{ic}|\rho_c-\rho_{y_i}|,\\
+\mathcal L&=\mathcal L_{\mathrm{CE}}+0{,}1\mathcal L_{\mathrm{sev}}.\label{eq:training-loss}
+\end{align}
+Hệ số 0,1 có trong config đã lưu; CSV history cũng có cột CE, severity và penalty tương ứng. Thành phần severity phạt kỳ vọng sai lệch mức ngập, còn ``lỗi nặng'' ở đánh giá dùng nhãn top-1 và khoảng cách ít nhất hai mức (Mục~\ref{sec:02-metrics-image}); hai đại lượng này không trùng nhau. Cấu hình hiện tắt weighted sampler và class-weight loss; các multiplier khai báo trong config không có nghĩa đang được áp dụng.
+
+\subsection{Tối ưu, chọn checkpoint và khác biệt phiên bản}
+Siêu tham số huấn luyện được tổng hợp ở Bảng~\ref{tab:train-config}. Mã notebook dùng AdamW với hai nhóm learning rate cho backbone và classifier; ReduceLROnPlateau theo validation. Ba epoch đầu khóa backbone và giữ các lớp features ở chế độ eval để không cập nhật BatchNorm của phần bị khóa; sau đó mở backbone để tinh chỉnh. AMP chỉ được bật khi cấu hình cho phép và thiết bị là CUDA.
+
+\begin{table}[htbp]\centering\small
+\caption{Cấu hình huấn luyện mô hình ảnh theo config đã lưu}\label{tab:train-config}
+\begin{tabular}{P{.34\textwidth}P{.54\textwidth}}
+\toprule Thành phần & Giá trị \\\midrule
+Kiến trúc & MobileNetV3-Large (torchvision), Dropout 0,25, Linear 4 đầu ra \\
+Đầu vào & $256\times256$, letterbox bilinear, màu đệm $(124,116,104)$ \\
+Kích thước batch $M$ & 32 \\
+Số epoch tối đa & 35; dừng sớm với patience 7 \\
+Bộ tối ưu & AdamW, weight decay $5\times10^{-4}$ \\
+Learning rate & backbone $10^{-5}$, classifier $2\times10^{-4}$ \\
+Scheduler & ReduceLROnPlateau theo validation, factor 0,5, patience 3, tối thiểu $10^{-7}$ \\
+Khóa backbone & Ba epoch đầu \\
+Hàm mục tiêu & CE với label smoothing 0,05 cộng 0,1 lần thành phần severity \\
+Weighted sampler, class-weight loss & Tắt \\
+\bottomrule\end{tabular}
+\end{table}
+
+Checkpoint được lựa chọn ưu tiên theo accuracy trên tập validation. Nếu accuracy nằm trong vùng sai số 0,005 so với cực đại đã thấy, checkpoint có tỷ lệ lỗi nặng thấp hơn có thể được chọn. Do đó checkpoint được giữ không nhất thiết là epoch có accuracy cao nhất đơn thuần. Test là bước đánh giá sau lựa chọn, không được đưa vào scheduler hoặc quy tắc chọn checkpoint.
+
+Hình huấn luyện trong báo cáo được cập nhật từ config và artifact seed \BenchmarkSeed{}. Notebook được dùng để giải thích cơ chế; benchmark runtime được chọn thuộc seed \BenchmarkSeed{}, lượng tử hóa seed \QuantizationSeed{} và benchmark mobile của phương án triển khai dùng seed 1024. Các cấu hình mobile seed 159 được giữ làm đối chứng trong phần so sánh mô hình. Seed huấn luyện không tự xác nhận manifest chia tập của phiên mới.
+\begin{figure}[htbp]\centering
+\includegraphics[width=\textwidth]{training-loss.png}
+\caption{Loss theo 11 epoch đã lưu của model seed 1024}
+\label{fig:training-history}
+\end{figure}
+\begin{figure}[htbp]\centering
+\includegraphics[width=\textwidth]{training-metrics.png}
+\caption{Các chỉ số train và validation theo epoch của model seed 1024}
+\end{figure}
+\begin{figure}[htbp]\centering
+\includegraphics[width=\textwidth]{validation-recall.png}
+\caption{Recall validation theo từng lớp của model seed 1024}
+\end{figure}
+
+Train loss có xu hướng giảm trong các hàng đã lưu, trong khi validation accuracy dao động. Khoảng cách train--validation ở cuối history cho thấy cần giữ quy tắc chọn trên validation và đánh giá test độc lập. Chỉ từ CSV chưa thể kết luận mọi dao động là overfitting hoặc phiên đã dừng đúng cơ chế early stopping; cần đối chiếu log và metadata checkpoint để xác định nguyên nhân hoặc epoch được xuất cuối.
+
+\subsection{Tối ưu hóa mô hình: PTQ, QAT và cắt tỉa}\label{sec:02-optimization}
+Ba cơ chế này khác nhau và được đánh giá riêng (Hình~\ref{fig:flow-ai-training-optimization}). Lượng tử hóa ánh xạ số thực $x$ sang số nguyên $x_q$ theo scale $\delta_q>0$ và zero-point $z_q$:
+\begin{equation}
+x_q=\operatorname{clip}\bigl(\operatorname{round}(x/\delta_q)+z_q\bigr),\qquad
+\widehat x=\delta_q(x_q-z_q).
+\end{equation}
+PTQ xác định các tham số sau huấn luyện từ dữ liệu calibration; QAT mô phỏng tác động lượng tử hóa trong quá trình tinh chỉnh. Cấu hình PTQ dùng lượng tử hóa QDQ với trọng số INT8 theo từng kênh và activation UINT8. Calibration dùng ảnh train phân tầng với seed \QuantizationSeed{} theo cấu hình đã lưu, không dùng test để hiệu chỉnh. QAT là một nhánh riêng, có artifact và validation riêng. Tài liệu ONNX Runtime nêu rằng lượng tử hóa có thể làm giảm chất lượng và cung cấp công cụ so sánh tensor để tìm tầng sai lệch \citep{onnxQuantization}; đây là căn cứ cho kế hoạch phân tích nhánh QAT, chưa phải chẩn đoán nguyên nhân suy giảm đã thực hiện.
+
+Cắt tỉa có cấu trúc thay đổi kênh hoặc nhóm tham số của mạng. Trong artifact hiện tại, phương pháp \texttt{global\_group\_magnitude\_channel} có target ratio 0,01; số tham số trước và sau là 4.207.156 và 4.145.694, với cấu hình lưu trong benchmark seed \PruningSeed{}. Lợi ích được kiểm tra bằng tệp thực, dự đoán và timing cùng runtime: giảm tham số, giảm byte và tăng tốc là ba kết quả riêng. Chương~\ref{chap:04-evaluation} giữ cả trường hợp giảm dung lượng nhưng runtime chậm hơn.
+
+\begin{figure}[htbp]
+\centering
+\includegraphics[width=\textwidth]{flow_09_ai_training_optimization.pdf}
+\caption{Pipeline quy trình huấn luyện, tối ưu nén mô hình và xuất runtime AI kép}
+\label{fig:flow-ai-training-optimization}
+\end{figure}

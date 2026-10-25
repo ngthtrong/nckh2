@@ -1,0 +1,94 @@
+<mxfile host="Electron" agent="Antigravity">
+  <diagram id="diag-1" name="Luu-do-02-Tao-Bao-cao-Edge-AI">
+    <mxGraphModel dx="783" dy="435" grid="0" gridSize="10" guides="1" tooltips="1" connect="1" arrows="1" fold="1" page="1" pageScale="1" pageWidth="850" pageHeight="1130" math="0" shadow="0">
+      <root>
+        <mxCell id="0" />
+        <mxCell id="1" parent="0" />
+        <mxCell id="start" parent="1" style="ellipse;whiteSpace=wrap;html=1;fontStyle=1;fontFamily=Helvetica;fontSize=15;" value="&lt;div style=&quot;line-height:1;&quot;&gt;Bắt đầu&lt;/div&gt;" vertex="1">
+          <mxGeometry height="40" width="100" x="370" y="40" as="geometry" />
+        </mxCell>
+        <mxCell id="open_form" parent="1" style="rounded=1;whiteSpace=wrap;html=1;fontSize=15;fontFamily=Helvetica;" value="&lt;div style=&quot;line-height:1;&quot;&gt;Mở biểu mẫu&#xa;&#39;Tạo Báo cáo Cứu hộ&#39;&lt;/div&gt;" vertex="1">
+          <mxGeometry height="50" width="180" x="330" y="110" as="geometry" />
+        </mxCell>
+        <mxCell id="img_dec" parent="1" style="rhombus;whiteSpace=wrap;html=1;fontSize=15;fontFamily=Helvetica;" value="&lt;div style=&quot;line-height:1;&quot;&gt;Người dùng có&#xa;đính kèm ảnh?&lt;/div&gt;" vertex="1">
+          <mxGeometry height="65" width="140" x="350" y="190" as="geometry" />
+        </mxCell>
+        <mxCell id="capture" parent="1" style="rounded=1;whiteSpace=wrap;html=1;fontSize=15;fontFamily=Helvetica;" value="&lt;div style=&quot;line-height:1;&quot;&gt;Chụp ảnh hiện trường&#xa;hoặc chọn từ thư viện&lt;/div&gt;" vertex="1">
+          <mxGeometry height="50" width="200" x="130" y="280" as="geometry" />
+        </mxCell>
+        <mxCell id="run_ai" parent="1" style="rounded=1;whiteSpace=wrap;html=1;fontSize=15;fontFamily=Helvetica;" value="&lt;div style=&quot;line-height:1;&quot;&gt;AnalyzeImageUseCase:&#xa;Chạy MobileNetV3 On-device&#xa;(ONNX Runtime / ExecuTorch .pte)&lt;/div&gt;" vertex="1">
+          <mxGeometry height="65" width="250" x="105" y="360" as="geometry" />
+        </mxCell>
+        <mxCell id="ai_out" parent="1" style="rounded=1;whiteSpace=wrap;html=1;fontSize=15;fontFamily=Helvetica;" value="&lt;div style=&quot;line-height:1;&quot;&gt;Trích xuất kết quả AI:&#xa;Nhãn ngập (non/low/med/high)&#xa;&amp;amp; Điểm tin cậy (Confidence)&lt;/div&gt;" vertex="1">
+          <mxGeometry height="60" width="236" x="112" y="455" as="geometry" />
+        </mxCell>
+        <mxCell id="gen_tags" parent="1" style="rounded=1;whiteSpace=wrap;html=1;fontSize=15;fontFamily=Helvetica;" value="&lt;div style=&quot;line-height:1;&quot;&gt;Sinh mảng AiTag[]&#xa;(label, confidence, timestamp)&lt;/div&gt;" vertex="1">
+          <mxGeometry height="50" width="200" x="130" y="545" as="geometry" />
+        </mxCell>
+        <mxCell id="skip_ai" parent="1" style="rounded=1;whiteSpace=wrap;html=1;fontSize=15;fontFamily=Helvetica;" value="&lt;div style=&quot;line-height:1;&quot;&gt;Không có ảnh:&#xa;Gán nhãn non_flood mặc định&lt;/div&gt;" vertex="1">
+          <mxGeometry height="50" width="200" x="530" y="280" as="geometry" />
+        </mxCell>
+        <mxCell id="fill_info" parent="1" style="rounded=1;whiteSpace=wrap;html=1;fontSize=15;fontFamily=Helvetica;" value="&lt;div style=&quot;line-height:1;&quot;&gt;Nhập thông tin cứu hộ chi tiết:&#xa;- Số người kẹt, số người bị thương&#xa;- Nhóm yếu thế (người già, trẻ nhỏ...)&#xa;- Mô tả tình hình hiện trường&lt;/div&gt;" vertex="1">
+          <mxGeometry height="75" width="300" x="280" y="628" as="geometry" />
+        </mxCell>
+        <mxCell id="calc_urgency" parent="1" style="rounded=1;whiteSpace=wrap;html=1;fontSize=15;fontFamily=Helvetica;" value="&lt;div style=&quot;line-height:1;&quot;&gt;Tự động tính độ khẩn cấp:&#xa;Urgency Score (E_i / U_i)&lt;/div&gt;" vertex="1">
+          <mxGeometry height="50" width="200" x="330" y="735" as="geometry" />
+        </mxCell>
+        <mxCell id="get_gps" parent="1" style="rounded=1;whiteSpace=wrap;html=1;fontSize=15;fontFamily=Helvetica;" value="&lt;div style=&quot;line-height:1;&quot;&gt;Lấy tọa độ GPS (hoặc để trống/nhập tay)&lt;/div&gt;" vertex="1">
+          <mxGeometry height="45" width="200" x="330" y="815" as="geometry" />
+        </mxCell>
+        <mxCell id="make_rec" parent="1" style="rounded=1;whiteSpace=wrap;html=1;fontSize=15;fontFamily=Helvetica;" value="&lt;div style=&quot;line-height:1;&quot;&gt;Đóng gói RescueRecord:&#xa;id=post-*, status=processing&lt;/div&gt;" vertex="1">
+          <mxGeometry height="50" width="200" x="330" y="890" as="geometry" />
+        </mxCell>
+        <mxCell id="deliver" parent="1" style="rounded=1;whiteSpace=wrap;html=1;fontSize=15;fontFamily=Helvetica;" value="&lt;div style=&quot;line-height:1;&quot;&gt;Chuyển sang chính sách&#xa;gửi thích ứng (deliverRecord)&lt;/div&gt;" vertex="1">
+          <mxGeometry height="50" width="200" x="330" y="970" as="geometry" />
+        </mxCell>
+        <mxCell id="end" parent="1" style="ellipse;whiteSpace=wrap;html=1;fontStyle=1;fontFamily=Helvetica;fontSize=15;" value="&lt;div style=&quot;line-height:1;&quot;&gt;Kết thúc&lt;/div&gt;" vertex="1">
+          <mxGeometry height="40" width="100" x="380" y="1050" as="geometry" />
+        </mxCell>
+        <mxCell id="e1" edge="1" parent="1" source="start" style="endArrow=classic;html=1;strokeWidth=1.3;fontSize=15;fontFamily=Helvetica;" target="open_form" value="">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="e2" edge="1" parent="1" source="open_form" style="endArrow=classic;html=1;strokeWidth=1.3;fontSize=15;fontFamily=Helvetica;" target="img_dec" value="">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="e3" edge="1" parent="1" source="img_dec" style="endArrow=classic;html=1;strokeWidth=1.3;fontSize=15;fontFamily=Helvetica;fontColor=#172B4D;labelBackgroundColor=#FFFFFF;" target="capture" value="Có ảnh">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="e4" edge="1" parent="1" source="img_dec" style="endArrow=classic;html=1;strokeWidth=1.3;fontSize=15;fontFamily=Helvetica;fontColor=#172B4D;labelBackgroundColor=#FFFFFF;" target="skip_ai" value="Không">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="e5" edge="1" parent="1" source="capture" style="endArrow=classic;html=1;strokeWidth=1.3;fontSize=15;fontFamily=Helvetica;" target="run_ai" value="">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="e6" edge="1" parent="1" source="run_ai" style="endArrow=classic;html=1;strokeWidth=1.3;fontSize=15;fontFamily=Helvetica;" target="ai_out" value="">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="e7" edge="1" parent="1" source="ai_out" style="endArrow=classic;html=1;strokeWidth=1.3;fontSize=15;fontFamily=Helvetica;" target="gen_tags" value="">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="e8" edge="1" parent="1" source="gen_tags" style="endArrow=classic;html=1;strokeWidth=1.3;fontSize=15;fontFamily=Helvetica;" target="fill_info" value="">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="e9" edge="1" parent="1" source="skip_ai" style="endArrow=classic;html=1;strokeWidth=1.3;fontSize=15;fontFamily=Helvetica;" target="fill_info" value="">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="e10" edge="1" parent="1" source="fill_info" style="endArrow=classic;html=1;strokeWidth=1.3;fontSize=15;fontFamily=Helvetica;" target="calc_urgency" value="">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="e11" edge="1" parent="1" source="calc_urgency" style="endArrow=classic;html=1;strokeWidth=1.3;fontSize=15;fontFamily=Helvetica;" target="get_gps" value="">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="e12" edge="1" parent="1" source="get_gps" style="endArrow=classic;html=1;strokeWidth=1.3;fontSize=15;fontFamily=Helvetica;" target="make_rec" value="">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="e13" edge="1" parent="1" source="make_rec" style="endArrow=classic;html=1;strokeWidth=1.3;fontSize=15;fontFamily=Helvetica;" target="deliver" value="">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="e14" edge="1" parent="1" source="deliver" style="endArrow=classic;html=1;strokeWidth=1.3;fontSize=15;fontFamily=Helvetica;" target="end" value="">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+      </root>
+    </mxGraphModel>
+  </diagram>
+</mxfile>

@@ -1,0 +1,31 @@
+\addchap{KẾT LUẬN VÀ HƯỚNG PHÁT TRIỂN}\label{chap:conclusion}
+\addsec{Kết luận}
+Đề tài đã xây dựng nguyên mẫu hệ thống hỗ trợ tiếp nhận, xử lý và điều phối thông tin cứu hộ bão lũ, kết nối ứng dụng Flutter có suy luận AI tại biên, máy chủ FastAPI thực hiện phân cụm và bàn điều phối Web GIS. Hai kịch bản kiểm thử trên điện thoại thật đạt các tiêu chí luồng xử lý và giao diện đã công bố, gồm nhận diện, gửi bài, phục hồi đồng bộ, xử lý thiếu GPS và cập nhật trạng thái. Riêng Case 8 run\_001 đạt về giữ bài và gửi lại sau khi có Wi-Fi; hiện tượng thoát app khi gửi lúc mất mạng vẫn được ghi nhận để xử lý. Kết quả hỗ trợ khả năng lưu và phục hồi truyền báo cáo trong các điều kiện đã thử, chưa đại diện cho mọi tình huống mạng viễn thông ngoài thực địa.
+
+Đối với mô hình thị giác máy tính, kiến trúc MobileNetV3-Large đạt độ chính xác (Accuracy) \NewImageAccuracy\% và macro-F1 \NewImageMacroFOne\% trên tập test gồm \ImageTest{} ảnh của bộ dữ liệu đã chia; tính độc lập hoàn toàn theo nguồn và sự kiện chưa được xác nhận. Mô hình được xuất sang định dạng ONNX và PTE để thực thi lần lượt bằng ONNX Runtime và ExecuTorch; các phép đối chiếu trên CPU ghi nhận đồng thuận top-1 với mô hình PTH lần lượt là \CpuOnnxAgreement\% và \CpuPteAgreement\% trên cùng tập test. Lượng tử hóa giảm dung lượng từ 16,04 MiB (FP32) xuống 4,51 MiB (PTQ) và 4,57 MiB (QAT), nhưng Accuracy giảm tương ứng từ \NewImageAccuracy\% xuống \PTQAccuracy\% và \QATAccuracy\%; QAT có macro-F1 \QATMacroFOne\% (Bảng~\ref{tab:fp32_ptq_qat}). Kết quả cho thấy lợi ích về dung lượng đi kèm suy giảm chất lượng; cần đánh giá lỗi phân loại và hiệu năng trên thiết bị đích trước khi lựa chọn phương án triển khai.
+
+Mô hình ước lượng mức độ khẩn cấp dựa trên các dấu hiệu khẩn cấp được người dùng lựa chọn cung cấp cơ chế tính điểm minh bạch, có thể giải thích được và dễ dàng cấu hình, hỗ trợ đắc lực cho khâu tiền lọc dữ liệu cứu hộ tại hiện trường.
+
+Về mặt giải thuật, các thực nghiệm đối chứng đa dạng trên đồ thị không gian--thời gian đã làm sáng tỏ ưu thế cũng như giới hạn của các phương pháp phân cụm cộng và tích (RQ1), đánh giá tính ổn định của hàm điểm ưu tiên đa tiêu chí trước các biến thể dữ liệu trùng lặp (RQ2), và phân tích định lượng hệ quả của các sai số phân hoạch đối với bài toán lập lịch điều phối nguồn lực cứu trợ (RQ3).
+
+Các đóng góp chính của đề tài bao gồm:
+\begin{enumerate}
+\item Xây dựng hoàn chỉnh nguyên mẫu hệ thống gồm ứng dụng di động, máy chủ và website điều phối;
+\item Đề xuất và kiểm chứng giải thuật gom cụm đồ thị không gian--thời gian và hàm ưu tiên cứu nạn đa tiêu chí;
+\item Thiết kế cơ chế lựa chọn chế độ gửi theo điều kiện mạng, lưu bản tin cục bộ và gửi lại khi có kết nối, góp phần nâng cao tính chủ động và hiệu quả tác chiến trong công tác cứu nạn thiên tai.
+\end{enumerate}
+
+\addsec{Hạn chế của đề tài}
+Hệ thống chưa được đánh giá trong vận hành cứu hộ thực địa với người sử dụng và đơn vị chuyên môn. Luồng SMS đã có thành phần hỗ trợ, nhưng tỷ lệ giao tin và độ trễ qua mạng viễn thông/gateway thực tế chưa được kiểm chứng đầy đủ.
+
+\addsec{Kiến nghị}
+Trước khi thí điểm với địa phương, nhóm phát triển cần khắc phục các lỗi ứng dụng đã ghi nhận và kiểm tra truyền nhận qua mạng di động, SMS/gateway thực tế. Đơn vị cứu hộ chuyên môn cần phối hợp xây dựng kịch bản, kiểm tra tiêu chí ưu tiên và đánh giá kết quả; đơn vị vận hành cần quy định quyền truy cập, bảo vệ dữ liệu cá nhân, sao lưu và quy trình xác minh thông tin. Chỉ mở rộng phạm vi sử dụng sau khi có kết quả thử nghiệm và đánh giá của các đơn vị tham gia.
+
+\addsec{Hướng nghiên cứu tiếp theo}
+Trên cơ sở các kết quả đạt được, các hướng phát triển tiếp theo của đề tài bao gồm:
+\begin{itemize}
+\item Bổ sung chức năng phân tích tin nhắn cứu hộ tiếng Việt tự do để trích xuất thông tin và nhận diện dấu hiệu nguy cấp, mở rộng khả năng tiếp nhận ngoài các lựa chọn có cấu trúc trên biểu mẫu;
+\item Mở rộng thử nghiệm phần cứng: triển khai thử nghiệm trên đa dạng các dòng điện thoại Android và iOS thực tế, đánh giá chi tiết mức độ tiêu thụ pin và độ trễ suy luận trong nhiều điều kiện môi trường;
+\item Tích hợp mạng truyền thông chịu trễ (DTN): phát triển giao thức chuyển tiếp dữ liệu cơ hội qua kết nối cự ly ngắn (BLE, Wi-Fi Direct) kết hợp các trạm thu phát cơ động hoặc thiết bị bay không người lái (UAV) phục vụ các khu vực bị chia cắt cô lập hoàn toàn;
+\item Thử nghiệm thực địa diện rộng: phối hợp cùng các lực lượng cứu hộ chuyên trách và chính quyền địa phương để diễn tập, đánh giá mức độ khả dụng và hoàn thiện quy trình nghiệp vụ cứu nạn trong thực tế bão lũ.
+\end{itemize}
