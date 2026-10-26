@@ -1,0 +1,156 @@
+\clearpage
+\section{Giao diện ứng dụng theo tác nhân}\label{sec:user-interfaces}
+
+Phần này trình bày các màn hình minh họa theo hai nhóm tác nhân: người dân gửi yêu cầu cứu hộ và điều phối viên trên dashboard web. Các ảnh được sắp xếp theo luồng thao tác; ký hiệu (a), (b), (c) liên kết từng màn hình với phần mô tả bên dưới. Trạng thái, nhãn AI và số liệu trên ảnh chỉ phản ánh thời điểm chụp; các màn hình dashboard sử dụng dữ liệu giả lập, không phải số liệu cứu hộ thực tế.
+
+\subsection{Người dân gửi yêu cầu cứu hộ}
+
+\begin{figure}[!htbp]\centering
+\begin{minipage}[t]{.31\textwidth}\centering
+\includegraphics[width=\linewidth,height=.40\textheight,keepaspectratio]{UI/user_da_loc/user/01_trang_chu_SOS.jpg}
+\par\small (a)\end{minipage}\hfill
+\begin{minipage}[t]{.31\textwidth}\centering
+\includegraphics[width=\linewidth,height=.40\textheight,keepaspectratio]{UI/user_da_loc/user/02_bieu_mau_gui_bai_cuu_ho.jpg}
+\par\small (b)\end{minipage}\hfill
+\begin{minipage}[t]{.31\textwidth}\centering
+\includegraphics[width=\linewidth,height=.40\textheight,keepaspectratio]{UI/user_da_loc/user/03_anh_hien_truong_AI_nhan_dien.jpg}
+\par\small (c)\end{minipage}\hfill
+\caption{Trang chủ và biểu mẫu gửi yêu cầu cứu hộ}\label{fig:ui-1}
+\end{figure}
+
+\noindent\textbf{Hình~\ref{fig:ui-1}(a).} Trang chủ đặt nút SOS ở vị trí trung tâm, cung cấp lối vào biểu mẫu gửi bài cứu hộ, các số khẩn cấp và trạng thái kết nối, hàng đợi đồng bộ.
+
+\noindent\textbf{Hình~\ref{fig:ui-1}(b).} Biểu mẫu gửi bài cứu hộ cho phép khai báo vị trí, số người mắc kẹt, số người bị thương và các dấu hiệu khẩn cấp. Người gửi bổ sung thông tin có cấu trúc trước khi gửi yêu cầu.
+
+\noindent\textbf{Hình~\ref{fig:ui-1}(c).} Phần ảnh hiện trường cho phép chụp hoặc chọn ảnh và hiển thị nhãn nhận diện của AI. Kết quả trong ảnh chỉ minh họa cách trình bày đầu ra mô hình tại thời điểm chụp.
+
+\clearpage
+
+\begin{figure}[!htbp]\centering
+\begin{minipage}[t]{.31\textwidth}\centering
+\includegraphics[width=\linewidth,height=.40\textheight,keepaspectratio]{UI/user_da_loc/user/04_xac_nhan_luu_cho_dong_bo.jpg}
+\par\small (a)\end{minipage}\hfill
+\begin{minipage}[t]{.31\textwidth}\centering
+\includegraphics[width=\linewidth,height=.40\textheight,keepaspectratio]{UI/user_da_loc/user/05_SOS_trong_hang_doi.jpg}
+\par\small (b)\end{minipage}\hfill
+\begin{minipage}[t]{.31\textwidth}\centering
+\includegraphics[width=\linewidth,height=.40\textheight,keepaspectratio]{UI/user_da_loc/user/06_lich_su_yeu_cau_cuu_ho.jpg}
+\par\small (c)\end{minipage}\hfill
+\caption{Lưu yêu cầu, hàng đợi SOS và lịch sử cứu hộ}\label{fig:ui-2}
+\end{figure}
+
+\noindent\textbf{Hình~\ref{fig:ui-2}(a).} Màn hình xác nhận cho biết yêu cầu đã được lưu tại thiết bị và đang chờ gửi lên trung tâm. Thông báo này phân biệt việc lưu cục bộ với việc máy chủ đã tiếp nhận.
+
+\noindent\textbf{Hình~\ref{fig:ui-2}(b).} Khi SOS chưa gửi được, trang chủ hiển thị trạng thái đã xếp hàng và sẽ gửi lại khi có mạng. Người dùng theo dõi trạng thái gửi ngay tại nút SOS.
+
+\noindent\textbf{Hình~\ref{fig:ui-2}(c).} Lịch sử liệt kê yêu cầu cứu hộ cùng mã yêu cầu, thời gian, vị trí và trạng thái hiển thị. Thẻ yêu cầu tóm tắt số người mắc kẹt và nhóm cần ưu tiên để người gửi kiểm tra lại thông tin.
+
+\clearpage
+
+\begin{figure}[!htbp]\centering
+\begin{minipage}[t]{.31\textwidth}\centering
+\includegraphics[width=\linewidth,height=.40\textheight,keepaspectratio]{UI/user_da_loc/user/07_huong_dan_su_dung_ung_dung.jpg}
+\par\small (a)\end{minipage}\hfill
+\begin{minipage}[t]{.31\textwidth}\centering
+\includegraphics[width=\linewidth,height=.40\textheight,keepaspectratio]{UI/user_da_loc/user/08_huong_dan_so_cuu.jpg}
+\par\small (b)\end{minipage}\hfill
+\begin{minipage}[t]{.31\textwidth}\centering
+\includegraphics[width=\linewidth,height=.40\textheight,keepaspectratio]{UI/user_da_loc/user/09_danh_ba_so_khan_cap.jpg}
+\par\small (c)\end{minipage}\hfill
+\caption{Hướng dẫn sử dụng, sơ cứu và danh bạ khẩn cấp}\label{fig:ui-3}
+\end{figure}
+
+\noindent\textbf{Hình~\ref{fig:ui-3}(a).} Thẻ Dùng app trình bày trình tự mở ứng dụng, nhấn SOS, gửi ảnh hiện trường và mô tả tình huống, giúp người dùng làm quen với các thao tác chính.
+
+\noindent\textbf{Hình~\ref{fig:ui-3}(b).} Thẻ Sơ cứu tổ chức nội dung hướng dẫn theo từng nhóm tình huống. Ảnh minh họa cách ứng dụng trình bày nội dung tra cứu cho lũ lụt, ngập nước và hỏa hoạn.
+
+\noindent\textbf{Hình~\ref{fig:ui-3}(c).} Thẻ Số điện thoại tập hợp các đầu số khẩn cấp và liên hệ theo khu vực, kèm biểu tượng gọi để người dùng lựa chọn liên lạc phù hợp.
+
+\clearpage
+
+\begin{figure}[!htbp]\centering
+\begin{minipage}[t]{.31\textwidth}\centering
+\includegraphics[width=\linewidth,height=.40\textheight,keepaspectratio]{UI/user_da_loc/user/10_cai_dat_tai_khoan.jpg}
+\par\small (a)\end{minipage}\hfill
+\begin{minipage}[t]{.31\textwidth}\centering
+\includegraphics[width=\linewidth,height=.40\textheight,keepaspectratio]{UI/user_da_loc/user/11_chinh_sua_thong_tin.jpg}
+\par\small (b)\end{minipage}\hfill
+\begin{minipage}[t]{.31\textwidth}\centering
+\includegraphics[width=\linewidth,height=.40\textheight,keepaspectratio]{UI/user_da_loc/user/12_doi_mat_khau.jpg}
+\par\small (c)\end{minipage}\hfill
+\caption{Quản lý thông tin và mật khẩu của người dùng}\label{fig:ui-4}
+\end{figure}
+
+\noindent\textbf{Hình~\ref{fig:ui-4}(a).} Màn hình Cài đặt hiển thị tài khoản, số điện thoại và địa chỉ thường trú, đồng thời cung cấp chức năng chỉnh sửa thông tin.
+
+\noindent\textbf{Hình~\ref{fig:ui-4}(b).} Hộp chỉnh sửa cho phép cập nhật số điện thoại và địa chỉ; tên đăng nhập được hiển thị là không thay đổi. Nút Lưu thay đổi xác nhận nội dung cập nhật.
+
+\noindent\textbf{Hình~\ref{fig:ui-4}(c).} Hộp Đổi mật khẩu yêu cầu mật khẩu hiện tại, mật khẩu mới và xác nhận mật khẩu mới, kèm điều khiển hiện hoặc ẩn nội dung nhập.
+
+\clearpage
+
+\subsection{Điều phối viên trên dashboard web}
+
+\begin{figure}[!htbp]\centering
+\begin{minipage}[t]{.96\textwidth}\centering
+\includegraphics[width=\linewidth,height=.25\textheight,keepaspectratio]{UI/dieuphoivien_da_loc/dieuphoivien/01_tong_quan_ban_do_dieu_phoi.png}
+\par\small (a)\end{minipage}\par\medskip
+\begin{minipage}[t]{.96\textwidth}\centering
+\includegraphics[width=\linewidth,height=.25\textheight,keepaspectratio]{UI/dieuphoivien_da_loc/dieuphoivien/02_thong_ke_bao_cao.png}
+\par\small (b)\end{minipage}\par\medskip
+\caption{Tổng quan bản đồ và thống kê báo cáo cứu hộ}\label{fig:ui-6}
+\end{figure}
+
+\noindent\textbf{Hình~\ref{fig:ui-6}(a).} Màn hình tổng quan kết hợp bản đồ, các thẻ thống kê trạng thái và danh sách cụm ưu tiên. Điều phối viên có thể quan sát phân bố báo cáo, chọn cụm và xem các gợi ý hỗ trợ xử lý.
+
+\noindent\textbf{Hình~\ref{fig:ui-6}(b).} Khối Thống kê trình bày các chỉ số thời gian và biểu đồ theo dõi báo cáo. Thanh công cụ cung cấp chức năng xuất dữ liệu để phục vụ tổng hợp và đối chiếu.
+
+\clearpage
+
+\begin{figure}[!htbp]\centering
+\begin{minipage}[t]{.96\textwidth}\centering
+\includegraphics[width=\linewidth,height=.25\textheight,keepaspectratio]{UI/dieuphoivien_da_loc/dieuphoivien/03_danh_sach_bao_cao_cuu_ho.png}
+\par\small (a)\end{minipage}\par\medskip
+\begin{minipage}[t]{.96\textwidth}\centering
+\includegraphics[width=\linewidth,height=.25\textheight,keepaspectratio]{UI/dieuphoivien_da_loc/dieuphoivien/04_chi_tiet_bao_cao_cuu_ho.png}
+\par\small (b)\end{minipage}\par\medskip
+\caption{Danh sách và chi tiết báo cáo cứu hộ}\label{fig:ui-7}
+\end{figure}
+
+\noindent\textbf{Hình~\ref{fig:ui-7}(a).} Danh sách báo cáo trong cụm có bộ lọc trạng thái, lựa chọn bản ghi và thông tin tóm tắt về thời gian, người mắc kẹt, mô tả và vị trí. Điều phối viên mở chi tiết từ từng dòng để tiếp tục xử lý.
+
+\noindent\textbf{Hình~\ref{fig:ui-7}(b).} Khung chi tiết hiển thị nội dung báo cáo, vị trí, thông tin liên hệ, lịch sử và các thao tác chuyển trạng thái. Các nút điều phối, hoàn tất và đóng báo cáo được đặt cùng ngữ cảnh bản ghi đang chọn.
+
+\clearpage
+
+\begin{figure}[!htbp]\centering
+\begin{minipage}[t]{.96\textwidth}\centering
+\includegraphics[width=\linewidth,height=.25\textheight,keepaspectratio]{UI/dieuphoivien_da_loc/dieuphoivien/05_uu_tien_xac_minh_vi_tri.png}
+\par\small (a)\end{minipage}\par\medskip
+\begin{minipage}[t]{.96\textwidth}\centering
+\includegraphics[width=\linewidth,height=.25\textheight,keepaspectratio]{UI/dieuphoivien_da_loc/dieuphoivien/06_tao_bao_cao_moi.png}
+\par\small (b)\end{minipage}\par\medskip
+\caption{Xác minh vị trí và tiếp nhận báo cáo thủ công}\label{fig:ui-8}
+\end{figure}
+
+\noindent\textbf{Hình~\ref{fig:ui-8}(a).} Danh sách Cần xem xét tập trung các báo cáo cần xác minh vị trí, kèm thao tác mở chi tiết và cập nhật vị trí. Bản đồ giúp đối chiếu thông tin trước khi đưa vào xử lý tiếp.
+
+\noindent\textbf{Hình~\ref{fig:ui-8}(b).} Hộp Báo cáo mới hỗ trợ tiếp nhận thông tin từ tổng đài hoặc nhập thủ công, gồm tình huống, số điện thoại người cần cứu, số người mắc kẹt, bị thương, nhóm yếu thế và tọa độ.
+
+\clearpage
+
+\begin{figure}[!htbp]\centering
+\begin{minipage}[t]{.96\textwidth}\centering
+\includegraphics[width=\linewidth,height=.25\textheight,keepaspectratio]{UI/dieuphoivien_da_loc/dieuphoivien/07_quan_ly_doi_cuu_ho.png}
+\par\small (a)\end{minipage}\par\medskip
+\begin{minipage}[t]{.96\textwidth}\centering
+\includegraphics[width=\linewidth,height=.25\textheight,keepaspectratio]{UI/dieuphoivien_da_loc/dieuphoivien/08_quan_ly_tai_khoan_dieu_phoi.png}
+\par\small (b)\end{minipage}\par\medskip
+\caption{Quản lý đội cứu hộ và tài khoản điều phối}\label{fig:ui-9}
+\end{figure}
+
+\noindent\textbf{Hình~\ref{fig:ui-9}(a).} Hộp Đội cứu hộ cung cấp danh sách đội cùng biểu mẫu thêm đội với tên, số điện thoại, số người và ghi chú. Đây là nơi quản lý thông tin lực lượng phục vụ điều phối.
+
+\noindent\textbf{Hình~\ref{fig:ui-9}(b).} Hộp Tài khoản điều phối hiển thị người dùng và vai trò, cung cấp thao tác sửa, đặt lại mật khẩu và tạo tài khoản. Các chức năng quản lý tài khoản được tổ chức riêng với thao tác xử lý báo cáo.
+
+\clearpage

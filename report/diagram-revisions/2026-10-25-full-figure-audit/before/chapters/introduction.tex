@@ -1,0 +1,80 @@
+\addchap{MỞ ĐẦU}\label{chap:introduction}
+
+\addsec{Tổng quan tình hình nghiên cứu trong nước và ngoài nước}
+
+Thông tin cầu cứu trong thiên tai bão lũ thường đến từ nhiều nguồn, gồm văn bản, hình ảnh và vị trí địa lý. Một tình huống có thể được phản ánh nhiều lần, trong khi các tình huống độc lập lại có thể xảy ra ở những vị trí gần nhau. Khi kết nối mạng bị gián đoạn, thông tin còn có thể đến muộn hoặc thiếu hình ảnh. Những đặc điểm này gây khó khăn cho việc xác định các báo cáo cùng phản ánh một sự kiện và tổng hợp thông tin phục vụ cứu hộ.
+
+Các nghiên cứu trong và ngoài nước cung cấp cơ sở để xử lý từng loại thông tin đầu vào. Tại Việt Nam, trí tuệ nhân tạo đã được ứng dụng để phát hiện vùng ngập và ước lượng độ sâu từ hình ảnh \citep{doan2025sar,ngo2025urban}. Trên thế giới, Sakaki và cộng sự khai thác thông tin do người dùng tạo ra để phát hiện sự kiện \citep{sakaki2010earthquake}; CrisisMMD cung cấp dữ liệu ảnh--văn bản về thiên tai \citep{alam2018crisismmd}, còn FloodNet phục vụ phân tích cảnh ngập từ ảnh trên không \citep{rahnemoonfar2021floodnet}. Những công trình này giúp định hình cách khai thác hình ảnh và thông tin cộng đồng. Đối với đề tài, các phương pháp cần được xem xét trong điều kiện cụ thể: người dân gửi báo cáo từ điện thoại và đường truyền có thể không ổn định.
+
+Trong điều kiện đó, xử lý một phần dữ liệu ngay trên điện thoại có thể giảm lượng thông tin phải gửi về máy chủ. Trí tuệ nhân tạo tại biên (Edge AI) cho phép thực hiện suy luận trực tiếp trên thiết bị; MobileNetV3 là một kiến trúc được thiết kế cho thiết bị di động \citep{howard2019mobilenetv3}. Đề tài lựa chọn kiến trúc này để nghiên cứu nhận diện mức ngập từ ảnh, kết hợp với việc lựa chọn dữ liệu gửi theo điều kiện kết nối. Kết quả nhận diện là thông tin đầu vào để tiếp tục xử lý báo cáo tại trung tâm.
+
+Sau khi tiếp nhận, hệ thống cần xác định những báo cáo có liên quan đến cùng một sự kiện. Việc này đòi hỏi xem xét đồng thời vị trí, thời gian và nội dung khai báo: chỉ dựa vào khoảng cách có thể gộp nhầm hai tình huống gần nhau, còn báo cáo trùng lặp có thể làm sai lệch mức độ ưu tiên. Louvain, Leiden và DBSCAN cung cấp các phương pháp phân cụm để khảo sát bài toán này \citep{blondel2008louvain,traag2019leiden,ester1996dbscan}. Vì vậy, đề tài tập trung đánh giá cách liên kết báo cáo và ảnh hưởng của dữ liệu trùng lặp đến kết quả phân cụm.
+
+Kết quả phân cụm sau đó được sử dụng để xếp hạng và hỗ trợ phân bổ nguồn lực. Do việc phân bổ còn phải cân nhắc hiệu quả, tính công bằng và nhu cầu khẩn cấp \citep{gralla2014review}, chất lượng phân cụm cần được đánh giá cả qua ảnh hưởng đến quyết định điều phối. Trên cơ sở đó, đề tài đặt ra ba câu hỏi nghiên cứu về chất lượng phân cụm, độ ổn định của điểm ưu tiên và hệ quả đối với điều phối mô phỏng. Các câu hỏi được trình bày tại phần Mục tiêu đề tài.
+
+
+\addsec{Lý do chọn đề tài}
+
+Việt Nam là quốc gia thường xuyên chịu ảnh hưởng của bão lũ và các hiện tượng thời tiết cực đoan. Trong những tình huống thiên tai, việc tiếp nhận và xử lý thông tin cầu cứu kịp thời có ý nghĩa quan trọng đối với hoạt động tìm kiếm, cứu hộ và cứu nạn. Tuy nhiên, thông tin thường được gửi qua nhiều kênh khác nhau, có thể thiếu vị trí chính xác, không đầy đủ về tình trạng hiện trường hoặc bị trùng lặp. Khi số lượng báo cáo tăng, việc tổng hợp thủ công gây khó khăn cho quá trình xác định mức độ khẩn cấp và nhận diện các khu vực thực sự cần hỗ trợ.
+
+Một khó khăn khác là sự phụ thuộc vào kết nối Internet của các hệ thống xử lý tập trung. Trong điều kiện bão lũ, hạ tầng viễn thông có thể bị quá tải hoặc gián đoạn, khiến việc truyền tải hình ảnh và các dữ liệu dung lượng lớn gặp nhiều hạn chế. Nếu ứng dụng chỉ ghi nhận báo cáo sau khi gửi thành công, thông tin cầu cứu có thể bị mất khi thiết bị mất kết nối. Điều này đặt ra yêu cầu cần có cơ chế lưu trữ cục bộ, duy trì dữ liệu trong thời gian ngoại tuyến và đồng bộ khi kết nối được khôi phục.
+
+Xuất phát từ những vấn đề thực tiễn và kỹ thuật nêu trên, đề tài ``Xây dựng hệ thống phân tích đa phương thức và phân cụm sự kiện cứu hộ bão lũ dựa trên Edge AI'' được thực hiện nhằm nghiên cứu khả năng kết hợp phân tích dữ liệu tại thiết bị, truyền thông tin trong điều kiện mạng không ổn định và phân cụm các báo cáo cứu hộ. Hệ thống hướng đến việc hỗ trợ tiếp nhận, tổng hợp và trực quan hóa thông tin, đồng thời cung cấp cơ sở để nghiên cứu các phương pháp xếp hạng ưu tiên và hỗ trợ điều phối nguồn lực trong những tình huống thiên tai.
+
+
+\addsec{Mục tiêu đề tài}
+
+Mục tiêu chung là xây dựng hệ thống ứng dụng trí tuệ nhân tạo trên thiết bị di động để tiếp nhận, phân tích thông tin và hỗ trợ ra quyết định cứu hộ bão lũ trong điều kiện mạng không ổn định, hướng tới giảm thiểu thiệt hại về người và tài sản.
+
+Các mục tiêu cụ thể bao gồm:
+
+\begin{enumerate}
+    \item Nâng cao khả năng nhận diện và phân tích tình huống cứu hộ từ văn bản và hình ảnh.
+    \item Duy trì hoạt động khi mạng yếu hoặc gián đoạn bằng xử lý tại thiết bị và truyền dữ liệu tối giản.
+    \item Đánh giá mức độ khẩn cấp và gom nhóm các tình huống cứu hộ để hỗ trợ ra quyết định, điều phối nguồn lực.
+\end{enumerate}
+
+Đối với phần nghiên cứu thuật toán, ba câu hỏi nghiên cứu được đặt ra như sau:
+
+\begin{enumerate}
+    \item RQ1: Phương pháp phân cụm đồ thị sử dụng cổng không gian dạng tích có cải thiện chất lượng phân cụm so với phương pháp dạng cộng khi các cấu hình được lựa chọn độc lập hay không?
+    \item RQ2: Phương pháp tính điểm ưu tiên tổng hợp theo họ bằng chứng có duy trì tính ổn định trước các báo cáo trùng lặp và phản ánh phù hợp lợi ích được xác định độc lập trong mô phỏng hay không?
+    \item RQ3: Những sai lệch trong quá trình phân cụm, bao gồm tách sai, gộp sai và hình thành điểm đến giả, ảnh hưởng như thế nào đến kết quả lập lịch điều phối cứu hộ?
+\end{enumerate}
+
+
+\addsec{Phương pháp nghiên cứu}
+
+Đề tài kết hợp nghiên cứu tài liệu, xử lý dữ liệu, thiết kế hệ thống và so sánh thực nghiệm qua các bước sau:
+
+\begin{enumerate}
+    \item \textbf{Thu thập và xử lý dữ liệu:} Khảo sát các nghiên cứu về nhận diện ảnh, phân tích văn bản, Edge AI và phân cụm; chuẩn hóa, gán nhãn dữ liệu phục vụ huấn luyện và đánh giá.
+    \item \textbf{Phân tích yêu cầu và thiết kế hệ thống:} Xác định chức năng, yêu cầu hiệu năng và khả năng hoạt động khi mạng gián đoạn; thiết kế kiến trúc, cơ sở dữ liệu và luồng trao đổi giữa ứng dụng với máy chủ.
+    \item \textbf{Huấn luyện và tối ưu mô hình:} Huấn luyện MobileNetV3-Large; so sánh chuyển đổi định dạng, lượng tử hóa và cắt tỉa trên cùng tập kiểm thử theo độ chính xác, kích thước và độ trễ. Kết quả CPU máy tính và điện thoại được phân tích riêng.
+    \item \textbf{Phân cụm và xếp hạng:} Xây dựng đồ thị từ vị trí, thời gian và ngữ cảnh; so sánh chất lượng phân cụm, độ ổn định điểm ưu tiên và kết quả điều phối mô phỏng khi có dữ liệu thiếu, nhiễu hoặc trùng lặp. Cấu hình được chọn trên tập hiệu chỉnh trước khi đánh giá trên tập kiểm thử; các phương pháp dùng cùng điều kiện nhiễu trong mỗi lần chạy.
+    \item \textbf{Phát triển và kiểm thử phần mềm:} Xây dựng ứng dụng Flutter, backend Python và dashboard; kiểm tra tạo, lưu, gửi, đồng bộ báo cáo và khả năng truyền dữ liệu dưới mạng yếu giả lập.
+    \item \textbf{Đánh giá kết quả:} Đối chiếu dự đoán, cấu hình và bảng số liệu đã lưu; so sánh các phương pháp bằng chỉ số và phép kiểm định phù hợp với từng bài toán. Thiết kế đánh giá và cách phân tích thống kê được trình bày trong chương Phương pháp nghiên cứu.
+\end{enumerate}
+
+\addsec{Đối tượng nghiên cứu}
+
+\begin{itemize}
+    \item Dữ liệu ảnh ngập lụt bốn lớp, thông tin cứu hộ tiếng Việt và các trường vị trí, thời gian, mức độ khẩn cấp; báo cáo mô phỏng phục vụ phân cụm, xếp hạng và điều phối.
+    \item Mô hình MobileNetV3-Large, các định dạng PyTorch, ONNX, ExecuTorch và kỹ thuật tối ưu cho điện thoại; mô hình đánh giá khẩn cấp từ 32 trạng thái có cấu trúc, không phải tập tin nhắn cứu hộ thực tế.
+    \item Phương pháp xây dựng đồ thị tương đồng, phân cụm sự kiện và tính điểm ưu tiên cứu hộ.
+    \item Ứng dụng Flutter, backend, cơ sở dữ liệu SQLite, dashboard và cơ chế lưu trữ, truyền, đồng bộ thông tin.
+\end{itemize}
+
+Hệ thống hướng đến người dân gửi yêu cầu và lực lượng cứu hộ.
+
+\addsec{Phạm vi nghiên cứu}
+
+\begin{itemize}
+    \item \textbf{Thời gian:} 06 tháng, từ tháng 05/2026 đến tháng 10/2026.
+    \item \textbf{Nội dung và nền tảng:} Phân tích thông tin cứu hộ bằng AI tại thiết bị; tạo, lưu và gửi báo cáo qua HTTP hoặc SMS gateway; đồng bộ khi có mạng; phân cụm, xếp hạng và hiển thị trên ứng dụng di động, web. Phân cụm xử lý các tập báo cáo hiện có, dashboard cập nhật theo chu kỳ; quyết định điều phối vẫn do con người thực hiện.
+    \item \textbf{Dữ liệu:} Ảnh ngập lụt từ bộ \texttt{Dataset\_Flood} do nhóm xây dựng, thông tin mô tả nhu cầu cứu hộ và các trường liên quan. FloodNet và CrisisMMD chỉ là tài liệu tham khảo, không được sử dụng trực tiếp trong tập huấn luyện hiện tại. RQ1 dùng dữ liệu bán tổng hợp Generator 3.0; RQ2/RQ3 dùng dữ liệu tổng hợp Candidate 4.1. Đây là các bộ dữ liệu riêng, không phải báo cáo cứu hộ thực tế hoặc một chuỗi kiểm chứng trên cùng tập mẫu.
+    \item \textbf{Phân tích ảnh và thông tin khẩn cấp:} Đánh giá riêng mô hình nhận diện mức ngập và các phương án tối ưu trên CPU, điện thoại; không khái quát hiệu năng cho mọi thiết bị. Logistic Regression ước lượng điểm khẩn cấp từ các lựa chọn có cấu trúc trên ứng dụng. Theo thiết kế tích hợp, điểm này được gửi lên máy chủ để kết hợp với thông tin khẩn cấp do backend xác định; đây không phải chức năng phân tích trực tiếp tin nhắn cứu hộ tiếng Việt.
+    \item \textbf{Mạng và giới hạn ứng dụng:} Nghiên cứu cơ chế lưu báo cáo trên thiết bị và gửi lại khi kết nối với máy chủ được khôi phục. Hệ thống hỗ trợ tiếp nhận, tổng hợp và hiển thị thông tin; quyết định điều phối do con người thực hiện. Không nghiên cứu dự báo khí tượng--thủy văn hoặc điều hành cứu hộ tự động.
+\end{itemize}
+
+Các thực nghiệm đánh giá từng thành phần trong điều kiện đã xác định; nghiên cứu chưa khảo sát thực địa với người dân và lực lượng cứu hộ. Hiệu quả về thời gian phản ứng, giảm thiệt hại và khả năng triển khai trong thiên tai cần được kiểm chứng thêm qua thử nghiệm thực địa với đơn vị chuyên môn.

@@ -1,0 +1,97 @@
+<mxfile host="Electron" agent="Antigravity">
+  <diagram id="diag-1" name="Luu-do-08-Vong-doi-Dieu-phoi-Cuu-ho">
+    <mxGraphModel dx="1878" dy="1043" grid="0" gridSize="10" guides="1" tooltips="1" connect="1" arrows="1" fold="1" page="1" pageScale="1" pageWidth="850" pageHeight="1080" math="0" shadow="0">
+      <root>
+        <mxCell id="0" />
+        <mxCell id="1" parent="0" />
+        <mxCell id="start" parent="1" style="ellipse;whiteSpace=wrap;html=1;fontStyle=1;fontFamily=Helvetica;fontSize=15;" value="&lt;div style=&quot;line-height:1;&quot;&gt;Bắt đầu&lt;/div&gt;" vertex="1">
+          <mxGeometry height="40" width="100" x="390" y="40" as="geometry" />
+        </mxCell>
+        <mxCell id="view_board" parent="1" style="rounded=1;whiteSpace=wrap;html=1;fontSize=15;fontFamily=Helvetica;" value="&lt;div style=&quot;line-height:1;&quot;&gt;Điều phối viên xem danh sách cụm ưu tiên&#xa;và bản đồ sự cố Leaflet GIS&lt;/div&gt;" vertex="1">
+          <mxGeometry height="55" width="240" x="320" y="110" as="geometry" />
+        </mxCell>
+        <mxCell id="select_case" parent="1" style="rounded=1;whiteSpace=wrap;html=1;fontSize=15;fontFamily=Helvetica;" value="&lt;div style=&quot;line-height:1;&quot;&gt;Chọn ca cứu hộ cần xử lý:&#xa;Xem ảnh hiện trường, nhãn AI, số nạn nhân&lt;/div&gt;" vertex="1">
+          <mxGeometry height="55" width="220" x="330" y="195" as="geometry" />
+        </mxCell>
+        <mxCell id="gps_check" parent="1" style="rhombus;whiteSpace=wrap;html=1;fontSize=15;fontFamily=Helvetica;" value="&lt;div style=&quot;line-height:1;&quot;&gt;Ca cứu hộ đã có&#xa;tọa độ GPS?&lt;/div&gt;" vertex="1">
+          <mxGeometry height="65" width="140" x="370" y="280" as="geometry" />
+        </mxCell>
+        <mxCell id="add_loc" parent="1" style="rounded=1;whiteSpace=wrap;html=1;fontSize=15;fontFamily=Helvetica;" value="&lt;div style=&quot;line-height:1;&quot;&gt;BỔ SUNG VỊ TRÍ:&#xa;Gọi xác minh &amp;amp; cập nhật tọa độ&#xa;PUT /api/reports/{id}/location&lt;/div&gt;" vertex="1">
+          <mxGeometry height="60" width="220" x="130" y="375" as="geometry" />
+        </mxCell>
+        <mxCell id="loc_ready" parent="1" style="rounded=1;whiteSpace=wrap;html=1;fontSize=15;fontFamily=Helvetica;" value="&lt;div style=&quot;line-height:1;&quot;&gt;Tọa độ hợp lệ,&#xa;chuyển sang bước điều động&lt;/div&gt;" vertex="1">
+          <mxGeometry height="50" width="210" x="530" y="375" as="geometry" />
+        </mxCell>
+        <mxCell id="pick_team" parent="1" style="rounded=1;whiteSpace=wrap;html=1;fontSize=15;fontFamily=Helvetica;" value="&lt;div style=&quot;line-height:1;&quot;&gt;Lựa chọn đội cứu hộ (teams)&#xa;phù hợp địa bàn và năng lực&lt;/div&gt;" vertex="1">
+          <mxGeometry height="55" width="220" x="330" y="465" as="geometry" />
+        </mxCell>
+        <mxCell id="assign_dispatch" parent="1" style="rounded=1;whiteSpace=wrap;html=1;fontSize=15;fontFamily=Helvetica;" value="&lt;div style=&quot;line-height:1;&quot;&gt;Giao đội &amp;amp; Chuyển trạng thái:&#xa;PUT /api/reports/{id}/team&#xa;status -&amp;gt; dispatched (tăng statusVersion)&lt;/div&gt;" vertex="1">
+          <mxGeometry height="65" width="240" x="320" y="550" as="geometry" />
+        </mxCell>
+        <mxCell id="field_action" parent="1" style="rounded=1;whiteSpace=wrap;html=1;fontSize=15;fontFamily=Helvetica;" value="&lt;div style=&quot;line-height:1;&quot;&gt;Đội cứu hộ tiếp cận hiện trường&#xa;và triển khai cứu nạn&lt;/div&gt;" vertex="1">
+          <mxGeometry height="50" width="220" x="330" y="645" as="geometry" />
+        </mxCell>
+        <mxCell id="res_dec" parent="1" style="rhombus;whiteSpace=wrap;html=1;fontSize=15;fontFamily=Helvetica;" value="&lt;div style=&quot;line-height:1;&quot;&gt;Kết quả cứu hộ&#xa;tại thực địa?&lt;/div&gt;" vertex="1">
+          <mxGeometry height="70" width="140" x="370" y="725" as="geometry" />
+        </mxCell>
+        <mxCell id="mark_resolved" parent="1" style="rounded=1;whiteSpace=wrap;html=1;fontSize=15;fontFamily=Helvetica;" value="&lt;div style=&quot;line-height:1;&quot;&gt;CỨU HỘ THÀNH CÔNG:&#xa;Cập nhật status -&amp;gt; resolved&#xa;(Nạn nhân đã được an toàn)&lt;/div&gt;" vertex="1">
+          <mxGeometry height="60" width="220" x="180" y="825" as="geometry" />
+        </mxCell>
+        <mxCell id="mark_cancelled" parent="1" style="rounded=1;whiteSpace=wrap;html=1;fontSize=15;fontFamily=Helvetica;" value="&lt;div style=&quot;line-height:1;&quot;&gt;HỦY CA / TIN GIẢ:&#xa;Cập nhật status -&amp;gt; cancelled&#xa;(Bắt buộc chọn lý do hủy)&lt;/div&gt;" vertex="1">
+          <mxGeometry height="60" width="220" x="480" y="825" as="geometry" />
+        </mxCell>
+        <mxCell id="log_audit" parent="1" style="shape=cylinder3;whiteSpace=wrap;html=1;boundedLbl=1;backgroundOutline=1;size=10;fontSize=15;fontFamily=Helvetica;" value="&lt;div style=&quot;line-height:1;&quot;&gt;Ghi audit log vào report_events&#xa;(Actor, action, timestamp);&#xa;Loại ca khỏi active clusters&lt;/div&gt;" vertex="1">
+          <mxGeometry height="65" width="240" x="320" y="915" as="geometry" />
+        </mxCell>
+        <mxCell id="end" parent="1" style="ellipse;whiteSpace=wrap;html=1;fontStyle=1;fontFamily=Helvetica;fontSize=15;" value="&lt;div style=&quot;line-height:1;&quot;&gt;Kết thúc&lt;/div&gt;" vertex="1">
+          <mxGeometry height="40" width="100" x="390" y="1010" as="geometry" />
+        </mxCell>
+        <mxCell id="e1" edge="1" parent="1" source="start" style="endArrow=classic;html=1;strokeWidth=1.3;fontSize=15;fontFamily=Helvetica;" target="view_board" value="">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="e2" edge="1" parent="1" source="view_board" style="endArrow=classic;html=1;strokeWidth=1.3;fontSize=15;fontFamily=Helvetica;" target="select_case" value="">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="e3" edge="1" parent="1" source="select_case" style="endArrow=classic;html=1;strokeWidth=1.3;fontSize=15;fontFamily=Helvetica;" target="gps_check" value="">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="e4" edge="1" parent="1" source="gps_check" style="endArrow=classic;html=1;strokeWidth=1.3;fontSize=15;fontFamily=Helvetica;fontColor=#172B4D;labelBackgroundColor=#FFFFFF;" target="add_loc" value="Chưa có">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="e5" edge="1" parent="1" source="gps_check" style="endArrow=classic;html=1;strokeWidth=1.3;fontSize=15;fontFamily=Helvetica;fontColor=#172B4D;labelBackgroundColor=#FFFFFF;" target="loc_ready" value="Đã có">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="e6" edge="1" parent="1" source="add_loc" style="endArrow=classic;html=1;strokeWidth=1.3;fontSize=15;fontFamily=Helvetica;" target="pick_team" value="">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="e7" edge="1" parent="1" source="loc_ready" style="endArrow=classic;html=1;strokeWidth=1.3;fontSize=15;fontFamily=Helvetica;" target="pick_team" value="">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="e8" edge="1" parent="1" source="pick_team" style="endArrow=classic;html=1;strokeWidth=1.3;fontSize=15;fontFamily=Helvetica;" target="assign_dispatch" value="">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="e9" edge="1" parent="1" source="assign_dispatch" style="endArrow=classic;html=1;strokeWidth=1.3;fontSize=15;fontFamily=Helvetica;" target="field_action" value="">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="e10" edge="1" parent="1" source="field_action" style="endArrow=classic;html=1;strokeWidth=1.3;fontSize=15;fontFamily=Helvetica;" target="res_dec" value="">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="e11" edge="1" parent="1" source="res_dec" style="endArrow=classic;html=1;strokeWidth=1.3;fontSize=15;fontFamily=Helvetica;fontColor=#172B4D;labelBackgroundColor=#FFFFFF;" target="mark_resolved" value="Thành công">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="e12" edge="1" parent="1" source="res_dec" style="endArrow=classic;html=1;strokeWidth=1.3;fontSize=15;fontFamily=Helvetica;fontColor=#172B4D;labelBackgroundColor=#FFFFFF;" target="mark_cancelled" value="Hủy / Lỗi">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="e13" edge="1" parent="1" source="mark_resolved" style="endArrow=classic;html=1;strokeWidth=1.3;fontSize=15;fontFamily=Helvetica;" target="log_audit" value="">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="e14" edge="1" parent="1" source="mark_cancelled" style="endArrow=classic;html=1;strokeWidth=1.3;fontSize=15;fontFamily=Helvetica;" target="log_audit" value="">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="e15" edge="1" parent="1" source="log_audit" style="endArrow=classic;html=1;strokeWidth=1.3;fontSize=15;fontFamily=Helvetica;" target="end" value="">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+      </root>
+    </mxGraphModel>
+  </diagram>
+</mxfile>

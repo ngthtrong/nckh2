@@ -5,10 +5,10 @@ Nghiên cứu gồm hai nhánh dữ liệu độc lập và một chuỗi xử l
 Các nhánh dùng dữ liệu khác nhau và không có quan hệ ghép hàng giữa ảnh, tin nhắn và sự kiện. Vì vậy mỗi nhánh được đánh giá riêng, trên đơn vị riêng, và kết quả của nhánh này không được dùng làm bằng chứng cho nhánh khác.
 
 \begin{figure}[htbp]\centering
-\begin{tikzpicture}[>=Stealth,font=\footnotesize,node distance=5mm and 7mm,
+\begin{tikzpicture}[>=Stealth,font=\small,node distance=5mm and 7mm,
  box/.style={draw,rounded corners=2pt,align=center,text width=40mm,minimum height=11mm},
  ev/.style={box,dashed},
- lab/.style={font=\scriptsize\itshape}]
+ lab/.style={font=\footnotesize\itshape}]
 \node[box] (img) {Ảnh \ImageTotal{} mẫu, bốn mức ngập\\(Mục~\ref{sec:02-data-methods-data})};
 \node[box,right=of img] (cnn) {MobileNetV3-Large\\PTQ, QAT, cắt tỉa\\(Mục~\ref{sec:image-design})};
 \node[ev,right=of cnn] (imev) {Accuracy, macro-F1,\\lỗi nặng, latency};

@@ -1,0 +1,45 @@
+\section{Thiết kế nghiên cứu tổng quát}\label{sec:02-overview}
+\subsection{Quy trình và các nhánh đánh giá}
+Nghiên cứu gồm hai nhánh dữ liệu độc lập và một chuỗi xử lý báo cáo. Nhánh ảnh huấn luyện và tối ưu bộ phân loại bốn mức ngập chạy tại thiết bị. Nhánh khẩn cấp có cấu trúc dựng mô hình Logistic Regression trên bảng 32 trạng thái Boolean. Chuỗi xử lý báo cáo biểu diễn mỗi báo cáo bằng các trường quan sát, dựng đồ thị tương đồng, phân cụm, tổng hợp bằng chứng theo họ, tính điểm ưu tiên và lập lịch điều phối. Hình~\ref{fig:method-pipeline} cho thấy vị trí của từng bước và chỗ nhãn thật được nối vào.
+
+Các nhánh dùng dữ liệu khác nhau và không có quan hệ ghép hàng giữa ảnh, tin nhắn và sự kiện. Vì vậy mỗi nhánh được đánh giá riêng, trên đơn vị riêng, và kết quả của nhánh này không được dùng làm bằng chứng cho nhánh khác.
+
+\begin{figure}[htbp]\centering
+\begin{tikzpicture}[>=Stealth,font=\footnotesize,node distance=5mm and 7mm,
+ box/.style={draw,rounded corners=2pt,align=center,text width=40mm,minimum height=11mm},
+ ev/.style={box,dashed},
+ lab/.style={font=\scriptsize\itshape}]
+\node[box] (img) {Ảnh \ImageTotal{} mẫu, bốn mức ngập\\(Mục~\ref{sec:02-data-methods-data})};
+\node[box,right=of img] (cnn) {MobileNetV3-Large\\PTQ, QAT, cắt tỉa\\(Mục~\ref{sec:image-design})};
+\node[ev,right=of cnn] (imev) {Accuracy, macro-F1,\\lỗi nặng, latency};
+\node[box,below=8mm of img] (rep) {Báo cáo quan sát\\$(L,T,F,E,N,V,Q)$\\Generator 3.0, Candidate 4.1};
+\node[box,right=of rep] (graph) {Đồ thị tương đồng\\và phân cụm\\(RQ1)};
+\node[box,right=of graph] (prio) {Họ bằng chứng\\và điểm ưu tiên $P_k$\\(RQ2)};
+\node[box,below=of prio] (sched) {Lập lịch điều phối\\(RQ3)};
+\node[ev,left=of sched] (truth) {Evaluator nối nhãn thật\\sau khi đã lưu dự đoán};
+\draw[->] (img)--(cnn);\draw[->] (cnn)--(imev);
+\draw[->] (rep)--(graph);\draw[->] (graph)--(prio);\draw[->] (prio)--(sched);
+\draw[->,dashed] (sched)--(truth);
+\node[lab,above=1mm of rep.north west,anchor=south west] {Nhánh báo cáo};
+\node[lab,above=1mm of img.north west,anchor=south west] {Nhánh ảnh};
+\end{tikzpicture}
+\caption{Các nhánh nghiên cứu và vị trí của ba câu hỏi nghiên cứu; khung nét đứt là bước đánh giá}
+\label{fig:method-pipeline}
+\end{figure}
+
+Bảng~\ref{tab:method-map} ghi dữ liệu, phương pháp, thước đo và đơn vị thống kê của từng nhánh. Số lượng và nguồn kết quả chi tiết nằm ở Bảng~\ref{tab:experiment-map} của Chương~\ref{chap:04-evaluation}.
+
+\begin{longtable}{P{.13\textwidth}P{.28\textwidth}P{.24\textwidth}P{.24\textwidth}}
+\caption{Ánh xạ nhánh nghiên cứu, dữ liệu, phương pháp và thước đo}\label{tab:method-map}\\
+\toprule Nhánh & Dữ liệu và đơn vị & Phương pháp & Thước đo \\\midrule\endfirsthead
+\toprule Nhánh & Dữ liệu và đơn vị & Phương pháp & Thước đo \\\midrule\endhead
+Phân loại ảnh & \ImageTest{} ảnh test trong \ImageTotal{} ảnh; đơn vị là ảnh & MobileNetV3-Large bốn lớp; PTQ, QAT, cắt tỉa & Accuracy, macro-F1, lỗi nặng, latency \\
+Khẩn cấp có cấu trúc & 32 trạng thái Boolean & Logistic Regression so với quy tắc OR & Độ khớp nhãn ở ngưỡng 0,5 \\
+RQ1 & Generator 3.0, 80 run; chọn tham số trên 20 run calibration, báo cáo trên 40 run test; đơn vị là run & Đồ thị cổng tích so với dạng cộng; Louvain, Leiden & ARI, F1 theo cặp \\
+RQ2 & Candidate 4.1, 40 seed test; nhóm oracle; đơn vị là seed & Điểm $P_k$ theo họ bằng chứng so với năm đối chứng & NDCG@5, Spearman, overlap top-5, drift, churn \\
+RQ3 & Candidate 4.1, 40 seed; ba điều kiện nguồn lực lấy trung bình trong seed & Lịch điều phối từ cụm dự đoán, sáu chính sách & Harm, trễ hạn, điều phối trùng, điểm đến giả \\
+\bottomrule
+\end{longtable}
+
+\subsection{Ký hiệu}
+Công thức trong chương dùng nhiều chữ cái, nên các ký hiệu dễ nhầm được tách như sau. $M$ là kích thước batch khi huấn luyện; $B=\beta+\gamma$ chỉ xuất hiện ở chặn cạnh. $\mu_c^{\mathrm{img}},\sigma_c^{\mathrm{img}}$ là trung bình và độ lệch chuẩn ImageNet; $\sigma$ không có chỉ số trên là thang khoảng cách (mét) của cổng không gian, còn $\mu=2$ là hệ số cực đại của điểm ưu tiên. $\rho_c$ là mức severity của lớp ảnh; $s=10$ là thang của $\tanh$ trong điểm ưu tiên. $K$ là số láng giềng giữ lại khi làm thưa đồ thị, còn $k$ là chỉ số cụm. $\xi_0,\xi_j$ là hệ số của Logistic Regression, khác với trọng số cạnh $w_{ij}$. $\mathcal Y=\{\texttt{low},\texttt{medium},\texttt{high},\texttt{non\_flood}\}$ là tập bốn lớp ảnh.

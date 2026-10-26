@@ -1,0 +1,106 @@
+<mxfile host="Electron" agent="Antigravity">
+  <diagram id="diag-func-arch" name="Kien-truc-chuc-nang-he-thong">
+    <mxGraphModel dx="1337" dy="754" grid="0" gridSize="10" guides="1" tooltips="1" connect="1" arrows="1" fold="1" page="1" pageScale="1" pageWidth="1080" pageHeight="500" math="0" shadow="0">
+      <root>
+        <mxCell id="0" />
+        <mxCell id="1" parent="0" />
+        <mxCell id="c1_frame" parent="1" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#F4F7FB;strokeColor=#526B88;strokeWidth=1.5;arcSize=4;fontSize=15;" value="" vertex="1">
+          <mxGeometry height="478" width="275" x="20" y="16" as="geometry" />
+        </mxCell>
+        <mxCell id="c1_title" parent="1" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#DCE8F5;strokeColor=#526B88;strokeWidth=1.5;fontColor=#172B4D;fontSize=15;fontFamily=Helvetica;" value="&lt;b&gt;PHÂN HỆ DI ĐỘNG BIÊN (EDGE)&lt;/b&gt;" vertex="1">
+          <mxGeometry height="32" width="275" x="20" y="5" as="geometry" />
+        </mxCell>
+        <mxCell id="act_mob" parent="1" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#EDF3FA;strokeColor=#526B88;strokeWidth=1.2;fontSize=15;fontColor=#172B4D;fontFamily=Helvetica;" value="&lt;div style=&quot;line-height:1;&quot;&gt;&lt;b&gt;Người dân / Nạn nhân&lt;/b&gt;&lt;br&gt;&lt;b&gt;&amp;amp; Đội cứu hộ thực địa&lt;/b&gt;&lt;/div&gt;" vertex="1">
+          <mxGeometry height="52" width="200" x="57.5" y="58" as="geometry" />
+        </mxCell>
+        <mxCell id="app_flutter" parent="1" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#EDF3FA;strokeColor=#526B88;strokeWidth=1.8;fontSize=15;fontFamily=Helvetica;align=center;verticalAlign=top;spacingTop=6;fontColor=#172B4D;" value="&lt;div style=&quot;line-height:1;&quot;&gt;&lt;b&gt;Ứng dụng Di động (Flutter Client)&lt;/b&gt;&lt;hr&gt;&lt;div align=&quot;left&quot; style=&quot;color: rgb(0, 0, 0);&quot;&gt;• Tạo SOS và báo cáo hiện trường&lt;br&gt;• GPS, ảnh và AI tại thiết bị&lt;br&gt;• Lưu ngoại tuyến, đồng bộ và SMS dự phòng&lt;br&gt;• Theo dõi trạng thái cứu hộ&lt;/div&gt;&lt;/div&gt;" vertex="1">
+          <mxGeometry height="130" width="252.5" x="29" y="239.25" as="geometry" />
+        </mxCell>
+        <mxCell id="sms_gw" parent="1" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#EDF3FA;strokeColor=#526B88;strokeWidth=1.2;fontSize=15;fontFamily=Helvetica;align=center;fontColor=#172B4D;spacing=0;spacing=0;" value="&lt;div style=&quot;line-height:1;&quot;&gt;&lt;b&gt;SMS GATEWAY&lt;/b&gt;&lt;br&gt;Nhận SOS qua SMS&lt;br&gt;Chuyển tiếp đến Backend qua webhook&lt;/div&gt;" vertex="1">
+          <mxGeometry height="116" width="110" x="307" y="16" as="geometry" />
+        </mxCell>
+        <mxCell id="c2_frame" parent="1" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#F4F7FB;strokeColor=#526B88;strokeWidth=1.6;dashed=1;dashPattern=6 4;arcSize=4;fontSize=15;" value="" vertex="1">
+          <mxGeometry height="478" width="321" x="486" y="16" as="geometry" />
+        </mxCell>
+        <mxCell id="UHBnQhTRVOmlB7T9Xob0-1" edge="1" parent="1" source="c2_title" style="edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;jettySize=auto;html=1;defaultLabelBackgroundColor=page;fontSize=15;" target="act_disp" value="">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="c2_title" parent="1" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#DCE8F5;strokeColor=#526B88;strokeWidth=1.6;fontColor=#172B4D;fontSize=15;fontFamily=Helvetica;" value="&lt;b&gt;MÁY CHỦ XỬ LÝ TRUNG TÂM (BACKEND CORE)&lt;/b&gt;" vertex="1">
+          <mxGeometry height="43" width="321" x="486" y="5" as="geometry" />
+        </mxCell>
+        <mxCell id="gw_api" parent="1" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#EDF3FA;strokeColor=#526B88;strokeWidth=1.8;fontSize=15;fontFamily=Helvetica;align=center;verticalAlign=top;spacingTop=6;fontColor=#172B4D;" value="&lt;div style=&quot;line-height:1;&quot;&gt;&lt;b&gt;Cổng Tiếp nhận &amp;amp; REST API (FastAPI)&lt;/b&gt;&lt;hr&gt;&lt;div align=&quot;left&quot; style=&quot;line-height: 1.1; color: rgb(0, 0, 0);&quot;&gt;• Nhận báo cáo, ảnh và SOS qua SMS&lt;br&gt;• Kiểm tra dữ liệu, chống trùng khi gửi lại&lt;br&gt;• Cung cấp API và xác thực điều phối viên&lt;/div&gt;&lt;/div&gt;" vertex="1">
+          <mxGeometry height="104" width="298" x="499" y="58" as="geometry" />
+        </mxCell>
+        <mxCell id="db_storage" parent="1" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#EDF3FA;strokeColor=#526B88;strokeWidth=1.8;fontSize=15;fontFamily=Helvetica;align=center;verticalAlign=top;spacingTop=6;fontColor=#172B4D;" value="&lt;div style=&quot;line-height:1;&quot;&gt;&lt;b&gt;Lưu trữ · SQLite WAL và tệp ảnh&lt;/b&gt;&lt;br&gt;&lt;hr&gt;&lt;div align=&quot;left&quot; style=&quot;line-height: 1.1; color: rgb(0, 0, 0);&quot;&gt;• Báo cáo, đội cứu hộ và dữ liệu đồng bộ&lt;br&gt;• Nhật ký điều phối&lt;br&gt;• Ảnh hiện trường&lt;/div&gt;&lt;/div&gt;" vertex="1">
+          <mxGeometry height="101" width="298" x="499" y="211" as="geometry" />
+        </mxCell>
+        <mxCell id="core_rescue" parent="1" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#EDF3FA;strokeColor=#526B88;strokeWidth=1.8;fontSize=15;fontFamily=Helvetica;align=center;verticalAlign=top;spacingTop=6;fontColor=#172B4D;" value="&lt;div style=&quot;line-height:1;&quot;&gt;&lt;b&gt;Lõi Thuật toán &amp;amp; Phân cụm (rescue_core)&lt;/b&gt;&lt;hr&gt;&lt;div align=&quot;left&quot; style=&quot;line-height: 1.1; color: rgb(0, 0, 0);&quot;&gt;• Phân cụm đồ thị bằng Louvain&lt;br&gt;• Xếp hạng ưu tiên đa tiêu chí &lt;span&gt;\(P(c)\)&lt;/span&gt;&lt;br&gt;• Tách báo cáo thiếu vị trí/thời gian để xem xét&lt;br&gt;• Lưu đệm kết quả phân cụm&lt;/div&gt;&lt;/div&gt;" vertex="1">
+          <mxGeometry height="130" width="302" x="497" y="354" as="geometry" />
+        </mxCell>
+        <mxCell id="c3_frame" parent="1" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#F4F7FB;strokeColor=#526B88;strokeWidth=1.5;arcSize=4;fontSize=15;" value="" vertex="1">
+          <mxGeometry height="478" width="220" x="850" y="16" as="geometry" />
+        </mxCell>
+        <mxCell id="c3_title" parent="1" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#DCE8F5;strokeColor=#526B88;strokeWidth=1.5;fontColor=#172B4D;fontSize=15;fontFamily=Helvetica;" value="&lt;b&gt;PHÂN HỆ ĐIỀU PHỐI WEB (DASHBOARD)&lt;/b&gt;" vertex="1">
+          <mxGeometry height="43" width="220" x="850" y="5" as="geometry" />
+        </mxCell>
+        <mxCell id="act_disp" parent="1" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#EDF3FA;strokeColor=#526B88;strokeWidth=1.2;fontSize=15;fontColor=#172B4D;fontFamily=Helvetica;" value="&lt;div style=&quot;line-height:1;&quot;&gt;&lt;b&gt;Điều phối viên cứu hộ&lt;/b&gt;&lt;br&gt;(Dispatcher Web Client)&lt;/div&gt;" vertex="1">
+          <mxGeometry height="52" width="210" x="855" y="58" as="geometry" />
+        </mxCell>
+        <mxCell id="dash_web" parent="1" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#EDF3FA;strokeColor=#526B88;strokeWidth=1.8;fontSize=15;fontFamily=Helvetica;align=center;verticalAlign=top;spacingTop=6;fontColor=#172B4D;" value="&lt;div style=&quot;line-height:1;&quot;&gt;&lt;b&gt;Bàn điều phối Web (Leaflet GIS)&lt;/b&gt;&lt;hr&gt;&lt;div align=&quot;left&quot; style=&quot;color: rgb(0, 0, 0);&quot;&gt;&lt;span style=&quot;background-color: transparent;&quot;&gt;•&amp;nbsp;&lt;/span&gt;Bản đồ và danh sách cụm ưu tiên&lt;br&gt;• Xác minh, bổ sung thông tin báo cáo&lt;br&gt;• Phân công đội và cập nhật trạng thái&lt;br&gt;• Xem nhật ký, xuất CSV/GeoJSON&lt;/div&gt;&lt;/div&gt;" vertex="1">
+          <mxGeometry height="188" width="210" x="855" y="262" as="geometry" />
+        </mxCell>
+        <mxCell id="e_act_mob" edge="1" parent="1" source="act_mob" style="edgeStyle=orthogonalEdgeStyle;rounded=0;html=1;strokeWidth=1.5;strokeColor=#000000;endArrow=classic;startArrow=classic;fontSize=15;fontColor=#172B4D;labelBackgroundColor=#FFFFFF;" target="app_flutter" value="Tương tác App">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="e_act_disp" edge="1" parent="1" source="act_disp" style="edgeStyle=orthogonalEdgeStyle;rounded=0;html=1;strokeWidth=1.5;strokeColor=#000000;endArrow=classic;startArrow=classic;fontSize=15;fontColor=#172B4D;labelBackgroundColor=#FFFFFF;entryX=0.75;entryY=0;entryDx=0;entryDy=0;" target="dash_web" value="Vận hành Web">
+          <mxGeometry relative="1" x="-0.2567" as="geometry">
+            <Array as="points">
+              <mxPoint x="1012.5" y="150.28" />
+              <mxPoint x="1012.5" y="150.28" />
+            </Array>
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="e_mob_gw_ip" edge="1" parent="1" source="app_flutter" style="edgeStyle=orthogonalEdgeStyle;rounded=0;html=1;strokeWidth=1.6;strokeColor=#000000;endArrow=classic;startArrow=classic;fontSize=15;fontColor=#172B4D;labelBackgroundColor=#FFFFFF;" target="gw_api" value="Gửi báo cáo /&amp;nbsp;&lt;div&gt;Tra cứu trạng thái&lt;/div&gt;">
+          <mxGeometry relative="1" x="-0.3987" y="-9" as="geometry">
+            <mxPoint as="offset" />
+            <Array as="points">
+              <mxPoint x="437.9" y="270" />
+              <mxPoint x="437.9" y="143.8" />
+            </Array>
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="e_mob_sms" edge="1" parent="1" source="app_flutter" style="edgeStyle=orthogonalEdgeStyle;rounded=0;html=1;strokeWidth=1.5;strokeColor=#000000;dashed=1;endArrow=classic;fontSize=15;fontColor=#172B4D;labelBackgroundColor=#FFFFFF;exitX=0.75;exitY=0;exitDx=0;exitDy=0;" target="sms_gw" value="GSM SMS">
+          <mxGeometry relative="1" x="-0.0818" as="geometry">
+            <mxPoint x="-8" as="offset" />
+            <Array as="points">
+              <mxPoint x="220.6" y="176.8" />
+              <mxPoint x="278.4" y="176.8" />
+              <mxPoint x="278.4" y="80.2" />
+            </Array>
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="e_sms_gw" edge="1" parent="1" source="sms_gw" style="rounded=0;html=1;strokeWidth=1.5;strokeColor=#000000;endArrow=classic;fontSize=15;fontColor=#172B4D;labelBackgroundColor=#FFFFFF;whiteSpace=wrap;labelWidth=104;entryX=0;entryY=0.25;entryDx=0;entryDy=0;exitX=1;exitY=0.5;exitDx=0;exitDy=0;" target="gw_api" value="&lt;font style=&quot;font-size: 13px;&quot;&gt;Webhook&amp;nbsp;&lt;/font&gt;&lt;div&gt;&lt;font style=&quot;font-size: 13px;&quot;&gt;SOS&lt;/font&gt;&lt;/div&gt;">
+          <mxGeometry relative="1" x="-0.0901" as="geometry">
+            <mxPoint as="offset" />
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="e_gw_db" edge="1" parent="1" source="gw_api" style="edgeStyle=orthogonalEdgeStyle;rounded=0;html=1;strokeWidth=1.6;strokeColor=#000000;endArrow=classic;startArrow=classic;fontSize=15;fontColor=#172B4D;labelBackgroundColor=#FFFFFF;" target="db_storage" value="Đọc / ghi dữ liệu">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="e_db_core" edge="1" parent="1" source="db_storage" style="edgeStyle=orthogonalEdgeStyle;rounded=0;html=1;strokeWidth=1.6;strokeColor=#000000;endArrow=classic;startArrow=classic;fontSize=15;fontColor=#172B4D;labelBackgroundColor=#FFFFFF;" target="core_rescue" value="Đọc active reports ↔ Cache RAM (ETag)">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="e_gw_dash" edge="1" parent="1" source="gw_api" style="edgeStyle=orthogonalEdgeStyle;rounded=0;html=1;strokeWidth=1.6;strokeColor=#000000;endArrow=classic;startArrow=classic;fontSize=15;fontColor=#172B4D;labelBackgroundColor=#FFFFFF;whiteSpace=wrap;labelWidth=86;" target="dash_web" value="Dữ liệu điều phối / Cập nhật nghiệp vụ">
+          <mxGeometry relative="1" x="-0.0835" y="9" as="geometry">
+            <mxPoint as="offset" />
+            <Array as="points">
+              <mxPoint x="838.4" y="113" />
+              <mxPoint x="838.4" y="189.7" />
+              <mxPoint x="960" y="189.7" />
+            </Array>
+          </mxGeometry>
+        </mxCell>
+      </root>
+    </mxGraphModel>
+  </diagram>
+</mxfile>

@@ -1,0 +1,131 @@
+\section{Kiến trúc hệ thống}\label{sec:03-system-architecture}
+\subsection{Tổng thể các thành phần}
+Hệ thống cứu hộ khẩn cấp được thiết kế theo mô hình kiến trúc phân tán đa tầng, bao gồm ba phân hệ chính: (1) Ứng dụng di động biên trên nền Flutter cho phép người dân và lực lượng cứu hộ gửi báo cáo hiện trường, bổ sung vị trí, hình ảnh và tình trạng nạn nhân hoặc hộ dân cần hỗ trợ; (2) Máy chủ xử lý trung tâm nền FastAPI tích hợp lõi thuật toán \texttt{rescue\_core} phục vụ gom cụm đồ thị Louvain và xếp hạng ưu tiên đa tiêu chí $P(c)$; (3) Bàn điều phối Web GIS trên nền Leaflet phục vụ điều phối viên giám sát bản đồ sự cố và ra quyết định cứu trợ theo thời gian thực. Trạng thái nghiệp vụ được lưu trữ bền vững tại cơ sở dữ liệu SQLite (chế độ WAL), kết hợp cùng thư mục lưu trữ ảnh hiện trường (\texttt{uploads/}).
+
+Mô hình học sâu phân loại ngập lụt MobileNetV3 và bộ quy tắc tính điểm khẩn cấp được triển khai trực tiếp tại biên (On-device Edge AI) nhằm trích xuất đặc trưng tức thời. Các Jupyter Notebook nghiên cứu đóng vai trò là môi trường đánh giá độc lập để kiểm chứng thuật toán và phân tích hiệu năng ngoại tuyến, hoàn toàn tách biệt khỏi quy trình vận hành trực tuyến của hệ thống.
+
+\begin{landscape}
+\begin{figure}[p]
+\centering
+\setlength{\abovecaptionskip}{4pt}
+\includegraphics[width=\linewidth]{functional_architecture.pdf}
+\caption{Kiến trúc chức năng và các tuyến trao đổi dữ liệu của hệ thống}
+\label{fig:system-architecture}
+\end{figure}
+\end{landscape}
+
+Hệ thống cho phép tiếp nhận đồng thời dữ liệu thực tế từ ứng dụng di động của người dân và các nguồn dữ liệu mô phỏng phục vụ diễn tập thực nghiệm. Các bản ghi dữ liệu mô phỏng được gắn cờ phân biệt rõ ràng, đảm bảo quy trình kiểm thử và trực quan hóa bản đồ không ảnh hưởng đến các yêu cầu cứu hộ thực tế.
+
+\begin{landscape}
+\begin{figure}[p]
+\centering
+\setlength{\abovecaptionskip}{4pt}
+\includegraphics[width=\linewidth]{flowchart.pdf}
+\caption{Lưu đồ phối hợp bốn phân hệ và phản hồi trạng thái cứu hộ}
+\label{fig:overall-flowchart}
+\end{figure}
+\end{landscape}
+
+\subsection{Phân lớp ứng dụng Flutter}
+Ứng dụng di động Flutter được tổ chức theo kiến trúc Clean Architecture với ba tầng phân lập rõ ràng:
+\begin{itemize}
+\item Tầng Dữ liệu (\emph{Data layer}): Chứa các nguồn dữ liệu cục bộ (Hive database), nguồn dữ liệu từ xa (REST API client) và hiện thực các repository;
+\item Tầng Nghiệp vụ (\emph{Domain layer}): Định nghĩa các thực thể cốt lõi (\emph{entities}), giao diện repository, các trường hợp sử dụng (\emph{use cases}) và quy tắc nghiệp vụ như chính sách gửi thích ứng, kiểm tra mã băm tính toàn vẹn dữ liệu;
+\item Tầng Trình diễn (\emph{Presentation layer}): Chứa các bộ điều khiển trạng thái (controllers), giao diện người dùng (screens) và các thành phần hiển thị (widgets).
+\end{itemize}
+
+Khâu tích hợp On-device Edge AI trên ứng dụng di động sử dụng cơ chế xuất phụ thuộc điều kiện (\emph{conditional export}) giữa nền tảng Native và Web. Trên hệ điều hành Android, mô hình ONNX được nạp thông qua ONNX Runtime, trong khi mô hình ExecuTorch được gọi thông qua kênh giao tiếp nền tảng MethodChannel. Tương tự, kênh SMS dự phòng được kích hoạt qua MethodChannel giao tiếp với dịch vụ nhắn tin hệ thống. Nền tảng Web hỗ trợ kiểm thử luồng giao diện, truyền nhận HTTP và kịch bản đồng bộ ngoại tuyến.
+
+\begin{landscape}
+\begin{figure}[p]
+\centering
+\setlength{\abovecaptionskip}{4pt}
+\includegraphics[width=\linewidth]{mobile_architecture.pdf}
+\caption{Phân lớp Flutter, hợp đồng domain và tích hợp nền tảng}
+\label{fig:mobile-architecture-layers}
+\end{figure}
+\end{landscape}
+
+\subsection{Lưu trữ cục bộ và hàng đợi}
+Khi tạo báo cáo, ứng dụng ghi bản ghi và dữ liệu cần đồng bộ vào Hive. Outbox giữ message cùng định danh, hash, sequence và số lần thử. Repository điều phối gửi metadata/ảnh và chỉ xử lý hoàn tất khi phản hồi phù hợp. Nếu ảnh chưa gửi được, metadata hoặc bản ghi vẫn có thể tồn tại để tiếp tục lần sau.
+
+Việc chọn chế độ gửi được thực hiện khi có ảnh và được xem xét lại khi hàng đợi gửi sau gián đoạn. Không nên dùng nguyên đánh giá mạng cũ cho một lần đồng bộ mới. Workmanager định kỳ khoảng 15 phút trên nền tảng hỗ trợ; controller còn kích hoạt đồng bộ theo trạng thái kết nối. Chu kỳ khai báo không bảo đảm hệ điều hành sẽ thực thi đúng thời điểm trong mọi điều kiện nền hoặc tiết kiệm pin.
+
+Địa điểm báo cáo có thể null. Màn hình trung tâm cần có danh sách cho báo cáo thiếu vị trí ngoài bản đồ, bởi một bản ghi không xuất hiện trên bản đồ không có nghĩa không cần xử lý. Vị trí được nhập thủ công có nguồn \texttt{manual}; khi GPS thiết bị đến sau, quy tắc cập nhật dữ liệu xác định cách bổ sung/thay thế để giữ nguồn gốc.
+
+\subsection{Quy tắc trao đổi dữ liệu giữa ứng dụng và máy chủ}
+Ứng dụng và máy chủ trao đổi dữ liệu theo cùng một bộ quy tắc. Header \path{X-Message-Contract-Version} cho biết phiên bản quy tắc đang sử dụng, hiện là phiên bản 1. Metadata truyền qua \texttt{POST /sync/messages}; ảnh qua \texttt{POST /api/reports} dạng multipart với phần JSON \texttt{meta}. Batch có tối đa 50 message và 256 KiB; mỗi message có phản hồi riêng để app biết message nào nhận, trùng hoặc bị từ chối.
+
+Payload hash dùng SHA-256 của JSON chuẩn tắc RFC 8785 \citep{rfc8785}. Phần chuẩn tắc phải tạo cùng byte ở Dart và Python, nhất là biểu diễn số và thứ tự thuộc tính. Hash ở đây kiểm tra nội dung phù hợp định danh, không tự chứng minh danh tính người gửi hoặc sự thật của hiện trường.
+
+Một request có thể mất ACK sau khi transaction thành công. Khi app gửi lại cùng message và hash, backend trả duplicate thay vì tạo thao tác mới. Nếu cùng message ID nhưng nội dung khác, trả \texttt{ID\_REUSED\_WITH\_DIFFERENT\_PAYLOAD}. Nếu cặp client/sequence bị tái sử dụng, trả \texttt{SEQUENCE\_REUSED}. Cơ chế này cho phép retry trong mạng gián đoạn mà không đánh đổi tính nhất quán.
+
+\subsection{Lưu trữ backend}
+SQLite giữ bảng \texttt{reports}, \texttt{messages\_dedup}, \texttt{report\_events}, \texttt{teams}, \texttt{operators}, \texttt{sessions} và \texttt{server\_meta}. Ảnh nằm ngoài CSDL; bản ghi lưu tên, URL, hash và kích thước. Bảng báo cáo giữ payload gốc để bảo toàn những trường nghiên cứu chưa có cột riêng.
+
+Hình~\ref{fig:database-erd-detailed} trình bày ERD ở mức thiết kế nghiệp vụ, gồm người gửi/thiết bị, báo cáo cứu hộ, đội cứu hộ, điều phối viên và sự kiện xử lý. Sơ đồ dùng ký hiệu Crow's Foot để mô tả số lượng tham gia quan hệ; mỗi ô chỉ giữ thuộc tính cốt lõi. Người gửi/thiết bị là thực thể khái niệm, không hàm ý có bảng người dùng di động riêng; sự kiện tự động có thể không gắn với điều phối viên. Các bảng kỹ thuật như chống trùng, phiên đăng nhập và metadata máy chủ được mô tả ở phần lưu trữ.
+
+\begin{figure}[htbp]
+\centering
+\begin{tikzpicture}[node distance=9mm,>=Stealth,
+ box/.style={draw=black!80,align=center,text width=46mm,minimum height=17mm,font=\small,rounded corners=1pt}]
+\node[box] (reports) {\textbf{reports}\\
+  \scriptsize id, vị trí (lat, lng), status\\
+  \scriptsize trapped, injured, payload};
+\node[box,left=22mm of reports] (events) {\textbf{report\_events}\\
+  \scriptsize id, report\_id, kind\\
+  \scriptsize actor, source, created\_at};
+\node[box,below=of reports] (teams) {\textbf{teams}\\
+  \scriptsize id, name, phone\\
+  \scriptsize members, note, active};
+\node[box,below=of events] (ops) {\textbf{operators / sessions}\\
+  \scriptsize operators (id, user, role)\\
+  \scriptsize sessions (token, op\_id)};
+\node[box,below=of teams] (dedup) {\textbf{messages\_dedup}\\
+  \scriptsize message\_id, payload\_hash\\
+  \scriptsize client\_id, sequence\_number};
+\draw[->] (reports)--node[above,font=\scriptsize]{ghi nhật ký}(events);
+\draw[->] (reports)--node[right,font=\scriptsize]{giao đội}(teams);
+\draw[dashed,->] (ops)--node[left,font=\scriptsize]{actor kiểm toán}(events);
+\draw[dashed,->] (dedup.east)--++(8mm,0)|-node[pos=0.25,right,font=\scriptsize]{đồng bộ / upsert}(reports.east);
+\end{tikzpicture}
+\caption{Quan hệ logic chính của lưu trữ; nét đứt biểu diễn liên hệ nghiệp vụ}
+\label{fig:data-relations}
+\end{figure}
+
+Transaction theo từng message giúp lỗi của một phần batch không hủy các phần hợp lệ khác. Chế độ WAL cho phép dashboard đọc khi app ghi. \texttt{server\_meta} giữ sequence thay đổi, epoch và version đầu vào cụm. Migration bổ sung cột/bảng và chuẩn hóa trạng thái legacy khi khởi tạo, giữ dữ liệu hiện có.
+
+Cùng report ID được gửi lại để bổ sung ảnh hoặc dữ liệu sau mất ACK được xử lý theo quy tắc gộp. Backend giữ ảnh đầu tiên, thời điểm nhận đầu và các trường đã có; số bằng không là dữ liệu hợp lệ, không xem như trường trống. \texttt{owner\_client\_id} tham gia kiểm tra quyền gộp. Quyền sở hữu dựa trên client ID giúp chống sửa chéo theo quy tắc trao đổi dữ liệu hiện tại, nhưng không tự thay thế xác thực danh tính người gửi.
+
+\begin{landscape}
+\begin{figure}[p]
+\centering
+\setlength{\abovecaptionskip}{4pt}
+\includegraphics[width=\linewidth]{database_erd.pdf}
+\caption{ERD các thực thể và quan hệ nghiệp vụ của hệ thống cứu hộ}
+\label{fig:database-erd-detailed}
+\end{figure}
+\end{landscape}
+
+\subsection{Dịch vụ phân cụm và hàng xem xét}
+Adapter \texttt{to\_report\_v2} chuyển báo cáo lưu trữ sang tuple thuật toán. Nhãn ngập được ánh xạ \texttt{non\_flood}$\mapsto0$, \texttt{low}$\mapsto0{,}33$, \texttt{medium}$\mapsto0{,}66$, \texttt{high}$\mapsto1$. Nếu payload có \texttt{flood}, dùng trường này. Ứng dụng gửi điểm LR trong trường \texttt{E\_i}; adapter hiện lấy $E$ từ trường \texttt{urgency} nếu có, nếu không thì suy từ mô tả bằng từ khóa. Adapter chưa đọc trực tiếp \texttt{E\_i}, nên đường nối từ điểm LR của ứng dụng đến điểm khẩn cấp của thuật toán chưa được tích hợp. $N$ hiện là số mắc kẹt cộng số bị thương; $V$ là số nhóm yếu thế được chọn khi không có trường trực tiếp.
+
+Các ánh xạ chuyển thông tin định tính thành các đại lượng số học phục vụ giải thuật. Trọng số và tham số phân cụm, xếp hạng được cấu hình trong mã nguồn backend. Điều phối viên sử dụng kết quả trên dashboard để xem xét báo cáo, xác minh thông tin, giao đội và cập nhật trạng thái cứu hộ.
+
+Báo cáo resolved/cancelled được loại khỏi cụm đang hoạt động. Cụm được tính lại khi version dữ liệu liên quan thay đổi; nếu một lần tính kéo dài, dịch vụ có cơ chế cập nhật nền. \texttt{clusterId} có thể đổi giữa lần chạy, còn \texttt{clusterKey} dùng ID nhỏ nhất trong cụm để hỗ trợ giữ lựa chọn trên giao diện. Khóa này cũng có thể đổi khi thành viên thay đổi; các thao tác điều phối cần xác nhận danh sách hiện tại.
+
+\subsection{Dashboard và vòng phản hồi}
+Dashboard là HTML, ES module và CSS phục vụ từ backend hoặc nginx. Leaflet được tích hợp cục bộ để thư viện giao diện không cần phụ thuộc Internet bên ngoài khi triển khai mạng nội bộ. Giao diện polling báo cáo thay đổi và cụm mỗi 5 giây, dùng cursor/epoch và ETag để giảm tải so với tải lại toàn bộ.
+
+Điều phối viên có thể lọc theo trạng thái/cụm, xem chi tiết, gán đội, ghi chú, cập nhật vị trí và chuyển trạng thái. API quản trị hỗ trợ quản lý tài khoản và sao lưu. Nhật ký \texttt{report\_events} ghi actor, nguồn và thời gian thao tác để theo dõi quá trình xử lý. Ứng dụng di động định kỳ đồng bộ trạng thái báo cáo từ máy chủ để hiển thị phản hồi kịp thời cho người dân.
+
+\subsection{Luồng xử lý dữ liệu và hỗ trợ điều phối}
+Sơ đồ tại Hình~\ref{fig:research-pipeline} thể hiện ranh giới phân tách dữ liệu của hệ thống: các trường thông tin quan sát trực tiếp được đưa vào giải thuật gom cụm đồ thị và xếp hạng ưu tiên; các báo cáo thiếu thông tin vị trí được chuyển vào hàng đợi xem xét riêng; trong khi nhãn thực tế được bảo toàn độc lập phục vụ kiểm chứng thực nghiệm. Trên hệ thống vận hành thực tế, danh sách ưu tiên đóng vai trò hỗ trợ điều phối viên ra quyết định phân bổ nguồn lực, đảm bảo tính linh hoạt và an toàn trong tác chiến cứu hộ.
+\begin{landscape}
+\begin{figure}[p]
+\centering
+\setlength{\abovecaptionskip}{4pt}\includegraphics[width=\linewidth]{research_pipeline_report.pdf}
+\caption{Ranh giới dữ liệu quan sát, hàng xem xét và luồng đánh giá}
+\label{fig:research-pipeline}
+\end{figure}
+\end{landscape}

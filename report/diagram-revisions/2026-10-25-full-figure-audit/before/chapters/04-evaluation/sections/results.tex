@@ -1,0 +1,196 @@
+\section{Kết quả đánh giá mô hình và thuật toán}\label{sec:04-evaluation-results}
+Các kết quả được trình bày lần lượt theo danh mục thực nghiệm: TN01 chất lượng ảnh; TN02 confidence; TN03 chuyển đổi runtime; TN04 benchmark app; TN05 lượng tử hóa; TN06 cắt tỉa; TN07 khẩn cấp LR; TN08--TN09 phân cụm cơ sở và stress; TN10--TN12 xếp hạng, robustness và độ nhạy hệ số; TN13 điều phối; TN14 kiểm thử hệ thống và truyền tải. Benchmark nhận diện trên nhiều mẫu điện thoại được trình bày riêng theo ba bước lựa chọn mô hình và runtime, kèm số liệu đầy đủ trong phụ lục. Kết quả kiểm thử chức năng và truyền tải được trình bày riêng tại Mục~\ref{sec:system-testing}.
+
+
+Trong các bảng so sánh, \textbf{chữ đậm} đánh dấu giá trị mô tả tốt nhất của từng chỉ số trong nhóm có thể so sánh; các giá trị đồng hạng đều được in đậm. Accuracy, Precision, Recall, F1, ARI và NDCG càng cao càng tốt; lỗi, MAE/RMSE, dung lượng, độ trễ và độ biến động càng thấp càng tốt. Bảng cắt tỉa so sánh trước/sau trong cùng runtime; bảng stress so sánh các phương pháp trong từng điều kiện; bảng robustness so sánh R/L theo từng cặp chỉ số. Bảng~\ref{tab:phone-selected-runtimes} so sánh độ trễ giữa hai runtime trên cùng điện thoại. Chữ đậm không khẳng định khác biệt có ý nghĩa thống kê. Cỡ mẫu, ma trận đếm, khoảng tin cậy, đường kính cụm và $p$-value không được xếp hạng như chỉ số hiệu quả; bảng RQ3 trình bày các tương phản với đối chứng khác nhau nên giữ nguyên cách đọc theo dấu $\Delta$.
+
+\subsection{Chất lượng phân loại ảnh FP32}
+Model mới được dùng cho các hình phân loại là MobileNetV3-Large với seed 1024. Trên 256 ảnh test, artifact ghi Accuracy \NewImageAccuracy\%, macro-F1 \NewImageMacroFOne\% và balanced accuracy 73,87\%. Bảng~\ref{tab:confusion} và \ref{tab:image-classes} đã được tính đối chiếu từ ma trận với JSON metric của chính model này.
+\input{generated/tables/confusion}
+\input{generated/tables/image-classes}
+\begin{figure}[htbp]\centering
+\includegraphics[width=.86\textwidth]{image-confusion.png}
+\caption{Ma trận nhầm lẫn trên test của MobileNetV3-Large seed 1024}
+\label{fig:image-confusion}
+\end{figure}
+\begin{figure}[htbp]\centering
+\includegraphics[width=.86\textwidth]{image-confusion-normalized.png}
+\caption{Ma trận nhầm lẫn test chuẩn hóa theo lớp thật của model seed 1024}
+\end{figure}
+Recall non\_flood là 90,70\%; recall high là 74,07\%. Trong 54 ảnh high, 12 ảnh bị dự đoán medium và 2 ảnh bị dự đoán low. Có 3 lỗi cách ít nhất hai mức severity (1,17\% test). Đây là chỉ số theo thứ tự mức ngập, chưa đo hệ quả cứu hộ.
+
+Checkpoint seed 1024 chưa lưu hash manifest chia tập của lần train. Các kiểm tra ảnh sạch và lỗi validation ở Chương~\ref{chap:02-data-methods} nhất quán với split dùng chung, nhưng chưa xác nhận toàn bộ phân công mẫu huấn luyện ban đầu. Phiên benchmark seed 1024 chạy lại đã có đủ dự đoán trên test, hash split/config và hash model để đối chiếu. Bằng chứng của phiên đánh giá này không thay thế hồ sơ chia tập còn thiếu của lần train; không dùng riêng chênh lệch Accuracy giữa các phiên để kết luận model cải thiện hoặc suy giảm.
+\begin{figure}[htbp]\centering
+\includegraphics[width=\textwidth]{image-examples.png}
+\caption{Các ví dụ phân loại sai trên validation của model seed 1024}
+\label{fig:image-examples}
+\end{figure}
+Trong hình, T là nhãn thật, P là dự đoán, conf là xác suất lớp dự đoán và true\_prob là xác suất nhãn thật. Ảnh minh họa gồm các lỗi validation, không phải ví dụ đúng/sai trên test như hình của phiên cũ. Có lỗi confidence cao; không suy nguyên nhân sai nhãn, góc chụp hay che khuất chỉ từ hình. Các ảnh nguồn Dataset\_Flood giữ tác quyền ban đầu; minh họa nội bộ không xác nhận quyền phát hành lại ngoài báo cáo.
+
+\subsection{Confidence và chính sách gửi metadata}
+Các phân tích confidence dưới đây thuộc benchmark FP32 seed \BenchmarkSeed{} và dùng CSV dự đoán đi kèm. ECE của phiên benchmark là \ImageECE{} và Brier \ImageBrier{}.
+Hình~\ref{fig:confidence-calibration} được tính từ dự đoán FP32 trên 256 ảnh test với bin rộng 0,1. Đường reliability so sánh confidence trung bình với tỷ lệ đúng trong mỗi bin; biểu đồ số mẫu cho biết một điểm trên đường có bao nhiêu quan sát. Đây là phép mô tả trên split hiện tại, không phải kết quả đã hiệu chuẩn lại mô hình. Giá trị ECE nêu trên được lấy theo cấu hình artifact gốc, không tính lại ECE từ các bin minh họa này.
+\begin{figure}[htbp]\centering
+\includegraphics[width=\textwidth]{confidence-calibration.pdf}
+\caption{Reliability và số mẫu theo confidence của mô hình FP32 trên tập test}
+\label{fig:confidence-calibration}
+\end{figure}
+
+Ở ngưỡng $p\geq0{,}90$, CSV được chọn có \HighConfidenceCount/\ImageTest{} ảnh (\HighConfidenceCoverage\%), trong đó \HighConfidenceCorrect{} dự đoán đúng. Kết quả này bổ sung thông tin cho chính sách gửi metadata; nó không bảo đảm mọi ảnh camera mới có confidence cao đều đúng. Ngưỡng 0,90 là cấu hình ứng dụng đang có, không được chọn lại từ phân tích này. Nếu dùng tập test để chỉnh ngưỡng, cần tập xác nhận mới để đánh giá quyết định sau điều chỉnh.
+
+Nghiên cứu calibration phân biệt confidence của mạng với khả năng đúng quan sát được và khảo sát temperature scaling trên các bài toán phân loại \citep{guo2017calibration}. Đối với đề tài, một bước tiếp theo là fit phép hiệu chuẩn trên validation rồi đo trên tập camera độc lập. Đồng thời, cần đánh giá cả lượng dữ liệu tiết kiệm và số ca quan trọng bị thiếu ảnh tại trung tâm, bởi tỷ lệ phân loại đúng chưa đủ đo chất lượng quyết định truyền tải.
+
+\subsection{Đối chiếu PyTorch, ONNX và ExecuTorch}
+Bảng runtime FP32 dưới đây thuộc model seed \BenchmarkSeed{}; benchmark trên bốn điện thoại dùng seed 159/1024 tại Mục~\ref{sec:phone-benchmark-results}, lượng tử hóa thuộc seed \QuantizationSeed{} và cắt tỉa thuộc seed \PruningSeed{}. Các nguồn được chọn độc lập với checkpoint đang triển khai, tránh gán số liệu lịch sử cho model mới khi chưa đo lại.
+
+\input{generated/tables/pth_onnx_pte}
+
+Đồng thuận top-1 PTH--ONNX là \CpuOnnxAgreement\% và PTH--PTE là \CpuPteAgreement\% trên \ImageTest{} ảnh. Sai khác xác suất tối đa tương ứng là $\CpuOnnxMaxDiff$ và $\CpuPteMaxDiff$. Các phép đo này kiểm tra việc giữ đầu ra sau chuyển đổi trên split và pipeline đã khai báo.
+
+Bảng~\ref{tab:pth_onnx_pte} trình bày dung lượng và trung vị lời gọi suy luận của từng định dạng trong cùng phiên. Đây là đối chiếu trên máy tính, không đủ để chọn runtime nhanh nhất trên mọi điện thoại. Chênh lệch kích thước checkpoint và file triển khai không đồng nghĩa toàn bộ phần chênh lệch là tham số tính toán cần cắt tỉa.
+
+Verification trên \VerificationSamples{} ảnh test ghi \VerificationPassedChecks{} kiểm tra local pass gồm tiền xử lý, precision, provider, parity và label mapping. Công cụ verification chỉ kiểm tra PTH/ONNX trên CPU; trường mobile của tệp này không đánh giá phiên benchmark ứng dụng độc lập. Kết quả full test xác nhận đường suy luận đã kiểm tra trên tập cố định, chưa thay thế phép đối chiếu pixel/runtime native trên điện thoại.
+
+\subsection{Đánh giá mô hình nhận diện trên các mẫu điện thoại}\label{sec:phone-benchmark-results}
+Theo thiết lập ở Mục~\ref{sec:phone-benchmark-setup}, bộ đánh giá gồm đủ 32 cấu hình: bốn điện thoại, hai seed 159/1024, hai biến thể baseline/cắt tỉa và hai runtime ONNX/PTE. Mỗi cấu hình có 256 ảnh test và năm lượt warmup; không có lỗi suy luận hoặc warmup trong các JSON đã lưu. Nguồn kết quả và cách đối chiếu được mô tả ở Mục~\ref{sec:phone-benchmark-evidence}. Ba bảng dưới đây trình bày cơ sở lựa chọn; Mục~\ref{sec:phone-full-results} giữ đủ kết quả từng cấu hình và từng lớp.
+
+\subsubsection{So sánh baseline và cắt tỉa trong từng seed}
+Bảng~\ref{tab:phone-model-quality} dùng cùng bốn điện thoại để đối chiếu bốn phương án; B là baseline, P là cắt tỉa có cấu trúc. Mỗi giá trị là trung bình có trọng số bằng nhau của tám phiên máy--runtime thuộc phương án đó. Trong cùng máy và model, ONNX/PTE trùng nhãn dự đoán trên 256/256 ảnh, nên lấy trung bình hai runtime không làm tăng số ảnh độc lập. Không diễn giải tám phiên hoặc toàn bộ dự đoán lặp là các tập test độc lập.
+
+\input{generated/tables/phone-model-quality}
+
+Precision (P) đo tỷ lệ đúng trong các ảnh được dự đoán thuộc một lớp; Recall (R) đo tỷ lệ nhận ra ảnh thật của lớp đó. F1 của mỗi lớp là trung bình điều hòa của Precision và Recall; macro-F1 lấy trung bình F1 bốn lớp, không tính bằng F1 của hai số P/R macro. Để cân bằng chất lượng giữa các lớp, phân tích ưu tiên macro-F1, dùng Accuracy làm tiêu chí phụ khi bằng nhau. Đây là quy tắc lựa chọn khi phân tích kết quả hiện có, không phải tiêu chí đã đăng ký trước khi chạy thực nghiệm.
+
+Trong seed 159, cắt tỉa tăng macro-F1 từ 73,29\% lên 74,26\% (khoảng 0,969 điểm phần trăm), đồng thời tăng cả P/R macro trung bình. Trong seed 1024, macro-F1 tăng từ 74,15\% lên 74,58\% (khoảng 0,422 điểm phần trăm), nhưng P macro giảm nhẹ từ 74,67\% xuống 74,50\%. Vì vậy, chọn bản cắt tỉa trong mỗi seed theo tiêu chí F1, không gọi mọi chỉ số đều được cải thiện. Kết quả từng máy ở phụ lục cũng cho thấy seed 159 cắt tỉa không tăng F1 trên Samsung S10e.
+
+Giữa hai bản cắt tỉa, seed 1024 cao hơn seed 159 khoảng 0,314 điểm phần trăm macro-F1 và 0,098 điểm phần trăm Accuracy trung bình. Đây là chênh lệch mô tả nhỏ, chưa được kiểm định ý nghĩa thống kê; seed 1024 không thắng trên mọi máy. Cơ sở ưu tiên tiếp tục được kiểm tra qua chất lượng lớp ngập cao và sai lệch thứ bậc dưới đây.
+
+\subsubsection{Đánh đổi phát hiện ngập cao và sai lệch mức ngập}
+MAE/RMSE được tính bổ sung từ nhãn thật và dự đoán đã lưu, với thứ tự non\_flood$=0$, low$=1$, medium$=2$, high$=3$. Đơn vị là mức phân loại quy ước, không phải mét nước; RMSE nhấn mạnh sai lệch nhiều mức hơn MAE. Lỗi nặng là lệch ít nhất hai mức. Bảng~\ref{tab:phone-model-tradeoffs} lấy trung bình chỉ số từng phiên như bảng trước; cột lỗi nặng là số lỗi trung bình trên 256 ảnh, có thể không nguyên. RMSE trong bảng là trung bình RMSE từng phiên, không phải RMSE tính từ các dự đoán gộp.
+
+\input{generated/tables/phone-model-tradeoffs}
+
+Seed 1024 cắt tỉa có Recall high trung bình cao nhất, 87,96\%, so với 76,85\% của baseline cùng seed. Mức tăng khoảng 11,11 điểm phần trăm đi kèm Precision high giảm từ 86,01\% xuống 80,85\%: phát hiện được nhiều ảnh ngập cao hơn, đồng thời tăng việc gán nhầm lớp khác thành high. So với seed 159 cắt tỉa, seed 1024 cắt tỉa có cả Precision high và Recall high cao hơn. Điều này phù hợp với định hướng ưu tiên hạn chế bỏ sót ngập cao của nguyên mẫu hỗ trợ cứu hộ, với điều kiện vẫn xem dự đoán cùng các thông tin báo cáo khác; chưa chứng minh hiệu quả hay mức an toàn cứu hộ thực tế.
+
+MAE thấp nhất thuộc seed 1024 cắt tỉa (0,2461 mức), nhưng baseline 1024 có RMSE thấp hơn (0,5191 so với 0,5210) và ít lỗi nặng trung bình hơn (2,25 so với 3,25). Do đó, không có phương án tốt nhất trên mọi tiêu chí. Báo cáo ưu tiên seed 1024 cắt tỉa nhờ cân bằng F1 và khả năng phát hiện high; nếu đặt chi phí lỗi nhiều mức hoặc báo nhầm cao hơn, baseline 1024 vẫn là đối chứng cần giữ.
+
+\subsubsection{Đối chiếu runtime trên từng điện thoại}
+Bảng~\ref{tab:phone-selected-runtimes} đối chiếu ONNX Runtime với ExecuTorch/PTE trên từng điện thoại, giữ cùng model seed 1024 cắt tỉa. Mỗi máy có hai dòng; chữ đậm chỉ đánh dấu độ trễ thấp hơn trong cặp runtime của máy đó, không dùng để xếp hạng giữa các điện thoại. P50 và P95 là các phân vị thời gian xử lý ảnh theo nearest-rank. Hai runtime cho cùng nhãn dự đoán trên 256 ảnh của từng máy, nên bảng này tập trung vào độ trễ; kết quả từng cấu hình được giữ đầy đủ trong phụ lục.
+
+\input{generated/tables/phone-selected-runtimes}
+
+PTE có P50 từ 34,40 đến 90,89 ms và P95 từ 103,34 đến 202,81 ms trên bốn máy. So với ONNX trong cùng máy/model, tăng tốc theo P50 từ 1,89 đến 3,27 lần. Trung bình P50 của bốn máy giảm từ 139,96 ms xuống 59,45 ms; đây là trung bình các trung vị theo máy, không phải trung vị gộp. PTE đồng thời có mean/P50/P95 thấp hơn ONNX ở cả 16 cặp máy--model của bộ đánh giá, trong khi giữ cùng dự đoán top-1 trong từng cặp.
+
+Các phép đo bao gồm giải mã, tiền xử lý và suy luận trong \texttt{classifyImage}, không bao gồm đọc ảnh package hay truyền báo cáo tới server. Mỗi cấu hình mới có một phiên lưu, các runtime được chạy ở thời điểm khác nhau và hồ sơ thiếu kiểm soát nhiệt độ/tải; kết quả chưa xác lập mức tăng tốc ổn định trên thiết bị khác hoặc khả năng tiết kiệm pin/RAM. Cắt tỉa cũng không tự bảo đảm nhanh hơn baseline: riêng ONNX seed 1024 cắt tỉa trên Redmi Note 13 có P50 239,02 ms, cao hơn baseline 175,08 ms.
+
+\paragraph{Kết luận lựa chọn.}
+Trong phạm vi bộ benchmark đã thực hiện, phương án được ưu tiên cho bước triển khai nguyên mẫu tiếp theo là \textbf{MobileNetV3-Large seed 1024, cắt tỉa có cấu trúc, chạy ExecuTorch/PTE}. Lựa chọn dựa trên macro-F1 trung bình cao nhất, Recall high cao nhất, MAE nhỏ nhất trong bốn phương án, cùng độ trễ PTE thấp hơn ONNX trên từng máy đã thử. Vẫn giữ baseline 1024 để đối chiếu đánh đổi Precision high, RMSE và lỗi nặng. Đây là lựa chọn sau khi xem kết quả test; cần bộ ảnh camera độc lập và phép đo lặp để xác nhận chất lượng sau lựa chọn, không điều chỉnh ngưỡng confidence từ chính tập test. Kết luận này không xác nhận APK triển khai hiện tại đã thay model, không thay thế kiểm thử E2E Android và không suy ra hiệu quả cứu hộ ngoài thực địa.
+
+\subsection{Benchmark lượng tử hóa và nén mô hình}
+Bảng~\ref{tab:fp32_ptq_qat} đối chiếu các chỉ số chất lượng, kích thước tệp và độ trễ giữa mô hình gốc FP32 và các phương án tối ưu hóa lượng tử hóa (PTQ và QAT).
+
+\input{generated/tables/fp32_ptq_qat}
+
+PTQ INT8 đạt Accuracy \PTQAccuracy\%, với đồng thuận top-1 FP32--PTQ là \PTQAgreement\%. Bảng~\ref{tab:fp32_ptq_qat} trình bày đồng thời dung lượng, chất lượng và trung vị độ trễ để đánh giá đánh đổi với FP32 trên cùng tập test.
+
+Các thời gian trong bảng thuộc cùng phiên đo FP32/PTQ/QAT. Artifact lượng tử hóa riêng có thể có trung vị khác vì phiên đo khác; báo cáo không chọn số thuận lợi ở phiên khác để khẳng định INT8 luôn nhanh hơn. Lợi ích tốc độ cần được kiểm tra trên runtime và phần cứng triển khai.
+
+Theo summary đã chọn, QAT INT8 đạt Accuracy \QATAccuracy\%, macro-F1 \QATMacroFOne\% và \QATCriticalCount{} lỗi nặng. Độ trễ được đối chiếu với hai phương án còn lại trong cùng bảng. Kết quả đặc trưng cho checkpoint và quy trình đã lưu; không suy ra QAT nói chung luôn tốt hơn hoặc kém hơn các phương pháp khác.
+
+\subsection{Cắt tỉa có cấu trúc}
+
+\input{generated/tables/pruning_st}
+
+Benchmark seed \PruningSeed{} đối chiếu mô hình gốc và cắt tỉa trên cùng test split ở ba định dạng. Artifact ghi số tham số từ \PruningParametersBefore{} xuống \PruningParametersAfter{}, giảm \PruningParameterReduction\%. Bảng~\ref{tab:pruning_st} giữ riêng Accuracy, macro-F1, lỗi nặng, dung lượng và trung vị độ trễ của từng phương án, tránh thay đổi một chỉ số tổng hợp che khuất các đánh đổi còn lại.
+
+Model cắt tỉa đạt Accuracy \PruningAccuracy\% và macro-F1 \PruningMacroFOne\%, nhưng có \PruningCriticalCount{} lỗi nặng so với 3 lỗi của model gốc. Đồng thuận top-1 giữa PTH gốc và cắt tỉa là \PruningAgreement\%. Mức tăng chỉ số tổng hợp đi kèm các ảnh chuyển từ đúng sang sai và ngược lại; cần xem từng lớp và disagreement để đánh giá đánh đổi.
+
+Độ trễ trước/sau cắt tỉa phải được so trong cùng runtime và cùng phiên. Ít tham số hơn không bảo đảm runtime nhanh hơn, vì kernel, bố trí graph và backend có thể khác. Một phiên đo CPU chưa đủ để khẳng định ưu thế hiệu năng tổng quát hoặc tốc độ trên điện thoại.
+
+\begin{figure}[htbp]\centering
+\includegraphics[width=\textwidth]{compression-tradeoffs.pdf}
+\caption{Đánh đổi dung lượng--accuracy theo summary nén và độ trễ trước/sau cắt tỉa}
+\label{fig:compression-tradeoffs}
+\end{figure}
+
+\subsection{Khẩn cấp LR: độ khớp nhãn thay thế}
+JSON v5 ghi fidelity trên 32 trạng thái tại threshold 0,5 bằng 1,0. Bảng so sánh với quy tắc cho thấy tất cả profile khớp nhãn OR. Các audit dataset/final gate ghi kiểm tra integrity; audit nguồn giữ các trạng thái có điều kiện và thay đổi sau rà soát, không chuyển mọi hạng mục thành một phát biểu ``pass'' vô điều kiện.
+
+Sanity 10 vòng giữ một số profile dương để kiểm tra khả năng dự đoán trạng thái chưa có trong train của vòng đó. Có vòng recall 0,75 hoặc 0,667, nên không nên diễn giải kết quả toàn bảng là tổng quát hoàn hảo khi huấn luyện thiếu profile. Đây là kiểm tra kỹ thuật trong không gian tổng hợp hữu hạn. Mô hình không được đánh giá trên người bệnh, tin nhắn tự do hoặc dữ liệu điều phối thực.
+
+Ứng dụng đã có chức năng nạp mô hình và tính điểm LR từ các dấu hiệu khẩn cấp được người dùng lựa chọn. Thiết kế tích hợp sử dụng trường \texttt{E\_i} gửi lên máy chủ, kết hợp với thông tin \texttt{urgency} do backend xác định để phục vụ phân cụm và xếp hạng. Kết quả hiện có gồm dữ liệu, mô hình và bước tính điểm tại ứng dụng. Đây là mô hình dùng đầu vào có cấu trúc, không phải mô hình phân tích tin nhắn tiếng Việt.
+
+\subsection{RQ1: chất lượng phân cụm cơ sở}
+\input{generated/tables/rq1-benchmark}
+\begin{figure}[htbp]\centering
+\includegraphics[width=\textwidth]{rq1-graph-baselines.pdf}
+\caption{ARI và CI 95\% của năm biến thể đồ thị trên 40 run test RQ1}
+\label{fig:rq1-baselines}
+\end{figure}
+Additive Louvain có ARI trung bình 0,9191, cao nhất bảng; Product Louvain là 0,9072. Product trừ Additive được chọn độc lập có hiệu trung bình $-0{,}01184$, CI bootstrap 95\% chưa hiệu chỉnh $[-0{,}02257;-0{,}00240]$, với 9 run thắng, 19 hòa và 12 thua. Wilcoxon raw $p=0{,}0987$, sau Holm $p=0{,}2560$. Kết quả không xác lập ưu thế thành phần tích.
+
+So với Additive khớp mật độ, Product có hiệu $+0{,}00989$, CI $[-0{,}00100;0{,}02082]$ và $p_{\mathrm{Holm}}=0{,}2560$. Hai pipeline có retained-edge fraction xấp xỉ 0,03011 và 0,03021, mean degree 9,90 và 9,94. Đây là diagnostic giảm chênh lệch mật độ, không xác định tác động nhân quả của operator, vì trọng số và thành viên cạnh vẫn khác.
+
+Product Leiden có ARI 0,9165; phép so sánh với Product Louvain sau Holm có $p=0{,}1120$. Các kết quả cho thấy cần đánh giá cả cấu hình đồ thị và bộ phát hiện cộng đồng. Các baseline mật độ thấp hơn trong bundle này không chứng minh chúng kém trong mọi môi trường hoặc mọi cách chuẩn hóa đặc trưng.
+
+Một phát hiện vận hành là Product có fake absorption và fake rejection đều bằng không, nhưng false-destination rate 16,49\%. Tin giả không hòa vào điểm thật nhưng tạo điểm đến giả riêng. Vì thế, tỷ lệ hấp thụ bằng không không được gọi là chống tin giả hiệu quả. Nếu scheduler coi các cụm giả là điểm cần đi, chúng vẫn tiêu tốn nguồn lực.
+
+\subsection{RQ1: độ nhạy dưới nhiễu và bản sao}
+\input{generated/tables/rq1-stress}
+\begin{figure}[htbp]\centering
+\includegraphics[width=.97\textwidth]{../paper/figures/rq1_stress_delta_ari.pdf}
+\caption{Thay đổi ARI trong từng phương pháp so với đối chứng, 40 run test RQ1}
+\label{fig:rq1-stress-report}
+\end{figure}
+
+Các mức nhiễu tọa độ và thời gian được thử đều làm ARI trung bình giảm. Không phương pháp nào đứng đầu ở mọi điều kiện. Bản sao hai lần làm ARI của bốn biến thể đồ thị tăng nhẹ, nhưng năm lần làm trung bình về khoảng 0,30. Geo-time DBSCAN giữ mức đối chứng thấp hơn khi chỉ thay multiplicity exact.
+
+Với Product Louvain, thay đổi năm lần là $-0{,}6108$, CI ghép cặp chưa hiệu chỉnh $[-0{,}6318;-0{,}5881]$. Hai multiplicity được thử cho thấy đáp ứng không đơn điệu, không xác định một ngưỡng sụp đổ chính xác và không chứng minh thêm bản sao có lợi. Quantile và cạnh top-$k$ là các cơ chế có thể liên quan, nhưng protocol chưa cô lập nguyên nhân.
+
+Lần chạy độc lập không gộp chỉ làm một số tổng hợp ở điều kiện hai lần khác nhẹ; kết luận GPS, timestamp và năm lần được giữ theo audit. Quan trọng hơn, thất bại ở phân cụm cùng tồn tại với bất biến sao chép của score khi grouping cố định. Hai phát biểu áp dụng hai tầng khác nhau.
+
+\subsection{RQ2: phù hợp với lợi ích mô phỏng}
+\input{generated/tables/rq2-alignment}
+\begin{figure}[htbp]\centering
+\includegraphics[width=\textwidth]{rq2-alignment.pdf}
+\caption{Mức phù hợp xếp hạng với lợi ích mô phỏng trong điều kiện oracle grouping}
+\label{fig:rq2-alignment}
+\end{figure}
+Điểm có chặn đạt NDCG@5 0,6669, CI 95\% $[0{,}6306;0{,}7018]$. Spearman trung bình $-0{,}0304$ với CI $[-0{,}1165;0{,}0549]$, overlap top-5 bằng 0,285 với CI $[0{,}2349;0{,}3400]$. NDCG@5 cao hơn legacy khoảng 0,0121 nhưng tương phản sau Holm không có ý nghĩa theo artifact.
+
+Ước lượng điểm của phương pháp có chặn còn thấp hơn chỉ số người (0,6709) và ngẫu nhiên (0,6763). Những chênh lệch điểm này không tự chứng minh khác biệt thống kê. Vì grouping oracle đã loại lỗi phân cụm khỏi điều kiện RQ2, sự phù hợp yếu không thể quy hoàn toàn cho phân hoạch sai.
+
+\subsection{RQ2: bất biến hẹp và thất bại dưới phối hợp}
+\input{generated/tables/rq2-robustness}
+\begin{figure}[htbp]\centering
+\includegraphics[width=\textwidth]{rq2-robustness.pdf}
+\caption{Năm điều kiện RQ2 cho thấy bất biến exact và các giới hạn trước khai báo tăng/phối hợp}
+\label{fig:rq2-robustness}
+\end{figure}
+Sao chép exact 2, 5 và 10 lần tạo priority drift bằng không cho score có chặn khi nhóm bằng chứng và đầu vào cố định. Legacy có drift lần lượt 0,0026; 0,0086 và 0,0148. Điều này hỗ trợ thuộc tính bất biến đã nêu, với đúng điều kiện kiểm tra.
+
+Các perturbation gần trùng, mâu thuẫn $F/E$, missingness và tăng $F$ dưới confidence thấp thường cho score có chặn drift nhỏ hơn legacy. Tuy nhiên, với tăng $N$ confidence thấp, drift có chặn là 0,0696 so với 0,0140; với tăng $V$ là 0,0758 so với 0,0074. Các kết quả này được giữ như hạn chế thay vì chỉ trình bày bản sao exact.
+
+Chiến dịch phối hợp confidence cao tạo drift 0,1688 cho score có chặn, 0,0309 cho legacy và false-priority lift 0,8828. Hiệu drift khoảng 0,1379 có $p_{\mathrm{Holm}}\approx9{,}1\times10^{-12}$ theo artifact. Có chặn và chống multiplicity exact không bảo đảm nguồn tin đúng, và chính các payload phối hợp khác nhau có thể vượt qua cơ chế đếm củng cố.
+
+\subsection{RQ2: độ nhạy các hệ số xếp hạng}\label{sec:rq2-sensitivity-results}
+\input{generated/tables/rq2-sensitivity}
+Phân tích hằng số one-at-a-time có 21 cấu hình trên 40 seed (840 quan sát seed/cấu hình). Span NDCG@5 trung bình đều dưới 0,01, lớn nhất khoảng 0,00546 khi thay trọng số $\omega_F$. Ổn định cục bộ này cùng tồn tại với alignment yếu; không chứng minh các hằng số đã có giá trị chính sách hoặc kết quả giữ nguyên ngoài miền perturbation.
+
+\subsection{RQ3: hệ quả điều phối từ phân hoạch dự đoán}
+\input{generated/tables/rq3-effects}
+Trên phân hoạch Product, điểm có chặn làm harm mô phỏng tăng 14,34 so với legacy và giảm tỷ lệ trễ hạn khoảng 1,88 điểm phần trăm. Cả hai tương phản không có ý nghĩa sau Holm: $p=0{,}563$ và $p=0{,}247$. Bảng dùng chiều $\Delta$ cải thiện, nên harm tăng tương ứng hiệu âm.
+
+So với gần nhất trước, score có chặn kém hơn về harm và trễ hạn, với $p_{\mathrm{Holm}}\approx4{,}1\times10^{-5}$ và $1{,}3\times10^{-6}$. Product cũng kém hơn Additive khớp mật độ khi dùng cùng score ở harm ($p_{\mathrm{Holm}}=0{,}000168$). Sai phân hoạch có hệ quả xuống tầng lập lịch, và bảo đảm điểm hữu hạn không loại bỏ hệ quả đó.
+\begin{figure}[htbp]\centering
+\includegraphics[width=\textwidth]{../paper/figures/rq3_dispatch_conditions.pdf}
+\caption{Trung bình mô tả theo điều kiện nguồn lực trên phân hoạch Product}
+\label{fig:rq3-conditions-report}
+\end{figure}
+
+Gần nhất trước có harm và trễ hạn trung bình thấp hơn trong mọi điều kiện được thử. Một diễn giải có thể là score theo nhu cầu chưa biểu diễn đủ chi phí đi lại và ràng buộc lịch; đây là giả thuyết giải thích, chưa được cô lập bằng thực nghiệm cơ chế. Kết quả không xác lập gần nhất trước là chính sách thực địa tối ưu.
+
+\subsection{Bàn luận xuyên các tầng}
+Các kết quả cho thấy cần đánh giá riêng ba dạng chất lượng: đúng biểu diễn tại thiết bị, đúng liên kết sự kiện và phù hợp quyết định điều phối. FP32 có parity tốt giữa runtime nhưng vẫn nhầm lớp; score có invariance exact nhưng alignment yếu; Product có chặn cạnh nhưng nhạy multiplicity. Không có một chỉ số đơn lẻ thay thế được các tầng còn lại.
+
+Mức hoàn thành phần mềm tạo một nền tảng thử nghiệm có thể trình diễn và kiểm tra việc tuân thủ quy tắc trao đổi dữ liệu. Phần nghiên cứu thuật toán cung cấp các giới hạn toán học và kết quả âm có ích cho cải tiến. Khả năng ứng dụng được phát biểu ở mức nguyên mẫu hỗ trợ quyết định; hiệu quả cứu hộ ngoài thực tế còn cần dữ liệu độc lập, chuyên gia và thử nghiệm thiết bị/hạ tầng.
