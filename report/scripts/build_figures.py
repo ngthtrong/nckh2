@@ -11,6 +11,7 @@ matplotlib.use('Agg')
 import matplotlib.pyplot as plt
 from matplotlib import font_manager
 import numpy as np
+from PIL import Image
 from mobile_evidence import audit_mobile
 
 ROOT = Path(__file__).resolve().parents[2]
@@ -54,7 +55,7 @@ def save(fig, name):
 
 
 def image_figures(predictions):
-    # Copy the new model's published plots verbatim; preserve the original pixels.
+    # Re-render saved values for legible print; retain original data and encodings.
     model = 'products/fe/model/Edge Ai/mobilenetv3_large_dataset_v4_seed1024/'
     names = {'cm_raw_test_mobilenetv3_large': 'image-confusion',
              'cm_norm_test_mobilenetv3_large': 'image-confusion-normalized',
@@ -62,14 +63,50 @@ def image_figures(predictions):
              'metrics_curve_mobilenetv3_large': 'training-metrics',
              'val_recall_per_class_mobilenetv3_large': 'validation-recall',
              'misclassified_examples_mobilenetv3_large': 'image-examples'}
-    for original, name in names.items():
-        raw = read(model + original + '.png')
-        (OUT / (name + '.png')).write_bytes(raw)
-        OUTPUTS[name] = {'png': hashlib.sha256(raw).hexdigest()}
+    for original in names:
+        read(model + original + '.png')  # provenance of the original visual
     history = rows(model + 'history_mobilenetv3_large.csv')
     for name in ['config_mobilenetv3_large.json', 'test_metrics_mobilenetv3_large.json',
                  'cm_raw_test_mobilenetv3_large.csv', 'misclassified_val_mobilenetv3_large.csv']:
         read(model + name)
+    classes=['low','medium','high','non_flood']
+    matrix_rows=rows(model+'cm_raw_test_mobilenetv3_large.csv')
+    matrix=np.array([[int(row[c]) for c in classes] for row in matrix_rows])
+    assert matrix.sum()==256
+    for normalized,name in [(False,'image-confusion'),(True,'image-confusion-normalized')]:
+        values=matrix/matrix.sum(axis=1,keepdims=True) if normalized else matrix
+        fig,ax=plt.subplots(figsize=(6.3,5.5),layout='constrained')
+        image=ax.imshow(values,cmap='viridis',vmin=0,vmax=1 if normalized else matrix.max())
+        ax.set(xticks=range(4),xticklabels=classes,yticks=range(4),yticklabels=classes,
+               xlabel='Predicted label',ylabel='True label',
+               title='MobileNetV3-Large — '+('Normalized by True Class' if normalized else 'Confusion Matrix Raw Counts'))
+        ax.tick_params(axis='x',labelrotation=25)
+        for y in range(4):
+            for x in range(4):
+                ax.text(x,y,f'{values[y,x]:.2f}' if normalized else str(matrix[y,x]),
+                        ha='center',va='center',fontsize=12,color='white' if values[y,x]<image.norm.vmax*.45 else 'black')
+        fig.colorbar(image,ax=ax,shrink=.9);save(fig,name)
+    epochs=[int(r['epoch']) for r in history]
+    specifications=[('training-loss','Training / Validation Loss','Loss',
+                     [('train_loss','Train Loss'),('val_loss','Val Loss')]),
+                    ('training-metrics','Training Metrics','Score',
+                     [('train_acc','Train Acc'),('val_acc','Val Acc'),('val_macro_f1','Val Macro F1'),('val_balanced_acc','Val Balanced Acc')]),
+                    ('validation-recall','Validation Recall per Class','Recall',
+                     [('val_'+c+'_recall',c+' recall') for c in classes])]
+    for name,title,ylabel,series in specifications:
+        fig,ax=plt.subplots(figsize=(6.3,4.1),layout='constrained')
+        for key,label in series:ax.plot(epochs,[float(r[key]) for r in history],label=label)
+        ax.set(xlabel='Epoch',ylabel=ylabel,title='MobileNetV3-Large — '+title,xticks=epochs)
+        ax.grid(alpha=.25);ax.legend(fontsize=11);save(fig,name)
+    errors=sorted(rows(model+'misclassified_val_mobilenetv3_large.csv'),key=lambda r:-float(r['confidence']))[:12]
+    fig,axes=plt.subplots(3,4,figsize=(10.1,5.5),layout='constrained')
+    for ax,row in zip(axes.flat,errors):
+        path=ROOT/'products/fe/model/Dataset_Flood'/row['relative_path']
+        read(path.relative_to(ROOT).as_posix())
+        with Image.open(path) as picture:ax.imshow(picture.convert('RGB'))
+        ax.set_title(f"T: {row['true_label']} | P: {row['pred_label']}\nconf={float(row['confidence']):.2f}, true_prob={float(row['true_prob']):.2f}",fontsize=10)
+        ax.axis('off')
+    save(fig,'image-examples')
     # Report coverage and error in bins, without interpreting confidence as medical risk.
     confidence = np.array([float(r['confidence_pth']) for r in predictions])
     correct = np.array([r['pred_pth'] == r['ground_truth'] for r in predictions])
@@ -83,11 +120,12 @@ def image_figures(predictions):
     axes[0].plot([0, 1], [0, 1], '--', color='#777777', linewidth=1, label='Đường lý tưởng')
     axes[0].plot([b['confidence'] for b in bins], [b['accuracy'] for b in bins], 'o-', color=BLUE)
     axes[0].set(xlabel='Confidence trung bình theo bin', ylabel='Tỷ lệ đúng theo bin',
-                xlim=(0, 1), ylim=(0, 1)); axes[0].legend(fontsize=8)
+                xlim=(0, 1), ylim=(0, 1)); axes[0].legend(fontsize=11)
     axes[1].bar([b['lower'] + .05 for b in bins], [b['n'] for b in bins], width=.085, color=BLUE)
     axes[1].set(xlabel='Bin confidence (độ rộng 0,1)', ylabel='Số ảnh test', xlim=(0, 1))
     save(fig, 'confidence-calibration')
-    return {'new_model_plots': names, 'historical_confidence_bins': bins,
+    return {'new_model_plots': names, 'rendered_from_saved_values': True,
+            'validation_examples':[r['relative_path'] for r in errors], 'historical_confidence_bins': bins,
             'confidence_ge_090': {'samples': int((confidence >= .9).sum()),
                                  'correct': int(correct[confidence >= .9].sum())},
             'history_rows': len(history)}
@@ -116,11 +154,11 @@ def research_figures():
              'product_cij_leiden': 'Product Leiden', 'convex_cij_louvain': 'Convex Louvain',
              'additive_cij_louvain_matched_density': 'Additive mật độ khớp'}
     selected = sorted([r for r in benchmark if r['method'] in names], key=lambda r: -float(r['ari_mean']))
-    fig, ax = plt.subplots(figsize=(7.5, 3.5), layout='constrained')
+    fig, ax = plt.subplots(figsize=(6.3, 3.5), layout='constrained')
     for i, r in enumerate(selected):
         mean = float(r['ari_mean']); low = float(r['ari_ci95_low']); high = float(r['ari_ci95_high'])
         ax.errorbar(mean, i, xerr=[[mean-low], [high-mean]], fmt='o', color=BLUE, capsize=4)
-        ax.text(.95, i, f'{mean:.4f}', va='center', fontsize=9)
+        ax.text(.95, i, f'{mean:.4f}', va='center', fontsize=11)
     ax.set(yticks=range(len(selected)), yticklabels=[names[r['method']] for r in selected],
            xlabel='ARI trung bình và CI bootstrap 95%', xlim=(.85, .99))
     ax.invert_yaxis(); ax.grid(axis='x', alpha=.18)
@@ -130,7 +168,7 @@ def research_figures():
     labels = {'duplicate_aware_robust': 'Có chặn', 'legacy_raw': 'Legacy', 'population_only': 'Chỉ số người',
               'random': 'Ngẫu nhiên', 'simple_linear': 'Tuyến tính', 'urgency_only': 'Chỉ khẩn cấp'}
     align = [r for r in rq2 if r['section'] == 'alignment' and r['metric'] == 'ndcg_at_5']
-    fig, ax = plt.subplots(figsize=(7.5, 3.8), layout='constrained')
+    fig, ax = plt.subplots(figsize=(6.3, 3.8), layout='constrained')
     for i, r in enumerate(align):
         mean = float(r['mean']); lo, hi = json.loads(r['paired_confidence_interval'])
         ax.errorbar(mean, i, xerr=[[mean-lo], [hi-mean]], fmt='o', capsize=4, color=BLUE)
@@ -142,7 +180,7 @@ def research_figures():
     cases = [('exact_duplicate_10x', 'Exact ×10'), ('near_duplicate', 'Gần trùng'),
              ('low_confidence_inflate_N', 'Tăng N, Q thấp'), ('low_confidence_inflate_V', 'Tăng V, Q thấp'),
              ('coordinated_high_confidence_campaign', 'Phối hợp Q cao')]
-    fig, ax = plt.subplots(figsize=(8, 3.8), layout='constrained')
+    fig, ax = plt.subplots(figsize=(6.3, 3.8), layout='constrained')
     x = np.arange(len(cases))
     for key, label, offset, color in [('duplicate_aware_robust', 'Có chặn', -.19, BLUE), ('legacy_raw', 'Legacy', .19, ORANGE)]:
         vals = [float(next(r for r in rq2 if r['section'] == 'robustness' and r['metric'] == 'priority_drift_abs_normalized'
@@ -193,7 +231,7 @@ def main():
          'image_model': 'mobilenetv3_large_dataset_v4_seed1024',
          'benchmark_sources': benchmarks,
          'benchmark_figures': ['confidence-calibration', 'compression-tradeoffs', 'mobile-latency'],
-         'note': 'Saved evidence only; six plots copied verbatim from seed1024; benchmark sources selected in config/benchmark-sources.json; no new observations.'},
+         'note': 'Saved evidence only; model plots re-rendered from seed1024 CSV values for print readability; same 12 validation examples sorted by confidence; benchmark sources selected in config/benchmark-sources.json; no new observations.'},
         ensure_ascii=False, indent=2) + '\n')
     print(f'Generated {len(OUTPUTS)} figures with input/output hashes.')
 

@@ -1,205 +1,1085 @@
-<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1080 500" width="1080" height="500">
-  <defs>
-    <style>
-      .sectitle { font-family: 'Roboto', 'DejaVu Sans', 'Arial', sans-serif; font-size: 12.5px; font-weight: bold; }
-      .boxbold { font-family: 'Roboto', 'DejaVu Sans', 'Arial', sans-serif; font-size: 11.5px; font-weight: bold; }
-      .boxsub { font-family: 'Roboto', 'DejaVu Sans', 'Arial', sans-serif; font-size: 10px; fill: #000000; }
-      .actorbold { font-family: 'Roboto', 'DejaVu Sans', 'Arial', sans-serif; font-size: 11.5px; font-weight: bold; fill: #000000; }
-      .actorsub { font-family: 'Roboto', 'DejaVu Sans', 'Arial', sans-serif; font-size: 10.5px; fill: #000000; }
-      .lblbold { font-family: 'Roboto', 'DejaVu Sans', 'Arial', sans-serif; font-size: 9.5px; font-weight: bold; }
-      .lblsub { font-family: 'Roboto', 'DejaVu Sans', 'Arial', sans-serif; font-size: 8.5px; fill: #000000; }
-    </style>
-    <marker id="arrow-blue" viewBox="0 0 10 10" refX="7" refY="5" markerWidth="6" markerHeight="6" orient="auto-start-reverse">
-      <path d="M 0 1.5 L 8 5 L 0 8.5 z" fill="#000000" />
-    </marker>
-    <marker id="arrow-orange" viewBox="0 0 10 10" refX="7" refY="5" markerWidth="6" markerHeight="6" orient="auto-start-reverse">
-      <path d="M 0 1.5 L 8 5 L 0 8.5 z" fill="#000000" />
-    </marker>
-    <marker id="arrow-purple" viewBox="0 0 10 10" refX="7" refY="5" markerWidth="6" markerHeight="6" orient="auto-start-reverse">
-      <path d="M 0 1.5 L 8 5 L 0 8.5 z" fill="#000000" />
-    </marker>
-    <marker id="arrow-teal" viewBox="0 0 10 10" refX="7" refY="5" markerWidth="6" markerHeight="6" orient="auto-start-reverse">
-      <path d="M 0 1.5 L 8 5 L 0 8.5 z" fill="#000000" />
-    </marker>
-    <marker id="arrow-actor" viewBox="0 0 10 10" refX="7" refY="5" markerWidth="6" markerHeight="6" orient="auto-start-reverse">
-      <path d="M 0 1.5 L 8 5 L 0 8.5 z" fill="#000000" />
-    </marker>
-    <marker id="arrow-green" viewBox="0 0 10 10" refX="7" refY="5" markerWidth="6" markerHeight="6" orient="auto-start-reverse">
-      <path d="M 0 1.5 L 8 5 L 0 8.5 z" fill="#000000" />
-    </marker>
-  </defs>
-
-  <!-- Background Canvas -->
-  <rect x="0" y="0" width="1080" height="500" fill="#ffffff" />
-
-  <!-- ==================== CỘT 1: PHÂN HỆ DI ĐỘNG BIÊN (TRÁI) ==================== -->
-  <rect x="20" y="16" width="275" height="468" rx="8" fill="#ffffff" stroke="#000000" stroke-width="1.5" />
-  <rect x="20" y="16" width="275" height="32" rx="8" fill="#ffffff" stroke="#000000" stroke-width="1.5" />
-  <text x="157" y="37" text-anchor="middle" font-family="Roboto, DejaVu Sans, Arial, sans-serif" font-size="12px" font-weight="bold" fill="#000000">PHÂN HỆ DI ĐỘNG BIÊN (EDGE)</text>
-
-  <!-- Actor Mobile -->
-  <rect x="36" y="58" width="242" height="52" rx="6" fill="#ffffff" stroke="#000000" stroke-width="1.2" />
-  <text x="157" y="79" text-anchor="middle" font-family="Roboto, DejaVu Sans, Arial, sans-serif" font-size="11px" font-weight="bold" fill="#000000">Người dân / Nạn nhân</text>
-  <text x="157" y="97" text-anchor="middle" font-family="Roboto, DejaVu Sans, Arial, sans-serif" font-size="10.5px" font-weight="bold" fill="#000000">&amp; Đội cứu hộ thực địa</text>
-
-  <!-- Mũi tên Actor <-> Flutter Client -->
-  <line x1="157" y1="110" x2="157" y2="132" stroke="#000000" stroke-width="1.5" marker-start="url(#arrow-actor)" marker-end="url(#arrow-actor)" />
-  <text x="166" y="124" font-family="Roboto, DejaVu Sans, Arial, sans-serif" font-size="8.5px" fill="#000000">Tương tác App</text>
-
-  <!-- Ứng dụng Di động Flutter -->
-  <rect x="36" y="132" width="242" height="336" rx="8" fill="#ffffff" stroke="#000000" stroke-width="1.8" />
-  <rect x="36" y="132" width="242" height="32" rx="8" fill="#ffffff" stroke="#000000" stroke-width="1.8" />
-  <text x="157" y="153" text-anchor="middle" font-family="Roboto, DejaVu Sans, Arial, sans-serif" font-size="11.5px" font-weight="bold" fill="#000000">Ứng dụng Di động (Flutter Client)</text>
-
-  <!-- Module 1: SOS & Báo cứu nạn -->
-  <rect x="47" y="174" width="220" height="64" rx="5" fill="#ffffff" stroke="#ffffff" stroke-width="1" />
-  <text x="58" y="193" font-family="Roboto, DejaVu Sans, Arial, sans-serif" font-size="10.5px" font-weight="bold" fill="#000000">SOS Khẩn cấp &amp; Báo cáo</text>
-  <text x="58" y="210" font-family="Roboto, DejaVu Sans, Arial, sans-serif" font-size="9.5px" fill="#000000">• SOS 1 chạm gửi tọa độ GPS tức thời</text>
-  <text x="58" y="226" font-family="Roboto, DejaVu Sans, Arial, sans-serif" font-size="9.5px" fill="#000000">• Báo ngập đa phương thức (Ảnh, N, V)</text>
-
-  <!-- Module 2: Edge AI -->
-  <rect x="47" y="248" width="220" height="86" rx="5" fill="#ffffff" stroke="#ffffff" stroke-width="1" />
-  <text x="58" y="267" font-family="Roboto, DejaVu Sans, Arial, sans-serif" font-size="10.5px" font-weight="bold" fill="#000000">Suy luận On-device Edge AI</text>
-  <text x="58" y="285" font-family="Roboto, DejaVu Sans, Arial, sans-serif" font-size="9.5px" fill="#000000">• Phân loại mức ngập F (MobileNetV3)</text>
-  <text x="58" y="301" font-family="Roboto, DejaVu Sans, Arial, sans-serif" font-size="9.5px" fill="#000000">• Runtime: ExecuTorch (chính), ONNX</text>
-  <text x="58" y="317" font-family="Roboto, DejaVu Sans, Arial, sans-serif" font-size="9.5px" fill="#000000">• Tính điểm khẩn cấp biên E_i</text>
-
-  <!-- Module 3: Outbox & Sync -->
-  <rect x="47" y="344" width="220" height="112" rx="5" fill="#ffffff" stroke="#ffffff" stroke-width="1" />
-  <text x="58" y="363" font-family="Roboto, DejaVu Sans, Arial, sans-serif" font-size="10.5px" font-weight="bold" fill="#000000">Hive Outbox &amp; Ngoại tuyến</text>
-  <text x="58" y="381" font-family="Roboto, DejaVu Sans, Arial, sans-serif" font-size="9.5px" fill="#000000">• Store-and-Forward chống mất tin</text>
-  <text x="58" y="397" font-family="Roboto, DejaVu Sans, Arial, sans-serif" font-size="9.5px" fill="#000000">• Chuẩn hóa băm JCS (RFC 8785)</text>
-  <text x="58" y="413" font-family="Roboto, DejaVu Sans, Arial, sans-serif" font-size="9.5px" fill="#000000">• Tra cứu tiến độ ca (/reports/status)</text>
-  <text x="58" y="429" font-family="Roboto, DejaVu Sans, Arial, sans-serif" font-size="9.5px" fill="#000000">• Tiếp nhận nhiệm vụ cứu hộ thực địa</text>
-
-
-  <!-- ==================== CỘT 2: MÁY CHỦ XỬ LÝ TRUNG TÂM (GIỮA) ==================== -->
-  <rect x="415" y="16" width="290" height="468" rx="8" fill="#ffffff" stroke="#000000" stroke-width="1.6" stroke-dasharray="6,4" />
-  <rect x="415" y="16" width="290" height="32" rx="8" fill="#ffffff" stroke="#000000" stroke-width="1.6" />
-  <text x="560" y="37" text-anchor="middle" font-family="Roboto, DejaVu Sans, Arial, sans-serif" font-size="12px" font-weight="bold" fill="#000000">MÁY CHỦ XỬ LÝ TRUNG TÂM (BACKEND CORE)</text>
-
-  <!-- Box 1: FastAPI Ingestion & Service -->
-  <rect x="428" y="58" width="264" height="110" rx="7" fill="#ffffff" stroke="#000000" stroke-width="1.8" />
-  <rect x="428" y="58" width="264" height="26" rx="7" fill="#ffffff" stroke="#000000" stroke-width="1.8" />
-  <text x="560" y="75" text-anchor="middle" font-family="Roboto, DejaVu Sans, Arial, sans-serif" font-size="10.5px" font-weight="bold" fill="#000000">Cổng Tiếp nhận &amp; REST API (FastAPI)</text>
-  <text x="439" y="99" font-family="Roboto, DejaVu Sans, Arial, sans-serif" font-size="9.5px" fill="#000000">• Hợp đồng JCS (RFC 8785) &amp; Header v1</text>
-  <text x="439" y="115" font-family="Roboto, DejaVu Sans, Arial, sans-serif" font-size="9.5px" fill="#000000">• Chống trùng lặp Idempotency (messages_dedup)</text>
-  <text x="439" y="131" font-family="Roboto, DejaVu Sans, Arial, sans-serif" font-size="9.5px" fill="#000000">• Tiếp nhận SMS Webhook (/api/sms/inbound)</text>
-  <text x="439" y="147" font-family="Roboto, DejaVu Sans, Arial, sans-serif" font-size="9.5px" fill="#000000">• Xác thực phiên &amp; REST API cho Mobile, Web</text>
-
-  <!-- Mũi tên Gateway <-> Storage (Ghi nhận tức thời) -->
-  <line x1="560" y1="168" x2="560" y2="198" stroke="#000000" stroke-width="1.6" marker-start="url(#arrow-teal)" marker-end="url(#arrow-teal)" />
-  <rect x="475" y="175" width="170" height="16" rx="3" fill="#ffffff" stroke="#000000" stroke-width="0.8" />
-  <text x="560" y="187" text-anchor="middle" font-family="Roboto, DejaVu Sans, Arial, sans-serif" font-size="8.5px" font-weight="bold" fill="#000000">Ghi nhận tức thời &amp; Đọc ca (SQLite WAL)</text>
-
-  <!-- Box 2: Lưu trữ Bền vững -->
-  <rect x="428" y="198" width="264" height="96" rx="7" fill="#ffffff" stroke="#000000" stroke-width="1.8" />
-  <rect x="428" y="198" width="264" height="26" rx="7" fill="#ffffff" stroke="#000000" stroke-width="1.8" />
-  <text x="560" y="215" text-anchor="middle" font-family="Roboto, DejaVu Sans, Arial, sans-serif" font-size="10.5px" font-weight="bold" fill="#000000">Kho Lưu trữ Bền vững (SQLite &amp; Files)</text>
-  <text x="439" y="239" font-family="Roboto, DejaVu Sans, Arial, sans-serif" font-size="9.5px" fill="#000000">• CSDL SQLite WAL (reports, teams, meta)</text>
-  <text x="439" y="255" font-family="Roboto, DejaVu Sans, Arial, sans-serif" font-size="9.5px" fill="#000000">• Nhật ký kiểm toán phân công report_events</text>
-  <text x="439" y="271" font-family="Roboto, DejaVu Sans, Arial, sans-serif" font-size="9.5px" fill="#000000">• Thư mục lưu trữ ảnh hiện trường (uploads/)</text>
-
-  <!-- Mũi tên Storage <-> rescue_core -->
-  <line x1="560" y1="294" x2="560" y2="324" stroke="#000000" stroke-width="1.6" marker-start="url(#arrow-purple)" marker-end="url(#arrow-purple)" />
-  <rect x="472" y="301" width="176" height="16" rx="3" fill="#ffffff" stroke="#ffffff" stroke-width="0.8" />
-  <text x="560" y="313" text-anchor="middle" font-family="Roboto, DejaVu Sans, Arial, sans-serif" font-size="8.5px" font-weight="bold" fill="#000000">Đọc active reports ↔ Cache RAM (ETag)</text>
-
-  <!-- Box 3: Lõi thuật toán rescue_core & ClusterService -->
-  <rect x="428" y="324" width="264" height="144" rx="7" fill="#ffffff" stroke="#000000" stroke-width="1.8" />
-  <rect x="428" y="324" width="264" height="26" rx="7" fill="#ffffff" stroke="#000000" stroke-width="1.8" />
-  <text x="560" y="341" text-anchor="middle" font-family="Roboto, DejaVu Sans, Arial, sans-serif" font-size="10.5px" font-weight="bold" fill="#000000">Lõi Thuật toán &amp; Phân cụm (rescue_core)</text>
-  <text x="439" y="365" font-family="Roboto, DejaVu Sans, Arial, sans-serif" font-size="9.5px" fill="#000000">• Ma trận đồ thị C_ij &amp; Phân cụm Louvain đa tỉ lệ</text>
-  <text x="439" y="381" font-family="Roboto, DejaVu Sans, Arial, sans-serif" font-size="9.5px" fill="#000000">• Điểm ưu tiên cụm P(c) đa tiêu chí (E, F, N, V)</text>
-  <text x="439" y="397" font-family="Roboto, DejaVu Sans, Arial, sans-serif" font-size="9.5px" fill="#000000">• Khóa clusterKey duy trì lựa chọn khi tải</text>
-  <text x="439" y="413" font-family="Roboto, DejaVu Sans, Arial, sans-serif" font-size="9.5px" fill="#000000">• Hàng xem xét (Review Queue) thiếu GPS/giờ</text>
-  <text x="439" y="429" font-family="Roboto, DejaVu Sans, Arial, sans-serif" font-size="9.5px" fill="#000000">• Bộ nhớ đệm phân cụm trên RAM (ETag)</text>
-
-
-  <!-- ==================== CỘT 3: BÀN ĐIỀU PHỐI WEB GIS (PHẢI) ==================== -->
-  <rect x="795" y="16" width="265" height="468" rx="8" fill="#ffffff" stroke="#000000" stroke-width="1.5" />
-  <rect x="795" y="16" width="265" height="32" rx="8" fill="#ffffff" stroke="#000000" stroke-width="1.5" />
-  <text x="927" y="37" text-anchor="middle" font-family="Roboto, DejaVu Sans, Arial, sans-serif" font-size="12px" font-weight="bold" fill="#000000">PHÂN HỆ ĐIỀU PHỐI WEB (DASHBOARD)</text>
-
-  <!-- Actor Dispatcher -->
-  <rect x="810" y="58" width="235" height="52" rx="6" fill="#ffffff" stroke="#000000" stroke-width="1.2" />
-  <text x="927" y="80" text-anchor="middle" font-family="Roboto, DejaVu Sans, Arial, sans-serif" font-size="11.5px" font-weight="bold" fill="#000000">Điều phối viên cứu nạn</text>
-  <text x="927" y="96" text-anchor="middle" font-family="Roboto, DejaVu Sans, Arial, sans-serif" font-size="10px" fill="#000000">(Dispatcher Web Client)</text>
-
-  <!-- Mũi tên Actor <-> Dashboard -->
-  <line x1="927" y1="110" x2="927" y2="132" stroke="#000000" stroke-width="1.5" marker-start="url(#arrow-actor)" marker-end="url(#arrow-actor)" />
-  <text x="936" y="124" font-family="Roboto, DejaVu Sans, Arial, sans-serif" font-size="8.5px" fill="#000000">Vận hành Web</text>
-
-  <!-- Bàn điều phối Web GIS Leaflet -->
-  <rect x="810" y="132" width="235" height="336" rx="8" fill="#ffffff" stroke="#000000" stroke-width="1.8" />
-  <rect x="810" y="132" width="235" height="32" rx="8" fill="#ffffff" stroke="#000000" stroke-width="1.8" />
-  <text x="927" y="153" text-anchor="middle" font-family="Roboto, DejaVu Sans, Arial, sans-serif" font-size="11.5px" font-weight="bold" fill="#000000">Bàn điều phối Web (Leaflet GIS)</text>
-
-  <!-- Module 1: Bản đồ giám sát -->
-  <rect x="821" y="174" width="213" height="64" rx="5" fill="#ffffff" stroke="#000000" stroke-width="1" />
-  <text x="832" y="193" font-family="Roboto, DejaVu Sans, Arial, sans-serif" font-size="10.5px" font-weight="bold" fill="#000000">Bản đồ Giám sát Leaflet GIS</text>
-  <text x="832" y="210" font-family="Roboto, DejaVu Sans, Arial, sans-serif" font-size="9.5px" fill="#000000">• Ranh giới cụm &amp; màu ưu tiên theo P(c)</text>
-  <text x="832" y="226" font-family="Roboto, DejaVu Sans, Arial, sans-serif" font-size="9.5px" fill="#000000">• Chấm gán tọa độ ca thiếu GPS/thời gian</text>
-
-  <!-- Module 2: Quản lý cụm & Ca -->
-  <rect x="821" y="248" width="213" height="86" rx="5" fill="#ffffff" stroke="#000000" stroke-width="1" />
-  <text x="832" y="267" font-family="Roboto, DejaVu Sans, Arial, sans-serif" font-size="10.5px" font-weight="bold" fill="#000000">Bảng Cụm &amp; Thẩm tra (Review)</text>
-  <text x="832" y="285" font-family="Roboto, DejaVu Sans, Arial, sans-serif" font-size="9.5px" fill="#000000">• Danh sách xếp hạng ưu tiên giảm dần P(c)</text>
-  <text x="832" y="301" font-family="Roboto, DejaVu Sans, Arial, sans-serif" font-size="9.5px" fill="#000000">• Hàng xem xét (Review Queue) thẩm tra SOS</text>
-  <text x="832" y="317" font-family="Roboto, DejaVu Sans, Arial, sans-serif" font-size="9.5px" fill="#000000">• Khóa clusterKey giữ ổn định hiển thị</text>
-
-  <!-- Module 3: Phân công & Quản trị -->
-  <rect x="821" y="344" width="213" height="112" rx="5" fill="#ffffff" stroke="#ffffff" stroke-width="1" />
-  <text x="832" y="363" font-family="Roboto, DejaVu Sans, Arial, sans-serif" font-size="10.5px" font-weight="bold" fill="#000000">Phân công Đội &amp; Quản trị</text>
-  <text x="832" y="381" font-family="Roboto, DejaVu Sans, Arial, sans-serif" font-size="9.5px" fill="#000000">• Giao đội cứu trợ &amp; đổi 4 trạng thái ca</text>
-  <text x="832" y="397" font-family="Roboto, DejaVu Sans, Arial, sans-serif" font-size="9.5px" fill="#000000">• Quản lý đội cứu hộ (/api/teams)</text>
-  <text x="832" y="413" font-family="Roboto, DejaVu Sans, Arial, sans-serif" font-size="9.5px" fill="#000000">• Nhật ký kiểm toán ca (report_events)</text>
-  <text x="832" y="429" font-family="Roboto, DejaVu Sans, Arial, sans-serif" font-size="9.5px" fill="#000000">• Quản lý tài khoản điều phối &amp; sao lưu DB</text>
-
-
-  <!-- ==================== CÁC TUYẾN KẾT NỐI LIÊN PHÂN HỆ ==================== -->
-  
-  <!-- 1. KÊNH IP TRỰC TIẾP (REST API) MOBILE <-> FASTAPI -->
-  <rect x="306" y="66" width="98" height="52" rx="4" fill="#ffffff" stroke="#000000" stroke-width="1" />
-  <text x="355" y="80" text-anchor="middle" font-family="Roboto, DejaVu Sans, Arial, sans-serif" font-size="9px" font-weight="bold" fill="#000000">KÊNH IP (REST)</text>
-  <text x="355" y="93" text-anchor="middle" font-family="Roboto, DejaVu Sans, Arial, sans-serif" font-size="8px" fill="#000000">• POST /sync, /reports</text>
-  <text x="355" y="105" text-anchor="middle" font-family="Roboto, DejaVu Sans, Arial, sans-serif" font-size="8px" fill="#000000">• GET /reports/status</text>
-
-  <!-- Mũi tên từ Flutter Client sang Hộp Kênh IP -->
-  <line x1="278" y1="92" x2="306" y2="92" stroke="#000000" stroke-width="1.6" marker-start="url(#arrow-blue)" marker-end="url(#arrow-blue)" />
-  <!-- Mũi tên từ Hộp Kênh IP sang FastAPI -->
-  <line x1="404" y1="92" x2="428" y2="92" stroke="#000000" stroke-width="1.6" marker-start="url(#arrow-blue)" marker-end="url(#arrow-blue)" />
-
-
-  <!-- 2. KÊNH GSM & SMS GATEWAY TRUNG GIAN -->
-  <rect x="306" y="132" width="98" height="52" rx="5" fill="#ffffff" stroke="#000000" stroke-width="1.2" />
-  <text x="355" y="147" text-anchor="middle" font-family="Roboto, DejaVu Sans, Arial, sans-serif" font-size="9px" font-weight="bold" fill="#000000">SMS GATEWAY</text>
-  <text x="355" y="160" text-anchor="middle" font-family="Roboto, DejaVu Sans, Arial, sans-serif" font-size="8px" fill="#000000">Thiết bị / Tổng đài GSM</text>
-  <text x="355" y="172" text-anchor="middle" font-family="Roboto, DejaVu Sans, Arial, sans-serif" font-size="7.5px" fill="#000000">Thu nhận tin SMS SOS</text>
-
-  <!-- Mũi tên từ Flutter Client sang SMS Gateway (GSM SMS) -->
-  <line x1="278" y1="158" x2="306" y2="158" stroke="#000000" stroke-width="1.5" stroke-dasharray="3,2" marker-end="url(#arrow-orange)" />
-  <text x="292" y="152" text-anchor="middle" font-family="Roboto, DejaVu Sans, Arial, sans-serif" font-size="7.5px" font-weight="bold" fill="#000000">GSM</text>
-
-  <!-- Mũi tên từ SMS Gateway sang FastAPI Webhook -->
-  <line x1="404" y1="158" x2="428" y2="158" stroke="#000000" stroke-width="1.5" marker-end="url(#arrow-green)" />
-  <text x="416" y="151" text-anchor="middle" font-family="Roboto, DejaVu Sans, Arial, sans-serif" font-size="7px" font-weight="bold" fill="#000000">HTTP</text>
-
-  <rect x="306" y="188" width="98" height="18" rx="3" fill="#ffffff" stroke="#000000" stroke-width="0.8" />
-  <text x="355" y="200" text-anchor="middle" font-family="Roboto, DejaVu Sans, Arial, sans-serif" font-size="7.5px" font-weight="bold" fill="#000000">POST /api/sms/inbound</text>
-
-
-  <!-- 3. KẾT NỐI FASTAPI GATEWAY <-> WEB DASHBOARD -->
-  <rect x="702" y="76" width="94" height="74" rx="4" fill="#ffffff" stroke="#000000" stroke-width="1" />
-  <text x="749" y="90" text-anchor="middle" font-family="Roboto, DejaVu Sans, Arial, sans-serif" font-size="9px" font-weight="bold" fill="#000000">HTTP REST API</text>
-  <text x="749" y="103" text-anchor="middle" font-family="Roboto, DejaVu Sans, Arial, sans-serif" font-size="7.8px" fill="#000000">• Poll: /changes, /clusters</text>
-  <text x="749" y="115" text-anchor="middle" font-family="Roboto, DejaVu Sans, Arial, sans-serif" font-size="7.8px" fill="#000000">• Điều phối: /team, /status</text>
-  <text x="749" y="127" text-anchor="middle" font-family="Roboto, DejaVu Sans, Arial, sans-serif" font-size="7.8px" fill="#000000">• Quản lý: /api/teams</text>
-  <text x="749" y="139" text-anchor="middle" font-family="Roboto, DejaVu Sans, Arial, sans-serif" font-size="7.2px" fill="#000000">(Cookie Session Auth)</text>
-
-  <!-- Mũi tên từ FastAPI sang Hộp REST API Dashboard -->
-  <line x1="692" y1="113" x2="702" y2="113" stroke="#000000" stroke-width="1.6" marker-start="url(#arrow-orange)" marker-end="url(#arrow-orange)" />
-  <!-- Mũi tên từ Hộp REST API sang Web Dashboard -->
-  <line x1="796" y1="113" x2="810" y2="113" stroke="#000000" stroke-width="1.6" marker-start="url(#arrow-orange)" marker-end="url(#arrow-orange)" />
-
+<?xml version="1.0" encoding="utf-8" standalone="no"?>
+<!DOCTYPE svg PUBLIC "-//W3C//DTD SVG 1.1//EN"
+  "http://www.w3.org/Graphics/SVG/1.1/DTD/svg11.dtd">
+<svg xmlns:xlink="http://www.w3.org/1999/xlink" width="728.503937pt" height="415pt" viewBox="0 0 728.503937 415" xmlns="http://www.w3.org/2000/svg" version="1.1">
+ <metadata>
+  <rdf:RDF xmlns:dc="http://purl.org/dc/elements/1.1/" xmlns:cc="http://creativecommons.org/ns#" xmlns:rdf="http://www.w3.org/1999/02/22-rdf-syntax-ns#">
+   <cc:Work>
+    <dc:type rdf:resource="http://purl.org/dc/dcmitype/StillImage"/>
+    <dc:format>image/svg+xml</dc:format>
+    <dc:creator>
+     <cc:Agent>
+      <dc:title>Matplotlib v3.10.8, https://matplotlib.org/</dc:title>
+     </cc:Agent>
+    </dc:creator>
+   </cc:Work>
+  </rdf:RDF>
+ </metadata>
+ <defs>
+  <style type="text/css">*{stroke-linejoin: round; stroke-linecap: butt}</style>
+ </defs>
+ <g id="figure_1">
+  <g id="patch_1">
+   <path d="M 0 415
+L 728.503937 415
+L 728.503937 0
+L 0 0
+z
+" style="fill: #ffffff"/>
+  </g>
+  <g id="axes_1">
+   <g id="patch_2">
+    <path d="M 14 10
+L 216 10
+Q 220 10 220 14
+L 220 339
+Q 220 343 216 343
+L 14 343
+Q 10 343 10 339
+L 10 14
+Q 10 10 14 10
+z
+" clip-path="url(#pd39310bda7)" style="fill: #edf4fa; stroke: #587489; stroke-width: 0.9; stroke-linejoin: miter"/>
+   </g>
+   <g id="patch_3">
+    <path d="M 253 10
+L 475 10
+Q 479 10 479 14
+L 479 339
+Q 479 343 475 343
+L 253 343
+Q 249 343 249 339
+L 249 14
+Q 249 10 253 10
+z
+" clip-path="url(#pd39310bda7)" style="fill: #eaf5f2; stroke: #587489; stroke-width: 0.9; stroke-linejoin: miter"/>
+   </g>
+   <g id="patch_4">
+    <path d="M 512 10
+L 714 10
+Q 718 10 718 14
+L 718 339
+Q 718 343 714 343
+L 512 343
+Q 508 343 508 339
+L 508 14
+Q 508 10 512 10
+z
+" clip-path="url(#pd39310bda7)" style="fill: #fff5e5; stroke: #587489; stroke-width: 0.9; stroke-linejoin: miter"/>
+   </g>
+   <g id="patch_5">
+    <path d="M 26.4 18
+L 29.6 18
+Q 33.6 18 33.6 22
+L 33.6 30
+Q 33.6 34 29.6 34
+L 26.4 34
+Q 22.4 34 22.4 30
+L 22.4 22
+Q 22.4 18 26.4 18
+z
+" clip-path="url(#pd39310bda7)" style="fill: #ffffff; stroke: #587489; stroke-width: 0.9; stroke-linejoin: miter"/>
+   </g>
+   <g id="patch_6">
+    <path d="M 518 18
+L 534 18
+L 534 29.2
+L 518 29.2
+z
+" clip-path="url(#pd39310bda7)" style="fill: #ffffff; stroke: #587489; stroke-width: 0.9; stroke-linejoin: miter"/>
+   </g>
+   <g id="patch_7">
+    <path d="M 34.75 52
+L 58.25 52
+Q 62.25 52 62.25 56
+L 62.25 93
+Q 62.25 97 58.25 97
+L 34.75 97
+Q 30.75 97 30.75 93
+L 30.75 56
+Q 30.75 52 34.75 52
+z
+" clip-path="url(#pd39310bda7)" style="fill: #ffffff; stroke: #587489; stroke-width: 0.9; stroke-linejoin: miter"/>
+   </g>
+   <g id="patch_8">
+    <path d="M 90 59.75
+L 113 59.75
+L 113 74.7
+L 90 74.7
+z
+" clip-path="url(#pd39310bda7)" style="fill: #ffffff; stroke: #587489; stroke-width: 0.9; stroke-linejoin: miter"/>
+   </g>
+   <g id="patch_9">
+    <path d="M 26 125
+L 35 125
+L 35 134
+L 26 134
+z
+" clip-path="url(#pd39310bda7)" style="fill: #ffffff; stroke: #587489; stroke-width: 0.9; stroke-linejoin: miter"/>
+   </g>
+   <g id="patch_10">
+    <path d="M 23.75 188.25
+L 37.25 188.25
+L 37.25 198.75
+L 23.75 198.75
+z
+" clip-path="url(#pd39310bda7)" style="fill: #ffffff; stroke: #587489; stroke-width: 0.9; stroke-linejoin: miter"/>
+   </g>
+   <g id="patch_11">
+    <path d="M 265 65
+L 463 65
+Q 467 65 467 69
+L 467 131
+Q 467 135 463 135
+L 265 135
+Q 261 135 261 131
+L 261 69
+Q 261 65 265 65
+z
+" clip-path="url(#pd39310bda7)" style="fill: #ffffff; stroke: #587489; stroke-width: 0.9; stroke-linejoin: miter"/>
+   </g>
+   <g id="patch_12">
+    <path d="M 267.1 281.3
+L 304.9 281.3
+L 304.9 310.7
+L 267.1 310.7
+z
+" clip-path="url(#pd39310bda7)" style="fill: #ffffff; stroke: #587489; stroke-width: 0.9; stroke-linejoin: miter"/>
+   </g>
+   <g id="patch_13">
+    <path d="M 523 52
+L 703 52
+L 703 143
+L 523 143
+z
+" clip-path="url(#pd39310bda7)" style="fill: #ffffff; stroke: #587489; stroke-width: 0.9; stroke-linejoin: miter"/>
+   </g>
+   <g id="patch_14">
+    <path d="M 108 352
+L 285 352
+Q 289 352 289 356
+L 289 371
+Q 289 375 285 375
+L 108 375
+Q 104 375 104 371
+L 104 356
+Q 104 352 108 352
+z
+" clip-path="url(#pd39310bda7)" style="fill: #f4f5f6; stroke: #587489; stroke-width: 0.9; stroke-linejoin: miter"/>
+   </g>
+   <g id="patch_15">
+    <path d="M 101.5 62.05
+C 102.719934 62.05 103.890067 62.534685 104.752691 63.397309
+C 105.615315 64.259933 106.1 65.430066 106.1 66.65
+C 106.1 67.869934 105.615315 69.040067 104.752691 69.902691
+C 103.890067 70.765315 102.719934 71.25 101.5 71.25
+C 100.280066 71.25 99.109933 70.765315 98.247309 69.902691
+C 97.384685 69.040067 96.9 67.869934 96.9 66.65
+C 96.9 65.430066 97.384685 64.259933 98.247309 63.397309
+C 99.109933 62.534685 100.280066 62.05 101.5 62.05
+z
+" clip-path="url(#pd39310bda7)" style="fill: #ffffff; stroke: #587489; stroke-width: 0.9; stroke-linejoin: miter"/>
+   </g>
+   <g id="patch_16">
+    <path d="M 153.5 55.15
+C 155.329901 55.15 157.085101 55.877028 158.379037 57.170963
+C 159.672972 58.464899 160.4 60.220099 160.4 62.05
+C 160.4 63.879901 159.672972 65.635101 158.379037 66.929037
+C 157.085101 68.222972 155.329901 68.95 153.5 68.95
+C 151.670099 68.95 149.914899 68.222972 148.620963 66.929037
+C 147.327028 65.635101 146.6 63.879901 146.6 62.05
+C 146.6 60.220099 147.327028 58.464899 148.620963 57.170963
+C 149.914899 55.877028 151.670099 55.15 153.5 55.15
+z
+" clip-path="url(#pd39310bda7)" style="fill: #ffffff; stroke: #587489; stroke-width: 0.9; stroke-linejoin: miter"/>
+   </g>
+   <g id="patch_17">
+    <path d="M 153.5 59.75
+C 154.109967 59.75 154.695034 59.992343 155.126346 60.423654
+C 155.557657 60.854966 155.8 61.440033 155.8 62.05
+C 155.8 62.659967 155.557657 63.245034 155.126346 63.676346
+C 154.695034 64.107657 154.109967 64.35 153.5 64.35
+C 152.890033 64.35 152.304966 64.107657 151.873654 63.676346
+C 151.442343 63.245034 151.2 62.659967 151.2 62.05
+C 151.2 61.440033 151.442343 60.854966 151.873654 60.423654
+C 152.304966 59.992343 152.890033 59.75 153.5 59.75
+z
+" clip-path="url(#pd39310bda7)" style="fill: #ffffff; stroke: #587489; stroke-width: 0.9; stroke-linejoin: miter"/>
+   </g>
+   <g id="patch_18">
+    <path d="M 26.75 266.475
+C 26.889232 266.475 27.022779 266.530317 27.121231 266.628769
+C 27.219683 266.727221 27.275 266.860768 27.275 267
+C 27.275 267.139232 27.219683 267.272779 27.121231 267.371231
+C 27.022779 267.469683 26.889232 267.525 26.75 267.525
+C 26.610768 267.525 26.477221 267.469683 26.378769 267.371231
+C 26.280317 267.272779 26.225 267.139232 26.225 267
+C 26.225 266.860768 26.280317 266.727221 26.378769 266.628769
+C 26.477221 266.530317 26.610768 266.475 26.75 266.475
+z
+" clip-path="url(#pd39310bda7)" style="fill: #ffffff; stroke: #587489; stroke-width: 0.9; stroke-linejoin: miter"/>
+   </g>
+   <g id="patch_19">
+    <path d="M 30.5 266.475
+C 30.639232 266.475 30.772779 266.530317 30.871231 266.628769
+C 30.969683 266.727221 31.025 266.860768 31.025 267
+C 31.025 267.139232 30.969683 267.272779 30.871231 267.371231
+C 30.772779 267.469683 30.639232 267.525 30.5 267.525
+C 30.360768 267.525 30.227221 267.469683 30.128769 267.371231
+C 30.030317 267.272779 29.975 267.139232 29.975 267
+C 29.975 266.860768 30.030317 266.727221 30.128769 266.628769
+C 30.227221 266.530317 30.360768 266.475 30.5 266.475
+z
+" clip-path="url(#pd39310bda7)" style="fill: #ffffff; stroke: #587489; stroke-width: 0.9; stroke-linejoin: miter"/>
+   </g>
+   <g id="patch_20">
+    <path d="M 34.25 266.475
+C 34.389232 266.475 34.522779 266.530317 34.621231 266.628769
+C 34.719683 266.727221 34.775 266.860768 34.775 267
+C 34.775 267.139232 34.719683 267.272779 34.621231 267.371231
+C 34.522779 267.469683 34.389232 267.525 34.25 267.525
+C 34.110768 267.525 33.977221 267.469683 33.878769 267.371231
+C 33.780317 267.272779 33.725 267.139232 33.725 267
+C 33.725 266.860768 33.780317 266.727221 33.878769 266.628769
+C 33.977221 266.530317 34.110768 266.475 34.25 266.475
+z
+" clip-path="url(#pd39310bda7)" style="fill: #ffffff; stroke: #587489; stroke-width: 0.9; stroke-linejoin: miter"/>
+   </g>
+   <g id="patch_21">
+    <path d="M 273.8 168.88
+C 274.733515 168.88 275.628921 169.250889 276.289016 169.910984
+C 276.949111 170.571079 277.32 171.466485 277.32 172.4
+C 277.32 173.333515 276.949111 174.228921 276.289016 174.889016
+C 275.628921 175.549111 274.733515 175.92 273.8 175.92
+C 272.866485 175.92 271.971079 175.549111 271.310984 174.889016
+C 270.650889 174.228921 270.28 173.333515 270.28 172.4
+C 270.28 171.466485 270.650889 170.571079 271.310984 169.910984
+C 271.971079 169.250889 272.866485 168.88 273.8 168.88
+z
+" clip-path="url(#pd39310bda7)" style="fill: #ffffff; stroke: #587489; stroke-width: 0.9; stroke-linejoin: miter"/>
+   </g>
+   <g id="patch_22">
+    <path d="M 294.6 167.28
+C 295.533515 167.28 296.428921 167.650889 297.089016 168.310984
+C 297.749111 168.971079 298.12 169.866485 298.12 170.8
+C 298.12 171.733515 297.749111 172.628921 297.089016 173.289016
+C 296.428921 173.949111 295.533515 174.32 294.6 174.32
+C 293.666485 174.32 292.771079 173.949111 292.110984 173.289016
+C 291.450889 172.628921 291.08 171.733515 291.08 170.8
+C 291.08 169.866485 291.450889 168.971079 292.110984 168.310984
+C 292.771079 167.650889 293.666485 167.28 294.6 167.28
+z
+" clip-path="url(#pd39310bda7)" style="fill: #ffffff; stroke: #587489; stroke-width: 0.9; stroke-linejoin: miter"/>
+   </g>
+   <g id="patch_23">
+    <path d="M 281.8 181.68
+C 282.733515 181.68 283.628921 182.050889 284.289016 182.710984
+C 284.949111 183.371079 285.32 184.266485 285.32 185.2
+C 285.32 186.133515 284.949111 187.028921 284.289016 187.689016
+C 283.628921 188.349111 282.733515 188.72 281.8 188.72
+C 280.866485 188.72 279.971079 188.349111 279.310984 187.689016
+C 278.650889 187.028921 278.28 186.133515 278.28 185.2
+C 278.28 184.266485 278.650889 183.371079 279.310984 182.710984
+C 279.971079 182.050889 280.866485 181.68 281.8 181.68
+z
+" clip-path="url(#pd39310bda7)" style="fill: #ffffff; stroke: #587489; stroke-width: 0.9; stroke-linejoin: miter"/>
+   </g>
+   <g id="patch_24">
+    <path d="M 297.8 191.28
+C 298.733515 191.28 299.628921 191.650889 300.289016 192.310984
+C 300.949111 192.971079 301.32 193.866485 301.32 194.8
+C 301.32 195.733515 300.949111 196.628921 300.289016 197.289016
+C 299.628921 197.949111 298.733515 198.32 297.8 198.32
+C 296.866485 198.32 295.971079 197.949111 295.310984 197.289016
+C 294.650889 196.628921 294.28 195.733515 294.28 194.8
+C 294.28 193.866485 294.650889 192.971079 295.310984 192.310984
+C 295.971079 191.650889 296.866485 191.28 297.8 191.28
+z
+" clip-path="url(#pd39310bda7)" style="fill: #ffffff; stroke: #587489; stroke-width: 0.9; stroke-linejoin: miter"/>
+   </g>
+   <g id="patch_25">
+    <path d="M 270.6 191.28
+C 271.533515 191.28 272.428921 191.650889 273.089016 192.310984
+C 273.749111 192.971079 274.12 193.866485 274.12 194.8
+C 274.12 195.733515 273.749111 196.628921 273.089016 197.289016
+C 272.428921 197.949111 271.533515 198.32 270.6 198.32
+C 269.666485 198.32 268.771079 197.949111 268.110984 197.289016
+C 267.450889 196.628921 267.08 195.733515 267.08 194.8
+C 267.08 193.866485 267.450889 192.971079 268.110984 192.310984
+C 268.771079 191.650889 269.666485 191.28 270.6 191.28
+z
+" clip-path="url(#pd39310bda7)" style="fill: #ffffff; stroke: #587489; stroke-width: 0.9; stroke-linejoin: miter"/>
+   </g>
+   <g id="patch_26">
+    <path d="M 571.2 77.98
+C 571.995609 77.98 572.75874 78.296099 573.32132 78.85868
+C 573.883901 79.42126 574.2 80.184391 574.2 80.98
+C 574.2 81.775609 573.883901 82.53874 573.32132 83.10132
+C 572.75874 83.663901 571.995609 83.98 571.2 83.98
+C 570.404391 83.98 569.64126 83.663901 569.07868 83.10132
+C 568.516099 82.53874 568.2 81.775609 568.2 80.98
+C 568.2 80.184391 568.516099 79.42126 569.07868 78.85868
+C 569.64126 78.296099 570.404391 77.98 571.2 77.98
+z
+" clip-path="url(#pd39310bda7)" style="fill: #ffffff; stroke: #587489; stroke-width: 0.9; stroke-linejoin: miter"/>
+   </g>
+   <g id="patch_27">
+    <path d="M 571.2 79.98
+C 571.465203 79.98 571.71958 80.085366 571.907107 80.272893
+C 572.094634 80.46042 572.2 80.714797 572.2 80.98
+C 572.2 81.245203 572.094634 81.49958 571.907107 81.687107
+C 571.71958 81.874634 571.465203 81.98 571.2 81.98
+C 570.934797 81.98 570.68042 81.874634 570.492893 81.687107
+C 570.305366 81.49958 570.2 81.245203 570.2 80.98
+C 570.2 80.714797 570.305366 80.46042 570.492893 80.272893
+C 570.68042 80.085366 570.934797 79.98 571.2 79.98
+z
+" clip-path="url(#pd39310bda7)" style="fill: #ffffff; stroke: #587489; stroke-width: 0.9; stroke-linejoin: miter"/>
+   </g>
+   <g id="patch_28">
+    <path d="M 654 102.55
+C 654.795609 102.55 655.55874 102.866099 656.12132 103.42868
+C 656.683901 103.99126 657 104.754391 657 105.55
+C 657 106.345609 656.683901 107.10874 656.12132 107.67132
+C 655.55874 108.233901 654.795609 108.55 654 108.55
+C 653.204391 108.55 652.44126 108.233901 651.87868 107.67132
+C 651.316099 107.10874 651 106.345609 651 105.55
+C 651 104.754391 651.316099 103.99126 651.87868 103.42868
+C 652.44126 102.866099 653.204391 102.55 654 102.55
+z
+" clip-path="url(#pd39310bda7)" style="fill: #ffffff; stroke: #587489; stroke-width: 0.9; stroke-linejoin: miter"/>
+   </g>
+   <g id="patch_29">
+    <path d="M 654 104.55
+C 654.265203 104.55 654.51958 104.655366 654.707107 104.842893
+C 654.894634 105.03042 655 105.284797 655 105.55
+C 655 105.815203 654.894634 106.06958 654.707107 106.257107
+C 654.51958 106.444634 654.265203 106.55 654 106.55
+C 653.734797 106.55 653.48042 106.444634 653.292893 106.257107
+C 653.105366 106.06958 653 105.815203 653 105.55
+C 653 105.284797 653.105366 105.03042 653.292893 104.842893
+C 653.48042 104.655366 653.734797 104.55 654 104.55
+z
+" clip-path="url(#pd39310bda7)" style="fill: #ffffff; stroke: #587489; stroke-width: 0.9; stroke-linejoin: miter"/>
+   </g>
+   <g id="patch_30">
+    <path d="M 632.4 115.29
+C 633.195609 115.29 633.95874 115.606099 634.52132 116.16868
+C 635.083901 116.73126 635.4 117.494391 635.4 118.29
+C 635.4 119.085609 635.083901 119.84874 634.52132 120.41132
+C 633.95874 120.973901 633.195609 121.29 632.4 121.29
+C 631.604391 121.29 630.84126 120.973901 630.27868 120.41132
+C 629.716099 119.84874 629.4 119.085609 629.4 118.29
+C 629.4 117.494391 629.716099 116.73126 630.27868 116.16868
+C 630.84126 115.606099 631.604391 115.29 632.4 115.29
+z
+" clip-path="url(#pd39310bda7)" style="fill: #ffffff; stroke: #587489; stroke-width: 0.9; stroke-linejoin: miter"/>
+   </g>
+   <g id="patch_31">
+    <path d="M 632.4 117.29
+C 632.665203 117.29 632.91958 117.395366 633.107107 117.582893
+C 633.294634 117.77042 633.4 118.024797 633.4 118.29
+C 633.4 118.555203 633.294634 118.80958 633.107107 118.997107
+C 632.91958 119.184634 632.665203 119.29 632.4 119.29
+C 632.134797 119.29 631.88042 119.184634 631.692893 118.997107
+C 631.505366 118.80958 631.4 118.555203 631.4 118.29
+C 631.4 118.024797 631.505366 117.77042 631.692893 117.582893
+C 631.88042 117.395366 632.134797 117.29 632.4 117.29
+z
+" clip-path="url(#pd39310bda7)" style="fill: #ffffff; stroke: #587489; stroke-width: 0.9; stroke-linejoin: miter"/>
+   </g>
+   <g id="patch_32">
+    <path d="M 528.5 179.75
+C 529.693414 179.75 530.838109 180.224148 531.681981 181.068019
+C 532.525852 181.911891 533 183.056586 533 184.25
+C 533 185.443414 532.525852 186.588109 531.681981 187.431981
+C 530.838109 188.275852 529.693414 188.75 528.5 188.75
+C 527.306586 188.75 526.161891 188.275852 525.318019 187.431981
+C 524.474148 186.588109 524 185.443414 524 184.25
+C 524 183.056586 524.474148 181.911891 525.318019 181.068019
+C 526.161891 180.224148 527.306586 179.75 528.5 179.75
+z
+" clip-path="url(#pd39310bda7)" style="fill: #ffffff; stroke: #587489; stroke-width: 0.9; stroke-linejoin: miter"/>
+   </g>
+   <g id="patch_33">
+    <path d="M 528.5 182.75
+C 528.897805 182.75 529.27937 182.908049 529.56066 183.18934
+C 529.841951 183.47063 530 183.852195 530 184.25
+C 530 184.647805 529.841951 185.02937 529.56066 185.31066
+C 529.27937 185.591951 528.897805 185.75 528.5 185.75
+C 528.102195 185.75 527.72063 185.591951 527.43934 185.31066
+C 527.158049 185.02937 527 184.647805 527 184.25
+C 527 183.852195 527.158049 183.47063 527.43934 183.18934
+C 527.72063 182.908049 528.102195 182.75 528.5 182.75
+z
+" clip-path="url(#pd39310bda7)" style="fill: #ffffff; stroke: #587489; stroke-width: 0.9; stroke-linejoin: miter"/>
+   </g>
+   <g id="patch_34">
+    <path d="M 524.75 257.5
+C 525.346707 257.5 525.919055 257.737074 526.34099 258.15901
+C 526.762926 258.580945 527 259.153293 527 259.75
+C 527 260.346707 526.762926 260.919055 526.34099 261.34099
+C 525.919055 261.762926 525.346707 262 524.75 262
+C 524.153293 262 523.580945 261.762926 523.15901 261.34099
+C 522.737074 260.919055 522.5 260.346707 522.5 259.75
+C 522.5 259.153293 522.737074 258.580945 523.15901 258.15901
+C 523.580945 257.737074 524.153293 257.5 524.75 257.5
+z
+" clip-path="url(#pd39310bda7)" style="fill: #ffffff; stroke: #587489; stroke-width: 0.9; stroke-linejoin: miter"/>
+   </g>
+   <g id="patch_35">
+    <path d="M 532.25 257.5
+C 532.846707 257.5 533.419055 257.737074 533.84099 258.15901
+C 534.262926 258.580945 534.5 259.153293 534.5 259.75
+C 534.5 260.346707 534.262926 260.919055 533.84099 261.34099
+C 533.419055 261.762926 532.846707 262 532.25 262
+C 531.653293 262 531.080945 261.762926 530.65901 261.34099
+C 530.237074 260.919055 530 260.346707 530 259.75
+C 530 259.153293 530.237074 258.580945 530.65901 258.15901
+C 531.080945 257.737074 531.653293 257.5 532.25 257.5
+z
+" clip-path="url(#pd39310bda7)" style="fill: #ffffff; stroke: #587489; stroke-width: 0.9; stroke-linejoin: miter"/>
+   </g>
+   <g id="patch_36">
+    <path d="M 528.5 262
+C 529.096707 262 529.669055 262.237074 530.09099 262.65901
+C 530.512926 263.080945 530.75 263.653293 530.75 264.25
+C 530.75 264.846707 530.512926 265.419055 530.09099 265.84099
+C 529.669055 266.262926 529.096707 266.5 528.5 266.5
+C 527.903293 266.5 527.330945 266.262926 526.90901 265.84099
+C 526.487074 265.419055 526.25 264.846707 526.25 264.25
+C 526.25 263.653293 526.487074 263.080945 526.90901 262.65901
+C 527.330945 262.237074 527.903293 262 528.5 262
+z
+" clip-path="url(#pd39310bda7)" style="fill: #ffffff; stroke: #587489; stroke-width: 0.9; stroke-linejoin: miter"/>
+   </g>
+   <g id="patch_37">
+    <path d="M 82.75 359.935
+C 82.92636 359.935 83.095521 360.005069 83.220226 360.129774
+C 83.344931 360.254479 83.415 360.42364 83.415 360.6
+C 83.415 360.77636 83.344931 360.945521 83.220226 361.070226
+C 83.095521 361.194931 82.92636 361.265 82.75 361.265
+C 82.57364 361.265 82.404479 361.194931 82.279774 361.070226
+C 82.155069 360.945521 82.085 360.77636 82.085 360.6
+C 82.085 360.42364 82.155069 360.254479 82.279774 360.129774
+C 82.404479 360.005069 82.57364 359.935 82.75 359.935
+z
+" clip-path="url(#pd39310bda7)" style="fill: #ffffff; stroke: #587489; stroke-width: 0.9; stroke-linejoin: miter"/>
+   </g>
+   <g id="patch_38">
+    <path d="M 87.5 359.935
+C 87.67636 359.935 87.845521 360.005069 87.970226 360.129774
+C 88.094931 360.254479 88.165 360.42364 88.165 360.6
+C 88.165 360.77636 88.094931 360.945521 87.970226 361.070226
+C 87.845521 361.194931 87.67636 361.265 87.5 361.265
+C 87.32364 361.265 87.154479 361.194931 87.029774 361.070226
+C 86.905069 360.945521 86.835 360.77636 86.835 360.6
+C 86.835 360.42364 86.905069 360.254479 87.029774 360.129774
+C 87.154479 360.005069 87.32364 359.935 87.5 359.935
+z
+" clip-path="url(#pd39310bda7)" style="fill: #ffffff; stroke: #587489; stroke-width: 0.9; stroke-linejoin: miter"/>
+   </g>
+   <g id="patch_39">
+    <path d="M 92.25 359.935
+C 92.42636 359.935 92.595521 360.005069 92.720226 360.129774
+C 92.844931 360.254479 92.915 360.42364 92.915 360.6
+C 92.915 360.77636 92.844931 360.945521 92.720226 361.070226
+C 92.595521 361.194931 92.42636 361.265 92.25 361.265
+C 92.07364 361.265 91.904479 361.194931 91.779774 361.070226
+C 91.655069 360.945521 91.585 360.77636 91.585 360.6
+C 91.585 360.42364 91.655069 360.254479 91.779774 360.129774
+C 91.904479 360.005069 92.07364 359.935 92.25 359.935
+z
+" clip-path="url(#pd39310bda7)" style="fill: #ffffff; stroke: #587489; stroke-width: 0.9; stroke-linejoin: miter"/>
+   </g>
+   <g id="patch_40">
+    <path d="M 25.6 20.4
+L 30.4 20.4
+" clip-path="url(#pd39310bda7)" style="fill: none; stroke: #587489; stroke-width: 0.9; stroke-linecap: round"/>
+   </g>
+   <g id="patch_41">
+    <path d="M 25.6 31.6
+L 30.4 31.6
+" clip-path="url(#pd39310bda7)" style="fill: none; stroke: #587489; stroke-width: 0.9; stroke-linecap: round"/>
+   </g>
+   <g id="patch_42">
+    <path d="M 267 18
+L 274.2 21.2
+L 272.6 28.4
+L 267 34
+L 261.4 28.4
+L 259.8 21.2
+L 267 18
+" clip-path="url(#pd39310bda7)" style="fill: none; stroke: #587489; stroke-width: 0.9; stroke-linecap: round"/>
+   </g>
+   <g id="patch_43">
+    <path d="M 263 25.2
+L 266.2 28.4
+L 271 22.8
+" clip-path="url(#pd39310bda7)" style="fill: none; stroke: #587489; stroke-width: 0.9; stroke-linecap: round"/>
+   </g>
+   <g id="patch_44">
+    <path d="M 526 29.2
+L 526 33.2
+" clip-path="url(#pd39310bda7)" style="fill: none; stroke: #587489; stroke-width: 0.9; stroke-linecap: round"/>
+   </g>
+   <g id="patch_45">
+    <path d="M 522 33.2
+L 530 33.2
+" clip-path="url(#pd39310bda7)" style="fill: none; stroke: #587489; stroke-width: 0.9; stroke-linecap: round"/>
+   </g>
+   <g id="patch_46">
+    <path d="M 39.75 58.75
+L 53.25 58.75
+" clip-path="url(#pd39310bda7)" style="fill: none; stroke: #587489; stroke-width: 0.9; stroke-linecap: round"/>
+   </g>
+   <g id="patch_47">
+    <path d="M 39.75 90.25
+L 53.25 90.25
+" clip-path="url(#pd39310bda7)" style="fill: none; stroke: #587489; stroke-width: 0.9; stroke-linecap: round"/>
+   </g>
+   <g id="patch_48">
+    <path d="M 94.6 59.75
+L 96.9 55.15
+L 104.95 55.15
+L 107.25 59.75
+" clip-path="url(#pd39310bda7)" style="fill: none; stroke: #587489; stroke-width: 0.9; stroke-linecap: round"/>
+   </g>
+   <g id="patch_49">
+    <path d="M 147.75 66.65
+L 153.5 77
+L 159.25 66.65
+" clip-path="url(#pd39310bda7)" style="fill: none; stroke: #587489; stroke-width: 0.9; stroke-linecap: round"/>
+   </g>
+   <g id="patch_50">
+    <path d="M 27.5 122
+L 27.5 125
+" clip-path="url(#pd39310bda7)" style="fill: none; stroke: #587489; stroke-width: 0.9; stroke-linecap: round"/>
+   </g>
+   <g id="patch_51">
+    <path d="M 27.5 134
+L 27.5 137
+" clip-path="url(#pd39310bda7)" style="fill: none; stroke: #587489; stroke-width: 0.9; stroke-linecap: round"/>
+   </g>
+   <g id="patch_52">
+    <path d="M 23 126.5
+L 26 126.5
+" clip-path="url(#pd39310bda7)" style="fill: none; stroke: #587489; stroke-width: 0.9; stroke-linecap: round"/>
+   </g>
+   <g id="patch_53">
+    <path d="M 35 126.5
+L 38 126.5
+" clip-path="url(#pd39310bda7)" style="fill: none; stroke: #587489; stroke-width: 0.9; stroke-linecap: round"/>
+   </g>
+   <g id="patch_54">
+    <path d="M 30.5 122
+L 30.5 125
+" clip-path="url(#pd39310bda7)" style="fill: none; stroke: #587489; stroke-width: 0.9; stroke-linecap: round"/>
+   </g>
+   <g id="patch_55">
+    <path d="M 30.5 134
+L 30.5 137
+" clip-path="url(#pd39310bda7)" style="fill: none; stroke: #587489; stroke-width: 0.9; stroke-linecap: round"/>
+   </g>
+   <g id="patch_56">
+    <path d="M 23 129.5
+L 26 129.5
+" clip-path="url(#pd39310bda7)" style="fill: none; stroke: #587489; stroke-width: 0.9; stroke-linecap: round"/>
+   </g>
+   <g id="patch_57">
+    <path d="M 35 129.5
+L 38 129.5
+" clip-path="url(#pd39310bda7)" style="fill: none; stroke: #587489; stroke-width: 0.9; stroke-linecap: round"/>
+   </g>
+   <g id="patch_58">
+    <path d="M 33.5 122
+L 33.5 125
+" clip-path="url(#pd39310bda7)" style="fill: none; stroke: #587489; stroke-width: 0.9; stroke-linecap: round"/>
+   </g>
+   <g id="patch_59">
+    <path d="M 33.5 134
+L 33.5 137
+" clip-path="url(#pd39310bda7)" style="fill: none; stroke: #587489; stroke-width: 0.9; stroke-linecap: round"/>
+   </g>
+   <g id="patch_60">
+    <path d="M 23 132.5
+L 26 132.5
+" clip-path="url(#pd39310bda7)" style="fill: none; stroke: #587489; stroke-width: 0.9; stroke-linecap: round"/>
+   </g>
+   <g id="patch_61">
+    <path d="M 35 132.5
+L 38 132.5
+" clip-path="url(#pd39310bda7)" style="fill: none; stroke: #587489; stroke-width: 0.9; stroke-linecap: round"/>
+   </g>
+   <g id="patch_62">
+    <path d="M 23 262.5
+L 38 262.5
+L 38 272.25
+L 29.75 272.25
+L 25.25 276
+L 25.25 272.25
+L 23 272.25
+L 23 262.5
+" clip-path="url(#pd39310bda7)" style="fill: none; stroke: #587489; stroke-width: 0.9; stroke-linecap: round"/>
+   </g>
+   <g id="patch_63">
+    <path d="M 273.8 172.4
+L 294.6 170.8
+" clip-path="url(#pd39310bda7)" style="fill: none; stroke: #587489; stroke-width: 0.9; stroke-linecap: round"/>
+   </g>
+   <g id="patch_64">
+    <path d="M 273.8 172.4
+L 281.8 185.2
+" clip-path="url(#pd39310bda7)" style="fill: none; stroke: #587489; stroke-width: 0.9; stroke-linecap: round"/>
+   </g>
+   <g id="patch_65">
+    <path d="M 294.6 170.8
+L 281.8 185.2
+" clip-path="url(#pd39310bda7)" style="fill: none; stroke: #587489; stroke-width: 0.9; stroke-linecap: round"/>
+   </g>
+   <g id="patch_66">
+    <path d="M 281.8 185.2
+L 297.8 194.8
+" clip-path="url(#pd39310bda7)" style="fill: none; stroke: #587489; stroke-width: 0.9; stroke-linecap: round"/>
+   </g>
+   <g id="patch_67">
+    <path d="M 281.8 185.2
+L 270.6 194.8
+" clip-path="url(#pd39310bda7)" style="fill: none; stroke: #587489; stroke-width: 0.9; stroke-linecap: round"/>
+   </g>
+   <g id="patch_68">
+    <path d="M 364 135
+L 364 153.993769
+" clip-path="url(#pd39310bda7)" style="fill: none; stroke: #587489; stroke-width: 0.9; stroke-linecap: round"/>
+    <path d="M 365.8 150.393769
+L 364 153.993769
+L 362.2 150.393769
+" clip-path="url(#pd39310bda7)" style="fill: none; stroke: #587489; stroke-width: 0.9; stroke-linecap: round"/>
+   </g>
+   <g id="patch_69">
+    <path d="M 364 252
+L 364 264
+L 286 264
+L 286 273.993769
+" clip-path="url(#pd39310bda7)" style="fill: none; stroke: #587489; stroke-width: 0.9; stroke-linecap: round"/>
+    <path d="M 287.8 270.393769
+L 286 273.993769
+L 284.2 270.393769
+" clip-path="url(#pd39310bda7)" style="fill: none; stroke: #587489; stroke-width: 0.9; stroke-linecap: round"/>
+   </g>
+   <g id="patch_70">
+    <path d="M 259.993769 123
+L 254 123
+L 254 296
+L 263.993769 296
+" clip-path="url(#pd39310bda7)" style="fill: none; stroke: #587489; stroke-width: 0.9; stroke-linecap: round"/>
+    <path d="M 256.393769 121.2
+L 259.993769 123
+L 256.393769 124.8
+" clip-path="url(#pd39310bda7)" style="fill: none; stroke: #587489; stroke-width: 0.9; stroke-linecap: round"/>
+    <path d="M 260.393769 294.2
+L 263.993769 296
+L 260.393769 297.8
+" clip-path="url(#pd39310bda7)" style="fill: none; stroke: #587489; stroke-width: 0.9; stroke-linecap: round"/>
+   </g>
+   <g id="patch_71">
+    <path d="M 523 83.85
+L 577 88.4
+L 640 70.2
+L 703 79.3
+" clip-path="url(#pd39310bda7)" style="fill: none; stroke: #587489; stroke-width: 0.9; stroke-linecap: round"/>
+   </g>
+   <g id="patch_72">
+    <path d="M 577 52
+L 600.4 97.5
+L 577 143
+" clip-path="url(#pd39310bda7)" style="fill: none; stroke: #587489; stroke-width: 0.9; stroke-linecap: round"/>
+   </g>
+   <g id="patch_73">
+    <path d="M 523 124.8
+L 622 111.15
+L 703 124.8
+" clip-path="url(#pd39310bda7)" style="fill: none; stroke: #587489; stroke-width: 0.9; stroke-linecap: round"/>
+   </g>
+   <g id="patch_74">
+    <path d="M 649 52
+L 631 97.5
+L 676 143
+" clip-path="url(#pd39310bda7)" style="fill: none; stroke: #587489; stroke-width: 0.9; stroke-linecap: round"/>
+   </g>
+   <g id="patch_75">
+    <path d="M 568.7 82.98
+L 571.2 87.48
+L 573.7 82.98
+" clip-path="url(#pd39310bda7)" style="fill: none; stroke: #587489; stroke-width: 0.9; stroke-linecap: round"/>
+   </g>
+   <g id="patch_76">
+    <path d="M 651.5 107.55
+L 654 112.05
+L 656.5 107.55
+" clip-path="url(#pd39310bda7)" style="fill: none; stroke: #587489; stroke-width: 0.9; stroke-linecap: round"/>
+   </g>
+   <g id="patch_77">
+    <path d="M 629.9 120.29
+L 632.4 124.79
+L 634.9 120.29
+" clip-path="url(#pd39310bda7)" style="fill: none; stroke: #587489; stroke-width: 0.9; stroke-linecap: round"/>
+   </g>
+   <g id="patch_78">
+    <path d="M 524.75 187.25
+L 528.5 194
+L 532.25 187.25
+" clip-path="url(#pd39310bda7)" style="fill: none; stroke: #587489; stroke-width: 0.9; stroke-linecap: round"/>
+   </g>
+   <g id="patch_79">
+    <path d="M 521 268.75
+L 521 265
+L 524 262.75
+" clip-path="url(#pd39310bda7)" style="fill: none; stroke: #587489; stroke-width: 0.9; stroke-linecap: round"/>
+   </g>
+   <g id="patch_80">
+    <path d="M 536 268.75
+L 536 265
+L 533 262.75
+" clip-path="url(#pd39310bda7)" style="fill: none; stroke: #587489; stroke-width: 0.9; stroke-linecap: round"/>
+   </g>
+   <g id="patch_81">
+    <path d="M 524 271
+L 524 268.75
+L 528.5 266.5
+L 533 268.75
+L 533 271
+" clip-path="url(#pd39310bda7)" style="fill: none; stroke: #587489; stroke-width: 0.9; stroke-linecap: round"/>
+   </g>
+   <g id="patch_82">
+    <path d="M 221.006231 103
+L 259.993769 103
+" clip-path="url(#pd39310bda7)" style="fill: none; stroke: #587489; stroke-width: 0.9; stroke-linecap: round"/>
+    <path d="M 224.606231 104.8
+L 221.006231 103
+L 224.606231 101.2
+" clip-path="url(#pd39310bda7)" style="fill: none; stroke: #587489; stroke-width: 0.9; stroke-linecap: round"/>
+    <path d="M 256.393769 101.2
+L 259.993769 103
+L 256.393769 104.8
+" clip-path="url(#pd39310bda7)" style="fill: none; stroke: #587489; stroke-width: 0.9; stroke-linecap: round"/>
+   </g>
+   <g id="patch_83">
+    <path d="M 468.006231 103
+L 506.993769 103
+" clip-path="url(#pd39310bda7)" style="fill: none; stroke: #587489; stroke-width: 0.9; stroke-linecap: round"/>
+    <path d="M 471.606231 104.8
+L 468.006231 103
+L 471.606231 101.2
+" clip-path="url(#pd39310bda7)" style="fill: none; stroke: #587489; stroke-width: 0.9; stroke-linecap: round"/>
+    <path d="M 503.393769 101.2
+L 506.993769 103
+L 503.393769 104.8
+" clip-path="url(#pd39310bda7)" style="fill: none; stroke: #587489; stroke-width: 0.9; stroke-linecap: round"/>
+   </g>
+   <g id="patch_84">
+    <path d="M 78 354.9
+L 97 354.9
+L 97 367.25
+L 86.55 367.25
+L 80.85 372
+L 80.85 367.25
+L 78 367.25
+L 78 354.9
+" clip-path="url(#pd39310bda7)" style="fill: none; stroke: #587489; stroke-width: 0.9; stroke-linecap: round"/>
+   </g>
+   <g id="patch_85">
+    <path d="M 117 343
+L 117 348
+L 104 348
+L 104 361.993769
+" clip-path="url(#pd39310bda7)" style="fill: none; stroke-dasharray: 2.7,1.8; stroke-dashoffset: 0; stroke: #587489; stroke-width: 0.9; stroke-linecap: round"/>
+    <path d="M 105.8 358.393769
+L 104 361.993769
+L 102.2 358.393769
+" clip-path="url(#pd39310bda7)" style="fill: none; stroke-dasharray: 2.7,1.8; stroke-dashoffset: 0; stroke: #587489; stroke-width: 0.9; stroke-linecap: round"/>
+   </g>
+   <g id="patch_86">
+    <path d="M 289 363
+L 297 363
+L 297 348
+L 240 348
+L 240 127
+L 259.993769 127
+" clip-path="url(#pd39310bda7)" style="fill: none; stroke-dasharray: 2.7,1.8; stroke-dashoffset: 0; stroke: #587489; stroke-width: 0.9; stroke-linecap: round"/>
+    <path d="M 256.393769 125.2
+L 259.993769 127
+L 256.393769 128.8
+" clip-path="url(#pd39310bda7)" style="fill: none; stroke-dasharray: 2.7,1.8; stroke-dashoffset: 0; stroke: #587489; stroke-width: 0.9; stroke-linecap: round"/>
+   </g>
+   <g id="patch_87">
+    <path d="M 30.5 186
+C 32.290121 186 34.007164 186.237074 35.272971 186.65901
+C 36.538777 187.080945 37.25 187.653293 37.25 188.25
+C 37.25 188.846707 36.538777 189.419055 35.272971 189.84099
+C 34.007164 190.262926 32.290121 190.5 30.5 190.5
+C 28.709879 190.5 26.992836 190.262926 25.727029 189.84099
+C 24.461223 189.419055 23.75 188.846707 23.75 188.25
+C 23.75 187.653293 24.461223 187.080945 25.727029 186.65901
+C 26.992836 186.237074 28.709879 186 30.5 186
+z
+" clip-path="url(#pd39310bda7)" style="fill: #ffffff; stroke: #587489; stroke-width: 0.9; stroke-linejoin: miter"/>
+   </g>
+   <g id="patch_88">
+    <path d="M 30.5 191.25
+C 32.290121 191.25 34.007164 191.487074 35.272971 191.90901
+C 36.538777 192.330945 37.25 192.903293 37.25 193.5
+C 37.25 194.096707 36.538777 194.669055 35.272971 195.09099
+C 34.007164 195.512926 32.290121 195.75 30.5 195.75
+C 28.709879 195.75 26.992836 195.512926 25.727029 195.09099
+C 24.461223 194.669055 23.75 194.096707 23.75 193.5
+C 23.75 192.903293 24.461223 192.330945 25.727029 191.90901
+C 26.992836 191.487074 28.709879 191.25 30.5 191.25
+z
+" clip-path="url(#pd39310bda7)" style="fill: #ffffff; stroke: #587489; stroke-width: 0.9; stroke-linejoin: miter"/>
+   </g>
+   <g id="patch_89">
+    <path d="M 30.5 196.5
+C 32.290121 196.5 34.007164 196.737074 35.272971 197.15901
+C 36.538777 197.580945 37.25 198.153293 37.25 198.75
+C 37.25 199.346707 36.538777 199.919055 35.272971 200.34099
+C 34.007164 200.762926 32.290121 201 30.5 201
+C 28.709879 201 26.992836 200.762926 25.727029 200.34099
+C 24.461223 199.919055 23.75 199.346707 23.75 198.75
+C 23.75 198.153293 24.461223 197.580945 25.727029 197.15901
+C 26.992836 196.737074 28.709879 196.5 30.5 196.5
+z
+" clip-path="url(#pd39310bda7)" style="fill: #ffffff; stroke: #587489; stroke-width: 0.9; stroke-linejoin: miter"/>
+   </g>
+   <g id="patch_90">
+    <path d="M 286 275
+C 291.012339 275 295.82006 275.663808 299.364318 276.845227
+C 302.908577 278.026647 304.9 279.62922 304.9 281.3
+C 304.9 282.97078 302.908577 284.573353 299.364318 285.754773
+C 295.82006 286.936192 291.012339 287.6 286 287.6
+C 280.987661 287.6 276.17994 286.936192 272.635682 285.754773
+C 269.091423 284.573353 267.1 282.97078 267.1 281.3
+C 267.1 279.62922 269.091423 278.026647 272.635682 276.845227
+C 276.17994 275.663808 280.987661 275 286 275
+z
+" clip-path="url(#pd39310bda7)" style="fill: #ffffff; stroke: #587489; stroke-width: 0.9; stroke-linejoin: miter"/>
+   </g>
+   <g id="patch_91">
+    <path d="M 286 289.7
+C 291.012339 289.7 295.82006 290.363808 299.364318 291.545227
+C 302.908577 292.726647 304.9 294.32922 304.9 296
+C 304.9 297.67078 302.908577 299.273353 299.364318 300.454773
+C 295.82006 301.636192 291.012339 302.3 286 302.3
+C 280.987661 302.3 276.17994 301.636192 272.635682 300.454773
+C 269.091423 299.273353 267.1 297.67078 267.1 296
+C 267.1 294.32922 269.091423 292.726647 272.635682 291.545227
+C 276.17994 290.363808 280.987661 289.7 286 289.7
+z
+" clip-path="url(#pd39310bda7)" style="fill: #ffffff; stroke: #587489; stroke-width: 0.9; stroke-linejoin: miter"/>
+   </g>
+   <g id="patch_92">
+    <path d="M 286 304.4
+C 291.012339 304.4 295.82006 305.063808 299.364318 306.245227
+C 302.908577 307.426647 304.9 309.02922 304.9 310.7
+C 304.9 312.37078 302.908577 313.973353 299.364318 315.154773
+C 295.82006 316.336192 291.012339 317 286 317
+C 280.987661 317 276.17994 316.336192 272.635682 315.154773
+C 269.091423 313.973353 267.1 312.37078 267.1 310.7
+C 267.1 309.02922 269.091423 307.426647 272.635682 306.245227
+C 276.17994 305.063808 280.987661 304.4 286 304.4
+z
+" clip-path="url(#pd39310bda7)" style="fill: #ffffff; stroke: #587489; stroke-width: 0.9; stroke-linejoin: miter"/>
+   </g>
+   <g id="text_1">
+    <text style="font-weight: 700; font-size: 10px; font-family: 'DejaVu Sans'; text-anchor: start; fill: #203b50" x="44" y="29.564062" transform="rotate(-0 44 29.564062)">DI ĐỘNG BIÊN</text>
+   </g>
+   <g id="text_2">
+    <text style="font-weight: 700; font-size: 10px; font-family: 'DejaVu Sans'; text-anchor: start; fill: #203b50" x="283" y="28.759375" transform="rotate(-0 283 28.759375)">BACKEND TRUNG TÂM</text>
+   </g>
+   <g id="text_3">
+    <text style="font-weight: 700; font-size: 10px; font-family: 'DejaVu Sans'; text-anchor: start; fill: #203b50" x="542" y="29.267187" transform="rotate(-0 542 29.267187)">WEB ĐIỀU PHỐI</text>
+   </g>
+   <g id="text_4">
+    <text style="font-size: 9.2px; font-family: 'DejaVu Sans'; text-anchor: start; fill: #203b50" x="23" y="45.722625" transform="rotate(-0 23 45.722625)">Người dân / đội cứu hộ</text>
+   </g>
+   <g id="text_5">
+    <text style="font-size: 9.2px; font-family: 'DejaVu Sans'; text-anchor: start; fill: #203b50" x="521" y="45.931062" transform="rotate(-0 521 45.931062)">Điều phối viên</text>
+   </g>
+   <g id="text_6">
+    <text style="font-weight: 700; font-size: 9px; font-family: 'DejaVu Sans'; text-anchor: middle; fill: #aa4d48" x="46" y="78.483437" transform="rotate(-0 46 78.483437)">SOS</text>
+   </g>
+   <g id="text_7">
+    <text style="font-size: 9.2px; font-family: 'DejaVu Sans'; text-anchor: start; fill: #203b50" x="82" y="93.608344" transform="rotate(-0 82 93.608344)">SOS một chạm / báo cáo</text>
+   </g>
+   <g id="text_8">
+    <text style="font-size: 9.2px; font-family: 'DejaVu Sans'; text-anchor: start; fill: #203b50" x="82" y="107.175437" transform="rotate(-0 82 107.175437)">Ảnh, GPS, N, V, mô tả</text>
+   </g>
+   <g id="text_9">
+    <text style="font-size: 9.2px; font-family: 'DejaVu Sans'; text-anchor: start; fill: #203b50" x="23" y="118.931062" transform="rotate(-0 23 118.931062)">N: số người; V: nhóm yếu thế</text>
+   </g>
+   <g id="text_10">
+    <text style="font-weight: 700; font-size: 9.7px; font-family: 'DejaVu Sans'; text-anchor: start; fill: #203b50" x="46" y="133.214641" transform="rotate(-0 46 133.214641)">AI tại thiết bị</text>
+   </g>
+   <g id="text_11">
+    <text style="font-size: 9.2px; font-family: 'DejaVu Sans'; text-anchor: start; fill: #203b50" x="23" y="153.931062" transform="rotate(-0 23 153.931062)">MobileNetV3-Large: bốn mức ngập</text>
+   </g>
+   <g id="text_12">
+    <text style="font-size: 9.2px; font-family: 'DejaVu Sans'; text-anchor: start; fill: #203b50" x="23" y="166.538625" transform="rotate(-0 23 166.538625)">Confidence; ONNX / ExecuTorch</text>
+   </g>
+   <g id="text_13">
+    <text style="font-size: 9.2px; font-family: 'DejaVu Sans'; text-anchor: start; fill: #203b50" x="23" y="179.803125" transform="rotate(-0 23 179.803125)">LR: 5 dấu hiệu → E_i</text>
+   </g>
+   <g id="text_14">
+    <text style="font-weight: 700; font-size: 9.7px; font-family: 'DejaVu Sans'; text-anchor: start; fill: #203b50" x="46" y="196.676594" transform="rotate(-0 46 196.676594)">Hive + Outbox</text>
+   </g>
+   <g id="text_15">
+    <text style="font-size: 9.2px; font-family: 'DejaVu Sans'; text-anchor: start; fill: #203b50" x="23" y="218.538625" transform="rotate(-0 23 218.538625)">Report ID; message ID; client / sequence</text>
+   </g>
+   <g id="text_16">
+    <text style="font-size: 9.2px; font-family: 'DejaVu Sans'; text-anchor: start; fill: #203b50" x="23" y="231.538625" transform="rotate(-0 23 231.538625)">Payload JCS → SHA-256; ACK / retry</text>
+   </g>
+   <g id="text_17">
+    <text style="font-size: 9.2px; font-family: 'DejaVu Sans'; text-anchor: start; fill: #203b50" x="23" y="244.769344" transform="rotate(-0 23 244.769344)">Metadata và ảnh có trạng thái gửi riêng</text>
+   </g>
+   <g id="text_18">
+    <text style="font-weight: 700; font-size: 9.7px; font-family: 'DejaVu Sans'; text-anchor: start; fill: #203b50" x="46" y="272.197969" transform="rotate(-0 46 272.197969)">Truyền tải thích ứng</text>
+   </g>
+   <g id="text_19">
+    <text style="font-size: 9.2px; font-family: 'DejaVu Sans'; text-anchor: start; fill: #203b50" x="23" y="293.597344" transform="rotate(-0 23 293.597344)">Ảnh gốc / ảnh nén / chỉ metadata</text>
+   </g>
+   <g id="text_20">
+    <text style="font-size: 9.2px; font-family: 'DejaVu Sans'; text-anchor: start; fill: #203b50" x="23" y="305.722625" transform="rotate(-0 23 305.722625)">SMS dự phòng; giữ hàng đợi HTTP</text>
+   </g>
+   <g id="text_21">
+    <text style="font-size: 9.2px; font-family: 'DejaVu Sans'; text-anchor: start; fill: #203b50" x="23" y="318.722625" transform="rotate(-0 23 318.722625)">Tra cứu /api/reports/status</text>
+   </g>
+   <g id="text_22">
+    <text style="font-size: 9.2px; font-family: 'DejaVu Sans'; fill: #203b50" transform="translate(293.072312 87.20722)">FastAPI · tiếp nhận và xác thực</text>
+    <text style="font-size: 9.2px; font-family: 'DejaVu Sans'; fill: #203b50" transform="translate(283.506469 97.15968)">POST /sync/messages · JSON batch</text>
+    <text style="font-size: 9.2px; font-family: 'DejaVu Sans'; fill: #203b50" transform="translate(281.744812 107.642792)">POST /api/reports · metadata + ảnh</text>
+    <text style="font-size: 9.2px; font-family: 'DejaVu Sans'; fill: #203b50" transform="translate(295.569969 118.654905)">SMS webhook / nhập tổng đài</text>
+   </g>
+   <g id="text_23">
+    <text style="font-size: 9.2px; font-family: 'DejaVu Sans'; text-anchor: start; fill: #203b50" x="309" y="168.410687" transform="rotate(-0 309 168.410687)">ClusterService + rescue_core</text>
+   </g>
+   <g id="text_24">
+    <text style="font-size: 9.2px; font-family: 'DejaVu Sans'; text-anchor: start; fill: #203b50" x="309" y="182.538625" transform="rotate(-0 309 182.538625)">Louvain; ưu tiên P(c)</text>
+   </g>
+   <g id="text_25">
+    <text style="font-size: 9.2px; font-family: 'DejaVu Sans'; text-anchor: start; fill: #203b50" x="309" y="196.931062" transform="rotate(-0 309 196.931062)">Thiếu L/T → hàng xem xét</text>
+   </g>
+   <g id="text_26">
+    <text style="font-size: 9.2px; font-family: 'DejaVu Sans'; text-anchor: start; fill: #203b50" x="309" y="210.538625" transform="rotate(-0 309 210.538625)">clusterKey; cache RAM</text>
+   </g>
+   <g id="text_27">
+    <text style="font-size: 9.1px; font-family: 'DejaVu Sans'; fill: #203b50" transform="translate(286.483641 235.938277)">epoch:cluster_rev · snapshot ETag</text>
+    <text style="font-size: 9.1px; font-family: 'DejaVu Sans'; fill: #203b50" transform="translate(269.637977 247.083786)">Không đổi: cache; chậm: stale + tính nền</text>
+   </g>
+   <g id="text_28">
+    <text style="font-size: 9.2px; font-family: 'DejaVu Sans'; text-anchor: start; fill: #203b50" x="321" y="282.538625" transform="rotate(-0 321 282.538625)">SQLite WAL + uploads/</text>
+   </g>
+   <g id="text_29">
+    <text style="font-size: 9.2px; font-family: 'DejaVu Sans'; text-anchor: start; fill: #203b50" x="321" y="297.538625" transform="rotate(-0 321 297.538625)">reports, teams, auth, events</text>
+   </g>
+   <g id="text_30">
+    <text style="font-size: 9.2px; font-family: 'DejaVu Sans'; text-anchor: start; fill: #203b50" x="321" y="312.410687" transform="rotate(-0 321 312.410687)">messages_dedup; server_meta</text>
+   </g>
+   <g id="text_31">
+    <g id="patch_93">
+     <path d="M 367.490469 270.525156
+L 452.509531 270.525156
+L 452.509531 259.474844
+L 367.490469 259.474844
+z
+" style="fill: #ffffff"/>
+    </g>
+    <text style="font-size: 9px; font-family: 'DejaVu Sans'; text-anchor: middle; fill: #203b50" x="410" y="267.483438" transform="rotate(-0 410 267.483438)">Đọc active reports</text>
+   </g>
+   <g id="text_32">
+    <g id="patch_94">
+     <path d="M 573.532187 141.797266
+L 652.467812 141.797266
+L 652.467812 130.202734
+L 573.532187 130.202734
+z
+" style="fill: #ffffff"/>
+    </g>
+    <text style="font-size: 9px; font-family: 'DejaVu Sans'; text-anchor: middle; fill: #203b50" x="613" y="138.755547" transform="rotate(-0 613 138.755547)">Bản đồ minh họa</text>
+   </g>
+   <g id="text_33">
+    <text style="font-weight: 700; font-size: 9.4px; font-family: 'DejaVu Sans'; text-anchor: middle; fill: #203b50" x="613" y="157.57325" transform="rotate(-0 613 157.57325)">Leaflet GIS · cụm theo P(c)</text>
+   </g>
+   <g id="text_34">
+    <text style="font-weight: 700; font-size: 9.7px; font-family: 'DejaVu Sans'; text-anchor: start; fill: #203b50" x="544" y="189.676594" transform="rotate(-0 544 189.676594)">Xem xét và xác minh</text>
+   </g>
+   <g id="text_35">
+    <text style="font-size: 9.2px; font-family: 'DejaVu Sans'; text-anchor: start; fill: #203b50" x="521" y="211.483062" transform="rotate(-0 521 211.483062)">Ảnh, nhãn AI, số nạn nhân</text>
+   </g>
+   <g id="text_36">
+    <text style="font-size: 9.2px; font-family: 'DejaVu Sans'; text-anchor: start; fill: #203b50" x="521" y="223.999344" transform="rotate(-0 521 223.999344)">Hàng thiếu vị trí; bổ sung tọa độ</text>
+   </g>
+   <g id="text_37">
+    <text style="font-size: 9.2px; font-family: 'DejaVu Sans'; text-anchor: start; fill: #203b50" x="521" y="236.538625" transform="rotate(-0 521 236.538625)">Polling 5 s: changes / clusters</text>
+   </g>
+   <g id="text_38">
+    <text style="font-weight: 700; font-size: 9.7px; font-family: 'DejaVu Sans'; text-anchor: start; fill: #203b50" x="544" y="267.197969" transform="rotate(-0 544 267.197969)">Điều phối và truy vết</text>
+   </g>
+   <g id="text_39">
+    <text style="font-size: 9.2px; font-family: 'DejaVu Sans'; text-anchor: start; fill: #203b50" x="521" y="287.722625" transform="rotate(-0 521 287.722625)">Giao đội; cập nhật trạng thái riêng</text>
+   </g>
+   <g id="text_40">
+    <text style="font-size: 9.2px; font-family: 'DejaVu Sans'; text-anchor: start; fill: #203b50" x="521" y="300.329469" transform="rotate(-0 521 300.329469)">report_events; CSV / GeoJSON</text>
+   </g>
+   <g id="text_41">
+    <text style="font-size: 9.2px; font-family: 'DejaVu Sans'; text-anchor: start; fill: #203b50" x="521" y="313.769344" transform="rotate(-0 521 313.769344)">Tài khoản; sao lưu; quản trị</text>
+   </g>
+   <g id="text_42">
+    <g id="patch_95">
+     <path d="M 230.455469 96.525156
+L 245.544531 96.525156
+L 245.544531 85.474844
+L 230.455469 85.474844
+z
+" style="fill: #ffffff"/>
+    </g>
+    <text style="font-size: 9px; font-family: 'DejaVu Sans'; text-anchor: middle; fill: #203b50" x="238" y="93.483437" transform="rotate(-0 238 93.483437)">[1]</text>
+   </g>
+   <g id="text_43">
+    <g id="patch_96">
+     <path d="M 480.455469 96.525156
+L 495.544531 96.525156
+L 495.544531 85.474844
+L 480.455469 85.474844
+z
+" style="fill: #ffffff"/>
+    </g>
+    <text style="font-size: 9px; font-family: 'DejaVu Sans'; text-anchor: middle; fill: #203b50" x="488" y="93.483437" transform="rotate(-0 488 93.483437)">[3]</text>
+   </g>
+   <g id="text_44">
+    <text style="font-size: 9.2px; font-family: 'DejaVu Sans'; text-anchor: middle; fill: #203b50" x="196.5" y="366.038625" transform="rotate(-0 196.5 366.038625)">SMS gateway → webhook</text>
+   </g>
+   <g id="text_45">
+    <g id="patch_97">
+     <path d="M 230.455469 156.525156
+L 245.544531 156.525156
+L 245.544531 145.474844
+L 230.455469 145.474844
+z
+" style="fill: #ffffff"/>
+    </g>
+    <text style="font-size: 9px; font-family: 'DejaVu Sans'; text-anchor: middle; fill: #203b50" x="238" y="153.483437" transform="rotate(-0 238 153.483437)">[2]</text>
+   </g>
+   <g id="text_46">
+    <text style="font-size: 9px; font-family: 'DejaVu Sans'; text-anchor: start; fill: #203b50" x="10" y="391.709141" transform="rotate(-0 10 391.709141)">[1] HTTP: metadata/ảnh, ACK và trạng thái. [2] GSM SMS → gateway → /api/sms/inbound.</text>
+   </g>
+   <g id="text_47">
+    <text style="font-size: 9px; font-family: 'DejaVu Sans'; text-anchor: start; fill: #203b50" x="10" y="406.742188" transform="rotate(-0 10 406.742188)">[3] API điều phối, JSON/ETag. App gửi E_i; adapter lấy E từ urgency hoặc mô tả.</text>
+   </g>
+  </g>
+ </g>
+ <defs>
+  <clipPath id="pd39310bda7">
+   <rect x="0" y="0" width="728.503937" height="415"/>
+  </clipPath>
+ </defs>
 </svg>

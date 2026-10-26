@@ -71,16 +71,16 @@ Checkpoint được lựa chọn ưu tiên theo accuracy trên tập validation.
 
 Hình huấn luyện trong báo cáo được cập nhật từ config và artifact seed \BenchmarkSeed{}. Notebook được dùng để giải thích cơ chế; benchmark runtime được chọn thuộc seed \BenchmarkSeed{}, lượng tử hóa seed \QuantizationSeed{} và benchmark mobile của phương án triển khai dùng seed 1024. Các cấu hình mobile seed 159 được giữ làm đối chứng trong phần so sánh mô hình. Seed huấn luyện không tự xác nhận manifest chia tập của phiên mới.
 \begin{figure}[htbp]\centering
-\includegraphics[width=\textwidth]{training-loss.png}
+\includegraphics[width=\textwidth]{training-loss.pdf}
 \caption{Loss theo 11 epoch đã lưu của model seed 1024}
 \label{fig:training-history}
 \end{figure}
 \begin{figure}[htbp]\centering
-\includegraphics[width=\textwidth]{training-metrics.png}
+\includegraphics[width=\textwidth]{training-metrics.pdf}
 \caption{Các chỉ số train và validation theo epoch của model seed 1024}
 \end{figure}
 \begin{figure}[htbp]\centering
-\includegraphics[width=\textwidth]{validation-recall.png}
+\includegraphics[width=\textwidth]{validation-recall.pdf}
 \caption{Recall validation theo từng lớp của model seed 1024}
 \end{figure}
 
@@ -96,9 +96,12 @@ PTQ xác định các tham số sau huấn luyện từ dữ liệu calibration;
 
 Cắt tỉa có cấu trúc thay đổi kênh hoặc nhóm tham số của mạng. Trong artifact hiện tại, phương pháp \texttt{global\_group\_magnitude\_channel} có target ratio 0,01; số tham số trước và sau là 4.207.156 và 4.145.694, với cấu hình lưu trong benchmark seed \PruningSeed{}. Lợi ích được kiểm tra bằng tệp thực, dự đoán và timing cùng runtime: giảm tham số, giảm byte và tăng tốc là ba kết quả riêng. Chương~\ref{chap:04-evaluation} giữ cả trường hợp giảm dung lượng nhưng runtime chậm hơn.
 
-\begin{figure}[htbp]
+\begin{landscape}
+\begin{figure}[p]
 \centering
-\includegraphics[width=\textwidth]{flow_09_ai_training_optimization.pdf}
+\setlength{\abovecaptionskip}{4pt}
+\includegraphics[width=\linewidth]{flow_09_ai_training_optimization.pdf}
 \caption{Pipeline quy trình huấn luyện, tối ưu nén mô hình và xuất runtime AI kép}
 \label{fig:flow-ai-training-optimization}
 \end{figure}
+\end{landscape}

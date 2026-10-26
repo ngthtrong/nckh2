@@ -1,0 +1,259 @@
+<mxfile host="Electron" agent="Antigravity">
+  <diagram id="diag-1" name="So-do-Thuc-the-Lien-ket-CSDL-ERD">
+    <mxGraphModel dx="3363" dy="1079" grid="0" gridSize="10" guides="1" tooltips="1" connect="1" arrows="1" fold="1" page="1" pageScale="1" pageWidth="1420" pageHeight="960" math="0" shadow="0">
+      <root>
+        <mxCell id="0" />
+        <mxCell id="1" parent="0" />
+        <mxCell id="t_reports" parent="1" style="shape=swimlane;fontStyle=1;align=center;verticalAlign=top;childLayout=stackLayout;horizontal=1;startSize=30;horizontalStack=0;resizeParent=1;resizeParentMax=0;resizeLast=0;collapsible=0;marginBottom=0;whiteSpace=wrap;html=1;fontFamily=Helvetica;fontSize=15;fillColor=#DCE8F5;strokeColor=#526B88;swimlaneFillColor=#F7F9FC;fontColor=#172B4D;" value="Table: reports (Báo cáo cứu hộ khẩn cấp)" vertex="1">
+          <mxGeometry height="720" width="431" x="459" y="19" as="geometry" />
+        </mxCell>
+        <mxCell id="t_reports_c1" parent="t_reports" style="text;strokeColor=#526B88;strokeWidth=0.5;fillColor=#EDF3FA;align=left;verticalAlign=middle;spacingLeft=8;spacingRight=4;overflow=hidden;points=[[0,0.5],[1,0.5]];portConstraint=eastwest;rotatable=0;whiteSpace=wrap;html=1;fontStyle=1;fontSize=15;fontFamily=Helvetica;fontColor=#172B4D;" value="&lt;div style=&quot;line-height:1;&quot;&gt;PK  id : TEXT PRIMARY KEY (Mã SOS duy nhất)&lt;/div&gt;" vertex="1">
+          <mxGeometry height="30" width="431" y="30" as="geometry" />
+        </mxCell>
+        <mxCell id="t_reports_c2" parent="t_reports" style="text;strokeColor=#526B88;strokeWidth=0.5;fillColor=#EDF3FA;align=left;verticalAlign=middle;spacingLeft=8;spacingRight=4;overflow=hidden;points=[[0,0.5],[1,0.5]];portConstraint=eastwest;rotatable=0;whiteSpace=wrap;html=1;fontSize=15;fontFamily=Helvetica;fontColor=#172B4D;" value="&lt;div style=&quot;line-height:1;&quot;&gt;    server_received_at : TEXT NOT NULL (ISO-8601 UTC)&lt;/div&gt;" vertex="1">
+          <mxGeometry height="30" width="431" y="60" as="geometry" />
+        </mxCell>
+        <mxCell id="t_reports_c3" parent="t_reports" style="text;strokeColor=#526B88;strokeWidth=0.5;fillColor=#EDF3FA;align=left;verticalAlign=middle;spacingLeft=8;spacingRight=4;overflow=hidden;points=[[0,0.5],[1,0.5]];portConstraint=eastwest;rotatable=0;whiteSpace=wrap;html=1;fontSize=15;fontFamily=Helvetica;fontColor=#172B4D;" value="&lt;div style=&quot;line-height:1;&quot;&gt;    created_at : TEXT (Thời điểm tạo tại client)&lt;/div&gt;" vertex="1">
+          <mxGeometry height="30" width="431" y="90" as="geometry" />
+        </mxCell>
+        <mxCell id="t_reports_c4" parent="t_reports" style="text;strokeColor=#526B88;strokeWidth=0.5;fillColor=#EDF3FA;align=left;verticalAlign=middle;spacingLeft=8;spacingRight=4;overflow=hidden;points=[[0,0.5],[1,0.5]];portConstraint=eastwest;rotatable=0;whiteSpace=wrap;html=1;fontSize=15;fontFamily=Helvetica;fontColor=#172B4D;" value="&lt;div style=&quot;line-height:1;&quot;&gt;    lat, lng : REAL (Tọa độ WGS84 GPS hiện trường)&lt;/div&gt;" vertex="1">
+          <mxGeometry height="30" width="431" y="120" as="geometry" />
+        </mxCell>
+        <mxCell id="t_reports_c5" parent="t_reports" style="text;strokeColor=#526B88;strokeWidth=0.5;fillColor=#EDF3FA;align=left;verticalAlign=middle;spacingLeft=8;spacingRight=4;overflow=hidden;points=[[0,0.5],[1,0.5]];portConstraint=eastwest;rotatable=0;whiteSpace=wrap;html=1;fontSize=15;fontFamily=Helvetica;fontColor=#172B4D;" value="&lt;div style=&quot;line-height:1;&quot;&gt;    trapped_count : INTEGER DEFAULT 0 (Số người mắc kẹt)&lt;/div&gt;" vertex="1">
+          <mxGeometry height="30" width="431" y="150" as="geometry" />
+        </mxCell>
+        <mxCell id="t_reports_c6" parent="t_reports" style="text;strokeColor=#526B88;strokeWidth=0.5;fillColor=#EDF3FA;align=left;verticalAlign=middle;spacingLeft=8;spacingRight=4;overflow=hidden;points=[[0,0.5],[1,0.5]];portConstraint=eastwest;rotatable=0;whiteSpace=wrap;html=1;fontSize=15;fontFamily=Helvetica;fontColor=#172B4D;" value="&lt;div style=&quot;line-height:1;&quot;&gt;    injured_count : INTEGER DEFAULT 0 (Số người bị thương)&lt;/div&gt;" vertex="1">
+          <mxGeometry height="30" width="431" y="180" as="geometry" />
+        </mxCell>
+        <mxCell id="t_reports_c7" parent="t_reports" style="text;strokeColor=#526B88;strokeWidth=0.5;fillColor=#EDF3FA;align=left;verticalAlign=middle;spacingLeft=8;spacingRight=4;overflow=hidden;points=[[0,0.5],[1,0.5]];portConstraint=eastwest;rotatable=0;whiteSpace=wrap;html=1;fontSize=15;fontFamily=Helvetica;fontColor=#172B4D;" value="&lt;div style=&quot;line-height:1;&quot;&gt;    vulnerable_groups : TEXT (JSON: trẻ em, người già...)&lt;/div&gt;" vertex="1">
+          <mxGeometry height="30" width="431" y="210" as="geometry" />
+        </mxCell>
+        <mxCell id="t_reports_c8" parent="t_reports" style="text;strokeColor=#526B88;strokeWidth=0.5;fillColor=#EDF3FA;align=left;verticalAlign=middle;spacingLeft=8;spacingRight=4;overflow=hidden;points=[[0,0.5],[1,0.5]];portConstraint=eastwest;rotatable=0;whiteSpace=wrap;html=1;fontSize=15;fontFamily=Helvetica;fontColor=#172B4D;" value="&lt;div style=&quot;line-height:1;&quot;&gt;    description : TEXT (Mô tả hiện trường / khẩn cấp)&lt;/div&gt;" vertex="1">
+          <mxGeometry height="30" width="431" y="240" as="geometry" />
+        </mxCell>
+        <mxCell id="t_reports_c9" parent="t_reports" style="text;strokeColor=#526B88;strokeWidth=0.5;fillColor=#EDF3FA;align=left;verticalAlign=middle;spacingLeft=8;spacingRight=4;overflow=hidden;points=[[0,0.5],[1,0.5]];portConstraint=eastwest;rotatable=0;whiteSpace=wrap;html=1;fontSize=15;fontFamily=Helvetica;fontColor=#172B4D;" value="&lt;div style=&quot;line-height:1;&quot;&gt;    ai_tags : TEXT (JSON kết quả Edge AI on-device)&lt;/div&gt;" vertex="1">
+          <mxGeometry height="30" width="431" y="270" as="geometry" />
+        </mxCell>
+        <mxCell id="t_reports_c10" parent="t_reports" style="text;strokeColor=#526B88;strokeWidth=0.5;fillColor=#EDF3FA;align=left;verticalAlign=middle;spacingLeft=8;spacingRight=4;overflow=hidden;points=[[0,0.5],[1,0.5]];portConstraint=eastwest;rotatable=0;whiteSpace=wrap;html=1;fontSize=15;fontFamily=Helvetica;fontColor=#172B4D;" value="&lt;div style=&quot;line-height:1;&quot;&gt;    send_mode : TEXT (Chế độ gửi: HTTP, Sync, SMS)&lt;/div&gt;" vertex="1">
+          <mxGeometry height="30" width="431" y="300" as="geometry" />
+        </mxCell>
+        <mxCell id="t_reports_c11" parent="t_reports" style="text;strokeColor=#526B88;strokeWidth=0.5;fillColor=#EDF3FA;align=left;verticalAlign=middle;spacingLeft=8;spacingRight=4;overflow=hidden;points=[[0,0.5],[1,0.5]];portConstraint=eastwest;rotatable=0;whiteSpace=wrap;html=1;fontSize=15;fontFamily=Helvetica;fontColor=#172B4D;" value="&lt;div style=&quot;line-height:1;&quot;&gt;    status : TEXT DEFAULT &#39;processing&#39;&lt;/div&gt;" vertex="1">
+          <mxGeometry height="30" width="431" y="330" as="geometry" />
+        </mxCell>
+        <mxCell id="t_reports_c12" parent="t_reports" style="text;strokeColor=#526B88;strokeWidth=0.5;fillColor=#EDF3FA;align=left;verticalAlign=middle;spacingLeft=8;spacingRight=4;overflow=hidden;points=[[0,0.5],[1,0.5]];portConstraint=eastwest;rotatable=0;whiteSpace=wrap;html=1;fontSize=15;fontFamily=Helvetica;fontColor=#172B4D;" value="&lt;div style=&quot;line-height:1;&quot;&gt;    status_version : INTEGER DEFAULT 1 (Phiên bản đồng bộ)&lt;/div&gt;" vertex="1">
+          <mxGeometry height="30" width="431" y="360" as="geometry" />
+        </mxCell>
+        <mxCell id="t_reports_c13" parent="t_reports" style="text;strokeColor=#526B88;strokeWidth=0.5;fillColor=#EDF3FA;align=left;verticalAlign=middle;spacingLeft=8;spacingRight=4;overflow=hidden;points=[[0,0.5],[1,0.5]];portConstraint=eastwest;rotatable=0;whiteSpace=wrap;html=1;fontSize=15;fontFamily=Helvetica;fontColor=#172B4D;" value="&lt;div style=&quot;line-height:1;&quot;&gt;    image_sha256 : TEXT (SHA-256 hash ảnh hiện trường)&lt;/div&gt;" vertex="1">
+          <mxGeometry height="30" width="431" y="390" as="geometry" />
+        </mxCell>
+        <mxCell id="t_reports_c14" parent="t_reports" style="text;strokeColor=#526B88;strokeWidth=0.5;fillColor=#EDF3FA;align=left;verticalAlign=middle;spacingLeft=8;spacingRight=4;overflow=hidden;points=[[0,0.5],[1,0.5]];portConstraint=eastwest;rotatable=0;whiteSpace=wrap;html=1;fontSize=15;fontFamily=Helvetica;fontColor=#172B4D;" value="&lt;div style=&quot;line-height:1;&quot;&gt;    image_size_bytes : INTEGER (Dung lượng ảnh byte)&lt;/div&gt;" vertex="1">
+          <mxGeometry height="30" width="431" y="420" as="geometry" />
+        </mxCell>
+        <mxCell id="t_reports_c15" parent="t_reports" style="text;strokeColor=#526B88;strokeWidth=0.5;fillColor=#EDF3FA;align=left;verticalAlign=middle;spacingLeft=8;spacingRight=4;overflow=hidden;points=[[0,0.5],[1,0.5]];portConstraint=eastwest;rotatable=0;whiteSpace=wrap;html=1;fontSize=15;fontFamily=Helvetica;fontColor=#172B4D;" value="&lt;div style=&quot;line-height:1;&quot;&gt;    image_filename, image_url : TEXT (Tên file &amp;amp; URL xem ảnh)&lt;/div&gt;" vertex="1">
+          <mxGeometry height="30" width="431" y="450" as="geometry" />
+        </mxCell>
+        <mxCell id="t_reports_c16" parent="t_reports" style="text;strokeColor=#526B88;strokeWidth=0.5;fillColor=#EDF3FA;align=left;verticalAlign=middle;spacingLeft=8;spacingRight=4;overflow=hidden;points=[[0,0.5],[1,0.5]];portConstraint=eastwest;rotatable=0;whiteSpace=wrap;html=1;fontSize=15;fontFamily=Helvetica;fontColor=#172B4D;" value="&lt;div style=&quot;line-height:1;&quot;&gt;    raw_payload : TEXT NOT NULL (Canonical RFC 8785)&lt;/div&gt;" vertex="1">
+          <mxGeometry height="30" width="431" y="480" as="geometry" />
+        </mxCell>
+        <mxCell id="t_reports_c17" parent="t_reports" style="text;strokeColor=#526B88;strokeWidth=0.5;fillColor=#EDF3FA;align=left;verticalAlign=middle;spacingLeft=8;spacingRight=4;overflow=hidden;points=[[0,0.5],[1,0.5]];portConstraint=eastwest;rotatable=0;whiteSpace=wrap;html=1;fontStyle=2;fontSize=15;fontFamily=Helvetica;fontColor=#172B4D;" value="&lt;div style=&quot;line-height:1;&quot;&gt;FK  assigned_team_id : INTEGER [Ref: teams.id]&lt;/div&gt;" vertex="1">
+          <mxGeometry height="30" width="431" y="510" as="geometry" />
+        </mxCell>
+        <mxCell id="t_reports_c18" parent="t_reports" style="text;strokeColor=#526B88;strokeWidth=0.5;fillColor=#EDF3FA;align=left;verticalAlign=middle;spacingLeft=8;spacingRight=4;overflow=hidden;points=[[0,0.5],[1,0.5]];portConstraint=eastwest;rotatable=0;whiteSpace=wrap;html=1;fontSize=15;fontFamily=Helvetica;fontColor=#172B4D;" value="&lt;div style=&quot;line-height:1;&quot;&gt;    location_source : TEXT (&#39;device&#39; GPS | &#39;manual&#39;)&lt;/div&gt;" vertex="1">
+          <mxGeometry height="30" width="431" y="540" as="geometry" />
+        </mxCell>
+        <mxCell id="t_reports_c19" parent="t_reports" style="text;strokeColor=#526B88;strokeWidth=0.5;fillColor=#EDF3FA;align=left;verticalAlign=middle;spacingLeft=8;spacingRight=4;overflow=hidden;points=[[0,0.5],[1,0.5]];portConstraint=eastwest;rotatable=0;whiteSpace=wrap;html=1;fontSize=15;fontFamily=Helvetica;fontColor=#172B4D;" value="&lt;div style=&quot;line-height:1;&quot;&gt;    owner_client_id : TEXT (Client ID thiết bị sở hữu)&lt;/div&gt;" vertex="1">
+          <mxGeometry height="30" width="431" y="570" as="geometry" />
+        </mxCell>
+        <mxCell id="t_reports_c20" parent="t_reports" style="text;strokeColor=#526B88;strokeWidth=0.5;fillColor=#EDF3FA;align=left;verticalAlign=middle;spacingLeft=8;spacingRight=4;overflow=hidden;points=[[0,0.5],[1,0.5]];portConstraint=eastwest;rotatable=0;whiteSpace=wrap;html=1;fontSize=15;fontFamily=Helvetica;fontColor=#172B4D;" value="&lt;div style=&quot;line-height:1;&quot;&gt;    close_reason : TEXT (Lý do khi status=&#39;cancelled&#39;)&lt;/div&gt;" vertex="1">
+          <mxGeometry height="30" width="431" y="600" as="geometry" />
+        </mxCell>
+        <mxCell id="t_reports_c21" parent="t_reports" style="text;strokeColor=#526B88;strokeWidth=0.5;fillColor=#EDF3FA;align=left;verticalAlign=middle;spacingLeft=8;spacingRight=4;overflow=hidden;points=[[0,0.5],[1,0.5]];portConstraint=eastwest;rotatable=0;whiteSpace=wrap;html=1;fontSize=15;fontFamily=Helvetica;fontColor=#172B4D;" value="&lt;div style=&quot;line-height:1;&quot;&gt;    first_received_at : TEXT (Thời điểm nhận đầu tính SLA)&lt;/div&gt;" vertex="1">
+          <mxGeometry height="30" width="431" y="630" as="geometry" />
+        </mxCell>
+        <mxCell id="t_reports_c22" parent="t_reports" style="text;strokeColor=#526B88;strokeWidth=0.5;fillColor=#EDF3FA;align=left;verticalAlign=middle;spacingLeft=8;spacingRight=4;overflow=hidden;points=[[0,0.5],[1,0.5]];portConstraint=eastwest;rotatable=0;whiteSpace=wrap;html=1;fontSize=15;fontFamily=Helvetica;fontColor=#172B4D;" value="&lt;div style=&quot;line-height:1;&quot;&gt;    status_updated_at : TEXT (Lần đổi trạng thái gần nhất)&lt;/div&gt;" vertex="1">
+          <mxGeometry height="30" width="431" y="660" as="geometry" />
+        </mxCell>
+        <mxCell id="t_reports_c23" parent="t_reports" style="text;strokeColor=#526B88;strokeWidth=0.5;fillColor=#EDF3FA;align=left;verticalAlign=middle;spacingLeft=8;spacingRight=4;overflow=hidden;points=[[0,0.5],[1,0.5]];portConstraint=eastwest;rotatable=0;whiteSpace=wrap;html=1;fontSize=15;fontFamily=Helvetica;fontColor=#172B4D;" value="&lt;div style=&quot;line-height:1;&quot;&gt;    updated_seq : INTEGER DEFAULT 0 (Seq counter delta)&lt;/div&gt;" vertex="1">
+          <mxGeometry height="30" width="431" y="690" as="geometry" />
+        </mxCell>
+        <mxCell id="t_dedup" parent="1" style="shape=swimlane;fontStyle=1;align=center;verticalAlign=top;childLayout=stackLayout;horizontal=1;startSize=36;horizontalStack=0;resizeParent=1;resizeParentMax=0;resizeLast=0;collapsible=0;marginBottom=0;whiteSpace=wrap;html=1;fontFamily=Helvetica;fontSize=15;fillColor=#DCE8F5;strokeColor=#526B88;swimlaneFillColor=#F7F9FC;fontColor=#172B4D;" value="Table: messages_dedup (Chống trùng lặp Outbox)" vertex="1">
+          <mxGeometry height="366" width="477" x="-139" y="12" as="geometry" />
+        </mxCell>
+        <mxCell id="t_dedup_c1" parent="t_dedup" style="text;strokeColor=#526B88;strokeWidth=0.5;fillColor=#EDF3FA;align=left;verticalAlign=middle;spacingLeft=8;spacingRight=4;overflow=hidden;points=[[0,0.5],[1,0.5]];portConstraint=eastwest;rotatable=0;whiteSpace=wrap;html=1;fontStyle=1;fontSize=15;fontFamily=Helvetica;fontColor=#172B4D;" value="&lt;div style=&quot;line-height:1;&quot;&gt;PK  message_id : TEXT PRIMARY KEY (UUID outbox)&lt;/div&gt;" vertex="1">
+          <mxGeometry height="30" width="477" y="36" as="geometry" />
+        </mxCell>
+        <mxCell id="t_dedup_c2" parent="t_dedup" style="text;strokeColor=#526B88;strokeWidth=0.5;fillColor=#EDF3FA;align=left;verticalAlign=middle;spacingLeft=8;spacingRight=4;overflow=hidden;points=[[0,0.5],[1,0.5]];portConstraint=eastwest;rotatable=0;whiteSpace=wrap;html=1;fontStyle=1;fontSize=15;fontFamily=Helvetica;fontColor=#172B4D;" value="&lt;div style=&quot;line-height:1;&quot;&gt;UQ  client_id : TEXT NOT NULL (Định danh thiết bị)&lt;/div&gt;" vertex="1">
+          <mxGeometry height="30" width="477" y="66" as="geometry" />
+        </mxCell>
+        <mxCell id="t_dedup_c3" parent="t_dedup" style="text;strokeColor=#526B88;strokeWidth=0.5;fillColor=#EDF3FA;align=left;verticalAlign=middle;spacingLeft=8;spacingRight=4;overflow=hidden;points=[[0,0.5],[1,0.5]];portConstraint=eastwest;rotatable=0;whiteSpace=wrap;html=1;fontStyle=1;fontSize=15;fontFamily=Helvetica;fontColor=#172B4D;" value="&lt;div style=&quot;line-height:1;&quot;&gt;UQ  sequence_number : INTEGER NOT NULL (Tuần tự tăng dần)&lt;/div&gt;" vertex="1">
+          <mxGeometry height="30" width="477" y="96" as="geometry" />
+        </mxCell>
+        <mxCell id="t_dedup_c4" parent="t_dedup" style="text;strokeColor=#526B88;strokeWidth=0.5;fillColor=#EDF3FA;align=left;verticalAlign=middle;spacingLeft=8;spacingRight=4;overflow=hidden;points=[[0,0.5],[1,0.5]];portConstraint=eastwest;rotatable=0;whiteSpace=wrap;html=1;fontSize=15;fontFamily=Helvetica;fontColor=#172B4D;" value="&lt;div style=&quot;line-height:1;&quot;&gt;    operation_type : TEXT NOT NULL (CREATE_REPORT...)&lt;/div&gt;" vertex="1">
+          <mxGeometry height="30" width="477" y="126" as="geometry" />
+        </mxCell>
+        <mxCell id="t_dedup_c6" parent="t_dedup" style="text;strokeColor=#526B88;strokeWidth=0.5;fillColor=#EDF3FA;align=left;verticalAlign=middle;spacingLeft=8;spacingRight=4;overflow=hidden;points=[[0,0.5],[1,0.5]];portConstraint=eastwest;rotatable=0;whiteSpace=wrap;html=1;fontSize=15;fontFamily=Helvetica;fontColor=#172B4D;" value="&lt;div style=&quot;line-height:1;&quot;&gt;    status : TEXT NOT NULL (PROCESSED, DUPLICATE...)&lt;/div&gt;" vertex="1">
+          <mxGeometry height="30" width="477" y="156" as="geometry" />
+        </mxCell>
+        <mxCell id="t_dedup_c5" parent="t_dedup" style="text;strokeColor=#526B88;strokeWidth=0.5;fillColor=#EDF3FA;align=left;verticalAlign=middle;spacingLeft=8;spacingRight=4;overflow=hidden;points=[[0,0.5],[1,0.5]];portConstraint=eastwest;rotatable=0;whiteSpace=wrap;html=1;fontSize=15;fontFamily=Helvetica;fontColor=#172B4D;" value="&lt;div style=&quot;line-height:1;&quot;&gt;    payload_hash : TEXT NOT NULL (RFC 8785 SHA-256)&lt;/div&gt;" vertex="1">
+          <mxGeometry height="30" width="477" y="186" as="geometry" />
+        </mxCell>
+        <mxCell id="t_dedup_c7" parent="t_dedup" style="text;strokeColor=#526B88;strokeWidth=0.5;fillColor=#EDF3FA;align=left;verticalAlign=middle;spacingLeft=8;spacingRight=4;overflow=hidden;points=[[0,0.5],[1,0.5]];portConstraint=eastwest;rotatable=0;whiteSpace=wrap;html=1;fontSize=15;fontFamily=Helvetica;fontColor=#172B4D;" value="&lt;div style=&quot;line-height:1;&quot;&gt;    error_code : TEXT (Mã lỗi nếu bị từ chối)&lt;/div&gt;" vertex="1">
+          <mxGeometry height="30" width="477" y="216" as="geometry" />
+        </mxCell>
+        <mxCell id="t_dedup_c8" parent="t_dedup" style="text;strokeColor=#526B88;strokeWidth=0.5;fillColor=#EDF3FA;align=left;verticalAlign=middle;spacingLeft=8;spacingRight=4;overflow=hidden;points=[[0,0.5],[1,0.5]];portConstraint=eastwest;rotatable=0;whiteSpace=wrap;html=1;fontSize=15;fontFamily=Helvetica;fontColor=#172B4D;" value="&lt;div style=&quot;line-height:1;&quot;&gt;    result_data : TEXT (JSON: record_id, ack token)&lt;/div&gt;" vertex="1">
+          <mxGeometry height="30" width="477" y="246" as="geometry" />
+        </mxCell>
+        <mxCell id="t_dedup_c9" parent="t_dedup" style="text;strokeColor=#526B88;strokeWidth=0.5;fillColor=#EDF3FA;align=left;verticalAlign=middle;spacingLeft=8;spacingRight=4;overflow=hidden;points=[[0,0.5],[1,0.5]];portConstraint=eastwest;rotatable=0;whiteSpace=wrap;html=1;fontSize=15;fontFamily=Helvetica;fontColor=#172B4D;" value="&lt;div style=&quot;line-height:1;&quot;&gt;    processed_at : TEXT NOT NULL (Thời điểm server xử lý)&lt;/div&gt;" vertex="1">
+          <mxGeometry height="30" width="477" y="276" as="geometry" />
+        </mxCell>
+        <mxCell id="t_dedup_c10" parent="t_dedup" style="text;strokeColor=#526B88;strokeWidth=0.5;fillColor=#EDF3FA;align=left;verticalAlign=middle;spacingLeft=8;spacingRight=4;overflow=hidden;points=[[0,0.5],[1,0.5]];portConstraint=eastwest;rotatable=0;whiteSpace=wrap;html=1;fontSize=15;fontFamily=Helvetica;fontColor=#172B4D;" value="&lt;div style=&quot;line-height:1;letter-spacing:-0.8px;white-space:nowrap;&quot;&gt;    created_at : TEXT NOT NULL (Thời điểm tạo client)&lt;/div&gt;" vertex="1">
+          <mxGeometry height="30" width="477" y="306" as="geometry" />
+        </mxCell>
+        <mxCell id="t_dedup_c11" parent="t_dedup" style="text;strokeColor=#526B88;strokeWidth=0.5;fillColor=#EDF3FA;align=left;verticalAlign=middle;spacingLeft=8;spacingRight=4;overflow=hidden;points=[[0,0.5],[1,0.5]];portConstraint=eastwest;rotatable=0;whiteSpace=wrap;html=1;fontSize=15;fontFamily=Helvetica;fontColor=#172B4D;" value="&lt;div style=&quot;line-height:1;&quot;&gt;    expires_at : TEXT (Thời điểm hết hạn lưu trữ)&lt;/div&gt;" vertex="1">
+          <mxGeometry height="30" width="477" y="336" as="geometry" />
+        </mxCell>
+        <mxCell id="t_events" parent="1" style="shape=swimlane;fontStyle=1;align=center;verticalAlign=top;childLayout=stackLayout;horizontal=1;startSize=45;horizontalStack=0;resizeParent=1;resizeParentMax=0;resizeLast=0;collapsible=0;marginBottom=0;whiteSpace=wrap;html=1;fontFamily=Helvetica;fontSize=15;fillColor=#DCE8F5;strokeColor=#526B88;swimlaneFillColor=#F7F9FC;fontColor=#172B4D;" value="Table: report_events (Nhật ký kiểm toán truy vết)" vertex="1">
+          <mxGeometry height="375" width="379" x="996" y="19" as="geometry" />
+        </mxCell>
+        <mxCell id="t_events_c1" parent="t_events" style="text;strokeColor=#526B88;strokeWidth=0.5;fillColor=#EDF3FA;align=left;verticalAlign=middle;spacingLeft=8;spacingRight=4;overflow=hidden;points=[[0,0.5],[1,0.5]];portConstraint=eastwest;rotatable=0;whiteSpace=wrap;html=1;fontStyle=1;fontSize=15;fontFamily=Helvetica;fontColor=#172B4D;" value="&lt;div style=&quot;line-height:1;&quot;&gt;PK  id : INTEGER PRIMARY KEY AUTOINCREMENT&lt;/div&gt;" vertex="1">
+          <mxGeometry height="30" width="379" y="45" as="geometry" />
+        </mxCell>
+        <mxCell id="t_events_c2" parent="t_events" style="text;strokeColor=#526B88;strokeWidth=0.5;fillColor=#EDF3FA;align=left;verticalAlign=middle;spacingLeft=8;spacingRight=4;overflow=hidden;points=[[0,0.5],[1,0.5]];portConstraint=eastwest;rotatable=0;whiteSpace=wrap;html=1;fontStyle=2;fontSize=15;fontFamily=Helvetica;fontColor=#172B4D;" value="&lt;div style=&quot;line-height:1;&quot;&gt;FK  report_id : TEXT NOT NULL [Ref: reports.id]&lt;/div&gt;" vertex="1">
+          <mxGeometry height="30" width="379" y="75" as="geometry" />
+        </mxCell>
+        <mxCell id="t_events_c3" parent="t_events" style="text;strokeColor=#526B88;strokeWidth=0.5;fillColor=#EDF3FA;align=left;verticalAlign=middle;spacingLeft=8;spacingRight=4;overflow=hidden;points=[[0,0.5],[1,0.5]];portConstraint=eastwest;rotatable=0;whiteSpace=wrap;html=1;fontSize=15;fontFamily=Helvetica;fontColor=#172B4D;" value="&lt;div style=&quot;line-height:1;&quot;&gt;    kind : TEXT NOT NULL (status/assign/note/loc...)&lt;/div&gt;" vertex="1">
+          <mxGeometry height="30" width="379" y="105" as="geometry" />
+        </mxCell>
+        <mxCell id="WtRRVcrKLp42j1UeUorm-1" parent="t_events" style="text;strokeColor=#526B88;strokeWidth=0.5;fillColor=#EDF3FA;align=left;verticalAlign=middle;spacingLeft=8;spacingRight=4;overflow=hidden;points=[[0,0.5],[1,0.5]];portConstraint=eastwest;rotatable=0;whiteSpace=wrap;html=1;fontSize=15;fontFamily=Helvetica;fontColor=#172B4D;" value="&lt;div style=&quot;line-height:1;&quot;&gt;    from_value : TEXT (Giá trị trước thao tác)&lt;/div&gt;" vertex="1">
+          <mxGeometry height="30" width="379" y="135" as="geometry" />
+        </mxCell>
+        <mxCell id="t_events_c4" parent="t_events" style="text;strokeColor=#526B88;strokeWidth=0.5;fillColor=#EDF3FA;align=left;verticalAlign=middle;spacingLeft=8;spacingRight=4;overflow=hidden;points=[[0,0.5],[1,0.5]];portConstraint=eastwest;rotatable=0;whiteSpace=wrap;html=1;fontSize=15;fontFamily=Helvetica;fontColor=#172B4D;" value="&lt;div style=&quot;line-height:1;&quot;&gt;    from_value : TEXT (Giá trị trước thao tác)&lt;/div&gt;" vertex="1">
+          <mxGeometry height="30" width="379" y="165" as="geometry" />
+        </mxCell>
+        <mxCell id="t_events_c5" parent="t_events" style="text;strokeColor=#526B88;strokeWidth=0.5;fillColor=#EDF3FA;align=left;verticalAlign=middle;spacingLeft=8;spacingRight=4;overflow=hidden;points=[[0,0.5],[1,0.5]];portConstraint=eastwest;rotatable=0;whiteSpace=wrap;html=1;fontSize=15;fontFamily=Helvetica;fontColor=#172B4D;" value="&lt;div style=&quot;line-height:1;&quot;&gt;    to_value : TEXT (Giá trị sau thao tác)&lt;/div&gt;" vertex="1">
+          <mxGeometry height="30" width="379" y="195" as="geometry" />
+        </mxCell>
+        <mxCell id="t_events_c6" parent="t_events" style="text;strokeColor=#526B88;strokeWidth=0.5;fillColor=#EDF3FA;align=left;verticalAlign=middle;spacingLeft=8;spacingRight=4;overflow=hidden;points=[[0,0.5],[1,0.5]];portConstraint=eastwest;rotatable=0;whiteSpace=wrap;html=1;fontSize=15;fontFamily=Helvetica;fontColor=#172B4D;" value="&lt;div style=&quot;line-height:1;&quot;&gt;    status_version : INTEGER (Phiên bản trạng thái)&lt;/div&gt;" vertex="1">
+          <mxGeometry height="30" width="379" y="225" as="geometry" />
+        </mxCell>
+        <mxCell id="t_events_c7" parent="t_events" style="text;strokeColor=#526B88;strokeWidth=0.5;fillColor=#EDF3FA;align=left;verticalAlign=middle;spacingLeft=8;spacingRight=4;overflow=hidden;points=[[0,0.5],[1,0.5]];portConstraint=eastwest;rotatable=0;whiteSpace=wrap;html=1;fontSize=15;fontFamily=Helvetica;fontColor=#172B4D;" value="&lt;div style=&quot;line-height:1;&quot;&gt;    actor : TEXT (Điều phối viên / App client)&lt;/div&gt;" vertex="1">
+          <mxGeometry height="30" width="379" y="255" as="geometry" />
+        </mxCell>
+        <mxCell id="t_events_c8" parent="t_events" style="text;strokeColor=#526B88;strokeWidth=0.5;fillColor=#EDF3FA;align=left;verticalAlign=middle;spacingLeft=8;spacingRight=4;overflow=hidden;points=[[0,0.5],[1,0.5]];portConstraint=eastwest;rotatable=0;whiteSpace=wrap;html=1;fontSize=15;fontFamily=Helvetica;fontColor=#172B4D;" value="&lt;div style=&quot;line-height:1;&quot;&gt;    source : TEXT NOT NULL (app/sync/sms/dashboard)&lt;/div&gt;" vertex="1">
+          <mxGeometry height="30" width="379" y="285" as="geometry" />
+        </mxCell>
+        <mxCell id="t_events_c9" parent="t_events" style="text;strokeColor=#526B88;strokeWidth=0.5;fillColor=#EDF3FA;align=left;verticalAlign=middle;spacingLeft=8;spacingRight=4;overflow=hidden;points=[[0,0.5],[1,0.5]];portConstraint=eastwest;rotatable=0;whiteSpace=wrap;html=1;fontSize=15;fontFamily=Helvetica;fontColor=#172B4D;" value="&lt;div style=&quot;line-height:1;&quot;&gt;    note : TEXT (Ghi chú điều phối / lý do hủy)&lt;/div&gt;" vertex="1">
+          <mxGeometry height="30" width="379" y="315" as="geometry" />
+        </mxCell>
+        <mxCell id="t_events_c10" parent="t_events" style="text;strokeColor=#526B88;strokeWidth=0.5;fillColor=#EDF3FA;align=left;verticalAlign=middle;spacingLeft=8;spacingRight=4;overflow=hidden;points=[[0,0.5],[1,0.5]];portConstraint=eastwest;rotatable=0;whiteSpace=wrap;html=1;fontSize=15;fontFamily=Helvetica;fontColor=#172B4D;" value="&lt;div style=&quot;line-height:1;&quot;&gt;    created_at : TEXT NOT NULL (ISO-8601 UTC)&lt;/div&gt;" vertex="1">
+          <mxGeometry height="30" width="379" y="345" as="geometry" />
+        </mxCell>
+        <mxCell id="t_teams" parent="1" style="shape=swimlane;fontStyle=1;align=center;verticalAlign=top;childLayout=stackLayout;horizontal=1;startSize=31;horizontalStack=0;resizeParent=1;resizeParentMax=0;resizeLast=0;collapsible=0;marginBottom=0;whiteSpace=wrap;html=1;fontFamily=Helvetica;fontSize=15;fillColor=#DCE8F5;strokeColor=#526B88;swimlaneFillColor=#F7F9FC;fontColor=#172B4D;" value="Table: teams (Đội cứu hộ / Cứu nạn cơ động)" vertex="1">
+          <mxGeometry height="241" width="426" x="454" y="822" as="geometry" />
+        </mxCell>
+        <mxCell id="t_teams_c1" parent="t_teams" style="text;strokeColor=#526B88;strokeWidth=0.5;fillColor=#EDF3FA;align=left;verticalAlign=middle;spacingLeft=8;spacingRight=4;overflow=hidden;points=[[0,0.5],[1,0.5]];portConstraint=eastwest;rotatable=0;whiteSpace=wrap;html=1;fontStyle=1;fontSize=15;fontFamily=Helvetica;fontColor=#172B4D;" value="&lt;div style=&quot;line-height:1;&quot;&gt;PK  id : INTEGER PRIMARY KEY AUTOINCREMENT&lt;/div&gt;" vertex="1">
+          <mxGeometry height="30" width="426" y="31" as="geometry" />
+        </mxCell>
+        <mxCell id="t_teams_c2" parent="t_teams" style="text;strokeColor=#526B88;strokeWidth=0.5;fillColor=#EDF3FA;align=left;verticalAlign=middle;spacingLeft=8;spacingRight=4;overflow=hidden;points=[[0,0.5],[1,0.5]];portConstraint=eastwest;rotatable=0;whiteSpace=wrap;html=1;fontStyle=1;fontSize=15;fontFamily=Helvetica;fontColor=#172B4D;" value="&lt;div style=&quot;line-height:1;&quot;&gt;UQ  name : TEXT NOT NULL UNIQUE (Tên đội thực địa)&lt;/div&gt;" vertex="1">
+          <mxGeometry height="30" width="426" y="61" as="geometry" />
+        </mxCell>
+        <mxCell id="t_teams_c3" parent="t_teams" style="text;strokeColor=#526B88;strokeWidth=0.5;fillColor=#EDF3FA;align=left;verticalAlign=middle;spacingLeft=8;spacingRight=4;overflow=hidden;points=[[0,0.5],[1,0.5]];portConstraint=eastwest;rotatable=0;whiteSpace=wrap;html=1;fontSize=15;fontFamily=Helvetica;fontColor=#172B4D;" value="&lt;div style=&quot;line-height:1;&quot;&gt;    phone : TEXT (Số điện thoại liên lạc chỉ huy)&lt;/div&gt;" vertex="1">
+          <mxGeometry height="30" width="426" y="91" as="geometry" />
+        </mxCell>
+        <mxCell id="t_teams_c4" parent="t_teams" style="text;strokeColor=#526B88;strokeWidth=0.5;fillColor=#EDF3FA;align=left;verticalAlign=middle;spacingLeft=8;spacingRight=4;overflow=hidden;points=[[0,0.5],[1,0.5]];portConstraint=eastwest;rotatable=0;whiteSpace=wrap;html=1;fontSize=15;fontFamily=Helvetica;fontColor=#172B4D;" value="&lt;div style=&quot;line-height:1;&quot;&gt;    members : INTEGER (Số lượng thành viên trong đội)&lt;/div&gt;" vertex="1">
+          <mxGeometry height="30" width="426" y="121" as="geometry" />
+        </mxCell>
+        <mxCell id="t_teams_c5" parent="t_teams" style="text;strokeColor=#526B88;strokeWidth=0.5;fillColor=#EDF3FA;align=left;verticalAlign=middle;spacingLeft=8;spacingRight=4;overflow=hidden;points=[[0,0.5],[1,0.5]];portConstraint=eastwest;rotatable=0;whiteSpace=wrap;html=1;fontSize=15;fontFamily=Helvetica;fontColor=#172B4D;" value="&lt;div style=&quot;line-height:1;&quot;&gt;    note : TEXT (Năng lực, phương tiện xuồng/ca nô)&lt;/div&gt;" vertex="1">
+          <mxGeometry height="30" width="426" y="151" as="geometry" />
+        </mxCell>
+        <mxCell id="t_teams_c6" parent="t_teams" style="text;strokeColor=#526B88;strokeWidth=0.5;fillColor=#EDF3FA;align=left;verticalAlign=middle;spacingLeft=8;spacingRight=4;overflow=hidden;points=[[0,0.5],[1,0.5]];portConstraint=eastwest;rotatable=0;whiteSpace=wrap;html=1;fontSize=15;fontFamily=Helvetica;fontColor=#172B4D;" value="&lt;div style=&quot;line-height:1;&quot;&gt;    active : INTEGER NOT NULL DEFAULT 1 (Sẵn sàng)&lt;/div&gt;" vertex="1">
+          <mxGeometry height="30" width="426" y="181" as="geometry" />
+        </mxCell>
+        <mxCell id="t_teams_c7" parent="t_teams" style="text;strokeColor=#526B88;strokeWidth=0.5;fillColor=#EDF3FA;align=left;verticalAlign=middle;spacingLeft=8;spacingRight=4;overflow=hidden;points=[[0,0.5],[1,0.5]];portConstraint=eastwest;rotatable=0;whiteSpace=wrap;html=1;fontSize=15;fontFamily=Helvetica;fontColor=#172B4D;" value="&lt;div style=&quot;line-height:1;&quot;&gt;    created_at : TEXT NOT NULL (ISO-8601 UTC)&lt;/div&gt;" vertex="1">
+          <mxGeometry height="30" width="426" y="211" as="geometry" />
+        </mxCell>
+        <mxCell id="t_operators" parent="1" style="shape=swimlane;fontStyle=1;align=center;verticalAlign=top;childLayout=stackLayout;horizontal=1;startSize=40;horizontalStack=0;resizeParent=1;resizeParentMax=0;resizeLast=0;collapsible=0;marginBottom=0;whiteSpace=wrap;html=1;fontFamily=Helvetica;fontSize=15;fillColor=#DCE8F5;strokeColor=#526B88;swimlaneFillColor=#F7F9FC;fontColor=#172B4D;" value="Table: operators (Tài khoản điều phối &amp;amp; Quản trị)" vertex="1">
+          <mxGeometry height="310" width="454" x="958.5" y="435" as="geometry" />
+        </mxCell>
+        <mxCell id="t_operators_c1" parent="t_operators" style="text;strokeColor=#526B88;strokeWidth=0.5;fillColor=#EDF3FA;align=left;verticalAlign=middle;spacingLeft=8;spacingRight=4;overflow=hidden;points=[[0,0.5],[1,0.5]];portConstraint=eastwest;rotatable=0;whiteSpace=wrap;html=1;fontStyle=1;fontSize=15;fontFamily=Helvetica;fontColor=#172B4D;" value="&lt;div style=&quot;line-height:1;&quot;&gt;PK  id : INTEGER PRIMARY KEY AUTOINCREMENT&lt;/div&gt;" vertex="1">
+          <mxGeometry height="30" width="454" y="40" as="geometry" />
+        </mxCell>
+        <mxCell id="t_operators_c2" parent="t_operators" style="text;strokeColor=#526B88;strokeWidth=0.5;fillColor=#EDF3FA;align=left;verticalAlign=middle;spacingLeft=8;spacingRight=4;overflow=hidden;points=[[0,0.5],[1,0.5]];portConstraint=eastwest;rotatable=0;whiteSpace=wrap;html=1;fontStyle=1;fontSize=15;fontFamily=Helvetica;fontColor=#172B4D;" value="&lt;div style=&quot;line-height:1;&quot;&gt;UQ  username : TEXT NOT NULL UNIQUE COLLATE NOCASE&lt;/div&gt;" vertex="1">
+          <mxGeometry height="30" width="454" y="70" as="geometry" />
+        </mxCell>
+        <mxCell id="t_operators_c3" parent="t_operators" style="text;strokeColor=#526B88;strokeWidth=0.5;fillColor=#EDF3FA;align=left;verticalAlign=middle;spacingLeft=8;spacingRight=4;overflow=hidden;points=[[0,0.5],[1,0.5]];portConstraint=eastwest;rotatable=0;whiteSpace=wrap;html=1;fontStyle=1;fontSize=15;fontFamily=Helvetica;fontColor=#172B4D;" value="&lt;div style=&quot;line-height:1;&quot;&gt;UQ  display_name : TEXT NOT NULL UNIQUE (Actor log)&lt;/div&gt;" vertex="1">
+          <mxGeometry height="30" width="454" y="100" as="geometry" />
+        </mxCell>
+        <mxCell id="t_operators_c4" parent="t_operators" style="text;strokeColor=#526B88;strokeWidth=0.5;fillColor=#EDF3FA;align=left;verticalAlign=middle;spacingLeft=8;spacingRight=4;overflow=hidden;points=[[0,0.5],[1,0.5]];portConstraint=eastwest;rotatable=0;whiteSpace=wrap;html=1;fontSize=15;fontFamily=Helvetica;fontColor=#172B4D;" value="&lt;div style=&quot;line-height:1;&quot;&gt;    password_hash : TEXT NOT NULL (PBKDF2-SHA256)&lt;/div&gt;" vertex="1">
+          <mxGeometry height="30" width="454" y="130" as="geometry" />
+        </mxCell>
+        <mxCell id="t_operators_c5" parent="t_operators" style="text;strokeColor=#526B88;strokeWidth=0.5;fillColor=#EDF3FA;align=left;verticalAlign=middle;spacingLeft=8;spacingRight=4;overflow=hidden;points=[[0,0.5],[1,0.5]];portConstraint=eastwest;rotatable=0;whiteSpace=wrap;html=1;fontSize=15;fontFamily=Helvetica;fontColor=#172B4D;" value="&lt;div style=&quot;line-height:1;&quot;&gt;    role : TEXT NOT NULL DEFAULT &#39;operator&#39;&lt;/div&gt;" vertex="1">
+          <mxGeometry height="30" width="454" y="160" as="geometry" />
+        </mxCell>
+        <mxCell id="t_operators_c6" parent="t_operators" style="text;strokeColor=#526B88;strokeWidth=0.5;fillColor=#EDF3FA;align=left;verticalAlign=middle;spacingLeft=8;spacingRight=4;overflow=hidden;points=[[0,0.5],[1,0.5]];portConstraint=eastwest;rotatable=0;whiteSpace=wrap;html=1;fontSize=15;fontFamily=Helvetica;fontColor=#172B4D;" value="&lt;div style=&quot;line-height:1;&quot;&gt;    active : INTEGER NOT NULL DEFAULT 1 (Hoạt động)&lt;/div&gt;" vertex="1">
+          <mxGeometry height="30" width="454" y="190" as="geometry" />
+        </mxCell>
+        <mxCell id="t_operators_c7" parent="t_operators" style="text;strokeColor=#526B88;strokeWidth=0.5;fillColor=#EDF3FA;align=left;verticalAlign=middle;spacingLeft=8;spacingRight=4;overflow=hidden;points=[[0,0.5],[1,0.5]];portConstraint=eastwest;rotatable=0;whiteSpace=wrap;html=1;fontSize=15;fontFamily=Helvetica;fontColor=#172B4D;" value="&lt;div style=&quot;line-height:1;&quot;&gt;    must_change_password : INTEGER NOT NULL DEFAULT 0&lt;/div&gt;" vertex="1">
+          <mxGeometry height="30" width="454" y="220" as="geometry" />
+        </mxCell>
+        <mxCell id="t_operators_c8" parent="t_operators" style="text;strokeColor=#526B88;strokeWidth=0.5;fillColor=#EDF3FA;align=left;verticalAlign=middle;spacingLeft=8;spacingRight=4;overflow=hidden;points=[[0,0.5],[1,0.5]];portConstraint=eastwest;rotatable=0;whiteSpace=wrap;html=1;fontSize=15;fontFamily=Helvetica;fontColor=#172B4D;" value="&lt;div style=&quot;line-height:1;&quot;&gt;    created_at : TEXT NOT NULL (ISO-8601 UTC)&lt;/div&gt;" vertex="1">
+          <mxGeometry height="30" width="454" y="250" as="geometry" />
+        </mxCell>
+        <mxCell id="t_operators_c9" parent="t_operators" style="text;strokeColor=#526B88;strokeWidth=0.5;fillColor=#EDF3FA;align=left;verticalAlign=middle;spacingLeft=8;spacingRight=4;overflow=hidden;points=[[0,0.5],[1,0.5]];portConstraint=eastwest;rotatable=0;whiteSpace=wrap;html=1;fontSize=15;fontFamily=Helvetica;fontColor=#172B4D;" value="&lt;div style=&quot;line-height:1;&quot;&gt;    last_login_at : TEXT (Lần đăng nhập gần nhất)&lt;/div&gt;" vertex="1">
+          <mxGeometry height="30" width="454" y="280" as="geometry" />
+        </mxCell>
+        <mxCell id="t_sessions" parent="1" style="shape=swimlane;fontStyle=1;align=center;verticalAlign=top;childLayout=stackLayout;horizontal=1;startSize=39;horizontalStack=0;resizeParent=1;resizeParentMax=0;resizeLast=0;collapsible=0;marginBottom=0;whiteSpace=wrap;html=1;fontFamily=Helvetica;fontSize=15;fillColor=#DCE8F5;strokeColor=#526B88;swimlaneFillColor=#F7F9FC;fontColor=#172B4D;" value="Table: sessions (Phiên đăng nhập Web Dashboard)" vertex="1">
+          <mxGeometry height="189" width="426" x="972.5" y="806" as="geometry" />
+        </mxCell>
+        <mxCell id="t_sessions_c1" parent="t_sessions" style="text;strokeColor=#526B88;strokeWidth=0.5;fillColor=#EDF3FA;align=left;verticalAlign=middle;spacingLeft=8;spacingRight=4;overflow=hidden;points=[[0,0.5],[1,0.5]];portConstraint=eastwest;rotatable=0;whiteSpace=wrap;html=1;fontStyle=1;fontSize=15;fontFamily=Helvetica;fontColor=#172B4D;" value="&lt;div style=&quot;line-height:1;&quot;&gt;PK  token_hash : TEXT PRIMARY KEY (SHA-256 session)&lt;/div&gt;" vertex="1">
+          <mxGeometry height="30" width="426" y="39" as="geometry" />
+        </mxCell>
+        <mxCell id="t_sessions_c2" parent="t_sessions" style="text;strokeColor=#526B88;strokeWidth=0.5;fillColor=#EDF3FA;align=left;verticalAlign=middle;spacingLeft=8;spacingRight=4;overflow=hidden;points=[[0,0.5],[1,0.5]];portConstraint=eastwest;rotatable=0;whiteSpace=wrap;html=1;fontStyle=2;fontSize=15;fontFamily=Helvetica;fontColor=#172B4D;" value="&lt;div style=&quot;line-height:1;&quot;&gt;FK  operator_id : INTEGER [Ref: operators.id]&lt;/div&gt;" vertex="1">
+          <mxGeometry height="30" width="426" y="69" as="geometry" />
+        </mxCell>
+        <mxCell id="t_sessions_c3" parent="t_sessions" style="text;strokeColor=#526B88;strokeWidth=0.5;fillColor=#EDF3FA;align=left;verticalAlign=middle;spacingLeft=8;spacingRight=4;overflow=hidden;points=[[0,0.5],[1,0.5]];portConstraint=eastwest;rotatable=0;whiteSpace=wrap;html=1;fontSize=15;fontFamily=Helvetica;fontColor=#172B4D;" value="&lt;div style=&quot;line-height:1;&quot;&gt;    operator : TEXT NOT NULL (Tên hiển thị lúc login)&lt;/div&gt;" vertex="1">
+          <mxGeometry height="30" width="426" y="99" as="geometry" />
+        </mxCell>
+        <mxCell id="t_sessions_c4" parent="t_sessions" style="text;strokeColor=#526B88;strokeWidth=0.5;fillColor=#EDF3FA;align=left;verticalAlign=middle;spacingLeft=8;spacingRight=4;overflow=hidden;points=[[0,0.5],[1,0.5]];portConstraint=eastwest;rotatable=0;whiteSpace=wrap;html=1;fontSize=15;fontFamily=Helvetica;fontColor=#172B4D;" value="&lt;div style=&quot;line-height:1;&quot;&gt;    created_at : TEXT NOT NULL (Thời điểm cấp phiên)&lt;/div&gt;" vertex="1">
+          <mxGeometry height="30" width="426" y="129" as="geometry" />
+        </mxCell>
+        <mxCell id="t_sessions_c5" parent="t_sessions" style="text;strokeColor=#526B88;strokeWidth=0.5;fillColor=#EDF3FA;align=left;verticalAlign=middle;spacingLeft=8;spacingRight=4;overflow=hidden;points=[[0,0.5],[1,0.5]];portConstraint=eastwest;rotatable=0;whiteSpace=wrap;html=1;fontSize=15;fontFamily=Helvetica;fontColor=#172B4D;" value="&lt;div style=&quot;line-height:1;&quot;&gt;    expires_at : TEXT NOT NULL (Thời điểm hết hạn)&lt;/div&gt;" vertex="1">
+          <mxGeometry height="30" width="426" y="159" as="geometry" />
+        </mxCell>
+        <mxCell id="t_meta" parent="1" style="shape=swimlane;fontStyle=1;align=center;verticalAlign=top;childLayout=stackLayout;horizontal=1;startSize=28;horizontalStack=0;resizeParent=1;resizeParentMax=0;resizeLast=0;collapsible=0;marginBottom=0;whiteSpace=wrap;html=1;fontFamily=Helvetica;fontSize=15;fillColor=#DCE8F5;strokeColor=#526B88;swimlaneFillColor=#F7F9FC;fontColor=#172B4D;" value="Table: server_meta (Metadata đồng bộ hệ thống)" vertex="1">
+          <mxGeometry height="178" width="409" y="455" as="geometry" />
+        </mxCell>
+        <mxCell id="t_meta_c1" parent="t_meta" style="text;strokeColor=#526B88;strokeWidth=0.5;fillColor=#EDF3FA;align=left;verticalAlign=middle;spacingLeft=8;spacingRight=4;overflow=hidden;points=[[0,0.5],[1,0.5]];portConstraint=eastwest;rotatable=0;whiteSpace=wrap;html=1;fontStyle=1;fontSize=15;fontFamily=Helvetica;fontColor=#172B4D;" value="&lt;div style=&quot;line-height:1;&quot;&gt;PK  key : TEXT PRIMARY KEY (&#39;seq&#39;, &#39;epoch&#39;..)&lt;/div&gt;" vertex="1">
+          <mxGeometry height="30" width="409" y="28" as="geometry" />
+        </mxCell>
+        <mxCell id="t_meta_c2" parent="t_meta" style="text;strokeColor=#526B88;strokeWidth=0.5;fillColor=#EDF3FA;align=left;verticalAlign=middle;spacingLeft=8;spacingRight=4;overflow=hidden;points=[[0,0.5],[1,0.5]];portConstraint=eastwest;rotatable=0;whiteSpace=wrap;html=1;fontSize=15;fontFamily=Helvetica;fontColor=#172B4D;" value="&lt;div style=&quot;line-height:1;&quot;&gt;    value : TEXT NOT NULL (Counter / UUID / Rev)&lt;/div&gt;" vertex="1">
+          <mxGeometry height="30" width="409" y="58" as="geometry" />
+        </mxCell>
+        <mxCell id="t_meta_c3" parent="t_meta" style="text;strokeColor=#526B88;strokeWidth=0.5;fillColor=#EDF3FA;align=left;verticalAlign=middle;spacingLeft=8;spacingRight=4;overflow=hidden;points=[[0,0.5],[1,0.5]];portConstraint=eastwest;rotatable=0;whiteSpace=wrap;html=1;fontSize=15;fontStyle=2;fontFamily=Helvetica;fontColor=#172B4D;" value="&lt;div style=&quot;line-height:1;&quot;&gt;    -- seq : Bộ đếm tăng dần cho Polling delta&lt;/div&gt;" vertex="1">
+          <mxGeometry height="30" width="409" y="88" as="geometry" />
+        </mxCell>
+        <mxCell id="t_meta_c4" parent="t_meta" style="text;strokeColor=#526B88;strokeWidth=0.5;fillColor=#EDF3FA;align=left;verticalAlign=middle;spacingLeft=8;spacingRight=4;overflow=hidden;points=[[0,0.5],[1,0.5]];portConstraint=eastwest;rotatable=0;whiteSpace=wrap;html=1;fontSize=15;fontStyle=2;fontFamily=Helvetica;fontColor=#172B4D;" value="&lt;div style=&quot;line-height:1;&quot;&gt;    -- epoch : Đổi khi reset dữ liệu (Hard sync)&lt;/div&gt;" vertex="1">
+          <mxGeometry height="30" width="409" y="118" as="geometry" />
+        </mxCell>
+        <mxCell id="t_meta_c5" parent="t_meta" style="text;strokeColor=#526B88;strokeWidth=0.5;fillColor=#EDF3FA;align=left;verticalAlign=middle;spacingLeft=8;spacingRight=4;overflow=hidden;points=[[0,0.5],[1,0.5]];portConstraint=eastwest;rotatable=0;whiteSpace=wrap;html=1;fontSize=15;fontStyle=2;fontFamily=Helvetica;fontColor=#172B4D;" value="&lt;div style=&quot;line-height:1;&quot;&gt;    -- cluster_rev : Phiên bản đầu vào phân cụm Louvain&lt;/div&gt;" vertex="1">
+          <mxGeometry height="30" width="409" y="148" as="geometry" />
+        </mxCell>
+        <mxCell id="erd_e1" edge="1" parent="1" source="t_teams" style="endArrow=diamondThin;endFill=1;startArrow=none;html=1;strokeColor=#000000;strokeWidth=1.5;fontSize=15;exitX=0.5;exitY=0.0;exitDx=0;exitDy=0;entryX=0.5;entryY=1;entryDx=0;entryDy=0;fontColor=#172B4D;labelBackgroundColor=#FFFFFF;" target="t_reports" value="1 : N (Giao đội: assigned_team_id)">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="erd_e2" edge="1" parent="1" source="t_reports" style="endArrow=diamondThin;endFill=1;startArrow=none;html=1;strokeColor=#000000;strokeWidth=1.5;fontSize=15;exitX=1.0;exitY=0.2;exitDx=0;exitDy=0;entryX=0;entryY=0.5;entryDx=0;entryDy=0;fontColor=#172B4D;labelBackgroundColor=#FFFFFF;" target="t_events_c5" value="1 : N (Events)">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="erd_e3" edge="1" parent="1" source="t_operators" style="endArrow=diamondThin;endFill=1;startArrow=none;html=1;strokeColor=#000000;strokeWidth=1.5;fontSize=15;exitX=0.5;exitY=1.0;exitDx=0;exitDy=0;entryX=0.5;entryY=0.0;entryDx=0;entryDy=0;fontColor=#172B4D;labelBackgroundColor=#FFFFFF;" target="t_sessions" value="1 : N (Phiên làm việc)">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="erd_e4" edge="1" parent="1" source="t_dedup" style="endArrow=diamondThin;endFill=1;startArrow=none;html=1;strokeColor=#000000;strokeWidth=1.5;fontSize=15;exitX=1.0;exitY=0.3;exitDx=0;exitDy=0;entryX=0;entryY=0.5;entryDx=0;entryDy=0;fontColor=#172B4D;labelBackgroundColor=#FFFFFF;" target="t_reports_c3" value="1 : N (Upsert)">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="erd_e5" edge="1" parent="1" source="t_operators" style="endArrow=diamondThin;endFill=1;startArrow=none;html=1;strokeColor=#000000;strokeWidth=1.5;fontSize=15;exitX=0.5;exitY=0.0;exitDx=0;exitDy=0;entryX=0.5;entryY=1.0;entryDx=0;entryDy=0;fontColor=#172B4D;labelBackgroundColor=#FFFFFF;" target="t_events" value="Audit: actor">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+      </root>
+    </mxGraphModel>
+  </diagram>
+</mxfile>

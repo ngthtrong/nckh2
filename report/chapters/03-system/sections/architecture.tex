@@ -4,21 +4,27 @@ Hệ thống cứu hộ khẩn cấp được thiết kế theo mô hình kiến
 
 Mô hình học sâu phân loại ngập lụt MobileNetV3 và bộ quy tắc tính điểm khẩn cấp được triển khai trực tiếp tại biên (On-device Edge AI) nhằm trích xuất đặc trưng tức thời. Các Jupyter Notebook nghiên cứu đóng vai trò là môi trường đánh giá độc lập để kiểm chứng thuật toán và phân tích hiệu năng ngoại tuyến, hoàn toàn tách biệt khỏi quy trình vận hành trực tuyến của hệ thống.
 
-\begin{figure}[htbp]
+\begin{landscape}
+\begin{figure}[p]
 \centering
-\includegraphics[width=\textwidth]{functional_architecture.pdf}
-\caption{Sơ đồ luồng chức năng và tương tác giữa các phân hệ trong hệ thống cứu hộ}
+\setlength{\abovecaptionskip}{4pt}
+\includegraphics[width=\linewidth]{functional_architecture.pdf}
+\caption{Kiến trúc chức năng và các tuyến trao đổi dữ liệu của hệ thống}
 \label{fig:system-architecture}
 \end{figure}
+\end{landscape}
 
 Hệ thống cho phép tiếp nhận đồng thời dữ liệu thực tế từ ứng dụng di động của người dân và các nguồn dữ liệu mô phỏng phục vụ diễn tập thực nghiệm. Các bản ghi dữ liệu mô phỏng được gắn cờ phân biệt rõ ràng, đảm bảo quy trình kiểm thử và trực quan hóa bản đồ không ảnh hưởng đến các yêu cầu cứu hộ thực tế.
 
-\begin{figure}[htbp]
+\begin{landscape}
+\begin{figure}[p]
 \centering
-\includegraphics[width=\textwidth]{flowchart.pdf}
-\caption{Lưu đồ quy trình phối hợp tổng thể 4 làn giữa các tác nhân và phân hệ trong hệ thống}
+\setlength{\abovecaptionskip}{4pt}
+\includegraphics[width=\linewidth]{flowchart.pdf}
+\caption{Lưu đồ phối hợp bốn phân hệ và phản hồi trạng thái cứu hộ}
 \label{fig:overall-flowchart}
 \end{figure}
+\end{landscape}
 
 \subsection{Phân lớp ứng dụng Flutter}
 Ứng dụng di động Flutter được tổ chức theo kiến trúc Clean Architecture với ba tầng phân lập rõ ràng:
@@ -30,12 +36,15 @@ Hệ thống cho phép tiếp nhận đồng thời dữ liệu thực tế từ
 
 Khâu tích hợp On-device Edge AI trên ứng dụng di động sử dụng cơ chế xuất phụ thuộc điều kiện (\emph{conditional export}) giữa nền tảng Native và Web. Trên hệ điều hành Android, mô hình ONNX được nạp thông qua ONNX Runtime, trong khi mô hình ExecuTorch được gọi thông qua kênh giao tiếp nền tảng MethodChannel. Tương tự, kênh SMS dự phòng được kích hoạt qua MethodChannel giao tiếp với dịch vụ nhắn tin hệ thống. Nền tảng Web hỗ trợ kiểm thử luồng giao diện, truyền nhận HTTP và kịch bản đồng bộ ngoại tuyến.
 
-\begin{figure}[htbp]
+\begin{landscape}
+\begin{figure}[p]
 \centering
-\includegraphics[width=\textwidth]{mobile_architecture.pdf}
-\caption{Kiến trúc phân lớp ứng dụng di động Flutter theo nguyên lý Clean Architecture}
+\setlength{\abovecaptionskip}{4pt}
+\includegraphics[width=\linewidth]{mobile_architecture.pdf}
+\caption{Phân lớp Flutter, hợp đồng domain và tích hợp nền tảng}
 \label{fig:mobile-architecture-layers}
 \end{figure}
+\end{landscape}
 
 \subsection{Lưu trữ cục bộ và hàng đợi}
 Khi tạo báo cáo, ứng dụng ghi bản ghi và dữ liệu cần đồng bộ vào Hive. Outbox giữ message cùng định danh, hash, sequence và số lần thử. Repository điều phối gửi metadata/ảnh và chỉ xử lý hoàn tất khi phản hồi phù hợp. Nếu ảnh chưa gửi được, metadata hoặc bản ghi vẫn có thể tồn tại để tiếp tục lần sau.
@@ -53,6 +62,8 @@ Một request có thể mất ACK sau khi transaction thành công. Khi app gử
 
 \subsection{Lưu trữ backend}
 SQLite giữ bảng \texttt{reports}, \texttt{messages\_dedup}, \texttt{report\_events}, \texttt{teams}, \texttt{operators}, \texttt{sessions} và \texttt{server\_meta}. Ảnh nằm ngoài CSDL; bản ghi lưu tên, URL, hash và kích thước. Bảng báo cáo giữ payload gốc để bảo toàn những trường nghiên cứu chưa có cột riêng.
+
+Hình~\ref{fig:database-erd-detailed} trình bày ERD ở mức thiết kế nghiệp vụ, gồm người gửi/thiết bị, báo cáo cứu hộ, đội cứu hộ, điều phối viên và sự kiện xử lý. Sơ đồ dùng tên tiếng Anh và ký hiệu Crow's Foot, thể hiện định danh, thuộc tính tùy chọn và số lượng tham gia quan hệ. Vị trí, đánh giá tình huống và ảnh lưu trữ được tách thành ba đối tượng giá trị (\emph{value object}) thuộc báo cáo, không hàm ý tạo thêm bảng SQLite. Người gửi/thiết bị là thực thể khái niệm, không hàm ý có bảng người dùng di động riêng; sự kiện tự động có thể không gắn với điều phối viên. Các bảng kỹ thuật như chống trùng, phiên đăng nhập và metadata máy chủ được mô tả ở phần lưu trữ.
 
 \begin{figure}[htbp]
 \centering
@@ -86,15 +97,18 @@ Transaction theo từng message giúp lỗi của một phần batch không hủ
 
 Cùng report ID được gửi lại để bổ sung ảnh hoặc dữ liệu sau mất ACK được xử lý theo quy tắc gộp. Backend giữ ảnh đầu tiên, thời điểm nhận đầu và các trường đã có; số bằng không là dữ liệu hợp lệ, không xem như trường trống. \texttt{owner\_client\_id} tham gia kiểm tra quyền gộp. Quyền sở hữu dựa trên client ID giúp chống sửa chéo theo quy tắc trao đổi dữ liệu hiện tại, nhưng không tự thay thế xác thực danh tính người gửi.
 
-\begin{figure}[htbp]
+\begin{landscape}
+\begin{figure}[p]
 \centering
-\includegraphics[width=\textwidth]{database_erd.pdf}
-\caption{Sơ đồ thực thể liên kết cơ sở dữ liệu quan hệ (ERD) chi tiết}
+\setlength{\abovecaptionskip}{4pt}
+\includegraphics[width=\linewidth]{database_erd.pdf}
+\caption{ERD chi tiết các thực thể và quan hệ nghiệp vụ của hệ thống cứu hộ}
 \label{fig:database-erd-detailed}
 \end{figure}
+\end{landscape}
 
 \subsection{Dịch vụ phân cụm và hàng xem xét}
-Adapter \texttt{to\_report\_v2} chuyển báo cáo lưu trữ sang tuple thuật toán. Nhãn ngập được ánh xạ \texttt{non\_flood}$\mapsto0$, \texttt{low}$\mapsto0{,}33$, \texttt{medium}$\mapsto0{,}66$, \texttt{high}$\mapsto1$. Nếu payload có \texttt{flood}, dùng trường này. Theo thiết kế tích hợp, đầu vào khẩn cấp kết hợp điểm \texttt{E\_i} do mô hình LR trên ứng dụng gửi lên với thông tin \texttt{urgency} do backend xác định. $N$ hiện là số mắc kẹt cộng số bị thương; $V$ là số nhóm yếu thế được chọn khi không có trường trực tiếp.
+Adapter \texttt{to\_report\_v2} chuyển báo cáo lưu trữ sang tuple thuật toán. Nhãn ngập được ánh xạ \texttt{non\_flood}$\mapsto0$, \texttt{low}$\mapsto0{,}33$, \texttt{medium}$\mapsto0{,}66$, \texttt{high}$\mapsto1$. Nếu payload có \texttt{flood}, dùng trường này. Ứng dụng gửi điểm LR trong trường \texttt{E\_i}; adapter hiện lấy $E$ từ trường \texttt{urgency} nếu có, nếu không thì suy từ mô tả bằng từ khóa. Adapter chưa đọc trực tiếp \texttt{E\_i}, nên đường nối từ điểm LR của ứng dụng đến điểm khẩn cấp của thuật toán chưa được tích hợp. $N$ hiện là số mắc kẹt cộng số bị thương; $V$ là số nhóm yếu thế được chọn khi không có trường trực tiếp.
 
 Các ánh xạ chuyển thông tin định tính thành các đại lượng số học phục vụ giải thuật. Trọng số và tham số phân cụm, xếp hạng được cấu hình trong mã nguồn backend. Điều phối viên sử dụng kết quả trên dashboard để xem xét báo cáo, xác minh thông tin, giao đội và cập nhật trạng thái cứu hộ.
 
@@ -107,8 +121,11 @@ Dashboard là HTML, ES module và CSS phục vụ từ backend hoặc nginx. Lea
 
 \subsection{Luồng xử lý dữ liệu và hỗ trợ điều phối}
 Sơ đồ tại Hình~\ref{fig:research-pipeline} thể hiện ranh giới phân tách dữ liệu của hệ thống: các trường thông tin quan sát trực tiếp được đưa vào giải thuật gom cụm đồ thị và xếp hạng ưu tiên; các báo cáo thiếu thông tin vị trí được chuyển vào hàng đợi xem xét riêng; trong khi nhãn thực tế được bảo toàn độc lập phục vụ kiểm chứng thực nghiệm. Trên hệ thống vận hành thực tế, danh sách ưu tiên đóng vai trò hỗ trợ điều phối viên ra quyết định phân bổ nguồn lực, đảm bảo tính linh hoạt và an toàn trong tác chiến cứu hộ.
-\begin{figure}[htbp]
-\centering\includegraphics[width=\textwidth]{../paper/figures/pipeline_v2.pdf}
+\begin{landscape}
+\begin{figure}[p]
+\centering
+\setlength{\abovecaptionskip}{4pt}\includegraphics[width=\linewidth]{research_pipeline_report.pdf}
 \caption{Ranh giới dữ liệu quan sát, hàng xem xét và luồng đánh giá}
 \label{fig:research-pipeline}
 \end{figure}
+\end{landscape}

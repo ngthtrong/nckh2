@@ -1,358 +1,467 @@
-<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1820 1360" width="1820" height="1360">
-  <defs>
-    <style>
-      .lanetitle { font-family: 'Roboto', 'DejaVu Sans', 'Arial', sans-serif; font-size: 13px; font-weight: bold; }
-      .nodetitle { font-family: 'Roboto', 'DejaVu Sans', 'Arial', sans-serif; font-size: 11px; font-weight: bold; }
-      .nodesub { font-family: 'Roboto', 'DejaVu Sans', 'Arial', sans-serif; font-size: 9.5px; fill: #000000; }
-      .edgelbl { font-family: 'Roboto', 'DejaVu Sans', 'Arial', sans-serif; font-size: 9px; font-weight: bold; fill: #000000; }
-      .phasebadge { font-family: 'Roboto', 'DejaVu Sans', 'Arial', sans-serif; font-size: 10.5px; font-weight: bold; fill: #000000; }
-    </style>
-    <marker id="arr-gray" viewBox="0 0 10 10" refX="7" refY="5" markerWidth="6" markerHeight="6" orient="auto-start-reverse">
-      <path d="M 0 1.5 L 8 5 L 0 8.5 z" fill="#000000" />
-    </marker>
-    <marker id="arr-blue" viewBox="0 0 10 10" refX="7" refY="5" markerWidth="6" markerHeight="6" orient="auto-start-reverse">
-      <path d="M 0 1.5 L 8 5 L 0 8.5 z" fill="#000000" />
-    </marker>
-    <marker id="arr-purple" viewBox="0 0 10 10" refX="7" refY="5" markerWidth="6" markerHeight="6" orient="auto-start-reverse">
-      <path d="M 0 1.5 L 8 5 L 0 8.5 z" fill="#000000" />
-    </marker>
-    <marker id="arr-orange" viewBox="0 0 10 10" refX="7" refY="5" markerWidth="6" markerHeight="6" orient="auto-start-reverse">
-      <path d="M 0 1.5 L 8 5 L 0 8.5 z" fill="#000000" />
-    </marker>
-    <marker id="arr-green" viewBox="0 0 10 10" refX="7" refY="5" markerWidth="6" markerHeight="6" orient="auto-start-reverse">
-      <path d="M 0 1.5 L 8 5 L 0 8.5 z" fill="#000000" />
-    </marker>
-    <marker id="arr-brown" viewBox="0 0 10 10" refX="7" refY="5" markerWidth="6" markerHeight="6" orient="auto-start-reverse">
-      <path d="M 0 1.5 L 8 5 L 0 8.5 z" fill="#000000" />
-    </marker>
-    <marker id="arr-red" viewBox="0 0 10 10" refX="7" refY="5" markerWidth="6" markerHeight="6" orient="auto-start-reverse">
-      <path d="M 0 1.5 L 8 5 L 0 8.5 z" fill="#000000" />
-    </marker>
-  </defs>
-
-  <!-- Background Canvas -->
-  <rect x="0" y="0" width="1820" height="1360" fill="#ffffff" />
-
-  <!-- ==================== 4 SWIMLANES ==================== -->
-  <!-- Lane 1: Mobile (w=410, x=30) -->
-  <rect x="30" y="25" width="410" height="1310" rx="8" fill="#ffffff" stroke="#000000" stroke-width="1.8" />
-  <rect x="30" y="25" width="410" height="36" rx="8" fill="#ffffff" stroke="#000000" stroke-width="1.8" />
-  <text x="235" y="48" text-anchor="middle" class="lanetitle" fill="#000000">1. ỨNG DỤNG DI ĐỘNG BIÊN (FLUTTER EDGE APP)</text>
-
-  <!-- Lane 2: Server Ingestion & DB (w=420, x=470) -->
-  <rect x="470" y="25" width="420" height="1310" rx="8" fill="#ffffff" stroke="#000000" stroke-width="1.8" />
-  <rect x="470" y="25" width="420" height="36" rx="8" fill="#ffffff" stroke="#000000" stroke-width="1.8" />
-  <text x="680" y="48" text-anchor="middle" class="lanetitle" fill="#000000">2. MÁY CHỦ TIẾP NHẬN &amp; DEDUP (FASTAPI / SQLITE)</text>
-
-  <!-- Lane 3: Core Clustering (w=420, x=920) -->
-  <rect x="920" y="25" width="420" height="1310" rx="8" fill="#ffffff" stroke="#000000" stroke-width="1.8" />
-  <rect x="920" y="25" width="420" height="36" rx="8" fill="#ffffff" stroke="#000000" stroke-width="1.8" />
-  <text x="1130" y="48" text-anchor="middle" class="lanetitle" fill="#000000">3. LÕI PHÂN CỤM &amp; ƯU TIÊN (RESCUE_CORE)</text>
-
-  <!-- Lane 4: Dashboard (w=420, x=1370) -->
-  <rect x="1370" y="25" width="420" height="1310" rx="8" fill="#ffffff" stroke="#000000" stroke-width="1.8" />
-  <rect x="1370" y="25" width="420" height="36" rx="8" fill="#ffffff" stroke="#000000" stroke-width="1.8" />
-  <text x="1580" y="48" text-anchor="middle" class="lanetitle" fill="#000000">4. BÀN ĐIỀU PHỐI TRUNG TÂM (WEB GIS DASHBOARD)</text>
-
-  <!-- ==================== PHASE DIVIDERS ==================== -->
-  <!-- Phase 1 Header -->
-  <rect x="35" y="66" width="310" height="20" rx="4" fill="#ffffff" />
-  <text x="45" y="80" class="phasebadge">GIAI ĐOẠN 1: BÁO CÁO KHẨN CẤP &amp; ĐỒNG BỘ BIÊN</text>
-
-  <!-- Phase 2 Header -->
-  <line x1="30" y1="365" x2="1790" y2="365" stroke="#ffffff" stroke-width="1.2" stroke-dasharray="6 4" />
-  <rect x="925" y="372" width="375" height="20" rx="4" fill="#ffffff" />
-  <text x="935" y="386" class="phasebadge">GIAI ĐOẠN 2: PHÂN CỤM ĐỒ THỊ LOUVAIN (THEO NHU CẦU POLLING)</text>
-
-  <!-- Phase 3 Header -->
-  <line x1="30" y1="895" x2="1790" y2="895" stroke="#ffffff" stroke-width="1.2" stroke-dasharray="6 4" />
-  <rect x="1375" y="902" width="350" height="20" rx="4" fill="#ffffff" />
-  <text x="1385" y="916" class="phasebadge">GIAI ĐOẠN 3: GIÁM SÁT, THẨM TRA &amp; TÁC NGHIỆP CỨU NẠN</text>
-
-  <!-- ==================== GIAI ĐOẠN 1: BÁO CÁO & ĐỒNG BỘ BIÊN (y = 90 .. 350) ==================== -->
-  
-  <!-- m_start -->
-  <ellipse cx="235" cy="110" rx="65" ry="18" fill="#ffffff" stroke="#000000" stroke-width="1.5" />
-  <text x="235" y="114" text-anchor="middle" class="nodetitle" fill="#000000">Bắt đầu (Mở App)</text>
-
-  <!-- m_choose -->
-  <rect x="135" y="146" width="200" height="40" rx="6" fill="#ffffff" stroke="#000000" stroke-width="1.4" />
-  <text x="235" y="162" text-anchor="middle" class="nodetitle" fill="#000000">Chọn: Gửi SOS 1 chạm</text>
-  <text x="235" y="176" text-anchor="middle" class="nodesub">hoặc Tạo báo cáo chi tiết</text>
-
-  <!-- m_ai -->
-  <rect x="120" y="204" width="230" height="46" rx="6" fill="#ffffff" stroke="#000000" stroke-width="1.5" />
-  <text x="235" y="221" text-anchor="middle" class="nodetitle" fill="#000000">Chụp ảnh -&gt; Edge AI MobileNetV3</text>
-  <text x="235" y="236" text-anchor="middle" class="nodesub">Phân loại 4 mức ngập F &amp; Confidence</text>
-
-  <!-- m_form -->
-  <rect x="120" y="268" width="230" height="46" rx="6" fill="#ffffff" stroke="#000000" stroke-width="1.4" />
-  <text x="235" y="284" text-anchor="middle" class="nodetitle" fill="#000000">Nhập GPS (hoặc để trống), N, V</text>
-  <text x="235" y="299" text-anchor="middle" class="nodesub">Ghi Outbox (Hive) &amp; Canonical JCS Hash</text>
-
-  <!-- m_net_dec -->
-  <polygon points="235,328 325,350 235,372 145,350" fill="#ffffff" stroke="#000000" stroke-width="1.5" />
-  <text x="235" y="353" text-anchor="middle" font-family="Roboto, Arial, sans-serif" font-size="10px" font-weight="bold" fill="#000000">Đánh giá mạng?</text>
-
-  <!-- m_sms -->
-  <rect x="45" y="410" width="160" height="44" rx="6" fill="#ffffff" stroke="#000000" stroke-width="1.4" />
-  <text x="125" y="426" text-anchor="middle" class="nodetitle" fill="#000000">Mất mạng: Gửi SMS SOS</text>
-  <text x="125" y="441" text-anchor="middle" class="nodesub">Dự phòng GSM (chờ sync)</text>
-
-  <!-- m_rest -->
-  <rect x="225" y="410" width="195" height="44" rx="6" fill="#ffffff" stroke="#000000" stroke-width="1.4" />
-  <text x="322" y="426" text-anchor="middle" class="nodetitle" fill="#000000">Có mạng: REST / Multipart</text>
-  <text x="322" y="441" text-anchor="middle" class="nodesub">POST /sync batch hoặc /api/reports</text>
-
-  <!-- Lane 2: s_recv (API Gateway) -->
-  <rect x="495" y="410" width="220" height="44" rx="6" fill="#ffffff" stroke="#000000" stroke-width="1.6" />
-  <text x="605" y="426" text-anchor="middle" class="nodetitle" fill="#000000">Cổng Tiếp nhận (API Gateway)</text>
-  <text x="605" y="441" text-anchor="middle" class="nodesub">Sync Batch / Multipart / SMS Webhook</text>
-
-  <!-- Lane 2: s_val (Validate Contract & Hash) -->
-  <rect x="495" y="490" width="220" height="44" rx="6" fill="#ffffff" stroke="#000000" stroke-width="1.4" />
-  <text x="605" y="506" text-anchor="middle" class="nodetitle" fill="#000000">Xác thực Hợp đồng &amp; Hash</text>
-  <text x="605" y="521" text-anchor="middle" class="nodesub">Header v1, Canonical JCS SHA-256</text>
-
-  <!-- Lane 2: s_dedup_dec -->
-  <polygon points="605,550 705,572 605,594 505,572" fill="#ffffff" stroke="#000000" stroke-width="1.5" />
-  <text x="605" y="575" text-anchor="middle" font-family="Roboto, Arial, sans-serif" font-size="10px" font-weight="bold" fill="#000000">Tra cứu messages_dedup?</text>
-
-  <!-- Lane 2: s_dup (Idempotent ACK) -->
-  <rect x="740" y="550" width="135" height="44" rx="6" fill="#ffffff" stroke="#000000" stroke-width="1.3" />
-  <text x="807" y="567" text-anchor="middle" class="nodetitle" fill="#000000">Trùng ID &amp; Hash</text>
-  <text x="807" y="582" text-anchor="middle" class="nodesub">Trả ACK cũ (Idempotent)</text>
-
-  <!-- Lane 2: s_tx (Valid Transaction) -->
-  <rect x="495" y="618" width="220" height="46" rx="6" fill="#ffffff" stroke="#000000" stroke-width="1.5" />
-  <text x="605" y="634" text-anchor="middle" class="nodetitle" fill="#000000">Giao dịch SQLite (WAL Mode)</text>
-  <text x="605" y="650" text-anchor="middle" class="nodesub">Lưu reports, dedup, files uploads/</text>
-
-  <!-- Lane 2: s_meta (Update server_meta & ACK) -->
-  <rect x="495" y="682" width="220" height="44" rx="6" fill="#ffffff" stroke="#000000" stroke-width="1.5" />
-  <text x="605" y="698" text-anchor="middle" class="nodetitle" fill="#000000">Tăng cluster_version</text>
-  <text x="605" y="713" text-anchor="middle" class="nodesub">server_meta &amp; Trả HTTP Response</text>
-
-  <!-- Lane 1: m_wait_ack -->
-  <rect x="135" y="682" width="200" height="44" rx="6" fill="#ffffff" stroke="#000000" stroke-width="1.4" />
-  <text x="235" y="698" text-anchor="middle" class="nodetitle" fill="#000000">Nhận phản hồi ACK</text>
-  <text x="235" y="713" text-anchor="middle" class="nodesub">Cập nhật Outbox synced=true</text>
-
-  <!-- ==================== GIAI ĐOẠN 2: POLLING & PHÂN CỤM LOUVAIN (y = 400 .. 860) ==================== -->
-  
-  <!-- Lane 4: d_login -->
-  <rect x="1480" y="340" width="200" height="40" rx="6" fill="#ffffff" stroke="#000000" stroke-width="1.4" />
-  <text x="1580" y="356" text-anchor="middle" class="nodetitle" fill="#000000">Đăng nhập Bàn Điều phối</text>
-  <text x="1580" y="370" text-anchor="middle" class="nodesub">Khởi tạo phiên làm việc Dispatcher</text>
-
-  <!-- Lane 4: d_poll -->
-  <rect x="1465" y="410" width="230" height="44" rx="6" fill="#ffffff" stroke="#000000" stroke-width="1.5" />
-  <text x="1580" y="426" text-anchor="middle" class="nodetitle" fill="#000000">Polling định kỳ 5s</text>
-  <text x="1580" y="441" text-anchor="middle" class="nodesub">GET /api/reports/changes &amp; /api/clusters</text>
-
-  <!-- Lane 3: c_recv (Check ETag & version) -->
-  <rect x="945" y="410" width="220" height="44" rx="6" fill="#ffffff" stroke="#000000" stroke-width="1.5" />
-  <text x="1055" y="426" text-anchor="middle" class="nodetitle" fill="#000000">Tiếp nhận GET /api/clusters</text>
-  <text x="1055" y="441" text-anchor="middle" class="nodesub">Kiểm tra header If-None-Match ETag</text>
-
-  <!-- Lane 3: c_etag_dec -->
-  <polygon points="1055,476 1150,498 1055,520 960,498" fill="#ffffff" stroke="#000000" stroke-width="1.5" />
-  <text x="1055" y="501" text-anchor="middle" font-family="Roboto, Arial, sans-serif" font-size="10px" font-weight="bold" fill="#000000">cluster_version đổi?</text>
-
-  <!-- Lane 3: c_304 (Not Modified) -->
-  <rect x="1195" y="476" width="130" height="44" rx="6" fill="#ffffff" stroke="#000000" stroke-width="1.3" />
-  <text x="1260" y="493" text-anchor="middle" class="nodetitle" fill="#000000">304 Not Modified</text>
-  <text x="1260" y="508" text-anchor="middle" class="nodesub">Giữ nguyên cụm cũ</text>
-
-  <!-- Lane 3: c_fetch (Extract active reports) -->
-  <rect x="945" y="542" width="220" height="44" rx="6" fill="#ffffff" stroke="#000000" stroke-width="1.4" />
-  <text x="1055" y="558" text-anchor="middle" class="nodetitle" fill="#000000">Lấy báo cáo active_only</text>
-  <text x="1055" y="574" text-anchor="middle" class="nodesub">Trích xuất [F, U, N, V] qua to_report_v2</text>
-
-  <!-- Lane 3: c_split_dec -->
-  <polygon points="1055,608 1145,630 1055,652 965,630" fill="#ffffff" stroke="#000000" stroke-width="1.5" />
-  <text x="1055" y="633" text-anchor="middle" font-family="Roboto, Arial, sans-serif" font-size="10px" font-weight="bold" fill="#000000">Tọa độ GPS hợp lệ?</text>
-
-  <!-- Lane 3: c_rev (Review Queue) -->
-  <rect x="1190" y="608" width="140" height="44" rx="6" fill="#ffffff" stroke="#000000" stroke-width="1.4" />
-  <text x="1260" y="625" text-anchor="middle" class="nodetitle" fill="#000000">Review Queue</text>
-  <text x="1260" y="640" text-anchor="middle" class="nodesub">Tách riêng ca thiếu GPS</text>
-
-  <!-- Lane 3: c_graph (Louvain Community Detection) -->
-  <rect x="945" y="674" width="220" height="46" rx="6" fill="#ffffff" stroke="#000000" stroke-width="1.5" />
-  <text x="1055" y="690" text-anchor="middle" class="nodetitle" fill="#000000">Ma trận C_ij &amp; Cụm Louvain</text>
-  <text x="1055" y="706" text-anchor="middle" class="nodesub">Khoảng cách Haversine, ngập, khẩn cấp</text>
-
-  <!-- Lane 3: c_score (Calculate P(c)) -->
-  <rect x="945" y="742" width="220" height="46" rx="6" fill="#ffffff" stroke="#000000" stroke-width="1.5" />
-  <text x="1055" y="758" text-anchor="middle" class="nodetitle" fill="#000000">Tính điểm ưu tiên cụm P(c)</text>
-  <text x="1055" y="774" text-anchor="middle" class="nodesub">Khóa clusterKey &amp; Cập nhật ETag mới</text>
-
-  <!-- Lane 3: c_resp -->
-  <rect x="945" y="810" width="220" height="44" rx="6" fill="#ffffff" stroke="#000000" stroke-width="1.4" />
-  <text x="1055" y="826" text-anchor="middle" class="nodetitle" fill="#000000">Trả JSON Clusters &amp; Review</text>
-  <text x="1055" y="841" text-anchor="middle" class="nodesub">Kèm header ETag cho Dashboard</text>
-
-  <!-- ==================== GIAI ĐOẠN 3: GIÁM SÁT, ĐIỀU PHỐI & HOÀN TẤT (y = 810 .. 1320) ==================== -->
-  
-  <!-- Lane 4: d_view -->
-  <rect x="1465" y="810" width="230" height="44" rx="6" fill="#ffffff" stroke="#000000" stroke-width="1.5" />
-  <text x="1580" y="826" text-anchor="middle" class="nodetitle" fill="#000000">Cập nhật Leaflet GIS &amp; Bảng Cụm</text>
-  <text x="1580" y="841" text-anchor="middle" class="nodesub">Hiển thị ranh giới cụm &amp; Hàng xem xét</text>
-
-  <!-- Lane 4: d_branch_dec -->
-  <polygon points="1580,935 1675,957 1580,979 1485,957" fill="#ffffff" stroke="#000000" stroke-width="1.5" />
-  <text x="1580" y="960" text-anchor="middle" font-family="Roboto, Arial, sans-serif" font-size="10px" font-weight="bold" fill="#000000">Phân loại ca xử lý?</text>
-
-  <!-- Lane 4: d_geocode (Manual GPS Assignment) -->
-  <rect x="1385" y="1000" width="175" height="44" rx="6" fill="#ffffff" stroke="#000000" stroke-width="1.4" />
-  <text x="1472" y="1016" text-anchor="middle" class="nodetitle" fill="#000000">Ca thiếu GPS (Review)</text>
-  <text x="1472" y="1031" text-anchor="middle" class="nodesub">Thẩm tra, gọi &amp; Gán tọa độ</text>
-
-  <!-- Lane 4: d_pick (Pick Highest Priority Cluster) -->
-  <rect x="1595" y="1000" width="180" height="44" rx="6" fill="#ffffff" stroke="#000000" stroke-width="1.4" />
-  <text x="1685" y="1016" text-anchor="middle" class="nodetitle" fill="#000000">Ca đã gom cụm P(c)</text>
-  <text x="1685" y="1031" text-anchor="middle" class="nodesub">Chọn cụm có độ khẩn cấp cao</text>
-
-  <!-- Lane 4: d_assign (Dispatch Team) -->
-  <rect x="1465" y="1066" width="230" height="46" rx="6" fill="#ffffff" stroke="#000000" stroke-width="1.6" />
-  <text x="1580" y="1083" text-anchor="middle" class="nodetitle" fill="#000000">Giao đội cứu hộ (PUT /team)</text>
-  <text x="1580" y="1098" text-anchor="middle" class="nodesub">Đổi status -&gt; dispatched (tăng version)</text>
-
-  <!-- Lane 2: s_status_tx (Server Record Event) -->
-  <rect x="495" y="1066" width="220" height="46" rx="6" fill="#ffffff" stroke="#000000" stroke-width="1.5" />
-  <text x="605" y="1083" text-anchor="middle" class="nodetitle" fill="#000000">Cập nhật DB &amp; Ghi report_events</text>
-  <text x="605" y="1098" text-anchor="middle" class="nodesub">Nhật ký kiểm toán (actor, action, time)</text>
-
-  <!-- Lane 4: d_rescue -->
-  <rect x="1465" y="1134" width="230" height="44" rx="6" fill="#ffffff" stroke="#000000" stroke-width="1.4" />
-  <text x="1580" y="1150" text-anchor="middle" class="nodetitle" fill="#000000">Đội Cứu hộ Thực địa Tác nghiệp</text>
-  <text x="1580" y="1165" text-anchor="middle" class="nodesub">Tiếp cận hiện trường &amp; Triển khai ứng cứu</text>
-
-  <!-- Lane 4: d_result_dec -->
-  <polygon points="1580,1200 1675,1222 1580,1244 1485,1222" fill="#ffffff" stroke="#000000" stroke-width="1.5" />
-  <text x="1580" y="1225" text-anchor="middle" font-family="Roboto, Arial, sans-serif" font-size="10px" font-weight="bold" fill="#000000">Kết quả cứu hộ?</text>
-
-  <!-- Lane 4: d_ok (Resolved) -->
-  <rect x="1385" y="1268" width="180" height="42" rx="6" fill="#ffffff" stroke="#000000" stroke-width="1.4" />
-  <text x="1475" y="1284" text-anchor="middle" class="nodetitle" fill="#000000">Thành công: resolved</text>
-  <text x="1475" y="1299" text-anchor="middle" class="nodesub">Cập nhật cứu hộ hoàn tất</text>
-
-  <!-- Lane 4: d_cancel (Cancelled) -->
-  <rect x="1595" y="1268" width="180" height="42" rx="6" fill="#ffffff" stroke="#000000" stroke-width="1.4" />
-  <text x="1685" y="1284" text-anchor="middle" class="nodetitle" fill="#000000">Hủy / Giả: cancelled</text>
-  <text x="1685" y="1299" text-anchor="middle" class="nodesub">Bắt buộc nhập lý do đóng</text>
-
-  <!-- Lane 1: m_poll_status -->
-  <rect x="120" y="1066" width="230" height="46" rx="6" fill="#ffffff" stroke="#000000" stroke-width="1.4" />
-  <text x="235" y="1083" text-anchor="middle" class="nodetitle" fill="#000000">Polling GET /api/reports/status</text>
-  <text x="235" y="1098" text-anchor="middle" class="nodesub">Nhận cập nhật tiến trình điều phối</text>
-
-  <!-- Lane 1: m_end -->
-  <ellipse cx="235" cy="1289" rx="75" ry="20" fill="#ffffff" stroke="#000000" stroke-width="1.6" />
-  <text x="235" y="1293" text-anchor="middle" class="nodetitle" fill="#000000">Kết thúc (Được cứu)</text>
-
-  <!-- ==================== ARROWS / CONNECTORS ==================== -->
-  
-  <!-- Phase 1: Lane 1 Downwards -->
-  <line x1="235" y1="128" x2="235" y2="146" stroke="#000000" stroke-width="1.4" marker-end="url(#arr-blue)" />
-  <line x1="235" y1="186" x2="235" y2="204" stroke="#000000" stroke-width="1.4" marker-end="url(#arr-blue)" />
-  <line x1="235" y1="250" x2="235" y2="268" stroke="#000000" stroke-width="1.4" marker-end="url(#arr-blue)" />
-  <line x1="235" y1="314" x2="235" y2="328" stroke="#000000" stroke-width="1.4" marker-end="url(#arr-blue)" />
-
-  <!-- Net decision branches -->
-  <path d="M 145 350 L 125 350 L 125 410" fill="none" stroke="#000000" stroke-width="1.3" marker-end="url(#arr-red)" />
-  <text x="110" y="375" text-anchor="middle" class="edgelbl" fill="#000000">Mất sóng</text>
-
-  <path d="M 325 350 L 322 350 L 322 410" fill="none" stroke="#000000" stroke-width="1.3" marker-end="url(#arr-blue)" />
-  <text x="345" y="375" text-anchor="start" class="edgelbl" fill="#000000">Có IP data</text>
-
-  <!-- Cross Lane 1 -> Lane 2: Send Request (Clean Horizontal Bridges without text collisions) -->
-  <!-- SMS route: goes generously under m_rest (y=472) to reach s_recv -->
-  <path d="M 125 454 L 125 472 L 460 472 L 460 432 L 495 432" fill="none" stroke="#000000" stroke-width="1.3" stroke-dasharray="4 3" marker-end="url(#arr-purple)" />
-  <text x="210" y="485" class="edgelbl" fill="#000000">SMS Gateway Webhook</text>
-
-  <!-- REST route -->
-  <line x1="420" y1="432" x2="495" y2="432" stroke="#000000" stroke-width="1.4" marker-end="url(#arr-purple)" />
-  <text x="440" y="425" class="edgelbl" fill="#000000">HTTP REST</text>
-
-  <!-- Lane 2 Downwards -->
-  <line x1="605" y1="454" x2="605" y2="490" stroke="#000000" stroke-width="1.4" marker-end="url(#arr-purple)" />
-  <line x1="605" y1="534" x2="605" y2="550" stroke="#000000" stroke-width="1.4" marker-end="url(#arr-purple)" />
-
-  <line x1="705" y1="572" x2="740" y2="572" stroke="#000000" stroke-width="1.3" marker-end="url(#arr-green)" />
-  <text x="715" y="565" class="edgelbl" fill="#000000">Trùng</text>
-
-  <line x1="605" y1="594" x2="605" y2="618" stroke="#000000" stroke-width="1.4" marker-end="url(#arr-green)" />
-  <text x="615" y="609" class="edgelbl" fill="#000000">Hợp lệ</text>
-
-  <line x1="605" y1="664" x2="605" y2="682" stroke="#000000" stroke-width="1.4" marker-end="url(#arr-purple)" />
-
-  <!-- Lane 2 -> Lane 1: ACK Response (Horizontal Left) -->
-  <line x1="495" y1="704" x2="335" y2="704" stroke="#000000" stroke-width="1.5" marker-end="url(#arr-green)" />
-  <text x="415" y="697" text-anchor="middle" class="edgelbl" fill="#000000">Trả HTTP 201 / ACK</text>
-
-  <!-- Lane 1 ACK downwards to poll status -->
-  <line x1="235" y1="726" x2="235" y2="1066" stroke="#000000" stroke-width="1.3" stroke-dasharray="4 3" marker-end="url(#arr-blue)" />
-  <text x="245" y="890" class="edgelbl" fill="#000000">Chờ điều phối</text>
-
-  <line x1="235" y1="1112" x2="235" y2="1269" stroke="#000000" stroke-width="1.4" marker-end="url(#arr-green)" />
-
-  <!-- Phase 2: Lane 4 Polling -> Lane 3 -->
-  <line x1="1580" y1="380" x2="1580" y2="410" stroke="#000000" stroke-width="1.4" marker-end="url(#arr-orange)" />
-  
-  <line x1="1465" y1="432" x2="1165" y2="432" stroke="#000000" stroke-width="1.4" marker-end="url(#arr-brown)" />
-  <text x="1315" y="425" text-anchor="middle" class="edgelbl" fill="#000000">GET /api/clusters (ETag)</text>
-
-  <!-- Lane 3 Downwards -->
-  <line x1="1055" y1="454" x2="1055" y2="476" stroke="#000000" stroke-width="1.4" marker-end="url(#arr-brown)" />
-  
-  <line x1="1150" y1="498" x2="1195" y2="498" stroke="#000000" stroke-width="1.3" marker-end="url(#arr-gray)" />
-  <text x="1160" y="491" class="edgelbl" fill="#000000">Không</text>
-
-  <line x1="1055" y1="520" x2="1055" y2="542" stroke="#000000" stroke-width="1.4" marker-end="url(#arr-brown)" />
-  <text x="1065" y="534" class="edgelbl" fill="#000000">Đổi</text>
-
-  <line x1="1055" y1="586" x2="1055" y2="608" stroke="#000000" stroke-width="1.4" marker-end="url(#arr-brown)" />
-
-  <!-- GPS Split -->
-  <line x1="1145" y1="630" x2="1190" y2="630" stroke="#000000" stroke-width="1.3" marker-end="url(#arr-orange)" />
-  <text x="1155" y="623" class="edgelbl" fill="#000000">Thiếu</text>
-
-  <!-- Review Queue packages into response -->
-  <path d="M 1260 652 L 1260 832 L 1165 832" fill="none" stroke="#000000" stroke-width="1.3" stroke-dasharray="3 3" marker-end="url(#arr-brown)" />
-  <text x="1268" y="740" class="edgelbl" fill="#000000">Gộp Review</text>
-
-  <line x1="1055" y1="652" x2="1055" y2="674" stroke="#000000" stroke-width="1.4" marker-end="url(#arr-brown)" />
-  <text x="1065" y="665" class="edgelbl" fill="#000000">Có GPS</text>
-
-  <line x1="1055" y1="720" x2="1055" y2="742" stroke="#000000" stroke-width="1.4" marker-end="url(#arr-brown)" />
-  <line x1="1055" y1="788" x2="1055" y2="810" stroke="#000000" stroke-width="1.4" marker-end="url(#arr-green)" />
-
-  <!-- Lane 3 -> Lane 4: Return JSON Clusters + Review (Horizontal Right) -->
-  <line x1="1165" y1="832" x2="1465" y2="832" stroke="#000000" stroke-width="1.5" marker-end="url(#arr-orange)" />
-  <text x="1315" y="825" text-anchor="middle" class="edgelbl" fill="#000000">JSON: Cụm P(c) &amp; Review Queue</text>
-
-  <!-- Phase 3: Lane 4 Downwards -->
-  <line x1="1580" y1="854" x2="1580" y2="935" stroke="#000000" stroke-width="1.4" marker-end="url(#arr-orange)" />
-
-  <path d="M 1485 957 L 1472 957 L 1472 1000" fill="none" stroke="#000000" stroke-width="1.3" marker-end="url(#arr-orange)" />
-  <path d="M 1675 957 L 1685 957 L 1685 1000" fill="none" stroke="#000000" stroke-width="1.3" marker-end="url(#arr-orange)" />
-
-  <path d="M 1472 1044 L 1472 1056 L 1580 1056 L 1580 1066" fill="none" stroke="#000000" stroke-width="1.3" marker-end="url(#arr-orange)" />
-  <path d="M 1685 1044 L 1685 1056 L 1580 1056 L 1580 1066" fill="none" stroke="#000000" stroke-width="1.3" />
-
-  <!-- Dispatch Action: Horizontal Left to Lane 2 Server DB -->
-  <line x1="1465" y1="1089" x2="715" y2="1089" stroke="#000000" stroke-width="1.5" marker-end="url(#arr-green)" />
-  <text x="1090" y="1082" text-anchor="middle" class="edgelbl" fill="#000000">PUT /api/reports/{id}/team &amp; PATCH /status</text>
-
-  <line x1="1580" y1="1112" x2="1580" y2="1134" stroke="#000000" stroke-width="1.4" marker-end="url(#arr-blue)" />
-  <line x1="1580" y1="1178" x2="1580" y2="1200" stroke="#000000" stroke-width="1.4" marker-end="url(#arr-blue)" />
-
-  <path d="M 1485 1222 L 1475 1222 L 1475 1268" fill="none" stroke="#000000" stroke-width="1.3" marker-end="url(#arr-green)" />
-  <text x="1455" y="1248" text-anchor="middle" class="edgelbl" fill="#000000">Đạt</text>
-
-  <path d="M 1675 1222 L 1685 1222 L 1685 1268" fill="none" stroke="#000000" stroke-width="1.3" marker-end="url(#arr-red)" />
-  <text x="1705" y="1248" text-anchor="middle" class="edgelbl" fill="#000000">Hủy</text>
-
+<?xml version="1.0" encoding="utf-8" standalone="no"?>
+<!DOCTYPE svg PUBLIC "-//W3C//DTD SVG 1.1//EN"
+  "http://www.w3.org/Graphics/SVG/1.1/DTD/svg11.dtd">
+<svg xmlns:xlink="http://www.w3.org/1999/xlink" width="728.503937pt" height="440pt" viewBox="0 0 728.503937 440" xmlns="http://www.w3.org/2000/svg" version="1.1">
+ <metadata>
+  <rdf:RDF xmlns:dc="http://purl.org/dc/elements/1.1/" xmlns:cc="http://creativecommons.org/ns#" xmlns:rdf="http://www.w3.org/1999/02/22-rdf-syntax-ns#">
+   <cc:Work>
+    <dc:type rdf:resource="http://purl.org/dc/dcmitype/StillImage"/>
+    <dc:format>image/svg+xml</dc:format>
+    <dc:creator>
+     <cc:Agent>
+      <dc:title>Matplotlib v3.10.8, https://matplotlib.org/</dc:title>
+     </cc:Agent>
+    </dc:creator>
+   </cc:Work>
+  </rdf:RDF>
+ </metadata>
+ <defs>
+  <style type="text/css">*{stroke-linejoin: round; stroke-linecap: butt}</style>
+ </defs>
+ <g id="figure_1">
+  <g id="patch_1">
+   <path d="M 0 440
+L 728.503937 440
+L 728.503937 0
+L 0 0
+z
+" style="fill: #ffffff"/>
+  </g>
+  <g id="axes_1">
+   <g id="patch_2">
+    <path d="M 10 10
+L 178 10
+L 178 412
+L 10 412
+z
+" clip-path="url(#pd6a67f094e)" style="fill: #ffffff; stroke: #111111; stroke-width: 0.9; stroke-linejoin: miter"/>
+   </g>
+   <g id="patch_3">
+    <path d="M 190 10
+L 358 10
+L 358 412
+L 190 412
+z
+" clip-path="url(#pd6a67f094e)" style="fill: #ffffff; stroke: #111111; stroke-width: 0.9; stroke-linejoin: miter"/>
+   </g>
+   <g id="patch_4">
+    <path d="M 370 10
+L 538 10
+L 538 412
+L 370 412
+z
+" clip-path="url(#pd6a67f094e)" style="fill: #ffffff; stroke: #111111; stroke-width: 0.9; stroke-linejoin: miter"/>
+   </g>
+   <g id="patch_5">
+    <path d="M 550 10
+L 718 10
+L 718 412
+L 550 412
+z
+" clip-path="url(#pd6a67f094e)" style="fill: #ffffff; stroke: #111111; stroke-width: 0.9; stroke-linejoin: miter"/>
+   </g>
+   <g id="patch_6">
+    <path d="M 24 55
+L 164 55
+Q 168 55 168 59
+L 168 91
+Q 168 95 164 95
+L 24 95
+Q 20 95 20 91
+L 20 59
+Q 20 55 24 55
+z
+" clip-path="url(#pd6a67f094e)" style="fill: #ffffff; stroke: #111111; stroke-width: 0.9; stroke-linejoin: miter"/>
+   </g>
+   <g id="patch_7">
+    <path d="M 24 145
+L 164 145
+Q 168 145 168 149
+L 168 181
+Q 168 185 164 185
+L 24 185
+Q 20 185 20 181
+L 20 149
+Q 20 145 24 145
+z
+" clip-path="url(#pd6a67f094e)" style="fill: #ffffff; stroke: #111111; stroke-width: 0.9; stroke-linejoin: miter"/>
+   </g>
+   <g id="patch_8">
+    <path d="M 24 235
+L 164 235
+Q 168 235 168 239
+L 168 271
+Q 168 275 164 275
+L 24 275
+Q 20 275 20 271
+L 20 239
+Q 20 235 24 235
+z
+" clip-path="url(#pd6a67f094e)" style="fill: #ffffff; stroke: #111111; stroke-width: 0.9; stroke-linejoin: miter"/>
+   </g>
+   <g id="patch_9">
+    <path d="M 24 335
+L 164 335
+Q 168 335 168 339
+L 168 371
+Q 168 375 164 375
+L 24 375
+Q 20 375 20 371
+L 20 339
+Q 20 335 24 335
+z
+" clip-path="url(#pd6a67f094e)" style="fill: #ffffff; stroke: #111111; stroke-width: 0.9; stroke-linejoin: miter"/>
+   </g>
+   <g id="patch_10">
+    <path d="M 204 55
+L 344 55
+Q 348 55 348 59
+L 348 91
+Q 348 95 344 95
+L 204 95
+Q 200 95 200 91
+L 200 59
+Q 200 55 204 55
+z
+" clip-path="url(#pd6a67f094e)" style="fill: #ffffff; stroke: #111111; stroke-width: 0.9; stroke-linejoin: miter"/>
+   </g>
+   <g id="patch_11">
+    <path d="M 204 145
+L 344 145
+Q 348 145 348 149
+L 348 181
+Q 348 185 344 185
+L 204 185
+Q 200 185 200 181
+L 200 149
+Q 200 145 204 145
+z
+" clip-path="url(#pd6a67f094e)" style="fill: #ffffff; stroke: #111111; stroke-width: 0.9; stroke-linejoin: miter"/>
+   </g>
+   <g id="patch_12">
+    <path d="M 204 335
+L 344 335
+Q 348 335 348 339
+L 348 371
+Q 348 375 344 375
+L 204 375
+Q 200 375 200 371
+L 200 339
+Q 200 335 204 335
+z
+" clip-path="url(#pd6a67f094e)" style="fill: #ffffff; stroke: #111111; stroke-width: 0.9; stroke-linejoin: miter"/>
+   </g>
+   <g id="patch_13">
+    <path d="M 384 55
+L 524 55
+Q 528 55 528 59
+L 528 91
+Q 528 95 524 95
+L 384 95
+Q 380 95 380 91
+L 380 59
+Q 380 55 384 55
+z
+" clip-path="url(#pd6a67f094e)" style="fill: #ffffff; stroke: #111111; stroke-width: 0.9; stroke-linejoin: miter"/>
+   </g>
+   <g id="patch_14">
+    <path d="M 384 145
+L 524 145
+Q 528 145 528 149
+L 528 181
+Q 528 185 524 185
+L 384 185
+Q 380 185 380 181
+L 380 149
+Q 380 145 384 145
+z
+" clip-path="url(#pd6a67f094e)" style="fill: #ffffff; stroke: #111111; stroke-width: 0.9; stroke-linejoin: miter"/>
+   </g>
+   <g id="patch_15">
+    <path d="M 384 235
+L 524 235
+Q 528 235 528 239
+L 528 271
+Q 528 275 524 275
+L 384 275
+Q 380 275 380 271
+L 380 239
+Q 380 235 384 235
+z
+" clip-path="url(#pd6a67f094e)" style="fill: #ffffff; stroke: #111111; stroke-width: 0.9; stroke-linejoin: miter"/>
+   </g>
+   <g id="patch_16">
+    <path d="M 564 145
+L 704 145
+Q 708 145 708 149
+L 708 181
+Q 708 185 704 185
+L 564 185
+Q 560 185 560 181
+L 560 149
+Q 560 145 564 145
+z
+" clip-path="url(#pd6a67f094e)" style="fill: #ffffff; stroke: #111111; stroke-width: 0.9; stroke-linejoin: miter"/>
+   </g>
+   <g id="patch_17">
+    <path d="M 564 235
+L 704 235
+Q 708 235 708 239
+L 708 271
+Q 708 275 704 275
+L 564 275
+Q 560 275 560 271
+L 560 239
+Q 560 235 564 235
+z
+" clip-path="url(#pd6a67f094e)" style="fill: #ffffff; stroke: #111111; stroke-width: 0.9; stroke-linejoin: miter"/>
+   </g>
+   <g id="patch_18">
+    <path d="M 564 335
+L 704 335
+Q 708 335 708 339
+L 708 371
+Q 708 375 704 375
+L 564 375
+Q 560 375 560 371
+L 560 339
+Q 560 335 564 335
+z
+" clip-path="url(#pd6a67f094e)" style="fill: #ffffff; stroke: #111111; stroke-width: 0.9; stroke-linejoin: miter"/>
+   </g>
+   <g id="patch_19">
+    <path d="M 94 95
+L 94 143.993769
+" clip-path="url(#pd6a67f094e)" style="fill: none; stroke: #111111; stroke-width: 0.9; stroke-linecap: round"/>
+    <path d="M 95.8 140.393769
+L 94 143.993769
+L 92.2 140.393769
+" clip-path="url(#pd6a67f094e)" style="fill: none; stroke: #111111; stroke-width: 0.9; stroke-linecap: round"/>
+   </g>
+   <g id="patch_20">
+    <path d="M 94 275
+L 94 333.993769
+" clip-path="url(#pd6a67f094e)" style="fill: none; stroke: #111111; stroke-width: 0.9; stroke-linecap: round"/>
+    <path d="M 95.8 330.393769
+L 94 333.993769
+L 92.2 330.393769
+" clip-path="url(#pd6a67f094e)" style="fill: none; stroke: #111111; stroke-width: 0.9; stroke-linecap: round"/>
+   </g>
+   <g id="patch_21">
+    <path d="M 274 95
+L 274 143.993769
+" clip-path="url(#pd6a67f094e)" style="fill: none; stroke: #111111; stroke-width: 0.9; stroke-linecap: round"/>
+    <path d="M 275.8 140.393769
+L 274 143.993769
+L 272.2 140.393769
+" clip-path="url(#pd6a67f094e)" style="fill: none; stroke: #111111; stroke-width: 0.9; stroke-linecap: round"/>
+   </g>
+   <g id="patch_22">
+    <path d="M 454 95
+L 454 143.993769
+" clip-path="url(#pd6a67f094e)" style="fill: none; stroke: #111111; stroke-width: 0.9; stroke-linecap: round"/>
+    <path d="M 455.8 140.393769
+L 454 143.993769
+L 452.2 140.393769
+" clip-path="url(#pd6a67f094e)" style="fill: none; stroke: #111111; stroke-width: 0.9; stroke-linecap: round"/>
+   </g>
+   <g id="patch_23">
+    <path d="M 454 185
+L 454 233.993769
+" clip-path="url(#pd6a67f094e)" style="fill: none; stroke: #111111; stroke-width: 0.9; stroke-linecap: round"/>
+    <path d="M 455.8 230.393769
+L 454 233.993769
+L 452.2 230.393769
+" clip-path="url(#pd6a67f094e)" style="fill: none; stroke: #111111; stroke-width: 0.9; stroke-linecap: round"/>
+   </g>
+   <g id="patch_24">
+    <path d="M 634 185
+L 634 233.993769
+" clip-path="url(#pd6a67f094e)" style="fill: none; stroke: #111111; stroke-width: 0.9; stroke-linecap: round"/>
+    <path d="M 635.8 230.393769
+L 634 233.993769
+L 632.2 230.393769
+" clip-path="url(#pd6a67f094e)" style="fill: none; stroke: #111111; stroke-width: 0.9; stroke-linecap: round"/>
+   </g>
+   <g id="patch_25">
+    <path d="M 634 275
+L 634 333.993769
+" clip-path="url(#pd6a67f094e)" style="fill: none; stroke: #111111; stroke-width: 0.9; stroke-linecap: round"/>
+    <path d="M 635.8 330.393769
+L 634 333.993769
+L 632.2 330.393769
+" clip-path="url(#pd6a67f094e)" style="fill: none; stroke: #111111; stroke-width: 0.9; stroke-linecap: round"/>
+   </g>
+   <g id="patch_26">
+    <path d="M 168 165
+L 181 165
+L 181 75
+L 198.993769 75
+" clip-path="url(#pd6a67f094e)" style="fill: none; stroke: #111111; stroke-width: 0.9; stroke-linecap: round"/>
+    <path d="M 195.393769 73.2
+L 198.993769 75
+L 195.393769 76.8
+" clip-path="url(#pd6a67f094e)" style="fill: none; stroke: #111111; stroke-width: 0.9; stroke-linecap: round"/>
+   </g>
+   <g id="patch_27">
+    <path d="M 200 165
+L 185 165
+L 185 255
+L 169.006231 255
+" clip-path="url(#pd6a67f094e)" style="fill: none; stroke: #111111; stroke-width: 0.9; stroke-linecap: round"/>
+    <path d="M 172.606231 256.8
+L 169.006231 255
+L 172.606231 253.2
+" clip-path="url(#pd6a67f094e)" style="fill: none; stroke: #111111; stroke-width: 0.9; stroke-linecap: round"/>
+   </g>
+   <g id="patch_28">
+    <path d="M 348 165
+L 362 165
+L 362 75
+L 378.993769 75
+" clip-path="url(#pd6a67f094e)" style="fill: none; stroke: #111111; stroke-width: 0.9; stroke-linecap: round"/>
+    <path d="M 375.393769 73.2
+L 378.993769 75
+L 375.393769 76.8
+" clip-path="url(#pd6a67f094e)" style="fill: none; stroke: #111111; stroke-width: 0.9; stroke-linecap: round"/>
+   </g>
+   <g id="patch_29">
+    <path d="M 528 255
+L 542 255
+L 542 165
+L 558.993769 165
+" clip-path="url(#pd6a67f094e)" style="fill: none; stroke: #111111; stroke-width: 0.9; stroke-linecap: round"/>
+    <path d="M 555.393769 163.2
+L 558.993769 165
+L 555.393769 166.8
+" clip-path="url(#pd6a67f094e)" style="fill: none; stroke: #111111; stroke-width: 0.9; stroke-linecap: round"/>
+   </g>
+   <g id="patch_30">
+    <path d="M 605 275
+L 605 305
+L 360 305
+L 360 355
+L 349.006231 355
+" clip-path="url(#pd6a67f094e)" style="fill: none; stroke: #111111; stroke-width: 0.9; stroke-linecap: round"/>
+    <path d="M 352.606231 356.8
+L 349.006231 355
+L 352.606231 353.2
+" clip-path="url(#pd6a67f094e)" style="fill: none; stroke: #111111; stroke-width: 0.9; stroke-linecap: round"/>
+   </g>
+   <g id="patch_31">
+    <path d="M 634 375
+L 634 401
+L 274 401
+L 274 376.006231
+" clip-path="url(#pd6a67f094e)" style="fill: none; stroke: #111111; stroke-width: 0.9; stroke-linecap: round"/>
+    <path d="M 272.2 379.606231
+L 274 376.006231
+L 275.8 379.606231
+" clip-path="url(#pd6a67f094e)" style="fill: none; stroke: #111111; stroke-width: 0.9; stroke-linecap: round"/>
+   </g>
+   <g id="patch_32">
+    <path d="M 200 355
+L 169.006231 355
+" clip-path="url(#pd6a67f094e)" style="fill: none; stroke: #111111; stroke-width: 0.9; stroke-linecap: round"/>
+    <path d="M 172.606231 356.8
+L 169.006231 355
+L 172.606231 353.2
+" clip-path="url(#pd6a67f094e)" style="fill: none; stroke: #111111; stroke-width: 0.9; stroke-linecap: round"/>
+   </g>
+   <g id="text_1">
+    <text style="font-weight: 700; font-size: 10.2px; font-family: 'DejaVu Sans'; text-anchor: start; fill: #111111" x="20" y="33.298344" transform="rotate(-0 20 33.298344)">1 · THIẾT BỊ</text>
+   </g>
+   <g id="text_2">
+    <text style="font-weight: 700; font-size: 10.2px; font-family: 'DejaVu Sans'; text-anchor: start; fill: #111111" x="200" y="33.298344" transform="rotate(-0 200 33.298344)">2 · TIẾP NHẬN</text>
+   </g>
+   <g id="text_3">
+    <text style="font-weight: 700; font-size: 10.2px; font-family: 'DejaVu Sans'; text-anchor: start; fill: #111111" x="380" y="32.635344" transform="rotate(-0 380 32.635344)">3 · PHÂN CỤM</text>
+   </g>
+   <g id="text_4">
+    <text style="font-weight: 700; font-size: 10.2px; font-family: 'DejaVu Sans'; text-anchor: start; fill: #111111" x="560" y="32.332531" transform="rotate(-0 560 32.332531)">4 · ĐIỀU PHỐI</text>
+   </g>
+   <g id="text_5">
+    <text style="font-size: 9.3px; font-family: 'DejaVu Sans'; fill: #111111" transform="translate(61.537187 72.454852)">SOS / báo cáo</text>
+    <text style="font-size: 9.3px; font-family: 'DejaVu Sans'; fill: #111111" transform="translate(43.309914 82.677586)">Lưu cục bộ và Outbox</text>
+   </g>
+   <g id="text_6">
+    <text style="font-size: 9.3px; font-family: 'DejaVu Sans'; fill: #111111" transform="translate(62.791234 162.678052)">Gửi thích ứng</text>
+    <text style="font-size: 9.3px; font-family: 'DejaVu Sans'; fill: #111111" transform="translate(29.954969 172.920839)">HTTP / SMS; giữ ID khi retry</text>
+   </g>
+   <g id="text_7">
+    <text style="font-size: 9.3px; font-family: 'DejaVu Sans'; fill: #111111" transform="translate(46.888961 252.606376)">Nhận ACK metadata</text>
+    <text style="font-size: 9.3px; font-family: 'DejaVu Sans'; fill: #111111" transform="translate(46.554016 262.667014)">Hoàn tất ảnh nếu có</text>
+   </g>
+   <g id="text_8">
+    <text style="font-size: 9.3px; font-family: 'DejaVu Sans'; fill: #111111" transform="translate(52.806086 352.319166)">Tra cứu trạng thái</text>
+    <text style="font-size: 9.3px; font-family: 'DejaVu Sans'; fill: #111111" transform="translate(35.866281 363.185271)">Hiển thị tiến trình cứu hộ</text>
+   </g>
+   <g id="text_9">
+    <text style="font-size: 9.3px; font-family: 'DejaVu Sans'; fill: #111111" transform="translate(234.833195 72.197212)">JSON / ảnh / SMS</text>
+    <text style="font-size: 9.3px; font-family: 'DejaVu Sans'; fill: #111111" transform="translate(229.302602 83.329022)">Kiểm tra từng kênh</text>
+   </g>
+   <g id="text_10">
+    <text style="font-size: 9.3px; font-family: 'DejaVu Sans'; fill: #111111" transform="translate(217.527203 162.664392)">Chống trùng; lưu dữ liệu</text>
+    <text style="font-size: 9.3px; font-family: 'DejaVu Sans'; fill: #111111" transform="translate(221.880766 173.261452)">Trả ACK theo message</text>
+   </g>
+   <g id="text_11">
+    <text style="font-size: 9.3px; font-family: 'DejaVu Sans'; fill: #111111" transform="translate(219.863828 352.545418)">Ghi thay đổi và nhật ký</text>
+    <text style="font-size: 9.3px; font-family: 'DejaVu Sans'; fill: #111111" transform="translate(217.576609 363.518473)">Cung cấp trạng thái mới</text>
+   </g>
+   <g id="text_12">
+    <text style="font-size: 9.3px; font-family: 'DejaVu Sans'; fill: #111111" transform="translate(399.263687 72.312918)">Đọc báo cáo đang xử lý</text>
+    <text style="font-size: 9.3px; font-family: 'DejaVu Sans'; fill: #111111" transform="translate(398.62068 83.285973)">Thiếu vị trí/giờ: xem xét</text>
+   </g>
+   <g id="text_13">
+    <text style="font-size: 9.3px; font-family: 'DejaVu Sans'; fill: #111111" transform="translate(411.846297 162.851555)">Đồ thị tương đồng</text>
+    <text style="font-size: 9.3px; font-family: 'DejaVu Sans'; fill: #111111" transform="translate(411.321719 173.074289)">Phân cụm Louvain</text>
+   </g>
+   <g id="text_14">
+    <text style="font-size: 9.3px; font-family: 'DejaVu Sans'; fill: #111111" transform="translate(418.652008 252.615894)">Họ bằng chứng</text>
+    <text style="font-size: 9.3px; font-family: 'DejaVu Sans'; fill: #111111" transform="translate(416.762219 263.58895)">Xếp ưu tiên P(c)</text>
+   </g>
+   <g id="text_15">
+    <text style="font-size: 9.3px; font-family: 'DejaVu Sans'; fill: #111111" transform="translate(575.660664 162.7219)">Xem cụm / hàng xem xét</text>
+    <text style="font-size: 9.3px; font-family: 'DejaVu Sans'; fill: #111111" transform="translate(592.36143 172.782538)">Xác minh báo cáo</text>
+   </g>
+   <g id="text_16">
+    <text style="font-size: 9.3px; font-family: 'DejaVu Sans'; fill: #111111" transform="translate(597.644992 252.392476)">Giao đội cứu hộ</text>
+    <text style="font-size: 9.3px; font-family: 'DejaVu Sans'; fill: #111111" transform="translate(585.821641 262.880914)">Cập nhật dispatched</text>
+   </g>
+   <g id="text_17">
+    <text style="font-size: 9.3px; font-family: 'DejaVu Sans'; fill: #111111" transform="translate(587.467305 352.7219)">Tác nghiệp; đóng ca</text>
+    <text style="font-size: 9.3px; font-family: 'DejaVu Sans'; fill: #111111" transform="translate(587.516711 362.782538)">resolved / cancelled</text>
+   </g>
+   <g id="text_18">
+    <g id="patch_33">
+     <path d="M 177.737187 226.525156
+L 198.262812 226.525156
+L 198.262812 215.474844
+L 177.737187 215.474844
+z
+" style="fill: #ffffff"/>
+    </g>
+    <text style="font-size: 9px; font-family: 'DejaVu Sans'; text-anchor: middle; fill: #111111" x="188" y="223.483438" transform="rotate(-0 188 223.483438)">ACK</text>
+   </g>
+   <g id="text_19">
+    <g id="patch_34">
+     <path d="M 397.605547 310.705156
+L 488.394453 310.705156
+L 488.394453 299.294844
+L 397.605547 299.294844
+z
+" style="fill: #ffffff"/>
+    </g>
+    <text style="font-size: 9px; font-family: 'DejaVu Sans'; text-anchor: middle; fill: #111111" x="443" y="307.663437" transform="rotate(-0 443 307.663437)">Cập nhật nghiệp vụ</text>
+   </g>
+   <g id="text_20">
+    <text style="font-size: 9px; font-family: 'DejaVu Sans'; text-anchor: start; fill: #111111" x="10" y="429.867344" transform="rotate(-0 10 429.867344)">ACK xác nhận gửi dữ liệu; trạng thái cứu hộ phản ánh tác nghiệp. Hai luồng thông tin được xử lý riêng.</text>
+   </g>
+  </g>
+ </g>
+ <defs>
+  <clipPath id="pd6a67f094e">
+   <rect x="0" y="0" width="728.503937" height="440"/>
+  </clipPath>
+ </defs>
 </svg>

@@ -1,0 +1,1415 @@
+{
+  "database_erd": {
+    "title": "ERD Crow's Foot — bảy thực thể lưu trữ",
+    "width_pt": 728.503937007874,
+    "height_pt": 427,
+    "minimum_font_pt": 9,
+    "text_count": 84,
+    "text_bounds": "PASS",
+    "artifacts": {
+      "pdf": "4ccc6c60e3fa2cd719c4b28e78212b2858ecdd8683c15d19577f753e558969db",
+      "svg": "ce7195d330559564358a37380790b3e6a78fae11320898e16994b189704aa915",
+      "drawio": "6205e609257e895bd979579ac4be9ff985e1692a77263d850a689da7e602714c"
+    },
+    "text_overlaps": "PASS",
+    "schema": {
+      "reports": {
+        "columns": [
+          {
+            "cid": 0,
+            "name": "id",
+            "type": "TEXT",
+            "notnull": 0,
+            "default": null,
+            "pk": 1
+          },
+          {
+            "cid": 1,
+            "name": "server_received_at",
+            "type": "TEXT",
+            "notnull": 1,
+            "default": null,
+            "pk": 0
+          },
+          {
+            "cid": 2,
+            "name": "created_at",
+            "type": "TEXT",
+            "notnull": 0,
+            "default": null,
+            "pk": 0
+          },
+          {
+            "cid": 3,
+            "name": "lat",
+            "type": "REAL",
+            "notnull": 0,
+            "default": null,
+            "pk": 0
+          },
+          {
+            "cid": 4,
+            "name": "lng",
+            "type": "REAL",
+            "notnull": 0,
+            "default": null,
+            "pk": 0
+          },
+          {
+            "cid": 5,
+            "name": "trapped_count",
+            "type": "INTEGER",
+            "notnull": 0,
+            "default": "0",
+            "pk": 0
+          },
+          {
+            "cid": 6,
+            "name": "injured_count",
+            "type": "INTEGER",
+            "notnull": 0,
+            "default": "0",
+            "pk": 0
+          },
+          {
+            "cid": 7,
+            "name": "vulnerable_groups",
+            "type": "TEXT",
+            "notnull": 0,
+            "default": null,
+            "pk": 0
+          },
+          {
+            "cid": 8,
+            "name": "description",
+            "type": "TEXT",
+            "notnull": 0,
+            "default": null,
+            "pk": 0
+          },
+          {
+            "cid": 9,
+            "name": "ai_tags",
+            "type": "TEXT",
+            "notnull": 0,
+            "default": null,
+            "pk": 0
+          },
+          {
+            "cid": 10,
+            "name": "send_mode",
+            "type": "TEXT",
+            "notnull": 0,
+            "default": null,
+            "pk": 0
+          },
+          {
+            "cid": 11,
+            "name": "status",
+            "type": "TEXT",
+            "notnull": 0,
+            "default": "'processing'",
+            "pk": 0
+          },
+          {
+            "cid": 12,
+            "name": "status_version",
+            "type": "INTEGER",
+            "notnull": 0,
+            "default": "1",
+            "pk": 0
+          },
+          {
+            "cid": 13,
+            "name": "image_filename",
+            "type": "TEXT",
+            "notnull": 0,
+            "default": null,
+            "pk": 0
+          },
+          {
+            "cid": 14,
+            "name": "image_local_path",
+            "type": "TEXT",
+            "notnull": 0,
+            "default": null,
+            "pk": 0
+          },
+          {
+            "cid": 15,
+            "name": "image_url",
+            "type": "TEXT",
+            "notnull": 0,
+            "default": null,
+            "pk": 0
+          },
+          {
+            "cid": 16,
+            "name": "image_sha256",
+            "type": "TEXT",
+            "notnull": 0,
+            "default": null,
+            "pk": 0
+          },
+          {
+            "cid": 17,
+            "name": "image_size_bytes",
+            "type": "INTEGER",
+            "notnull": 0,
+            "default": null,
+            "pk": 0
+          },
+          {
+            "cid": 18,
+            "name": "raw_payload",
+            "type": "TEXT",
+            "notnull": 1,
+            "default": null,
+            "pk": 0
+          },
+          {
+            "cid": 19,
+            "name": "first_received_at",
+            "type": "TEXT",
+            "notnull": 0,
+            "default": null,
+            "pk": 0
+          },
+          {
+            "cid": 20,
+            "name": "updated_seq",
+            "type": "INTEGER",
+            "notnull": 0,
+            "default": "0",
+            "pk": 0
+          },
+          {
+            "cid": 21,
+            "name": "assigned_team_id",
+            "type": "INTEGER",
+            "notnull": 0,
+            "default": null,
+            "pk": 0
+          },
+          {
+            "cid": 22,
+            "name": "location_source",
+            "type": "TEXT",
+            "notnull": 0,
+            "default": null,
+            "pk": 0
+          },
+          {
+            "cid": 23,
+            "name": "close_reason",
+            "type": "TEXT",
+            "notnull": 0,
+            "default": null,
+            "pk": 0
+          },
+          {
+            "cid": 24,
+            "name": "status_updated_at",
+            "type": "TEXT",
+            "notnull": 0,
+            "default": null,
+            "pk": 0
+          },
+          {
+            "cid": 25,
+            "name": "owner_client_id",
+            "type": "TEXT",
+            "notnull": 0,
+            "default": null,
+            "pk": 0
+          }
+        ],
+        "foreign_keys": []
+      },
+      "messages_dedup": {
+        "columns": [
+          {
+            "cid": 0,
+            "name": "message_id",
+            "type": "TEXT",
+            "notnull": 0,
+            "default": null,
+            "pk": 1
+          },
+          {
+            "cid": 1,
+            "name": "client_id",
+            "type": "TEXT",
+            "notnull": 1,
+            "default": null,
+            "pk": 0
+          },
+          {
+            "cid": 2,
+            "name": "sequence_number",
+            "type": "INTEGER",
+            "notnull": 1,
+            "default": null,
+            "pk": 0
+          },
+          {
+            "cid": 3,
+            "name": "operation_type",
+            "type": "TEXT",
+            "notnull": 1,
+            "default": null,
+            "pk": 0
+          },
+          {
+            "cid": 4,
+            "name": "payload_hash",
+            "type": "TEXT",
+            "notnull": 1,
+            "default": null,
+            "pk": 0
+          },
+          {
+            "cid": 5,
+            "name": "status",
+            "type": "TEXT",
+            "notnull": 1,
+            "default": null,
+            "pk": 0
+          },
+          {
+            "cid": 6,
+            "name": "error_code",
+            "type": "TEXT",
+            "notnull": 0,
+            "default": null,
+            "pk": 0
+          },
+          {
+            "cid": 7,
+            "name": "result_data",
+            "type": "TEXT",
+            "notnull": 0,
+            "default": null,
+            "pk": 0
+          },
+          {
+            "cid": 8,
+            "name": "created_at",
+            "type": "TEXT",
+            "notnull": 1,
+            "default": null,
+            "pk": 0
+          },
+          {
+            "cid": 9,
+            "name": "expires_at",
+            "type": "TEXT",
+            "notnull": 0,
+            "default": null,
+            "pk": 0
+          },
+          {
+            "cid": 10,
+            "name": "processed_at",
+            "type": "TEXT",
+            "notnull": 1,
+            "default": null,
+            "pk": 0
+          }
+        ],
+        "foreign_keys": [],
+        "unique_pair": [
+          "client_id",
+          "sequence_number"
+        ]
+      },
+      "report_events": {
+        "columns": [
+          {
+            "cid": 0,
+            "name": "id",
+            "type": "INTEGER",
+            "notnull": 0,
+            "default": null,
+            "pk": 1
+          },
+          {
+            "cid": 1,
+            "name": "report_id",
+            "type": "TEXT",
+            "notnull": 1,
+            "default": null,
+            "pk": 0
+          },
+          {
+            "cid": 2,
+            "name": "kind",
+            "type": "TEXT",
+            "notnull": 1,
+            "default": null,
+            "pk": 0
+          },
+          {
+            "cid": 3,
+            "name": "from_value",
+            "type": "TEXT",
+            "notnull": 0,
+            "default": null,
+            "pk": 0
+          },
+          {
+            "cid": 4,
+            "name": "to_value",
+            "type": "TEXT",
+            "notnull": 0,
+            "default": null,
+            "pk": 0
+          },
+          {
+            "cid": 5,
+            "name": "status_version",
+            "type": "INTEGER",
+            "notnull": 0,
+            "default": null,
+            "pk": 0
+          },
+          {
+            "cid": 6,
+            "name": "actor",
+            "type": "TEXT",
+            "notnull": 0,
+            "default": null,
+            "pk": 0
+          },
+          {
+            "cid": 7,
+            "name": "source",
+            "type": "TEXT",
+            "notnull": 1,
+            "default": null,
+            "pk": 0
+          },
+          {
+            "cid": 8,
+            "name": "note",
+            "type": "TEXT",
+            "notnull": 0,
+            "default": null,
+            "pk": 0
+          },
+          {
+            "cid": 9,
+            "name": "created_at",
+            "type": "TEXT",
+            "notnull": 1,
+            "default": null,
+            "pk": 0
+          }
+        ],
+        "foreign_keys": []
+      },
+      "operators": {
+        "columns": [
+          {
+            "cid": 0,
+            "name": "id",
+            "type": "INTEGER",
+            "notnull": 0,
+            "default": null,
+            "pk": 1
+          },
+          {
+            "cid": 1,
+            "name": "username",
+            "type": "TEXT",
+            "notnull": 1,
+            "default": null,
+            "pk": 0
+          },
+          {
+            "cid": 2,
+            "name": "display_name",
+            "type": "TEXT",
+            "notnull": 1,
+            "default": null,
+            "pk": 0
+          },
+          {
+            "cid": 3,
+            "name": "password_hash",
+            "type": "TEXT",
+            "notnull": 1,
+            "default": null,
+            "pk": 0
+          },
+          {
+            "cid": 4,
+            "name": "role",
+            "type": "TEXT",
+            "notnull": 1,
+            "default": "'operator'",
+            "pk": 0
+          },
+          {
+            "cid": 5,
+            "name": "active",
+            "type": "INTEGER",
+            "notnull": 1,
+            "default": "1",
+            "pk": 0
+          },
+          {
+            "cid": 6,
+            "name": "must_change_password",
+            "type": "INTEGER",
+            "notnull": 1,
+            "default": "0",
+            "pk": 0
+          },
+          {
+            "cid": 7,
+            "name": "created_at",
+            "type": "TEXT",
+            "notnull": 1,
+            "default": null,
+            "pk": 0
+          },
+          {
+            "cid": 8,
+            "name": "last_login_at",
+            "type": "TEXT",
+            "notnull": 0,
+            "default": null,
+            "pk": 0
+          }
+        ],
+        "foreign_keys": []
+      },
+      "sessions": {
+        "columns": [
+          {
+            "cid": 0,
+            "name": "token_hash",
+            "type": "TEXT",
+            "notnull": 0,
+            "default": null,
+            "pk": 1
+          },
+          {
+            "cid": 1,
+            "name": "operator",
+            "type": "TEXT",
+            "notnull": 1,
+            "default": null,
+            "pk": 0
+          },
+          {
+            "cid": 2,
+            "name": "created_at",
+            "type": "TEXT",
+            "notnull": 1,
+            "default": null,
+            "pk": 0
+          },
+          {
+            "cid": 3,
+            "name": "expires_at",
+            "type": "TEXT",
+            "notnull": 1,
+            "default": null,
+            "pk": 0
+          },
+          {
+            "cid": 4,
+            "name": "operator_id",
+            "type": "INTEGER",
+            "notnull": 0,
+            "default": null,
+            "pk": 0
+          }
+        ],
+        "foreign_keys": []
+      },
+      "teams": {
+        "columns": [
+          {
+            "cid": 0,
+            "name": "id",
+            "type": "INTEGER",
+            "notnull": 0,
+            "default": null,
+            "pk": 1
+          },
+          {
+            "cid": 1,
+            "name": "name",
+            "type": "TEXT",
+            "notnull": 1,
+            "default": null,
+            "pk": 0
+          },
+          {
+            "cid": 2,
+            "name": "phone",
+            "type": "TEXT",
+            "notnull": 0,
+            "default": null,
+            "pk": 0
+          },
+          {
+            "cid": 3,
+            "name": "members",
+            "type": "INTEGER",
+            "notnull": 0,
+            "default": null,
+            "pk": 0
+          },
+          {
+            "cid": 4,
+            "name": "note",
+            "type": "TEXT",
+            "notnull": 0,
+            "default": null,
+            "pk": 0
+          },
+          {
+            "cid": 5,
+            "name": "active",
+            "type": "INTEGER",
+            "notnull": 1,
+            "default": "1",
+            "pk": 0
+          },
+          {
+            "cid": 6,
+            "name": "created_at",
+            "type": "TEXT",
+            "notnull": 1,
+            "default": null,
+            "pk": 0
+          }
+        ],
+        "foreign_keys": []
+      },
+      "server_meta": {
+        "columns": [
+          {
+            "cid": 0,
+            "name": "key",
+            "type": "TEXT",
+            "notnull": 0,
+            "default": null,
+            "pk": 1
+          },
+          {
+            "cid": 1,
+            "name": "value",
+            "type": "TEXT",
+            "notnull": 1,
+            "default": null,
+            "pk": 0
+          }
+        ],
+        "foreign_keys": []
+      }
+    },
+    "table_count": 7,
+    "column_count": 70
+  },
+  "usecase": {
+    "title": "Use case UML — toàn hệ thống cứu hộ",
+    "width_pt": 728.503937007874,
+    "height_pt": 410,
+    "minimum_font_pt": 9,
+    "text_count": 21,
+    "text_bounds": "PASS",
+    "artifacts": {
+      "pdf": "378b76e6e641901a404ee0958011a0ab4a854415872fb75beaa65305d60bd9d4",
+      "svg": "767aa91971b8767da582442db6f0bc366f048ece200fb05ada9287e6ec68a8ef",
+      "drawio": "b8c8804211553afb247990399ca0cb0bf2ad0e83381baf02db6e09a48d2e4a26"
+    },
+    "text_overlaps": "PASS",
+    "uml_links": [
+      {
+        "source": [
+          57,
+          213
+        ],
+        "target": "ellipse5",
+        "kind": "association",
+        "points": [
+          [
+            57,
+            213
+          ],
+          [
+            120,
+            90.5
+          ]
+        ]
+      },
+      {
+        "source": [
+          57,
+          213
+        ],
+        "target": "ellipse7",
+        "kind": "association",
+        "points": [
+          [
+            57,
+            213
+          ],
+          [
+            120,
+            152.5
+          ]
+        ]
+      },
+      {
+        "source": [
+          57,
+          213
+        ],
+        "target": "ellipse9",
+        "kind": "association",
+        "points": [
+          [
+            57,
+            213
+          ],
+          [
+            120,
+            214.5
+          ]
+        ]
+      },
+      {
+        "source": [
+          57,
+          213
+        ],
+        "target": "ellipse11",
+        "kind": "association",
+        "points": [
+          [
+            57,
+            213
+          ],
+          [
+            120,
+            276.5
+          ]
+        ]
+      },
+      {
+        "source": [
+          57,
+          213
+        ],
+        "target": "ellipse13",
+        "kind": "association",
+        "points": [
+          [
+            57,
+            213
+          ],
+          [
+            120,
+            338.5
+          ]
+        ]
+      },
+      {
+        "source": [
+          685,
+          215
+        ],
+        "target": "ellipse15",
+        "kind": "association",
+        "points": [
+          [
+            685,
+            215
+          ],
+          [
+            648,
+            72.5
+          ]
+        ]
+      },
+      {
+        "source": [
+          685,
+          215
+        ],
+        "target": "ellipse17",
+        "kind": "association",
+        "points": [
+          [
+            685,
+            215
+          ],
+          [
+            648,
+            103.5
+          ]
+        ]
+      },
+      {
+        "source": [
+          685,
+          215
+        ],
+        "target": "ellipse19",
+        "kind": "association",
+        "points": [
+          [
+            685,
+            215
+          ],
+          [
+            648,
+            134.5
+          ]
+        ]
+      },
+      {
+        "source": [
+          685,
+          215
+        ],
+        "target": "ellipse21",
+        "kind": "association",
+        "points": [
+          [
+            685,
+            215
+          ],
+          [
+            648,
+            165.5
+          ]
+        ]
+      },
+      {
+        "source": [
+          685,
+          215
+        ],
+        "target": "ellipse23",
+        "kind": "association",
+        "points": [
+          [
+            685,
+            215
+          ],
+          [
+            648,
+            196.5
+          ]
+        ]
+      },
+      {
+        "source": [
+          685,
+          215
+        ],
+        "target": "ellipse27",
+        "kind": "association",
+        "points": [
+          [
+            685,
+            215
+          ],
+          [
+            648,
+            258.5
+          ]
+        ]
+      },
+      {
+        "source": [
+          685,
+          215
+        ],
+        "target": "ellipse29",
+        "kind": "association",
+        "points": [
+          [
+            685,
+            215
+          ],
+          [
+            648,
+            289.5
+          ]
+        ]
+      },
+      {
+        "source": [
+          685,
+          215
+        ],
+        "target": "ellipse31",
+        "kind": "association",
+        "points": [
+          [
+            685,
+            215
+          ],
+          [
+            648,
+            320.5
+          ]
+        ]
+      },
+      {
+        "source": [
+          685,
+          215
+        ],
+        "target": "ellipse33",
+        "kind": "association",
+        "points": [
+          [
+            685,
+            215
+          ],
+          [
+            648,
+            351.5
+          ]
+        ]
+      },
+      {
+        "source": [
+          353,
+          213
+        ],
+        "target": "ellipse9",
+        "kind": "association",
+        "points": [
+          [
+            353,
+            213
+          ],
+          [
+            310,
+            214.5
+          ]
+        ]
+      },
+      {
+        "source": [
+          377,
+          213
+        ],
+        "target": "ellipse25",
+        "kind": "association",
+        "points": [
+          [
+            377,
+            213
+          ],
+          [
+            416,
+            227.5
+          ]
+        ]
+      }
+    ],
+    "direct_straight_links": "PASS"
+  },
+  "usecase_mobile": {
+    "title": "Use case UML — ứng dụng di động",
+    "width_pt": 728.503937007874,
+    "height_pt": 423,
+    "minimum_font_pt": 9,
+    "text_count": 16,
+    "text_bounds": "PASS",
+    "artifacts": {
+      "pdf": "b72001a8aa21a86c0c8b5f8972510e45ee03d28877c5df0c06ffa50edb8dc9e8",
+      "svg": "fd146c2da50cd4591c9168436846ba8079d7fba999d4866440341864fff966f0",
+      "drawio": "a8ce3b134b3981b6ade68ca4964e69c6f1de52a54f08fdfe8f1a86ac8c2d07e2"
+    },
+    "text_overlaps": "PASS",
+    "uml_links": [
+      {
+        "source": [
+          65,
+          219
+        ],
+        "target": "ellipse3",
+        "kind": "association",
+        "points": [
+          [
+            65,
+            219
+          ],
+          [
+            145,
+            81.0
+          ]
+        ]
+      },
+      {
+        "source": [
+          65,
+          219
+        ],
+        "target": "ellipse5",
+        "kind": "association",
+        "points": [
+          [
+            65,
+            219
+          ],
+          [
+            145,
+            136.0
+          ]
+        ]
+      },
+      {
+        "source": [
+          65,
+          219
+        ],
+        "target": "ellipse7",
+        "kind": "association",
+        "points": [
+          [
+            65,
+            219
+          ],
+          [
+            145,
+            191.0
+          ]
+        ]
+      },
+      {
+        "source": [
+          65,
+          219
+        ],
+        "target": "ellipse9",
+        "kind": "association",
+        "points": [
+          [
+            65,
+            219
+          ],
+          [
+            145,
+            246.0
+          ]
+        ]
+      },
+      {
+        "source": [
+          65,
+          219
+        ],
+        "target": "ellipse11",
+        "kind": "association",
+        "points": [
+          [
+            65,
+            219
+          ],
+          [
+            145,
+            301.0
+          ]
+        ]
+      },
+      {
+        "source": [
+          65,
+          219
+        ],
+        "target": "ellipse13",
+        "kind": "association",
+        "points": [
+          [
+            65,
+            219
+          ],
+          [
+            145,
+            356.0
+          ]
+        ]
+      },
+      {
+        "source": [
+          666,
+          83
+        ],
+        "target": "ellipse15",
+        "kind": "association",
+        "points": [
+          [
+            666,
+            83
+          ],
+          [
+            615,
+            81.0
+          ]
+        ]
+      },
+      {
+        "source": "ellipse15",
+        "target": "ellipse3",
+        "kind": "extend",
+        "points": [
+          [
+            430,
+            81.0
+          ],
+          [
+            355,
+            81.0
+          ]
+        ]
+      },
+      {
+        "source": "ellipse15",
+        "target": "ellipse5",
+        "kind": "extend",
+        "points": [
+          [
+            430,
+            81.0
+          ],
+          [
+            355,
+            136.0
+          ]
+        ]
+      },
+      {
+        "source": "ellipse17",
+        "target": "ellipse5",
+        "kind": "extend",
+        "points": [
+          [
+            430,
+            164.0
+          ],
+          [
+            355,
+            136.0
+          ]
+        ]
+      }
+    ],
+    "direct_straight_links": "PASS"
+  },
+  "usecase_dashboard": {
+    "title": "Use case UML — dashboard điều phối",
+    "width_pt": 728.503937007874,
+    "height_pt": 420,
+    "minimum_font_pt": 9,
+    "text_count": 17,
+    "text_bounds": "PASS",
+    "artifacts": {
+      "pdf": "b08d735a9e95f4e7554a810fbba3f24eb1ed5b4659cde1b15234f660a02f8b6b",
+      "svg": "d51f51894ecf2499567bdf4236f11cf267de11bdbb2bb84d3895eb09c4ed5699",
+      "drawio": "58992c359c54df567d1d78ed5ef05647027a59c4657123997d603f38f2289904"
+    },
+    "text_overlaps": "PASS",
+    "uml_links": [
+      {
+        "source": [
+          65,
+          203
+        ],
+        "target": "ellipse3",
+        "kind": "association",
+        "points": [
+          [
+            65,
+            203
+          ],
+          [
+            160,
+            77.0
+          ]
+        ]
+      },
+      {
+        "source": [
+          65,
+          203
+        ],
+        "target": "ellipse5",
+        "kind": "association",
+        "points": [
+          [
+            65,
+            203
+          ],
+          [
+            160,
+            121.0
+          ]
+        ]
+      },
+      {
+        "source": [
+          65,
+          203
+        ],
+        "target": "ellipse7",
+        "kind": "association",
+        "points": [
+          [
+            65,
+            203
+          ],
+          [
+            160,
+            165.0
+          ]
+        ]
+      },
+      {
+        "source": [
+          65,
+          203
+        ],
+        "target": "ellipse9",
+        "kind": "association",
+        "points": [
+          [
+            65,
+            203
+          ],
+          [
+            160,
+            209.0
+          ]
+        ]
+      },
+      {
+        "source": [
+          65,
+          203
+        ],
+        "target": "ellipse11",
+        "kind": "association",
+        "points": [
+          [
+            65,
+            203
+          ],
+          [
+            160,
+            253.0
+          ]
+        ]
+      },
+      {
+        "source": [
+          65,
+          203
+        ],
+        "target": "ellipse13",
+        "kind": "association",
+        "points": [
+          [
+            65,
+            203
+          ],
+          [
+            160,
+            297.0
+          ]
+        ]
+      },
+      {
+        "source": [
+          65,
+          203
+        ],
+        "target": "ellipse15",
+        "kind": "association",
+        "points": [
+          [
+            65,
+            203
+          ],
+          [
+            160,
+            341.0
+          ]
+        ]
+      },
+      {
+        "source": [
+          685,
+          241
+        ],
+        "target": "ellipse21",
+        "kind": "association",
+        "points": [
+          [
+            685,
+            241
+          ],
+          [
+            645,
+            264.0
+          ]
+        ]
+      },
+      {
+        "source": "ellipse5",
+        "target": "ellipse17",
+        "kind": "include",
+        "points": [
+          [
+            420,
+            121.0
+          ],
+          [
+            470,
+            116.0
+          ]
+        ]
+      },
+      {
+        "source": "ellipse19",
+        "target": "ellipse7",
+        "kind": "extend",
+        "points": [
+          [
+            470,
+            190.0
+          ],
+          [
+            420,
+            165.0
+          ]
+        ]
+      }
+    ],
+    "direct_straight_links": "PASS"
+  },
+  "flow_04_track_rescue_status": {
+    "title": "Theo dõi và đồng bộ trạng thái",
+    "width_pt": 728.503937007874,
+    "height_pt": 417,
+    "minimum_font_pt": 9,
+    "text_count": 18,
+    "text_bounds": "PASS",
+    "artifacts": {
+      "pdf": "8af82115993fd730d556567d43c49164446537a9316d8f93d6a2b7a385f9c5df",
+      "svg": "93f95be9856d30a50eb520d2cce32c50995179aeeca923402e56797a24420da7",
+      "drawio": "5dc2637ec5efe97215134e042c228c4e93367304ce4764d5ecfeef7ae713463a"
+    },
+    "text_overlaps": "PASS"
+  },
+  "flow_02_create_report_edge_ai": {
+    "title": "Tạo báo cáo chi tiết và suy luận ảnh",
+    "width_pt": 728.503937007874,
+    "height_pt": 417,
+    "minimum_font_pt": 9,
+    "text_count": 18,
+    "text_bounds": "PASS",
+    "artifacts": {
+      "pdf": "8cb2103d3323a6eb3836c63ee950929bb9007e830fa5aef905641df26d6662f8",
+      "svg": "150d38362057c5c69d8423d709f5c07c0737c63149221b18dfc2862e8124b89e",
+      "drawio": "118485ec32f6f53791050b26cd76f4989db9947ccbb29e16c34d112bac15bc7e"
+    },
+    "text_overlaps": "PASS"
+  },
+  "deployment_infrastructure": {
+    "title": "Triển khai Docker Compose",
+    "width_pt": 728.503937007874,
+    "height_pt": 405,
+    "minimum_font_pt": 9,
+    "text_count": 13,
+    "text_bounds": "PASS",
+    "artifacts": {
+      "pdf": "f980dc78746e3be96f7b93cad2668cb709c80add9092901accf4c6c57317f5bf",
+      "svg": "022047b39975ca21dd6b91279e1f972467d3973dd539930383f78164b484d219",
+      "drawio": "a96757ad8a3bdae75f78c64aa018933b7ab78e4e44b3414da588c7b5f2fa4019"
+    },
+    "text_overlaps": "PASS"
+  },
+  "flow_03_adaptive_network_send": {
+    "title": "Truyền tải thích ứng, ACK và hoàn tất ảnh",
+    "width_pt": 728.503937007874,
+    "height_pt": 417,
+    "minimum_font_pt": 9,
+    "text_count": 26,
+    "text_bounds": "PASS",
+    "artifacts": {
+      "pdf": "af79068a8605b9e0253b01c414423d51736b6d1f97a5bca7d54fac0e88f3d481",
+      "svg": "c4d0454174bdab3eec762f829ef635426733f93ed6572f6587e5c872db238638",
+      "drawio": "6302146faeef5afbb13275c34d4ec77757e16e169500b95b7ed242d345af1044"
+    },
+    "text_overlaps": "PASS"
+  },
+  "status_machine": {
+    "title": "Máy trạng thái nghiệp vụ cứu hộ",
+    "width_pt": 453.5433070866142,
+    "height_pt": 245,
+    "minimum_font_pt": 9,
+    "text_count": 10,
+    "text_bounds": "PASS",
+    "artifacts": {
+      "pdf": "139e7eac497f6c147c8cf9a621a52e8cb539affec8fbbeaafb942aa3524b15b3",
+      "svg": "80b62a6516e8498e12f47bbe2ea4ae3d363b888522d97ee1d047fb2a1a2fab90",
+      "drawio": "b6783da8d3f690ff61df2527a9c233c5ab29fbf395bde81d2fe8f5e01ce3e490"
+    },
+    "text_overlaps": "PASS"
+  },
+  "flow_09_ai_training_optimization": {
+    "title": "Huấn luyện, tối ưu và xuất runtime",
+    "width_pt": 728.503937007874,
+    "height_pt": 417,
+    "minimum_font_pt": 9,
+    "text_count": 17,
+    "text_bounds": "PASS",
+    "artifacts": {
+      "pdf": "9575906982decb413b981765e8e5bc89b577948f5e9e35e5f7e3573dc09fb63a",
+      "svg": "bc8a2fca76ece70ac0ad82caadd07229f967cca41509342be07da7fa6de20251",
+      "drawio": "494a593dc070f34f65246f008d6793d39332a36f193362fabf70d78d3b1a08d8"
+    },
+    "text_overlaps": "PASS"
+  },
+  "flow_06_clustering_priority": {
+    "title": "Cache, đồ thị Louvain và ưu tiên có chặn",
+    "width_pt": 728.503937007874,
+    "height_pt": 417,
+    "minimum_font_pt": 9,
+    "text_count": 19,
+    "text_bounds": "PASS",
+    "artifacts": {
+      "pdf": "5df0be178efeff9eb487733af7a41ce01d143b5d30c8bc4451f310f30f9d69d8",
+      "svg": "8dabce1aaf82cf69aa8151904064e69cb13c65ec8d0f3afc980eea86e1104219",
+      "drawio": "ec6362745e1d24c37ba17ebd4cf126fcd042de50df8ef1bb662a3e103284b8b2"
+    },
+    "text_overlaps": "PASS"
+  },
+  "research_pipeline_report": {
+    "title": "Ranh giới suy luận và đánh giá",
+    "width_pt": 728.503937007874,
+    "height_pt": 385,
+    "minimum_font_pt": 9,
+    "text_count": 14,
+    "text_bounds": "PASS",
+    "artifacts": {
+      "pdf": "d32a1be6ead34221a8fa091c6662b9643d3624149200d9a2f7523cbf8a544a23",
+      "svg": "61fee0ee15a120907db73a5f5168839d98b9649f1cdcba172426425e7be8183c",
+      "drawio": "dbd05a003d1ee89ae79afd4f08aa3087796f032041c17bfa764b7657c951b36f"
+    },
+    "text_overlaps": "PASS"
+  }
+}

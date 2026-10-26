@@ -1,133 +1,295 @@
-<mxfile host="Electron" agent="Antigravity">
-  <diagram id="diag-1" name="Luu-do-Tiep-nhan-va-Chong-trung-Backend">
-    <mxGraphModel dx="2348" dy="1304" grid="0" gridSize="10" guides="1" tooltips="1" connect="1" arrows="1" fold="1" page="1" pageScale="1" pageWidth="900" pageHeight="1080" math="0" shadow="0">
+<?xml version='1.0' encoding='utf-8'?>
+<mxfile host="app.diagrams.net" version="26.0.0">
+  <diagram id="flow_05_backend_ingest_dedup" name="2.12 · Ba đường tiếp nhận và cơ chế chống trùng">
+    <mxGraphModel page="1" pageScale="1" pageWidth="728.503937007874" pageHeight="426" math="0" grid="0" shadow="0">
       <root>
         <mxCell id="0" />
         <mxCell id="1" parent="0" />
-        <mxCell id="bd_start" parent="1" style="ellipse;whiteSpace=wrap;html=1;fontStyle=1;fontFamily=Helvetica;fontSize=15;" value="&lt;div style=&quot;line-height:1;&quot;&gt;Nhận Request tới Backend&#xa;(Sync batch / Multipart / SMS)&lt;/div&gt;" vertex="1">
-          <mxGeometry height="45" width="223" x="308.5" y="17" as="geometry" />
+        <mxCell id="node1" parent="1" vertex="1" style="rounded=1;fillColor=#FFFFFF;strokeColor=#111111;strokeWidth=0.9;dashed=0;">
+          <mxGeometry x="10" y="10" width="294" height="385" as="geometry" />
         </mxCell>
-        <mxCell id="bd_header" parent="1" style="rhombus;whiteSpace=wrap;html=1;fontSize=15;fontFamily=Helvetica;" value="&lt;div style=&quot;line-height:1;&quot;&gt;Kiểm tra header bắt buộc:&#xa;X-Message-Contract-Version: 1&lt;/div&gt;" vertex="1">
-          <mxGeometry height="79" width="190" x="325" y="78" as="geometry" />
-        </mxCell>
-        <mxCell id="bd_bounds" parent="1" style="rhombus;whiteSpace=wrap;html=1;fontSize=15;fontFamily=Helvetica;" value="&lt;div style=&quot;line-height:1;&quot;&gt;Kiểm tra giới hạn kích thước:&#xa;- Batch &amp;lt;= 50 messages&#xa;- Tổng request &amp;lt;= 256 KiB&#xa;- Meta &amp;lt;= 64 KiB, Ảnh &amp;lt;= 15 MB&lt;/div&gt;" vertex="1">
-          <mxGeometry height="110" width="290" x="275" y="194" as="geometry" />
-        </mxCell>
-        <mxCell id="bd_jcs" parent="1" style="rounded=1;whiteSpace=wrap;html=1;fontSize=15;fontFamily=Helvetica;" value="&lt;div style=&quot;line-height:1;&quot;&gt;Chuẩn tắc hóa JSON theo RFC 8785&#xa;&amp;amp; Tính mã băm SHA-256 payload&lt;/div&gt;" vertex="1">
-          <mxGeometry height="50" width="240" x="298" y="341" as="geometry" />
-        </mxCell>
-        <mxCell id="bd_lookup" parent="1" style="rounded=1;whiteSpace=wrap;html=1;fontSize=15;fontFamily=Helvetica;" value="&lt;div style=&quot;line-height:1;&quot;&gt;Tra cứu bảng messages_dedup&#xa;theo message_id &amp;amp; client_id&lt;/div&gt;" vertex="1">
-          <mxGeometry height="50" width="190" x="323" y="417" as="geometry" />
-        </mxCell>
-        <mxCell id="bd_dedup_check" parent="1" style="rhombus;whiteSpace=wrap;html=1;fontSize=15;fontFamily=Helvetica;" value="&lt;div style=&quot;line-height:1;&quot;&gt;Kết quả đối chiếu&#xa;chống trùng lặp?&lt;/div&gt;" vertex="1">
-          <mxGeometry height="70" width="170" x="333" y="490" as="geometry" />
-        </mxCell>
-        <mxCell id="bd_dup_ok" parent="1" style="rounded=1;whiteSpace=wrap;html=1;fontSize=15;fontFamily=Helvetica;" value="&lt;div style=&quot;line-height:1;&quot;&gt;TRÙNG MESSAGE_ID &amp;amp; HASH:&#xa;- Phát hiện mất ACK sau commit&#xa;- Trả duplicate + kết quả cũ&#xa;- Không sửa đổi CSDL (Idempotent)&lt;/div&gt;" vertex="1">
-          <mxGeometry height="131" width="210" x="26" y="521" as="geometry" />
-        </mxCell>
-        <mxCell id="bd_err_conflict" parent="1" style="rounded=1;whiteSpace=wrap;html=1;fontSize=15;fontFamily=Helvetica;" value="&lt;div style=&quot;line-height:1;&quot;&gt;TRÙNG ID KHÁC HASH HOẶC TÁI DÙNG SEQ:&#xa;- Trả lỗi 409 Conflict&#xa;- Mã ID_REUSED_WITH_DIFFERENT_PAYLOAD&#xa;  hoặc SEQUENCE_REUSED&lt;/div&gt;" vertex="1">
-          <mxGeometry height="79" width="346" x="583" y="560" as="geometry" />
-        </mxCell>
-        <mxCell id="bd_new_tx" parent="1" style="rounded=1;whiteSpace=wrap;html=1;fontSize=15;fontFamily=Helvetica;" value="&lt;div style=&quot;line-height:1;&quot;&gt;THAO TÁC HỢP LỆ (MỚI):&#xa;Mở SQLite Database Transaction&#xa;Kiểm tra quyền sở hữu report_owner&lt;/div&gt;" vertex="1">
-          <mxGeometry height="65" width="244" x="296" y="614" as="geometry" />
-        </mxCell>
-        <mxCell id="bd_merge_check" parent="1" style="rhombus;whiteSpace=wrap;html=1;fontSize=15;fontFamily=Helvetica;" value="&lt;div style=&quot;line-height:1;&quot;&gt;Báo cáo đã có trong DB?&lt;/div&gt;" vertex="1">
-          <mxGeometry height="65" width="150" x="343" y="705" as="geometry" />
-        </mxCell>
-        <mxCell id="bd_merge_apply" parent="1" style="rounded=1;whiteSpace=wrap;html=1;fontSize=15;fontFamily=Helvetica;" value="&lt;div style=&quot;line-height:1;&quot;&gt;Báo cáo cũ (gộp dữ liệu):&#xa;- Chỉ bổ sung trường còn trống&#xa;- Gắn ảnh nếu trước đó chưa có ảnh&#xa;- Giữ nguyên ảnh đầu tiên và ngày tạo&lt;/div&gt;" vertex="1">
-          <mxGeometry height="65" width="259" x="111" y="796" as="geometry" />
-        </mxCell>
-        <mxCell id="bd_create_apply" parent="1" style="rounded=1;whiteSpace=wrap;html=1;fontSize=15;fontFamily=Helvetica;" value="&lt;div style=&quot;line-height:1;&quot;&gt;Báo cáo mới hoàn toàn:&#xa;- Tạo bản ghi mới trong bảng reports&#xa;- Trạng thái khởi tạo: processing&#xa;- Lưu file ảnh vật lý (nếu có)&lt;/div&gt;" vertex="1">
-          <mxGeometry height="65" width="259" x="442" y="796" as="geometry" />
-        </mxCell>
-        <mxCell id="bd_commit" parent="1" style="shape=cylinder3;whiteSpace=wrap;html=1;boundedLbl=1;backgroundOutline=1;size=10;fontSize=15;fontFamily=Helvetica;" value="&lt;div style=&quot;line-height:1;&quot;&gt;Commit Transaction:&#xa;- Ghi vết bảng messages_dedup&#xa;- Ghi nhật ký vào report_events&#xa;- Tăng server_meta version (báo cụm stale)&lt;/div&gt;" vertex="1">
-          <mxGeometry height="135" width="200" x="318" y="916" as="geometry" />
-        </mxCell>
-        <mxCell id="bd_ack" parent="1" style="rounded=1;whiteSpace=wrap;html=1;fontSize=15;fontFamily=Helvetica;" value="&lt;div style=&quot;line-height:1;&quot;&gt;Trả phản hồi HTTP cho Client&#xa;(accepted / 201 Created)&lt;/div&gt;" vertex="1">
-          <mxGeometry height="45" width="200" x="320" y="1096" as="geometry" />
-        </mxCell>
-        <mxCell id="bd_end" parent="1" style="ellipse;whiteSpace=wrap;html=1;fontStyle=1;fontFamily=Helvetica;fontSize=15;" value="&lt;div style=&quot;line-height:1;&quot;&gt;Kết thúc xử lý&lt;/div&gt;" vertex="1">
-          <mxGeometry height="57" width="114" x="363" y="1179" as="geometry" />
-        </mxCell>
-        <mxCell id="bd_err_bad" parent="1" style="rounded=1;whiteSpace=wrap;html=1;fontSize=15;fontFamily=Helvetica;" value="&lt;div style=&quot;line-height:1;&quot;&gt;Trả lỗi 400 Bad Request&#xa;(UNSUPPORTED_CONTRACT_VERSION&#xa;hoặc REQUEST_TOO_LARGE)&lt;/div&gt;" vertex="1">
-          <mxGeometry height="60" width="309" x="658" y="92.5" as="geometry" />
-        </mxCell>
-        <mxCell id="bde_1" edge="1" parent="1" source="bd_start" style="endArrow=classic;html=1;strokeWidth=1.3;fontSize=15;fontFamily=Helvetica;" target="bd_header" value="">
-          <mxGeometry relative="1" as="geometry" />
-        </mxCell>
-        <mxCell id="bde_2" edge="1" parent="1" source="bd_header" style="endArrow=classic;html=1;strokeWidth=1.3;fontSize=15;fontFamily=Helvetica;fontColor=#172B4D;labelBackgroundColor=#FFFFFF;" target="bd_err_bad" value="Sai version">
-          <mxGeometry relative="1" as="geometry" />
-        </mxCell>
-        <mxCell id="bde_3" edge="1" parent="1" source="bd_header" style="endArrow=classic;html=1;strokeWidth=1.3;fontSize=15;fontFamily=Helvetica;fontColor=#172B4D;labelBackgroundColor=#FFFFFF;" target="bd_bounds" value="Đúng version">
-          <mxGeometry relative="1" as="geometry" />
-        </mxCell>
-        <mxCell id="bde_4" edge="1" parent="1" source="bd_bounds" style="endArrow=classic;html=1;strokeWidth=1.3;fontSize=15;fontFamily=Helvetica;fontColor=#172B4D;labelBackgroundColor=#FFFFFF;" target="bd_err_bad" value="Vượt kích thước">
-          <mxGeometry relative="1" as="geometry" />
-        </mxCell>
-        <mxCell id="bde_5" edge="1" parent="1" source="bd_bounds" style="endArrow=classic;html=1;strokeWidth=1.3;fontSize=15;fontFamily=Helvetica;fontColor=#172B4D;labelBackgroundColor=#FFFFFF;" target="bd_jcs" value="Hợp lệ">
-          <mxGeometry relative="1" as="geometry" />
-        </mxCell>
-        <mxCell id="bde_6" edge="1" parent="1" source="bd_jcs" style="endArrow=classic;html=1;strokeWidth=1.3;fontSize=15;fontFamily=Helvetica;" target="bd_lookup" value="">
-          <mxGeometry relative="1" as="geometry" />
-        </mxCell>
-        <mxCell id="bde_7" edge="1" parent="1" source="bd_lookup" style="endArrow=classic;html=1;strokeWidth=1.3;fontSize=15;fontFamily=Helvetica;exitX=0.5;exitY=1;exitDx=0;exitDy=0;" target="bd_dedup_check" value="">
+        <mxCell id="edge2" parent="1" edge="1" style="html=1;rounded=0;strokeColor=#111111;strokeWidth=0.9;dashed=0;endArrow=none;startArrow=none;">
           <mxGeometry relative="1" as="geometry">
-            <mxPoint x="419.99999999999955" y="491" as="sourcePoint" />
-          </mxGeometry>
-        </mxCell>
-        <mxCell id="bde_8" edge="1" parent="1" source="bd_dedup_check" style="endArrow=classic;html=1;strokeWidth=1.3;fontSize=15;fontFamily=Helvetica;fontColor=#172B4D;labelBackgroundColor=#FFFFFF;exitX=0;exitY=0.5;exitDx=0;exitDy=0;" target="bd_dup_ok" value="Duplicate">
-          <mxGeometry relative="1" as="geometry" />
-        </mxCell>
-        <mxCell id="bde_9" edge="1" parent="1" source="bd_dedup_check" style="endArrow=classic;html=1;strokeWidth=1.3;fontSize=15;fontFamily=Helvetica;fontColor=#172B4D;labelBackgroundColor=#FFFFFF;exitX=1;exitY=0.5;exitDx=0;exitDy=0;entryX=0.5;entryY=0;entryDx=0;entryDy=0;" target="bd_err_conflict" value="Xung đột">
-          <mxGeometry relative="1" as="geometry" />
-        </mxCell>
-        <mxCell id="bde_10" edge="1" parent="1" source="bd_dedup_check" style="endArrow=classic;html=1;strokeWidth=1.3;fontSize=15;fontFamily=Helvetica;fontColor=#172B4D;labelBackgroundColor=#FFFFFF;" target="bd_new_tx" value="Hợp lệ">
-          <mxGeometry relative="1" as="geometry" />
-        </mxCell>
-        <mxCell id="bde_11" edge="1" parent="1" source="bd_new_tx" style="endArrow=classic;html=1;strokeWidth=1.3;fontSize=15;fontFamily=Helvetica;" target="bd_merge_check" value="">
-          <mxGeometry relative="1" as="geometry" />
-        </mxCell>
-        <mxCell id="bde_12" edge="1" parent="1" source="bd_merge_check" style="endArrow=classic;html=1;strokeWidth=1.3;fontSize=15;fontFamily=Helvetica;fontColor=#172B4D;labelBackgroundColor=#FFFFFF;" target="bd_merge_apply" value="Đã có id">
-          <mxGeometry relative="1" as="geometry" />
-        </mxCell>
-        <mxCell id="bde_13" edge="1" parent="1" source="bd_merge_check" style="endArrow=classic;html=1;strokeWidth=1.3;fontSize=15;fontFamily=Helvetica;fontColor=#172B4D;labelBackgroundColor=#FFFFFF;" target="bd_create_apply" value="Chưa có">
-          <mxGeometry relative="1" as="geometry" />
-        </mxCell>
-        <mxCell id="bde_14" edge="1" parent="1" source="bd_merge_apply" style="endArrow=classic;html=1;strokeWidth=1.3;fontSize=15;fontFamily=Helvetica;" target="bd_commit" value="">
-          <mxGeometry relative="1" as="geometry" />
-        </mxCell>
-        <mxCell id="bde_15" edge="1" parent="1" source="bd_create_apply" style="endArrow=classic;html=1;strokeWidth=1.3;fontSize=15;fontFamily=Helvetica;" target="bd_commit" value="">
-          <mxGeometry relative="1" as="geometry" />
-        </mxCell>
-        <mxCell id="bde_16" edge="1" parent="1" source="bd_commit" style="endArrow=classic;html=1;strokeWidth=1.3;fontSize=15;fontFamily=Helvetica;" target="bd_ack" value="">
-          <mxGeometry relative="1" as="geometry" />
-        </mxCell>
-        <mxCell id="bde_17" edge="1" parent="1" source="bd_ack" style="endArrow=classic;html=1;strokeWidth=1.3;fontSize=15;fontFamily=Helvetica;" target="bd_end" value="">
-          <mxGeometry relative="1" as="geometry" />
-        </mxCell>
-        <mxCell id="bde_18" edge="1" parent="1" source="bd_dup_ok" style="endArrow=classic;html=1;strokeWidth=1.3;fontSize=15;fontFamily=Helvetica;exitX=0.25;exitY=1;exitDx=0;exitDy=0;" target="bd_end" value="">
-          <mxGeometry relative="1" x="-0.1167" as="geometry">
+            <mxPoint x="22.4" y="18.0" as="sourcePoint" />
+            <mxPoint x="22.4" y="18.0" as="targetPoint" />
             <Array as="points">
-              <mxPoint x="78.5" y="1207.5" />
+              <mxPoint x="30.4" y="18.0" />
+              <mxPoint x="34.4" y="22.0" />
+              <mxPoint x="34.4" y="34.0" />
+              <mxPoint x="22.4" y="34.0" />
             </Array>
           </mxGeometry>
         </mxCell>
-        <mxCell id="bde_19" edge="1" parent="1" source="bd_err_conflict" style="endArrow=classic;html=1;strokeWidth=1.3;fontSize=15;fontFamily=Helvetica;edgeStyle=orthogonalEdgeStyle;" target="bd_end" value="">
-          <mxGeometry relative="1" x="-0.0235" as="geometry">
+        <mxCell id="edge3" parent="1" edge="1" style="html=1;rounded=0;strokeColor=#111111;strokeWidth=0.9;dashed=0;endArrow=none;startArrow=none;">
+          <mxGeometry relative="1" as="geometry">
+            <mxPoint x="24.8" y="24.4" as="sourcePoint" />
+            <mxPoint x="32.0" y="24.4" as="targetPoint" />
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="edge4" parent="1" edge="1" style="html=1;rounded=0;strokeColor=#111111;strokeWidth=0.9;dashed=0;endArrow=none;startArrow=none;">
+          <mxGeometry relative="1" as="geometry">
+            <mxPoint x="24.8" y="27.6" as="sourcePoint" />
+            <mxPoint x="32.0" y="27.6" as="targetPoint" />
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="edge5" parent="1" edge="1" style="html=1;rounded=0;strokeColor=#111111;strokeWidth=0.9;dashed=0;endArrow=none;startArrow=none;">
+          <mxGeometry relative="1" as="geometry">
+            <mxPoint x="24.8" y="30.8" as="sourcePoint" />
+            <mxPoint x="32.0" y="30.8" as="targetPoint" />
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="text6" parent="1" vertex="1" value="&lt;div&gt;A · JSON SYNC&lt;/div&gt;" style="text;html=1;whiteSpace=wrap;align=left;verticalAlign=middle;fontFamily=DejaVu Sans;fontSize=10;fontStyle=1;fontColor=#111111;spacing=0;overflow=visible;">
+          <mxGeometry x="43.00000000000001" y="19.959999999999923" width="82.1" height="12.080000000000041" as="geometry" />
+        </mxCell>
+        <mxCell id="node7" parent="1" vertex="1" style="rounded=1;fillColor=#FFFFFF;strokeColor=#111111;strokeWidth=0.9;dashed=0;">
+          <mxGeometry x="326" y="10" width="192" height="385" as="geometry" />
+        </mxCell>
+        <mxCell id="node8" parent="1" vertex="1" style="rounded=0;fillColor=#FFFFFF;strokeColor=#111111;strokeWidth=0.9;dashed=0;">
+          <mxGeometry x="336" y="22.0" width="16.0" height="10.4" as="geometry" />
+        </mxCell>
+        <mxCell id="edge9" parent="1" edge="1" style="html=1;rounded=0;strokeColor=#111111;strokeWidth=0.9;dashed=0;endArrow=none;startArrow=none;">
+          <mxGeometry relative="1" as="geometry">
+            <mxPoint x="339.2" y="22.0" as="sourcePoint" />
+            <mxPoint x="348.0" y="22.0" as="targetPoint" />
             <Array as="points">
-              <mxPoint x="840.8" y="1214.5" />
+              <mxPoint x="340.8" y="18.8" />
+              <mxPoint x="346.4" y="18.8" />
             </Array>
           </mxGeometry>
         </mxCell>
-        <mxCell id="bde_20" edge="1" parent="1" style="endArrow=classic;html=1;strokeWidth=1.3;fontSize=15;fontFamily=Helvetica;exitX=1;exitY=0.5;exitDx=0;exitDy=0;edgeStyle=orthogonalEdgeStyle;" value="">
-          <mxGeometry relative="1" x="0.0289" as="geometry">
+        <mxCell id="circle10" parent="1" vertex="1" style="ellipse;fillColor=white;strokeColor=#111111;strokeWidth=0.9;">
+          <mxGeometry x="340.8" y="23.6" width="6.4" height="6.4" as="geometry" />
+        </mxCell>
+        <mxCell id="text11" parent="1" vertex="1" value="&lt;div&gt;B · MULTIPART / ẢNH&lt;/div&gt;" style="text;html=1;whiteSpace=wrap;align=left;verticalAlign=middle;fontFamily=DejaVu Sans;fontSize=10;fontStyle=1;fontColor=#111111;spacing=0;overflow=visible;">
+          <mxGeometry x="359.0" y="19.059999999999945" width="117.47000000000003" height="13.879999999999995" as="geometry" />
+        </mxCell>
+        <mxCell id="node12" parent="1" vertex="1" style="rounded=1;fillColor=#FFFFFF;strokeColor=#111111;strokeWidth=0.9;dashed=0;">
+          <mxGeometry x="534" y="10" width="184" height="385" as="geometry" />
+        </mxCell>
+        <mxCell id="edge13" parent="1" edge="1" style="html=1;rounded=0;strokeColor=#111111;strokeWidth=0.9;dashed=0;endArrow=none;startArrow=none;">
+          <mxGeometry relative="1" as="geometry">
+            <mxPoint x="544.0" y="19.6" as="sourcePoint" />
+            <mxPoint x="544.0" y="19.6" as="targetPoint" />
             <Array as="points">
-              <mxPoint x="953.89" y="123" />
-              <mxPoint x="953.89" y="1231.2" />
+              <mxPoint x="560.0" y="19.6" />
+              <mxPoint x="560.0" y="30.0" />
+              <mxPoint x="551.2" y="30.0" />
+              <mxPoint x="546.4" y="34.0" />
+              <mxPoint x="546.4" y="30.0" />
+              <mxPoint x="544.0" y="30.0" />
             </Array>
-            <mxPoint x="943.89" y="123" as="sourcePoint" />
-            <mxPoint x="429.9964948310759" y="1231.1999999999998" as="targetPoint" />
           </mxGeometry>
+        </mxCell>
+        <mxCell id="circle14" parent="1" vertex="1" style="ellipse;fillColor=white;strokeColor=#111111;strokeWidth=0.9;">
+          <mxGeometry x="547.44" y="23.84" width="1.1199999999999999" height="1.1199999999999999" as="geometry" />
+        </mxCell>
+        <mxCell id="circle15" parent="1" vertex="1" style="ellipse;fillColor=white;strokeColor=#111111;strokeWidth=0.9;">
+          <mxGeometry x="551.44" y="23.84" width="1.1199999999999999" height="1.1199999999999999" as="geometry" />
+        </mxCell>
+        <mxCell id="circle16" parent="1" vertex="1" style="ellipse;fillColor=white;strokeColor=#111111;strokeWidth=0.9;">
+          <mxGeometry x="555.44" y="23.84" width="1.1199999999999999" height="1.1199999999999999" as="geometry" />
+        </mxCell>
+        <mxCell id="text17" parent="1" vertex="1" value="&lt;div&gt;C · SMS GATEWAY&lt;/div&gt;" style="text;html=1;whiteSpace=wrap;align=left;verticalAlign=middle;fontFamily=DejaVu Sans;fontSize=10;fontStyle=1;fontColor=#111111;spacing=0;overflow=visible;">
+          <mxGeometry x="567.0" y="19.959999999999923" width="101.45000000000005" height="12.080000000000041" as="geometry" />
+        </mxCell>
+        <mxCell id="node18" parent="1" vertex="1" style="rounded=1;fillColor=#FFFFFF;strokeColor=#111111;strokeWidth=0.9;dashed=0;">
+          <mxGeometry x="20" y="50" width="274" height="48" as="geometry" />
+        </mxCell>
+        <mxCell id="text19" parent="1" vertex="1" value="&lt;div&gt;POST /sync/messages · Header v1&lt;br&gt;JSON strict; ≤50 messages; ≤256 KiB&lt;br&gt;Sai request: HTTP 400; quá dung lượng: 413&lt;/div&gt;" style="text;html=1;whiteSpace=wrap;align=center;verticalAlign=middle;fontFamily=DejaVu Sans;fontSize=9.2;fontStyle=0;fontColor=#111111;spacing=0;overflow=visible;">
+          <mxGeometry x="53.984999999999985" y="57.87999999999994" width="206.03000000000006" height="32.24000000000001" as="geometry" />
+        </mxCell>
+        <mxCell id="node20" parent="1" vertex="1" style="rounded=1;fillColor=#FFFFFF;strokeColor=#111111;strokeWidth=0.9;dashed=0;">
+          <mxGeometry x="20" y="122" width="274" height="58" as="geometry" />
+        </mxCell>
+        <mxCell id="text21" parent="1" vertex="1" value="&lt;div&gt;Từng message: cấu trúc + thời hạn TTL&lt;br&gt;JCS (RFC 8785) → SHA-256; đối chiếu hash&lt;br&gt;Sai payload/hash hoặc hết hạn → rejected&lt;br&gt;Tra message_id, rồi cặp client_id/sequence_number&lt;/div&gt;" style="text;html=1;whiteSpace=wrap;align=center;verticalAlign=middle;fontFamily=DejaVu Sans;fontSize=9.2;fontStyle=0;fontColor=#111111;spacing=0;overflow=visible;">
+          <mxGeometry x="37.06499999999998" y="128.28975000000003" width="239.87000000000006" height="45.420499999999976" as="geometry" />
+        </mxCell>
+        <mxCell id="node22" parent="1" vertex="1" style="rhombus;fillColor=#FFFFFF;strokeColor=#111111;strokeWidth=0.9;dashed=0;">
+          <mxGeometry x="48" y="204" width="141" height="47" as="geometry" />
+        </mxCell>
+        <mxCell id="text23" parent="1" vertex="1" value="&lt;div&gt;Đã có ID&lt;br&gt;hoặc client/seq?&lt;/div&gt;" style="text;html=1;whiteSpace=wrap;align=center;verticalAlign=middle;fontFamily=DejaVu Sans;fontSize=9.2;fontStyle=0;fontColor=#111111;spacing=0;overflow=visible;">
+          <mxGeometry x="80.15" y="216.6" width="76.70000000000002" height="21.80000000000001" as="geometry" />
+        </mxCell>
+        <mxCell id="node24" parent="1" vertex="1" style="rounded=1;fillColor=#FFFFFF;strokeColor=#111111;strokeWidth=0.9;dashed=0;">
+          <mxGeometry x="202" y="201" width="92" height="64" as="geometry" />
+        </mxCell>
+        <mxCell id="text25" parent="1" vertex="1" value="&lt;div&gt;Cùng ID + hash:&lt;br&gt;duplicate&lt;br&gt;Khác hash / seq:&lt;br&gt;rejected&lt;/div&gt;" style="text;html=1;whiteSpace=wrap;align=center;verticalAlign=middle;fontFamily=DejaVu Sans;fontSize=9.2;fontStyle=0;fontColor=#111111;spacing=0;overflow=visible;">
+          <mxGeometry x="209.02000000000004" y="211.65999999999997" width="77.95999999999998" height="42.68000000000001" as="geometry" />
+        </mxCell>
+        <mxCell id="node26" parent="1" vertex="1" style="rounded=1;fillColor=#FFFFFF;strokeColor=#111111;strokeWidth=0.9;dashed=0;">
+          <mxGeometry x="20" y="286" width="274" height="64" as="geometry" />
+        </mxCell>
+        <mxCell id="text27" parent="1" vertex="1" value="&lt;div&gt;Mới: CREATE_RESCUE_RECORD&lt;br&gt;hoặc UPDATE_RESCUE_STATUS&lt;br&gt;Kiểm tra quyền gộp / quyền đổi trạng thái&lt;br&gt;Ghi nghiệp vụ + dedup; commit cùng transaction&lt;br&gt;accepted; lỗi server → rollback / retry_later&lt;/div&gt;" style="text;html=1;whiteSpace=wrap;align=center;verticalAlign=middle;fontFamily=DejaVu Sans;fontSize=9.2;fontStyle=0;fontColor=#111111;spacing=0;overflow=visible;">
+          <mxGeometry x="41.92499999999998" y="290.637875" width="230.15000000000006" height="54.724249999999984" as="geometry" />
+        </mxCell>
+        <mxCell id="node28" parent="1" vertex="1" style="rounded=1;fillColor=#FFFFFF;strokeColor=#111111;strokeWidth=0.9;dashed=0;">
+          <mxGeometry x="20" y="369" width="274" height="23" as="geometry" />
+        </mxCell>
+        <mxCell id="text29" parent="1" vertex="1" value="&lt;div&gt;HTTP 200: results ACK theo message_id&lt;/div&gt;" style="text;html=1;whiteSpace=wrap;align=center;verticalAlign=middle;fontFamily=DejaVu Sans;fontSize=9.2;fontStyle=0;fontColor=#111111;spacing=0;overflow=visible;">
+          <mxGeometry x="64.19999999999999" y="374.82" width="185.60000000000008" height="11.360000000000014" as="geometry" />
+        </mxCell>
+        <mxCell id="edge30" parent="1" edge="1" style="html=1;rounded=0;strokeColor=#111111;strokeWidth=0.9;dashed=0;endArrow=classic;startArrow=none;exitX=0.5;exitY=1.0;entryX=0.5;entryY=0.0;" source="node18" target="node20">
+          <mxGeometry relative="1" as="geometry">
+            <mxPoint x="157" y="98" as="sourcePoint" />
+            <mxPoint x="157" y="122" as="targetPoint" />
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="edge31" parent="1" edge="1" style="html=1;rounded=0;strokeColor=#111111;strokeWidth=0.9;dashed=0;endArrow=classic;startArrow=none;exitX=0.3613138686131387;exitY=1.0;entryX=0.5035460992907801;entryY=0.0;" source="node20" target="node22">
+          <mxGeometry relative="1" as="geometry">
+            <mxPoint x="119" y="180" as="sourcePoint" />
+            <mxPoint x="119" y="204" as="targetPoint" />
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="edge32" parent="1" edge="1" style="html=1;rounded=0;strokeColor=#111111;strokeWidth=0.9;dashed=0;endArrow=classic;startArrow=none;exitX=1.0;exitY=0.5106382978723404;entryX=0.0;entryY=0.421875;" source="node22" target="node24">
+          <mxGeometry relative="1" as="geometry">
+            <mxPoint x="189" y="228" as="sourcePoint" />
+            <mxPoint x="202" y="228" as="targetPoint" />
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="text33" parent="1" vertex="1" value="&lt;div&gt;Chưa có&lt;/div&gt;" style="text;html=1;whiteSpace=wrap;align=center;verticalAlign=middle;fontFamily=DejaVu Sans;fontSize=9;fontStyle=0;fontColor=#111111;spacing=0;overflow=visible;">
+          <mxGeometry x="128.64000000000001" y="264.32" width="38.72" height="11.359999999999957" as="geometry" />
+        </mxCell>
+        <mxCell id="edge34" parent="1" edge="1" style="html=1;rounded=0;strokeColor=#111111;strokeWidth=0.9;dashed=0;endArrow=classic;startArrow=none;exitX=0.5035460992907801;exitY=1.0;entryX=0.3613138686131387;entryY=0.0;" source="node22" target="node26">
+          <mxGeometry relative="1" as="geometry">
+            <mxPoint x="119" y="251" as="sourcePoint" />
+            <mxPoint x="119" y="286" as="targetPoint" />
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="edge35" parent="1" edge="1" style="html=1;rounded=0;strokeColor=#111111;strokeWidth=0.9;dashed=0;endArrow=classic;startArrow=none;exitX=0.5;exitY=1.0;entryX=0.5;entryY=0.0;" source="node26" target="node28">
+          <mxGeometry relative="1" as="geometry">
+            <mxPoint x="157" y="350" as="sourcePoint" />
+            <mxPoint x="157" y="369" as="targetPoint" />
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="edge36" parent="1" edge="1" style="html=1;rounded=0;strokeColor=#111111;strokeWidth=0.9;dashed=1;endArrow=classic;startArrow=none;exitX=1.0;exitY=0.5;entryX=1.0;entryY=0.4782608695652174;" source="node20" target="node28">
+          <mxGeometry relative="1" as="geometry">
+            <mxPoint x="294" y="151" as="sourcePoint" />
+            <mxPoint x="294" y="380" as="targetPoint" />
+            <Array as="points">
+              <mxPoint x="312" y="151" />
+              <mxPoint x="312" y="380" />
+            </Array>
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="edge37" parent="1" edge="1" style="html=1;rounded=0;strokeColor=#111111;strokeWidth=0.9;dashed=1;endArrow=none;startArrow=none;exitX=1.0;exitY=0.5625;" source="node24">
+          <mxGeometry relative="1" as="geometry">
+            <mxPoint x="294" y="237" as="sourcePoint" />
+            <mxPoint x="312" y="237" as="targetPoint" />
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="node38" parent="1" vertex="1" style="rounded=1;fillColor=#FFFFFF;strokeColor=#111111;strokeWidth=0.9;dashed=0;">
+          <mxGeometry x="336" y="50" width="172" height="48" as="geometry" />
+        </mxCell>
+        <mxCell id="text39" parent="1" vertex="1" value="&lt;div&gt;POST /api/reports&lt;br&gt;Header v1; meta ≤64 KiB&lt;br&gt;JSON strict; meta.id + clientId&lt;/div&gt;" style="text;html=1;whiteSpace=wrap;align=center;verticalAlign=middle;fontFamily=DejaVu Sans;fontSize=9.2;fontStyle=0;fontColor=#111111;spacing=0;overflow=visible;">
+          <mxGeometry x="352.06" y="57.87999999999994" width="139.88000000000005" height="32.24000000000001" as="geometry" />
+        </mxCell>
+        <mxCell id="node40" parent="1" vertex="1" style="rounded=1;fillColor=#FFFFFF;strokeColor=#111111;strokeWidth=0.9;dashed=0;">
+          <mxGeometry x="336" y="123" width="172" height="48" as="geometry" />
+        </mxCell>
+        <mxCell id="text41" parent="1" vertex="1" value="&lt;div&gt;Kiểm tra report ID / chủ sở hữu&lt;br&gt;owner_client_id: quyền bổ sung&lt;br&gt;409: REPORT_ID_CONFLICT&lt;/div&gt;" style="text;html=1;whiteSpace=wrap;align=center;verticalAlign=middle;fontFamily=DejaVu Sans;fontSize=9.2;fontStyle=0;fontColor=#111111;spacing=0;overflow=visible;">
+          <mxGeometry x="348.1" y="130.13018749999998" width="147.8" height="33.73962499999999" as="geometry" />
+        </mxCell>
+        <mxCell id="node42" parent="1" vertex="1" style="rounded=1;fillColor=#FFFFFF;strokeColor=#111111;strokeWidth=0.9;dashed=0;">
+          <mxGeometry x="336" y="196" width="172" height="78" as="geometry" />
+        </mxCell>
+        <mxCell id="text43" parent="1" vertex="1" value="&lt;div&gt;Nếu có ảnh: ≤15 MiB mặc định&lt;br&gt;SHA-256 + số byte phải khớp&lt;br&gt;Kiểm tra JPEG / PNG / WebP&lt;br&gt;Ảnh đầu được giữ; tệp uploads/&lt;br&gt;Lỗi: HTTP 400 / 413 / 415&lt;/div&gt;" style="text;html=1;whiteSpace=wrap;align=center;verticalAlign=middle;fontFamily=DejaVu Sans;fontSize=9.2;fontStyle=0;fontColor=#111111;spacing=0;overflow=visible;">
+          <mxGeometry x="348.955" y="206.39587499999996" width="146.09000000000003" height="57.20824999999999" as="geometry" />
+        </mxCell>
+        <mxCell id="node44" parent="1" vertex="1" style="rounded=1;fillColor=#FFFFFF;strokeColor=#111111;strokeWidth=0.9;dashed=0;">
+          <mxGeometry x="336" y="304" width="172" height="51" as="geometry" />
+        </mxCell>
+        <mxCell id="text45" parent="1" vertex="1" value="&lt;div&gt;Mới: status=processing&lt;br&gt;Đã có: bổ sung trường còn trống&lt;br&gt;DB lưu metadata + thông tin ảnh&lt;/div&gt;" style="text;html=1;whiteSpace=wrap;align=center;verticalAlign=middle;fontFamily=DejaVu Sans;fontSize=9.2;fontStyle=0;fontColor=#111111;spacing=0;overflow=visible;">
+          <mxGeometry x="344.185" y="312.966" width="155.63000000000005" height="33.067999999999984" as="geometry" />
+        </mxCell>
+        <mxCell id="node46" parent="1" vertex="1" style="rounded=1;fillColor=#FFFFFF;strokeColor=#111111;strokeWidth=0.9;dashed=0;">
+          <mxGeometry x="336" y="369" width="172" height="23" as="geometry" />
+        </mxCell>
+        <mxCell id="text47" parent="1" vertex="1" value="&lt;div&gt;HTTP 201 + id / imageUrl&lt;/div&gt;" style="text;html=1;whiteSpace=wrap;align=center;verticalAlign=middle;fontFamily=DejaVu Sans;fontSize=9.2;fontStyle=0;fontColor=#111111;spacing=0;overflow=visible;">
+          <mxGeometry x="362.68" y="374.82" width="118.64000000000004" height="11.360000000000014" as="geometry" />
+        </mxCell>
+        <mxCell id="edge48" parent="1" edge="1" style="html=1;rounded=0;strokeColor=#111111;strokeWidth=0.9;dashed=0;endArrow=classic;startArrow=none;exitX=0.5;exitY=1.0;entryX=0.5;entryY=0.0;" source="node38" target="node40">
+          <mxGeometry relative="1" as="geometry">
+            <mxPoint x="422" y="98" as="sourcePoint" />
+            <mxPoint x="422" y="123" as="targetPoint" />
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="edge49" parent="1" edge="1" style="html=1;rounded=0;strokeColor=#111111;strokeWidth=0.9;dashed=0;endArrow=classic;startArrow=none;exitX=0.5;exitY=1.0;entryX=0.5;entryY=0.0;" source="node40" target="node42">
+          <mxGeometry relative="1" as="geometry">
+            <mxPoint x="422" y="171" as="sourcePoint" />
+            <mxPoint x="422" y="196" as="targetPoint" />
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="edge50" parent="1" edge="1" style="html=1;rounded=0;strokeColor=#111111;strokeWidth=0.9;dashed=0;endArrow=classic;startArrow=none;exitX=0.5;exitY=1.0;entryX=0.5;entryY=0.0;" source="node42" target="node44">
+          <mxGeometry relative="1" as="geometry">
+            <mxPoint x="422" y="274" as="sourcePoint" />
+            <mxPoint x="422" y="304" as="targetPoint" />
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="edge51" parent="1" edge="1" style="html=1;rounded=0;strokeColor=#111111;strokeWidth=0.9;dashed=0;endArrow=classic;startArrow=none;exitX=0.5;exitY=1.0;entryX=0.5;entryY=0.0;" source="node44" target="node46">
+          <mxGeometry relative="1" as="geometry">
+            <mxPoint x="422" y="355" as="sourcePoint" />
+            <mxPoint x="422" y="369" as="targetPoint" />
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="node52" parent="1" vertex="1" style="rounded=1;fillColor=#FFFFFF;strokeColor=#111111;strokeWidth=0.9;dashed=0;">
+          <mxGeometry x="544" y="50" width="164" height="48" as="geometry" />
+        </mxCell>
+        <mxCell id="text53" parent="1" vertex="1" value="&lt;div&gt;POST /api/sms/inbound&lt;br&gt;Token header hoặc query&lt;br&gt;Tắt: HTTP 403; sai token: 401&lt;/div&gt;" style="text;html=1;whiteSpace=wrap;align=center;verticalAlign=middle;fontFamily=DejaVu Sans;fontSize=9.2;fontStyle=0;fontColor=#111111;spacing=0;overflow=visible;">
+          <mxGeometry x="556.87" y="57.87999999999994" width="138.26" height="32.24000000000001" as="geometry" />
+        </mxCell>
+        <mxCell id="node54" parent="1" vertex="1" style="rounded=1;fillColor=#FFFFFF;strokeColor=#111111;strokeWidth=0.9;dashed=0;">
+          <mxGeometry x="544" y="123" width="164" height="48" as="geometry" />
+        </mxCell>
+        <mxCell id="text55" parent="1" vertex="1" value="&lt;div&gt;Parse SOS|id:...|pos:...&lt;br&gt;GPS có thể unknown&lt;br&gt;Giữ ID để HTTP gộp về sau&lt;/div&gt;" style="text;html=1;whiteSpace=wrap;align=center;verticalAlign=middle;fontFamily=DejaVu Sans;fontSize=9.2;fontStyle=0;fontColor=#111111;spacing=0;overflow=visible;">
+          <mxGeometry x="563.665" y="130.47893749999997" width="124.67000000000007" height="33.042125" as="geometry" />
+        </mxCell>
+        <mxCell id="node56" parent="1" vertex="1" style="rounded=1;fillColor=#FFFFFF;strokeColor=#111111;strokeWidth=0.9;dashed=0;">
+          <mxGeometry x="544" y="196" width="164" height="65" as="geometry" />
+        </mxCell>
+        <mxCell id="text57" parent="1" vertex="1" value="&lt;div&gt;Tin tự do / thiếu ID:&lt;br&gt;sms-{hash(sender,text,time)}&lt;br&gt;Không có tọa độ:&lt;br&gt;đưa vào hàng xem xét&lt;/div&gt;" style="text;html=1;whiteSpace=wrap;align=center;verticalAlign=middle;fontFamily=DejaVu Sans;fontSize=9.2;fontStyle=0;fontColor=#111111;spacing=0;overflow=visible;">
+          <mxGeometry x="555.25" y="207.15999999999997" width="141.5" height="42.68000000000001" as="geometry" />
+        </mxCell>
+        <mxCell id="node58" parent="1" vertex="1" style="rounded=1;fillColor=#FFFFFF;strokeColor=#111111;strokeWidth=0.9;dashed=0;">
+          <mxGeometry x="544" y="295" width="164" height="60" as="geometry" />
+        </mxCell>
+        <mxCell id="text59" parent="1" vertex="1" value="&lt;div&gt;Nguồn SMS được trusted&lt;br&gt;save_report: tạo hoặc gộp&lt;br&gt;Giữ dữ liệu và ảnh đã có&lt;br&gt;Lưu nguồn, số liên hệ&lt;/div&gt;" style="text;html=1;whiteSpace=wrap;align=center;verticalAlign=middle;fontFamily=DejaVu Sans;fontSize=9.2;fontStyle=0;fontColor=#111111;spacing=0;overflow=visible;">
+          <mxGeometry x="564.655" y="302.93100000000004" width="122.69000000000005" height="44.13799999999998" as="geometry" />
+        </mxCell>
+        <mxCell id="node60" parent="1" vertex="1" style="rounded=1;fillColor=#FFFFFF;strokeColor=#111111;strokeWidth=0.9;dashed=0;">
+          <mxGeometry x="544" y="369" width="164" height="23" as="geometry" />
+        </mxCell>
+        <mxCell id="text61" parent="1" vertex="1" value="&lt;div&gt;HTTP 201 mới / 200 gộp&lt;/div&gt;" style="text;html=1;whiteSpace=wrap;align=center;verticalAlign=middle;fontFamily=DejaVu Sans;fontSize=9.2;fontStyle=0;fontColor=#111111;spacing=0;overflow=visible;">
+          <mxGeometry x="569.74" y="374.82" width="112.51999999999998" height="11.360000000000014" as="geometry" />
+        </mxCell>
+        <mxCell id="edge62" parent="1" edge="1" style="html=1;rounded=0;strokeColor=#111111;strokeWidth=0.9;dashed=0;endArrow=classic;startArrow=none;exitX=0.5;exitY=1.0;entryX=0.5;entryY=0.0;" source="node52" target="node54">
+          <mxGeometry relative="1" as="geometry">
+            <mxPoint x="626" y="98" as="sourcePoint" />
+            <mxPoint x="626" y="123" as="targetPoint" />
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="edge63" parent="1" edge="1" style="html=1;rounded=0;strokeColor=#111111;strokeWidth=0.9;dashed=0;endArrow=classic;startArrow=none;exitX=0.5;exitY=1.0;entryX=0.5;entryY=0.0;" source="node54" target="node56">
+          <mxGeometry relative="1" as="geometry">
+            <mxPoint x="626" y="171" as="sourcePoint" />
+            <mxPoint x="626" y="196" as="targetPoint" />
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="edge64" parent="1" edge="1" style="html=1;rounded=0;strokeColor=#111111;strokeWidth=0.9;dashed=0;endArrow=classic;startArrow=none;exitX=0.5;exitY=1.0;entryX=0.5;entryY=0.0;" source="node56" target="node58">
+          <mxGeometry relative="1" as="geometry">
+            <mxPoint x="626" y="261" as="sourcePoint" />
+            <mxPoint x="626" y="295" as="targetPoint" />
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="edge65" parent="1" edge="1" style="html=1;rounded=0;strokeColor=#111111;strokeWidth=0.9;dashed=0;endArrow=classic;startArrow=none;exitX=0.5;exitY=1.0;entryX=0.5;entryY=0.0;" source="node58" target="node60">
+          <mxGeometry relative="1" as="geometry">
+            <mxPoint x="626" y="355" as="sourcePoint" />
+            <mxPoint x="626" y="369" as="targetPoint" />
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="text66" parent="1" vertex="1" value="&lt;div&gt;JSON sync: ID_REUSED_WITH_DIFFERENT_PAYLOAD / SEQUENCE_REUSED là lỗi ACK, không phải HTTP 409.&lt;/div&gt;" style="text;html=1;whiteSpace=wrap;align=left;verticalAlign=middle;fontFamily=DejaVu Sans;fontSize=9;fontStyle=0;fontColor=#111111;spacing=0;overflow=visible;">
+          <mxGeometry x="9.0" y="396.97125" width="482.0600000000002" height="12.057500000000005" as="geometry" />
+        </mxCell>
+        <mxCell id="text67" parent="1" vertex="1" value="&lt;div&gt;Nét đứt: gom ACK. Tệp ảnh nằm ngoài transaction SQLite; SMS không sử dụng bảng messages_dedup.&lt;/div&gt;" style="text;html=1;whiteSpace=wrap;align=left;verticalAlign=middle;fontFamily=DejaVu Sans;fontSize=9;fontStyle=0;fontColor=#111111;spacing=0;overflow=visible;">
+          <mxGeometry x="9.0" y="411.96000000000004" width="466.4900000000001" height="12.079999999999984" as="geometry" />
         </mxCell>
       </root>
     </mxGraphModel>
