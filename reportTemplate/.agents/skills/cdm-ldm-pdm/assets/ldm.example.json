@@ -1,0 +1,111 @@
+{
+  "layer": "LDM",
+  "title": "LDM mượn sách — ví dụ",
+  "source": "Ví dụ thư viện giả định để minh họa; không phải dữ liệu của đề tài.",
+  "entities": [
+    {
+      "name": "Reader",
+      "attrs": [
+        [
+          true,
+          "reader_id",
+          "identifier",
+          false
+        ],
+        [
+          false,
+          "name",
+          "text",
+          false
+        ]
+      ]
+    },
+    {
+      "name": "Loan",
+      "attrs": [
+        [
+          true,
+          "loan_id",
+          "identifier",
+          false
+        ],
+        [
+          false,
+          "reader_id",
+          "identifier",
+          false
+        ],
+        [
+          false,
+          "loan_date",
+          "date",
+          false
+        ]
+      ]
+    },
+    {
+      "name": "Loan Item",
+      "attrs": [
+        [
+          true,
+          "loan_id",
+          "identifier",
+          false
+        ],
+        [
+          true,
+          "copy_id",
+          "identifier",
+          false
+        ],
+        [
+          false,
+          "return_date",
+          "date",
+          true
+        ]
+      ]
+    },
+    {
+      "name": "Book Copy",
+      "context": true
+    }
+  ],
+  "relations": [
+    {
+      "a": "Reader",
+      "b": "Loan",
+      "label": "lập",
+      "ca": "1",
+      "cb": "0..N",
+      "ident": false
+    },
+    {
+      "a": "Loan",
+      "b": "Loan Item",
+      "label": "gồm",
+      "ca": "1",
+      "cb": "0..N",
+      "ident": true
+    },
+    {
+      "a": "Book Copy",
+      "b": "Loan Item",
+      "label": "được mượn trong",
+      "ca": "1",
+      "cb": "0..N",
+      "ident": true
+    }
+  ],
+  "grid": [
+    [
+      "Reader",
+      "Loan"
+    ],
+    [
+      "Book Copy",
+      "Loan Item"
+    ]
+  ],
+  "note": "Ví dụ giả định: Loan Item có PK ghép (loan_id, copy_id). Book Copy là thực thể tham chiếu của module danh mục; xem PDM ví dụ để thấy cột. Phiếu nháp có thể chưa có dòng mượn."
+}

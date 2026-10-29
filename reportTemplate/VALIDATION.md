@@ -132,3 +132,27 @@ template/ctu-report.cls
 template/packages.tex
 template/typography.tex
 ```
+
+## Bổ sung skill CDM/LDM/PDM — 29/10/2026
+
+- Skill độc lập tại `.agents/skills/cdm-ldm-pdm/`; bộ kiểm tra
+  `skill-creator/scripts/quick_validate.py` báo `Skill is valid!`.
+- Chạy bốn mẫu CDM, LDM, PDM chi tiết và PDM tổng quan bằng Python 3.12,
+  Pillow 13.0.0, bốn phông Times New Roman của máy. Cả bốn đều có
+  `geometry_errors=0`, `metrics.labels=0`; SVG hợp lệ, kích thước PNG bằng
+  ba lần SVG và metadata ảnh đạt 300 dpi. Đã mở xem cả bốn PNG.
+- Sao chép riêng toàn bộ skill ra thư mục tạm rồi chạy từ `/tmp` thành
+  công; không cần `template-diagram-system/`, đặc tả hoặc CSV dự án cũ.
+- Đã tối ưu LDM và PDM có nhóm, sau đó dùng `--layout` để dựng lại;
+  SVG và PNG khớp từng byte với đầu ra của bố cục đã chọn.
+- Đầu vào sai cardinality, lặp tên trong lưới, PK nullable, quan hệ trỏ
+  tới hộp không tồn tại hoặc ẩn thuộc tính bằng compact đều bị từ chối.
+  Mẫu một thực thể độc lập và tự quan hệ có khoảng trống dựng thành công;
+  bố cục tự quan hệ quá chật bị chặn do nhãn va chạm, không xuất ảnh mới.
+- `--check-only` không xuất ảnh; đường dẫn phông khai báo nhưng không
+  tồn tại gây lỗi rõ ràng. `git diff --check` đạt.
+
+Ảnh xem thử nằm trong `build/diagrams-demo/` (bị Git bỏ qua). Nội dung
+LaTeX và PDF báo cáo không thay đổi trong lần bổ sung này; không biên
+dịch lại báo cáo. Các kiểm tra trên đánh giá skill và hình minh họa,
+không chứng minh ngữ nghĩa hoặc độ đầy đủ của schema một đề tài mới.

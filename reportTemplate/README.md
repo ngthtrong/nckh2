@@ -16,8 +16,9 @@ hay kiểm tra hồ sơ nghiệm thu.
 
 ## Cài đặt
 
-Yêu cầu Python **3.9+**, GNU Make, XeLaTeX và Poppler. Python chỉ dùng
-thư viện chuẩn; không cần môi trường ảo, pip hay latexmk.
+Yêu cầu Python **3.9+**, GNU Make, XeLaTeX và Poppler. Các script build
+báo cáo chỉ dùng thư viện chuẩn; không cần môi trường ảo, pip hay latexmk.
+Skill vẽ sơ đồ tùy chọn bên dưới có phụ thuộc riêng: Python 3.10+ và Pillow.
 
 Trên Debian/Ubuntu có thể cài:
 
@@ -158,6 +159,26 @@ sau `\caption`. Bảng dài dùng `longtable` với `\endfirsthead` và
 `\endhead` để lặp tiêu đề. Có thể viết sơ đồ TikZ ngay trong LaTeX;
 không cần công cụ sinh sơ đồ từ nghiên cứu cũ. Có PDF minh họa riêng
 từ `examples/formatting.tex` để xem định dạng trước khi điền nội dung.
+
+## Skill vẽ sơ đồ CDM, LDM và PDM
+
+Skill [cdm-ldm-pdm](.agents/skills/cdm-ldm-pdm/SKILL.md) đi kèm tại
+`.agents/skills/cdm-ldm-pdm/`. Skill giữ phương pháp vẽ chân chim, bố cục
+lưới, đường nối vuông góc và tối ưu từ `template-diagram-system`, có hướng
+dẫn riêng cho từng lớp mô hình và kiểm đếm phần lược. Tài nguyên và bộ
+vẽ nằm trong template; không cần thư mục nguồn hoặc dữ liệu dự án cũ.
+
+Khi mở `reportTemplate/` hoặc bản sao của nó làm workspace, Codex có thể
+phát hiện skill qua `.agents/skills/`; `AGENTS.md` cũng dẫn tới skill.
+Nếu đang làm ở gốc repository cha, yêu cầu đọc đường dẫn đầy đủ:
+
+> Dùng skill tại `reportTemplate/.agents/skills/cdm-ldm-pdm/SKILL.md`
+> để vẽ CDM, LDM và PDM từ đặc tả của đề tài, xuất hình vào `assets/diagrams/`.
+
+Cách chạy mẫu và cấu hình phông nằm trong `SKILL.md`. Các mẫu JSON là
+dữ liệu thư viện giả định, chỉ phục vụ minh họa; không được đưa mặc định
+vào nội dung báo cáo. SVG dùng cho Word, PNG 300 dpi dùng trực tiếp cho
+LaTeX; nếu cần vector trong LaTeX, chuyển SVG sang PDF bằng công cụ có sẵn.
 
 ## Tài liệu tham khảo IEEE
 
