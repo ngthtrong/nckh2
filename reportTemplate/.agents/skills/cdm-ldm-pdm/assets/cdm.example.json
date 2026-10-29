@@ -1,0 +1,41 @@
+{
+  "layer": "CDM",
+  "title": "CDM thư viện — ví dụ",
+  "source": "Ví dụ thư viện giả định để minh họa; không phải dữ liệu của đề tài.",
+  "entities": [
+    {
+      "name": "Độc giả"
+    },
+    {
+      "name": "Phiếu mượn"
+    },
+    {
+      "name": "Bản sách"
+    }
+  ],
+  "relations": [
+    {
+      "a": "Độc giả",
+      "b": "Phiếu mượn",
+      "label": "lập",
+      "ca": "1",
+      "cb": "0..N"
+    },
+    {
+      "a": "Phiếu mượn",
+      "b": "Bản sách",
+      "label": "ghi nhận mượn",
+      "ca": "0..N",
+      "cb": "0..N"
+    }
+  ],
+  "colgap": 192,
+  "grid": [
+    [
+      "Độc giả",
+      "Phiếu mượn",
+      "Bản sách"
+    ]
+  ],
+  "note": "Ví dụ giả định: phiếu nháp có thể chưa có bản sách; một bản sách có thể được mượn qua nhiều phiếu theo thời gian."
+}

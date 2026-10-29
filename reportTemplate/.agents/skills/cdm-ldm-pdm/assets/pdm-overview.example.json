@@ -1,0 +1,75 @@
+{
+  "layer": "PDM",
+  "title": "PDM tổng quan thư viện — ví dụ",
+  "source": "Ví dụ thư viện giả định để minh họa; không phải dữ liệu của đề tài.",
+  "entities": [
+    {
+      "name": "readers",
+      "compact": true
+    },
+    {
+      "name": "loans",
+      "compact": true,
+      "tags": [
+        "R"
+      ]
+    },
+    {
+      "name": "book_copies",
+      "compact": true
+    },
+    {
+      "name": "loan_items",
+      "compact": true
+    }
+  ],
+  "relations": [
+    {
+      "a": "loans",
+      "b": "loan_items",
+      "label": "loan_id",
+      "ca": "1",
+      "cb": "0..N",
+      "ident": true
+    },
+    {
+      "a": "book_copies",
+      "b": "loan_items",
+      "label": "copy_id",
+      "ca": "1",
+      "cb": "0..N",
+      "ident": true
+    }
+  ],
+  "grid": [
+    [
+      "readers",
+      "loans"
+    ],
+    [
+      "book_copies",
+      "loan_items"
+    ]
+  ],
+  "panels": [
+    {
+      "label": "DANH MỤC",
+      "names": [
+        "readers",
+        "book_copies"
+      ],
+      "color": "#1F3864",
+      "fill": "#E7EEF9"
+    },
+    {
+      "label": "MƯỢN TRẢ",
+      "names": [
+        "loans",
+        "loan_items"
+      ],
+      "color": "#1B6E4A",
+      "fill": "#E4F1EA"
+    }
+  ],
+  "note": "Tổng quan giả định: 4 bảng, ẩn toàn bộ cột; xem pdm.example.json cho bản chi tiết. 3 FK = 2 FK qua 2 đường + 1 FK qua tag R + 0 FK lược. [R] trên loans = loans.reader_id → readers.reader_id."
+}
