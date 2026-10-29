@@ -1,0 +1,223 @@
+                                                                     CDM · Conceptual Data Model
+
+
+
+                                                                                      Rescue Report
+               Report Source                                                                                                                           Rescue Team
+                                                                              Location L; observed time T
+        Mobile app / SMS / hotline                     submits                Flood F; urgency E                           is assigned          Personnel and contact details
+        Synthetic sources marked                                              People N; vulnerability V                                         Current report assignment
+                                                                              Image and source provenance
+
+
+
+
+                                                                                                records
+
+
+
+        Algorithm Configuration
+                                                                                                                       participates per run
+                                                                                       Report Event                                                     Operator
+   Graph and confidence parameters
+   Near-duplicate and priority settings                                         Intake / assignment / status               performs             Account and role
+   Formula version and mapping rules                                            Time, channel and actor                                         Auditable operator actions
+
+
+
+
+                       is used by
+
+
+
+
+               Analysis Run                                                           Rescue Cluster                                                  Evidence Family
+      Immutable input snapshot                        produces               Family-wise E, F, N, V aggregates              contains          Exact / near-duplicate evidence
+      Configuration and code version                                         Priority score P(c)                                              Maxima reduce duplicate influence
+
+
+
+
+Business relationships; a report can enter multiple runs. Crow foot = many; circle = zero; double bar = exactly one.
+Q and P(c) are derived values. Each evidence family belongs to one cluster within one analysis run.
+                                                                                                                            LDM · Logical Data Model
+
+
+
+                                                                                                              Rescue Report
+                                                                                               Report ID                        ID
+                                                                                               Source ID; assigned team ID      ID N
+                       Report Source                                                                                                                                                          Rescue Team                                        Operator
+                                                                                               Observed time T; location L      DateTime; Geo N
+                    Source ID        ID                             submits                    Flood F; urgency E               Real [0,1] N                                     Team ID                   ID                            Operator ID    ID
+                    Source type      Enum                                                                                                                       is assigned      Team name                 Text (unique)                 Username       Text (unique)
+                                                                                               People N; vulnerability V        Real ≥ 0 N
+                    Source family    Text N                                                    LR score; five urgency flags     Real; Boolean[5] N                               Member count; phone       Integer; Text N    performs   Display name   Text (unique)
+                                                                                               Image; model versions            Metadata N                                       Active                    Boolean                       Role; active   Enum; Boolean
+                                                                                               Received time                    DateTime                         records
+                                                                                               Status; status version           Enum; Integer
+
+
+
+
+                                                                                                                          is captured as
+
+
+                 Algorithm Configuration
+   Configuration ID                          ID
+   Formula version                           Text
+                                                                                                            Analysis Member
+   Graph mode; community method              Enum; Enum
+   σ; τt; τF; τE                             Real > 0                                           Run ID                         ID
+                                                                                                                                                                                             Report Event
+   α; β; γ                                   Real ≥ 0                                           Report ID                      ID
+   q; K; resolution; seed                    Real; Int; Real; Int                               Cluster ID; family ID          Integer                                        Event ID                ID
+   b0; b1; b2 (Q)                            Real                                               Snapshot L; T                  Geo; DateTime                                  Report ID               ID
+   Corroboration radius; time window         Real ≥ 0                                           Snapshot F; E                  Real [0,1]                                     Operator ID             ID N
+   ωE; ωF; ωN                                Real; sum = 1                                      Snapshot N; V                  Real ≥ 0                                       Kind; channel; time     Enum; Text; DateTime
+   μ; s; Nref; Ncap; Vcap                    Real                                               Image present; fingerprint     Boolean; Hash                                  Before; after; note     Text N
+   Near: d; Δt; ΔF; ΔE                       Real ≥ 0                                           Corroboration count; Q         Integer ≥ 0; [0,1]
+   Near: ΔN; ρN; ΔV; ΔQ                      Real ≥ 0                                           Source family; provenance      Text; Real N
+   Same source family; image state           Boolean
+   LR: ξ0; ξ1..ξ5; threshold                 Real
+   Flag order; flood-label mapping           List; Map
+
+
+
+                                                                                                                          contains
+                                is used by
+
+
+
+
+                        Analysis Run                                                                                                                                                         Rescue Cluster
+                                                                              contains
+      Run ID                           ID                                                                    Evidence Family                                                  Run ID              ID
+      Configuration ID                 ID                                                                                                                                     Cluster ID          Integer
+                                                                                                             Run ID        ID
+      Input revision; code version     Integer; Text                                                                                                                          Cluster key         Smallest member report ID
+                                                                                                             Cluster ID    Integer                   contains
+      Started time; state              DateTime; Enum                                                                                                                         Ē; F̄; N̄          Real [0,1]
+                                                                                                             Family ID     Integer
+      Completed time; threshold θ      DateTime; Real N                                                                                                                       V̄; priority P(c)   Real ≥ 0; [0,μ]
+                                                                                                                                     produces
+
+
+
+
+Underlined key = PK; N = nullable; crow foot = many; circle = zero; double bar = exactly one.
+Solid = identifying; dashed = non-identifying. Parameter groups are logical composite types.
+Analysis members retain complete L, T, F, E, N, V snapshots and Q; intake records may still have missing fields.
+                                                                                                  PDM · Proposed SQLite Schema — All Columns
+
+
+
+A · RESCUE OPERATIONS                                                      B · CONTROL AND SYNC                              C · METHOD CONFIGURATION                   D · ANALYSIS RESULTS
+
+                     sources                                                                     operators                               algorithm_configs                            analysis_runs
+              id                TEXT                                             id                             INTEGER          id                           TEXT               id               TEXT
+              kind              TEXT                                             username                       TEXT · UQ        label                        TEXT               config_id        TEXT · FK
+              source_family     TEXT N                                           display_name                   TEXT · UQ        created_at                   TEXT               input_revision   INTEGER
+              created_at        TEXT                                             password_hash                  TEXT             formula_version              TEXT               created_at       TEXT
+                                                                                 role                           TEXT             graph_mode                   TEXT               completed_at     TEXT N
+                                                                                 active                         INTEGER          community_algorithm          TEXT               state            TEXT
+                                                                                 must_change_password           INTEGER          sigma_geo_m                  REAL               actual_theta     REAL N
+                                                                                 created_at                     TEXT             tau_t_min                    REAL               code_version     TEXT
+                                                                                 last_login_at                  TEXT N           tau_f                        REAL
+                                                                                                                                 tau_e                        REAL
+                       teams                                                                                                     alpha                        REAL
+              id            INTEGER                                                                                              beta                         REAL
+              name          TEXT · UQ                                                                                            gamma                        REAL
+              phone         TEXT N                                                                                               quantile_q                   REAL
+              members       INTEGER N                                                                                            top_k                        INTEGER                    clusters
+              note          TEXT N                                                                sessions                       resolution                   REAL
+                                                                                                                                                                                 run_id           TEXT · FK
+              active        INTEGER                                                                                              random_seed                  INTEGER
+                                                                                       token_hash       TEXT                                                                     cluster_id       INTEGER
+              created_at    TEXT                                                                                                 q_b0                         REAL
+                                                                                       operator         TEXT                                                                     cluster_key      TEXT
+                                                                                                                                 q_b1                         REAL
+                                                                                       created_at       TEXT                                                                     e_agg            REAL
+                                                                                                                                 q_b2                         REAL
+                                                                                       expires_at       TEXT                                                                     f_agg            REAL
+                                                                                                                                 corrob_radius_m              REAL
+                                                                                       operator_id      INTEGER · FK                                                             n_norm           REAL
+                                                                                                                                 corrob_window_min            REAL
+                                                                                                                                                                                 v_agg            REAL
+                                                                                                                                 omega_e                      REAL
+                                                                                                                                                                                 priority_score   REAL
+                                                                                                                                 omega_f                      REAL
+                                                                                                                                 omega_n                      REAL
+                      reports
+                                                                                                                                 mu                           REAL
+     id                       TEXT                                                                                               v_scale                      REAL
+     server_received_at       TEXT                                                                                               n_ref                        REAL
+     created_at               TEXT N                                                           report_events                     n_claim_cap                  REAL
+     lat                      REAL N                                               id                   INTEGER                  v_cap                        REAL
+     lng                      REAL N                                                                                             near_distance_m              REAL                 evidence_families
+                                                                                   report_id            TEXT · FK
+     trapped_count            INTEGER N                                            kind                 TEXT                     near_time_min                REAL               run_id       TEXT · FK
+     injured_count            INTEGER N                                            from_value           TEXT N                   near_f_abs                   REAL               cluster_id   INTEGER · FK
+     vulnerable_groups        TEXT N                                               to_value             TEXT N                   near_e_abs                   REAL               family_id    INTEGER
+     description              TEXT N                                               status_version       INTEGER N                near_n_floor                 REAL
+     ai_tags                  TEXT N                                               actor                TEXT N                   near_n_relative              REAL
+     send_mode                TEXT N                                               source               TEXT                     near_v_abs                   REAL
+     status                   TEXT                                                 note                 TEXT N                   near_q_abs                   REAL
+     status_version           INTEGER                                              created_at           TEXT                     require_same_source_family   INTEGER
+     image_filename           TEXT N                                               operator_id          INTEGER · FK N           require_same_image_state     INTEGER
+     image_local_path         TEXT N                                                                                             lr_intercept                 REAL                analysis_members
+     image_url                TEXT N                                                                                             lr_coef_1                    REAL
+                                                                                                                                                                            run_id                TEXT · FK
+     image_sha256             TEXT N                                                                                             lr_coef_2                    REAL
+                                                                                                                                                                            report_id             TEXT · FK
+     image_size_bytes         INTEGER N                                                                                          lr_coef_3                    REAL
+                                                                                                                                                                            cluster_id            INTEGER · FK
+     raw_payload              TEXT                                                                                               lr_coef_4                    REAL
+                                                                                                                                                                            family_id             INTEGER · FK
+     first_received_at        TEXT N                                                                                             lr_coef_5                    REAL
+                                                                                                                                                                            lat                   REAL
+     updated_seq              INTEGER N                                                    messages_dedup                        lr_threshold                 REAL
+                                                                                                                                                                            lng                   REAL
+     assigned_team_id         INTEGER · FK N                                                                                     lr_feature_order_json        TEXT
+                                                                                    message_id              TEXT                                                            observed_at           TEXT
+     location_source          TEXT N                                                                                             flood_mapping_json           TEXT
+                                                                                    client_id               TEXT                                                            flood                 REAL
+     close_reason             TEXT N
+                                                                                    sequence_number         INTEGER                                                         urgency               REAL
+     status_updated_at        TEXT N
+                                                                                    operation_type          TEXT                                                            people_count          REAL
+     owner_client_id          TEXT N
+                                                                                    payload_hash            TEXT                                                            vulnerability         REAL
+     source_id                TEXT · FK N
+                                                                                    status                  TEXT                                                            has_image             INTEGER
+     flood                    REAL N
+                                                                                    error_code              TEXT N                                                          source_family         TEXT N
+     urgency_lr               REAL N
+                                                                                    result_data             TEXT N                                                          provenance_quality    REAL N
+     urgency                  REAL N
+                                                                                    created_at              TEXT                                                            exact_fingerprint     TEXT
+     people_count             REAL N
+                                                                                    expires_at              TEXT N                                                          n_corrob              INTEGER
+     vulnerability            REAL N
+                                                                                    processed_at            TEXT                                                            q_score               REAL
+     urgency_flags_json       TEXT N
+                                                                                    report_id               TEXT · FK N
+     ai_model_version         TEXT N
+     lr_model_version         TEXT N
+     provenance_quality       REAL N
+
+
+
+
+                                                                                                server_meta
+                                                                                                key      TEXT
+                                                                                                value    TEXT
+
+
+
+
+Underlined key = PK; N = nullable; crow foot = many; circle = zero; double bar = exactly one.
+Solid = identifying; dashed = non-identifying. FK/UQ = foreign key/single-column unique key.
+Composite UNIQUE, CHECK, DEFAULT and indexes: see schema.sql. All columns are shown.
+Proposed 13-table schema: retains columns of seven existing tables and adds six tables. Not implemented in the backend.
+

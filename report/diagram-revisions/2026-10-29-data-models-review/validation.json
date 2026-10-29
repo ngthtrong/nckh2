@@ -1,0 +1,108 @@
+{
+  "diagrams": {
+    "01-cdm": {
+      "box_count": 9,
+      "relationship_count": 8,
+      "geometry_errors": 0,
+      "box_intersections": 0,
+      "line_box_hits": 0,
+      "attribute_overflows": 0,
+      "bends": 3,
+      "length": 1576,
+      "cross": 1,
+      "labels": 0,
+      "area": 663424,
+      "size_px": [
+        1168,
+        616
+      ]
+    },
+    "02-ldm": {
+      "box_count": 10,
+      "relationship_count": 10,
+      "geometry_errors": 0,
+      "box_intersections": 0,
+      "line_box_hits": 0,
+      "attribute_overflows": 0,
+      "bends": 9,
+      "length": 2936,
+      "cross": 1,
+      "labels": 0,
+      "area": 1603584,
+      "size_px": [
+        1728,
+        994
+      ]
+    },
+    "03-pdm": {
+      "box_count": 13,
+      "relationship_count": 12,
+      "geometry_errors": 0,
+      "box_intersections": 0,
+      "line_box_hits": 0,
+      "attribute_overflows": 0,
+      "bends": 15,
+      "length": 3688,
+      "cross": 4,
+      "labels": 0,
+      "area": 1826304,
+      "size_px": [
+        1856,
+        984
+      ],
+      "attribute_count": 171,
+      "layout": "landscape; four groups in two rows"
+    }
+  },
+  "schema_checks": {
+    "preserved_current_columns": {
+      "reports": {
+        "existing_columns": 26,
+        "proposed_columns": 36
+      },
+      "report_events": {
+        "existing_columns": 10,
+        "proposed_columns": 11
+      },
+      "teams": {
+        "existing_columns": 7,
+        "proposed_columns": 7
+      },
+      "operators": {
+        "existing_columns": 9,
+        "proposed_columns": 9
+      },
+      "sessions": {
+        "existing_columns": 5,
+        "proposed_columns": 5
+      },
+      "server_meta": {
+        "existing_columns": 2,
+        "proposed_columns": 2
+      },
+      "messages_dedup": {
+        "existing_columns": 11,
+        "proposed_columns": 12
+      }
+    },
+    "constraint_checks": [
+      "one membership per report and run",
+      "family must belong to the same run and cluster",
+      "full-input snapshot rejects missing E",
+      "Q domain is bounded",
+      "priority weights sum to one"
+    ],
+    "fixture": "in-memory; rolled back",
+    "config_field_count": 49
+  },
+  "sqlite_integrity": "ok",
+  "foreign_key_check": "ok",
+  "schema_scope": "proposed; in-memory only",
+  "artifact_checks": {
+    "pdf_pages": 3,
+    "english_labels": "PASS",
+    "pdf_fonts_embedded": "PASS",
+    "visual_pdf_review": "PASS",
+    "protected_inputs_unchanged": "PASS"
+  }
+}
