@@ -63,7 +63,9 @@ Một request có thể mất ACK sau khi transaction thành công. Khi app gử
 \subsection{Lưu trữ backend}
 SQLite giữ bảng \texttt{reports}, \texttt{messages\_dedup}, \texttt{report\_events}, \texttt{teams}, \texttt{operators}, \texttt{sessions} và \texttt{server\_meta}. Ảnh nằm ngoài CSDL; bản ghi lưu tên, URL, hash và kích thước. Bảng báo cáo giữ payload gốc để bảo toàn những trường nghiên cứu chưa có cột riêng.
 
-Hình~\ref{fig:database-erd-detailed} trình bày ERD ở mức thiết kế nghiệp vụ, gồm người gửi/thiết bị, báo cáo cứu hộ, đội cứu hộ, điều phối viên và sự kiện xử lý. Sơ đồ dùng tên tiếng Anh và ký hiệu Crow's Foot, thể hiện định danh, thuộc tính tùy chọn và số lượng tham gia quan hệ. Vị trí, đánh giá tình huống và ảnh lưu trữ được tách thành ba đối tượng giá trị (\emph{value object}) thuộc báo cáo, không hàm ý tạo thêm bảng SQLite. Người gửi/thiết bị là thực thể khái niệm, không hàm ý có bảng người dùng di động riêng; sự kiện tự động có thể không gắn với điều phối viên. Các bảng kỹ thuật như chống trùng, phiên đăng nhập và metadata máy chủ được mô tả ở phần lưu trữ.
+Hình~\ref{fig:data-relations} khái quát các quan hệ lưu trữ chính của backend đang triển khai. Thiết kế dữ liệu đầy đủ được trình bày tiếp theo qua ba mức: mô hình khái niệm CDM, mô hình logic LDM và mô hình vật lý PDM. Các sơ đồ sử dụng tên tiếng Anh và ký pháp Crow's Foot; phần thuyết minh phân biệt dữ liệu nghiệp vụ, cấu hình thuật toán và kết quả phân tích theo từng lần chạy.
+
+Ba mô hình được xây dựng với giả định hệ thống đã tích hợp đầy đủ các đầu vào và tham số của công thức đề xuất. Mỗi báo cáo tham gia đường phân tích đầy đủ có vị trí $L_i$, thời gian quan sát $T_i$, mức ngập $F_i$, khẩn cấp $E_i$, số người $N_i$ và bằng chứng yếu thế $V_i$; $Q_i$ được tính từ ảnh và số payload khác nhau củng cố lân cận theo Công thức~\ref{eq:confidence-report}. Giả định này áp dụng cho dữ liệu đưa vào lần phân tích, trong khi bản ghi vừa tiếp nhận vẫn có thể thiếu thông tin và cần được bổ sung trước khi xử lý theo đường đầy đủ. Các bảng và trường bổ sung trong mô hình là thiết kế đề xuất, không đồng nghĩa backend hiện tại đã triển khai toàn bộ lược đồ đó.
 
 \begin{figure}[htbp]
 \centering
@@ -97,15 +99,54 @@ Transaction theo từng message giúp lỗi của một phần batch không hủ
 
 Cùng report ID được gửi lại để bổ sung ảnh hoặc dữ liệu sau mất ACK được xử lý theo quy tắc gộp. Backend giữ ảnh đầu tiên, thời điểm nhận đầu và các trường đã có; số bằng không là dữ liệu hợp lệ, không xem như trường trống. \texttt{owner\_client\_id} tham gia kiểm tra quyền gộp. Quyền sở hữu dựa trên client ID giúp chống sửa chéo theo quy tắc trao đổi dữ liệu hiện tại, nhưng không tự thay thế xác thực danh tính người gửi.
 
+\subsubsection{Mô hình dữ liệu khái niệm (CDM)}
+CDM tại Hình~\ref{fig:database-cdm} xác định chín thực thể nghiệp vụ: nguồn báo cáo, báo cáo cứu hộ, đội cứu hộ, điều phối viên, sự kiện xử lý, cấu hình thuật toán, lần chạy phân tích, cụm cứu hộ và họ bằng chứng. Nguồn báo cáo phân biệt ứng dụng, SMS, tổng đài và nguồn mô phỏng. Báo cáo có thể được giao cho một đội; sự kiện xử lý ghi nhận việc tiếp nhận, giao đội hoặc thay đổi trạng thái. Sự kiện tự động có thể không gắn với điều phối viên.
+
+Nhóm thực thể phân tích thể hiện quan hệ giữa cấu hình, lần chạy, cụm và họ bằng chứng. Mỗi lần chạy sử dụng một cấu hình; một cụm gồm các họ bằng chứng để tổng hợp thông tin mà không coi nhiều bản sao là những nhóm người độc lập. Cùng một báo cáo có thể tham gia nhiều lần chạy, nên quan hệ giữa báo cáo và họ bằng chứng phải được hiểu trong phạm vi từng lần phân tích. $Q_i$ và điểm ưu tiên $P(c)$ là các đại lượng dẫn xuất từ dữ liệu quan sát và cấu hình tương ứng.
+
 \begin{landscape}
 \begin{figure}[p]
 \centering
 \setlength{\abovecaptionskip}{4pt}
-\includegraphics[width=\linewidth]{database_erd.pdf}
-\caption{ERD chi tiết các thực thể và quan hệ nghiệp vụ của hệ thống cứu hộ}
-\label{fig:database-erd-detailed}
+\includegraphics[width=\linewidth,height=.88\textheight,keepaspectratio]{diagram-revisions/2026-10-29-data-models-review/01-cdm.pdf}
+\caption{Mô hình dữ liệu khái niệm (CDM) của hệ thống cứu hộ}
+\label{fig:database-cdm}
 \end{figure}
 \end{landscape}
+
+\subsubsection{Mô hình dữ liệu logic (LDM)}
+LDM tại Hình~\ref{fig:database-ldm} bổ sung định danh, thuộc tính, kiểu dữ liệu logic và lực lượng tham gia quan hệ. Thực thể \emph{Analysis Member} biểu diễn một báo cáo trong một lần chạy, có khóa chính ghép \emph{Run ID} và \emph{Report ID}. Nó giữ bản chụp các đầu vào $L_i,T_i,F_i,E_i,N_i,V_i$, thông tin có ảnh, fingerprint, số payload củng cố và $Q_i$. Cách tổ chức này bảo toàn đầu vào đã dùng khi báo cáo hoặc cấu hình của các lần chạy sau thay đổi. Định danh cụm gắn với lần chạy; định danh họ bằng chứng gắn với cả lần chạy và cụm.
+
+Thực thể \emph{Algorithm Configuration} lưu các nhóm tham số của đồ thị, confidence, nhận diện gần trùng, tổng hợp và xếp hạng. Các nhóm gồm $\sigma,\tau_t,\tau_F,\tau_E$, trọng số $\alpha,\beta,\gamma$, quantile $q$, top-$K$, resolution và seed; các hệ số của $Q_i$ và cửa sổ củng cố; các ngưỡng gần trùng; cùng $\omega_E,\omega_F,\omega_N,\mu,s,N_{\mathrm{ref}}$ và các ngưỡng chặn. Hệ số LR, thứ tự năm dấu hiệu và ánh xạ nhãn ngập cũng được giữ trong cấu hình. Các nhóm thuộc tính trên LDM là kiểu ghép logic, được mở rộng thành các cột vật lý trong PDM. Tham số $\alpha$ chỉ tham gia dạng đồ thị cộng; ngưỡng cạnh thực tế $\theta$ phụ thuộc dữ liệu nên được lưu theo lần chạy.
+
+Khóa chính được gạch chân, ký hiệu \texttt{N} chỉ thuộc tính cho phép thiếu; nét liền biểu diễn quan hệ định danh, nét đứt biểu diễn quan hệ không định danh. Các giá trị bằng không vẫn là quan sát hợp lệ. Việc lưu $Q_i$ trong bản chụp phân tích phân biệt rõ confidence dùng cho xếp hạng với confidence softmax của ảnh.
+
+\begin{landscape}
+\begin{figure}[p]
+\centering
+\setlength{\abovecaptionskip}{4pt}
+\includegraphics[width=\linewidth,height=.88\textheight,keepaspectratio]{diagram-revisions/2026-10-29-data-models-review/02-ldm.pdf}
+\caption{Mô hình dữ liệu logic (LDM), định danh và cấu hình phân tích}
+\label{fig:database-ldm}
+\end{figure}
+\end{landscape}
+
+\subsubsection{Mô hình dữ liệu vật lý (PDM)}
+PDM tại Hình~\ref{fig:database-pdm} cụ thể hóa thiết kế thành 13 bảng SQLite, chia thành bốn nhóm: nghiệp vụ cứu hộ; điều phối và đồng bộ; cấu hình phương pháp; kết quả theo lần chạy. Thiết kế giữ các cột của bảy bảng backend hiện tại, đồng thời bổ sung sáu bảng \texttt{sources}, \texttt{algorithm\_configs}, \texttt{analysis\_runs}, \texttt{clusters}, \texttt{evidence\_families} và \texttt{analysis\_members}. Những trường ngập, khẩn cấp, số người và yếu thế được lưu tường minh để đưa vào công thức; các bảng kỹ thuật về phiên đăng nhập, chống trùng và metadata máy chủ được thể hiện ở mức vật lý.
+
+Các kiểu \texttt{TEXT}, \texttt{INTEGER}, \texttt{REAL} biểu diễn chuỗi/định danh/thời gian, số nguyên/cờ và đại lượng số thực. Khóa ghép \texttt{(run\_id, report\_id)} bảo đảm một báo cáo chỉ có một bản ghi thành viên trong một lần chạy. Khóa ngoại ghép từ thành viên đến họ bằng chứng giữ nhất quán phạm vi lần chạy và cụm. Các cột tổng hợp và \texttt{priority\_score} thuộc bảng cụm, còn cấu hình và phiên bản đầu vào thuộc lần chạy. Ma trận tương đồng và các cạnh đồ thị là dữ liệu trung gian tính toán, không được đề xuất lưu thành bảng trong mô hình này.
+
+\begin{landscape}
+\begin{figure}[p]
+\centering
+\setlength{\abovecaptionskip}{4pt}
+\includegraphics[width=\linewidth,height=.88\textheight,keepaspectratio]{diagram-revisions/2026-10-29-data-models-review/03-pdm.pdf}
+\caption{Mô hình dữ liệu vật lý (PDM) đề xuất trên SQLite}
+\label{fig:database-pdm}
+\end{figure}
+\end{landscape}
+
+PDM là đích thiết kế cho giả định tích hợp đầy đủ. Trong phiên bản đang triển khai, dữ liệu vẫn nằm trong bảy bảng đã nêu và kết quả phân cụm được cache trong bộ nhớ; các ràng buộc khóa ngoại và bảng phân tích bổ sung chưa được áp dụng toàn bộ. Việc lưu bản chụp, giữ cấu hình bất biến và kiểm tra cụm/họ có thành viên cần được thực hiện đồng bộ với dịch vụ xử lý khi triển khai lược đồ này.
 
 \subsection{Dịch vụ phân cụm và hàng xem xét}
 Adapter \texttt{to\_report\_v2} chuyển báo cáo lưu trữ sang tuple thuật toán. Nhãn ngập được ánh xạ \texttt{non\_flood}$\mapsto0$, \texttt{low}$\mapsto0{,}33$, \texttt{medium}$\mapsto0{,}66$, \texttt{high}$\mapsto1$. Nếu payload có \texttt{flood}, dùng trường này. Ứng dụng gửi điểm LR trong trường \texttt{E\_i}; adapter hiện lấy $E$ từ trường \texttt{urgency} nếu có, nếu không thì suy từ mô tả bằng từ khóa. Adapter chưa đọc trực tiếp \texttt{E\_i}, nên đường nối từ điểm LR của ứng dụng đến điểm khẩn cấp của thuật toán chưa được tích hợp. $N$ hiện là số mắc kẹt cộng số bị thương; $V$ là số nhóm yếu thế được chọn khi không có trường trực tiếp.
