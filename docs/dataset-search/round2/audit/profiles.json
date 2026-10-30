@@ -1,0 +1,367 @@
+{
+  "scope": "Schema/presence checks only; no human labelling or RQ experiments",
+  "sources": {
+    "A02": {
+      "rows": 3593,
+      "columns": [
+        "APPROVED",
+        "CATEGORY",
+        "DESCRIPTION",
+        "INCIDENT DATE",
+        "INCIDENT TITLE",
+        "LATITUDE",
+        "LOCATION",
+        "LONGITUDE",
+        "Serial",
+        "VERIFIED"
+      ],
+      "duplicate_id_excess": 0,
+      "empty_text_rows": 0,
+      "exact_nonempty_text_duplicate_excess": 57,
+      "missing_fields": {
+        "Serial": 0,
+        "INCIDENT TITLE": 0,
+        "INCIDENT DATE": 0,
+        "LOCATION": 0,
+        "DESCRIPTION": 0,
+        "CATEGORY": 6,
+        "LATITUDE": 0,
+        "LONGITUDE": 0,
+        "APPROVED": 0,
+        "VERIFIED": 0
+      },
+      "valid_coordinate_rows": 3593,
+      "invalid_coordinate_rows": 0,
+      "distinct_coordinate_pairs": 2781,
+      "largest_shared_point_group": 140,
+      "parsed_timestamp_rows": 3593,
+      "timezone": "not specified in CSV",
+      "earliest_timestamp": "2010-01-12T04:08:00",
+      "latest_timestamp": "2010-07-05T17:26:00",
+      "category_counts": {
+        "1. Urgences | Emergency": 350,
+        "3. Public Health": 18,
+        "2. Urgences logistiques | Vital Lines": 498,
+        "8. Autre | Other": 163,
+        "5e. Communication lines down": 1,
+        "4. Menaces | Security Threats": 74,
+        "4e. Assainissement eau et hygiene | Water sanitation and hygiene promotion": 240,
+        "2f. Sans courant | Power Outage": 35,
+        "2d. Refuge | Shelter needed": 477,
+        "2a. Penurie d'aliments | Food Shortage": 1597,
+        "1a. Highly vulnerable": 2,
+        "2b. Penurie d'eau | Water shortage": 1333,
+        "7. Secours | Services Available": 304,
+        "6. Natural Hazards": 4,
+        "3b. Chronic care needs": 2,
+        "1b. Urgence medicale | Medical Emergency": 209,
+        "7d. Services de sante | Hospital/Clinics Operating": 258,
+        "3d. OBGYN/Women's Health": 7,
+        "8f. Other": 4,
+        "1d. Incendie | Fire": 7,
+        "8a. IDP concentration": 20,
+        "3a. Infectious human disease": 9,
+        "8c. Price gouging": 1,
+        "4c. Group violence": 1,
+        "5. Infrastructure Damage": 4,
+        "3e. Psychiatric need": 4,
+        "2e. Penurie de carburant | Fuel shortage": 21,
+        "5d. Compromised bridge": 1,
+        "3c. Besoins en materiels et medicaments | Medical equipment and supply needs": 305,
+        "1c. Personnes prises au piege | People trapped": 167,
+        "4a. Pillage | Looting": 25,
+        "5a. Structure effondres | Collapsed structure": 143,
+        "7a. Distribution d'aliments | Food distribution point": 333,
+        "7c. Denrees non alimentaires | Non-food aid distribution point": 77,
+        "8e. Nouvelles de Personnes | Persons News": 295,
+        "6b. Personnes Disparues | Missing Persons": 17,
+        "5b. Structures a risque | Unstable Structure": 33,
+        "2c. Probleme de securite | Security Concern": 12,
+        "7g. Morgue | Human remains management": 37,
+        "7b. Distribution d'eau | Water distribution point": 5,
+        "5c. Route barree | Road blocked": 29,
+        "8d. Recherche et sauvetage | Search and Rescue": 49,
+        "6c. Seisme et repliques | Earthquake and aftershocks": 15,
+        "2c. Eau contaminee | Contaminated water": 9,
+        "6c. Demandant de transmettre un message | Asking to forward a message": 7,
+        "7h. Deblayage de gravats | Rubble removal": 7,
+        "6a. Deces | Deaths": 2
+      },
+      "people_trapped_topic_rows": 167,
+      "people_trapped_distinct_points": 113,
+      "people_trapped_verified_counts": {
+        "NO": 163,
+        "YES": 4
+      },
+      "approved_counts": {
+        "YES": 3590,
+        "NO": 3
+      },
+      "verified_counts": {
+        "NO": 3377,
+        "YES": 216
+      },
+      "limitations": [
+        "CSV is an export from a crisis map, not established raw inbound message history.",
+        "Serial identifies exported records, not independently labelled physical incident groups.",
+        "Valid numeric coordinates do not establish precise rescue sites; shared points may be geocoding defaults.",
+        "People trapped is a topic label, not a count, priority grade or incident linkage.",
+        "Earthquake domain; flood evidence and observed rescue benefit absent.",
+        "Original catalog download is 404; mirror version/rights require source reconciliation."
+      ],
+      "source_hashes": {
+        "ushahidi_mirror.csv": "086f8f8101b25473a9fd1a51e074dcc743835d042e0cf811424397664fe247b9"
+      },
+      "sample_rows": 100
+    },
+    "A03": {
+      "rows": 1881,
+      "columns": [
+        "entities",
+        "relations",
+        "tweet",
+        "tweetId"
+      ],
+      "duplicate_id_excess": 0,
+      "empty_text_rows": 0,
+      "exact_nonempty_text_duplicate_excess": 0,
+      "entity_counts": {
+        "location modifier": 943,
+        "severity or quantity": 911,
+        "type of impact": 1182,
+        "place name": 3015,
+        "item affected": 519
+      },
+      "relation_counts": {
+        "modifier_place_rel": 1249,
+        "place_impact_rel": 1631,
+        "severity_impact_rel": 856,
+        "item_impact_rel": 499
+      },
+      "rows_with_place_impact_relation": 835,
+      "limitations": [
+        "Entity/relation spans are within a tweet, not cross-report incident identity.",
+        "No structured timestamp or resolved coordinates in this JSON.",
+        "Severity or quantity mixes damage scale, duration and numbers; not trapped-person gold.",
+        "No explicit data licence found in inspected repository tree/README; reuse needs clarification."
+      ],
+      "source_hashes": {
+        "quatred.json": "53fcb4064d877f9c2f5479eefc7ac88aba6018a9c3abe82bfde67e28946a2d5f"
+      },
+      "sample_rows": 100
+    },
+    "A05": {
+      "rows": 12826,
+      "columns": [
+        "crisisname",
+        "intention_annotation",
+        "period",
+        "relatedness_annotation",
+        "tweetID",
+        "urgency_annotation"
+      ],
+      "duplicate_id_excess": 2,
+      "empty_text_rows": null,
+      "exact_nonempty_text_duplicate_excess": null,
+      "repeated_id_groups": 2,
+      "repeated_id_urgency_conflicts": 1,
+      "repeated_id_crisis_conflicts": 2,
+      "crisisname_counts": {
+        "Aude": 1770,
+        "Autre": 1696,
+        "Beryl-Guadeloupe": 720,
+        "Bruno": 720,
+        "Corse-fionn": 720,
+        "Corse": 720,
+        "EffondrementMarseille": 720,
+        "Egon": 720,
+        "Eleanor": 720,
+        "Harvey": 720,
+        "Irma": 720,
+        "Irma_may": 720,
+        "Reunion-berguitta": 720,
+        "Susanna": 720,
+        "Ulrika": 720
+      },
+      "period_counts": {
+        "NA": 3466,
+        "Before": 1560,
+        "During": 4679,
+        "After": 3121
+      },
+      "relatedness_annotation_counts": {
+        "Useful": 3589,
+        "NotUseful": 9237
+      },
+      "urgency_annotation_counts": {
+        "Urgent": 2147,
+        "NotUrgent": 1442,
+        "NotUseful": 9237
+      },
+      "intention_annotation_counts": {
+        "MaterialDamages": 489,
+        "WarningAdvice": 1417,
+        "OtherMessages": 846,
+        "NotUseful": 9237,
+        "Support": 477,
+        "HumanDamages": 241,
+        "Critics": 119
+      },
+      "limitations": [
+        "Released CSV contains IDs and labels only; tweet content needs authorized rehydration.",
+        "Period is Before/During/After/NA, not a timestamp; crisisname is not a rescue incident.",
+        "Three labels include NotUseful; relevant urgency is binary, not three graded priorities.",
+        "2020 base corpus is not the full 19,595-tweet collection described in the 2024 paper.",
+        "Related to CrisisTS French sources; do not count publications as independent corpora."
+      ],
+      "source_hashes": {
+        "french.csv": "eeb0b9c08b9f227008ecff158a948b04a7a63d8432f41e6790feb8cfcbdbf4d0"
+      },
+      "sample_rows": 100
+    },
+    "A06": {
+      "rows": 59607,
+      "columns": [
+        "Advice",
+        "Assistance",
+        "Casualty",
+        "Damage",
+        "Evacuation",
+        "Gender_Bias",
+        "Hate_Speech",
+        "Information_Integrity",
+        "Linguistic_Bias",
+        "Political_Bias",
+        "Racial_Bias",
+        "Recovery",
+        "Request",
+        "id"
+      ],
+      "platform_rows": {
+        "reddit": 9928,
+        "tiktok": 47915,
+        "youtube": 1764
+      },
+      "duplicate_platform_id_excess": 0,
+      "request_label_rows": 11970,
+      "information_integrity_counts": {
+        "1": 42096,
+        "-1": 9752,
+        "0": 7759
+      },
+      "limitations": [
+        "Only platform IDs and annotations released, with no text, timestamp or coordinates.",
+        "Human-MLLM collaborative labels; not all labels were independently assigned by humans.",
+        "Request is a humanitarian topic; information integrity is not urgency or rescue benefit.",
+        "v1 article included X/98,662 posts; v2 and inspected release omit X/59,607 posts."
+      ],
+      "source_hashes": {
+        "mash_reddit.csv": "f6253c776390b8e9e4b290e198895f8cb83595cb39a2100d5eb647396b25f3a3",
+        "mash_tiktok.csv": "83610d4483b7eb2bf348b720adc761966ad22f20d0f6812d65f9759b1a63ad60",
+        "mash_youtube.csv": "d3dc3adafd6ab2a7cb081f76b70376fcc073230364e562a3bd29e804cc61b9cd"
+      },
+      "sample_rows": 100
+    },
+    "A07": {
+      "rows": 307,
+      "unit": "real_data.json records only",
+      "synthetic_rows_excluded": 1346,
+      "archive_members": [
+        {
+          "name": "request_offers_data/prompts/",
+          "bytes": 0
+        },
+        {
+          "name": "request_offers_data/prompts/BL1 prompt.txt",
+          "bytes": 7668
+        },
+        {
+          "name": "request_offers_data/prompts/BL2 prompt.txt",
+          "bytes": 13921
+        },
+        {
+          "name": "request_offers_data/prompts/BL3 prompt.txt",
+          "bytes": 17547
+        },
+        {
+          "name": "request_offers_data/prompts/BL4 prompt.txt",
+          "bytes": 23798
+        },
+        {
+          "name": "request_offers_data/prompts/BL5 prompt.txt",
+          "bytes": 29574
+        },
+        {
+          "name": "request_offers_data/prompts/QSF prompt.txt",
+          "bytes": 18339
+        },
+        {
+          "name": "request_offers_data/real_data.json",
+          "bytes": 203045
+        },
+        {
+          "name": "request_offers_data/resources.txt",
+          "bytes": 1497
+        },
+        {
+          "name": "request_offers_data/synthetic_data.json",
+          "bytes": 815482
+        },
+        {
+          "name": "request_offers_data/taxonomy.json",
+          "bytes": 44430
+        }
+      ],
+      "columns": [
+        "classification",
+        "text"
+      ],
+      "classification_fields": [
+        "action_offer",
+        "action_request",
+        "actionability",
+        "alpha",
+        "explanation",
+        "location",
+        "personnel_offer",
+        "personnel_request",
+        "supplies_offer",
+        "supplies_request",
+        "time",
+        "type"
+      ],
+      "empty_text_rows": 0,
+      "exact_nonempty_text_duplicate_excess": 2,
+      "real_synthetic_exact_text_overlap": 0,
+      "alpha_counts": {
+        "7": 56,
+        "6": 67,
+        "8": 15,
+        "5": 56,
+        "9": 1,
+        "4": 14,
+        "MISSING": 91,
+        "3": 6,
+        "2": 1
+      },
+      "actionability_counts": {
+        "True": 155,
+        "False": 61,
+        "MISSING": 91
+      },
+      "nonempty_location_annotation_rows": 80,
+      "nonempty_time_annotation_rows": 35,
+      "limitations": [
+        "Location/time are classification fields, not established structured coordinates/event timestamps.",
+        "Alpha/actionability do not establish an independently judged rescue-priority target.",
+        "No per-row event, original platform ID, annotator provenance or incident linkage in top-level schema.",
+        "Source page citation is Coming soon; no peer-reviewed dataset paper verified.",
+        "Synthetic records are explicitly excluded from the real-data profile and proposed evaluation."
+      ],
+      "source_hashes": {
+        "requests_offers.zip": "b42077b3b46e49a84ce162041e94562b5582cd74be8fc0501e773fef8427b42d"
+      },
+      "sample_rows": 100
+    }
+  }
+}
