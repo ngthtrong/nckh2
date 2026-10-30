@@ -1,0 +1,154 @@
+{
+  "date": "2026-10-29",
+  "pdf_comparison": {
+    "method": "pdftotext -layout",
+    "same_extracted_text": true,
+    "comparison_pdf_sha256": "b520d876eb618a6ec1e1de81e52004b98d5ea7acaa79a24bd6e01e6556421d45",
+    "publisher_pdf_sha256": "2922af42234c9b613c8587dcdc83840bb0a0175bba17ca51f392914558dd62ab",
+    "extracted_text_sha256": "9e49b83cc5de8b4054d48c2ca0329f7b69f57948d12394ab059b7278fcff0137"
+  },
+  "visual_inspection": {
+    "pages": [
+      4,
+      11
+    ],
+    "observed": [
+      "section 2.3 acquisition/deduplication",
+      "Table 1 explicitly fictitious examples",
+      "Data availability Slack reference",
+      "Appendix contains keyword list and aggregate correlations, not request records"
+    ]
+  },
+  "public_source_checks": [
+    {
+      "url": "https://rebuildearth.slack.com/",
+      "checked_at_utc": "2026-10-29T13:31:36.886395+00:00",
+      "http_status": 403,
+      "final_url": "https://rebuildearth.slack.com/",
+      "bytes": 74323,
+      "sha256": "1a01ae41a7f9f0ff8b2c00914717b5bad73e8843c7a539e0695fb3ff759b5b32",
+      "content_type": "text/html; charset=utf-8",
+      "login_marker": true,
+      "interpretation": "403; historical archive not obtained; no sign-in or access bypass attempted"
+    },
+    {
+      "url": "https://keralarescue.in/",
+      "checked_at_utc": "2026-10-29T13:31:38.028708+00:00",
+      "http_status": 200,
+      "final_url": "https://keralarescue.in/",
+      "bytes": 1010,
+      "sha256": "353d6b848ce48ea4f4dadcac107b3f410cfbab3b795747b2f725247fcab1fd90",
+      "content_type": "text/html; charset=UTF-8",
+      "login_marker": false,
+      "interpretation": "HTTP 200 is a parked/domain-for-sale HTML page, not a rescue archive"
+    }
+  ],
+  "github_source_checks": [
+    {
+      "kind": "application_model",
+      "url": "https://github.com/raksha-life/rescuekerala/blob/master/mainapp/models/models.py",
+      "checked_date": "2026-10-29",
+      "retrieval_method": "GitHub connector public fetch",
+      "content_utf8_bytes": 30829,
+      "content_sha256": "23a234c8dfc1daf7f4747e862d754f37e54d4b9aa5659e5205d0800bcdeba5e5",
+      "model_fields": {
+        "Request": {
+          "district": "CharField",
+          "location": "CharField",
+          "requestee": "CharField",
+          "requestee_phone": "CharField",
+          "latlng": "CharField",
+          "latlng_accuracy": "CharField",
+          "is_request_for_others": "BooleanField",
+          "needwater": "BooleanField",
+          "needfood": "BooleanField",
+          "needcloth": "BooleanField",
+          "needmed": "BooleanField",
+          "needtoilet": "BooleanField",
+          "needkit_util": "BooleanField",
+          "needrescue": "BooleanField",
+          "detailwater": "CharField",
+          "detailfood": "CharField",
+          "detailcloth": "CharField",
+          "detailmed": "CharField",
+          "detailtoilet": "CharField",
+          "detailkit_util": "CharField",
+          "detailrescue": "CharField",
+          "needothers": "CharField",
+          "status": "CharField",
+          "supply_details": "CharField",
+          "dateadded": "DateTimeField"
+        },
+        "RequestUpdate": {
+          "request": "ForeignKey",
+          "status": "CharField",
+          "other_status": "CharField",
+          "updater_name": "CharField",
+          "updater_phone": "CharField",
+          "notes": "TextField",
+          "update_ts": "DateTimeField"
+        }
+      },
+      "scope": "current code fields; not verified presence in 2018 research extract"
+    },
+    {
+      "kind": "application_routes",
+      "url": "https://github.com/raksha-life/rescuekerala/blob/master/mainapp/urls.py",
+      "checked_date": "2026-10-29",
+      "retrieval_method": "GitHub connector public fetch",
+      "content_utf8_bytes": 5267,
+      "content_sha256": "a0fdc2693adcfe3179ae130b7543e4a48785e91a8fbf079c41748d76865d69cd"
+    },
+    {
+      "kind": "application_api",
+      "url": "https://github.com/raksha-life/rescuekerala/blob/master/mainapp/api_views.py",
+      "checked_date": "2026-10-29",
+      "retrieval_method": "GitHub connector public fetch",
+      "content_utf8_bytes": 3889,
+      "content_sha256": "1b44089e50b319c863f579e98099a1bad9ed54d7afce07a401956f4e9c40241e",
+      "finding": "request_update_list handles POST mutations; not an archive download route; no endpoint mutation attempted"
+    },
+    {
+      "kind": "related_project_readme",
+      "url": "https://github.com/raksha-life/OpenSalve/blob/master/README.md",
+      "checked_date": "2026-10-29",
+      "retrieval_method": "GitHub connector public fetch",
+      "content_utf8_bytes": 2312,
+      "content_sha256": "0f5267a40be7331cb7da19d16c618e7f05c40cb1115a7768b017b7918358ee9b"
+    },
+    {
+      "kind": "related_metadata_sample",
+      "url": "https://github.com/raksha-life/data/blob/master/data/india/kerala/lsgi_site_data/1.json",
+      "checked_date": "2026-10-29",
+      "retrieval_method": "GitHub connector public fetch",
+      "content_utf8_bytes": 3173,
+      "content_sha256": "fc56e6d17b06350d19695f1407093a7e4c841d4a0172201962d9a76bccc03bb5",
+      "top_level_fields": [
+        "timeStamp",
+        "date",
+        "name",
+        "district",
+        "block",
+        "area",
+        "localbody_code",
+        "no_of_wards",
+        "population",
+        "male",
+        "female",
+        "population_density",
+        "sex_ratio",
+        "literacy_rate",
+        "literacy_rate_male",
+        "literacy_rate_female",
+        "president",
+        "wards"
+      ],
+      "classification": "administrative metadata; not a rescue request snapshot",
+      "scope": "one JSON file only; no full repository audit"
+    }
+  ],
+  "outgoing_messages_sent": 0,
+  "raw_request_records_obtained": false,
+  "new_human_annotations": 0,
+  "new_rq_experiments": 0
+}
