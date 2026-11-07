@@ -1,9 +1,15 @@
 # Template báo cáo nghiên cứu khoa học LaTeX
 
+Căn cứ ưu tiên là [HinhThucBC.pdf](HinhThucBC.pdf), không phải mọi thay
+đổi trong báo cáo gốc. Bảng đối chiếu mục 2 và 3.1–3.17 nằm trong
+[RULES.md](RULES.md). Báo cáo hoàn thiện phải đạt ít nhất 50 trang theo
+quy định và có hồ sơ thật; PDF khung trống chưa đáp ứng các điều kiện đó.
+
 Bộ template độc lập, giữ bố cục của báo cáo gốc: A4, Times New Roman
-13 bp, giãn dòng 1,3; lề trái 30 mm, phải/trên/dưới 20 mm. Hai bìa giữ
-khung đôi và vùng nội dung căn giữa riêng; biểu mẫu giữ bố cục, logo và
-giãn dòng riêng của bản gốc. Header/footer giữ kiểu hiện có: không có
+13 bp, giãn dòng 1,3; lề trái 30 mm, phải/trên/dưới 20 mm. Hai bìa dùng
+khung đôi và đầu trang vector từ mẫu CTU; biểu mẫu có cấu hình cỡ chữ,
+lề và giãn dòng riêng theo từng mẫu. Quy tắc và các thay đổi đã đồng bộ
+được ghi tại [RULES.md](RULES.md). Header/footer giữ kiểu hiện có: không có
 nội dung header, số trang ở giữa footer. Hai bìa không in số trang,
 phần đầu dùng số La Mã, Mở đầu bắt đầu số Ả Rập từ 1. Trang biểu mẫu
 không in số trang nhưng vẫn được tính trong phần đầu.
@@ -11,8 +17,10 @@ không in số trang nhưng vẫn được tính trong phần đầu.
 Nội dung nghiên cứu để trống, chỉ giữ tiêu đề khái quát và comment hướng
 dẫn. Ô trống và placeholder trên biểu mẫu là chủ ý. Thư mục này có thể
 sao chép ra ngoài repository để sử dụng; không cần dữ liệu, mô hình,
-minh chứng hoặc bước xuất số liệu. Không có kiểm tra số trang tối thiểu
-hay kiểm tra hồ sơ nghiệm thu.
+minh chứng hoặc bước xuất số liệu. Bốn bản tin/tóm tắt được ghép sau
+phụ lục và đồng thời có đầu ra PDF riêng. Kiểm tra kỹ thuật cho khung
+trống không áp số trang tối thiểu hoặc kiểm tra hồ sơ nghiệm thu; khi
+hoàn thiện vẫn phải đáp ứng mục 2.2 và 3.15–3.17 của PDF quy định.
 
 ## Cài đặt
 
@@ -68,7 +76,7 @@ Bản hai mặt giữ lề vật lý trái 30 mm/phải 20 mm trên cả trang c
 lẻ như báo cáo gốc, không đảo lề và không ép chương mở ở trang lẻ.
 
 Build mặc định ưu tiên biblatex-ieee/Biber; nếu thiếu, dùng
-natbib/BibTeX với `ieeetr`. Có thể chọn rõ:
+BibTeX với `plainurl` và `splitbib`. Có thể chọn rõ:
 
 ```bash
 make content BIBLIOGRAPHY=biblatex
@@ -83,7 +91,8 @@ vẫn có trang tài liệu tham khảo nhưng không sinh mục giả hoặc c�
 tham chiếu chưa giải quyết. Dùng Make/script để cơ chế này hoạt động;
 một lượt XeLaTeX trực tiếp chưa đủ giải quyết danh mục và tham chiếu.
 
-`make check` kiểm tra sáu PDF, log, khổ A4, phông nhúng và tài nguyên
+`make content` và `make content-twoside` tự dựng lại bốn PDF bản tin/
+tóm tắt từ cùng nguồn. `make check` kiểm tra sáu PDF, log, khổ A4, phông nhúng và tài nguyên
 nội bộ; kiểm tra thêm PDF minh họa nếu đã build. Build dừng khi gặp lỗi
 LaTeX, tràn khung, thiếu ký tự, nhãn lặp hoặc tham chiếu chưa giải quyết.
 Log nằm cạnh từng PDF. Xem trực quan PDF sau khi thay nội dung, vì log
@@ -97,7 +106,8 @@ Git; file phụ, log và tệp tạm bị bỏ qua.
 
 - `config/metadata.tex`: tên đề tài Việt–Anh, mã số, chủ nhiệm, thông
   tin cá nhân, lớp/khóa, người hướng dẫn, đơn vị, thời gian, kinh phí,
-  địa điểm và ngày báo cáo. Thông tin cơ quan có thể chỉnh ở cuối tệp.
+  địa điểm và ngày báo cáo. Thông tin cơ quan có thể chỉnh ở cuối tệp; khi đổi cơ quan,
+  thay cả đầu trang vector/khung bìa trong `assets/` và logo.
 - `config/members.tex`: tên các thành viên, hàng MSSV/lớp và danh sách
   dùng trên bản tin. Khi thêm/bớt thành viên, chỉnh cả `\MemberRows`
   và `\ProjectMembers` trong cùng tệp.
@@ -107,6 +117,8 @@ Git; file phụ, log và tệp tạm bị bỏ qua.
 - `chapters/introduction.tex`: sáu mục Mở đầu.
 - `chapters/01-foundations/` đến `04-evaluation/`: bốn chương chính,
   mỗi chương có `chapter.tex` và các tệp mục con trong `sections/`.
+  `main.tex` xếp cơ sở lý thuyết → thiết kế hệ thống → dữ liệu/phương
+  pháp → thực nghiệm; số trong tên thư mục không quyết định số chương.
 - `chapters/conclusion.tex`: kết luận và kiến nghị.
 - `appendices/`: hai phụ lục khái quát, có thể đổi tên/thêm/bớt.
 - `deliverables/content/`: nội dung bản tin Việt–Anh; hai bản tóm tắt
@@ -127,7 +139,8 @@ của báo cáo chính để trống cho đến khi có đối tượng với `\
 
 Đặt tài nguyên của đề tài mới vào `assets/figures/` hoặc
 `assets/diagrams/`. Các gói và đường dẫn đã cấu hình sẵn. Logo dùng
-chung là `logo-ctu.png`; thay tệp này khi đổi cơ quan.
+chung là `logo-ctu.png`; đầu trang/khung bìa dùng hai PDF trong `assets/`.
+Thay các tài nguyên này khi đổi cơ quan.
 
 ```latex
 \begin{figure}[htbp]
@@ -155,7 +168,11 @@ Công thức~\eqref{eq:ten-cong-thuc}.
 ```
 
 Đặt chú thích hình bên dưới, chú thích bảng phía trên; đặt `\label`
-sau `\caption`. Bảng dài dùng `longtable` với `\endfirsthead` và
+sau `\caption`. Hình/bảng được giữ sau đoạn giới thiệu và chặn trước nội dung tiếp
+theo bằng `flafter`/`FloatBarrier`. Bảng trong thân bài dùng 13 bp, kể
+cả khi môi trường ngoài có `\small`; không dùng `\resizebox` để ép bảng.
+Bảng rộng nên tách cột hoặc đặt trong `landscape` (gói `pdflscape`).
+Bảng dài dùng `longtable` với `\endfirsthead` và
 `\endhead` để lặp tiêu đề. Có thể viết sơ đồ TikZ ngay trong LaTeX;
 không cần công cụ sinh sơ đồ từ nghiên cứu cũ. Có PDF minh họa riêng
 từ `examples/formatting.tex` để xem định dạng trước khi điền nội dung.
@@ -180,7 +197,7 @@ dữ liệu thư viện giả định, chỉ phục vụ minh họa; không đư
 vào nội dung báo cáo. SVG dùng cho Word, PNG 300 dpi dùng trực tiếp cho
 LaTeX; nếu cần vector trong LaTeX, chuyển SVG sang PDF bằng công cụ có sẵn.
 
-## Tài liệu tham khảo IEEE
+## Tài liệu tham khảo phân nhóm
 
 Bốn tệp `bibliography/*.bib` ban đầu chỉ có comment. Thêm bản ghi
 thật vào tệp phù hợp: `books.bib`, `articles.bib`, `legal.bib` hoặc
@@ -201,11 +218,16 @@ Ví dụ cấu trúc để điền (không phải một nguồn đã xác minh):
 }
 ```
 
-Thay tất cả trường mẫu bằng dữ liệu thật trước khi sử dụng. Danh mục
-đánh số liên tục theo lần trích dẫn đầu tiên. `\nocite{khóa}` dùng khi
+Thay tất cả trường mẫu bằng dữ liệu thật trước khi sử dụng. Danh mục chia nhóm theo thứ tự: văn bản pháp quy; sách, báo, tạp chí;
+bài viết và tài liệu khác. Trong từng nhóm xếp theo tác giả (rồi năm/
+tiêu đề), đánh số liên tục toàn danh mục. Số trích dẫn trong thân bài
+vẫn ở ngoặc vuông; số không còn theo lần trích dẫn đầu tiên.
+`legal.bib`, `books.bib`, `articles.bib`/`references.bib` xác định nhóm
+ở cả hai backend; không bắt buộc tự điền `keywords`. Chỉ in nhóm có
+nguồn được trích dẫn; kiểm tra thủ công thứ tự tên Việt khi hoàn thiện. `\nocite{khóa}` dùng khi
 chủ ý đưa nguồn chưa trích dẫn vào danh mục. Bản ghi placeholder trong
-`examples/references.bib` chỉ phục vụ kiểm tra định dạng IEEE và không
-được dùng trong báo cáo chính.
+`examples/*.bib` chỉ phục vụ kiểm tra định dạng và phân nhóm, không được
+dùng trong báo cáo chính.
 
-Kết quả kiểm tra của phiên bản template ban đầu được ghi tại
+Kết quả kiểm tra và lần đồng bộ gần nhất được ghi tại
 `VALIDATION.md`.

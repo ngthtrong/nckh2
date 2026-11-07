@@ -25,8 +25,8 @@
 \renewcommand{\theHtable}{\theHchapter.\arabic{table}}
 \include{chapters/introduction}
 \include{chapters/01-foundations/chapter}
-\include{chapters/02-data-methods/chapter}
 \include{chapters/03-system/chapter}
+\include{chapters/02-data-methods/chapter}
 \include{chapters/04-evaluation/chapter}
 \include{chapters/conclusion}
 \clearpage
@@ -34,4 +34,17 @@
 \appendix
 \include{appendices/reproducibility}
 \include{appendices/supplementary-results}
+% HinhThucBC 3.15: approved proposal, only when the signed/stamped PDF is supplied.
+% \includepdf[pages=-,pagecommand={}]{assets/approved-proposal.pdf}
+% HinhThucBC 3.16: registered group I-III products, using real evidence PDFs.
+% \includepdf[pages=-,pagecommand={}]{assets/product-evidence.pdf}
+\clearpage\pdfbookmark[0]{Bản tin và báo cáo tóm tắt}{product-bulletins}
+\pdfbookmark[1]{Bản tin tiếng Việt}{product-bulletin-vi}
+\input{deliverables/content/bulletin-vi}
+\clearpage\pdfbookmark[1]{Bản tin tiếng Anh}{product-bulletin-en}
+\input{deliverables/content/bulletin-en}
+\clearpage\pdfbookmark[1]{Báo cáo tóm tắt tiếng Việt}{product-summary-vi}
+\input{deliverables/content/summary-vi}
+\clearpage\pdfbookmark[1]{Báo cáo tóm tắt tiếng Anh}{product-summary-en}
+\input{deliverables/content/summary-en}
 \end{document}

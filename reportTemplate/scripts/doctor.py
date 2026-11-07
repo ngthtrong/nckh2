@@ -20,7 +20,8 @@ if shutil.which('kpsewhich'):
     for package in ['scrreprt.cls', 'fontspec.sty', 'polyglossia.sty', 'unicode-math.sty',
                     'geometry.sty', 'setspace.sty', 'graphicx.sty', 'longtable.sty',
                     'booktabs.sty', 'tabularx.sty', 'amsmath.sty', 'tikz.sty', 'pdfpages.sty',
-                    'scrlayer-scrpage.sty', 'hyperref.sty', 'bookmark.sty', 'natbib.sty', 'ieeetr.bst']:
+                    'scrlayer-scrpage.sty', 'hyperref.sty', 'bookmark.sty', 'splitbib.sty', 'plainurl.bst',
+                    'pdflscape.sty', 'flafter.sty', 'placeins.sty', 'eso-pic.sty']:
         found = subprocess.run(['kpsewhich', package], capture_output=True, text=True).stdout.strip()
         print(f'{package}: {"OK" if found else "MISSING"}')
         if not found:
@@ -41,6 +42,9 @@ if shutil.which('xelatex'):
         print('Times New Roman (four faces): ' + ('OK' if good else 'MISSING / check fonts'))
         if not good:
             missing.append('Times New Roman')
+for name in ['template-headers.pdf', 'cover-frame.pdf']:
+    if not (ROOT / 'assets' / name).is_file():
+        missing.append(name)
 print('Logo: ' + ('OK' if (ROOT / 'logo-ctu.png').is_file() else 'MISSING'))
 if not (ROOT / 'logo-ctu.png').is_file():
     missing.append('logo-ctu.png')

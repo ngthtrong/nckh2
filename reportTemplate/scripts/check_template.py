@@ -29,13 +29,13 @@ for folder in ['template', 'config', 'frontmatter', 'chapters', 'appendices', 'd
     source_files.extend((ROOT / folder).rglob('*.tex'))
 for source in source_files:
     text = '\n'.join(line.split('%', 1)[0] for line in source.read_text().splitlines())
-    for command, name in re.findall(r'\\(input|include|includegraphics)(?:\[[^]]*\])?\{([^}]+)\}', text):
+    for command, name in re.findall(r'\\(input|include|includegraphics|includepdf)(?:\[[^]]*\])?\{([^}]+)\}', text):
         if '\\' in name:
             continue  # Macro paths are validated by the actual LaTeX build.
         candidate = ROOT / name
-        if command != 'includegraphics':
+        if command in ['input', 'include']:
             candidate = candidate.with_suffix('.tex')
-        choices = [candidate] if command != 'includegraphics' else [
+        choices = [candidate] if command in ['input', 'include', 'includepdf'] else [
             candidate, ROOT / 'assets/figures' / name, ROOT / 'assets/diagrams' / name]
         if command == 'includegraphics' and not candidate.suffix:
             choices = [p.with_suffix(ext) for p in choices for ext in ['.pdf', '.png', '.jpg', '.jpeg']]
@@ -62,7 +62,8 @@ for folder, job in targets.items():
     pages = int(re.search(r'^Pages:\s+(\d+)', info, re.M)[1])
     sizes = output(['pdfinfo', '-f', '1', '-l', str(pages), str(pdf)])
     dimensions = re.findall(r'(?:Page\s+\d+ size:|Page size:)\s+([\d.]+) x ([\d.]+)', sizes)
-    if not dimensions or any(abs(float(w) - 595.276) > 1 or abs(float(h) - 841.89) > 1 for w, h in dimensions):
+    if not dimensions or any(abs(min(float(w), float(h)) - 595.276) > 1 or
+                             abs(max(float(w), float(h)) - 841.89) > 1 for w, h in dimensions):
         errors.append(f'{folder}: page size must be A4')
     font_lines = output(['pdffonts', str(pdf)]).splitlines()[2:]
     if not any('TimesNewRoman' in line.replace(' ', '') for line in font_lines):
@@ -78,8 +79,30 @@ for folder, job in targets.items():
                 errors.append(f'{folder}: missing section {heading}')
         if 'INFORMATION ON RESEARCH RESULTS' not in pdf_text:
             errors.append(f'{folder}: English form missing')
-    if folder == 'smoke' and not re.search(r'\[1\]', pdf_text):
-        errors.append('smoke: IEEE citation [1] missing')
+    if folder in ['content', 'content-twoside', 'summary-vi']:
+        raw_text = output(['pdftotext', '-raw', str(pdf), '-'])
+        normalized = re.sub(r'\s+', ' ', raw_text).casefold()
+        for heading in ['Stt', 'Tên bài báo', 'Tác giả/ nhóm tác giả', 'Tên tạp chí',
+                        'Số tạp chí', 'Năm xuất bản']:
+            if heading.casefold() not in normalized:
+                errors.append(f'{folder}: publication-table column missing: {heading}')
+    if folder in ['content', 'content-twoside']:
+        headings = ['BẢN TIN ĐỀ TÀI', 'SUMMARY REPORT RESEARCH PROJECT',
+                    'BÁO CÁO TÓM TẮT', 'INFORMATION ON RESEARCH RESULTS']
+        positions = [pdf_text.rfind(heading) for heading in headings]
+        if any(position < 0 for position in positions) or positions != sorted(positions):
+            errors.append(f'{folder}: appended forms missing or out of order')
+    if folder in ['bulletin-vi', 'bulletin-en'] and pages != 1:
+        errors.append(f'{folder}: bulletin must fit on one page')
+    if folder == 'smoke':
+        bibliography = pdf_text.rsplit('Tài liệu tham khảo', 1)[-1]
+        markers = ['Văn bản pháp quy', 'Sách, báo, tạp chí', '[A Author]', '[Z Author]',
+                   'Bài viết và tài liệu khác']
+        positions = [bibliography.find(marker) for marker in markers]
+        if any(position < 0 for position in positions) or positions != sorted(positions):
+            errors.append('smoke: bibliography groups or alphabetic order incorrect')
+        if not re.search(r'\[1\]', bibliography):
+            errors.append('smoke: numeric bibliography label [1] missing')
     print(f'{pdf.relative_to(ROOT)}: {pages} pages, A4, fonts embedded, references/layout checked')
 
 if errors:
