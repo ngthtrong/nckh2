@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-"""Build the standalone template with an empty or populated IEEE bibliography."""
+"""Build the standalone template with an empty or grouped bibliography."""
 import argparse
 import os
 from pathlib import Path
@@ -54,7 +54,7 @@ def main():
         (out / source.relative_to(ROOT).parent).mkdir(parents=True, exist_ok=True)
     (out / 'appendices').mkdir(exist_ok=True)
     # Drop old auxiliary state: citation removal/backend switches cannot leak old entries.
-    for pattern in ['*.aux', '*.bbl', '*.blg', '*.bcf', '*.run.xml', '*.toc', '*.lof', '*.lot', '*.out']:
+    for pattern in ['*.aux', '*.bbl', '*.blg', '*.bcf', '*.run.xml', '*.toc', '*.lof', '*.lot', '*.out', '*.sbb', '*.sbc']:
         for artifact in out.rglob(pattern):
             artifact.unlink()
     source = ('main.tex' if args.target == 'content' else 'examples/formatting.tex'
@@ -70,7 +70,7 @@ def main():
              f'-output-directory={out.relative_to(ROOT)}', f'-jobname={args.target}',
              definitions + '\\input{' + source + '}'], env)
 
-    print(f'Building {name} ({"biblatex/IEEE" if use_biber else "BibTeX/IEEE"})', flush=True)
+    print(f'Building {name} ({"biblatex/IEEE grouped" if use_biber else "BibTeX/plainurl grouped"})', flush=True)
     latex()
     aux = '\n'.join(p.read_text(errors='replace') for p in out.rglob('*.aux'))
     cited = bibliography and bool(re.search(r'\\(?:abx@aux@cite|abx@aux@nocite|citation)\{', aux))
@@ -94,6 +94,12 @@ def main():
         raise SystemExit('PDF validation failed:\n' + '\n'.join(lines) + f'\nSee {out}')
     print(f'PDF: {(out / (args.target + ".pdf")).relative_to(ROOT)}; '
           f'{"references resolved" if cited else "no references to process"}')
+    if args.target == 'content':
+        # Rebuild the four standalone forms from the same source as the report.
+        for target in TARGETS[2:]:
+            run([sys.executable, 'scripts/build.py', target,
+                 '--bibliography', args.bibliography], env)
+
 
 
 if __name__ == '__main__':

@@ -1,34 +1,74 @@
-% Một danh mục IEEE, đánh số theo thứ tự trích dẫn.
+% Official order: legal documents, books/journals, then articles; alphabetical within each group.
 \newif\ifReportBiblatex
 \ifdefined\UseBibtex
   \ReportBiblatexfalse
 \else
-  \ReportBiblatextrue
+  \IfFileExists{ieee.bbx}{\ReportBiblatextrue}{\ReportBiblatexfalse}
 \fi
+\providecommand{\ReportLegalDatabase}{bibliography/legal}
+\providecommand{\ReportBooksDatabase}{bibliography/books}
 \providecommand{\ReportArticlesDatabase}{bibliography/articles}
 \ifReportBiblatex
-  \usepackage[backend=biber,style=ieee,sorting=none]{biblatex}
-  \addbibresource{bibliography/legal.bib}
-  \addbibresource{bibliography/books.bib}
+  \usepackage[backend=biber,style=ieee,sorting=nyt,defernumbers=true]{biblatex}
+  \addbibresource{\ReportLegalDatabase.bib}
+  \addbibresource{\ReportBooksDatabase.bib}
   \addbibresource{\ReportArticlesDatabase.bib}
   \addbibresource{bibliography/references.bib}
+  % Group by database without requiring hand-written keywords on every entry.
+  \DeclareSourcemap{\maps[datatype=bibtex]{
+    \map{\perdatasource{\ReportLegalDatabase.bib}
+      \step[fieldset=keywords,fieldvalue={legal},append]}
+    \map{\perdatasource{\ReportBooksDatabase.bib}
+      \step[fieldset=keywords,fieldvalue={books},append]}
+    \map{\perdatasource{\ReportArticlesDatabase.bib}
+      \step[fieldset=keywords,fieldvalue={articles},append]}
+    \map{\perdatasource{bibliography/references.bib}
+      \step[fieldset=keywords,fieldvalue={articles},append]}
+  }}
   \DeclareLanguageMapping{vietnamese}{english}
+  % ieee.cbx's cite command encloses each numeric citation in square brackets.
   \let\citep\cite
   \let\citet\textcite
   \newcommand{\PrintReportBibliography}{%
     \addchap{Tài liệu tham khảo}
     \ifdefined\TemplateHasReferences
-      \begin{english}\printbibliography[heading=none]\end{english}
+    \begin{english}
+      \printbibliography[keyword=legal,heading=subbibliography,title={Văn bản pháp quy}]
+      \printbibliography[keyword=books,heading=subbibliography,title={Sách, báo, tạp chí}]
+      \printbibliography[keyword=articles,heading=subbibliography,title={Bài viết và tài liệu khác}]
+    \end{english}
     \fi}
 \else
-  \usepackage[numbers,square,sort&compress]{natbib}
-  \renewcommand{\bibsection}{\addchap{Tài liệu tham khảo}}
+  \usepackage[nonewchap,keeporder]{splitbib}
+  \SBtitlestyle{simple}
+  \renewcommand{\SBtitlefont}[1]{{\normalfont\bfseries #1}}
+  \let\citep\cite
+  \let\citet\cite
+  % Assign keys from each existing database; plainurl retains URLs and DOI links.
+  \ExplSyntaxOn
+  \ior_new:N \l__report_bib_ior
+  \seq_new:N \l__report_bib_key_seq
+  \NewDocumentCommand{\ReportBibCategory}{mm}{
+    \begin{category}{#1}
+    \clist_map_inline:nn {#2}{
+      \ior_open:Nn \l__report_bib_ior {##1.bib}
+      \ior_str_map_inline:Nn \l__report_bib_ior {
+        \regex_extract_once:nnNT
+          {\A\s*@[A-Za-z]+\s*\{\s*([^,\s]+)\s*,}
+          {####1} \l__report_bib_key_seq
+          {\exp_args:Nx \SBentries {\seq_item:Nn \l__report_bib_key_seq {2}}}
+      }
+      \ior_close:N \l__report_bib_ior
+    }
+    \end{category}
+  }
+  \ExplSyntaxOff
+  \ReportBibCategory{Văn bản pháp quy}{\ReportLegalDatabase}
+  \ReportBibCategory{Sách, báo, tạp chí}{\ReportBooksDatabase}
+  \ReportBibCategory{Bài viết và tài liệu khác}{\ReportArticlesDatabase,bibliography/references}
   \newcommand{\PrintReportBibliography}{%
-    \bibliographystyle{ieeetr}
+    \addchap{Tài liệu tham khảo}
     \ifdefined\TemplateHasReferences
-      \bibliography{bibliography/legal,bibliography/books,\ReportArticlesDatabase,bibliography/references}
-    \else
-      \addchap{Tài liệu tham khảo}
-    \fi}
+    \bibliographystyle{plainurl}
+    \bibliography{\ReportLegalDatabase,\ReportBooksDatabase,\ReportArticlesDatabase,bibliography/references}\fi}
 \fi
-% scripts/build.py tự phát hiện trích dẫn và bật TemplateHasReferences.

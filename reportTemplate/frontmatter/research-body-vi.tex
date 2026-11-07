@@ -18,8 +18,24 @@
 % Liệt kê sản phẩm đã hoàn thành.
 \PendingField{Sản phẩm}
 \FormSection{6. Công bố khoa học từ kết quả nghiên cứu của đề tài, hoặc nhận xét, đánh giá của cơ sở đã áp dụng các kết quả nghiên cứu (nếu có):}
-% Điền thông tin công bố hoặc nhận xét; ghi không có nếu phù hợp.
-\PendingField{Công bố và nhận xét}
+% Điền công bố có thật; ghi rõ trạng thái chấp nhận/đã xuất bản.
+% Không lấy năm hội nghị làm năm xuất bản khi nhà xuất bản chưa xác nhận.
+% Nếu không có công bố, thay hàng trống bằng một hàng ghi "Không có".
+\begingroup
+\setlength{\tabcolsep}{5.4bp}
+\setlength{\arrayrulewidth}{.48bp}
+\renewcommand{\arraystretch}{1}
+\noindent\hspace*{\FormPublicationOffset}%
+\begin{tabular}{|>{\centering\arraybackslash}p{\FormPublicationFirst}|P{135.03bp}|P{68.30bp}|P{63.24bp}|P{\FormPublicationIssue}|P{59.28bp}|}
+\hline
+\multicolumn{1}{|c|}{\textbf{Stt}} & \textbf{Tên bài báo} & \textbf{Tác giả/ nhóm tác giả} &
+\textbf{Tên tạp chí} & \textbf{Số tạp chí} & \textbf{Năm xuất bản} \\
+\hline
+\PendingField{STT} & \PendingField{Tên bài báo} & \PendingField{Tác giả} &
+\PendingField{Tên tạp chí} & \PendingField{Số tạp chí} & \PendingField{Năm xuất bản} \\
+\hline
+\end{tabular}\par
+\endgroup
 \FormSection{7. Đóng góp về mặt kinh tế -- xã hội, giáo dục và đào tạo, an ninh, quốc phòng và khả năng áp dụng của đề tài:}
 % Trình bày đóng góp đã được kiểm chứng và phạm vi áp dụng.
 \PendingField{Đóng góp}

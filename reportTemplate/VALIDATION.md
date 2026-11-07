@@ -1,9 +1,73 @@
-# Kiểm tra template — 09/10/2026
+# Kiểm tra template — cập nhật 02/11/2026
+
+Đã đồng bộ các quy tắc dùng lại được từ báo cáo hiện tại và đối chiếu
+trực tiếp [HinhThucBC.pdf](HinhThucBC.pdf), gồm văn bản và trang quy định.
+Căn cứ ưu tiên, bảng đối chiếu mục 2/3.1–3.17 và phần cần điền nằm trong
+[RULES.md](RULES.md). Không sửa nguồn hoặc PDF của `report/`.
+
+## Kết quả phiên bản hiện tại
+
+| PDF | Số trang |
+| --- | ---: |
+| `build/content/content.pdf` | 31 |
+| `build/content-twoside/content.pdf` | 31 |
+| `build/bulletin-vi/bulletin-vi.pdf` | 1 |
+| `build/bulletin-en/bulletin-en.pdf` | 1 |
+| `build/summary-vi/summary-vi.pdf` | 1 |
+| `build/summary-en/summary-en.pdf` | 1 |
+| `build/smoke/smoke.pdf` | 6 |
+
+- `make doctor` đạt; Times New Roman đủ bốn kiểu, các gói mới có sẵn.
+- Cả bảy PDF qua `make check`: A4, font nhúng, không có lỗi tràn khung,
+  thiếu ký tự, nhãn lặp hoặc tham chiếu/trích dẫn chưa giải quyết trong
+  log cuối. Trang ngang A4 trong PDF minh họa có góc xoay 90 độ.
+- Nhánh Biber xuất ba nhóm tham khảo, số liên tục [1]–[4]; hai tác giả
+  minh họa A/Z được xếp đúng chữ cái dù trích dẫn theo thứ tự Z/A.
+  Các bản ghi minh họa chỉ có trong `examples/`.
+- Bản sao tách riêng dưới `/tmp/`, không mang `build/` hoặc môi trường
+  cũ, đã chạy thành công `make all smoke BIBLIOGRAPHY=bibtex` và
+  `make check`. Số trang giống bản Biber; không đọc tài nguyên dự án cũ.
+- Đã xem hình render của bìa chính/phụ, thông tin kết quả Việt, nhận xét
+  GVHD, phiếu chủ nhiệm, tóm tắt Việt, bản tin Anh và các trang minh họa
+  hình/bảng/trang ngang/tham khảo. Phiếu chủ nhiệm giữ ảnh trống và bốn
+  năm học cùng khối ký trên một trang, không chồng chữ lên khung ảnh.
+- Bảng công bố có đủ sáu cột trong biểu mẫu Việt và tóm tắt Việt. Bốn
+  bản tin/tóm tắt hiện diện ở cuối hai quyển theo đúng thứ tự.
+- PDF minh họa xác nhận chữ trong bảng dùng cùng font/cỡ thân bài, kể
+  cả bảng nằm trong nhóm có `\small` ở ngoài môi trường bảng.
+- Metadata và bốn tệp bibliography nghiên cứu vẫn để trống/placeholder;
+  kiểm tra văn bản PDF không thấy thông tin cá nhân, liên kết ảnh hoặc
+  tên mô hình riêng từ báo cáo gốc. `git diff --check` đạt.
+
+## Phạm vi kết luận
+
+Đây là **template trống đã kiểm tra kỹ thuật**, chưa phải báo cáo hoàn
+chỉnh đáp ứng toàn bộ hồ sơ. Mục 2.2 yêu cầu ít nhất 50 trang khi điền
+xong, không tính mục lục, tài liệu tham khảo và phụ lục. Không lấy số
+trang của khung, trang minh họa hay trang đính kèm để thay điều kiện này.
+Thuyết minh đã ký/đóng dấu và minh chứng thật theo mục 3.15–3.16 còn phải
+được cung cấp và chèn vào các vị trí đã đánh dấu trước bốn bản tin/tóm
+tắt. Nội dung khoa học, thứ tự từ viết tắt/tên tác giả sau khi điền và
+chữ ký cũng cần được kiểm tra lại.
+
+## Lệnh tái tạo
+
+```bash
+make -C reportTemplate doctor
+make -C reportTemplate all smoke
+make -C reportTemplate check
+```
+
+Để thử fallback, sao chép template ra thư mục độc lập rồi chạy
+`make all smoke BIBLIOGRAPHY=bibtex` và `make check`. Phần bên dưới là
+kết quả lịch sử của phiên bản ban đầu, không phải số trang hiện tại.
+
+## Kiểm tra ban đầu — 09/10/2026
 
 Đã hoàn tất biên dịch và kiểm tra bộ template ban đầu. Các ô trống và
 placeholder là phần cần điền cho đề tài mới.
 
-## PDF đã tạo
+### PDF đã tạo
 
 | Tệp | Số trang |
 | --- | ---: |
@@ -21,7 +85,7 @@ và lệnh ngắt trang vô hình `\par\penalty0` để chương trống không 
 Báo cáo chính không chứa hình, số liệu hay mục tài liệu tham khảo mẫu;
 PDF minh họa và bản ghi placeholder nằm riêng trong `examples/`.
 
-## Lệnh tái tạo
+### Lệnh tái tạo
 
 ```bash
 make -C reportTemplate doctor
@@ -36,7 +100,7 @@ make content smoke BIBLIOGRAPHY=bibtex
 make check
 ```
 
-## Kết quả
+### Kết quả
 
 - Cả bảy PDF đều A4, phông Times New Roman được nhúng. Kiểm tra công cụ
   xác nhận đủ bốn kiểu chữ. Class giữ cỡ thân bài 13 bp, giãn dòng 1,3

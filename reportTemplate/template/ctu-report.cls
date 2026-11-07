@@ -31,6 +31,11 @@
 \RedeclareSectionCommand[beforeskip=0pt,afterskip=18bp]{chapter}
 \setcounter{secnumdepth}{2}
 \setcounter{tocdepth}{2}
+% Reserve room for longer Roman page numbers in the contents and lists.
+\makeatletter
+\renewcommand*{\@pnumwidth}{2.5em}
+\renewcommand*{\@tocrmarg}{3.5em}
+\makeatother
 \RequirePackage{scrlayer-scrpage}
 \clearpairofpagestyles
 \cfoot*{\pagemark}
