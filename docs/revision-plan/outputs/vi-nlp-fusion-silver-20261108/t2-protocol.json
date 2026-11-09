@@ -1,0 +1,29 @@
+{
+  "status": "LOCKED_BEFORE_ANY_TEST_PREDICTIONS",
+  "scope": "Additional T2 encoder fine-tuning on the same AI-translated silver pilot; not independent native-Vietnamese validation",
+  "dataset_sha256": "04f44a9d0af284804dff5052b540a2286b1db666e133cbee7c1d4140c32dc55d",
+  "base_protocol_sha256": "e9abccbd4e681e6131c2d3a60a9d732580295aa1a4176b2b03dee764ff682ea2",
+  "learning_rates": [
+    1e-05,
+    2e-05
+  ],
+  "seeds": [
+    17,
+    29,
+    43
+  ],
+  "max_epochs": 5,
+  "early_stopping_patience": 2,
+  "effective_batch_size": 16,
+  "physical_batch_size": 4,
+  "max_length": 128,
+  "dropout": 0.2,
+  "optimizer": "AdamW",
+  "weight_decay": 0.01,
+  "loss": "cross entropy, inverse-frequency weights from training only",
+  "selection": "best dev macro-F1 per run, earlier epoch on tie; choose learning rate by mean of 3 development scores, lower learning rate on tie; retain all three selected-seed models",
+  "test_policy": "model/selection hashes frozen before test predictions; report all 3 selected seed results, no best-test seed selection",
+  "cpu_threads": 4,
+  "timeout_seconds": 1800,
+  "no_change_to_frozen_fusion_contrast": true
+}

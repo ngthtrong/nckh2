@@ -8,11 +8,15 @@ Trong các bảng so sánh, \textbf{chữ đậm} đánh dấu giá trị mô t�
 Model mới được dùng cho các hình phân loại là MobileNetV3-Large với seed 1024. Trên 256 ảnh test, artifact ghi Accuracy \NewImageAccuracy\%, macro-F1 \NewImageMacroFOne\% và balanced accuracy 73,87\%. Bảng~\ref{tab:confusion} và \ref{tab:image-classes} đã được tính đối chiếu từ ma trận với JSON metric của chính model này.
 \input{generated/tables/confusion}
 \input{generated/tables/image-classes}
+Hình~\ref{fig:image-confusion} biểu diễn số ảnh của từng cặp nhãn thật và nhãn dự đoán trên tập test.
+
 \begin{figure}[htbp]\centering
 \includegraphics[width=.86\textwidth]{image-confusion.pdf}
 \caption{Ma trận nhầm lẫn trên test của MobileNetV3-Large seed 1024}
 \label{fig:image-confusion}
 \end{figure}
+Hình~\ref{fig:image-confusion-normalized} chuẩn hóa ma trận theo lớp thật để đối chiếu tỷ lệ dự đoán giữa các lớp.
+
 \begin{figure}[htbp]\centering
 \includegraphics[width=.86\textwidth]{image-confusion-normalized.pdf}
 \caption{Ma trận nhầm lẫn test chuẩn hóa theo lớp thật của model seed 1024}\label{fig:image-confusion-normalized}
@@ -20,27 +24,27 @@ Model mới được dùng cho các hình phân loại là MobileNetV3-Large v�
 Recall non\_flood là 90,70\%; recall high là 74,07\%. Trong 54 ảnh high, 12 ảnh bị dự đoán medium và 2 ảnh bị dự đoán low. Có 3 lỗi cách ít nhất hai mức severity (1,17\% test). Đây là chỉ số theo thứ tự mức ngập, chưa đo hệ quả cứu hộ.
 
 Checkpoint seed 1024 chưa lưu hash manifest chia tập của lần train. Các kiểm tra ảnh sạch và lỗi validation ở Chương~\ref{chap:02-data-methods} nhất quán với split dùng chung, nhưng chưa xác nhận toàn bộ phân công mẫu huấn luyện ban đầu. Phiên benchmark seed 1024 chạy lại đã có đủ dự đoán trên test, hash split/config và hash model để đối chiếu. Bằng chứng của phiên đánh giá này không thay thế hồ sơ chia tập còn thiếu của lần train; không dùng riêng chênh lệch Accuracy giữa các phiên để kết luận model cải thiện hoặc suy giảm.
-\begin{landscape}
-\begin{figure}[p]\centering
-\setlength{\abovecaptionskip}{4pt}
-\includegraphics[width=\linewidth]{image-examples.pdf}
+Hình~\ref{fig:image-examples} minh họa các trường hợp phân loại sai trên validation của cùng mô hình.
+
+\begin{reportlandscapefigure}
+\centering
+
+\includegraphics[width=\linewidth,height=\ReportLandscapeImageHeight,keepaspectratio]{image-examples.pdf}
 \caption{Các ví dụ phân loại sai trên validation của model seed 1024}
 \label{fig:image-examples}
-\end{figure}
-\end{landscape}
+\end{reportlandscapefigure}
 Trong hình, T là nhãn thật, P là dự đoán, conf là xác suất lớp dự đoán và true\_prob là xác suất nhãn thật. Ảnh minh họa gồm các lỗi validation, không phải ví dụ đúng/sai trên test như hình của phiên cũ. Có lỗi confidence cao; không suy nguyên nhân sai nhãn, góc chụp hay che khuất chỉ từ hình. Các ảnh nguồn Dataset\_Flood giữ tác quyền ban đầu; minh họa nội bộ không xác nhận quyền phát hành lại ngoài báo cáo.
 
 \subsection{Confidence và chính sách gửi metadata}
 Các phân tích confidence dưới đây thuộc benchmark FP32 seed \BenchmarkSeed{} và dùng CSV dự đoán đi kèm. ECE của phiên benchmark là \ImageECE{} và Brier \ImageBrier{}.
 Hình~\ref{fig:confidence-calibration} được tính từ dự đoán FP32 trên 256 ảnh test với bin rộng 0,1. Đường reliability so sánh confidence trung bình với tỷ lệ đúng trong mỗi bin; biểu đồ số mẫu cho biết một điểm trên đường có bao nhiêu quan sát. Đây là phép mô tả trên split hiện tại, không phải kết quả đã hiệu chuẩn lại mô hình. Giá trị ECE nêu trên được lấy theo cấu hình artifact gốc, không tính lại ECE từ các bin minh họa này.
-\begin{landscape}
-\begin{figure}[p]\centering
-\setlength{\abovecaptionskip}{4pt}
-\includegraphics[width=\linewidth]{confidence-calibration.pdf}
+\begin{reportlandscapefigure}
+\centering
+
+\includegraphics[width=\linewidth,height=\ReportLandscapeImageHeight,keepaspectratio]{confidence-calibration.pdf}
 \caption{Reliability và số mẫu theo confidence của mô hình FP32 trên tập test}
 \label{fig:confidence-calibration}
-\end{figure}
-\end{landscape}
+\end{reportlandscapefigure}
 
 Ở ngưỡng $p\geq0{,}90$, CSV được chọn có \HighConfidenceCount/\ImageTest{} ảnh (\HighConfidenceCoverage\%), trong đó \HighConfidenceCorrect{} dự đoán đúng. Kết quả này bổ sung thông tin cho chính sách gửi metadata; nó không bảo đảm mọi ảnh camera mới có confidence cao đều đúng. Ngưỡng 0,90 là cấu hình ứng dụng đang có, không được chọn lại từ phân tích này. Nếu dùng tập test để chỉnh ngưỡng, cần tập xác nhận mới để đánh giá quyết định sau điều chỉnh.
 
@@ -103,6 +107,8 @@ Các thời gian trong bảng thuộc cùng phiên đo FP32/PTQ/QAT. Artifact l�
 
 Theo summary đã chọn, QAT INT8 đạt Accuracy \QATAccuracy\%, macro-F1 \QATMacroFOne\% và \QATCriticalCount{} lỗi nặng. Độ trễ được đối chiếu với hai phương án còn lại trong cùng bảng. Kết quả đặc trưng cho checkpoint và quy trình đã lưu; không suy ra QAT nói chung luôn tốt hơn hoặc kém hơn các phương pháp khác.
 
+\paragraph{Giải thích đánh đổi lượng tử hóa.} PTQ đưa tệp ONNX từ 16,04 xuống 4,51 MiB và trung vị suy luận CPU từ 14,81 xuống 13,97 ms trong phiên này, nhưng số lỗi nặng tăng từ 3 lên 17. Recall high 64,81\% của PTQ cũng thấp hơn 74,07\% của FP32 trong cùng nguồn dự đoán. QAT có tệp nhỏ 4,57 MiB nhưng trung vị 53,11 ms và 45 lỗi nặng; recall high 74,07\% riêng lẻ không bù được chất lượng toàn bộ bốn lớp. Như vậy, lợi ích lưu trữ của INT8 đã quan sát được, còn lựa chọn cho nguyên mẫu phải xét đồng thời macro-F1, recall high, lỗi nặng và độ trễ. Các số liệu này chưa giải thích vì sao checkpoint QAT suy giảm và chưa có đánh giá INT8 tương ứng trên từng điện thoại để kết luận lợi ích triển khai.
+
 \subsection{Cắt tỉa có cấu trúc}
 
 \input{generated/tables/pruning_st}
@@ -113,22 +119,39 @@ Model cắt tỉa đạt Accuracy \PruningAccuracy\% và macro-F1 \PruningMacroF
 
 Độ trễ trước/sau cắt tỉa phải được so trong cùng runtime và cùng phiên. Ít tham số hơn không bảo đảm runtime nhanh hơn, vì kernel, bố trí graph và backend có thể khác. Một phiên đo CPU chưa đủ để khẳng định ưu thế hiệu năng tổng quát hoặc tốc độ trên điện thoại.
 
-\begin{figure}[p]\centering
+Đối chiếu cụ thể trong Bảng~\ref{tab:pruning_st}, ONNX giảm từ 16,04 xuống 15,81 MiB nhưng trung vị tăng từ 10,28 lên 17,02 ms; PTE cũng chậm hơn trong phiên CPU đó, trong khi PTH cắt tỉa nhanh hơn PTH gốc. Cắt tỉa thay cấu trúc kênh, còn lượng tử hóa đổi cách biểu diễn số; hai cơ chế không thể được coi là một thang nén có thứ tự thắng chung. Lựa chọn model cắt tỉa/PTE cho nguyên mẫu dựa vào benchmark điện thoại ở Mục~\ref{sec:phone-benchmark-results}, không dựa vào việc gọi nó là mô hình nhỏ nhất hoặc lấy tốc độ PTH để suy ra tốc độ PTE.
+
+Hình~\ref{fig:compression-tradeoffs} đặt dung lượng, accuracy và độ trễ cạnh nhau để làm rõ các đánh đổi của tối ưu mô hình.
+
+\begin{figure}[htbp]\centering
 \setlength{\abovecaptionskip}{4pt}
 \includegraphics[width=\textwidth]{compression-tradeoffs.pdf}
 \caption{Đánh đổi dung lượng--accuracy theo summary nén và độ trễ trước/sau cắt tỉa}
 \label{fig:compression-tradeoffs}
 \end{figure}
 
+\subsection{Ảnh suy giảm nhân tạo: đánh giá ONNX trên CPU}\label{sec:image-quality-cpu-results}
+Bảng~\ref{tab:image-quality-cpu} trình bày đủ chín điều kiện của phép bổ sung ở Mục~\ref{sec:image-quality-cpu-setup}. Clean parity đạt đồng thuận top-1 100\% với artifact ONNX cắt tỉa lịch sử; sai khác xác suất lớn nhất xấp xỉ $8{,}34\times10^{-7}$, trong ngưỡng kiểm tra đã khóa. Accuracy clean là \QualityCleanAccuracy\%, macro-F1 \QualityCleanMacroFOne\% và recall high \QualityCleanHighRecall\%; đây là model cắt tỉa, khác FP32 gốc ở phần đầu chương.
+\input{generated/tables/image-quality-cpu}
+
+Với độ sáng nhân $0{,}4$, macro-F1 là \QualityDarkMacroFOne\%, chênh lệch so với clean là \QualityDarkDeltaFOne{} điểm phần trăm (CI 95\% ghép cặp [\QualityDarkCILow; \QualityDarkCIHigh]). Với blur $\sigma=2$, chênh lệch macro-F1 là \QualityBlurDeltaFOne{} điểm phần trăm (CI [\QualityBlurCILow; \QualityBlurCIHigh]). Không có lỗi giải mã trong 2.304 dự đoán. Toàn bộ hiệu ghép cặp và khoảng tin cậy cho tám điều kiện được lưu cùng dự đoán; không chọn điều kiện có số thuận lợi để kết luận chung về độ bền vững.
+
+Nhãn gốc được kế thừa, chưa có chuyên gia đánh giá lại tính giữ nguyên ngữ nghĩa sau biến đổi; blur hoặc giảm sáng có thể che dấu hiệu phân loại. Kết quả chỉ mô tả độ nhạy của model cố định với các phép biến đổi nhân tạo trên tập hiện có, chưa xác nhận chất lượng ảnh mưa thực địa, ảnh camera độc lập hoặc hiệu năng Android. Các dự đoán được giữ đầy đủ theo ảnh gốc; số biến thể không tăng cỡ mẫu độc lập.
+
+Ảnh tối làm giảm tín hiệu nhìn thấy; blur làm mất biên và mốc mức nước; giảm kích thước có thể bỏ chi tiết trước khi letterbox phóng về tensor cố định. Đây là các cơ chế thị giác khả dĩ để đọc bảng, chưa phải phân tích nguyên nhân riêng của từng ảnh sai. JPEG, blur và giảm sáng được áp riêng nên phép thử chưa bao quát tổ hợp mưa, rung, bóng tối và nén cùng lúc. Bảng hiện tại giúp xác định các điều kiện cần ưu tiên trong kế hoạch camera/Android ở Mục~\ref{sec:camera-evaluation-plan}; chưa cung cấp số đo cho kế hoạch đó.
+
 \subsection{Khẩn cấp LR: độ khớp nhãn thay thế}
 JSON v5 ghi fidelity trên 32 trạng thái tại threshold 0,5 bằng 1,0. Bảng so sánh với quy tắc cho thấy tất cả profile khớp nhãn OR. Các audit dataset/final gate ghi kiểm tra integrity; audit nguồn giữ các trạng thái có điều kiện và thay đổi sau rà soát, không chuyển mọi hạng mục thành một phát biểu ``pass'' vô điều kiện.
 
 Sanity 10 vòng giữ một số profile dương để kiểm tra khả năng dự đoán trạng thái chưa có trong train của vòng đó. Có vòng recall 0,75 hoặc 0,667, nên không nên diễn giải kết quả toàn bảng là tổng quát hoàn hảo khi huấn luyện thiếu profile. Đây là kiểm tra kỹ thuật trong không gian tổng hợp hữu hạn. Mô hình không được đánh giá trên người bệnh, tin nhắn tự do hoặc dữ liệu điều phối thực.
 
-Ứng dụng đã có chức năng nạp mô hình và tính điểm LR từ các dấu hiệu khẩn cấp được người dùng lựa chọn. Thiết kế tích hợp sử dụng trường \texttt{E\_i} gửi lên máy chủ, kết hợp với thông tin \texttt{urgency} do backend xác định để phục vụ phân cụm và xếp hạng. Kết quả hiện có gồm dữ liệu, mô hình và bước tính điểm tại ứng dụng. Đây là mô hình dùng đầu vào có cấu trúc, không phải mô hình phân tích tin nhắn tiếng Việt.
+Ứng dụng đã có chức năng nạp mô hình và tính điểm LR từ các dấu hiệu khẩn cấp được người dùng lựa chọn. Ứng dụng gửi \texttt{E\_i} và backend lưu payload, nhưng adapter chưa đọc điểm này: \texttt{ReportV2.E} lấy từ \texttt{urgency} hoặc từ khóa trong mô tả. Do đó chưa có bằng chứng điểm LR tham gia phân cụm hoặc xếp hạng trong luồng hiện hành. Kết quả hiện có gồm dữ liệu, mô hình và bước tính điểm tại ứng dụng. Đây là mô hình dùng đầu vào có cấu trúc, không phải mô hình phân tích tin nhắn tiếng Việt.
 
-\subsection{RQ1: chất lượng phân cụm cơ sở}
+\subsection{RQ1: chất lượng phân cụm cơ sở}\label{sec:rq1-discussion}
+RQ1 hỏi liệu đồ thị dùng cổng tích không gian có cải thiện chất lượng phân cụm và độ bền so với các đối chứng hay không. Phép so sánh cơ sở dưới đây dùng các cấu hình được chọn độc lập trên calibration; phần stress tiếp theo giữ nguyên cấu hình để khảo sát nhiễu và multiplicity.
 \input{generated/tables/rq1-benchmark}
+Hình~\ref{fig:rq1-baselines} đối chiếu ARI và khoảng tin cậy 95\% giữa năm biến thể đồ thị trên 40 run test.
+
 \begin{figure}[htbp]\centering
 \includegraphics[width=\textwidth]{rq1-graph-baselines.pdf}
 \caption{ARI và CI 95\% của năm biến thể đồ thị trên 40 run test RQ1}
@@ -142,8 +165,14 @@ Product Leiden có ARI 0,9165; phép so sánh với Product Louvain sau Holm có
 
 Một phát hiện vận hành là Product có fake absorption và fake rejection đều bằng không, nhưng false-destination rate 16,49\%. Tin giả không hòa vào điểm thật nhưng tạo điểm đến giả riêng. Vì thế, tỷ lệ hấp thụ bằng không không được gọi là chống tin giả hiệu quả. Nếu scheduler coi các cụm giả là điểm cần đi, chúng vẫn tiêu tốn nguồn lực.
 
+\paragraph{Cơ chế khả dĩ và điều kiện áp dụng.} Cổng không gian của Product hạn chế trọng số cạnh xa ngay cả khi thời gian và ngữ cảnh giống nhau; đây là tính chất của công thức, không bảo đảm phân hoạch đúng hơn. Sau chọn quantile và top-$K$, cấu hình Additive riêng có thể giữ tập cạnh khác và phù hợp generator hơn. So sánh khớp mật độ chỉ gần bằng tổng mức làm thưa, chưa khớp từng cạnh, phân bố trọng số hay nghiệm Louvain. Khi thêm bản sao, quantile toàn cục và cạnh tranh láng giềng có thể đổi, nên bảo đảm trên từng cạnh chưa bảo đảm cộng đồng bất biến. Các cơ chế này nhất quán với thiết kế và stress đã quan sát nhưng chưa được cô lập bằng ablation cơ chế. Kết luận áp dụng cho 40 run test của Generator 3.0, không tự chuyển sang báo cáo cứu hộ thực.
+
+\paragraph{Trả lời RQ1.} Chưa xác lập Product cải thiện chất lượng chung so với Additive được chọn độc lập. ARI và hiệu trung bình nghiêng về Additive trong bundle này; $p_{\mathrm{Holm}}>0{,}05$ không chứng minh hai phương pháp tương đương. So sánh khớp mật độ và Leiden cũng chưa xác nhận ưu thế chung của Product Louvain.
+
 \subsection{RQ1: độ nhạy dưới nhiễu và bản sao}
 \input{generated/tables/rq1-stress}
+Hình~\ref{fig:rq1-stress-report} biểu diễn thay đổi ARI so với đối chứng trong từng điều kiện nhiễu.
+
 \begin{figure}[htbp]\centering
 \includegraphics[width=.97\textwidth]{../paper/figures/rq1_stress_delta_ari.pdf}
 \caption{Thay đổi ARI trong từng phương pháp so với đối chứng, 40 run test RQ1}
@@ -156,8 +185,11 @@ Với Product Louvain, thay đổi năm lần là $-0{,}6108$, CI ghép cặp ch
 
 Lần chạy độc lập không gộp chỉ làm một số tổng hợp ở điều kiện hai lần khác nhẹ; kết luận GPS, timestamp và năm lần được giữ theo audit. Quan trọng hơn, thất bại ở phân cụm cùng tồn tại với bất biến sao chép của score khi grouping cố định. Hai phát biểu áp dụng hai tầng khác nhau.
 
-\subsection{RQ2: phù hợp với lợi ích mô phỏng}
+\subsection{RQ2: phù hợp với lợi ích mô phỏng}\label{sec:rq2-discussion}
+RQ2 hỏi hai điều khác nhau: score có chặn có ổn định trước bản sao và khai báo biến đổi hay không, và thứ tự của nó có phù hợp hơn với lợi ích mô phỏng hay không. Nhóm oracle được cố định để tách tầng điểm khỏi sai số phân cụm; đối chứng bao gồm legacy, chỉ khẩn cấp, chỉ số người, tuyến tính và ngẫu nhiên.
 \input{generated/tables/rq2-alignment}
+Hình~\ref{fig:rq2-alignment} đối chiếu mức phù hợp của các cách xếp hạng với lợi ích mô phỏng khi dùng nhóm oracle.
+
 \begin{figure}[htbp]\centering
 \includegraphics[width=\textwidth]{rq2-alignment.pdf}
 \caption{Mức phù hợp xếp hạng với lợi ích mô phỏng trong điều kiện oracle grouping}
@@ -167,8 +199,14 @@ Lần chạy độc lập không gộp chỉ làm một số tổng hợp ở đ
 
 Ước lượng điểm của phương pháp có chặn còn thấp hơn chỉ số người (0,6709) và ngẫu nhiên (0,6763). Những chênh lệch điểm này không tự chứng minh khác biệt thống kê. Vì grouping oracle đã loại lỗi phân cụm khỏi điều kiện RQ2, sự phù hợp yếu không thể quy hoàn toàn cho phân hoạch sai.
 
+\paragraph{Diễn giải phù hợp và ổn định.} Cực đại trong họ bằng chứng khiến bản sao exact không tăng thêm đóng góp khi nhóm và $Q_i$ đã khóa; đó là cơ chế toán học cho bất biến hẹp. Nhưng việc bão hòa số người, dùng cực đại severity và tăng điểm theo yếu thế không được tối ưu trực tiếp cho lợi ích evaluator. Vì thế, một thứ tự có thể rất ổn định nhưng vẫn không xếp đúng nhu cầu do generator quy định. Chiến dịch phối hợp dùng nhiều payload khác nhau còn có thể làm tăng củng cố/confidence, vượt ngoài điều kiện bản sao exact. Đây là cách giải thích phù hợp với cấu trúc score và các kết quả stress, chưa phải bằng chứng xác nhận hệ số chính sách hoặc nguyên nhân duy nhất của alignment yếu.
+
+\paragraph{Giới hạn replay thống kê RQ2.} Tái phân tích từ bảng đã lưu khớp các hiệu trung bình, CI và so sánh NDCG chính. Có ba raw $p$ của Spearman khác số đã lưu, kéo theo năm giá trị Holm trong các họ liên quan. Cả 15 giá trị Holm alignment lịch sử đều khớp khi tính lại từ chính raw $p$ lịch sử, nên chưa thấy lỗi hiệu chỉnh Holm độc lập. Sai khác vẫn còn khi dùng lại đúng phiên bản NumPy/pandas/SciPy của lần RQ2 gốc; chưa thể quy nguyên nhân cho phiên bản. Notebook tính comparison trong bộ nhớ trước khi xuất bảng với 10 chữ số có nghĩa. Chưa tìm được vector chưa làm tròn để xác minh rank/tie và nhánh kiểm định của lần chạy gốc; mất độ chính xác khi xuất vẫn chỉ là giả thuyết giải thích. Giữ số lịch sử và số replay riêng cùng tám trường còn OPEN, chưa chứng nhận tái lập toàn bộ suy luận RQ2. Các khác biệt này không đổi kết luận chưa xác lập lợi ích alignment chung.
+
 \subsection{RQ2: bất biến hẹp và thất bại dưới phối hợp}
 \input{generated/tables/rq2-robustness}
+Hình~\ref{fig:rq2-robustness} tổng hợp độ biến động xếp hạng dưới năm điều kiện thử nghiệm RQ2.
+
 \begin{figure}[htbp]\centering
 \includegraphics[width=\textwidth]{rq2-robustness.pdf}
 \caption{Năm điều kiện RQ2 cho thấy bất biến exact và các giới hạn trước khai báo tăng/phối hợp}
@@ -184,23 +222,48 @@ Chiến dịch phối hợp confidence cao tạo drift 0,1688 cho score có ch�
 \input{generated/tables/rq2-sensitivity}
 Phân tích hằng số one-at-a-time có 21 cấu hình trên 40 seed (840 quan sát seed/cấu hình). Span NDCG@5 trung bình đều dưới 0,01, lớn nhất khoảng 0,00546 khi thay trọng số $\omega_F$. Ổn định cục bộ này cùng tồn tại với alignment yếu; không chứng minh các hằng số đã có giá trị chính sách hoặc kết quả giữ nguyên ngoài miền perturbation.
 
-\subsection{RQ3: hệ quả điều phối từ phân hoạch dự đoán}
+\paragraph{Trả lời RQ2.} Bằng chứng hỗ trợ bất biến bản sao exact khi grouping cố định; không hỗ trợ độ bền trước mọi phối hợp và chưa xác lập lợi ích xếp hạng chung so với các đối chứng. Độ nhạy nhỏ trong miền hệ số đã thử không xác nhận chính sách ưu tiên ngoài thực địa.
+
+\subsection{RQ3: hệ quả điều phối từ phân hoạch dự đoán}\label{sec:rq3-discussion}
+RQ3 hỏi liệu dùng phân hoạch dự đoán và score có chặn trong scheduler có giảm harm hoặc trễ hạn mô phỏng so với các chính sách đối chứng hay không. Khác RQ2 giữ nhóm oracle, phép thử này cho phép lỗi phân cụm truyền xuống lựa chọn điểm đến và lịch phục vụ, với cùng điều kiện nguồn lực trong mỗi seed.
 \input{generated/tables/rq3-effects}
 Trên phân hoạch Product, điểm có chặn làm harm mô phỏng tăng 14,34 so với legacy và giảm tỷ lệ trễ hạn khoảng 1,88 điểm phần trăm. Cả hai tương phản không có ý nghĩa sau Holm: $p=0{,}563$ và $p=0{,}247$. Bảng dùng chiều $\Delta$ cải thiện, nên harm tăng tương ứng hiệu âm.
 
-So với gần nhất trước, score có chặn kém hơn về harm và trễ hạn, với $p_{\mathrm{Holm}}\approx4{,}1\times10^{-5}$ và $1{,}3\times10^{-6}$. Product cũng kém hơn Additive khớp mật độ khi dùng cùng score ở harm ($p_{\mathrm{Holm}}=0{,}000168$). Sai phân hoạch có hệ quả xuống tầng lập lịch, và bảo đảm điểm hữu hạn không loại bỏ hệ quả đó.
-\begin{landscape}
-\begin{figure}[p]\centering
-\setlength{\abovecaptionskip}{4pt}
-\includegraphics[width=\linewidth]{../paper/figures/rq3_dispatch_conditions.pdf}
+So với gần nhất trước, score có chặn kém hơn về harm và trễ hạn, với $p_{\mathrm{Holm}}\approx4{,}1\times10^{-5}$ và $1{,}17\times10^{-6}$. Product cũng kém hơn Additive khớp mật độ khi dùng cùng score ở harm ($p_{\mathrm{Holm}}=0{,}000168$). Sai phân hoạch có hệ quả xuống tầng lập lịch, và bảo đảm điểm hữu hạn không loại bỏ hệ quả đó.
+Đơn vị suy luận là 40 seed, sau lấy trung bình ba điều kiện nguồn lực trong từng seed; Holm xét 14 endpoint trong mỗi tương phản cố định. So với gần nhất trước, hiệu cải thiện harm là $-69{,}88$, CI 95\% $[-95{,}77;-45{,}03]$; hiệu cải thiện tỷ lệ trễ hạn là $-17{,}71$ điểm phần trăm, CI $[-20{,}83;-14{,}48]$. Đây là kết quả mô phỏng, không phải số người được cứu hoặc thiệt hại thực đo.
+
+Hình~\ref{fig:rq3-conditions-report} trình bày kết quả mô tả theo từng điều kiện nguồn lực trên phân hoạch Product.
+
+\begin{reportlandscapefigure}
+\centering
+
+\includegraphics[width=\linewidth,height=\ReportLandscapeImageHeight,keepaspectratio]{../paper/figures/rq3_dispatch_conditions.pdf}
 \caption{Trung bình mô tả theo điều kiện nguồn lực trên phân hoạch Product}
 \label{fig:rq3-conditions-report}
-\end{figure}
-\end{landscape}
+\end{reportlandscapefigure}
 
 Gần nhất trước có harm và trễ hạn trung bình thấp hơn trong mọi điều kiện được thử. Một diễn giải có thể là score theo nhu cầu chưa biểu diễn đủ chi phí đi lại và ràng buộc lịch; đây là giả thuyết giải thích, chưa được cô lập bằng thực nghiệm cơ chế. Kết quả không xác lập gần nhất trước là chính sách thực địa tối ưu.
 
+Một cụm bị gộp sai có thể dẫn scheduler tới đại diện không phù hợp; cụm bị tách có thể tạo nhiều điểm đến cho cùng sự kiện. Ngay cả khi phân hoạch đúng, ưu tiên nhu cầu cao nhưng ở xa có thể làm các điểm gần vượt deadline trong mô hình nguồn lực hữu hạn. Do đó, chất lượng phân cụm, giá trị score và quy tắc lập lịch phải được đọc cùng nhau. So sánh hiện có cho thấy pipeline được chọn chưa đạt lợi ích chung mong đợi; chưa phân rã được phần tổn thất do từng cơ chế và không biến đơn vị harm quy ước thành thiệt hại hay số người trong thực tế.
+
+\paragraph{Trả lời RQ3.} Sai phân hoạch có hệ quả bất lợi trong các phép so sánh đã thử; revised priority chưa xác lập lợi ích chung so với legacy và thua nearest-first về harm/trễ hạn trong bundle này. Chi phí đi lại và ràng buộc lịch là cơ chế khả dĩ để nghiên cứu tiếp, chưa phải chẩn đoán nhân quả đã được thực nghiệm xác nhận.
+
+\input{chapters/04-evaluation/sections/multimodal-pilot}
+\input{chapters/04-evaluation/sections/vi-silver-pilot}
+
 \subsection{Bàn luận xuyên các tầng}
+Bảng~\ref{tab:rq-evidence-boundaries} tổng hợp câu trả lời và ranh giới diễn giải của ba RQ, giữ riêng thuộc tính phương pháp với chất lượng quyết định.
+
+\begin{longtable}{P{.10\textwidth}P{.27\textwidth}P{.27\textwidth}P{.25\textwidth}}
+\caption{Bằng chứng và giới hạn của RQ1--RQ3 trong phạm vi mô phỏng}\label{tab:rq-evidence-boundaries}\\
+\toprule RQ & Kết quả hỗ trợ & Chưa hỗ trợ & Cách hiểu trong mô phỏng \\\midrule\endfirsthead
+\toprule RQ & Kết quả hỗ trợ & Chưa hỗ trợ & Cách hiểu trong mô phỏng \\\midrule\endhead
+RQ1 & Đặc tính chặn cạnh; chất lượng và thất bại dưới nhiễu/bản sao của từng pipeline đã đo & Product tốt hơn Additive chung; chống tin giả hoặc bất biến phân cụm & Đối chiếu pipeline trên Generator 3.0, không phải tác động nhân quả riêng operator \\
+RQ2 & Bất biến exact với grouping cố định; giới hạn trước khai báo phối hợp & Alignment tốt hơn chung; ưu tiên thực địa đúng; tái lập toàn bộ $p$ & Tách ổn định khỏi đúng mục tiêu; ba raw $p$ Spearman và năm Holm còn OPEN \\
+RQ3 & Phân hoạch và chính sách dẫn tới hệ quả harm/trễ hạn khác nhau; giữ kết quả thua gần nhất trước & Lợi ích điều phối chung của revised; chính sách tối ưu hoặc hiệu quả cứu người & Suy luận trên 40 seed sau trung bình ba điều kiện; harm theo evaluator \\
+\bottomrule
+\end{longtable}
+
 Các kết quả cho thấy cần đánh giá riêng ba dạng chất lượng: đúng biểu diễn tại thiết bị, đúng liên kết sự kiện và phù hợp quyết định điều phối. FP32 có parity tốt giữa runtime nhưng vẫn nhầm lớp; score có invariance exact nhưng alignment yếu; Product có chặn cạnh nhưng nhạy multiplicity. Không có một chỉ số đơn lẻ thay thế được các tầng còn lại.
 
 Mức hoàn thành phần mềm tạo một nền tảng thử nghiệm có thể trình diễn và kiểm tra việc tuân thủ quy tắc trao đổi dữ liệu. Phần nghiên cứu thuật toán cung cấp các giới hạn toán học và kết quả âm có ích cho cải tiến. Khả năng ứng dụng được phát biểu ở mức nguyên mẫu hỗ trợ quyết định; hiệu quả cứu hộ ngoài thực tế còn cần dữ liệu độc lập, chuyên gia và thử nghiệm thiết bị/hạ tầng.

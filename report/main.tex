@@ -37,11 +37,15 @@
 \include{appendices/reproducibility}
 \include{appendices/supplementary-results}
 \clearpage
-\includepdf[
-  pages=-,
-  pagecommand={},
-  fitpaper=false
-]{thuyet-minh.pdf}
+% Fit each scanned page independently, then overscan to hide the yellow edges.
+\foreach \proposalpage in {1,...,12}{%
+  \includepdf[
+    pages=\proposalpage,
+    pagecommand={},
+    fitpaper=false,
+    scale=1.05
+  ]{thuyet-minh.pdf}%
+}
 \ifReportFull
   \input{build/evidence.tex}
 \else

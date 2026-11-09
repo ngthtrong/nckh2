@@ -1,0 +1,454 @@
+--- before-session/report/Makefile
++++ after-session/report/Makefile
+@@ -7,6 +7,7 @@
+ results:
+ 	$(PYTHON) scripts/export_results.py
+ 	$(PYTHON) scripts/build_phone_report_tables.py
++	$(PYTHON) scripts/export_revision_profiles.py
+ templates:
+ 	$(PYTHON) scripts/read_guideline_docs.py
+ figures:
+--- before-session/report/README.md
++++ after-session/report/README.md
+@@ -4,7 +4,9 @@
+ 
+ Bản sơ bộ đã có Mở đầu đủ sáu mục, bốn chương khoa học, Kết luận/kiến nghị, hai phụ lục, thông tin kết quả Việt–Anh và bản tin/tóm tắt Việt–Anh. Nội dung dựa trên thuyết minh, mã nguồn và artifact trong repo hiện tại. Đây chưa phải hồ sơ nghiệm thu đủ điều kiện nộp.
+ 
+-Rà soát hình thức ngày **07/11/2026**: bản một mặt/hai mặt đều **165 trang**, gồm **105 trang thân bài**; đã cập nhật trạng thái bài báo thành đã công bố và đối chiếu đủ **48 hình, 37 bảng**. Xem [kết quả rà soát](audit/layout-2026-11-07.md) và [quy tắc biên soạn](RULES.md).
++Snapshot rà soát hình thức trước đợt chỉnh sửa nội dung ngày **07/11/2026**: bản một mặt/hai mặt đều **165 trang**, gồm **105 trang thân bài**; trạng thái bài báo được cập nhật theo xác nhận người dùng và đã đối chiếu **48 hình, 37 bảng**. Xem [kết quả rà soát](audit/layout-2026-11-07.md) và [quy tắc biên soạn](RULES.md).
++
++Đợt chỉnh sửa P01–P08 sau đó: hai bản nội dung **171 trang**, kiểm **48 hình, 38 bảng**; bản tin Việt/Anh 1/1 trang, tóm tắt Việt/Anh 2/3 trang. Nguồn hiện hành phân biệt LR/NLP, E_i chưa consumed, kết quả âm và các gap còn lại. Xem [bàn giao thực thi](../docs/revision-plan/outputs/phase-08/handoff.md) và [ledger 20 nhận xét](../docs/revision-plan/outputs/phase-08/final-review-status.csv); trạng thái công bố riêng bài vẫn chưa được xác minh độc lập. Audit 165 trang bên trên giữ như lịch sử.
+ 
+ ## Biên dịch
+ 
+@@ -50,7 +52,7 @@
+ 
+ Các số liệu chính dùng snapshot ảnh **1.702 mẫu, test 256 ảnh, đầu vào 256**, khác README/notebook cũ (1.621/1.625 mẫu, test 244, đầu vào 224). Accuracy FP32 của phiên lịch sử seed 42 là 76,17% không được so với 73,77% của split cũ để kết luận cải thiện. Các kết luận cũ thiếu split/INT8/ONNX được cập nhật theo file đang tồn tại.
+ 
+-**Điểm cần rà soát số liệu:** PTQ/QAT summary chưa khớp hoàn toàn CSV dự đoán. QAT summary ghi Accuracy 52,34%, CSV tính ra 51,17%. Báo cáo giữ cả hai nguồn và bảng đối chiếu, chưa xem metric nén là số liệu đã chốt. FP32/pruning khớp CSV; ảnh khớp MD5/split. Mã backend chưa đọc `E_i` mà app gửi khi chuyển sang thuật toán; điều này được ghi như khoảng trống tích hợp, không sửa sản phẩm trong công việc soạn báo cáo.
++**Phân biệt snapshot số liệu:** sai lệch QAT 52,34% trong summary so với 51,17% từ CSV thuộc bộ seed42 lịch sử và vẫn được giữ. Bộ seed1024 hiện được chọn có QAT Accuracy 46,48%, khớp CSV; P02 đối chiếu đủ 12 cấu hình FP32/PTQ/QAT/pruning theo metric và hash. Không suy nguyên nhân suy giảm QAT từ kiểm tra này. Mã backend chưa đọc `E_i` mà app gửi; report giữ khoảng trống tích hợp và không sửa sản phẩm. Xem `../docs/revision-plan/outputs/phase-02/` và kết quả replay/sai lệch RQ trong phase-03.
+ 
+ ## Hình thức và hồ sơ
+ 
+--- before-session/report/bibliography/articles.bib
++++ after-session/report/bibliography/articles.bib
+@@ -182,3 +182,14 @@
+  title={{JSON} Canonicalization Scheme ({JCS})}, year={2020},
+  howpublished={RFC 8785}, url={https://www.rfc-editor.org/rfc/rfc8785}, keywords={articles}
+ }
++
++@misc{whoIITTAdult,
++ author={{World Health Organization} and {International Committee of the Red Cross} and {Médecins Sans Frontières}},
++ title={Interagency Integrated Triage Tool: Age 12 and older},
++ url={https://cdn.who.int/media/docs/default-source/integrated-health-services-(ihs)/csy/iitt/iitt_adult.pdf?sfvrsn=b2a91431_1},
++ urldate={2026-11-07}, keywords={articles}}
++@misc{whoIITTReference,
++ author={{World Health Organization} and {International Committee of the Red Cross} and {Médecins Sans Frontières}},
++ title={Interagency Integrated Triage: Reference card},
++ url={https://cdn.who.int/media/docs/default-source/integrated-health-services-(ihs)/csy/iitt/iitt_reference-card09165e1c-0df5-472d-ab53-45506191a7bd.pdf},
++ urldate={2026-11-07}, keywords={articles}}
+--- before-session/report/bibliography/legal.bib
++++ after-session/report/bibliography/legal.bib
+@@ -1 +1,8 @@
+ % Văn bản pháp quy đã sử dụng. Nhóm: legal.
++
++@misc{vnDisasterLaw2026,
++ author={{Văn phòng Quốc hội}},
++ title={Luật Phòng, chống thiên tai: Văn bản hợp nhất 85/VBHN-VPQH},
++ year={2026},
++ url={https://datafiles.chinhphu.vn/cpp/files/vbpq/2026/3/85-vbhn-vpqh.pdf},
++ urldate={2026-11-07}, keywords={legal}}
+--- before-session/report/chapters/02-data-methods/sections/data.tex
++++ after-session/report/chapters/02-data-methods/sections/data.tex
+@@ -19,7 +19,7 @@
+ Mô hình dùng \ImageTotal{} ảnh sạch phân bố vào bốn mức. Thứ tự lớp được giữ thống nhất từ huấn luyện, xuất mô hình đến xử lý trong ứng dụng: \texttt{low}, \texttt{medium}, \texttt{high}, \texttt{non\_flood}.
+ \input{generated/tables/image-split}
+ 
+-\paragraph{Nguồn gốc.} Bộ ảnh do nhóm thu thập. Tên tệp cho thấy nhiều ảnh lấy từ web và báo điện tử, trong đó có ảnh chụp màn hình. Hiện chưa có bản ghi nguồn và giấy phép cho từng ảnh, nên bộ ảnh chỉ dùng cho nghiên cứu và không phân phối lại khi chưa rà soát bản quyền. Ảnh web đã nén thường nhỏ và khác ảnh chụp trực tiếp bằng điện thoại; mô hình chưa được đánh giá riêng trên ảnh chụp thực địa.
++\paragraph{Nguồn gốc.} Bộ ảnh do nhóm thu thập. Bản ghi hiện có chưa nối từng ảnh với URL, sự kiện gốc hoặc giấy phép; tên tệp không đủ để xác nhận nguồn ảnh. Hiện chưa có bản ghi nguồn và giấy phép cho từng ảnh, nên bộ ảnh chỉ dùng cho nghiên cứu và không phân phối lại khi chưa rà soát bản quyền. Ảnh web đã nén thường nhỏ và khác ảnh chụp trực tiếp bằng điện thoại; mô hình chưa được đánh giá riêng trên ảnh chụp thực địa.
+ 
+ \paragraph{Tiêu chí gán nhãn.} Nhãn theo hướng dẫn gán nhãn trong notebook huấn luyện (Bảng~\ref{tab:label-criteria}), dùng người và phương tiện trong ảnh làm mốc tham chiếu. Nhãn là chỉ dấu mức ngập hỗ trợ xếp hạng, không phải số đo độ sâu. Tài liệu của bộ ảnh không ghi số người gán nhãn hay độ đồng thuận giữa người gán, nên nhãn được xem là nhãn của nhóm theo hướng dẫn này. Ranh giới \texttt{low}/\texttt{medium} và \texttt{medium}/\texttt{high} phụ thuộc mốc tham chiếu nhìn thấy trong ảnh; đây là hai cặp lớp dễ nhầm nhất.
+ 
+@@ -34,13 +34,16 @@
+ \bottomrule\end{tabular}
+ \end{table}
+ 
++\paragraph{Đặc điểm tệp gốc.} Audit header trên toàn bộ \ImageTotal{} ảnh cho thấy JPEG 1.521, PNG 24, WEBP 152 và AVIF 5; mode RGB 1.687, RGBA 14 và L 1. Đây là format giải mã từ header, không suy từ đuôi tên. Chiều rộng min/trung vị/max là 168/512/5.472 pixel; chiều cao 100/384/3.648 pixel; dung lượng 2.481/41.564/2.900.796 byte. Bảng~\ref{tab:image-profile} tách theo lớp; hồ sơ tái lập giữ thêm phân vị và bảng chéo theo split. Các số này mô tả ảnh gốc, không thay kích thước tensor $256\times256$ hoặc chứng minh độ bền với ảnh tối, mờ.
++\input{generated/tables/image-profile}
++
+ \subsection{Làm sạch, nhóm ảnh và kiểm soát chia tập}
+ Trước khi huấn luyện, notebook loại ảnh không đọc được và các thư mục chờ rà soát. Ảnh trùng tuyệt đối theo MD5 nằm ở nhiều lớp khác nhau bị loại khỏi huấn luyện. Các ảnh gần giống nhau được gom thành nhóm cảm nhận (perceptual group) bằng dHash; nhóm có nhãn xung đột bị loại để rà soát. Mỗi nhóm chỉ nằm trong một tập, nhằm không để biến thể của cùng một cảnh xuất hiện ở cả huấn luyện lẫn kiểm tra. Việc chia phân tầng theo lớp với tỷ lệ xấp xỉ 70/15/15 theo bảng chia cố định đã lưu; Bảng~\ref{tab:image-split} là kết quả.
+ 
+ Cách làm này giảm nguy cơ rò rỉ do ảnh trùng hoặc gần trùng, nhưng không chứng minh các tập độc lập hoàn toàn về nguồn hay sự kiện: hai ảnh cùng một trận ngập từ hai nguồn có thể rơi vào hai tập khác nhau. Bộ xuất kết quả đối chiếu đường dẫn và MD5 giữa bảng chia với các tệp ảnh hiện có (Mục~\ref{sec:04-evaluation-setup}).
+ 
+ \subsection{Dữ liệu khẩn cấp có cấu trúc}
+-Bảng tham chiếu liệt kê toàn bộ $2^5=32$ tổ hợp của năm cờ Boolean do nhóm chọn: không phản ứng (\texttt{unresponsive}), khó thở (\texttt{respiratory\_distress}), chảy máu nhiều (\texttt{heavy\_bleeding}), co giật (\texttt{active\_convulsions}) và chấn thương nguy cơ cao (\texttt{high\_risk\_trauma}). Nhãn dương theo quy tắc OR của nhóm: có ít nhất một cờ thì dương. Do duyệt đủ không gian tổ hợp, bảng có tính tất định và có thể kiểm tra từng dòng.
++Bảng tham chiếu liệt kê toàn bộ $2^5=32$ tổ hợp của năm cờ Boolean do nhóm chọn: không phản ứng (\texttt{unresponsive}), khó thở hoặc tím tái (\texttt{respiratory\_\allowbreak{}distress\_\allowbreak{}or\_\allowbreak{}cyanosis}), chảy máu nhiều (\texttt{heavy\_bleeding}), co giật (\texttt{active\_convulsions}) và chấn thương nguy cơ cao (\texttt{high\_risk\_trauma}). Nhãn dương theo quy tắc OR của nhóm: có ít nhất một cờ thì dương. Do duyệt đủ không gian tổ hợp, bảng có tính tất định và có thể kiểm tra từng dòng.
+ 
+ Bảng này phục vụ khảo sát phương pháp ước lượng điểm khẩn cấp $E_i^{\mathrm{LR}}\in[0,1]$; nó không phải dữ liệu lâm sàng và không được dùng để kết luận về hiệu quả y khoa. Cách mô hình dùng bảng được trình bày ở Mục~\ref{sec:02-urgency-lr}.
+ 
+--- before-session/report/chapters/02-data-methods/sections/evaluation-design.tex
++++ after-session/report/chapters/02-data-methods/sections/evaluation-design.tex
+@@ -55,6 +55,8 @@
+ 
+ Các phép kiểm tra stress RQ1 báo cáo thay đổi trong từng phương pháp so với chính đối chứng của nó; chúng không phải kiểm định ưu thế giữa các phương pháp. Giữ các ranh giới này giúp trình bày đầy đủ kết quả âm và tránh diễn giải chọn lọc.
+ 
++\paragraph{Phạm vi kiểm chứng bổ sung.} Lần chỉnh sửa này chỉ tính lại thống kê từ bảng CSV và checkpoint đã lưu, không chạy lại phân cụm, generator hoặc huấn luyện. RQ1 stress primary và replication được kiểm riêng, gồm 300 hàng hiệu ứng mỗi bundle, với 288 khoảng tin cậy bootstrap được tính lại và 12 hàng thiếu chỉ số được kiểm tra giữ trống; không gộp thành 80 run độc lập. Các bootstrap stress dùng 5.000 mẫu với seed suy từ protocol theo method/scenario/metric. Một CSV cơ sở RQ1 hiện thiếu newline cuối so với commit gốc, nhưng 400 bản ghi và mọi trường giống nhau; sai lệch byte được giữ, không gọi toàn bộ verifier lịch sử đã đạt. RQ3 replay dùng NumPy 2.5.1, pandas 3.0.3 và SciPy 1.18.0; RQ2 có kiểm bổ sung bằng đúng phiên bản gốc. Sai lệch $p$ RQ2 còn lại được nêu tại phần kết quả, không sửa số gốc để làm kiểm tra đạt.
++
+ \subsection{Quy trình xử lý và kiểm chứng kết quả}\label{sec:02-reproducibility}
+ Quy trình được mô tả theo thứ tự thao tác để làm rõ nơi sử dụng dữ liệu. Trước hết kiểm tra quy định đầu vào và cấu trúc dữ liệu, chỉ nạp tệp chứa thông tin quan sát. Kiểm tra miền số, timestamp và tọa độ; đưa báo cáo không đủ vị trí hoặc thời gian vào hàng xem xét. Từ các báo cáo đủ trường, xác định định danh payload, số củng cố và $Q_i$. Sau đó tính các thành phần tương đồng, ngưỡng quantile và cạnh top-$K$, rồi gọi bộ phát hiện cộng đồng. Với mỗi cụm dự đoán, xây họ bằng chứng từ fingerprint và envelope, tính các tổng hợp ở Công thức~\ref{eq:aggregate-e}--\ref{eq:aggregate-v}. Điểm $P_k$ đi cùng cụm vào scheduler nghiên cứu hoặc danh sách hỗ trợ điều phối. Chỉ sau khi lưu đầu ra và cấu hình, evaluator mới nối nhãn để tính chỉ số. Hàng xem xét được giữ trong output; loại khỏi bảng kết quả sẽ che mất khối lượng mà con người phải xử lý.
+ 
+--- before-session/report/chapters/02-data-methods/sections/image-design.tex
++++ after-session/report/chapters/02-data-methods/sections/image-design.tex
+@@ -105,3 +105,5 @@
+ \caption{Pipeline quy trình huấn luyện, tối ưu nén mô hình và xuất runtime AI kép}
+ \label{fig:flow-ai-training-optimization}
+ \end{reportlandscapefigure}
++
++\paragraph{Phân tích lỗi và phạm vi suy luận.} Đối chiếu prediction seed 1024 trên cùng 256 ID cho FP32/PTQ/QAT cho recall lớp high lần lượt 74,07\%/64,81\%/74,07\%, trong khi số lỗi lệch ít nhất hai mức là 3/17/45. Recall high riêng lẻ không đủ kết luận chất lượng QAT: recall medium chỉ 11,67\% và nhiều nhầm lẫn sang mức thấp hơn hoặc cao hơn. Đây là mô tả lỗi đã quan sát, chưa cô lập nguyên nhân QAT. Sau pruning, số tham số giảm từ 4.207.156 xuống 4.145.694 (khoảng 1,46\%); chênh lệch byte checkpoint PTH còn chịu ảnh hưởng metadata/optimizer. Vì vậy giảm byte, giảm tham số và tăng tốc được xem là ba kết quả riêng; so tốc độ phải cùng runtime và cùng phạm vi predict.
+--- before-session/report/chapters/02-data-methods/sections/methods.tex
++++ after-session/report/chapters/02-data-methods/sections/methods.tex
+@@ -10,7 +10,13 @@
+ 
+ Trên toàn bộ 32 trạng thái, nhãn ở threshold 0,5 khớp quy tắc OR. Khi không có cờ, điểm bằng khoảng 0,2577; với một cờ, điểm nhỏ nhất của trạng thái dương khoảng 0,5127. Quy tắc OR trực tiếp là baseline chính xác cho định nghĩa nhãn này. Độ khớp toàn bảng và sanity test không chứng minh Logistic Regression tốt hơn quy tắc hoặc có hiệu quả lâm sàng.
+ 
+-Trong ứng dụng, Logistic Regression tính điểm $E_i^{\mathrm{LR}}$ từ các dấu hiệu khẩn cấp được người dùng lựa chọn và gửi đến máy chủ trong trường \texttt{E\_i}. Theo thiết kế tích hợp, máy chủ kết hợp điểm này với thông tin \texttt{urgency} do backend xác định để tạo đầu vào khẩn cấp phục vụ phân cụm và xếp hạng. Mô hình LR không phân tích trực tiếp văn bản tự do.
++Trong ứng dụng, Logistic Regression tính điểm $E_i^{\mathrm{LR}}$ từ các dấu hiệu khẩn cấp được người dùng lựa chọn và gửi đến máy chủ trong trường \texttt{E\_i}. Backend lưu payload gốc trong SQLite, nhưng adapter hiện hành chỉ đọc \texttt{urgency}; nếu thiếu trường này, adapter dùng từ khóa trong mô tả để tạo \texttt{ReportV2.E}. Adapter chưa đọc \texttt{E\_i}. Vì vậy, nối điểm LR vào đầu vào khẩn cấp của lõi mới là thiết kế dự kiến, chưa phải đường tích hợp đã hoạt động. Mô hình LR không phân tích trực tiếp văn bản tự do.
++
++\paragraph{Căn cứ dấu hiệu và giới hạn ánh xạ.} Năm dấu hiệu được đối chiếu với nhóm tiêu chí đỏ của IITT dành cho người từ 12 tuổi; thẻ tham chiếu làm rõ khó thở và chấn thương nguy cơ cao \citep{whoIITT,whoIITTAdult,whoIITTReference}. IITT phục vụ phân loại bệnh nhân tại cơ sở y tế, còn ứng dụng chuyển thành cờ do người dân khai báo cho một nhóm người. Việc chọn năm tiêu chí, rút thành OR nhị phân và đơn giản hóa lời mô tả là thích nghi của nhóm; không thực hiện đầy đủ IITT, không xác nhận đánh giá của người không chuyên và không suy ra trọng số dispatch từ tiêu chí y tế. Cờ không thể di chuyển được giữ như ngữ cảnh, không thuộc năm đầu vào LR v5.
++
++Điều 26 khoản 1 điểm a của Luật Phòng, chống thiên tai trong bản hợp nhất 85/VBHN-VPQH năm 2026 nêu bảo đảm an toàn, đặc biệt với đối tượng dễ bị tổn thương; điểm g và h đề cập liên lạc và tìm kiếm cứu nạn tại vùng chia cắt \citep{vnDisasterLaw2026}. Đây là căn cứ định hướng nghiệp vụ, không quy định các hệ số $\omega,\mu,s$ của đề tài. Những hệ số đó vẫn là heuristic chưa được chuyên gia cứu hộ xác nhận. Đối chiếu điều khoản đã đọc không phải đánh giá toàn bộ tính tuân thủ pháp lý của hệ thống.
++
++Hash byte của CSV LR hiện tại khác hash trong JSON mô hình; tái dựng CRLF trong bộ nhớ khớp hash lịch sử. Không thay CSV hoặc manifest để xóa sai lệch này. Kiểm tra đại số trên bảng hiện tại xác nhận OR/fidelity và tính tương đương theo số cờ; chưa xác nhận nguyên byte dữ liệu tại lần huấn luyện lịch sử.
+ 
+ \subsection{Biểu diễn báo cáo và điều kiện tiếp nhận}
+ Bản thảo nghiên cứu định nghĩa
+--- before-session/report/chapters/02-data-methods/sections/scope.tex
++++ after-session/report/chapters/02-data-methods/sections/scope.tex
+@@ -1,6 +1,10 @@
+ \section{Phạm vi của phương pháp}\label{sec:02-scope}
+ Phương pháp trong chương này có ba giới hạn cần giữ khi đọc kết quả. Thứ nhất, dữ liệu phân cụm và xếp hạng là bán tổng hợp hoặc tổng hợp, nên kết quả RQ1--RQ3 mô tả hành vi của thuật toán dưới các điều kiện mô phỏng có kiểm soát, không phải hiệu quả trên báo cáo cứu hộ thực tế. Thứ hai, bộ ảnh do nhóm thu thập và gán nhãn, chưa có giấy phép cho từng ảnh, chưa có mẫu chụp thực địa độc lập và chưa đo độ đồng thuận giữa người gán nhãn. Thứ ba, các hằng số của $Q_i$ và điểm ưu tiên là heuristic của nhóm, chưa được chuyên gia cứu hộ xác nhận.
+ 
+-Đối với thông tin khẩn cấp, đề tài sử dụng Logistic Regression từ các lựa chọn có cấu trúc trên biểu mẫu, thay cho phương án phân tích văn bản tiếng Việt tự do dự kiến ban đầu. Các dấu hiệu được người dùng lựa chọn được mã hóa thành đầu vào để mô hình ước lượng mức độ khẩn cấp.
++Đối với thông tin khẩn cấp, đề tài sử dụng Logistic Regression từ các lựa chọn có cấu trúc trên biểu mẫu, thay cho phương án phân tích văn bản tiếng Việt tự do dự kiến ban đầu. Đây là surrogate trên năm cờ với nhãn OR tự sinh, không phải xác suất nguy kịch đã được hiệu chuẩn trên dữ liệu thực. Trong phạm vi repository và các ref đã khảo sát, chưa tìm thấy mô hình văn bản tự do được huấn luyện hoặc đánh giá như cam kết DistilBERT; nội dung NLP mới được thực hiện một phần ở mức tiếp nhận mô tả và heuristic từ khóa, chưa chứng minh hoàn thành cam kết nghiên cứu. Nhận định này không phủ nhận khả năng có nghiên cứu ngoài repository.
++
++Cần phân biệt ba mức: tiếp nhận ảnh, mô tả và vị trí; tích hợp các trường bằng công thức, ánh xạ và heuristic; học một mô hình fusion chung trên dữ liệu ghép cặp. Hệ thống có hai mức đầu với khoảng trống nối điểm LR vào adapter; chưa có bằng chứng learned fusion. Nguồn tham chiếu dấu hiệu IITT không xác nhận các trọng số điều phối của nhóm. Sửa cách mô tả phạm vi không có nghĩa đã hoàn thành các cam kết còn thiếu.
+ 
+ Nội dung nghiên cứu được đối chiếu với thuyết minh ở Mục~\ref{sec:proposal-comparison}; giới hạn của các phép thử được trình bày ở Mục~\ref{sec:04-evaluation-limitations}.
++
++Ablation ảnh/văn bản/cả hai chưa thực hiện vì chưa có cùng nhiệm vụ, report ID ghép cặp và gold độc lập chung. Mask các trường $F/E$ mô phỏng chỉ là phân tích độ nhạy nguồn thông tin có cấu trúc, không thay thế ablation mô hình ảnh--văn bản. Cần vượt các điều kiện dữ liệu và nhãn trước khi khóa protocol, không thay target sau khi xem kết quả.
+--- before-session/report/chapters/03-system/sections/architecture.tex
++++ after-session/report/chapters/03-system/sections/architecture.tex
+@@ -145,7 +145,7 @@
+ \subsection{Dịch vụ phân cụm và hàng xem xét}
+ Adapter \texttt{to\_report\_v2} chuyển báo cáo lưu trữ sang tuple thuật toán. Nhãn ngập được ánh xạ \texttt{non\_flood}$\mapsto0$, \texttt{low}$\mapsto0{,}33$, \texttt{medium}$\mapsto0{,}66$, \texttt{high}$\mapsto1$. Nếu payload có \texttt{flood}, dùng trường này. Ứng dụng gửi điểm LR trong trường \texttt{E\_i}; adapter hiện lấy $E$ từ trường \texttt{urgency} nếu có, nếu không thì suy từ mô tả bằng từ khóa. Adapter chưa đọc trực tiếp \texttt{E\_i}, nên đường nối từ điểm LR của ứng dụng đến điểm khẩn cấp của thuật toán chưa được tích hợp. $N$ hiện là số mắc kẹt cộng số bị thương; $V$ là số nhóm yếu thế được chọn khi không có trường trực tiếp.
+ 
+-Các ánh xạ chuyển thông tin định tính thành các đại lượng số học phục vụ giải thuật. Trọng số và tham số phân cụm, xếp hạng được cấu hình trong mã nguồn backend. Điều phối viên sử dụng kết quả trên dashboard để xem xét báo cáo, xác minh thông tin, giao đội và cập nhật trạng thái cứu hộ.
++Các ánh xạ chuyển thông tin định tính thành các đại lượng số học phục vụ giải thuật. Đây là tích hợp bằng công thức và heuristic từ các trường quan sát, chưa phải mô hình fusion được học chung trên cặp ảnh--văn bản. Lược đồ phân tích đầy đủ ở trên là thiết kế đề xuất; cần phân biệt với adapter đang triển khai. Trọng số và tham số phân cụm, xếp hạng được cấu hình trong mã nguồn backend. Điều phối viên sử dụng kết quả trên dashboard để xem xét báo cáo, xác minh thông tin, giao đội và cập nhật trạng thái cứu hộ.
+ 
+ Báo cáo resolved/cancelled được loại khỏi cụm đang hoạt động. Cụm được tính lại khi version dữ liệu liên quan thay đổi; nếu một lần tính kéo dài, dịch vụ có cơ chế cập nhật nền. \texttt{clusterId} có thể đổi giữa lần chạy, còn \texttt{clusterKey} dùng ID nhỏ nhất trong cụm để hỗ trợ giữ lựa chọn trên giao diện. Khóa này cũng có thể đổi khi thành viên thay đổi; các thao tác điều phối cần xác nhận danh sách hiện tại.
+ 
+--- before-session/report/chapters/04-evaluation/sections/limitations.tex
++++ after-session/report/chapters/04-evaluation/sections/limitations.tex
+@@ -8,10 +8,10 @@
+ Tập ảnh Dataset\_Flood chưa bao quát mọi điều kiện chụp tại hiện trường, như ánh sáng yếu, mưa lớn, ảnh rung hoặc góc nhìn bị che khuất. Kết quả trên tập test phản ánh chất lượng với bộ dữ liệu đã chia; cần ảnh hiện trường độc lập để đánh giá khả năng áp dụng rộng hơn.
+ 
+ \paragraph{Thiết bị và số lượt đo.}
+-Benchmark nhận diện được thực hiện trên bốn mẫu điện thoại, còn kiểm thử luồng xử lý và giao diện gồm hai run trên Samsung S10e. Số thiết bị và phiên đo còn giới hạn, chưa đủ để kết luận về mọi dòng Android hoặc độ ổn định dài hạn. Thời gian xử lý đã ghi cũng chưa đại diện cho mọi mức tải, nhiệt độ và tình trạng pin của thiết bị.
++Benchmark nhận diện được thực hiện trên bốn mẫu điện thoại, còn tài liệu mô tả hai run luồng xử lý và giao diện trên Samsung S10e nhưng raw/log hiện chưa được khôi phục. Số thiết bị và phiên đo còn giới hạn, chưa đủ để kết luận về mọi dòng Android hoặc độ ổn định dài hạn. Thời gian xử lý đã ghi cũng chưa đại diện cho mọi mức tải, nhiệt độ và tình trạng pin của thiết bị.
+ 
+ \paragraph{Điều kiện mạng.}
+-Các phép đo truyền tải định lượng chủ yếu dùng proxy giới hạn băng thông và độ trễ. Kiểm thử trên điện thoại đã bổ sung tình huống tắt/bật kết nối thật, nhưng chưa bao quát biến động vùng phủ sóng, tắc nghẽn và gián đoạn của mạng viễn thông trong thiên tai. Vì vậy, kết quả xác nhận hành vi trong các điều kiện đã thử, chưa thay thế đánh giá mạng ngoài thực địa.
++Các phép đo truyền tải định lượng chủ yếu dùng proxy giới hạn băng thông và độ trễ. Tài liệu kiểm thử điện thoại ghi nhận tình huống tắt/bật kết nối thật, chưa xác minh độc lập từ raw hiện có, nhưng chưa bao quát biến động vùng phủ sóng, tắc nghẽn và gián đoạn của mạng viễn thông trong thiên tai. Vì vậy, chỉ phần có raw được kiểm lại mới hỗ trợ xác minh trong phạm vi tương ứng, chưa thay thế đánh giá mạng ngoài thực địa.
+ 
+ \paragraph{Đánh đổi khi lượng tử hóa.}
+ Theo Bảng~\ref{tab:fp32_ptq_qat}, PTQ INT8 giảm dung lượng từ 16,04 xuống 4,51 MiB, nhưng Accuracy giảm từ \NewImageAccuracy\% xuống \PTQAccuracy\%. QAT INT8 có dung lượng 4,57 MiB, Accuracy \QATAccuracy\%, macro-F1 \QATMacroFOne\% và \QATCriticalCount{} lỗi nặng, đồng thời có trung vị độ trễ cao hơn FP32 trong cùng phiên đo. Vì vậy, giảm dung lượng chưa đủ để kết luận mô hình đáp ứng yêu cầu triển khai; cần phân tích lỗi phân loại, nhất là lỗi lệch từ hai mức, và kiểm tra lại chất lượng, độ trễ trên thiết bị đích trước khi sử dụng.
+@@ -32,3 +32,8 @@
+ Đối với phân cụm, cần thử canonicalize transport copy trước tạo đồ thị và kiểm tra lại quantile/top-$k$ dưới multiplicity, đồng thời giữ baseline mật độ khớp. Đối với score, cần kiểm tra nguồn củng cố độc lập, chống campaign và xác định mục tiêu phù hợp với chuyên gia. Đối với scheduler, cần đưa chi phí đi lại, năng lực đội và bất định vào thiết kế mục tiêu.
+ 
+ Đối với ảnh, PTQ cần được chọn theo trade-off dung lượng/recall/lỗi nặng thay vì chỉ kích thước; nhánh QAT cần phân tích lỗi trước triển khai. Với phần mềm, ưu tiên thống nhất cách hiểu và xử lý các trường dữ liệu và kiểm thử Android end-to-end. Các hướng này xuất phát từ kết quả đã quan sát, chưa được trình bày như cải thiện đã đạt.
++
++\paragraph{Giới hạn tái lập suy luận.} Hash manifest khớp chứng minh tính toàn vẹn artifact theo manifest, không tự chứng minh mỗi phép kiểm thống kê được tái lập. Ba raw $p$ Spearman và năm giá trị Holm liên quan của RQ2 chưa khớp replay từ bảng metric đã lưu, dù đã kiểm đúng phiên bản thư viện gốc. Vì vậy giữ trạng thái tái lập một phần, không xem các số này là đã được kiểm chứng lại đầy đủ. Kết luận âm về alignment chung không phụ thuộc vào việc chọn số lịch sử hay replay thuận lợi hơn.
++
++
++\paragraph{Phạm vi các phase có điều kiện.} Chưa chạy suy luận clean/degraded hoặc phiên Android bổ sung trong đợt chỉnh sửa; chín đầu vào dẫn xuất của một ảnh validation chỉ kiểm bước chuẩn bị corruption. Không có kết quả robustness mới cho ảnh mờ, tối hoặc nén. Đã kiểm lại gói tài nguyên E2E và tìm raw qua working tree, các ref/lịch sử có sẵn; chưa phục hồi được các run Android/Web được nêu. Benchmark ảnh 32 JSON vẫn hợp lệ trong scope riêng, không thay thế E2E hay phiên đo lặp.
+--- before-session/report/chapters/04-evaluation/sections/results.tex
++++ after-session/report/chapters/04-evaluation/sections/results.tex
+@@ -131,7 +131,7 @@
+ 
+ Sanity 10 vòng giữ một số profile dương để kiểm tra khả năng dự đoán trạng thái chưa có trong train của vòng đó. Có vòng recall 0,75 hoặc 0,667, nên không nên diễn giải kết quả toàn bảng là tổng quát hoàn hảo khi huấn luyện thiếu profile. Đây là kiểm tra kỹ thuật trong không gian tổng hợp hữu hạn. Mô hình không được đánh giá trên người bệnh, tin nhắn tự do hoặc dữ liệu điều phối thực.
+ 
+-Ứng dụng đã có chức năng nạp mô hình và tính điểm LR từ các dấu hiệu khẩn cấp được người dùng lựa chọn. Thiết kế tích hợp sử dụng trường \texttt{E\_i} gửi lên máy chủ, kết hợp với thông tin \texttt{urgency} do backend xác định để phục vụ phân cụm và xếp hạng. Kết quả hiện có gồm dữ liệu, mô hình và bước tính điểm tại ứng dụng. Đây là mô hình dùng đầu vào có cấu trúc, không phải mô hình phân tích tin nhắn tiếng Việt.
++Ứng dụng đã có chức năng nạp mô hình và tính điểm LR từ các dấu hiệu khẩn cấp được người dùng lựa chọn. Ứng dụng gửi \texttt{E\_i} và backend lưu payload, nhưng adapter chưa đọc điểm này: \texttt{ReportV2.E} lấy từ \texttt{urgency} hoặc từ khóa trong mô tả. Do đó chưa có bằng chứng điểm LR tham gia phân cụm hoặc xếp hạng trong luồng hiện hành. Kết quả hiện có gồm dữ liệu, mô hình và bước tính điểm tại ứng dụng. Đây là mô hình dùng đầu vào có cấu trúc, không phải mô hình phân tích tin nhắn tiếng Việt.
+ 
+ \subsection{RQ1: chất lượng phân cụm cơ sở}
+ \input{generated/tables/rq1-benchmark}
+@@ -150,6 +150,8 @@
+ 
+ Một phát hiện vận hành là Product có fake absorption và fake rejection đều bằng không, nhưng false-destination rate 16,49\%. Tin giả không hòa vào điểm thật nhưng tạo điểm đến giả riêng. Vì thế, tỷ lệ hấp thụ bằng không không được gọi là chống tin giả hiệu quả. Nếu scheduler coi các cụm giả là điểm cần đi, chúng vẫn tiêu tốn nguồn lực.
+ 
++\paragraph{Trả lời RQ1.} Chưa xác lập Product cải thiện chất lượng chung so với Additive được chọn độc lập. ARI và hiệu trung bình nghiêng về Additive trong bundle này; $p_{\mathrm{Holm}}>0{,}05$ không chứng minh hai phương pháp tương đương. So sánh khớp mật độ và Leiden cũng chưa xác nhận ưu thế chung của Product Louvain.
++
+ \subsection{RQ1: độ nhạy dưới nhiễu và bản sao}
+ \input{generated/tables/rq1-stress}
+ Hình~\ref{fig:rq1-stress-report} biểu diễn thay đổi ARI so với đối chứng trong từng điều kiện nhiễu.
+@@ -179,6 +181,8 @@
+ 
+ Ước lượng điểm của phương pháp có chặn còn thấp hơn chỉ số người (0,6709) và ngẫu nhiên (0,6763). Những chênh lệch điểm này không tự chứng minh khác biệt thống kê. Vì grouping oracle đã loại lỗi phân cụm khỏi điều kiện RQ2, sự phù hợp yếu không thể quy hoàn toàn cho phân hoạch sai.
+ 
++\paragraph{Giới hạn replay thống kê RQ2.} Tái phân tích từ bảng đã lưu khớp các hiệu trung bình, CI và so sánh NDCG chính. Có ba raw $p$ của Spearman khác số đã lưu, kéo theo năm giá trị Holm trong các họ liên quan. Sai khác vẫn còn khi dùng lại đúng phiên bản NumPy/pandas/SciPy của lần RQ2 gốc; chưa thể quy nguyên nhân cho phiên bản. Bảng metric đã làm tròn có thể làm thay đổi tie/rank, nhưng cơ chế này chưa được cô lập. Giữ số lịch sử và số replay riêng trong hồ sơ sai lệch, chưa chứng nhận tái lập toàn bộ suy luận RQ2. Các khác biệt này không đổi kết luận chưa xác lập lợi ích alignment chung.
++
+ \subsection{RQ2: bất biến hẹp và thất bại dưới phối hợp}
+ \input{generated/tables/rq2-robustness}
+ Hình~\ref{fig:rq2-robustness} tổng hợp độ biến động xếp hạng dưới năm điều kiện thử nghiệm RQ2.
+@@ -198,11 +202,15 @@
+ \input{generated/tables/rq2-sensitivity}
+ Phân tích hằng số one-at-a-time có 21 cấu hình trên 40 seed (840 quan sát seed/cấu hình). Span NDCG@5 trung bình đều dưới 0,01, lớn nhất khoảng 0,00546 khi thay trọng số $\omega_F$. Ổn định cục bộ này cùng tồn tại với alignment yếu; không chứng minh các hằng số đã có giá trị chính sách hoặc kết quả giữ nguyên ngoài miền perturbation.
+ 
++\paragraph{Trả lời RQ2.} Bằng chứng hỗ trợ bất biến bản sao exact khi grouping cố định; không hỗ trợ độ bền trước mọi phối hợp và chưa xác lập lợi ích xếp hạng chung so với các đối chứng. Độ nhạy nhỏ trong miền hệ số đã thử không xác nhận chính sách ưu tiên ngoài thực địa.
++
+ \subsection{RQ3: hệ quả điều phối từ phân hoạch dự đoán}
+ \input{generated/tables/rq3-effects}
+ Trên phân hoạch Product, điểm có chặn làm harm mô phỏng tăng 14,34 so với legacy và giảm tỷ lệ trễ hạn khoảng 1,88 điểm phần trăm. Cả hai tương phản không có ý nghĩa sau Holm: $p=0{,}563$ và $p=0{,}247$. Bảng dùng chiều $\Delta$ cải thiện, nên harm tăng tương ứng hiệu âm.
+ 
+-So với gần nhất trước, score có chặn kém hơn về harm và trễ hạn, với $p_{\mathrm{Holm}}\approx4{,}1\times10^{-5}$ và $1{,}3\times10^{-6}$. Product cũng kém hơn Additive khớp mật độ khi dùng cùng score ở harm ($p_{\mathrm{Holm}}=0{,}000168$). Sai phân hoạch có hệ quả xuống tầng lập lịch, và bảo đảm điểm hữu hạn không loại bỏ hệ quả đó.
++So với gần nhất trước, score có chặn kém hơn về harm và trễ hạn, với $p_{\mathrm{Holm}}\approx4{,}1\times10^{-5}$ và $1{,}17\times10^{-6}$. Product cũng kém hơn Additive khớp mật độ khi dùng cùng score ở harm ($p_{\mathrm{Holm}}=0{,}000168$). Sai phân hoạch có hệ quả xuống tầng lập lịch, và bảo đảm điểm hữu hạn không loại bỏ hệ quả đó.
++Đơn vị suy luận là 40 seed, sau lấy trung bình ba điều kiện nguồn lực trong từng seed; Holm xét 14 endpoint trong mỗi tương phản cố định. So với gần nhất trước, hiệu cải thiện harm là $-69{,}88$, CI 95\% $[-95{,}77;-45{,}03]$; hiệu cải thiện tỷ lệ trễ hạn là $-17{,}71$ điểm phần trăm, CI $[-20{,}83;-14{,}48]$. Đây là kết quả mô phỏng, không phải số người được cứu hoặc thiệt hại thực đo.
++
+ Hình~\ref{fig:rq3-conditions-report} trình bày kết quả mô tả theo từng điều kiện nguồn lực trên phân hoạch Product.
+ 
+ \begin{reportlandscapefigure}
+@@ -215,6 +223,8 @@
+ 
+ Gần nhất trước có harm và trễ hạn trung bình thấp hơn trong mọi điều kiện được thử. Một diễn giải có thể là score theo nhu cầu chưa biểu diễn đủ chi phí đi lại và ràng buộc lịch; đây là giả thuyết giải thích, chưa được cô lập bằng thực nghiệm cơ chế. Kết quả không xác lập gần nhất trước là chính sách thực địa tối ưu.
+ 
++\paragraph{Trả lời RQ3.} Sai phân hoạch có hệ quả bất lợi trong các phép so sánh đã thử; revised priority chưa xác lập lợi ích chung so với legacy và thua nearest-first về harm/trễ hạn trong bundle này. Chi phí đi lại và ràng buộc lịch là cơ chế khả dĩ để nghiên cứu tiếp, chưa phải chẩn đoán nhân quả đã được thực nghiệm xác nhận.
++
+ \subsection{Bàn luận xuyên các tầng}
+ Các kết quả cho thấy cần đánh giá riêng ba dạng chất lượng: đúng biểu diễn tại thiết bị, đúng liên kết sự kiện và phù hợp quyết định điều phối. FP32 có parity tốt giữa runtime nhưng vẫn nhầm lớp; score có invariance exact nhưng alignment yếu; Product có chặn cạnh nhưng nhạy multiplicity. Không có một chỉ số đơn lẻ thay thế được các tầng còn lại.
+ 
+--- before-session/report/chapters/04-evaluation/sections/setup.tex
++++ after-session/report/chapters/04-evaluation/sections/setup.tex
+@@ -119,3 +119,5 @@
+ Nguồn RQ1 stress chính được lấy từ \texttt{rq1\_results}. Lần chạy lại \texttt{rq1\_results\_v2} được giữ riêng và không lựa chọn theo kết quả thuận lợi. Các phiên bản bài báo/renderer khác được ghi trong phụ lục, tránh nhập chung những số ID/OOD không thuộc protocol bản thảo dài hiện tại.
+ 
+ Đối với mô hình ảnh, hash config và split của ba bảng hiện tại khớp file đang có. Metadata một số phiên đo ghi hash manifest khác nhau; thay đổi đóng gói manifest phải được xem cùng hash model và pipeline, không thể tuyên bố manifest hiện tại trùng mọi snapshot đo. Báo cáo giữ hash nguồn trong provenance để có thể kiểm tra sự khác biệt này.
++
++\paragraph{Trạng thái xác minh bằng chứng tại lần chỉnh sửa.} Hồ sơ hiện có đủ 32 JSON benchmark ảnh; tính lại Accuracy/macro-F1 và nối ID/nhãn với test đều khớp. Có 8.192 dự đoán lặp trên 256 ảnh, không phải 8.192 ảnh độc lập. Các mô tả E2E Android/Web ở trên được giữ như kết quả tài liệu đã ghi nhận; raw JSON/CSV/log tương ứng chưa được khôi phục tại checkout, nên hash APK, sự liên kết run và các số PASS chưa được xác minh độc lập. Không dùng metadata được kể lại trong báo cáo như bằng chứng raw đã có.
+--- before-session/report/chapters/04-evaluation/sections/system-tests.tex
++++ after-session/report/chapters/04-evaluation/sections/system-tests.tex
+@@ -2,7 +2,7 @@
+ Phần này tổng hợp ba nhóm bằng chứng: kiểm thử tích hợp đầu cuối trên Android thật, E2E bổ sung trên web giả lập và phép đo truyền tải dưới mạng yếu. Các nhóm khác nhau về môi trường, đầu vào và cách thao tác nên được trình bày riêng, không cộng số case hay tiêu chí thành một cỡ mẫu chung. Thiết lập của từng nhóm được mô tả tại Mục~\ref{sec:04-evaluation-setup}.
+ 
+ \subsection{Kiểm thử tích hợp đầu cuối trên thiết bị Android thật}\label{sec:mobile-system-results}
+-Theo Mục~\ref{sec:mobile-system-setup}, hai bộ kết quả ngày 24/10/2026 ghi nhận trên cùng Samsung S10e. Bảng~\ref{tab:mobile-system-cases} tổng hợp JSON/CSV cùng xác nhận bổ sung của người chạy về Case 8 run\_001: bài vẫn được giữ và gửi đi sau khi bật lại Wi-Fi. Theo tiêu chí lưu và phục hồi gửi bài, cả hai run đạt chín case; riêng Case 8 run\_001 được ghi PASS có chú thích vì còn hiện tượng thoát app khi gửi lúc mất mạng. Cả hai đạt 6/6 case luồng xử lý. Kết quả này không xác nhận giao diện hoàn toàn không có lỗi.
++Theo tài liệu và phần báo cáo kiểm thử trước đây, hai run ngày 24/10/2026 được ghi nhận trên Samsung S10e. Raw JSON/CSV/log tương ứng chưa có trong checkout hiện tại, nên Bảng~\ref{tab:mobile-system-cases} giữ trạng thái lịch sử được mô tả, chưa xác minh độc lập. Run\_001 được mô tả 8 PASS/1 FAIL; Case 8 có xác nhận bổ sung rằng bài được giữ và gửi lại khi có Wi-Fi, nhưng sự cố thoát app hoặc mất phiên vẫn còn. Xác nhận bổ sung này không thay trạng thái FAIL lịch sử hoặc chứng minh lỗi đã sửa. Run\_002 được báo cáo đạt chín case; các tỷ lệ ở đây không phải số đo mới.
+ 
+ \begin{table}[htbp]\centering
+ \caption{Kết quả kiểm thử luồng xử lý và giao diện trên Samsung S10e}
+@@ -18,18 +18,18 @@
+ 6 & Phản hồi: app nhận trạng thái dispatched từ backend & PASS & PASS \\
+ \midrule
+ 7 & Thao tác giao diện Android: gửi bài và xem Lịch sử & PASS & PASS \\
+-8 & Tắt/bật mạng thật: giữ bài và gửi lại khi có mạng & PASS$^{*}$ & PASS \\
++8 & Tắt/bật mạng thật: giữ bài và gửi lại khi có mạng & FAIL$^{*}$ & PASS \\
+ \midrule
+ 9 & Dashboard: hiển thị đúng các ID bài của benchmark & PASS & PASS \\
+ \bottomrule
+ \end{tabular}
+ \end{table}
+-\noindent\textit{$^{*}$Run\_001 đạt về giữ và phục hồi gửi bài theo xác nhận bổ sung của người chạy; vẫn ghi nhận lỗi thoát app khi gửi lúc mất mạng.}
++\noindent\textit{$^{*}$Run\_001: trạng thái raw được mô tả là FAIL; có xác nhận bổ sung về giữ và gửi lại, nhưng chưa khôi phục raw/log để xác minh độc lập hoặc phân biệt crash với mất phiên.}
+ 
+ Case 1--6 là kiểm tra bằng lời gọi hàm trong app; Case 7--8 là xác nhận của người thao tác trên giao diện thật; Case 9 lấy bằng chứng từ Playwright trên máy tính. Không gộp các nhóm này thành tuyên bố tự động thao tác E2E toàn bộ giao diện Android. Mỗi bộ quan sát backend chứa năm ID bài của luồng xử lý; Case 6 dùng lại bài online để đổi trạng thái, không tạo bài thứ sáu. Tệp kiểm tra dashboard ghi PASS cho năm ID tương ứng của mỗi lượt.
+ 
+ \paragraph{Hành vi gửi và nhận diện thực tế.}
+-Bảng~\ref{tab:mobile-system-network} trích probe và số byte ảnh đã đối chiếu với backend. Ảnh gốc được xác nhận bằng SHA-256; ảnh nén có sai khác tuyệt đối trung bình trên mẫu RGB giải mã lần lượt 0,80 và 1,04, dưới ngưỡng kiểm tra 20. Chỉ số này kiểm tra ảnh truyền đúng nội dung, không đánh giá chất lượng phân loại hay chất lượng ảnh cảm nhận. Với chế độ chỉ văn bản, không có ảnh tải lên; dấu gạch không có nghĩa tổng lưu lượng bằng 0.
++Bảng~\ref{tab:mobile-system-network} giữ probe và số byte ảnh theo báo cáo lịch sử; lần chỉnh sửa này chưa đối chiếu lại với raw backend. Theo tài liệu kiểm thử, ảnh gốc được xác nhận bằng SHA-256; ảnh nén có sai khác tuyệt đối trung bình trên mẫu RGB giải mã lần lượt 0,80 và 1,04, dưới ngưỡng kiểm tra 20. Chỉ số này kiểm tra ảnh truyền đúng nội dung, không đánh giá chất lượng phân loại hay chất lượng ảnh cảm nhận. Với chế độ chỉ văn bản, không có ảnh tải lên; dấu gạch không có nghĩa tổng lưu lượng bằng 0.
+ 
+ \begin{table}[htbp]\centering
+ \caption{Chế độ gửi của ba case có ảnh trên điện thoại thật}
+@@ -49,9 +49,9 @@
+ Trong ba lần gọi PTE có ảnh của run\_001, nhãn chuẩn \texttt{high} được dự đoán thành \texttt{medium}, confidence 0,7802; thời gian \texttt{classifyImage} lần lượt là 64, 37 và 33 ms. Run\_002 có nhãn chuẩn \texttt{medium} nhưng dự đoán \texttt{high}, confidence 0,6461; thời gian là 30, 40 và 37 ms. Hai ảnh đều bị nhận diện khác nhãn chuẩn dù các case gửi bài đạt: PASS xác nhận đầu ra hợp lệ và luồng truyền dữ liệu đúng, không xác nhận phân loại đúng. Không dùng sáu lời gọi trên hai ảnh lặp lại để tính Accuracy/F1 hoặc so sánh tốc độ model; việc đó thuộc benchmark ảnh riêng.
+ 
+ \paragraph{Lỗi phát hiện và giới hạn kết luận.}
+-Ở Case 8 run\_001, người chạy ban đầu ghi FAIL trong hồ sơ vì khi tắt Wi-Fi rồi chọn gửi bài, app bị thoát và không đăng nhập lại được cho đến khi bật Wi-Fi. Sau đó người chạy xác nhận bài vẫn được gửi khi có Wi-Fi trở lại. Vì vậy báo cáo cập nhật kết quả phục hồi gửi bài thành PASS có chú thích, đồng thời giữ hiện tượng thoát app là lỗi giao diện/phiên cần điều tra riêng; chưa có log để phân biệt crash với mất phiên. JSON/CSV gốc vẫn giữ 8 PASS, 1 FAIL và trạng thái \texttt{failed}; phần cập nhật trong báo cáo dựa trên xác nhận bổ sung, không phải kết quả chạy lại hay bằng chứng lỗi thoát app đã được sửa. Run\_002 ghi PASS cho bài có mã hiển thị \texttt{\#11F944B0}; bài được lưu chờ gửi, sau khi bật Wi-Fi thì dashboard nhận bài và Lịch sử hiển thị “Đã nhận”.
++Ở Case 8 run\_001, người chạy ban đầu ghi FAIL trong hồ sơ vì khi tắt Wi-Fi rồi chọn gửi bài, app bị thoát và không đăng nhập lại được cho đến khi bật Wi-Fi. Sau đó người chạy xác nhận bài vẫn được gửi khi có Wi-Fi trở lại. Xác nhận bổ sung được giữ như thông tin riêng về phục hồi gửi bài, đồng thời trạng thái FAIL lịch sử và lỗi giao diện/phiên vẫn cần điều tra; chưa có log để phân biệt crash với mất phiên. JSON/CSV gốc vẫn giữ 8 PASS, 1 FAIL và trạng thái \texttt{failed}; phần cập nhật trong báo cáo dựa trên xác nhận bổ sung, không phải kết quả chạy lại hay bằng chứng lỗi thoát app đã được sửa. Run\_002 ghi PASS cho bài có mã hiển thị \texttt{\#11F944B0}; bài được lưu chờ gửi, sau khi bật Wi-Fi thì dashboard nhận bài và Lịch sử hiển thị “Đã nhận”.
+ 
+-Lịch sử run\_002 còn ghi một lần Case 5 FAIL vì chưa từ chối quyền Vị trí; sau khi đáp ứng tiền điều kiện, chạy lại đạt PASS. Bảng giữ lịch sử thử lại và ghi rõ phần đánh giá bổ sung, không xóa lần thử lỗi. Các xác nhận giao diện có mã bài nhưng trường tên tệp bằng chứng còn trống, nên không xem JSON là hồ sơ ảnh/video tự động đầy đủ. Hai lượt trên một máy hỗ trợ kiểm chứng các tình huống đã thử, chưa phải mẫu độc lập để suy ra tỷ lệ tin cậy tổng quát, độ ổn định trên bốn điện thoại hoặc khả năng gửi SMS thành công.
++Lịch sử run\_002 còn ghi một lần Case 5 FAIL vì chưa từ chối quyền Vị trí; sau khi đáp ứng tiền điều kiện, chạy lại đạt PASS. Bảng giữ lịch sử thử lại và ghi rõ phần đánh giá bổ sung, không xóa lần thử lỗi. Các xác nhận giao diện có mã bài nhưng trường tên tệp bằng chứng còn trống, nên không xem JSON là hồ sơ ảnh/video tự động đầy đủ. Hai lượt được tài liệu ghi nhận trên một máy mô tả các tình huống đã thử; khi chưa có raw/log, chúng chưa cung cấp kiểm chứng độc lập, chưa phải mẫu độc lập để suy ra tỷ lệ tin cậy tổng quát, độ ổn định trên bốn điện thoại hoặc khả năng gửi SMS thành công.
+ 
+ \subsection{Kết quả kiểm thử lịch sử}
+ Bảng~\ref{tab:historical-tests} giữ kết quả lịch sử ngày 27/09/2026, được dẫn trong sổ đối chiếu nguồn. Các con số này thuộc phiên kiểm thử riêng, không cộng hoặc thay thế kết quả ngày 24/10/2026. Việc tạo APK xác nhận khả năng đóng gói, không thay thế kiểm thử chức năng.
+--- before-session/report/chapters/conclusion.tex
++++ after-session/report/chapters/conclusion.tex
+@@ -1,21 +1,23 @@
+ \addchap{KẾT LUẬN VÀ HƯỚNG PHÁT TRIỂN}\label{chap:conclusion}
+ \addsec{Kết luận}
+-Đề tài đã xây dựng nguyên mẫu hệ thống hỗ trợ tiếp nhận, xử lý và điều phối thông tin cứu hộ bão lũ, kết nối ứng dụng Flutter có suy luận AI tại biên, máy chủ FastAPI thực hiện phân cụm và bàn điều phối Web GIS. Hai kịch bản kiểm thử trên điện thoại thật đạt các tiêu chí luồng xử lý và giao diện đã công bố, gồm nhận diện, gửi bài, phục hồi đồng bộ, xử lý thiếu GPS và cập nhật trạng thái. Riêng Case 8 run\_001 đạt về giữ bài và gửi lại sau khi có Wi-Fi; hiện tượng thoát app khi gửi lúc mất mạng vẫn được ghi nhận để xử lý. Kết quả hỗ trợ khả năng lưu và phục hồi truyền báo cáo trong các điều kiện đã thử, chưa đại diện cho mọi tình huống mạng viễn thông ngoài thực địa.
++Đề tài đã xây dựng nguyên mẫu hệ thống hỗ trợ tiếp nhận, xử lý và điều phối thông tin cứu hộ bão lũ, kết nối ứng dụng Flutter có suy luận AI tại biên, máy chủ FastAPI thực hiện phân cụm và bàn điều phối Web GIS. Báo cáo và tài liệu kiểm thử ghi nhận hai run Android, nhưng raw JSON/CSV và log tương ứng chưa được khôi phục trong checkout hiện tại, nên các kết quả E2E còn ở mức được báo cáo, chưa xác minh độc lập. Case 8 run\_001 vẫn được ghi nhận 8 PASS/1 FAIL ở cấp run; xác nhận giữ bài và gửi lại không xóa hiện tượng thoát app hoặc mất phiên. Benchmark ảnh trên điện thoại có 32 JSON riêng, không thay thế bằng chứng E2E. Các kết quả chưa đại diện cho vận hành viễn thông ngoài thực địa.
+ 
+ Đối với mô hình thị giác máy tính, kiến trúc MobileNetV3-Large đạt độ chính xác (Accuracy) \NewImageAccuracy\% và macro-F1 \NewImageMacroFOne\% trên tập test gồm \ImageTest{} ảnh của bộ dữ liệu đã chia; tính độc lập hoàn toàn theo nguồn và sự kiện chưa được xác nhận. Mô hình được xuất sang định dạng ONNX và PTE để thực thi lần lượt bằng ONNX Runtime và ExecuTorch; các phép đối chiếu trên CPU ghi nhận đồng thuận top-1 với mô hình PTH lần lượt là \CpuOnnxAgreement\% và \CpuPteAgreement\% trên cùng tập test. Lượng tử hóa giảm dung lượng từ 16,04 MiB (FP32) xuống 4,51 MiB (PTQ) và 4,57 MiB (QAT), nhưng Accuracy giảm tương ứng từ \NewImageAccuracy\% xuống \PTQAccuracy\% và \QATAccuracy\%; QAT có macro-F1 \QATMacroFOne\% (Bảng~\ref{tab:fp32_ptq_qat}). Kết quả cho thấy lợi ích về dung lượng đi kèm suy giảm chất lượng; cần đánh giá lỗi phân loại và hiệu năng trên thiết bị đích trước khi lựa chọn phương án triển khai.
+ 
+-Mô hình ước lượng mức độ khẩn cấp dựa trên các dấu hiệu khẩn cấp được người dùng lựa chọn cung cấp cơ chế tính điểm minh bạch, có thể giải thích được và dễ dàng cấu hình, hỗ trợ đắc lực cho khâu tiền lọc dữ liệu cứu hộ tại hiện trường.
++Logistic Regression tái hiện nhãn OR trên bảng 32 trạng thái của năm cờ, không phải NLP hoặc kết quả xác nhận lâm sàng. App tính, gửi điểm LR và backend lưu payload, nhưng adapter hiện chỉ dùng urgency hoặc từ khóa mô tả cho đầu vào khẩn cấp của lõi; chưa chứng minh LR tham gia xếp hạng. Việc tiếp nhận nhiều loại dữ liệu và kết hợp bằng công thức chưa chứng minh học fusion. Các cam kết NLP và bộ mô hình đa phương thức trong thuyết minh còn chưa được chứng minh hoàn thành.
+ 
+-Về mặt giải thuật, các thực nghiệm đối chứng đa dạng trên đồ thị không gian--thời gian đã làm sáng tỏ ưu thế cũng như giới hạn của các phương pháp phân cụm cộng và tích (RQ1), đánh giá tính ổn định của hàm điểm ưu tiên đa tiêu chí trước các biến thể dữ liệu trùng lặp (RQ2), và phân tích định lượng hệ quả của các sai số phân hoạch đối với bài toán lập lịch điều phối nguồn lực cứu trợ (RQ3).
++Về giải thuật, RQ1 chưa xác lập ưu thế chung của Product so với Additive độc lập: ARI lần lượt 0,9072 và 0,9191, $p_{\mathrm{Holm}}=0{,}2560$; bản sao năm lần làm chất lượng phân cụm suy giảm mạnh. RQ2 hỗ trợ bất biến exact ở grouping cố định nhưng chưa xác lập lợi ích alignment chung: NDCG@5 revised là 0,6669 so với random 0,6763; phối hợp confidence cao vẫn gây sai lệch ưu tiên. Một số $p$ Spearman và Holm liên quan còn chưa khớp replay, được giữ là hạn chế tái lập. RQ3 dùng 40 seed sau trung bình ba điều kiện nguồn lực; revised kém nearest-first về harm và trễ hạn mô phỏng, chưa xác lập lợi ích chung so với legacy. Các kết quả này không chứng minh hiệu quả cứu hộ thực địa.
+ 
+ Các đóng góp chính của đề tài bao gồm:
+ \begin{enumerate}
+-\item Xây dựng hoàn chỉnh nguyên mẫu hệ thống gồm ứng dụng di động, máy chủ và website điều phối;
+-\item Đề xuất và kiểm chứng giải thuật gom cụm đồ thị không gian--thời gian và hàm ưu tiên cứu nạn đa tiêu chí;
+-\item Thiết kế cơ chế lựa chọn chế độ gửi theo điều kiện mạng, lưu bản tin cục bộ và gửi lại khi có kết nối, góp phần nâng cao tính chủ động và hiệu quả tác chiến trong công tác cứu nạn thiên tai.
++\item Xây dựng nguyên mẫu hệ thống gồm ứng dụng di động, máy chủ và website điều phối;
++\item Đề xuất và đánh giá trên dữ liệu mô phỏng giải thuật gom cụm đồ thị không gian--thời gian và hàm ưu tiên cứu nạn đa tiêu chí;
++\item Thiết kế cơ chế lựa chọn chế độ gửi theo điều kiện mạng, lưu bản tin cục bộ và gửi lại khi có kết nối, có bằng chứng thành phần trong các điều kiện đã thử; hiệu quả cứu hộ thực địa chưa được đo.
+ \end{enumerate}
+ 
+ \addsec{Hạn chế của đề tài}
++Chưa có thí nghiệm suy luận ảnh chất lượng kém có kiểm soát; bước chuẩn bị biến thể trên validation không cung cấp kết quả robustness. Ablation image-only/text-only/both hiện chưa đủ điều kiện vì target khác nhau, thiếu paired inputs và gold chung độc lập với công thức; không thể ghép Accuracy ảnh với fidelity OR. Cam kết NLP và fusion học chung vẫn chưa được chứng minh hoàn thành.
++
+ Hệ thống chưa được đánh giá trong vận hành cứu hộ thực địa với người sử dụng và đơn vị chuyên môn. Luồng SMS đã có thành phần hỗ trợ, nhưng tỷ lệ giao tin và độ trễ qua mạng viễn thông/gateway thực tế chưa được kiểm chứng đầy đủ.
+ 
+ \addsec{Kiến nghị}
+@@ -26,6 +28,8 @@
+ \begin{itemize}
+ \item Bổ sung chức năng phân tích tin nhắn cứu hộ tiếng Việt tự do để trích xuất thông tin và nhận diện dấu hiệu nguy cấp, mở rộng khả năng tiếp nhận ngoài các lựa chọn có cấu trúc trên biểu mẫu;
+ \item Mở rộng thử nghiệm phần cứng: triển khai thử nghiệm trên đa dạng các dòng điện thoại Android và iOS thực tế, đánh giá chi tiết mức độ tiêu thụ pin và độ trễ suy luận trong nhiều điều kiện môi trường;
+-\item Tích hợp mạng truyền thông chịu trễ (DTN): phát triển giao thức chuyển tiếp dữ liệu cơ hội qua kết nối cự ly ngắn (BLE, Wi-Fi Direct) kết hợp các trạm thu phát cơ động hoặc thiết bị bay không người lái (UAV) phục vụ các khu vực bị chia cắt cô lập hoàn toàn;
++\item Nghiên cứu định vị nhiều nguồn (GPS, Wi-Fi, mạng di động, IP và địa chỉ/mốc do người dùng xác nhận), lưu nguồn, thời điểm và độ bất định của từng ước lượng. Không mặc định IP chính xác hơn GPS; Wi-Fi cần cơ sở tham chiếu và hạ tầng phù hợp. Khi thiếu hoặc mâu thuẫn tọa độ, cần người xác nhận hoặc chuyển hàng xem xét, không tạo vị trí giả; quyền riêng tư phải được đánh giá trước thí điểm;
++\item Nghiên cứu tiếp nhận âm thanh theo chuỗi audio $\rightarrow$ nhận dạng tiếng nói (ASR) $\rightarrow$ trích xuất vị trí, số người, dấu hiệu nguy cấp $\rightarrow$ người gửi hoặc điều phối viên xác nhận. Cần đánh giá tiếng Việt địa phương, tiếng mưa/gió, nhiều người nói, lỗi chép sai và độ trễ trên thiết bị; chưa có mô hình hoặc số đo ASR trong kết quả hiện tại;
++\item Nghiên cứu kịch bản mất kết nối hoàn toàn: lưu cục bộ không đồng nghĩa đã giao đến trung tâm. SMS cần sóng di động và gateway; DTN qua BLE/Wi-Fi Direct cần relay, cơ hội tiếp xúc và đường ra tới trung tâm. Người không có điện thoại cần cơ chế báo hộ, hotline khi liên lạc được hoặc đội tại chỗ thu nhận thông tin, kèm xác minh, chống trùng và phản hồi. Đây là phương án đề xuất, chưa được triển khai và đo tỷ lệ giao tin;
+ \item Thử nghiệm thực địa diện rộng: phối hợp cùng các lực lượng cứu hộ chuyên trách và chính quyền địa phương để diễn tập, đánh giá mức độ khả dụng và hoàn thiện quy trình nghiệp vụ cứu nạn trong thực tế bão lũ.
+ \end{itemize}
+--- before-session/report/chapters/introduction.tex
++++ after-session/report/chapters/introduction.tex
+@@ -26,7 +26,7 @@
+ 
+ Mục tiêu chung là xây dựng hệ thống ứng dụng trí tuệ nhân tạo trên thiết bị di động để tiếp nhận, phân tích thông tin và hỗ trợ ra quyết định cứu hộ bão lũ trong điều kiện mạng không ổn định, hướng tới giảm thiểu thiệt hại về người và tài sản.
+ 
+-Các mục tiêu cụ thể bao gồm:
++Các mục tiêu cụ thể theo đăng ký bao gồm:
+ 
+ \begin{enumerate}
+     \item Nâng cao khả năng nhận diện và phân tích tình huống cứu hộ từ văn bản và hình ảnh.
+@@ -73,7 +73,7 @@
+     \item \textbf{Thời gian:} 06 tháng, từ tháng 05/2026 đến tháng 10/2026.
+     \item \textbf{Nội dung và nền tảng:} Phân tích thông tin cứu hộ bằng AI tại thiết bị; tạo, lưu và gửi báo cáo qua HTTP hoặc SMS gateway; đồng bộ khi có mạng; phân cụm, xếp hạng và hiển thị trên ứng dụng di động, web. Phân cụm xử lý các tập báo cáo hiện có, dashboard cập nhật theo chu kỳ; quyết định điều phối vẫn do con người thực hiện.
+     \item \textbf{Dữ liệu:} Ảnh ngập lụt từ bộ \texttt{Dataset\_Flood} do nhóm xây dựng, thông tin mô tả nhu cầu cứu hộ và các trường liên quan. FloodNet và CrisisMMD chỉ là tài liệu tham khảo, không được sử dụng trực tiếp trong tập huấn luyện hiện tại. RQ1 dùng dữ liệu bán tổng hợp Generator 3.0; RQ2/RQ3 dùng dữ liệu tổng hợp Candidate 4.1. Đây là các bộ dữ liệu riêng, không phải báo cáo cứu hộ thực tế hoặc một chuỗi kiểm chứng trên cùng tập mẫu.
+-    \item \textbf{Phân tích ảnh và thông tin khẩn cấp:} Đánh giá riêng mô hình nhận diện mức ngập và các phương án tối ưu trên CPU, điện thoại; không khái quát hiệu năng cho mọi thiết bị. Logistic Regression ước lượng điểm khẩn cấp từ các lựa chọn có cấu trúc trên ứng dụng. Theo thiết kế tích hợp, điểm này được gửi lên máy chủ để kết hợp với thông tin khẩn cấp do backend xác định; đây không phải chức năng phân tích trực tiếp tin nhắn cứu hộ tiếng Việt.
++    \item \textbf{Phân tích ảnh và thông tin khẩn cấp:} Đánh giá riêng mô hình nhận diện mức ngập và các phương án tối ưu trên CPU, điện thoại; không khái quát hiệu năng cho mọi thiết bị. Logistic Regression ước lượng điểm khẩn cấp từ các lựa chọn có cấu trúc trên ứng dụng. Điểm LR được gửi và lưu trong payload, nhưng adapter hiện chưa dùng điểm này cho phân cụm, xếp hạng; đầu vào khẩn cấp của lõi lấy từ trường urgency hoặc từ khóa mô tả. LR không xử lý tin nhắn tiếng Việt tự do và không hoàn thành thay cam kết NLP trong thuyết minh.
+     \item \textbf{Mạng và giới hạn ứng dụng:} Nghiên cứu cơ chế lưu báo cáo trên thiết bị và gửi lại khi kết nối với máy chủ được khôi phục. Hệ thống hỗ trợ tiếp nhận, tổng hợp và hiển thị thông tin; quyết định điều phối do con người thực hiện. Không nghiên cứu dự báo khí tượng--thủy văn hoặc điều hành cứu hộ tự động.
+ \end{itemize}
+ 
+--- before-session/report/deliverables/content/bulletin-en.tex
++++ after-session/report/deliverables/content/bulletin-en.tex
+@@ -16,9 +16,9 @@
+ 
+ \FormLine{Project activities: Image AI, structured urgency, persistent queues, adaptive sending, synchronization and dashboard development; conditional edge and copy-invariance audits.}
+ 
+-\FormLine{Research results: The original seed-1024 model achieves \NewImageAccuracy\% accuracy and \NewImageMacroFOne\% macro-F1 on 256 test images in CPU evaluation, with three critical errors. Runtime conversion, quantization and pruning were evaluated separately; quantization reduced model size but also accuracy. Phone benchmarks cover 32 configurations on four devices. A Flutter app, FastAPI/SQLite backend and dashboard were developed.}
++\FormLine{Research results: The original seed-1024 model achieves \NewImageAccuracy\% accuracy and \NewImageMacroFOne\% macro-F1 on 256 test images in CPU evaluation, with three critical errors. Runtime conversion, quantization and pruning were evaluated separately; quantization reduced model size but also accuracy. Phone benchmarks cover 32 configurations on four devices. A Flutter app, backend and dashboard were developed. The five-flag LR is not free-text NLP; its score is not consumed by the current ranking adapter. Learned fusion remains unfulfilled.}
+ 
+-\FormLine{Research new finding: RQ1--RQ3 reveal conditional safeguards and limitations without establishing general superiority or field rescue benefits.}
++\FormLine{Research new finding: RQ1 does not establish Product superiority; RQ2 does not establish general alignment gains and has unresolved replay differences. RQ3 favors nearest-first over revised priority on simulated harm and deadline misses. Field rescue benefits remain unmeasured.}
+ 
+ \FormLine{Application potentials: Research and workflow demonstration. Urgency integration, mobile provenance, repeated device/network/SMS tests and expert validation remain necessary.}
+ \end{english}\end{officialform}
+--- before-session/report/deliverables/content/bulletin-vi.tex
++++ after-session/report/deliverables/content/bulletin-vi.tex
+@@ -16,9 +16,9 @@
+ 
+ \FormLine{Nội dung nghiên cứu: Xây dựng và tối ưu mô hình nhận diện ảnh cứu hộ trên thiết bị di động; thu thập thông tin về vị trí và mức độ khẩn cấp; phát triển cơ chế lưu trữ, gửi lại và đồng bộ dữ liệu khi kết nối mạng không ổn định. Nghiên cứu phân cụm các báo cáo liên quan thành sự kiện cứu hộ, xếp hạng ưu tiên và xây dựng giao diện quản lý, hiển thị thông tin trên bản đồ số.}
+ 
+-\FormLine{Kết quả đạt được: Mô hình gốc seed 1024 đạt Accuracy \NewImageAccuracy\%, macro-F1 \NewImageMacroFOne\% trên 256 ảnh kiểm thử trong phép đo CPU, có 3 lỗi nặng. Chuyển đổi định dạng, lượng tử hóa và cắt tỉa được đánh giá riêng; lượng tử hóa giảm dung lượng nhưng cũng giảm độ chính xác. Đã đánh giá 32 cấu hình trên bốn điện thoại và xây dựng ứng dụng Flutter, backend FastAPI/SQLite cùng dashboard.}
++\FormLine{Kết quả đạt được: Mô hình gốc seed 1024 đạt Accuracy \NewImageAccuracy\%, macro-F1 \NewImageMacroFOne\% trên 256 ảnh kiểm thử trong phép đo CPU, có 3 lỗi nặng. Chuyển đổi định dạng, lượng tử hóa và cắt tỉa được đánh giá riêng; lượng tử hóa giảm dung lượng nhưng cũng giảm độ chính xác. Có 32 phiên benchmark ảnh trên bốn điện thoại. LR năm cờ không phải NLP; adapter chưa dùng điểm LR cho xếp hạng. Chưa có learned fusion. Đã xây dựng ứng dụng, backend và dashboard.}
+ 
+-\FormLine{Ý nghĩa: Cung cấp cơ sở thực nghiệm cho việc kết hợp Edge AI, truyền dữ liệu tối giản và phân cụm thông tin trong hệ thống hỗ trợ cứu hộ bão lũ. Sản phẩm phục vụ học tập, nghiên cứu và diễn tập quy trình tiếp nhận, tổng hợp thông tin cứu hộ.}
++\FormLine{Ý nghĩa: RQ1 chưa xác lập Product hơn Additive; RQ2 chưa xác lập lợi ích alignment chung; RQ3 cho revised kém nearest-first về harm và trễ hạn mô phỏng. Replay thống kê RQ2 còn sai lệch. Chưa đo hiệu quả cứu hộ thực địa.}
+ 
+ \FormLine{Khả năng ứng dụng: Sử dụng trong giảng dạy, nghiên cứu và trình diễn quy trình quản lý thông tin cứu hộ. Hệ thống là cơ sở để tiếp tục hoàn thiện, phối hợp với đơn vị chuyên môn thử nghiệm và đánh giá trước khi áp dụng thực tế.}
+ \end{officialform}
+--- before-session/report/frontmatter/research-body-en.tex
++++ after-session/report/frontmatter/research-body-en.tex
+@@ -20,9 +20,11 @@
+ 
+ For image classification, the model was evaluated on a test set of 256 images. Using seed 1024, the model achieved \NewImageAccuracy\% accuracy and \NewImageMacroFOne\% macro-F1, with three critical errors. The structured pruning experiment achieved \PruningAccuracy\% accuracy, with \PruningCriticalCount{} critical errors.
+ 
+-On the mobile device, image classification and urgency estimation from structured form selections provide complementary information. Their outputs are sent to the server for aggregation, event clustering and priority ranking. The research also examines data synchronization and system operation under unstable network conditions.
++On the mobile device, image classification and urgency estimation from structured form selections provide complementary information. The application sends image labels and the LR score to the server, which stores the payload. The current adapter does not consume the LR score for clustering or ranking; it reads urgency or applies description keywords. LR is a five-flag surrogate fitted to synthetic OR labels, rather than free-text Vietnamese NLP. Trained text processing and learned fusion remain unfulfilled commitments in the available evidence. The research also examines data synchronization and system operation under unstable network conditions.
+ 
+ In weak-network simulations with bandwidth of 50 kbit/s and a round-trip time of 600 ms, both metadata-only and compressed-image modes succeeded in 257/257 attempts (100\%), compared with 230/257 (89.49\%) for original images. The two modes transmitting less data achieved higher transmission success rates than original images under the tested conditions. Each mode was measured separately on a computer; transmission over real mobile networks requires further validation.
++
++RQ1 does not establish Product superiority over independently selected Additive (ARI 0.9072 versus 0.9191; Holm p=0.2560). RQ2 supports exact-copy invariance under fixed grouping, without establishing general alignment gains (revised NDCG@5 0.6669 versus random 0.6763). Across 40 seed-level pairs, revised priority performs worse than nearest-first on simulated harm and deadline misses. Several RQ2 p-values remain unreconciled in statistical replay.
+ 
+ The available results demonstrate the feasibility of selected prototype components in a research environment. They do not yet establish improvements in real-world rescue coordination or disaster response effectiveness.
+ 
+@@ -31,15 +33,10 @@
+ \FormIndented{-- A mobile application supporting disaster rescue, integrating AI models and rescue request submission functions.}
+ \FormIndented{-- A web-based rescue information management system featuring a digital map for visualizing rescue locations and clustering related events.}
+ \FormIndented{-- A trained and optimized multimodal AI model package for analyzing rescue information and supporting deployment on mobile devices.}
+-\par\noindent In addition, the project registers a research bulletin, a research summary and a demonstration video of no more than two minutes, in accordance with Can Tho University's requirements. The paper ``Stress-Testing Product-Gated Clustering and Bounded Priority Ranking for Flood-Rescue Reports: A Synthetic Study'' has also been published in the ISDS 2026 proceedings, in Springer's Communications in Computer and Information Science (CCIS) series.
++\par\noindent The model package is a registered deliverable; the available image model and structured LR do not establish completion of the text-model and learned-fusion commitments.
++\par\noindent In addition, the project registers a research bulletin, a research summary and a demonstration video of no more than two minutes, in accordance with Can Tho University's requirements. The paper ``Stress-Testing Product-Gated Clustering and Bounded Priority Ranking for Flood-Rescue Reports: A Synthetic Study'' is recorded as published based on the team confirmation dated 7 November 2026. Article-level DOI, online date, pages, volume and publication year have not been independently verified in the current dossier; book-level metadata does not resolve these fields.
+ 
+ \FormSection{6. Effects, technology transfer means and applicability:}
+-The project contributes to education and research by providing practical experience in deep learning, multimodal data processing, Edge AI, mobile application development and disaster-related information systems.
++The project outputs support education and research in edge image inference and rescue information management. They are intended for transfer to the School of Information and Communication Technology, Can Tho University, for educational use and further development.
+ 
+-From a technological perspective, the research explores the feasibility of processing rescue information at the network edge and integrating event clustering with spatial data visualization.
+-
+-The proposed system has the potential to support the collection, classification and consolidation of rescue information under limited network connectivity, thereby assisting rescue-related decision-making and resource coordination.
+-
+-The project outputs are intended to be packaged and transferred to the School of Information and Communication Technology, Can Tho University, for educational, research and further development purposes.
+-
+-Future practical deployment requires additional validation of multimodal analysis, mobile inference performance, network synchronization, event clustering reliability and system operation under realistic disaster conditions. Real-world rescue effectiveness and socioeconomic benefits have not yet been experimentally established.
++Before field pilots, the prototype requires validation of text processing and fusion, device and network behavior, synchronization and event clustering with rescue professionals. Real-world rescue effectiveness and socioeconomic benefits remain unmeasured.
+--- before-session/report/frontmatter/research-body-vi.tex
++++ after-session/report/frontmatter/research-body-vi.tex
+@@ -19,9 +19,11 @@
+ \FormSection{4. Kết quả nghiên cứu:}
+ Đối với bài toán phân loại hình ảnh, mô hình được đánh giá trên tập kiểm thử gồm 256 ảnh. Với cấu hình seed 1024, mô hình đạt Accuracy \NewImageAccuracy\% và macro-F1 \NewImageMacroFOne\%, ghi nhận 3 lỗi nghiêm trọng. Thử nghiệm cắt tỉa mô hình đạt Accuracy \PruningAccuracy\% với \PruningCriticalCount{} lỗi nghiêm trọng.
+ 
+-Tại thiết bị, hệ thống kết hợp hai nhánh phân tích: phân loại mức ngập từ hình ảnh và ước lượng mức độ khẩn cấp bằng Logistic Regression từ các thông tin do người dùng lựa chọn trên biểu mẫu. Kết quả của hai nhánh được gửi đến máy chủ để tổng hợp, phân cụm và xếp hạng ưu tiên các báo cáo cứu hộ. Đề tài đồng thời nghiên cứu đồng bộ dữ liệu và hoạt động của hệ thống trong điều kiện mạng không ổn định.
++Tại thiết bị, hệ thống kết hợp hai nhánh phân tích: phân loại mức ngập từ hình ảnh và ước lượng mức độ khẩn cấp bằng Logistic Regression từ các thông tin do người dùng lựa chọn trên biểu mẫu. Ứng dụng gửi nhãn ảnh và điểm LR đến máy chủ; điểm LR được lưu trong payload nhưng adapter chưa dùng nó cho phân cụm hoặc xếp hạng, mà lấy khẩn cấp từ urgency hoặc từ khóa mô tả. LR dùng năm cờ có cấu trúc với nhãn OR, không phải NLP tiếng Việt tự do; chưa có bằng chứng mô hình fusion học chung và cam kết này chưa được chứng minh hoàn thành. Đề tài đồng thời nghiên cứu đồng bộ dữ liệu và hoạt động của hệ thống trong điều kiện mạng không ổn định.
+ 
+ Trong thử nghiệm mạng yếu giả lập với băng thông 50 kbit/s và độ trễ khứ hồi 600 ms, chế độ chỉ gửi thông tin cơ bản và chế độ gửi ảnh nén đều thành công ở 257/257 lượt (100\%), trong khi gửi ảnh gốc đạt 230/257 lượt (89,49\%). Kết quả cho thấy hai chế độ gửi ít dữ liệu hơn có tỷ lệ truyền thành công cao hơn gửi ảnh gốc trong điều kiện thử nghiệm. Các phép đo được thực hiện riêng cho từng chế độ trên máy tính; khả năng truyền qua mạng di động thực tế cần được kiểm chứng thêm.
++
++RQ1 chưa xác lập Product hơn Additive độc lập (ARI 0,9072 so với 0,9191; Holm p=0,2560). RQ2 chưa xác lập lợi ích alignment chung (NDCG@5 revised 0,6669, random 0,6763); chỉ hỗ trợ bất biến exact ở grouping cố định. RQ3 trên 40 seed cho revised kém nearest-first về harm và trễ hạn mô phỏng. Một số p-value RQ2 chưa khớp replay, nên kiểm chứng thống kê còn một phần.
+ 
+ Các kết quả hiện có phản ánh khả năng triển khai và đánh giá nguyên mẫu trong môi trường nghiên cứu, chưa đủ cơ sở để khẳng định hiệu quả điều phối cứu hộ trong điều kiện thiên tai thực tế.
+ 
+@@ -30,6 +32,7 @@
+ \FormIndented{-- Ứng dụng di động hỗ trợ cứu hộ thiên tai, tích hợp mô hình AI và chức năng gửi thông tin cầu cứu.}
+ \FormIndented{-- Website quản lý thông tin cứu hộ, trực quan hóa vị trí cầu cứu và phân cụm sự kiện trên bản đồ số.}
+ \FormIndented{-- Bộ mô hình AI đa phương thức được huấn luyện, tinh chỉnh và tối ưu hóa để phục vụ phân loại thông tin cứu hộ.}
++\par\noindent Bộ mô hình là sản phẩm đăng ký; bằng chứng hiện có gồm mô hình ảnh và LR có cấu trúc, chưa chứng minh hoàn thành nhánh NLP và fusion học chung.
+ \par\noindent Ngoài ra, đề tài đăng ký các sản phẩm theo quy định của Đại học Cần Thơ gồm bản tin, báo cáo tóm tắt và video giới thiệu kết quả nghiên cứu có thời lượng tối đa 02 phút.
+ 
+ \FormSection{6. Công bố khoa học từ kết quả nghiên cứu của đề tài, hoặc nhận xét, đánh giá của cơ sở đã áp dụng các kết quả nghiên cứu (nếu có):}
+@@ -62,7 +65,7 @@
+ \hline
+ \end{tabular}\par
+ \endgroup
+-\noindent\textit{Bài báo đã công bố trong kỷ yếu ISDS 2026 thuộc bộ sách Communications in Computer and Information Science (CCIS), Springer. Số tập và năm xuất bản chưa được cập nhật trong hồ sơ đề tài.}
++\noindent\textit{Bài báo được ghi nhận đã công bố theo xác nhận của nhóm ngày 07/11/2026. Hồ sơ hiện chưa đối chiếu được DOI, ngày online, số trang, tập và năm xuất bản ở cấp riêng bài; các trường này chưa cập nhật. Thông tin cấp quyển không thay thế minh chứng cấp bài.}
+ 
+ \FormSection{7. Đóng góp về mặt kinh tế -- xã hội, giáo dục và đào tạo, an ninh, quốc phòng và khả năng áp dụng của đề tài:}
+ Sản phẩm phục vụ đào tạo và nghiên cứu về Edge AI, tối ưu mô hình và quản lý thông tin cứu hộ. Hệ thống có tiềm năng hỗ trợ tiếp nhận, tổng hợp và phân loại yêu cầu khi mạng hạn chế; lợi ích về thời gian cứu hộ, chi phí và giảm thiệt hại chưa được kiểm chứng thực địa.
+--- before-session/report/generated/README.md
++++ after-session/report/generated/README.md
+@@ -15,6 +15,12 @@
+ - Kiểm tra CSV dự đoán dùng đúng tập test; tính lại ma trận nhầm lẫn, Accuracy và macro-F1.
+ - Xuất 14 bảng: chia ảnh, ma trận/lớp, định dạng FP32, PTQ/QAT, audit metric, pruning, RQ1 benchmark/stress, RQ2 alignment/robustness/sensitivity và RQ3 hiệu ghép cặp theo seed và benchmark ứng dụng.
+ - Ghi SHA-256 của các nguồn trực tiếp, commit đầu vào và kết quả audit trong `provenance.json`.
++
++## Bổ sung provenance ngày 07/11/2026
++
++Đường benchmark điện thoại mới dùng `build_phone_report_tables.py` với 32 JSON của seed159/1024, tách khỏi nguồn mobile seed42 lịch sử trong benchmark-sources.json. P02 đã đối chiếu metric/ID/nhãn và hash cả 32 phiên. Các CSV phụ README phone từng nhắc nhưng chưa hiện diện không được xem như output đã có.
++
++`export_revision_profiles.py` bổ sung bảng đặc điểm ảnh từ P02 image-profile.csv, kèm revision-profile-provenance.json; Makefile results gọi cùng các exporter hiện có. Không chạy model để sinh bảng này. Báo cáo thống kê và giới hạn cập nhật ở `../../docs/revision-plan/outputs/phase-02/handoff.md`; replay RQ và sai lệch còn lại ở phase-03. Phần seed42 bên dưới giữ thông tin đường dữ liệu lịch sử, không mô tả đầy đủ benchmark phone32 mới.
+ 
+ ## Chọn nguồn benchmark và chuyển sang seed 1024
+ 

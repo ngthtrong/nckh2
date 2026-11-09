@@ -15,7 +15,7 @@
   \PassOptionsToClass{oneside}{scrreprt}
 \fi
 \LoadClass[fontsize=13bp,a4paper,open=any,chapterprefix=true,
-  listof=totoc,bibliography=totoc,numbers=noenddot]{scrreprt}
+  listof=totoc,bibliography=totoc,numbers=noenddot,captions=tableheading]{scrreprt}
 \RequirePackage[reset,a4paper,left=3cm,right=2cm,top=2cm,bottom=2cm,
   headheight=22bp,footskip=10mm]{geometry}
 \ifdefined\TwoSidedReport
@@ -29,6 +29,10 @@
 \setkomafont{caption}{\normalfont\normalsize}
 \setkomafont{captionlabel}{\normalfont\bfseries}
 \RedeclareSectionCommand[beforeskip=0pt,afterskip=18bp]{chapter}
+\RedeclareSectionCommand[beforeskip=14bp,afterskip=7bp]{section}
+\RedeclareSectionCommand[beforeskip=10bp,afterskip=5bp]{subsection}
+\RedeclareSectionCommand[beforeskip=8bp,afterskip=4bp]{subsubsection}
+\RedeclareSectionCommand[beforeskip=7bp,afterskip=.75em,runin=true]{paragraph}
 \setcounter{secnumdepth}{2}
 \setcounter{tocdepth}{2}
 % Leave room for longer Roman page numbers after the lists of tables/figures grow.

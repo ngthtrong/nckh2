@@ -2,7 +2,7 @@
 Phần này tổng hợp ba nhóm bằng chứng: kiểm thử tích hợp đầu cuối trên Android thật, E2E bổ sung trên web giả lập và phép đo truyền tải dưới mạng yếu. Các nhóm khác nhau về môi trường, đầu vào và cách thao tác nên được trình bày riêng, không cộng số case hay tiêu chí thành một cỡ mẫu chung. Thiết lập của từng nhóm được mô tả tại Mục~\ref{sec:04-evaluation-setup}.
 
 \subsection{Kiểm thử tích hợp đầu cuối trên thiết bị Android thật}\label{sec:mobile-system-results}
-Theo Mục~\ref{sec:mobile-system-setup}, hai bộ kết quả ngày 24/10/2026 ghi nhận trên cùng Samsung S10e. Bảng~\ref{tab:mobile-system-cases} tổng hợp JSON/CSV cùng xác nhận bổ sung của người chạy về Case 8 run\_001: bài vẫn được giữ và gửi đi sau khi bật lại Wi-Fi. Theo tiêu chí lưu và phục hồi gửi bài, cả hai run đạt chín case; riêng Case 8 run\_001 được ghi PASS có chú thích vì còn hiện tượng thoát app khi gửi lúc mất mạng. Cả hai đạt 6/6 case luồng xử lý. Kết quả này không xác nhận giao diện hoàn toàn không có lỗi.
+Theo tài liệu và phần báo cáo kiểm thử trước đây, hai run ngày 24/10/2026 được ghi nhận trên Samsung S10e. Raw JSON/CSV/log tương ứng chưa có trong checkout hiện tại, nên Bảng~\ref{tab:mobile-system-cases} giữ trạng thái lịch sử được mô tả, chưa xác minh độc lập. Run\_001 được mô tả 8 PASS/1 FAIL; Case 8 có xác nhận bổ sung rằng bài được giữ và gửi lại khi có Wi-Fi, nhưng sự cố thoát app hoặc mất phiên vẫn còn. Xác nhận bổ sung này không thay trạng thái FAIL lịch sử hoặc chứng minh lỗi đã sửa. Run\_002 được báo cáo đạt chín case; các tỷ lệ ở đây không phải số đo mới.
 
 \begin{table}[htbp]\centering
 \caption{Kết quả kiểm thử luồng xử lý và giao diện trên Samsung S10e}
@@ -18,18 +18,18 @@ Theo Mục~\ref{sec:mobile-system-setup}, hai bộ kết quả ngày 24/10/2026 
 6 & Phản hồi: app nhận trạng thái dispatched từ backend & PASS & PASS \\
 \midrule
 7 & Thao tác giao diện Android: gửi bài và xem Lịch sử & PASS & PASS \\
-8 & Tắt/bật mạng thật: giữ bài và gửi lại khi có mạng & PASS$^{*}$ & PASS \\
+8 & Tắt/bật mạng thật: giữ bài và gửi lại khi có mạng & FAIL$^{*}$ & PASS \\
 \midrule
 9 & Dashboard: hiển thị đúng các ID bài của benchmark & PASS & PASS \\
 \bottomrule
 \end{tabular}
 \end{table}
-\noindent\textit{$^{*}$Run\_001 đạt về giữ và phục hồi gửi bài theo xác nhận bổ sung của người chạy; vẫn ghi nhận lỗi thoát app khi gửi lúc mất mạng.}
+\noindent\textit{$^{*}$Run\_001: trạng thái raw được mô tả là FAIL; có xác nhận bổ sung về giữ và gửi lại, nhưng chưa khôi phục raw/log để xác minh độc lập hoặc phân biệt crash với mất phiên.}
 
 Case 1--6 là kiểm tra bằng lời gọi hàm trong app; Case 7--8 là xác nhận của người thao tác trên giao diện thật; Case 9 lấy bằng chứng từ Playwright trên máy tính. Không gộp các nhóm này thành tuyên bố tự động thao tác E2E toàn bộ giao diện Android. Mỗi bộ quan sát backend chứa năm ID bài của luồng xử lý; Case 6 dùng lại bài online để đổi trạng thái, không tạo bài thứ sáu. Tệp kiểm tra dashboard ghi PASS cho năm ID tương ứng của mỗi lượt.
 
 \paragraph{Hành vi gửi và nhận diện thực tế.}
-Bảng~\ref{tab:mobile-system-network} trích probe và số byte ảnh đã đối chiếu với backend. Ảnh gốc được xác nhận bằng SHA-256; ảnh nén có sai khác tuyệt đối trung bình trên mẫu RGB giải mã lần lượt 0,80 và 1,04, dưới ngưỡng kiểm tra 20. Chỉ số này kiểm tra ảnh truyền đúng nội dung, không đánh giá chất lượng phân loại hay chất lượng ảnh cảm nhận. Với chế độ chỉ văn bản, không có ảnh tải lên; dấu gạch không có nghĩa tổng lưu lượng bằng 0.
+Bảng~\ref{tab:mobile-system-network} giữ probe và số byte ảnh theo báo cáo lịch sử; lần chỉnh sửa này chưa đối chiếu lại với raw backend. Theo tài liệu kiểm thử, ảnh gốc được xác nhận bằng SHA-256; ảnh nén có sai khác tuyệt đối trung bình trên mẫu RGB giải mã lần lượt 0,80 và 1,04, dưới ngưỡng kiểm tra 20. Chỉ số này kiểm tra ảnh truyền đúng nội dung, không đánh giá chất lượng phân loại hay chất lượng ảnh cảm nhận. Với chế độ chỉ văn bản, không có ảnh tải lên; dấu gạch không có nghĩa tổng lưu lượng bằng 0.
 
 \begin{table}[htbp]\centering
 \caption{Chế độ gửi của ba case có ảnh trên điện thoại thật}
@@ -49,9 +49,9 @@ run\_002 & 20 kbit/s & 18 & Chỉ văn bản & --- \\
 Trong ba lần gọi PTE có ảnh của run\_001, nhãn chuẩn \texttt{high} được dự đoán thành \texttt{medium}, confidence 0,7802; thời gian \texttt{classifyImage} lần lượt là 64, 37 và 33 ms. Run\_002 có nhãn chuẩn \texttt{medium} nhưng dự đoán \texttt{high}, confidence 0,6461; thời gian là 30, 40 và 37 ms. Hai ảnh đều bị nhận diện khác nhãn chuẩn dù các case gửi bài đạt: PASS xác nhận đầu ra hợp lệ và luồng truyền dữ liệu đúng, không xác nhận phân loại đúng. Không dùng sáu lời gọi trên hai ảnh lặp lại để tính Accuracy/F1 hoặc so sánh tốc độ model; việc đó thuộc benchmark ảnh riêng.
 
 \paragraph{Lỗi phát hiện và giới hạn kết luận.}
-Ở Case 8 run\_001, người chạy ban đầu ghi FAIL trong hồ sơ vì khi tắt Wi-Fi rồi chọn gửi bài, app bị thoát và không đăng nhập lại được cho đến khi bật Wi-Fi. Sau đó người chạy xác nhận bài vẫn được gửi khi có Wi-Fi trở lại. Vì vậy báo cáo cập nhật kết quả phục hồi gửi bài thành PASS có chú thích, đồng thời giữ hiện tượng thoát app là lỗi giao diện/phiên cần điều tra riêng; chưa có log để phân biệt crash với mất phiên. JSON/CSV gốc vẫn giữ 8 PASS, 1 FAIL và trạng thái \texttt{failed}; phần cập nhật trong báo cáo dựa trên xác nhận bổ sung, không phải kết quả chạy lại hay bằng chứng lỗi thoát app đã được sửa. Run\_002 ghi PASS cho bài có mã hiển thị \texttt{\#11F944B0}; bài được lưu chờ gửi, sau khi bật Wi-Fi thì dashboard nhận bài và Lịch sử hiển thị “Đã nhận”.
+Ở Case 8 run\_001, người chạy ban đầu ghi FAIL trong hồ sơ vì khi tắt Wi-Fi rồi chọn gửi bài, app bị thoát và không đăng nhập lại được cho đến khi bật Wi-Fi. Sau đó người chạy xác nhận bài vẫn được gửi khi có Wi-Fi trở lại. Xác nhận bổ sung được giữ như thông tin riêng về phục hồi gửi bài, đồng thời trạng thái FAIL lịch sử và lỗi giao diện/phiên vẫn cần điều tra; chưa có log để phân biệt crash với mất phiên. JSON/CSV gốc vẫn giữ 8 PASS, 1 FAIL và trạng thái \texttt{failed}; phần cập nhật trong báo cáo dựa trên xác nhận bổ sung, không phải kết quả chạy lại hay bằng chứng lỗi thoát app đã được sửa. Run\_002 ghi PASS cho bài có mã hiển thị \texttt{\#11F944B0}; bài được lưu chờ gửi, sau khi bật Wi-Fi thì dashboard nhận bài và Lịch sử hiển thị “Đã nhận”.
 
-Lịch sử run\_002 còn ghi một lần Case 5 FAIL vì chưa từ chối quyền Vị trí; sau khi đáp ứng tiền điều kiện, chạy lại đạt PASS. Bảng giữ lịch sử thử lại và ghi rõ phần đánh giá bổ sung, không xóa lần thử lỗi. Các xác nhận giao diện có mã bài nhưng trường tên tệp bằng chứng còn trống, nên không xem JSON là hồ sơ ảnh/video tự động đầy đủ. Hai lượt trên một máy hỗ trợ kiểm chứng các tình huống đã thử, chưa phải mẫu độc lập để suy ra tỷ lệ tin cậy tổng quát, độ ổn định trên bốn điện thoại hoặc khả năng gửi SMS thành công.
+Lịch sử run\_002 còn ghi một lần Case 5 FAIL vì chưa từ chối quyền Vị trí; sau khi đáp ứng tiền điều kiện, chạy lại đạt PASS. Bảng giữ lịch sử thử lại và ghi rõ phần đánh giá bổ sung, không xóa lần thử lỗi. Các xác nhận giao diện có mã bài nhưng trường tên tệp bằng chứng còn trống, nên không xem JSON là hồ sơ ảnh/video tự động đầy đủ. Hai lượt được tài liệu ghi nhận trên một máy mô tả các tình huống đã thử; khi chưa có raw/log, chúng chưa cung cấp kiểm chứng độc lập, chưa phải mẫu độc lập để suy ra tỷ lệ tin cậy tổng quát, độ ổn định trên bốn điện thoại hoặc khả năng gửi SMS thành công.
 
 \subsection{Kết quả kiểm thử lịch sử}
 Bảng~\ref{tab:historical-tests} giữ kết quả lịch sử ngày 27/09/2026, được dẫn trong sổ đối chiếu nguồn. Các con số này thuộc phiên kiểm thử riêng, không cộng hoặc thay thế kết quả ngày 24/10/2026. Việc tạo APK xác nhận khả năng đóng gói, không thay thế kiểm thử chức năng.

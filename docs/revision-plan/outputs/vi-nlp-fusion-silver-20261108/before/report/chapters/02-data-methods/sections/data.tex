@@ -1,0 +1,89 @@
+\section{Dữ liệu}\label{sec:02-data-methods-data}
+\subsection{Các nguồn dữ liệu và vai trò}
+Báo cáo dùng năm nhóm dữ liệu có mục đích khác nhau (Bảng~\ref{tab:data-sources}): bộ ảnh để huấn luyện và đánh giá phân loại; bảng trạng thái Boolean để xây dựng điểm khẩn cấp có cấu trúc; bộ báo cáo Generator 3.0 để đánh giá phân cụm; bộ Candidate 4.1 để khảo sát xếp hạng và điều phối; và các cặp ảnh--văn bản CrisisMMD cho pilot phân loại tính hữu ích thông tin (\emph{informative}). Riêng CrisisMMD có ghép cặp ảnh--văn bản trong cùng bài đăng. Không ghép nó với ảnh mức ngập, bảng cờ khẩn cấp hoặc báo cáo mô phỏng, và không cộng số mẫu của năm nhóm thành một bộ dữ liệu cứu hộ chung.
+
+\begin{table}[htbp]\centering\small
+\caption{Năm nhóm dữ liệu, bản chất và phạm vi sử dụng}\label{tab:data-sources}
+\begin{tabular}{P{.19\textwidth}P{.17\textwidth}P{.23\textwidth}P{.28\textwidth}}
+\toprule Nhóm & Quy mô & Bản chất & Dùng cho \\\midrule
+Bộ ảnh mức ngập & \ImageTotal{} ảnh & Ảnh do nhóm thu thập, gán nhãn thủ công & Huấn luyện và đánh giá phân loại ảnh \\
+Bảng trạng thái khẩn cấp & 32 trạng thái & Bảng tham chiếu tổng hợp, liệt kê đầy đủ & Mô hình Logistic Regression \\
+Generator 3.0 & 80 run, 26.288 báo cáo & Bán tổng hợp, neo vào bối cảnh Copernicus EMSR848 & RQ1 \\
+Candidate 4.1 & 80 tập, 30.229 báo cáo & Tổng hợp & RQ2 và RQ3 \\
+CrisisMMD pilot & 4.261 cặp sau lọc & Bài đăng ảnh--văn bản công khai; nhãn informative & Text, ảnh và fusion trên nhiệm vụ riêng \\
+\bottomrule\end{tabular}
+\end{table}
+
+Hai bộ báo cáo mô phỏng không đại diện cho báo cáo cứu hộ thực tế và không tạo thành chuỗi kiểm chứng liên tục trên cùng một tập mẫu.
+
+\subsection{Bộ ảnh mức ngập}
+Mô hình dùng \ImageTotal{} ảnh sạch phân bố vào bốn mức. Thứ tự lớp được giữ thống nhất từ huấn luyện, xuất mô hình đến xử lý trong ứng dụng: \texttt{low}, \texttt{medium}, \texttt{high}, \texttt{non\_flood}.
+\input{generated/tables/image-split}
+
+\paragraph{Nguồn gốc.} Bộ ảnh do nhóm thu thập. Bản ghi hiện có chưa nối từng ảnh với URL, sự kiện gốc hoặc giấy phép; tên tệp không đủ để xác nhận nguồn ảnh. Hiện chưa có bản ghi nguồn và giấy phép cho từng ảnh, nên bộ ảnh chỉ dùng cho nghiên cứu và không phân phối lại khi chưa rà soát bản quyền. Ảnh web đã nén thường nhỏ và khác ảnh chụp trực tiếp bằng điện thoại; mô hình chưa được đánh giá riêng trên ảnh chụp thực địa.
+
+\paragraph{Tiêu chí gán nhãn.} Nhãn theo hướng dẫn gán nhãn trong notebook huấn luyện (Bảng~\ref{tab:label-criteria}), dùng người và phương tiện trong ảnh làm mốc tham chiếu. Nhãn là chỉ dấu mức ngập hỗ trợ xếp hạng, không phải số đo độ sâu. Tài liệu của bộ ảnh không ghi số người gán nhãn hay độ đồng thuận giữa người gán, nên nhãn được xem là nhãn của nhóm theo hướng dẫn này. Ranh giới \texttt{low}/\texttt{medium} và \texttt{medium}/\texttt{high} phụ thuộc mốc tham chiếu nhìn thấy trong ảnh; đây là hai cặp lớp dễ nhầm nhất.
+
+\begin{table}[htbp]\centering\small
+\caption{Tiêu chí gán nhãn bốn mức ngập}\label{tab:label-criteria}
+\begin{tabular}{P{.14\textwidth}P{.78\textwidth}}
+\toprule Lớp & Dấu hiệu thị giác \\\midrule
+\texttt{non\_flood} & Không có nước ngập rõ ràng; đường khô, ướt, mưa hoặc vũng nước nhỏ nhưng chưa phải ngập \\
+\texttt{low} & Có nước ngập rõ nhưng dưới gối người, dưới thân thấp xe máy, dưới phần chính bánh xe ô tô \\
+\texttt{medium} & Nước khoảng từ gối đến dưới ngực; tới hoặc gần yên xe máy; qua bánh xe ô tô \\
+\texttt{high} & Nước từ ngực trở lên; qua tay lái xe máy; tới cửa kính hoặc mái xe; ngập sâu vào nhà, cửa sổ \\
+\bottomrule\end{tabular}
+\end{table}
+
+\paragraph{Đặc điểm tệp gốc.} Audit header trên toàn bộ \ImageTotal{} ảnh cho thấy JPEG 1.521, PNG 24, WEBP 152 và AVIF 5; mode RGB 1.687, RGBA 14 và L 1. Đây là format giải mã từ header, không suy từ đuôi tên. Chiều rộng min/trung vị/max là 168/512/5.472 pixel; chiều cao 100/384/3.648 pixel; dung lượng 2.481/41.564/2.900.796 byte. Bảng~\ref{tab:image-profile} tách theo lớp; hồ sơ tái lập giữ thêm phân vị và bảng chéo theo split. Các số này mô tả ảnh gốc, không thay kích thước tensor $256\times256$ hoặc chứng minh độ bền với ảnh tối, mờ.
+\input{generated/tables/image-profile}
+
+JPEG chiếm phần lớn bộ ảnh, còn PNG, WEBP và AVIF đòi hỏi bộ giải mã hỗ trợ đúng định dạng thực. Đuôi tên giống nhau không bảo đảm định dạng hoặc cách giải mã giống nhau. Mode RGBA có kênh trong suốt, còn mode L chỉ có mức xám; bước chuyển RGB tạo đầu vào ba kênh thống nhất nhưng không bổ sung thông tin màu vốn không có. Hướng EXIF cần được áp trước khi resize để mốc người và phương tiện không bị xoay sai. Audit header không cho biết ảnh đã trải qua bao nhiêu lần nén, có bị sửa nội dung hay còn nhìn rõ mốc ngập hay không.
+
+Theo Bảng~\ref{tab:image-profile}, lớp low có chiều rộng và dung lượng trung vị nhỏ hơn các lớp còn lại. Khác biệt này gợi ý cần kiểm tra mô hình có khai thác dấu vết chất lượng hoặc nguồn ảnh thay cho mức ngập; thống kê hiện tại chưa xác lập điều đó. Khi đưa ảnh nhỏ lên tensor $256\times256$, nội suy chỉ tăng số pixel, không khôi phục chi tiết đã mất. Với ảnh lớn, thu nhỏ có thể làm mờ mốc ngập nhỏ; letterbox giữ tỷ lệ nhưng dành một phần tensor cho vùng đệm. Dung lượng tệp, độ phân giải và mức dễ nhận diện vì thế là ba thuộc tính khác nhau. Kết quả suy giảm nhân tạo trên CPU ở Mục~\ref{sec:image-quality-cpu-results} bổ sung bằng chứng về một model cố định; chúng không biến mô tả header thành đánh giá ảnh camera thực địa.
+
+\subsection{Làm sạch, nhóm ảnh và kiểm soát chia tập}
+Trước khi huấn luyện, notebook loại ảnh không đọc được và các thư mục chờ rà soát. Ảnh trùng tuyệt đối theo MD5 nằm ở nhiều lớp khác nhau bị loại khỏi huấn luyện. Các ảnh gần giống nhau được gom thành nhóm cảm nhận (perceptual group) bằng dHash; nhóm có nhãn xung đột bị loại để rà soát. Mỗi nhóm chỉ nằm trong một tập, nhằm không để biến thể của cùng một cảnh xuất hiện ở cả huấn luyện lẫn kiểm tra. Việc chia phân tầng theo lớp với tỷ lệ xấp xỉ 70/15/15 theo bảng chia cố định đã lưu; Bảng~\ref{tab:image-split} là kết quả.
+
+Cách làm này giảm nguy cơ rò rỉ do ảnh trùng hoặc gần trùng, nhưng không chứng minh các tập độc lập hoàn toàn về nguồn hay sự kiện: hai ảnh cùng một trận ngập từ hai nguồn có thể rơi vào hai tập khác nhau. Bộ xuất kết quả đối chiếu đường dẫn và MD5 giữa bảng chia với các tệp ảnh hiện có (Mục~\ref{sec:04-evaluation-setup}).
+
+Đối chiếu bổ sung xác nhận 1.702 bản ghi sau làm sạch của seed 1024 khớp tám trường định danh, nhãn, mã băm và nhóm với bảng chia hiện tại; toàn bộ trường nhóm nguồn còn trống. Metadata checkpoint ghi seed 1024 và đường dẫn bảng chia dùng chung trong kho huấn luyện, nhưng chưa khôi phục được checksum của bảng chia tại thời điểm train. Sự khớp của bản ghi hiện có và đường dẫn lịch sử chưa chứng minh bytes của split đã dùng khi huấn luyện; nguồn ảnh, giấy phép, độ đồng thuận gán nhãn và xác nhận chuyên gia vẫn chưa có hồ sơ bổ sung.
+
+\subsection{Quy trình dữ liệu hiện có và phương án hoàn thiện}\label{sec:data-process}
+Quy trình được mô tả theo sáu công đoạn: thu thập, sàng lọc, làm sạch, gán nhãn, chia tập và quản lý phiên bản. Đây là cách tổ chức hồ sơ để người đọc nhận biết dữ liệu hình thành và được kiểm tra thế nào; không suy ra rằng đã có nhật ký đầy đủ cho mọi lần thao tác lịch sử. Bảng~\ref{tab:data-process} phân biệt thông tin đang có với phần cần bổ sung.
+
+\begin{longtable}{P{.12\textwidth}P{.25\textwidth}P{.24\textwidth}P{.27\textwidth}}
+\caption{Hồ sơ quy trình bộ ảnh hiện có và phương án hoàn thiện chưa thực hiện}\label{tab:data-process}\\
+\toprule Công đoạn & Hồ sơ hiện có & Thông tin chưa có & Phương án hoàn thiện \\\midrule\endfirsthead
+\toprule Công đoạn & Hồ sơ hiện có & Thông tin chưa có & Phương án hoàn thiện \\\midrule\endhead
+Thu thập & Tệp ảnh và danh sách 1.702 bản ghi sau làm sạch; nguồn chung do nhóm thu thập & URL, sự kiện, thời điểm thu thập, giấy phép từng ảnh; mọi source\_group đang trống & Lập bản ghi nguồn theo từng ảnh khi có chứng từ; giữ trường chưa biết và lịch sử bổ sung \\
+Sàng lọc & Notebook loại ảnh không đọc được và thư mục chờ rà soát & Nhật ký tiếp nhận và lý do loại đầy đủ của các phiên lịch sử & Ghi ID đầu vào, lý do giữ/loại và khả năng nhìn thấy mốc; giữ riêng mẫu chưa quyết định \\
+Làm sạch & MD5, dHash và nhóm cảm nhận; quy tắc loại trùng xung đột lớp & Chưa chứng minh hết bản trùng ngữ nghĩa hoặc cùng sự kiện & Rà nhóm gần trùng, lưu quan hệ bản gốc--biến thể; không coi dHash là xác nhận nguồn độc lập \\
+Gán nhãn & Bốn lớp và tiêu chí thị giác ở Bảng~\ref{tab:label-criteria} & Số người gán, nhãn từng người, độ đồng thuận và phân xử & Hai người gán độc lập theo hướng dẫn khóa trước; giữ bất đồng, đo đồng thuận rồi phân xử có lý do \\
+Chia tập & Bảng cố định 1.189/257/256 ảnh; nhóm đã ghi không xuyên split & Checksum bảng chia lúc train; nhóm nguồn/sự kiện đầy đủ & Khóa nhóm nguồn trước chia khi có hồ sơ; lưu hash danh sách, seed, phiên bản quy tắc và ngày khóa \\
+Quản lý phiên bản & Config, prediction, model và provenance hiện có để đối chiếu & Chưa có lineage nguyên byte cho mọi phiên lịch sử & Tạo manifest phiên dữ liệu, hash tệp và nhãn, nhật ký đổi nhãn/nhóm; giữ snapshot cũ và lý do đổi \\
+\bottomrule
+\end{longtable}
+
+Trong phương án gán nhãn bổ sung, mỗi người cần ghi cả nhãn và tình trạng đủ/thiếu mốc tham chiếu. Không ép ảnh không đủ thông tin vào một mức ngập chỉ để tăng số mẫu. Độ đồng thuận cần được tính trên nhãn độc lập trước phân xử, kèm phân bố lớp và ma trận bất đồng; kết quả chưa đo không được điền bằng tỷ lệ dự kiến. Mẫu dùng thử hướng dẫn phải được tách khỏi tập test xác nhận. Đây là thiết kế hoàn thiện quy trình, chưa phải xác nhận đã có hai người gán hoặc chuyên gia thẩm định bộ ảnh hiện tại.
+
+Với phiên dữ liệu tiếp theo, bảng chia cần được khóa trước lựa chọn mô hình; mọi sửa nhãn hoặc bổ sung ảnh tạo một phiên mới thay vì ghi đè âm thầm. Nếu khôi phục được nguồn hoặc checksum cũ, hồ sơ bổ sung phải ghi rõ ngày và căn cứ khôi phục, không gán ngược thành metadata đã tồn tại lúc huấn luyện. Đối với CrisisMMD, dữ liệu được quản lý theo tweet ID, cặp ảnh--văn bản và sự kiện; nhãn informative giữ nguyên nhiệm vụ của pilot ở Mục~\ref{sec:multimodal-pilot}, không dùng làm nhãn mức ngập hoặc nguy cấp.
+
+\subsection{Dữ liệu khẩn cấp có cấu trúc}
+Bảng tham chiếu liệt kê toàn bộ $2^5=32$ tổ hợp của năm cờ Boolean do nhóm chọn: không phản ứng (\texttt{unresponsive}), khó thở hoặc tím tái (\texttt{respiratory\_\allowbreak{}distress\_\allowbreak{}or\_\allowbreak{}cyanosis}), chảy máu nhiều (\texttt{heavy\_bleeding}), co giật (\texttt{active\_convulsions}) và chấn thương nguy cơ cao (\texttt{high\_risk\_trauma}). Nhãn dương theo quy tắc OR của nhóm: có ít nhất một cờ thì dương. Do duyệt đủ không gian tổ hợp, bảng có tính tất định và có thể kiểm tra từng dòng.
+
+Bảng này phục vụ khảo sát phương pháp ước lượng điểm khẩn cấp $E_i^{\mathrm{LR}}\in[0,1]$; nó không phải dữ liệu lâm sàng và không được dùng để kết luận về hiệu quả y khoa. Cách mô hình dùng bảng được trình bày ở Mục~\ref{sec:02-urgency-lr}.
+
+\subsection{Generator 3.0 cho RQ1}
+Bộ dữ liệu RQ1 gồm 80 run với seed từ 1 đến 80, mỗi run mô phỏng 16 sự kiện thiên tai tiềm ẩn. Tổng cộng 26.288 báo cáo, gồm 17.901 báo cáo thật trong mô phỏng, 3.587 báo cáo trùng lặp và 4.800 báo cáo tin giả có phối hợp. Bối cảnh không gian và mật độ dân cư được neo vào kích hoạt vệ tinh Copernicus EMSR848 kết hợp OpenStreetMap và WorldPop tại Việt Nam \citep{copernicusEMSR848,worldpop2025vietnam}. Đây là dữ liệu bán tổng hợp, không phải báo cáo cứu hộ thực tế.
+
+Mỗi run gồm năm thành phần tách riêng: dữ liệu đầu vào thuật toán, danh sách báo cáo quan sát được, nhãn thật (ground truth), các sự cố tiềm ẩn và siêu dữ liệu cấu hình. Chỉ tệp đầu vào thuật toán được đưa vào suy luận; nhãn thật được nối sau khi đã lưu dự đoán để đối soát độc lập.
+
+\subsection{Candidate 4.1 cho RQ2 và RQ3}
+Candidate 4.1 là bộ dữ liệu tổng hợp riêng cho độ bền vững của điểm ưu tiên và hệ quả điều phối. Bộ gồm 80 tập với 30.229 báo cáo, mô phỏng các dạng tấn công phối hợp, tin giả và dữ liệu trùng lặp. Mô hình sinh dữ liệu cung cấp thời hạn phục vụ, điều kiện tiếp cận hiện trường và mức tổn thất mô phỏng, đủ để tính lợi ích và harm khi đánh giá điều phối. Vì các đại lượng này do generator quy định, kết quả chỉ nói về sự phù hợp với mục tiêu mô phỏng.
+
+\subsection{CrisisMMD cho pilot ảnh--văn bản}
+Pilot đã sử dụng dữ liệu CrisisMMD \citep{alam2018crisismmd} có nhãn informative thống nhất giữa hai nguồn để huấn luyện các classifier văn bản, ảnh và fusion. Sau lọc trùng xuyên split, giữ 2.971 cặp train, 589 validation và 701 test; test là sự kiện lũ Sri Lanka, validation là Maria, còn train thuộc năm sự kiện khác. Cách chia và ngưỡng được khóa riêng cho pilot. Nguồn mô tả corpus bằng tiếng Anh, nhưng chưa có đánh giá ngôn ngữ từng hàng. Nhãn mô tả tính hữu ích thông tin của bài đăng, không mô tả độ sâu ngập, mức nguy cấp hoặc thứ tự điều phối. Quy trình chọn mẫu và kết quả ở Mục~\ref{sec:multimodal-pilot}; không nhập các cặp này vào Dataset\_Flood hoặc các RQ mô phỏng.
+
+\subsection{Lưu trữ và truy vết}
+Các bảng số liệu và hình định lượng được sinh từ artifact đã lưu bằng script, kèm bản ghi nguồn và mã băm trong hồ sơ provenance. Bảng thiết kế và sơ đồ giải thích được biên soạn trong nguồn LaTeX, phân biệt với kết quả thực nghiệm. Dữ liệu, seed, cấu hình và kết quả của từng lần chạy được giữ cùng nhau để tái lập; quy trình cụ thể ở Mục~\ref{sec:02-reproducibility}.

@@ -1,0 +1,54 @@
+{
+  "status": "PASS",
+  "pair_id": "877412529647095809_3",
+  "checks": {
+    "text_tfidf_lr": true,
+    "image_frozen_lr": true,
+    "feature_concat_lr": true
+  },
+  "outputs": {
+    "text_tfidf_lr": {
+      "task": "public_crisis_informativeness",
+      "language_scope": "en",
+      "prediction": "informative",
+      "probabilities": {
+        "not_informative": 0.48895807441193584,
+        "informative": 0.5110419255880642
+      },
+      "model": "text_tfidf_lr",
+      "model_sha256": "668a962f2fb8a95b7adbe8cb675a1977262f1006358a4b04c537980ee11e1bed",
+      "usage": "LOCAL_RESEARCH_ONLY",
+      "urgency_mapping": "PROHIBITED_DIFFERENT_TARGET",
+      "limitations": "No Vietnamese, rescue priority, field, mobile or probability-calibration validation"
+    },
+    "image_frozen_lr": {
+      "task": "public_crisis_informativeness",
+      "language_scope": "en",
+      "prediction": "not_informative",
+      "probabilities": {
+        "not_informative": 0.9464403300909298,
+        "informative": 0.053559669909070254
+      },
+      "model": "image_frozen_lr",
+      "model_sha256": "668a962f2fb8a95b7adbe8cb675a1977262f1006358a4b04c537980ee11e1bed",
+      "usage": "LOCAL_RESEARCH_ONLY",
+      "urgency_mapping": "PROHIBITED_DIFFERENT_TARGET",
+      "limitations": "No Vietnamese, rescue priority, field, mobile or probability-calibration validation"
+    },
+    "feature_concat_lr": {
+      "task": "public_crisis_informativeness",
+      "language_scope": "en",
+      "prediction": "not_informative",
+      "probabilities": {
+        "not_informative": 0.8120841131749221,
+        "informative": 0.1879158868250779
+      },
+      "model": "feature_concat_lr",
+      "model_sha256": "668a962f2fb8a95b7adbe8cb675a1977262f1006358a4b04c537980ee11e1bed",
+      "usage": "LOCAL_RESEARCH_ONLY",
+      "urgency_mapping": "PROHIBITED_DIFFERENT_TARGET",
+      "limitations": "No Vietnamese, rescue priority, field, mobile or probability-calibration validation"
+    }
+  },
+  "scope": "one held-out fixture per route; no operational or device validation"
+}

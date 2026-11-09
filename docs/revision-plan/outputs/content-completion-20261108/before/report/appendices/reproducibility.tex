@@ -1,0 +1,75 @@
+\chapter{Tái lập thực nghiệm}\label{chap:reproducibility}
+\section{Nguồn dữ liệu và mã nguồn}
+Các bảng kết quả được tổng hợp từ dữ liệu thực nghiệm đã lưu. Dữ liệu đầu vào, cấu hình mô hình, mã nguồn và kết quả được lưu kèm bộ sản phẩm bàn giao để phục vụ đối chiếu và tái lập \citep{nguyen2026floodartifact}.
+
+\section{Sinh lại bảng và kiểm tra ảnh}
+Từ thư mục gốc repo, chạy:
+\begin{verbatim}
+python3 report/scripts/export_results.py
+make -C report content
+make -C report deliverables
+make -C report check
+\end{verbatim}
+Script chỉ dùng Python chuẩn, đọc artifact đã lưu, đối chiếu config/split, kiểm tra từng ảnh theo MD5 và kiểm tra nhóm không vượt split. Sau đó sinh bảng TeX, macro dùng chung và provenance. Nó không huấn luyện, không thay đổi JSON/CSV nghiên cứu và không chạy benchmark thiết bị. Để tái lập chỉ số từ đầu, phải dùng công cụ runtime tương ứng.
+
+Tệp split có SHA-256:
+\begin{quote}\small\path{f7b52cd25411d4d1df2f7f80745a2cf430819773854345798cf7e093e3bcba45}\end{quote}
+Tệp config có SHA-256:
+\begin{quote}\small\path{1a14408bd2f42c9c06aba419ec3862fefec109c4e1030fa2a354ca8522a46779}\end{quote}
+Ảnh test phải lấy theo cột \texttt{relative\_path}, không chia lại dataset và không thay thế bằng toàn bộ thư mục ảnh. Đường dẫn tuyệt đối Windows trong metadata là đường môi trường của lần chạy gốc; cần ánh xạ sang đường tương đối khi dùng máy khác.
+
+\section{Tái lập các phép so sánh ảnh}
+Các công cụ trong thư mục \texttt{tools/} có CLI cho so sánh FP32, PTQ/QAT và pruning. Cần xem \texttt{--help} của đúng script trước khi chạy để chọn output riêng và tránh ghi đè artifact đang dẫn trong báo cáo. Thí dụ kiểm tra parity nhỏ từ thư mục tools:
+\begin{verbatim}
+python3 compare_models.py --help
+python3 compare_models.py --limit 3 --skip-pte --no-plots
+\end{verbatim}
+Lệnh smoke không thay kết quả full test. Với full test, cần checkpoint, config, split và manifest khớp hash, dependency đúng runtime và quyền truy cập đủ ảnh. Khi PTE không có runtime, trạng thái phải ghi rõ chưa thử thay vì tạo dự đoán thay thế từ ONNX.
+
+Phiên đo cần ghi phần cứng, provider, số luồng, warmup, batch và ranh giới timing. Các phiên summary CPU tính predict; benchmark điện thoại tại Mục~\ref{sec:phone-benchmark-results} tính classifyImage rộng hơn. Cần giữ output trong một thư mục riêng khi đo lại để có thể so sánh mà không mất bản cũ. Bộ benchmark bốn điện thoại đã có metadata thiết bị và hash model; các phiên tiếp theo vẫn cần bổ sung thông tin phiên bản APK, log tải và nhiệt độ để xác nhận build và độ ổn định hiệu năng.
+
+\section{Sinh hình và kiểm tra benchmark ứng dụng}
+Chín hình minh họa gồm các biểu đồ định lượng và ví dụ ảnh được tổng hợp từ dữ liệu, kết quả thí nghiệm của đề tài. PDF được dùng trong LaTeX; PNG đi cùng để xem nhanh. Script lưu quy tắc lựa chọn ảnh minh họa, hash các nguồn trực tiếp, hash đầu ra và các số tổng hợp trong tệp provenance hình sinh tự động. Các sơ đồ kiến trúc/nghiệp vụ được viết bằng TikZ trong nguồn chương; sơ đồ khái niệm có ghi rõ không phải kết quả thực nghiệm.
+\begin{verbatim}
+python3 -m venv report/build/visual-env
+report/build/visual-env/bin/python -m pip install \
+  -r report/scripts/requirements-figures.txt
+make -C report figures
+\end{verbatim}
+Các file hình đã có trong repo nên build nội dung thường không cần cài matplotlib. Khi nguồn thực nghiệm đổi, cần xuất lại bảng và hình để giữ đồng bộ. Bộ kiểm tra report đối chiếu hash hình/nguồn và sẽ báo nếu hình đã lỗi thời.
+
+\subsection{Nguồn benchmark nhận diện trên điện thoại}\label{sec:phone-benchmark-evidence}
+Bộ benchmark hiện tại được đo trên bốn mẫu điện thoại: realme 15, Redmi Note 11, Redmi Note 13 và Samsung S10e. Mỗi máy được đánh giá với MobileNetV3-Large seed 159 và seed 1024, hai biến thể baseline/cắt tỉa và hai runtime ONNX/ExecuTorch, tổng cộng 32 cấu hình. Mỗi cấu hình thực hiện năm lượt warmup rồi xử lý 256 ảnh test. Phương án triển khai được lựa chọn là seed 1024 cắt tỉa chạy ExecuTorch/PTE; các cấu hình còn lại cung cấp đối chứng về chất lượng và độ trễ.
+
+Kết quả từng phiên ghi thông tin thiết bị, model, nhãn dự đoán, confidence và thời gian xử lý từng ảnh. Các bảng được đối chiếu với dự đoán gốc, ma trận nhầm lẫn và hash model; Accuracy, macro-F1, sai lệch mức ngập và mean/P50/P95 được tổng hợp theo từng cấu hình. Thời gian bao gồm giải mã, tiền xử lý và suy luận tại điện thoại, không gồm truyền bài lên backend. Kết quả chính ở Mục~\ref{sec:phone-benchmark-results}; bảng chi tiết ở Mục~\ref{sec:phone-full-results}. Việc tổng hợp báo cáo sử dụng các phiên đã đo, không chạy suy luận lại.
+
+\section{Tái lập RQ1 và stress}
+Đánh giá phân cụm RQ1 cần sử dụng đúng mã nguồn và notebook tương ứng trong bộ bàn giao. Bộ dữ liệu giữ split run 1--20/21--40/41--80. Cấu hình chọn có trong tệp cấu hình đã lưu kèm kết quả. Stress dùng các cấu hình này không tuning lại.
+
+Nguồn stress chính gồm protocol, manifest, selected configs, checkpoint từng run/điều kiện, aggregate, duplicate mapping và runtime log. Notebook đã chạy được lưu kèm kết quả stress. Một lần chạy mới cần giữ seed, phiên bản notebook, dữ liệu và cấu hình; resume chỉ từ checkpoint có provenance khớp.
+
+Có 1.400 fit ở full batch. Smoke một run không chứng minh full batch hoàn thành. Nếu chạy lại, giữ kết quả trong thư mục riêng và so sánh với nguồn chính; không gộp với \texttt{rq1\_results\_v2} hoặc chọn bản có kết quả tốt hơn.
+
+\section{Tái lập và kiểm chứng kết quả RQ2/RQ3}
+Nguồn RQ2 chứa summary, alignment, robustness, paired comparisons và sensitivity. Nguồn RQ3 chứa bảng theo điều kiện, bảng theo seed, destination assignments, partition losses và provenance tái phân tích. Bản theo seed là nguồn suy luận chính cho RQ3.
+
+Script kiểm tra artifact và số liệu manuscript đã được lưu kèm theo môi trường khóa phiên bản. Cần môi trường biệt lập có đúng phiên bản được pin trước khi dùng script; không xem việc thiếu dependency là bằng chứng artifact sai. Bản báo cáo này xuất từ artifact đã lưu, không tuyên bố đã chạy lại bộ verifier trong môi trường khác.
+
+Để tái lập suy luận RQ3 từ bảng đã lưu, script tái tính tầng seed lấy trung bình điều kiện theo seed, bootstrap 5.000 và Holm cho 14 endpoint trong mỗi block so sánh. Nguồn provenance ghi hash vào/ra và runtime. Giữ nguyên hướng metric khi diễn giải hiệu ghép cặp.
+
+\section{Chạy demo và kiểm thử phần mềm}
+Từ gốc repo, có thể build web và chạy Compose theo hướng dẫn hiện tại:
+\begin{verbatim}
+products/scripts/demo/build_web.sh
+FE_BUILD_TARGET=prebuilt docker compose up -d --build
+\end{verbatim}
+Thao tác này tạo môi trường demo và có thể nạp dữ liệu bán tổng hợp nếu volume trống. Không dùng dữ liệu nạp này như yêu cầu cứu hộ thực. Đối với test backend cục bộ, đặt database/uploads ở vùng tạm trước import \texttt{main}, vì khởi tạo module có thể tạo/migrate database.
+
+Kiểm thử backend và Flutter được hướng dẫn trong tài liệu sản phẩm. Kiểm thử luồng xử lý và giao diện được thực hiện trên điện thoại Android thật, kết hợp coordinator, backend và dashboard. Điện thoại cần truy cập được máy chủ và có bộ dữ liệu/model đúng phiên; các bài thử được phân biệt bằng tên lượt và ID. Thử SMS cần cấu hình số tiếp nhận của phiên kiểm tra.
+
+\section{Phạm vi kiểm chứng}
+Quá trình biên soạn không thực hiện lại huấn luyện MobileNet, suy luận ảnh, notebook Colab hoặc kiểm thử E2E trên Docker và Android; các kết quả được tổng hợp từ những phiên thực nghiệm đã lưu. Kết quả test lịch sử được dẫn rõ ngày và nguồn. Kiểm tra mới chỉ xác nhận tính nhất quán dữ liệu đầu vào bảng và khả năng biên dịch báo cáo. Phân biệt này giúp người đọc biết phần nào là kết quả nghiên cứu đã lưu và phần nào là kiểm tra biên soạn.
+
+\section{Hồ sơ kiểm thử ứng dụng di động ngày 24/10/2026}
+Nguồn chính là hai bộ JSON/CSV và \texttt{manifest.json} dưới \RepoPath{products/fe/experiment_mobile/results/SM-G970U/}, cùng tiền tố \RepoPath{2026-10-24_10-28-41-463525_mobile_run_001}; bộ run\_002 có thêm hậu tố \texttt{\_run\_002}. Chọn theo \texttt{goldRun}/\texttt{seedRun} trong manifest, không suy từ riêng tên thư mục. JSON giữ trạng thái hiện tại, lịch sử lần thử và quan sát backend; \texttt{loi\_thu\_cong.csv} giữ lỗi được người chạy ghi nhận. Bản trích nguồn và hash dùng cho các bảng nằm tại \RepoPath{report/generated/mobile-system/source-audit.json}. Các lượt ngày 23/10 được giữ làm lịch sử, không cộng thành lần lặp độc lập của hai lượt chính.
+

@@ -3,6 +3,7 @@
 import argparse
 import os
 from pathlib import Path
+import re
 import shutil
 import subprocess
 import sys
@@ -26,6 +27,12 @@ def build_deliverables(target, bibliography):
     if target == 'content':
         for name in ['bulletin-vi', 'bulletin-en', 'summary-vi', 'summary-en']:
             run([sys.executable, 'scripts/build.py', name, '--bibliography', bibliography])
+
+
+def update_main_pdf(target, twoside, out):
+    if target == 'content' and not twoside:
+        shutil.copyfile(out / 'content.pdf', ROOT / 'main.pdf')
+        print('PDF: main.pdf (same as build/content/content.pdf)')
 
 def main():
     parser = argparse.ArgumentParser(description=__doc__)
@@ -83,6 +90,7 @@ def main():
                 artifact.replace(out / f'{job}.{suffix}')
         print('PDF: ' + str((out / f'{job}.pdf').relative_to(ROOT)))
         build_deliverables(args.target, args.bibliography)
+        update_main_pdf(args.target, args.twoside, out)
         return
 
     cmd = ['xelatex', '-interaction=nonstopmode', '-halt-on-error', '-file-line-error',
@@ -96,7 +104,17 @@ def main():
     marker = out / '.bibliography-backend'
     previous_aux = out / f'{job}.aux'
     incompatible_aux = previous_aux.exists() and ('\\abx@aux' in previous_aux.read_text(errors='replace')) != use_biber
-    if incompatible_aux or (marker.exists() and marker.read_text().strip() != backend):
+    numbering_incomplete = False
+    if use_biber and previous_aux.exists():
+        cached = previous_aux.read_text(errors='replace')
+        cited = set(re.findall(r'\\abx@aux@cite\{[^{}]*\}\{([^{}]+)\}', cached))
+        numbered = {key for key, number in re.findall(
+            r'\\abx@aux@number\{[^{}]*\}\{([^{}]+)\}\{[^{}]*\}\{[^{}]*\}\{(\d+)\}', cached)
+                    if int(number) > 0}
+        numbering_incomplete = bool(cited - numbered)
+    # Deferred biblatex numbers can retain zero for an entry formerly omitted
+    # from the grouped bibliography. Rebuild auxiliary data after fixing it.
+    if incompatible_aux or numbering_incomplete or (marker.exists() and marker.read_text().strip() != backend):
         for pattern in ['*.aux', '*.bbl', '*.blg', '*.bcf', '*.run.xml', '*.toc', '*.lof', '*.lot', '*.out']:
             for artifact in out.rglob(pattern):
                 artifact.unlink()
@@ -124,6 +142,7 @@ def main():
         run([sys.executable, 'scripts/check_report.py', '--release', '--build-dir', str(out.relative_to(ROOT))])
     print('PDF: ' + str((out / f'{job}.pdf').relative_to(ROOT)))
     build_deliverables(args.target, args.bibliography)
+    update_main_pdf(args.target, args.twoside, out)
 
 if __name__ == '__main__':
     try:

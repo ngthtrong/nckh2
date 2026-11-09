@@ -1,0 +1,77 @@
+\FormSection{1. Thông tin chung:}
+\FormLine{Mã số đề tài: \ProjectCode}
+\FormLine{Tên đề tài: \ProjectTitle}
+\FormLine{Sinh viên chủ nhiệm đề tài: \PrincipalName}
+\FormLine{Lớp: DI2396F1 -- Khóa 49; Trường/Khoa/Viện: Trường CNTT\&TT.}
+\FormIndented{Năm thứ: \PrincipalYear\qquad Số năm đào tạo: \TrainingYears}
+\FormLine{Người hướng dẫn: \SupervisorName}
+
+\FormSection{2. Mục tiêu đề tài:}
+Xây dựng hệ thống ứng dụng trí tuệ nhân tạo trên thiết bị di động để tiếp nhận, phân tích thông tin và hỗ trợ ra quyết định cứu hộ bão lũ trong điều kiện mạng không ổn định, hướng tới giảm thiểu thiệt hại về người và tài sản.
+
+\FormSection{3. Tính mới và sáng tạo:}
+Đề tài đề xuất cách tiếp cận kết hợp phân tích dữ liệu đa phương thức, trí tuệ nhân tạo tại biên và phân cụm sự kiện cứu hộ trong một hệ thống thống nhất.
+
+Thay vì phụ thuộc hoàn toàn vào máy chủ, hệ thống hướng tới thực hiện suy luận AI trực tiếp trên thiết bị di động, sử dụng mô hình học sâu được tối ưu hóa nhằm giảm yêu cầu tài nguyên và hạn chế truyền tải dữ liệu dung lượng lớn.
+
+Bên cạnh đó, việc kết hợp thông tin vị trí, thời gian và nội dung cứu hộ để phát hiện, gom nhóm các yêu cầu liên quan giúp hạn chế thông tin trùng lặp và hỗ trợ trực quan hóa tình huống cứu hộ trên bản đồ số.
+
+\FormSection{4. Kết quả nghiên cứu:}
+Đối với bài toán phân loại hình ảnh, mô hình được đánh giá trên tập kiểm thử gồm 256 ảnh. Với cấu hình seed 1024, mô hình đạt Accuracy \NewImageAccuracy\% và macro-F1 \NewImageMacroFOne\%, ghi nhận 3 lỗi nghiêm trọng. Thử nghiệm cắt tỉa mô hình đạt Accuracy \PruningAccuracy\% với \PruningCriticalCount{} lỗi nghiêm trọng.
+
+Đánh giá bổ sung trên ONNX CPU của model cắt tỉa dùng cùng 256 ảnh và tám biến đổi nhân tạo. Macro-F1 giảm từ \QualityCleanMacroFOne\% ở ảnh gốc xuống \QualityDarkMacroFOne\% khi nhân độ sáng với 0,4. Phép đo chưa xác nhận độ bền trên Android hoặc ảnh camera thực địa; nhãn kế thừa sau biến đổi chưa được thẩm định lại.
+
+Ứng dụng phân loại mức ngập từ ảnh và tính điểm LR từ năm cờ biểu mẫu với nhãn OR tự sinh. Điểm LR được gửi và lưu, nhưng adapter chưa dùng cho phân cụm hoặc xếp hạng; khẩn cấp hiện lấy từ urgency hoặc từ khóa mô tả. LR không phải NLP tiếng Việt; xử lý tiếng Việt và fusion phục vụ cứu hộ trong ứng dụng vẫn chưa được chứng minh hoàn thành.
+
+Pilot CrisisMMD công khai bổ sung đã huấn luyện text TF-IDF và fusion tuyến tính, đạt macro-F1 \MMTextFOne\% và \MMFusionFOne\% trên \MMTestN{} cặp của một sự kiện test riêng. Các CI hiệu chứa 0, chưa xác lập ưu thế; benchmark tiếng Anh không thay đánh giá tiếng Việt hoặc ưu tiên cứu hộ.
+
+Trong mạng yếu giả lập (50 kbit/s, độ trễ khứ hồi 600 ms), gửi thông tin cơ bản và ảnh nén đều thành công 257/257 lượt; ảnh gốc đạt 230/257 (89,49\%). Các chế độ được đo riêng trên máy tính; chưa xác nhận khả năng truyền qua mạng di động thực tế.
+
+RQ1 chưa xác lập Product hơn Additive độc lập (ARI 0,9072 so với 0,9191; Holm p=0,2560). RQ2 chưa xác lập lợi ích alignment chung (NDCG@5 revised 0,6669, random 0,6763); chỉ hỗ trợ bất biến exact ở grouping cố định. RQ3 trên 40 seed cho revised kém nearest-first về harm và trễ hạn mô phỏng. Một số p-value RQ2 chưa khớp replay, nên kiểm chứng thống kê còn một phần.
+
+Các kết quả hiện có phản ánh khả năng triển khai và đánh giá nguyên mẫu trong môi trường nghiên cứu, chưa đủ cơ sở để khẳng định hiệu quả điều phối cứu hộ trong điều kiện thiên tai thực tế.
+
+\FormSection{5. Sản phẩm:}
+Đề tài đăng ký ba sản phẩm khoa học và công nghệ chính:
+\FormIndented{-- Ứng dụng di động hỗ trợ cứu hộ thiên tai, tích hợp mô hình AI và chức năng gửi thông tin cầu cứu.}
+\FormIndented{-- Website quản lý thông tin cứu hộ, trực quan hóa vị trí cầu cứu và phân cụm sự kiện trên bản đồ số.}
+\FormIndented{-- Bộ mô hình AI đa phương thức được huấn luyện, tinh chỉnh và tối ưu hóa để phục vụ phân loại thông tin cứu hộ.}
+\par\noindent Bộ mô hình là sản phẩm đăng ký; bằng chứng hiện có gồm mô hình ảnh và LR có cấu trúc, chưa chứng minh hoàn thành nhánh NLP và fusion học chung.
+\par\noindent Ngoài ra, đề tài đăng ký các sản phẩm theo quy định của Đại học Cần Thơ gồm bản tin, báo cáo tóm tắt và video giới thiệu kết quả nghiên cứu có thời lượng tối đa 02 phút.
+
+\FormSection{6. Công bố khoa học từ kết quả nghiên cứu của đề tài, hoặc nhận xét, đánh giá của cơ sở đã áp dụng các kết quả nghiên cứu (nếu có):}
+% Title and author order follow paper/main.tex. Published status was confirmed
+% by the user on 07/11/2026. CCIS/Scopus Q3 follows the ISDS 2026 CFP:
+% https://isds.ctu.edu.vn/2026/author (accessed 24/10/2026).
+% Volume and publication year are not supplied in the project records.
+% This body is shared with the Vietnamese summary; do not infer these fields.
+\begingroup
+\fontsize{12bp}{13.8bp}\selectfont
+\setlength{\tabcolsep}{5.4bp}
+\setlength{\arrayrulewidth}{.48bp}
+\renewcommand{\arraystretch}{1}
+\noindent\hspace*{\FormPublicationOffset}%
+\begin{tabular}{|>{\centering\arraybackslash}p{\FormPublicationFirst}|P{95.03bp}|P{108.30bp}|P{63.24bp}|P{\FormPublicationIssue}|P{59.28bp}|}
+\hline
+\multicolumn{1}{|c|}{\textbf{Stt}} &
+\multicolumn{1}{c|}{\textbf{Tên bài báo}} &
+\multicolumn{1}{c|}{\shortstack{\strut\textbf{Tác giả/}\\\strut\textbf{nhóm tác giả}}} &
+\multicolumn{1}{c|}{\textbf{Tên tạp chí}} &
+\multicolumn{1}{c|}{\textbf{Số tạp chí}} &
+\multicolumn{1}{c|}{\shortstack{\strut\textbf{Năm}\\\strut\textbf{xuất bản}}} \\
+\hline
+1. &
+Stress-Testing Product-Gated Clustering and Bounded Priority Ranking for Flood-Rescue Reports: A Synthetic Study &
+Thanh-Trong Nguyen;\newline Ngoc-Anh Le;\newline Nhu-Quynh Nguyen;\newline Tuong-Hung Cao;\newline Hung-Thinh Ngo;\newline Xuan-Phuong Chau;\newline Lan Phuong Phan;\newline Thanh-Khoa Nguyen &
+\foreignlanguage{english}{Com\-mu\-ni\-ca\-tions in Computer and Information Science (CCIS)}, Springer; kỷ yếu ISDS 2026 (Scopus Q3) &
+Chưa cập nhật &
+Chưa cập nhật \\
+\hline
+\end{tabular}\par
+\endgroup
+
+\FormSection{7. Đóng góp về mặt kinh tế -- xã hội, giáo dục và đào tạo, an ninh, quốc phòng và khả năng áp dụng của đề tài:}
+Sản phẩm phục vụ đào tạo và nghiên cứu về Edge AI, tối ưu mô hình và quản lý thông tin cứu hộ. Hệ thống có tiềm năng hỗ trợ tiếp nhận, tổng hợp và phân loại yêu cầu khi mạng hạn chế; lợi ích về thời gian cứu hộ, chi phí và giảm thiệt hại chưa được kiểm chứng thực địa.
+
+\FormSection{8. Hiệu quả, phương thức chuyển giao kết quả nghiên cứu và khả năng áp dụng:}
+Các sản phẩm dự kiến được đóng gói và chuyển giao cho Trường Công nghệ Thông tin và Truyền thông, Đại học Cần Thơ để lưu trữ, giảng dạy và nghiên cứu. Trước khi ứng dụng thực tế, cần hoàn thiện phân tích đa phương thức, kiểm thử thiết bị và mạng thực, đánh giá phân cụm, đồng bộ dữ liệu và phối hợp với đơn vị cứu hộ chuyên môn.

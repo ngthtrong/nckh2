@@ -16,12 +16,26 @@
   % ieee.cbx's cite command encloses each numeric citation in square brackets.
   \let\citep\cite
   \let\citet\textcite
+  % Omit empty categories instead of producing empty-bibliography warnings.
+  \newif\ifReportLegalCited
+  \newif\ifReportBooksCited
+  \newif\ifReportArticlesCited
+  \AtDataInput{%
+    \ifkeyword{legal}{\global\ReportLegalCitedtrue}{}%
+    \ifkeyword{books}{\global\ReportBooksCitedtrue}{}%
+    \ifkeyword{articles}{\global\ReportArticlesCitedtrue}{}}
   \newcommand{\PrintReportBibliography}{%
     \addchap{Tài liệu tham khảo}
     \begin{english}
-      \printbibliography[keyword=legal,heading=subbibliography,title={Văn bản pháp quy}]
-      \printbibliography[keyword=books,heading=subbibliography,title={Sách, báo, tạp chí}]
-      \printbibliography[keyword=articles,heading=subbibliography,title={Bài viết và tài liệu khác}]
+      \ifReportLegalCited
+        \printbibliography[keyword=legal,heading=subbibliography,title={Văn bản pháp quy}]
+      \fi
+      \ifReportBooksCited
+        \printbibliography[keyword=books,heading=subbibliography,title={Sách, báo, tạp chí}]
+      \fi
+      \ifReportArticlesCited
+        \printbibliography[keyword=articles,heading=subbibliography,title={Bài viết và tài liệu khác}]
+      \fi
     \end{english}}
 \else
   \usepackage[nonewchap,keeporder]{splitbib}

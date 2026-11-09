@@ -1,0 +1,10 @@
+phase,scope,status,evidence,limits
+VN-00,AI-silver task and scope,EXECUTED_SILVER,protocol.json;task-authorization.json,Native/human-gold target approval remains open
+VN-01,Source and labeling,EXECUTED_SILVER,source-search.md;dataset-lock.json,AI translation and single-pass source-text labels; no human IAA
+VN-02,Corpus and split,EXECUTED_SILVER,dataset-lock.json,179/58/59; retrospective one-event test; four uncertain excluded
+VN-03,Separate CPU pipeline and CLI,EXECUTED_TECHNICAL,cli-smoke.json;contracts.log,Fixed pilot paths; no app/backend integration
+VN-04,Text and image models,EXECUTED_SILVER,training.json;t2-training.json;encoder-update-check.json,18 LR fits and six full-encoder T2 runs; no native gold
+VN-05,Frozen feature fusion and masks,EXECUTED_SILVER,metrics.csv;predictions.csv,No joint encoder fusion; missing-image recall is zero
+VN-06,Metrics and paired uncertainty,VERIFIED_TECHNICAL,verification.json;paired-effects.csv,10 checks; AI label validity and transfer remain unverified
+VN-07,Report and handoff,DELIVERED_WITH_AI_SILVER_LIMITS,handoff.md;report-checks/delivery-pdfs.json;report-checks/visual-review.json,Report checks do not establish scientific or operational acceptance
+GOLD,Original Vietnamese human annotation gate,NOT_RUN,../multimodal-20261108/annotation-kit/,Zero human annotations; unchanged

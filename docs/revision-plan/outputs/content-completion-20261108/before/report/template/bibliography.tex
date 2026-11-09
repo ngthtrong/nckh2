@@ -1,0 +1,72 @@
+% Official order: legal documents, books/journals, then articles; alphabetical within each group.
+\newif\ifReportBiblatex
+\ifdefined\UseBibtex
+  \ReportBiblatexfalse
+\else
+  \IfFileExists{ieee.bbx}{\ReportBiblatextrue}{\ReportBiblatexfalse}
+\fi
+\providecommand{\ReportBooksDatabase}{bibliography/books}
+\ifReportBiblatex
+  \usepackage[backend=biber,style=ieee,sorting=nyt,defernumbers=true]{biblatex}
+  \addbibresource{bibliography/legal.bib}
+  \addbibresource{\ReportBooksDatabase.bib}
+  \addbibresource{bibliography/articles.bib}
+  \addbibresource{bibliography/references.bib}
+  \DeclareLanguageMapping{vietnamese}{english}
+  % ieee.cbx's cite command encloses each numeric citation in square brackets.
+  \let\citep\cite
+  \let\citet\textcite
+  % Omit empty categories instead of producing empty-bibliography warnings.
+  \newif\ifReportLegalCited
+  \newif\ifReportBooksCited
+  \newif\ifReportArticlesCited
+  \AtDataInput{%
+    \ifkeyword{legal}{\global\ReportLegalCitedtrue}{}%
+    \ifkeyword{books}{\global\ReportBooksCitedtrue}{}%
+    \ifkeyword{articles}{\global\ReportArticlesCitedtrue}{}}
+  \newcommand{\PrintReportBibliography}{%
+    \addchap{Tài liệu tham khảo}
+    \begin{english}
+      \ifReportLegalCited
+        \printbibliography[keyword=legal,heading=subbibliography,title={Văn bản pháp quy}]
+      \fi
+      \ifReportBooksCited
+        \printbibliography[keyword=books,heading=subbibliography,title={Sách, báo, tạp chí}]
+      \fi
+      \ifReportArticlesCited
+        \printbibliography[keyword=articles,heading=subbibliography,title={Bài viết và tài liệu khác}]
+      \fi
+    \end{english}}
+\else
+  \usepackage[nonewchap,keeporder]{splitbib}
+  \SBtitlestyle{simple}
+  \renewcommand{\SBtitlefont}[1]{{\normalfont\bfseries #1}}
+  \let\citep\cite
+  \let\citet\cite
+  % Assign keys from each existing database; plainurl retains URLs and DOI links.
+  \ExplSyntaxOn
+  \ior_new:N \l__report_bib_ior
+  \seq_new:N \l__report_bib_key_seq
+  \NewDocumentCommand{\ReportBibCategory}{mm}{
+    \begin{category}{#1}
+    \clist_map_inline:nn {#2}{
+      \ior_open:Nn \l__report_bib_ior {##1.bib}
+      \ior_str_map_inline:Nn \l__report_bib_ior {
+        \regex_extract_once:nnNT
+          {\A\s*@[A-Za-z]+\s*\{\s*([^,\s]+)\s*,}
+          {####1} \l__report_bib_key_seq
+          {\exp_args:Nx \SBentries {\seq_item:Nn \l__report_bib_key_seq {2}}}
+      }
+      \ior_close:N \l__report_bib_ior
+    }
+    \end{category}
+  }
+  \ExplSyntaxOff
+  \ReportBibCategory{Văn bản pháp quy}{bibliography/legal}
+  \ReportBibCategory{Sách, báo, tạp chí}{\ReportBooksDatabase}
+  \ReportBibCategory{Bài viết và tài liệu khác}{bibliography/articles,bibliography/references}
+  \newcommand{\PrintReportBibliography}{%
+    \addchap{Tài liệu tham khảo}
+    \bibliographystyle{plainurl}
+    \bibliography{bibliography/legal,\ReportBooksDatabase,bibliography/articles,bibliography/references}}
+\fi

@@ -1,0 +1,65 @@
+\FormSection{1. Thông tin chung:}
+\FormLine{Mã số đề tài: \ProjectCode}
+\FormLine{Tên đề tài: \ProjectTitle}
+\FormLine{Sinh viên chủ nhiệm đề tài: \PrincipalName}
+\FormLine{Lớp: DI2396F1 -- Khóa 49; Trường/Khoa/Viện: Trường CNTT\&TT.}
+\FormIndented{Năm thứ: \PrincipalYear\qquad Số năm đào tạo: \TrainingYears}
+\FormLine{Người hướng dẫn: \SupervisorName}
+
+\FormSection{2. Mục tiêu đề tài:}
+Xây dựng hệ thống trí tuệ nhân tạo (AI) trên điện thoại để tiếp nhận, phân tích thông tin và hỗ trợ quyết định cứu hộ bão lũ khi mạng không ổn định, hướng tới giảm thiệt hại về người và tài sản.
+
+\FormSection{3. Tính mới và sáng tạo:}
+Đề tài kết hợp suy luận ảnh tại biên, truyền dữ liệu theo kết nối và gom nhóm báo cáo từ vị trí, thời gian, nội dung để hỗ trợ xác minh trên bản đồ. Thiết kế mở rộng xử lý ngôn ngữ tự nhiên (NLP) và fusion tiếng Việt được trình bày riêng với phần đã thực hiện.
+
+\FormSection{4. Kết quả nghiên cứu:}
+Trên 256 ảnh test, model seed 1024 đạt Accuracy \NewImageAccuracy\%, macro-F1 \NewImageMacroFOne\% và 3 lỗi nặng; cắt tỉa đạt Accuracy \PruningAccuracy\% với \PruningCriticalCount{} lỗi nặng. Trên ONNX CPU của model cắt tỉa với cùng 256 ảnh và tám biến đổi nhân tạo, macro-F1 clean đạt \QualityCleanMacroFOne\%, giảm còn \QualityDarkMacroFOne\% khi nhân độ sáng 0,4. Chưa xác nhận độ bền Android/ảnh camera; nhãn sau biến đổi chưa được thẩm định lại.
+
+App tính LR từ năm cờ với nhãn OR tự sinh rồi gửi, lưu điểm; adapter chưa dùng LR cho phân cụm/xếp hạng, mà lấy urgency hoặc từ khóa mô tả. LR không phải NLP tiếng Việt. Pilot CrisisMMD đã huấn luyện text TF-IDF và fusion tuyến tính, đạt macro-F1 \MMTextFOne\% và \MMFusionFOne\% trên \MMTestN{} cặp của một sự kiện test. Các CI hiệu chứa 0; benchmark tiếng Anh với nhãn informative không thay đánh giá khẩn cấp hoặc cứu hộ tiếng Việt.
+
+Báo cáo bổ sung thiết kế DistilBERT, fusion cùng nhiệm vụ nhận diện yêu cầu hỗ trợ trong tin tiếng Việt, ablation và đánh giá camera/Android; các phương án này chưa được huấn luyện, tích hợp hoặc đo bổ sung.
+
+Trong mạng yếu giả lập trên máy tính (50 kbit/s, độ trễ khứ hồi 600 ms), metadata và ảnh nén đều thành công 257/257 lượt, ảnh gốc 230/257 (89,49\%); các chế độ được đo riêng, chưa xác nhận mạng di động thực.
+
+RQ1 chưa xác lập Product hơn Additive độc lập (ARI 0,9072 so với 0,9191; Holm p=0,2560). RQ2 chưa xác lập lợi ích alignment chung (NDCG@5 revised 0,6669, random 0,6763), chỉ hỗ trợ bất biến exact khi grouping cố định. RQ3 trên 40 seed cho revised kém nearest-first về harm và trễ hạn mô phỏng. Ba raw p Spearman và năm Holm RQ2 chưa khớp replay. Các kết quả hiện có hỗ trợ đánh giá nguyên mẫu, chưa xác nhận hiệu quả cứu hộ thực địa.
+
+\FormSection{5. Sản phẩm:}
+Ba sản phẩm đăng ký gồm ứng dụng di động hỗ trợ gửi cầu cứu và AI; website bản đồ quản lý, phân cụm thông tin; bộ mô hình AI đa phương thức huấn luyện, tinh chỉnh và tối ưu. Bằng chứng đã có gồm mô hình ảnh, LR có cấu trúc và pilot CrisisMMD riêng; chưa chứng minh hoàn thành NLP tiếng Việt hoặc fusion cứu hộ trong app.
+\par\noindent Sản phẩm theo quy định gồm bản tin, báo cáo tóm tắt và video giới thiệu tối đa 02 phút.
+
+\FormSection{6. Công bố khoa học từ kết quả nghiên cứu của đề tài, hoặc nhận xét, đánh giá của cơ sở đã áp dụng các kết quả nghiên cứu (nếu có):}
+% Title and author order follow paper/main.tex. Published status was confirmed
+% by the user on 07/11/2026. CCIS/Scopus Q3 follows the ISDS 2026 CFP:
+% https://isds.ctu.edu.vn/2026/author (accessed 24/10/2026).
+% Volume and publication year are not supplied in the project records.
+% This body is shared with the Vietnamese summary; do not infer these fields.
+\begingroup
+\fontsize{12bp}{13.8bp}\selectfont
+\setlength{\tabcolsep}{5.4bp}
+\setlength{\arrayrulewidth}{.48bp}
+\renewcommand{\arraystretch}{1}
+\noindent\hspace*{\FormPublicationOffset}%
+\begin{tabular}{|>{\centering\arraybackslash}p{\FormPublicationFirst}|P{95.03bp}|P{108.30bp}|P{63.24bp}|P{\FormPublicationIssue}|P{59.28bp}|}
+\hline
+\multicolumn{1}{|c|}{\textbf{Stt}} &
+\multicolumn{1}{c|}{\textbf{Tên bài báo}} &
+\multicolumn{1}{c|}{\shortstack{\strut\textbf{Tác giả/}\\\strut\textbf{nhóm tác giả}}} &
+\multicolumn{1}{c|}{\textbf{Tên tạp chí}} &
+\multicolumn{1}{c|}{\textbf{Số tạp chí}} &
+\multicolumn{1}{c|}{\shortstack{\strut\textbf{Năm}\\\strut\textbf{xuất bản}}} \\
+\hline
+1. &
+Stress-Testing Product-Gated Clustering and Bounded Priority Ranking for Flood-Rescue Reports: A Synthetic Study &
+Thanh-Trong Nguyen;\newline Ngoc-Anh Le;\newline Nhu-Quynh Nguyen;\newline Tuong-Hung Cao;\newline Hung-Thinh Ngo;\newline Xuan-Phuong Chau;\newline Lan Phuong Phan;\newline Thanh-Khoa Nguyen &
+\foreignlanguage{english}{Com\-mu\-ni\-ca\-tions in Computer and Information Science (CCIS)}, Springer; kỷ yếu ISDS 2026 (Scopus Q3) &
+Chưa cập nhật &
+Chưa cập nhật \\
+\hline
+\end{tabular}\par
+\endgroup
+
+\FormSection{7. Đóng góp về mặt kinh tế -- xã hội, giáo dục và đào tạo, an ninh, quốc phòng và khả năng áp dụng của đề tài:}
+Sản phẩm phục vụ đào tạo, nghiên cứu Edge AI và quản lý thông tin cứu hộ; lợi ích về thời gian, chi phí và giảm thiệt hại chưa được đo thực địa.
+
+\FormSection{8. Hiệu quả, phương thức chuyển giao kết quả nghiên cứu và khả năng áp dụng:}
+Dự kiến chuyển giao cho Trường CNTT\&TT, Đại học Cần Thơ để lưu trữ, giảng dạy và nghiên cứu. Trước khi áp dụng, cần hoàn thiện NLP/fusion, kiểm thử thiết bị, mạng, đồng bộ, phân cụm và đánh giá với đơn vị cứu hộ chuyên môn.

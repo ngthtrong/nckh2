@@ -1,0 +1,35 @@
+\addchap{KẾT LUẬN VÀ HƯỚNG PHÁT TRIỂN}\label{chap:conclusion}
+\addsec{Kết luận}
+Đề tài đã xây dựng nguyên mẫu hệ thống hỗ trợ tiếp nhận, xử lý và điều phối thông tin cứu hộ bão lũ, kết nối ứng dụng Flutter có suy luận AI tại biên, máy chủ FastAPI thực hiện phân cụm và bàn điều phối Web GIS. Báo cáo và tài liệu kiểm thử ghi nhận hai run Android, nhưng raw JSON/CSV và log tương ứng chưa được khôi phục trong checkout hiện tại, nên các kết quả E2E còn ở mức được báo cáo, chưa xác minh độc lập. Case 8 run\_001 vẫn được ghi nhận 8 PASS/1 FAIL ở cấp run; xác nhận giữ bài và gửi lại không xóa hiện tượng thoát app hoặc mất phiên. Benchmark ảnh trên điện thoại có 32 JSON riêng, không thay thế bằng chứng E2E. Các kết quả chưa đại diện cho vận hành viễn thông ngoài thực địa.
+
+Đối với mô hình thị giác máy tính, kiến trúc MobileNetV3-Large đạt độ chính xác (Accuracy) \NewImageAccuracy\% và macro-F1 \NewImageMacroFOne\% trên tập test gồm \ImageTest{} ảnh của bộ dữ liệu đã chia; tính độc lập hoàn toàn theo nguồn và sự kiện chưa được xác nhận. Mô hình được xuất sang định dạng ONNX và PTE để thực thi lần lượt bằng ONNX Runtime và ExecuTorch; các phép đối chiếu trên CPU ghi nhận đồng thuận top-1 với mô hình PTH lần lượt là \CpuOnnxAgreement\% và \CpuPteAgreement\% trên cùng tập test. Lượng tử hóa giảm dung lượng từ 16,04 MiB (FP32) xuống 4,51 MiB (PTQ) và 4,57 MiB (QAT), nhưng Accuracy giảm tương ứng từ \NewImageAccuracy\% xuống \PTQAccuracy\% và \QATAccuracy\%; QAT có macro-F1 \QATMacroFOne\% (Bảng~\ref{tab:fp32_ptq_qat}). Kết quả cho thấy lợi ích về dung lượng đi kèm suy giảm chất lượng; cần đánh giá lỗi phân loại và hiệu năng trên thiết bị đích trước khi lựa chọn phương án triển khai.
+
+Logistic Regression tái hiện nhãn OR trên bảng 32 trạng thái của năm cờ, không phải NLP hoặc kết quả xác nhận lâm sàng. App tính, gửi điểm LR và backend lưu payload, nhưng adapter hiện chỉ dùng urgency hoặc từ khóa mô tả cho đầu vào khẩn cấp của lõi; chưa chứng minh LR tham gia xếp hạng. Việc tiếp nhận nhiều loại dữ liệu và kết hợp bằng công thức chưa chứng minh học fusion. Các cam kết NLP và bộ mô hình đa phương thức trong thuyết minh còn chưa được chứng minh hoàn thành.
+
+Về giải thuật, RQ1 chưa xác lập ưu thế chung của Product so với Additive độc lập: ARI lần lượt 0,9072 và 0,9191, $p_{\mathrm{Holm}}=0{,}2560$; bản sao năm lần làm chất lượng phân cụm suy giảm mạnh. RQ2 hỗ trợ bất biến exact ở grouping cố định nhưng chưa xác lập lợi ích alignment chung: NDCG@5 revised là 0,6669 so với random 0,6763; phối hợp confidence cao vẫn gây sai lệch ưu tiên. Một số $p$ Spearman và Holm liên quan còn chưa khớp replay, được giữ là hạn chế tái lập. RQ3 dùng 40 seed sau trung bình ba điều kiện nguồn lực; revised kém nearest-first về harm và trễ hạn mô phỏng, chưa xác lập lợi ích chung so với legacy. Các kết quả này không chứng minh hiệu quả cứu hộ thực địa.
+
+Các đóng góp chính của đề tài bao gồm:
+\begin{enumerate}
+\item Xây dựng nguyên mẫu hệ thống gồm ứng dụng di động, máy chủ và website điều phối;
+\item Đề xuất và đánh giá trên dữ liệu mô phỏng giải thuật gom cụm đồ thị không gian--thời gian và hàm ưu tiên cứu nạn đa tiêu chí;
+\item Thiết kế cơ chế lựa chọn chế độ gửi theo điều kiện mạng, lưu bản tin cục bộ và gửi lại khi có kết nối, có bằng chứng thành phần trong các điều kiện đã thử; hiệu quả cứu hộ thực địa chưa được đo.
+\end{enumerate}
+
+\addsec{Hạn chế của đề tài}
+Phép bổ sung đã đánh giá tám biến đổi ảnh nhân tạo và clean trên ONNX CPU với cùng 256 ảnh test, sau gate đồng thuận dự đoán lịch sử. Macro-F1 clean là \QualityCleanMacroFOne\%, với độ sáng nhân $0{,}4$ là \QualityDarkMacroFOne\%; kết quả chưa xác nhận độ bền với ảnh camera thực địa hoặc Android. Nhãn sau biến đổi chưa được thẩm định lại, nguồn ảnh và checksum split lúc train vẫn thiếu hồ sơ. Ablation image-only/text-only/both hiện chưa đủ điều kiện vì target khác nhau, thiếu paired inputs và gold chung độc lập với công thức; không thể ghép Accuracy ảnh với fidelity OR. Cam kết NLP và fusion học chung vẫn chưa được chứng minh hoàn thành.
+
+Hệ thống chưa được đánh giá trong vận hành cứu hộ thực địa với người sử dụng và đơn vị chuyên môn. Luồng SMS đã có thành phần hỗ trợ, nhưng tỷ lệ giao tin và độ trễ qua mạng viễn thông/gateway thực tế chưa được kiểm chứng đầy đủ.
+
+\addsec{Kiến nghị}
+Trước khi thí điểm với địa phương, nhóm phát triển cần khắc phục các lỗi ứng dụng đã ghi nhận và kiểm tra truyền nhận qua mạng di động, SMS/gateway thực tế. Đơn vị cứu hộ chuyên môn cần phối hợp xây dựng kịch bản, kiểm tra tiêu chí ưu tiên và đánh giá kết quả; đơn vị vận hành cần quy định quyền truy cập, bảo vệ dữ liệu cá nhân, sao lưu và quy trình xác minh thông tin. Chỉ mở rộng phạm vi sử dụng sau khi có kết quả thử nghiệm và đánh giá của các đơn vị tham gia.
+
+\addsec{Hướng nghiên cứu tiếp theo}
+Trên cơ sở các kết quả đạt được, các hướng phát triển tiếp theo của đề tài bao gồm:
+\begin{itemize}
+\item Bổ sung chức năng phân tích tin nhắn cứu hộ tiếng Việt tự do để trích xuất thông tin và nhận diện dấu hiệu nguy cấp, mở rộng khả năng tiếp nhận ngoài các lựa chọn có cấu trúc trên biểu mẫu;
+\item Mở rộng thử nghiệm phần cứng: triển khai thử nghiệm trên đa dạng các dòng điện thoại Android và iOS thực tế, đánh giá chi tiết mức độ tiêu thụ pin và độ trễ suy luận trong nhiều điều kiện môi trường;
+\item Nghiên cứu định vị nhiều nguồn (GPS, Wi-Fi, mạng di động, IP và địa chỉ/mốc do người dùng xác nhận), lưu nguồn, thời điểm và độ bất định của từng ước lượng. Không mặc định IP chính xác hơn GPS; Wi-Fi cần cơ sở tham chiếu và hạ tầng phù hợp. Khi thiếu hoặc mâu thuẫn tọa độ, cần người xác nhận hoặc chuyển hàng xem xét, không tạo vị trí giả; quyền riêng tư phải được đánh giá trước thí điểm;
+\item Nghiên cứu tiếp nhận âm thanh theo chuỗi audio $\rightarrow$ nhận dạng tiếng nói (ASR) $\rightarrow$ trích xuất vị trí, số người, dấu hiệu nguy cấp $\rightarrow$ người gửi hoặc điều phối viên xác nhận. Cần đánh giá tiếng Việt địa phương, tiếng mưa/gió, nhiều người nói, lỗi chép sai và độ trễ trên thiết bị; chưa có mô hình hoặc số đo ASR trong kết quả hiện tại;
+\item Nghiên cứu kịch bản mất kết nối hoàn toàn: lưu cục bộ không đồng nghĩa đã giao đến trung tâm. SMS cần sóng di động và gateway; DTN qua BLE/Wi-Fi Direct cần relay, cơ hội tiếp xúc và đường ra tới trung tâm. Người không có điện thoại cần cơ chế báo hộ, hotline khi liên lạc được hoặc đội tại chỗ thu nhận thông tin, kèm xác minh, chống trùng và phản hồi. Đây là phương án đề xuất, chưa được triển khai và đo tỷ lệ giao tin;
+\item Thử nghiệm thực địa diện rộng: phối hợp cùng các lực lượng cứu hộ chuyên trách và chính quyền địa phương để diễn tập, đánh giá mức độ khả dụng và hoàn thiện quy trình nghiệp vụ cứu nạn trong thực tế bão lũ.
+\end{itemize}

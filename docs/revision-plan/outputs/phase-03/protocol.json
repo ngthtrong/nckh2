@@ -1,0 +1,41 @@
+{
+  "scope": "statistical replay of saved outputs; no model/generator/clustering campaign",
+  "path_map": {
+    "historical src/": "current thucnghiem/"
+  },
+  "RQ1": {
+    "generator": "3.0",
+    "test_runs": "run_041..run_080",
+    "n": 40,
+    "primary": "rq1_results",
+    "replication": "rq1_results_v2/full kept separate",
+    "baseline_family": "9 ARI Product-vs-baseline contrasts; Holm across nine",
+    "bootstrap": "baseline comparisons 10000 resamples seed20260812 sequential selected-method order; stress5000 using SHA256-derived seeds from locked protocol",
+    "independent_unit": "run, copies/scenarios not independent"
+  },
+  "RQ2": {
+    "generator": "Candidate4.1",
+    "test_seeds": "3000..3039",
+    "n": 40,
+    "grouping": "oracle evaluator grouping",
+    "family": "3 alignment endpoints per comparator; 5 robustness endpoints per scenario",
+    "bootstrap_seed": 20260729,
+    "resamples": 5000,
+    "gold": "latent benefit independent of score but synthetic, evaluator-only"
+  },
+  "RQ3": {
+    "generator": "Candidate4.1",
+    "n": 40,
+    "unit": "three resource scenarios averaged within each seed",
+    "family": "14 endpoints per fixed partition policy contrast or fixed policy partition contrast",
+    "bootstrap_seed": 20260729,
+    "resamples": 5000,
+    "direction": "positive oriented mean means candidate better"
+  },
+  "environment": {
+    "numpy": "2.5.1",
+    "pandas": "3.0.3",
+    "scipy": "1.18.0"
+  },
+  "tolerance": "RQ1 1e-10; RQ2/3 CSV %.10g roundoff abs/relative 1e-7; any discrepancy retained"
+}

@@ -1,0 +1,32 @@
+\documentclass{template/ctu-report}
+\input{config/profiles}
+\input{config/metadata}
+\input{template/typography}
+\input{template/packages}
+\input{template/commands}
+\begin{document}
+\pagestyle{plain}
+\addchap{Ứng dụng di động hỗ trợ cứu hộ thiên tai}
+Ứng dụng hỗ trợ người dân tạo yêu cầu cứu hộ, cung cấp vị trí, số người cần hỗ trợ và ảnh hiện trường. Các màn hình dưới đây minh chứng chức năng gửi SOS, nhận diện mức ngập từ ảnh, lưu yêu cầu chờ đồng bộ và theo dõi lịch sử.
+
+\begin{figure}[htbp]\centering
+\begin{minipage}[t]{.23\textwidth}\centering
+\includegraphics[width=\linewidth,height=.32\textheight,keepaspectratio]{UI/user_da_loc/user/01_trang_chu_SOS.jpg}
+\par\small (a) Gửi SOS\end{minipage}\hfill
+\begin{minipage}[t]{.23\textwidth}\centering
+\includegraphics[width=\linewidth,height=.32\textheight,keepaspectratio]{UI/user_da_loc/user/03_anh_hien_truong_AI_nhan_dien.jpg}
+\par\small (b) Nhận diện ảnh\end{minipage}\hfill
+\begin{minipage}[t]{.23\textwidth}\centering
+\includegraphics[width=\linewidth,height=.32\textheight,keepaspectratio]{UI/user_da_loc/user/04_xac_nhan_luu_cho_dong_bo.jpg}
+\par\small (c) Lưu chờ gửi\end{minipage}\hfill
+\begin{minipage}[t]{.23\textwidth}\centering
+\includegraphics[width=\linewidth,height=.32\textheight,keepaspectratio]{UI/user_da_loc/user/06_lich_su_yeu_cau_cuu_ho.jpg}
+\par\small (d) Lịch sử yêu cầu\end{minipage}
+\caption{Các chức năng chính của ứng dụng di động}
+\end{figure}
+
+\noindent\textbf{Thành phần sản phẩm:} mã nguồn ứng dụng tại \RepoPath{products/fe/app/}; mô hình nhận diện bàn giao tại \RepoPath{products/fe/model/Edge Ai/seed1024/export/}.
+
+Các ảnh phản ánh giao diện và trạng thái tại thời điểm chụp. Thông báo lưu cục bộ không đồng nghĩa máy chủ đã tiếp nhận hoặc lực lượng cứu hộ đã xử lý yêu cầu. Kết quả kiểm thử, đo trên điện thoại và các giới hạn được trình bày trong phần thực nghiệm của báo cáo.
+
+\end{document}

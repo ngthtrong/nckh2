@@ -1,0 +1,72 @@
+{
+  "pdf": "ISDS/ISDS2026_Paper_6444_Conference_Deck.pdf",
+  "sha256": "b5bf52e369582cc3e1a7096acb647ca2e88edd322492a8d5d13546c73f5247fb",
+  "slide_count": 26,
+  "render_resolution": [
+    1280,
+    720
+  ],
+  "review_status": "passed",
+  "findings": [
+    {
+      "slide": 8,
+      "severity": "layout",
+      "issue": "Three-line bottom example extends behind takeaway banner; final time-context line is clipped.",
+      "recommendation": "Reduce to two lines or move example upward / shrink font.",
+      "status": "resolved",
+      "resolution": "Example reduced to two lines; clear of takeaway banner."
+    },
+    {
+      "slide": 15,
+      "severity": "layout",
+      "issue": "Both two-line metric names overlap LOWER IS BETTER labels.",
+      "recommendation": "Move lower-is-better labels below metric names, or use short one-line metric names.",
+      "status": "resolved",
+      "resolution": "Metric labels fit on one line; separated from direction labels."
+    },
+    {
+      "slide": 17,
+      "severity": "layout",
+      "issue": "Orange aggregate result extends behind takeaway banner; heatmap is too small for audience reading.",
+      "recommendation": "Shorten orange text; enlarge heatmap or move some visual detail to notes.",
+      "status": "resolved",
+      "resolution": "Graph GIF uses the full content width; aggregate heatmap is its readable final frame."
+    },
+    {
+      "slide": 18,
+      "severity": "layout",
+      "issue": "Coordinated campaign heading wraps into two lines and overlaps card body.",
+      "recommendation": "Increase heading area or shorten heading to Campaign.",
+      "status": "resolved",
+      "resolution": "Card heading shortened to Coordinated attack; heading and body no longer overlap."
+    }
+  ],
+  "verified_visuals": [
+    "CTU template preserved",
+    "Overview is slide2",
+    "Product/Additive formulas present",
+    "Louvain illustration present",
+    "NDCG formula legible",
+    "RQ1 and NDCG CI charts legible",
+    "RQ3 two-panel chart legible",
+    "Two references slides present",
+    "All26 slides render",
+    "Actual K2D / Readex Pro fonts embedded in PDF",
+    "Added source footnotes removed",
+    "All 26 slides checked after font change",
+    "RQ1 label colors match chart colors"
+  ],
+  "notes": [
+    "Static PDF displays the first GIF frame. GIF frame count, duration, distinct frames and unchanged PPTX embedding passed structural checks; native Microsoft PowerPoint playback was not exercised in this environment.",
+    "Template-owned CTU branding footer retained. No added source footnotes on audience slides."
+  ],
+  "prior_review_sha256": "f043ee8337ccb25c995a9882a6a5313847d72a498560e40f6a60eb2f855bed71",
+  "reviewer": "root agent: actual PDF slide images and contact sheet inspected",
+  "style_revision": {
+    "removed_bottom_summary_banners": 22,
+    "colored_box_left_borders": false,
+    "template_brand_footer": "retained",
+    "review": "All 26 slides reviewed on contact sheet; full slides 4 and 21 inspected after shared-style removal.",
+    "removed_discussion_bottom_note": true
+  }
+}

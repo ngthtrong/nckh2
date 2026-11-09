@@ -16,13 +16,17 @@ Instead of relying entirely on centralized server processing, the proposed syste
 Furthermore, the integration of location, time and rescue information for identifying and grouping related events is intended to reduce duplicate reports and support visualization of rescue situations on a digital map.
 
 \FormSection{4. Research results:}
-The research investigates the development of flood rescue datasets, deep learning-based image classification, urgency estimation using Logistic Regression from structured user selections, AI model optimization for mobile devices, and the design of a rescue information management and event clustering system.
-
 For image classification, the model was evaluated on a test set of 256 images. Using seed 1024, the model achieved \NewImageAccuracy\% accuracy and \NewImageMacroFOne\% macro-F1, with three critical errors. The structured pruning experiment achieved \PruningAccuracy\% accuracy, with \PruningCriticalCount{} critical errors.
 
-On the mobile device, image classification and urgency estimation from structured form selections provide complementary information. Their outputs are sent to the server for aggregation, event clustering and priority ranking. The research also examines data synchronization and system operation under unstable network conditions.
+Additional ONNX CPU screening of the pruned model used the same 256 images and eight synthetic corruptions. Macro-F1 decreased from \QualityCleanMacroFOne\% on clean images to \QualityDarkMacroFOne\% at 0.4 brightness. This does not establish robustness on Android or field camera images; inherited corruption labels have not been re-adjudicated.
+
+The app sends image labels and the LR score for storage; the adapter uses urgency or description keywords for clustering/ranking. Five-flag LR fitted to synthetic OR labels is not free-text NLP. The English CrisisMMD informativeness pilot reaches text/fusion macro-F1 of \MMTextFOne\%/\MMFusionFOne\%; effect CIs include zero.
+
+A separate pilot uses AI-translated Vietnamese text and AI labels: \VISilverTrainN{} training, \VISilverDevN{} development and \VISilverTestN{} test pairs. Text classifiers, DistilBERT fine-tuning and frozen feature fusion were run offline; frozen fusion reaches \VISilverFusionFOne\% macro-F1 and \VISilverFusionRecall\% request recall. Labels derive from source text, not independent human gold. Native-Vietnamese evaluation and application fusion remain unfulfilled; information extraction and camera/Android evaluation remain proposed.
 
 In weak-network simulations with bandwidth of 50 kbit/s and a round-trip time of 600 ms, both metadata-only and compressed-image modes succeeded in 257/257 attempts (100\%), compared with 230/257 (89.49\%) for original images. The two modes transmitting less data achieved higher transmission success rates than original images under the tested conditions. Each mode was measured separately on a computer; transmission over real mobile networks requires further validation.
+
+RQ1 does not establish Product superiority over independently selected Additive (ARI 0.9072 versus 0.9191; Holm p=0.2560). RQ2 supports exact-copy invariance under fixed grouping, without establishing general alignment gains (revised NDCG@5 0.6669 versus random 0.6763). Across 40 seed-level pairs, revised priority performs worse than nearest-first on simulated harm and deadline misses. Three raw Spearman p-values and five related Holm values remain unreconciled in RQ2 replay.
 
 The available results demonstrate the feasibility of selected prototype components in a research environment. They do not yet establish improvements in real-world rescue coordination or disaster response effectiveness.
 
@@ -31,15 +35,8 @@ The project registers three main scientific and technological products:
 \FormIndented{-- A mobile application supporting disaster rescue, integrating AI models and rescue request submission functions.}
 \FormIndented{-- A web-based rescue information management system featuring a digital map for visualizing rescue locations and clustering related events.}
 \FormIndented{-- A trained and optimized multimodal AI model package for analyzing rescue information and supporting deployment on mobile devices.}
-\par\noindent In addition, the project registers a research bulletin, a research summary and a demonstration video of no more than two minutes, in accordance with Can Tho University's requirements. No scientific publication is registered as an official research output.
+\par\noindent The model package is registered; the image model, structured LR and separate CrisisMMD pilot do not establish completion of Vietnamese NLP and rescue fusion in the application.
+\par\noindent In addition, the project registers a research bulletin, a research summary and a demonstration video of no more than two minutes, in accordance with Can Tho University's requirements. The paper ``Stress-Testing Product-Gated Clustering and Bounded Priority Ranking for Flood-Rescue Reports: A Synthetic Study'' has been published.
 
 \FormSection{6. Effects, technology transfer means and applicability:}
-The project contributes to education and research by providing practical experience in deep learning, multimodal data processing, Edge AI, mobile application development and disaster-related information systems.
-
-From a technological perspective, the research explores the feasibility of processing rescue information at the network edge and integrating event clustering with spatial data visualization.
-
-The proposed system has the potential to support the collection, classification and consolidation of rescue information under limited network connectivity, thereby assisting rescue-related decision-making and resource coordination.
-
-The project outputs are intended to be packaged and transferred to the School of Information and Communication Technology, Can Tho University, for educational, research and further development purposes.
-
-Future practical deployment requires additional validation of multimodal analysis, mobile inference performance, network synchronization, event clustering reliability and system operation under realistic disaster conditions. Real-world rescue effectiveness and socioeconomic benefits have not yet been experimentally established.
+The outputs support education and research in edge image inference and rescue information management, with planned transfer to Can Tho University's School of Information and Communication Technology. Before field pilots, text processing, fusion, device and network behavior, synchronization and event clustering require validation with rescue professionals. Real-world rescue effectiveness and socioeconomic benefits remain unmeasured.

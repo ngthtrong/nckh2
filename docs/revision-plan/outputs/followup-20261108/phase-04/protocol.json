@@ -1,0 +1,36 @@
+{
+  "status": "LOCKED_BEFORE_TEST_INFERENCE",
+  "scope": "CPU_ONLY_ONNX",
+  "conditions": [
+    "clean",
+    "jpeg_q50",
+    "jpeg_q20",
+    "short_edge_128",
+    "short_edge_64",
+    "blur_sigma_1",
+    "blur_sigma_2",
+    "exposure_0.7",
+    "exposure_0.4"
+  ],
+  "independent_unit": "252 split_groups, 256 original test images",
+  "seed": 20261107,
+  "bootstrap_draws": 5000,
+  "ci": "paired cluster percentile bootstrap, 95%, unadjusted",
+  "hypotheses": "No null-hypothesis tests; all eight paired effect CIs reported",
+  "ordinal": {
+    "low": 1,
+    "medium": 2,
+    "high": 3,
+    "non_flood": 0
+  },
+  "model_sha256": "2ec932a12e4730811597d297edc4de4566cdd6b381e871bc65c658ec8d794d27",
+  "clean_gate": "100% historical structured_onnx argmax agreement and probabilities allclose atol=1e-5 rtol=1e-4",
+  "preprocess": "repository quantize_model.preprocess: EXIF->RGB->bilinear letterbox256->ImageNet NCHW",
+  "transforms": "independent from decoded EXIF RGB; JPEG Pillow defaults quality50/20 decoded then lossless PNG; short edge128/64 min(1,edge/min(w,h)), round; GaussianBlur radius1/2; Brightness .7/.4",
+  "abstention": "disabled; report confidence distribution and descriptive fraction below .5, no threshold tuning",
+  "budget": "256 clean + 2048 degraded test inferences; three separate validation smoke/warmup calls",
+  "timing": "CPU one thread; predict and preprocess+predict recorded separately; excludes model load, derivative generation, file hashing/logging",
+  "order": "clean first for parity gate, then image order as split CSV; eight conditions cyclically rotated by image index",
+  "failures": "keep all 256 per condition; incorrect for accuracy/F1; decode failure counted separately from ordinal errors",
+  "limits": "synthetic corruption labels not re-adjudicated; no real camera/Android/field claim; training split provenance remains unverified"
+}

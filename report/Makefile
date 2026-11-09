@@ -7,6 +7,7 @@ all: content
 results:
 	$(PYTHON) scripts/export_results.py
 	$(PYTHON) scripts/build_phone_report_tables.py
+	$(PYTHON) scripts/export_revision_profiles.py
 templates:
 	$(PYTHON) scripts/read_guideline_docs.py
 figures:

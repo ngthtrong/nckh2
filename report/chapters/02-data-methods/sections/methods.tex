@@ -10,7 +10,21 @@ JSON lưu $\xi_0=-1{,}0580446217$ và cả năm hệ số $\xi_j=1{,}1087792041$
 
 Trên toàn bộ 32 trạng thái, nhãn ở threshold 0,5 khớp quy tắc OR. Khi không có cờ, điểm bằng khoảng 0,2577; với một cờ, điểm nhỏ nhất của trạng thái dương khoảng 0,5127. Quy tắc OR trực tiếp là baseline chính xác cho định nghĩa nhãn này. Độ khớp toàn bảng và sanity test không chứng minh Logistic Regression tốt hơn quy tắc hoặc có hiệu quả lâm sàng.
 
-Trong ứng dụng, Logistic Regression tính điểm $E_i^{\mathrm{LR}}$ từ các dấu hiệu khẩn cấp được người dùng lựa chọn và gửi đến máy chủ trong trường \texttt{E\_i}. Theo thiết kế tích hợp, máy chủ kết hợp điểm này với thông tin \texttt{urgency} do backend xác định để tạo đầu vào khẩn cấp phục vụ phân cụm và xếp hạng. Mô hình LR không phân tích trực tiếp văn bản tự do.
+\paragraph{Nhãn OR và vai trò của số cờ.} Nhãn được dựng bởi $y=\mathbf{1}\{\sum_{j=1}^{5}x_j\geq1\}$, nên bảng có một trạng thái âm và 31 trạng thái dương. Không có người bệnh, văn bản tự do hoặc kết quả cứu hộ trong bảng này. Mọi hoán vị năm cột đều giữ nguyên tập 32 tổ hợp và nhãn; với cùng cách xử lý các đặc trưng trong phép fit đã lưu, nghiệm có hệ số bằng nhau phù hợp với tính đối xứng đó. \texttt{class\_weight=balanced} điều chỉnh đóng góp của hai lớp khi fit, không làm xuất hiện nhãn chuyên gia hay dân số bệnh nhân đại diện.
+
+Đặt $k_i=\sum_jx_j$, Công thức~\ref{eq:urgency-lr} trở thành $E_i^{\mathrm{LR}}=\operatorname{sigmoid}(-1{,}0580446217+1{,}1087792041\,k_i)$. Vì hệ số chung dương và sigmoid tăng, chọn thêm cờ làm điểm tăng; hai báo cáo có cùng số cờ nhận cùng điểm dù loại dấu hiệu khác nhau. Với ngưỡng 0,5, quyết định dương tương đương logit không âm; do đó không chọn cờ cho kết quả âm, còn một cờ đã đủ cho kết quả dương. Đây là đặc tính của hàm đã lưu, không phải quy tắc xác nhận mức nguy cấp giữa các loại dấu hiệu hoặc giữa nhiều người trong một báo cáo.
+
+\paragraph{Ví dụ minh họa, không phải mẫu thực nghiệm.} Với vector tự soạn $(0,0,0,0,0)$, thay vào hàm cho $\operatorname{sigmoid}(-1{,}0580446217)\simeq0{,}2577$. Đổi riêng cờ đầu thành một cho logit $-1{,}0580446217+1{,}1087792041$ và điểm khoảng 0,5127; đổi sang bất kỳ cờ đơn nào khác vẫn cho cùng kết quả. Ví dụ chỉ giải thích đại số từ hệ số đã lưu. Điểm 0,5127 không có nghĩa xác suất người đó nguy kịch là 51,27\%; trạng thái toàn số không cũng có thể phản ánh người dùng thiếu thông tin. Khi thiết kế lại biểu mẫu hoặc adapter, cần giữ riêng ``không có dấu hiệu'' và ``chưa biết/chưa khai báo'', thay vì âm thầm coi mọi trường thiếu là âm.
+
+Trong ứng dụng, Logistic Regression tính điểm $E_i^{\mathrm{LR}}$ từ các dấu hiệu khẩn cấp được người dùng lựa chọn và gửi đến máy chủ trong trường \texttt{E\_i}. Backend lưu payload gốc trong SQLite, nhưng adapter hiện hành chỉ đọc \texttt{urgency}; nếu thiếu trường này, adapter dùng từ khóa trong mô tả để tạo \texttt{ReportV2.E}. Adapter chưa đọc \texttt{E\_i}. Vì vậy, nối điểm LR vào đầu vào khẩn cấp của lõi mới là thiết kế dự kiến, chưa phải đường tích hợp đã hoạt động. Mô hình LR không phân tích trực tiếp văn bản tự do.
+
+Đối chứng OR trực tiếp giữ đúng nghĩa nhãn và không cần fit. LR bổ sung một ánh xạ liên tục phụ thuộc số cờ, nhưng để chứng minh ánh xạ đó hữu ích cho xếp hạng cần nhãn độc lập và đánh giá sau khi nối đúng luồng dữ liệu. Độ khớp OR không xác định threshold điều phối, mức ưu tiên giữa các cụm hay khả năng trích thông tin tiếng Việt. Những mục tiêu đó là các bài toán khác với tái hiện bảng 32 trạng thái.
+
+\paragraph{Căn cứ dấu hiệu và giới hạn ánh xạ.} Năm dấu hiệu được đối chiếu với nhóm tiêu chí đỏ của IITT dành cho người từ 12 tuổi; thẻ tham chiếu làm rõ khó thở và chấn thương nguy cơ cao \citep{whoIITT,whoIITTAdult,whoIITTReference}. IITT phục vụ phân loại bệnh nhân tại cơ sở y tế, còn ứng dụng chuyển thành cờ do người dân khai báo cho một nhóm người. Việc chọn năm tiêu chí, rút thành OR nhị phân và đơn giản hóa lời mô tả là thích nghi của nhóm; không thực hiện đầy đủ IITT, không xác nhận đánh giá của người không chuyên và không suy ra trọng số dispatch từ tiêu chí y tế. Cờ không thể di chuyển được giữ như ngữ cảnh, không thuộc năm đầu vào LR v5.
+
+Điều 26 khoản 1 điểm a của Luật Phòng, chống thiên tai trong bản hợp nhất 85/VBHN-VPQH năm 2026 nêu bảo đảm an toàn, đặc biệt với đối tượng dễ bị tổn thương; điểm g và h đề cập liên lạc và tìm kiếm cứu nạn tại vùng chia cắt \citep{vnDisasterLaw2026}. Đây là căn cứ định hướng nghiệp vụ, không quy định các hệ số $\omega,\mu,s$ của đề tài. Những hệ số đó vẫn là heuristic chưa được chuyên gia cứu hộ xác nhận. Đối chiếu điều khoản đã đọc không phải đánh giá toàn bộ tính tuân thủ pháp lý của hệ thống.
+
+Hash byte của CSV LR hiện tại khác hash trong JSON mô hình; tái dựng CRLF trong bộ nhớ khớp hash lịch sử. Không thay CSV hoặc manifest để xóa sai lệch này. Kiểm tra đại số trên bảng hiện tại xác nhận OR/fidelity và tính tương đương theo số cờ; chưa xác nhận nguyên byte dữ liệu tại lần huấn luyện lịch sử.
 
 \subsection{Biểu diễn báo cáo và điều kiện tiếp nhận}
 Bản thảo nghiên cứu định nghĩa
@@ -81,15 +95,15 @@ Mốc số người, trần yếu thế & $N_{\mathrm{ref}},\ V_{\mathrm{cap}}$ 
 \bottomrule\end{tabular}
 \end{table}
 
-\begin{landscape}
-\begin{figure}[p]
+Hình~\ref{fig:flow-clustering-priority} tổng hợp quy trình dựng đồ thị, phân cụm Louvain và tính điểm ưu tiên.
+
+\begin{reportlandscapefigure}
 \centering
-\setlength{\abovecaptionskip}{4pt}
-\includegraphics[width=\linewidth]{flow_06_clustering_priority.pdf}
+
+\includegraphics[width=\linewidth,height=\ReportLandscapeImageHeight,keepaspectratio]{flow_06_clustering_priority.pdf}
 \caption{Quy trình phân cụm đồ thị không gian Louvain và tính điểm ưu tiên cứu hộ $P(c)$}
 \label{fig:flow-clustering-priority}
-\end{figure}
-\end{landscape}
+\end{reportlandscapefigure}
 
 \subsection{Chặn khoảng cách cạnh và giới hạn của bảo đảm}
 Đặt $B=\beta+\gamma>0$. Vì $a_ia_j\leq1$ và $T_{ij}^{\mathrm{sim}},C_{ij}\leq1$,

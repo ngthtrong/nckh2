@@ -1,0 +1,42 @@
+\FormSection{1. General information:}
+\FormIndented{Project code: \ProjectCode}
+\FormIndented{Project title: \ProjectTitleEnglish}
+\FormIndented{Project coordinator: \PrincipalName}
+\FormIndented{Implementing institution: \PrincipalUnit}
+\FormIndented{Duration: \ProjectPeriodEnglish{} (six months).}
+
+\FormSection{2. Objective(s):}
+Develop an AI-based mobile system to receive and analyze flood rescue information and support decision-making under unstable network conditions, with the aim of reducing loss of life and property damage.
+
+\FormSection{3. Creativeness and innovativeness:}
+The project proposes an integrated approach combining multimodal data analysis, Edge AI and intelligent rescue-event clustering within a unified system.
+
+Instead of relying entirely on centralized server processing, the proposed system aims to perform AI inference directly on mobile devices using optimized lightweight deep learning models, thereby reducing computational requirements and the transmission of large data files.
+
+Furthermore, the integration of location, time and rescue information for identifying and grouping related events is intended to reduce duplicate reports and support visualization of rescue situations on a digital map.
+
+\FormSection{4. Research results:}
+For image classification, the model was evaluated on a test set of 256 images. Using seed 1024, the model achieved \NewImageAccuracy\% accuracy and \NewImageMacroFOne\% macro-F1, with three critical errors. The structured pruning experiment achieved \PruningAccuracy\% accuracy, with \PruningCriticalCount{} critical errors.
+
+Additional ONNX CPU screening of the pruned model used the same 256 images and eight synthetic corruptions. Macro-F1 decreased from \QualityCleanMacroFOne\% on clean images to \QualityDarkMacroFOne\% at 0.4 brightness. This does not establish robustness on Android or field camera images; inherited corruption labels have not been re-adjudicated.
+
+The app sends image labels and the LR score to the server for storage. Its adapter reads urgency or description keywords and does not consume LR for clustering or ranking. LR is a five-flag surrogate fitted to synthetic OR labels, not free-text Vietnamese NLP. Vietnamese rescue NLP and application fusion remain unfulfilled. The report proposes DistilBERT and fusion for detecting rescue-assistance requests in Vietnamese messages, with ablation and camera/Android evaluation plans; these extensions have not been trained, integrated or measured.
+
+A separate English CrisisMMD pilot trained TF-IDF text and linear feature-fusion classifiers, reaching macro-F1 \MMTextFOne\% and \MMFusionFOne\% on \MMTestN{} pairs from one held-out event. All paired effect CIs include zero; fusion superiority is not established. Vietnamese rescue NLP, priority labels and application fusion remain unfulfilled.
+
+In weak-network simulations with bandwidth of 50 kbit/s and a round-trip time of 600 ms, both metadata-only and compressed-image modes succeeded in 257/257 attempts (100\%), compared with 230/257 (89.49\%) for original images. The two modes transmitting less data achieved higher transmission success rates than original images under the tested conditions. Each mode was measured separately on a computer; transmission over real mobile networks requires further validation.
+
+RQ1 does not establish Product superiority over independently selected Additive (ARI 0.9072 versus 0.9191; Holm p=0.2560). RQ2 supports exact-copy invariance under fixed grouping, without establishing general alignment gains (revised NDCG@5 0.6669 versus random 0.6763). Across 40 seed-level pairs, revised priority performs worse than nearest-first on simulated harm and deadline misses. Three raw Spearman p-values and five related Holm values remain unreconciled in RQ2 replay.
+
+The available results demonstrate the feasibility of selected prototype components in a research environment. They do not yet establish improvements in real-world rescue coordination or disaster response effectiveness.
+
+\FormSection{5. Products:}
+The project registers three main scientific and technological products:
+\FormIndented{-- A mobile application supporting disaster rescue, integrating AI models and rescue request submission functions.}
+\FormIndented{-- A web-based rescue information management system featuring a digital map for visualizing rescue locations and clustering related events.}
+\FormIndented{-- A trained and optimized multimodal AI model package for analyzing rescue information and supporting deployment on mobile devices.}
+\par\noindent The model package is registered; the image model, structured LR and separate CrisisMMD pilot do not establish completion of Vietnamese NLP and rescue fusion in the application.
+\par\noindent In addition, the project registers a research bulletin, a research summary and a demonstration video of no more than two minutes, in accordance with Can Tho University's requirements. The paper ``Stress-Testing Product-Gated Clustering and Bounded Priority Ranking for Flood-Rescue Reports: A Synthetic Study'' has been published.
+
+\FormSection{6. Effects, technology transfer means and applicability:}
+The outputs support education and research in edge image inference and rescue information management, with planned transfer to Can Tho University's School of Information and Communication Technology. Before field pilots, text processing, fusion, device and network behavior, synchronization and event clustering require validation with rescue professionals. Real-world rescue effectiveness and socioeconomic benefits remain unmeasured.

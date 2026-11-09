@@ -8,6 +8,7 @@ import re
 import sys
 import subprocess
 from build_evidence import validated_entries
+from check_float_references import validate_floats
 
 ROOT = Path(__file__).resolve().parents[1]
 
@@ -37,6 +38,16 @@ def main():
     if args.release and entries == 0:
         errors.append('Chưa có tài liệu tham khảo thực sự trong bibliography/.')
     out = ROOT / args.build_dir
+    # With deferred numbering, cited but unprinted entries can silently render [0].
+    auxiliary = '\n'.join(p.read_text(errors='replace') for p in out.rglob('*.aux'))
+    cited = set(re.findall(r'\\abx@aux@cite\{[^{}]*\}\{([^{}]+)\}', auxiliary))
+    if cited:
+        assigned = {key: int(number) for key, number in re.findall(
+            r'\\abx@aux@number\{[^{}]*\}\{([^{}]+)\}\{[^{}]*\}\{[^{}]*\}\{(\d+)\}', auxiliary)}
+        missing = sorted(key for key in cited if assigned.get(key, 0) <= 0)
+        if missing:
+            errors.append('Trích dẫn chưa được đánh số dương trong danh mục: ' + ', '.join(missing))
+        print(f'Trích dẫn đã có số trong danh mục: {len(cited) - len(missing)}/{len(cited)}')
     figure_provenance = ROOT / 'generated/figure-provenance.json'
     if figure_provenance.exists():
         provenance = json.loads(figure_provenance.read_text())
@@ -66,11 +77,17 @@ def main():
         errors.append('Chưa có build nội dung: chạy make content trước.')
     for log in out.glob('*.log'):
         text = log.read_text(errors='replace')
-        for phrase in ['There were undefined references', 'There were undefined citations', 'Overfull \\hbox', 'Overfull \\vbox']:
+        for phrase in ['There were undefined references', 'There were undefined citations',
+                       'Overfull \\hbox', 'Overfull \\vbox', 'Float too large for page',
+                       'multiply defined', 'Some font shapes were not available']:
             if phrase in text:
                 print(f'{log.relative_to(ROOT)}: {phrase}')
-                if args.release:
-                    errors.append('Cần xử lý cảnh báo PDF trước khi xuất bản đầy đủ.')
+                errors.append('Cần xử lý lỗi bố cục/tham chiếu/phông trong PDF: ' + phrase)
+    float_errors, floats = validate_floats(out)
+    errors.extend(float_errors)
+    print(f'Đối chiếu nguồn, danh mục, nhãn và PDF: '
+          f'{sum(f["kind"] == "figure" for f in floats)} hình, '
+          f'{sum(f["kind"] == "table" for f in floats)} bảng')
     pdfs = list(out.glob('*.pdf')) + [ROOT / f'build/{name}/{name}.pdf'
                                     for name in ['bulletin-vi', 'bulletin-en', 'summary-vi', 'summary-en']]
     for pdf in pdfs:

@@ -1,0 +1,105 @@
+[
+  {
+    "name": "content",
+    "command": [
+      "make",
+      "-C",
+      "report",
+      "content"
+    ],
+    "exit": 0,
+    "started_at": "2026-11-08T00:40:15.349592+08:00",
+    "ended_at": "2026-11-08T00:41:40.032318+08:00",
+    "log": "content.log"
+  },
+  {
+    "name": "content-twoside",
+    "command": [
+      "make",
+      "-C",
+      "report",
+      "content-twoside"
+    ],
+    "exit": 0,
+    "started_at": "2026-11-08T00:41:40.032989+08:00",
+    "ended_at": "2026-11-08T00:42:54.100591+08:00",
+    "log": "content-twoside.log"
+  },
+  {
+    "name": "deliverables",
+    "command": [
+      "make",
+      "-C",
+      "report",
+      "deliverables"
+    ],
+    "exit": 0,
+    "started_at": "2026-11-08T00:42:54.101439+08:00",
+    "ended_at": "2026-11-08T00:43:30.003145+08:00",
+    "log": "deliverables.log"
+  },
+  {
+    "name": "check",
+    "command": [
+      "make",
+      "-C",
+      "report",
+      "check"
+    ],
+    "exit": 0,
+    "started_at": "2026-11-08T00:43:30.003547+08:00",
+    "ended_at": "2026-11-08T00:43:30.810455+08:00",
+    "log": "check.log"
+  },
+  {
+    "name": "check-twoside",
+    "command": [
+      "python3",
+      "report/scripts/check_report.py",
+      "--build-dir",
+      "build/content-twoside"
+    ],
+    "exit": 0,
+    "started_at": "2026-11-08T00:43:30.810908+08:00",
+    "ended_at": "2026-11-08T00:43:31.509943+08:00",
+    "log": "check-twoside.log"
+  },
+  {
+    "name": "float-content",
+    "command": [
+      "python3",
+      "report/scripts/check_float_references.py",
+      "--build-dir",
+      "build/content"
+    ],
+    "exit": 0,
+    "started_at": "2026-11-08T00:43:31.510396+08:00",
+    "ended_at": "2026-11-08T00:43:31.863726+08:00",
+    "log": "float-content.log"
+  },
+  {
+    "name": "float-twoside",
+    "command": [
+      "python3",
+      "report/scripts/check_float_references.py",
+      "--build-dir",
+      "build/content-twoside"
+    ],
+    "exit": 0,
+    "started_at": "2026-11-08T00:43:31.865333+08:00",
+    "ended_at": "2026-11-08T00:43:32.306583+08:00",
+    "log": "float-twoside.log"
+  },
+  {
+    "name": "diff-check",
+    "command": [
+      "git",
+      "diff",
+      "--check"
+    ],
+    "exit": 0,
+    "started_at": "2026-11-08T00:43:32.307180+08:00",
+    "ended_at": "2026-11-08T00:43:32.685655+08:00",
+    "log": "diff-check.log"
+  }
+]

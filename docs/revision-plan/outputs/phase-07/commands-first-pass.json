@@ -1,0 +1,79 @@
+[
+  {
+    "name": "content",
+    "command": [
+      "make",
+      "-C",
+      "report",
+      "content"
+    ],
+    "exit": 0,
+    "started_at": "2026-11-07T23:02:45.290267+08:00",
+    "finished_at": "2026-11-07T23:03:58.589161+08:00",
+    "log": "content.log"
+  },
+  {
+    "name": "content-twoside",
+    "command": [
+      "make",
+      "-C",
+      "report",
+      "content-twoside"
+    ],
+    "exit": 0,
+    "started_at": "2026-11-07T23:03:58.589633+08:00",
+    "finished_at": "2026-11-07T23:05:12.050746+08:00",
+    "log": "content-twoside.log"
+  },
+  {
+    "name": "deliverables",
+    "command": [
+      "make",
+      "-C",
+      "report",
+      "deliverables"
+    ],
+    "exit": 0,
+    "started_at": "2026-11-07T23:05:12.051264+08:00",
+    "finished_at": "2026-11-07T23:05:50.853117+08:00",
+    "log": "deliverables.log"
+  },
+  {
+    "name": "check",
+    "command": [
+      "make",
+      "-C",
+      "report",
+      "check"
+    ],
+    "exit": 0,
+    "started_at": "2026-11-07T23:05:50.853546+08:00",
+    "finished_at": "2026-11-07T23:05:51.640057+08:00",
+    "log": "check.log"
+  },
+  {
+    "name": "check-twoside",
+    "command": [
+      "python3",
+      "report/scripts/check_report.py",
+      "--build-dir",
+      "build/content-twoside"
+    ],
+    "exit": 0,
+    "started_at": "2026-11-07T23:05:51.640775+08:00",
+    "finished_at": "2026-11-07T23:05:52.336561+08:00",
+    "log": "check-twoside.log"
+  },
+  {
+    "name": "diff-check",
+    "command": [
+      "git",
+      "diff",
+      "--check"
+    ],
+    "exit": 2,
+    "started_at": "2026-11-07T23:05:52.337138+08:00",
+    "finished_at": "2026-11-07T23:05:52.793247+08:00",
+    "log": "diff-check.log"
+  }
+]

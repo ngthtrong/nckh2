@@ -1,0 +1,21 @@
+{
+  "command": [
+    "thucnghiem/vi_rescue/.venv/bin/python",
+    "-c",
+    "import sys; sys.path.insert(0,\"thucnghiem/vi_rescue\"); import numpy as np; from common import *; r=load_data(); m=read_json(OUT/\"features.json\"); p=BASE/\"cache/embeddings.npz\"; assert digest(p)==m[\"cache_sha256\"]; assert digest(PROTOCOL)==m[\"protocol_sha256\"]; assert digest(BASE/\"data/dataset.json\")==m[\"dataset_sha256\"]; z=np.load(p); assert list(z[\"image_ids\"])==[x[\"image_id\"] for x in r]; assert z[\"text\"].shape==(len(r),768) and z[\"image\"].shape==(len(r),960); assert all(np.isfinite(z[k]).all() and np.allclose(np.linalg.norm(z[k],axis=1),1,atol=1e-5) for k in (\"text\",\"image\")); print(\"Validated 296 aligned finite L2 text/image feature vectors\")"
+  ],
+  "cwd": "/home/ngthtrong/nckh2",
+  "timeout_seconds": 3600,
+  "start_utc": "2026-11-08T06:34:09.985572+00:00",
+  "status": "RUNNING",
+  "input_source_hashes": {
+    "thucnghiem/vi_rescue/assemble.py": "bd5b2433c78b8446a467d8df6d657756836174e1b152d6b4004e4aaed7b65d64",
+    "thucnghiem/vi_rescue/common.py": "2ba80e5e94327be923bbc644ac1f5e98e5cdaabd8758313017a6a538635f0ae5",
+    "thucnghiem/vi_rescue/features.py": "926e0a00154141a023bde1367ed141d87f5bffdd0f0d3f3615f83d7df20e6ec2",
+    "thucnghiem/vi_rescue/run_step.py": "1fe00ebdf0472d7e47537bdff21cd00b06be9c5dbbf561041d0cdf31ad5ed053",
+    "thucnghiem/vi_rescue/test_contracts.py": "a13f28eae91e65aba2c9f6b151518fa93917c3c863cc5269a11a7074fcf425fa",
+    "thucnghiem/vi_rescue/train.py": "a72a13496e72ed0b33828231273da01671d19b5d54cb77fd967350b207d94b7b"
+  },
+  "protocol_sha256": "e9abccbd4e681e6131c2d3a60a9d732580295aa1a4176b2b03dee764ff682ea2",
+  "pid": 14310
+}

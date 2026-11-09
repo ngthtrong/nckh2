@@ -1,0 +1,36 @@
+\section{Các khái niệm và kỹ thuật liên quan}\label{sec:01-foundations-background}
+\subsection{Thông tin cứu hộ đa phương thức}
+Một báo cáo cứu hộ có thể chứa ảnh, mô tả, tọa độ, thời gian và các trường khai báo có cấu trúc. Mỗi phương thức có mức quan sát khác nhau: ảnh phản ánh vùng nhìn thấy, tọa độ phản ánh vị trí thiết bị hoặc vị trí được nhập, còn số người mắc kẹt là một khai báo. Kết hợp dữ liệu đòi hỏi giữ lại nguồn gốc từng trường để người điều phối biết giá trị nào được đo, được mô hình suy ra hay do người dùng nhập.
+
+Trong hệ thống hiện tại, sự hợp nhất diễn ra ở mức trích xuất đặc trưng và chuẩn hóa payload: nhãn ảnh được chuyển thành mức ngập lượng hóa, thông tin mô tả và các chỉ số nhân khẩu (số người mắc kẹt, nhóm đối tượng yếu thế) được chuẩn hóa thành các tham số định lượng cho quá trình phân cụm và tính điểm ưu tiên. Mô hình Logistic Regression ước lượng mức độ khẩn cấp từ các thông tin do người dùng lựa chọn trên biểu mẫu. Kết quả của hai nhánh được gửi đến máy chủ để tổng hợp, phân cụm và xếp hạng ưu tiên các báo cáo cứu hộ.
+
+Báo cáo phân định rõ ràng giữa \emph{dữ liệu quan sát}, \emph{đặc trưng suy luận} và \emph{nhãn đánh giá thực nghiệm}. Dữ liệu ảnh và thông tin khai báo là quan sát thực tế; nhãn phân loại từ mô hình biên là đặc trưng suy luận phục vụ thuật toán; trong khi nhãn kiểm chứng chỉ được sử dụng ở giai đoạn đánh giá độ chính xác thực nghiệm mà không tham gia vào luồng suy luận thời gian thực.
+
+\subsection{Edge AI và chi phí triển khai}
+Edge AI đưa quá trình suy luận trí tuệ nhân tạo trực tiếp về thiết bị đầu cuối của người dùng. Với báo cáo có hình ảnh, thiết bị có thể trích xuất mức độ ngập lụt và độ tin cậy ngay tại chỗ trước khi quyết định phương thức gửi. Ưu điểm nổi bật của kiến trúc này là khả năng tạo metadata cô đọng trong điều kiện băng thông hạn chế, giảm tải áp lực truyền thông lên hạ tầng mạng cứu nạn.
+
+MobileNetV3 được thiết kế và tối ưu cho CPU trên thiết bị di động \citep{howard2019mobilenetv3}, là cơ sở để đề tài lựa chọn nghiên cứu phân loại mức ngập từ ảnh. Mô hình được xuất từ PyTorch sang ONNX và PTE để triển khai bằng ONNX Runtime và ExecuTorch trên điện thoại. ONNX Runtime hỗ trợ tối ưu đồ thị tính toán, còn ExecuTorch có thể sử dụng thư viện XNNPACK với các phép tính được tối ưu cho CPU di động \citep{onnxGraphOptimizations,executorchXnnpack}. Dung lượng tệp, độ chính xác và thời gian xử lý được đánh giá trên từng cấu hình thực nghiệm, thay vì giả định việc chuyển đổi định dạng luôn làm mô hình nhỏ hơn hoặc chạy nhanh hơn. Các kỹ thuật như lượng tử hóa sau huấn luyện (PTQ) và cắt tỉa mạng nơ-ron tiếp tục được khảo sát nhằm cân bằng giữa độ chính xác và tài nguyên phần cứng.
+
+\subsection{Lưu trữ và truyền dữ liệu khi mất kết nối}
+Trong bối cảnh thiên tai bão lũ, hạ tầng mạng viễn thông thường xuyên bị gián đoạn. Nếu không có cơ chế xử lý phù hợp, việc gửi lại yêu cầu cứu hộ có thể gây trùng lặp dữ liệu hoặc thất lạc thông tin. Hệ thống giải quyết thách thức này thông qua định danh giao dịch duy nhất, hàng đợi lưu trữ cục bộ, kiểm tra mã băm toàn vẹn payload và cơ chế xác thực phản hồi (ACK) từng bản tin.
+
+Ứng dụng lưu bản tin cứu hộ vào hàng đợi cục bộ khi chưa có kết nối và gửi lại máy chủ khi kết nối được khôi phục. Trong phạm vi đề tài, hệ thống tập trung vào việc lưu bản tin, gửi lại và xác nhận tiếp nhận giữa ứng dụng và máy chủ.
+
+Bên cạnh kết nối Internet, tin nhắn SMS đóng vai trò là kênh liên lạc dự phòng quan trọng khi mất kết nối dữ liệu. Bản tin khẩn cấp được mã hóa gọn gàng để truyền qua hạ tầng mạng di động cơ bản về cổng tiếp nhận SMS gateway có xác thực, từ đó tự động chuyển đổi thành yêu cầu điều phối trên hệ thống.
+
+\subsection{Phân cụm đồ thị và ý nghĩa đối với sự kiện}
+Trong biểu diễn đồ thị, một nút là báo cáo và trọng số cạnh thể hiện độ tương đồng giữa hai báo cáo. Cộng đồng là nhóm nút có cấu trúc liên kết mạnh theo mục tiêu tối ưu của thuật toán. Cộng đồng dự đoán có thể tương ứng một hiện trường, nhưng sự tương ứng này phải được đánh giá bằng nhãn sự kiện độc lập.
+
+Louvain tối ưu modularity qua quá trình gom cộng đồng \citep{blondel2008louvain}; Leiden là một lựa chọn phát hiện cộng đồng với các bảo đảm về tính liên kết được nghiên cứu trong tài liệu gốc \citep{traag2019leiden}. Trong đề tài, Product Leiden giữ đồ thị Product và thay bước phát hiện cộng đồng để tạo đối chứng. Đây là cách tách ảnh hưởng của bộ phát hiện cộng đồng khỏi cách tính cạnh, dù các điều kiện khác vẫn phải được khóa.
+
+DBSCAN dựa trên lân cận mật độ và cho phép đánh dấu nhiễu \citep{ester1996dbscan}. Một phương pháp gán mọi báo cáo vào cụm và một phương pháp từ chối báo cáo có khác biệt về khối lượng cần xem xét. Do đó, chỉ số ARI cần đi cùng tỷ lệ loại bỏ, số điểm đến giả và tỷ lệ hấp thụ tin giả. Không có báo cáo giả trong cụm thật có thể cùng tồn tại với nhiều cụm hoàn toàn giả.
+
+\subsection{Trùng dữ liệu, trùng bằng chứng và trùng sự kiện}
+Ba mức trùng có cơ chế xử lý khác nhau. Trùng message là gửi lại cùng thao tác do mạng; trùng payload là các bản sao cùng bằng chứng; cùng sự kiện là các quan sát có thể khác nhau nhưng nói về một hiện trường. Backend kiểm tra trùng message bằng \texttt{message\_id} và hash. Lõi nghiên cứu gom payload và bản gần trùng thành họ bằng chứng. Thuật toán đồ thị cố gắng gom những báo cáo có liên quan thành cụm sự kiện.
+
+Một định danh message hợp lệ không chứng minh nguồn độc lập. Hai payload khác nhau có thể đến từ một chiến dịch phối hợp. Tương tự, hai báo cáo gần nhau không chắc là bản sao. Những giới hạn này giải thích vì sao điểm confidence dựa trên số báo cáo củng cố chỉ là heuristic, cần giữ nguyên các kết quả đối kháng trong đánh giá.
+
+\subsection{Điểm ưu tiên và quyết định điều phối}
+Xếp hạng là tạo thứ tự từ những tín hiệu như mức ngập, khẩn cấp, số người và yếu thế. Điều phối còn cần vị trí đội, thời gian di chuyển, năng lực phục vụ, deadline và điều kiện tiếp cận. Nghiên cứu về logistics nhân đạo cho thấy các mục tiêu này cần được cân nhắc đồng thời \citep{gralla2014review}. Một thứ tự ưu tiên chỉ theo nhu cầu có thể khác với thứ tự tối ưu thời gian tiếp cận.
+
+Điểm ưu tiên tính toán đóng vai trò là công cụ hỗ trợ gợi ý quyết định, không thay thế hoàn toàn vai trò của con người. Trên giao diện điều phối, các cán bộ tác chiến vẫn trực tiếp xem xét ngữ cảnh chi tiết, xác minh thông tin và linh hoạt điều động phương tiện phù hợp với thực tế diễn biến thiên tai. Mô phỏng điều phối ở phần thực nghiệm khảo sát các kịch bản để đánh giá định lượng độ nhạy của thuật toán trước các sai số phân hoạch.

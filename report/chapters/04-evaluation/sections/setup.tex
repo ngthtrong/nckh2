@@ -1,6 +1,6 @@
 \section{Thiết lập thực nghiệm}\label{sec:04-evaluation-setup}
 \subsection{Phạm vi các phép đo}
-Chương này tổng hợp kết quả đã lưu trong repo. Các bảng được xuất từ JSON/CSV, giữ số mẫu, split, cấu hình và đơn vị thống kê. Bộ xuất đối chiếu summary với CSV dự đoán; các sai khác, nếu có, được công bố ở phần kết quả. Mỗi nhóm benchmark mang nhãn seed riêng. Không có phép đo mới về điện thoại, mạng viễn thông hoặc người dùng trong lần biên soạn. Kiểm tra bổ sung của báo cáo là kiểm tra tệp ảnh/hash/split và tính nhất quán bảng số liệu.
+Chương này tổng hợp kết quả đã lưu trong repo, phép đánh giá bổ sung ảnh suy giảm nhân tạo và pilot đa phương thức trên nguồn công khai ngày 08/11/2026. Các bảng được xuất từ JSON/CSV, giữ số mẫu, split, cấu hình và đơn vị thống kê. Bộ xuất đối chiếu summary với CSV dự đoán; các sai khác, nếu có, được công bố ở phần kết quả. Mỗi nhóm benchmark mang nhãn seed riêng. Không có phép đo mới về điện thoại, mạng viễn thông hoặc người dùng trong lần biên soạn. Các phép bổ sung trên CPU được tách riêng khỏi benchmark lịch sử.
 
 \begin{longtable}{P{.28\textwidth}P{.30\textwidth}P{.31\textwidth}}
 \caption{Các nhóm thực nghiệm, dữ liệu và chỉ tiêu đánh giá}\label{tab:experiment-map}\\
@@ -9,6 +9,8 @@ Chương này tổng hợp kết quả đã lưu trong repo. Các bảng đượ
 Phân loại ảnh và đối chiếu runtime FP32 & \ImageTest{} ảnh test, seed \BenchmarkSeed{} & Accuracy, macro-F1, độ trễ và đồng thuận dự đoán \\
 Lượng tử hóa sau huấn luyện và khi tinh chỉnh (PTQ/QAT) & Cùng \ImageTest{} ảnh test, seed \QuantizationSeed{} & Chất lượng phân loại, dung lượng và độ trễ \\
 Cắt tỉa có cấu trúc & Cùng \ImageTest{} ảnh test, seed \PruningSeed{} & Chất lượng phân loại, số tham số, dung lượng và độ trễ \\
+Ảnh suy giảm nhân tạo trên CPU & 256 ảnh, chín điều kiện ghép cặp; 252 nhóm split & Accuracy, macro-F1, recall high, lỗi nặng và CI ghép cặp \\
+Pilot ảnh--text công khai & CrisisMMD: \MMTrainN{} train, \MMDevN{} validation, \MMTestN{} test; tách theo sự kiện & Macro-F1, recall informative, cùng test IDs và CI ghép cặp \\
 Nhận diện ảnh trên điện thoại thật & 32 cấu hình; 256 ảnh/runtime; bốn mẫu điện thoại & Accuracy, macro-F1, lỗi mức ngập, thời gian xử lý ảnh \\
 Luồng xử lý và giao diện ứng dụng di động & Hai run, chín case/run trên một điện thoại & PASS/FAIL/NOT\_RUN; chế độ gửi và tính toàn vẹn bài nhận \\
 Truyền dữ liệu dưới mạng yếu giả lập & 257 ảnh, ba cấu hình mạng, ba chế độ gửi & Tỷ lệ thành công, median/P95 độ trễ và số byte \\
@@ -29,6 +31,22 @@ Latency chỉ tính lời gọi suy luận, không bao gồm đọc ảnh, tiề
 Đơn vị kích thước trong bảng sinh là MiB, tính byte chia $1024^2$. Nhãn MB trong các bản summary Markdown cũ được chuẩn hóa ở đây để mô tả phép biến đổi rõ ràng. Kích thước checkpoint có thể gồm trạng thái không cần suy luận, nên chỉ dùng dung lượng file không đủ để suy ra số phép tính.
 
 Benchmark trên điện thoại đo lời gọi \texttt{classifyImage}, gồm giải mã, tiền xử lý và suy luận, nên có phạm vi rộng hơn predict CPU. Không dùng chênh lệch thời gian giữa hai phạm vi này để tính speedup. Thiết lập được mô tả ở Mục~\ref{sec:phone-benchmark-setup}; kết quả và lựa chọn model/runtime ở Mục~\ref{sec:phone-benchmark-results}.
+
+\subsection{Đánh giá ảnh suy giảm nhân tạo trên CPU}\label{sec:image-quality-cpu-setup}
+Phép bổ sung giữ nguyên ONNX seed 1024 cắt tỉa có mã băm khớp asset trong ứng dụng và artifact lịch sử. Runner dùng ONNX Runtime 1.23.2, NumPy 2.2.6 và Pillow 12.0.0 trong môi trường riêng, CPU một luồng. Ba ảnh validation được dùng kiểm khả năng chạy; không dùng test để chọn checkpoint, mức suy giảm hoặc ngưỡng. Sau đó, clean parity trên đủ 256 ảnh test yêu cầu đồng thuận top-1 100\% và xác suất khớp với sai số tuyệt đối $10^{-5}$, tương đối $10^{-4}$. Chỉ khi đạt gate mới chạy các điều kiện suy giảm.
+
+Tám điều kiện được khóa từ protocol trước gồm JPEG q50/q20; giảm cạnh ngắn về 128/64 pixel, giữ tỷ lệ và không phóng to; Gaussian blur với $\sigma=1/2$; nhân độ sáng với $0{,}7/0{,}4$. Mỗi biến đổi xuất phát độc lập từ cùng ảnh đã sửa hướng EXIF và đổi RGB, sau đó lưu PNG không mất mát. Đầu vào clean và mọi biến thể dùng cùng tiền xử lý letterbox bilinear $256\times256$, màu đệm $(124,116,104)$, chuẩn hóa ImageNet. Mã băm ảnh cha và từng biến thể được lưu; không sửa ảnh gốc hoặc chia lại tập.
+
+Có 2.304 dự đoán test ($256\times9$), nhưng chỉ có 256 ảnh gốc. CI 95\% dùng 5.000 bootstrap ghép cặp, seed 20261107, lấy mẫu lại 252 nhóm split và giữ mọi ảnh trong nhóm; cùng mẫu bootstrap được dùng cho cả chín điều kiện, tính lại macro-F1 ở mỗi lần. Nhóm split giúp giữ quan hệ gần trùng đã ghi nhận, chưa chứng minh độc lập nguồn hoặc sự kiện. Các CI là mô tả, chưa hiệu chỉnh đa so sánh; không thực hiện kiểm định giả thuyết trong phép bổ sung.
+
+Giữ mọi lỗi giải mã trong mẫu số và ghi riêng với lỗi cách ít nhất hai mức theo thứ tự non\_flood, low, medium, high. Không bật abstention hoặc tối ưu ngưỡng confidence. Thời gian predict và tiền xử lý cộng predict được lưu riêng trong một phiên CPU; đầu vào đo là PNG dẫn xuất, không bao gồm chi phí tạo biến thể hoặc nạp model. Phiên suy giảm nạp lại runtime, chưa có warmup riêng. Những thời gian này không thay thế classifyImage Android hoặc chi phí giải mã ảnh camera gốc; chưa chạy PTE hoặc benchmark ảnh suy giảm trên thiết bị.
+
+\subsection{Phiên đánh giá camera/Android đề xuất --- chưa thực hiện}\label{sec:camera-session-plan}
+Thiết kế ở Mục~\ref{sec:camera-evaluation-plan} được tổ chức thành hai luồng bổ sung cho nhau. Luồng phát lại đưa đúng cùng ảnh gốc và các biến thể đã khóa vào ONNX/PTE trên cùng thiết bị, kiểm hash đầu vào, thứ tự lớp và tensor tiền xử lý trước khi so nhãn. Luồng camera độc lập thu nhiều điều kiện chụp theo ID cảnh và gán nhãn có quy tắc; nó dùng để kiểm tra miền ảnh mới, không coi biến đổi số trên ảnh cũ là ảnh thực địa. Cả hai luồng hiện chưa có phiên đo hoặc dự đoán mới.
+
+Một phiên đề xuất bắt đầu bằng lưu cấu hình thiết bị, APK, model và dữ liệu, rồi thực hiện warmup đã định trước. Đo các cặp ảnh tham chiếu--biến thể với cùng runtime; giữ thứ tự chạy được chốt trước và luân phiên các cặp runtime giữa các lượt để theo dõi ảnh hưởng nhiệt/tải. Nhật ký phải ghi mọi lần gọi, kể cả ảnh không giải mã được, timeout, nhãn mơ hồ và người chạy dừng phiên. Không thay phiên thất bại bằng một phiên mới mà xóa hồ sơ cũ. Số lượt, khoảng nghỉ và điều kiện dừng cần được khóa trước test; các phép thử ứng dụng chỉ dùng môi trường nghiên cứu riêng, không tạo yêu cầu SOS vận hành.
+
+Tệp ghi nhận dự kiến có một hàng mỗi ảnh/lượt/runtime và liên kết đến metadata phiên. Trước khi tổng hợp, đối chiếu đủ ID, hash ảnh/model, điều kiện ảnh và lỗi; kiểm tra ranh giới thời gian để tách tiền xử lý, suy luận và tổng lời gọi. Bảng chất lượng sẽ có Accuracy, macro-F1, recall high và lỗi nặng; bảng hiệu năng có P50/P95, số lượt thành công/thất bại và metadata phiên. Tại thời điểm biên soạn, các trường kết quả của kế hoạch đều là \emph{Chưa đo}. Benchmark 32 JSON lịch sử bên dưới vẫn có phạm vi riêng, không được dùng điền thay số của phiên đề xuất này.
 
 \subsection{Thiết lập đánh giá mô hình nhận diện trên điện thoại}\label{sec:phone-benchmark-setup}
 Phép đo trên ứng dụng Android chỉ đánh giá mô hình nhận diện mức ngập: chất lượng phân loại và thời gian xử lý ảnh của ONNX/ExecuTorch trên từng điện thoại. Đây không phải thực nghiệm E2E Android; không dùng benchmark này để đánh giá gửi SOS, GPS, đồng bộ nền hoặc SMS. Nguồn kết quả chính là các phiên benchmark đã lưu trên bốn mẫu điện thoại, có thông tin thiết bị và hash model để đối chiếu.
@@ -119,3 +137,5 @@ Metric có chiều tốt được định nghĩa rõ. Với harm/trễ hạn, th
 Nguồn RQ1 stress chính được lấy từ \texttt{rq1\_results}. Lần chạy lại \texttt{rq1\_results\_v2} được giữ riêng và không lựa chọn theo kết quả thuận lợi. Các phiên bản bài báo/renderer khác được ghi trong phụ lục, tránh nhập chung những số ID/OOD không thuộc protocol bản thảo dài hiện tại.
 
 Đối với mô hình ảnh, hash config và split của ba bảng hiện tại khớp file đang có. Metadata một số phiên đo ghi hash manifest khác nhau; thay đổi đóng gói manifest phải được xem cùng hash model và pipeline, không thể tuyên bố manifest hiện tại trùng mọi snapshot đo. Báo cáo giữ hash nguồn trong provenance để có thể kiểm tra sự khác biệt này.
+
+\paragraph{Trạng thái xác minh bằng chứng tại lần chỉnh sửa.} Hồ sơ hiện có đủ 32 JSON benchmark ảnh; tính lại Accuracy/macro-F1 và nối ID/nhãn với test đều khớp. Có 8.192 dự đoán lặp trên 256 ảnh, không phải 8.192 ảnh độc lập. Các mô tả E2E Android/Web ở trên được giữ như kết quả tài liệu đã ghi nhận; raw JSON/CSV/log tương ứng chưa được khôi phục tại checkout, nên hash APK, sự liên kết run và các số PASS chưa được xác minh độc lập. Không dùng metadata được kể lại trong báo cáo như bằng chứng raw đã có.

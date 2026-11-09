@@ -1,0 +1,200 @@
+--- a/docs/revision-plan/04-phase-roadmap.md
++++ b/docs/revision-plan/04-phase-roadmap.md
+@@ -156,4 +156,6 @@
+ 
+ ## Quy tắc bàn giao áp dụng cho mọi phase
+ 
++**Bổ sung P09–P14:** theo chỉ đạo mới ngày 08/11/2026, đã mở [nhánh mô hình và thực nghiệm](multimodal-extension.md). Người dùng chọn benchmark công khai và chuẩn bị kit tiếng Việt khi chưa có người gán/chuyên gia. [Gói thực thi](outputs/multimodal-20261108/README.md) giữ protocol, dữ liệu ghim revision, classifier text/ảnh/fusion, same-test ablation, local CLI và kiểm báo cáo riêng. Nhiệm vụ informative bổ trợ khác ưu tiên cứu hộ; chưa đóng cam kết tiếng Việt hoặc sửa app/backend. Quy tắc không tự train của P01–P08 mô tả phạm vi cũ, tách khỏi authorization mới có ghi riêng.
++
+ Mỗi `handoff.md` phải ghi HEAD + dirty scope, tệp đã thay, hash/version input, command/exit và phạm vi kiểm, kết quả thực có, quyết định khoa học, trạng thái từng nhận xét, rủi ro còn lại, đường dẫn output và bước kế. Artifact phase trước được đánh dấu **dự kiến** trong prompt; nếu thiếu, Agent kiểm tra nguồn thật và tái tạo tối thiểu hoặc ghi prerequisite chưa đạt, không giả vờ đã đọc file. Không tự chạy phase tiếp theo.
+--- a/docs/revision-plan/05-traceability-matrix.md
++++ b/docs/revision-plan/05-traceability-matrix.md
+@@ -1,4 +1,6 @@
+ # Truy vết nhận xét → cam kết → bằng chứng → sửa đổi
++
++**Trạng thái bổ sung P09–P14, 08/11/2026:** [ledger B1/B3/B4/B5 hiện tại](outputs/multimodal-20261108/review-status.csv) và [gói benchmark](outputs/multimodal-20261108/README.md) ghi đã huấn luyện text/fusion và chạy ablation trên cùng 701 cặp informative công khai. Bốn nhận xét giữ PARTIAL đối với cứu hộ tiếng Việt/app; B5 không còn là “chưa chạy bất kỳ ablation nào”, nhưng chưa có ablation trên nhiệm vụ cứu hộ đã cam kết. Các bảng P00/P08 phía dưới được giữ như snapshot lịch sử, không dùng làm trạng thái cuối của nghiên cứu mới.
+ 
+ Nguồn cam kết là DOCX `resource/Thuyết minh NCKH -THS2026-68.docx` mục 12–16. E01–E18 định nghĩa ở audit. Nguồn nhận xét ngoài bản người dùng cung cấp: `tmp.md`, Nhận xét 06–10 → B1–B5, 11–17 → C1–C7, 18–20 → D1–D3; các đoạn diễn giải của người tổng hợp không được gán thành lời Hội đồng nguyên văn. Task `Pxx.nn` là số bước trong prompt tương ứng. Bảng kế hoạch dưới đây giữ snapshot P00; trạng thái thực thi mới được bổ sung ở cuối tài liệu và final-review-status.csv. Không suy mọi thí nghiệm đã chạy từ tên output dự kiến.
+ 
+--- a/docs/revision-plan/README.md
++++ b/docs/revision-plan/README.md
+@@ -1,4 +1,6 @@
+ # Kế hoạch chỉnh sửa THS2026-68 sau nghiệm thu
++
++**Đợt bổ sung P09–P14 ngày 08/11/2026:** theo yêu cầu mới, đã nghiên cứu và triển khai [benchmark đa phương thức công khai và bộ chuẩn bị gán nhãn tiếng Việt](multimodal-extension.md). [Kết quả pilot](outputs/multimodal-20261108/README.md): 2.971 train/589 validation/701 test, macro-F1 text 76,60%, ảnh 76,19%, fusion 78,35%; các CI chênh lệch đều chứa 0. Đã có ablation trên common target informative của CrisisMMD; B1/B3/B4/B5 vẫn PARTIAL đối với cứu hộ tiếng Việt và tích hợp ứng dụng. Các snapshot P00–P08 dưới đây là hồ sơ lịch sử, không thay receipt của đợt mới.
+ 
+ Ngày khảo sát: **07/11/2026, Asia/Taipei**. Đề tài: **Xây dựng hệ thống phân tích đa phương thức và phân cụm sự kiện cứu hộ bão lũ dựa trên Edge AI**. Đây là kế hoạch đề xuất theo 20 nhận xét A1–D3 do người dùng tổng hợp, không phải biên bản Hội đồng có chữ ký hay xác nhận đã khắc phục.
+ 
+--- a/report/bibliography/articles.bib
++++ b/report/bibliography/articles.bib
+@@ -89,6 +89,15 @@
+   booktitle={Proceedings of the International AAAI Conference on Web and Social Media},
+   volume={12},
+   year={2018},
++  keywords={articles}
++}
++
++@inproceedings{ofli2020multimodal,
++  title={Analysis of Social Media Data using Multimodal Deep Learning for Disaster Response},
++  author={Ofli, Ferda and Alam, Firoj and Imran, Muhammad},
++  booktitle={Proceedings of the 17th International Conference on Information Systems for Crisis Response and Management},
++  year={2020},
++  url={https://arxiv.org/abs/2004.11838},
+   keywords={articles}
+ }
+ 
+--- a/report/chapters/02-data-methods/sections/scope.tex
++++ b/report/chapters/02-data-methods/sections/scope.tex
+@@ -1,10 +1,10 @@
+ \section{Phạm vi của phương pháp}\label{sec:02-scope}
+ Phương pháp trong chương này có ba giới hạn cần giữ khi đọc kết quả. Thứ nhất, dữ liệu phân cụm và xếp hạng là bán tổng hợp hoặc tổng hợp, nên kết quả RQ1--RQ3 mô tả hành vi của thuật toán dưới các điều kiện mô phỏng có kiểm soát, không phải hiệu quả trên báo cáo cứu hộ thực tế. Thứ hai, bộ ảnh do nhóm thu thập và gán nhãn, chưa có giấy phép cho từng ảnh, chưa có mẫu chụp thực địa độc lập và chưa đo độ đồng thuận giữa người gán nhãn. Thứ ba, các hằng số của $Q_i$ và điểm ưu tiên là heuristic của nhóm, chưa được chuyên gia cứu hộ xác nhận.
+ 
+-Đối với thông tin khẩn cấp, đề tài sử dụng Logistic Regression từ các lựa chọn có cấu trúc trên biểu mẫu, thay cho phương án phân tích văn bản tiếng Việt tự do dự kiến ban đầu. Đây là surrogate trên năm cờ với nhãn OR tự sinh, không phải xác suất nguy kịch đã được hiệu chuẩn trên dữ liệu thực. Trong phạm vi repository và các ref đã khảo sát, chưa tìm thấy mô hình văn bản tự do được huấn luyện hoặc đánh giá như cam kết DistilBERT; nội dung NLP mới được thực hiện một phần ở mức tiếp nhận mô tả và heuristic từ khóa, chưa chứng minh hoàn thành cam kết nghiên cứu. Nhận định này không phủ nhận khả năng có nghiên cứu ngoài repository.
++Đối với thông tin khẩn cấp, đề tài sử dụng Logistic Regression từ các lựa chọn có cấu trúc trên biểu mẫu, thay cho phương án phân tích văn bản tiếng Việt tự do dự kiến ban đầu. Đây là surrogate trên năm cờ với nhãn OR tự sinh, không phải xác suất nguy kịch đã được hiệu chuẩn trên dữ liệu thực. Trong phạm vi repository và các ref đã khảo sát, chưa tìm thấy mô hình văn bản tiếng Việt tự do được huấn luyện hoặc đánh giá như cam kết DistilBERT. Nhánh NLP của ứng dụng mới có tiếp nhận mô tả và heuristic từ khóa; chưa chứng minh hoàn thành cam kết nghiên cứu. Pilot văn bản tiếng Anh bổ sung ở Mục~\ref{sec:multimodal-pilot} có nhiệm vụ riêng, không thay thế đánh giá tiếng Việt hoặc nguy cấp.
+ 
+-Cần phân biệt ba mức: tiếp nhận ảnh, mô tả và vị trí; tích hợp các trường bằng công thức, ánh xạ và heuristic; học một mô hình fusion chung trên dữ liệu ghép cặp. Hệ thống có hai mức đầu với khoảng trống nối điểm LR vào adapter; chưa có bằng chứng learned fusion. Nguồn tham chiếu dấu hiệu IITT không xác nhận các trọng số điều phối của nhóm. Sửa cách mô tả phạm vi không có nghĩa đã hoàn thành các cam kết còn thiếu.
++Cần phân biệt ba mức: tiếp nhận ảnh, mô tả và vị trí; tích hợp các trường bằng công thức, ánh xạ và heuristic; học một mô hình fusion trên dữ liệu ghép cặp. Ứng dụng cứu hộ có hai mức đầu với khoảng trống nối điểm LR vào adapter. Đợt bổ sung đã huấn luyện fusion đặc trưng tuyến tính trên CrisisMMD, chưa tích hợp vào ứng dụng và chưa fine-tuning chung hai encoder. Nguồn tham chiếu dấu hiệu IITT không xác nhận các trọng số điều phối của nhóm. Sửa cách mô tả phạm vi và benchmark bổ trợ không đồng nghĩa đã hoàn thành các cam kết còn thiếu.
+ 
+ Nội dung nghiên cứu được đối chiếu với thuyết minh ở Mục~\ref{sec:proposal-comparison}; giới hạn của các phép thử được trình bày ở Mục~\ref{sec:04-evaluation-limitations}.
+ 
+-Ablation ảnh/văn bản/cả hai chưa thực hiện vì chưa có cùng nhiệm vụ, report ID ghép cặp và gold độc lập chung. Mask các trường $F/E$ mô phỏng chỉ là phân tích độ nhạy nguồn thông tin có cấu trúc, không thay thế ablation mô hình ảnh--văn bản. Cần vượt các điều kiện dữ liệu và nhãn trước khi khóa protocol, không thay target sau khi xem kết quả.
++Ablation ảnh/văn bản/cả hai đã thực hiện cho nhiệm vụ informative của CrisisMMD, với target và test IDs chung. Đối với nhiệm vụ ưu tiên cứu hộ tiếng Việt, vẫn thiếu report ID ghép cặp và gold độc lập chung. Mask các trường $F/E$ mô phỏng chỉ là phân tích độ nhạy nguồn thông tin có cấu trúc, không thay thế ablation mô hình ảnh--văn bản. Cần vượt các điều kiện dữ liệu và nhãn trước khi khóa protocol cứu hộ, không đổi target để coi benchmark bổ trợ là bằng chứng cùng nhiệm vụ.
+--- a/report/chapters/04-evaluation/sections/limitations.tex
++++ b/report/chapters/04-evaluation/sections/limitations.tex
+@@ -1,5 +1,8 @@
+ \section{Giới hạn của thực nghiệm}\label{sec:04-evaluation-limitations}
+ Các kết quả trong chương này cần được diễn giải trong phạm vi dữ liệu, thiết bị và điều kiện đo đã sử dụng.
++
++\paragraph{Pilot đa phương thức công khai.}
++Phép bổ sung CrisisMMD ở Mục~\ref{sec:multimodal-pilot} có nhánh đọc câu và fusion đặc trưng được huấn luyện trên common target, nhưng chỉ thử một split theo sự kiện và một seed classifier. Corpus được nguồn mô tả tiếng Anh, chỉ giữ cặp nhãn thống nhất và giới hạn số train/validation; chưa có nhãn ưu tiên cứu hộ hoặc đánh giá tiếng Việt. CI ghép cặp chưa hiệu chỉnh đều chứa 0, không xác lập fusion vượt trội. Recall informative của fusion giảm mạnh khi che nhánh ảnh; chưa xác nhận khả năng chịu thiếu modality, hiệu chuẩn xác suất hoặc chạy Android. Các nhóm gần trùng không đại diện cho nhiều sự kiện test độc lập.
+ 
+ \paragraph{Dữ liệu mô phỏng.}
+ Các phép đánh giá phân cụm, xếp hạng và điều phối dùng dữ liệu tổng hợp hoặc bán tổng hợp. Chúng cho phép đối chiếu các phương pháp trong những tình huống được kiểm soát, nhưng chưa đại diện đầy đủ cho hành vi báo tin, nhu cầu và nguồn lực cứu hộ ngoài thực địa. Các chỉ số lợi ích, tổn thất và trễ hạn trong mô phỏng không được xem là hiệu quả cứu hộ đã quan sát thực tế.
+--- a/report/chapters/04-evaluation/sections/results.tex
++++ b/report/chapters/04-evaluation/sections/results.tex
+@@ -233,6 +233,8 @@
+ 
+ \paragraph{Trả lời RQ3.} Sai phân hoạch có hệ quả bất lợi trong các phép so sánh đã thử; revised priority chưa xác lập lợi ích chung so với legacy và thua nearest-first về harm/trễ hạn trong bundle này. Chi phí đi lại và ràng buộc lịch là cơ chế khả dĩ để nghiên cứu tiếp, chưa phải chẩn đoán nhân quả đã được thực nghiệm xác nhận.
+ 
++\input{chapters/04-evaluation/sections/multimodal-pilot}
++
+ \subsection{Bàn luận xuyên các tầng}
+ Các kết quả cho thấy cần đánh giá riêng ba dạng chất lượng: đúng biểu diễn tại thiết bị, đúng liên kết sự kiện và phù hợp quyết định điều phối. FP32 có parity tốt giữa runtime nhưng vẫn nhầm lớp; score có invariance exact nhưng alignment yếu; Product có chặn cạnh nhưng nhạy multiplicity. Không có một chỉ số đơn lẻ thay thế được các tầng còn lại.
+ 
+--- a/report/chapters/04-evaluation/sections/setup.tex
++++ b/report/chapters/04-evaluation/sections/setup.tex
+@@ -1,6 +1,6 @@
+ \section{Thiết lập thực nghiệm}\label{sec:04-evaluation-setup}
+ \subsection{Phạm vi các phép đo}
+-Chương này tổng hợp kết quả đã lưu trong repo và phép đánh giá bổ sung ảnh suy giảm nhân tạo trên CPU ngày 08/11/2026. Các bảng được xuất từ JSON/CSV, giữ số mẫu, split, cấu hình và đơn vị thống kê. Bộ xuất đối chiếu summary với CSV dự đoán; các sai khác, nếu có, được công bố ở phần kết quả. Mỗi nhóm benchmark mang nhãn seed riêng. Không có phép đo mới về điện thoại, mạng viễn thông hoặc người dùng trong lần biên soạn. Phép suy luận CPU bổ sung được tách riêng khỏi benchmark lịch sử và kiểm tra tệp ảnh/hash/split.
++Chương này tổng hợp kết quả đã lưu trong repo, phép đánh giá bổ sung ảnh suy giảm nhân tạo và pilot đa phương thức trên nguồn công khai ngày 08/11/2026. Các bảng được xuất từ JSON/CSV, giữ số mẫu, split, cấu hình và đơn vị thống kê. Bộ xuất đối chiếu summary với CSV dự đoán; các sai khác, nếu có, được công bố ở phần kết quả. Mỗi nhóm benchmark mang nhãn seed riêng. Không có phép đo mới về điện thoại, mạng viễn thông hoặc người dùng trong lần biên soạn. Các phép bổ sung trên CPU được tách riêng khỏi benchmark lịch sử.
+ 
+ \begin{longtable}{P{.28\textwidth}P{.30\textwidth}P{.31\textwidth}}
+ \caption{Các nhóm thực nghiệm, dữ liệu và chỉ tiêu đánh giá}\label{tab:experiment-map}\\
+@@ -10,6 +10,7 @@
+ Lượng tử hóa sau huấn luyện và khi tinh chỉnh (PTQ/QAT) & Cùng \ImageTest{} ảnh test, seed \QuantizationSeed{} & Chất lượng phân loại, dung lượng và độ trễ \\
+ Cắt tỉa có cấu trúc & Cùng \ImageTest{} ảnh test, seed \PruningSeed{} & Chất lượng phân loại, số tham số, dung lượng và độ trễ \\
+ Ảnh suy giảm nhân tạo trên CPU & 256 ảnh, chín điều kiện ghép cặp; 252 nhóm split & Accuracy, macro-F1, recall high, lỗi nặng và CI ghép cặp \\
++Pilot ảnh--text công khai & CrisisMMD: \MMTrainN{} train, \MMDevN{} validation, \MMTestN{} test; tách theo sự kiện & Macro-F1, recall informative, cùng test IDs và CI ghép cặp \\
+ Nhận diện ảnh trên điện thoại thật & 32 cấu hình; 256 ảnh/runtime; bốn mẫu điện thoại & Accuracy, macro-F1, lỗi mức ngập, thời gian xử lý ảnh \\
+ Luồng xử lý và giao diện ứng dụng di động & Hai run, chín case/run trên một điện thoại & PASS/FAIL/NOT\_RUN; chế độ gửi và tính toàn vẹn bài nhận \\
+ Truyền dữ liệu dưới mạng yếu giả lập & 257 ảnh, ba cấu hình mạng, ba chế độ gửi & Tỷ lệ thành công, median/P95 độ trễ và số byte \\
+--- a/report/chapters/conclusion.tex
++++ b/report/chapters/conclusion.tex
+@@ -5,6 +5,8 @@
+ Đối với mô hình thị giác máy tính, kiến trúc MobileNetV3-Large đạt độ chính xác (Accuracy) \NewImageAccuracy\% và macro-F1 \NewImageMacroFOne\% trên tập test gồm \ImageTest{} ảnh của bộ dữ liệu đã chia; tính độc lập hoàn toàn theo nguồn và sự kiện chưa được xác nhận. Mô hình được xuất sang định dạng ONNX và PTE để thực thi lần lượt bằng ONNX Runtime và ExecuTorch; các phép đối chiếu trên CPU ghi nhận đồng thuận top-1 với mô hình PTH lần lượt là \CpuOnnxAgreement\% và \CpuPteAgreement\% trên cùng tập test. Lượng tử hóa giảm dung lượng từ 16,04 MiB (FP32) xuống 4,51 MiB (PTQ) và 4,57 MiB (QAT), nhưng Accuracy giảm tương ứng từ \NewImageAccuracy\% xuống \PTQAccuracy\% và \QATAccuracy\%; QAT có macro-F1 \QATMacroFOne\% (Bảng~\ref{tab:fp32_ptq_qat}). Kết quả cho thấy lợi ích về dung lượng đi kèm suy giảm chất lượng; cần đánh giá lỗi phân loại và hiệu năng trên thiết bị đích trước khi lựa chọn phương án triển khai.
+ 
+ Logistic Regression tái hiện nhãn OR trên bảng 32 trạng thái của năm cờ, không phải NLP hoặc kết quả xác nhận lâm sàng. App tính, gửi điểm LR và backend lưu payload, nhưng adapter hiện chỉ dùng urgency hoặc từ khóa mô tả cho đầu vào khẩn cấp của lõi; chưa chứng minh LR tham gia xếp hạng. Việc tiếp nhận nhiều loại dữ liệu và kết hợp bằng công thức chưa chứng minh học fusion. Các cam kết NLP và bộ mô hình đa phương thức trong thuyết minh còn chưa được chứng minh hoàn thành.
++
++Đợt bổ sung đã huấn luyện nhánh văn bản TF-IDF, nhánh ảnh frozen và classifier fusion tuyến tính trên CrisisMMD, cùng ablation trên \MMTestN{} cặp của một sự kiện lũ giữ riêng. Macro-F1 của text, ảnh và fusion lần lượt \MMTextFOne\%, \MMImageFOne\% và \MMFusionFOne\%; các CI hiệu giữa fusion và đối chứng đều chứa 0, chưa xác lập ưu thế. Phép thử này cung cấp bằng chứng phương pháp trên thông tin thiên tai công khai được nguồn mô tả tiếng Anh, không thay thế cam kết xử lý tiếng Việt, ưu tiên cứu hộ hoặc triển khai trên thiết bị. Nhãn informative không được đưa vào trường khẩn cấp của backend.
+ 
+ Về giải thuật, RQ1 chưa xác lập ưu thế chung của Product so với Additive độc lập: ARI lần lượt 0,9072 và 0,9191, $p_{\mathrm{Holm}}=0{,}2560$; bản sao năm lần làm chất lượng phân cụm suy giảm mạnh. RQ2 hỗ trợ bất biến exact ở grouping cố định nhưng chưa xác lập lợi ích alignment chung: NDCG@5 revised là 0,6669 so với random 0,6763; phối hợp confidence cao vẫn gây sai lệch ưu tiên. Một số $p$ Spearman và Holm liên quan còn chưa khớp replay, được giữ là hạn chế tái lập. RQ3 dùng 40 seed sau trung bình ba điều kiện nguồn lực; revised kém nearest-first về harm và trễ hạn mô phỏng, chưa xác lập lợi ích chung so với legacy. Các kết quả này không chứng minh hiệu quả cứu hộ thực địa.
+ 
+@@ -16,7 +18,7 @@
+ \end{enumerate}
+ 
+ \addsec{Hạn chế của đề tài}
+-Phép bổ sung đã đánh giá tám biến đổi ảnh nhân tạo và clean trên ONNX CPU với cùng 256 ảnh test, sau gate đồng thuận dự đoán lịch sử. Macro-F1 clean là \QualityCleanMacroFOne\%, với độ sáng nhân $0{,}4$ là \QualityDarkMacroFOne\%; kết quả chưa xác nhận độ bền với ảnh camera thực địa hoặc Android. Nhãn sau biến đổi chưa được thẩm định lại, nguồn ảnh và checksum split lúc train vẫn thiếu hồ sơ. Ablation image-only/text-only/both hiện chưa đủ điều kiện vì target khác nhau, thiếu paired inputs và gold chung độc lập với công thức; không thể ghép Accuracy ảnh với fidelity OR. Cam kết NLP và fusion học chung vẫn chưa được chứng minh hoàn thành.
++Phép bổ sung đã đánh giá tám biến đổi ảnh nhân tạo và clean trên ONNX CPU với cùng 256 ảnh test, sau gate đồng thuận dự đoán lịch sử. Macro-F1 clean là \QualityCleanMacroFOne\%, với độ sáng nhân $0{,}4$ là \QualityDarkMacroFOne\%; kết quả chưa xác nhận độ bền với ảnh camera thực địa hoặc Android. Nhãn sau biến đổi chưa được thẩm định lại, nguồn ảnh và checksum split lúc train vẫn thiếu hồ sơ. Ablation image-only/text-only/both cho nhiệm vụ ưu tiên cứu hộ tiếng Việt vẫn thiếu paired inputs và gold chung độc lập với công thức; không thể ghép Accuracy ảnh với fidelity OR. Pilot informative bổ sung không đóng khoảng trống đó. Cam kết NLP tiếng Việt và fusion trong ứng dụng vẫn chưa được chứng minh hoàn thành.
+ 
+ Hệ thống chưa được đánh giá trong vận hành cứu hộ thực địa với người sử dụng và đơn vị chuyên môn. Luồng SMS đã có thành phần hỗ trợ, nhưng tỷ lệ giao tin và độ trễ qua mạng viễn thông/gateway thực tế chưa được kiểm chứng đầy đủ.
+ 
+--- a/report/deliverables/content/bulletin-en.tex
++++ b/report/deliverables/content/bulletin-en.tex
+@@ -16,7 +16,7 @@
+ 
+ \FormLine{Project activities: Image AI, structured urgency, persistent queues, adaptive sending, synchronization and dashboard development; conditional edge and copy-invariance audits.}
+ 
+-\FormLine{Research results: The original seed-1024 model achieves \NewImageAccuracy\% accuracy and \NewImageMacroFOne\% macro-F1 on 256 test images in CPU evaluation, with three critical errors. Runtime conversion, quantization and pruning were evaluated separately; quantization reduced model size but also accuracy. Phone benchmarks cover 32 configurations on four devices. A Flutter app, backend and dashboard were developed. The five-flag LR is not free-text NLP; its score is not consumed by the current ranking adapter. Learned fusion remains unfulfilled.}
++\FormLine{Research results: The original seed-1024 model achieves \NewImageAccuracy\% accuracy and \NewImageMacroFOne\% macro-F1 on 256 CPU test images, with three critical errors. Quantization reduces size and accuracy. Phone benchmarks cover 32 configurations on four devices. The app, backend and dashboard were developed; five-flag LR is not free-text NLP and its score is not used by the ranking adapter. An English CrisisMMD fusion pilot reaches \MMFusionFOne\% macro-F1; effect CIs include zero. Vietnamese NLP and application fusion remain unfulfilled.}
+ 
+ \FormLine{Research new finding: RQ1 does not establish Product superiority; RQ2 does not establish general alignment gains and has unresolved replay differences. RQ3 favors nearest-first over revised priority on simulated harm and deadline misses. Field rescue benefits remain unmeasured.}
+ 
+--- a/report/deliverables/content/bulletin-vi.tex
++++ b/report/deliverables/content/bulletin-vi.tex
+@@ -16,7 +16,7 @@
+ 
+ \FormLine{Nội dung nghiên cứu: Xây dựng và tối ưu mô hình nhận diện ảnh cứu hộ trên thiết bị di động; thu thập thông tin về vị trí và mức độ khẩn cấp; phát triển cơ chế lưu trữ, gửi lại và đồng bộ dữ liệu khi kết nối mạng không ổn định. Nghiên cứu phân cụm các báo cáo liên quan thành sự kiện cứu hộ, xếp hạng ưu tiên và xây dựng giao diện quản lý, hiển thị thông tin trên bản đồ số.}
+ 
+-\FormLine{Kết quả đạt được: Mô hình gốc seed 1024 đạt Accuracy \NewImageAccuracy\%, macro-F1 \NewImageMacroFOne\% trên 256 ảnh kiểm thử trong phép đo CPU, có 3 lỗi nặng. Chuyển đổi định dạng, lượng tử hóa và cắt tỉa được đánh giá riêng; lượng tử hóa giảm dung lượng nhưng cũng giảm độ chính xác. Có 32 phiên benchmark ảnh trên bốn điện thoại. LR năm cờ không phải NLP; adapter chưa dùng điểm LR cho xếp hạng. Chưa có learned fusion. Đã xây dựng ứng dụng, backend và dashboard.}
++\FormLine{Kết quả đạt được: Mô hình gốc seed 1024 đạt Accuracy \NewImageAccuracy\%, macro-F1 \NewImageMacroFOne\% trên 256 ảnh CPU, có 3 lỗi nặng. Lượng tử hóa giảm dung lượng và độ chính xác; có 32 phiên benchmark ảnh trên bốn điện thoại. LR năm cờ không phải NLP; adapter chưa dùng điểm LR. Đã có ứng dụng, backend và dashboard. Pilot CrisisMMD tiếng Anh đạt macro-F1 fusion \MMFusionFOne\%, nhưng CI hiệu còn chứa 0; chưa xác nhận NLP tiếng Việt hoặc fusion trong ứng dụng.}
+ 
+ \FormLine{Ý nghĩa: RQ1 chưa xác lập Product hơn Additive; RQ2 chưa xác lập lợi ích alignment chung; RQ3 cho revised kém nearest-first về harm và trễ hạn mô phỏng. Replay thống kê RQ2 còn sai lệch. Chưa đo hiệu quả cứu hộ thực địa.}
+ 
+--- a/report/frontmatter/research-body-en.tex
++++ b/report/frontmatter/research-body-en.tex
+@@ -22,7 +22,9 @@
+ 
+ Additional ONNX CPU screening of the pruned model used the same 256 images and eight synthetic corruptions. Macro-F1 decreased from \QualityCleanMacroFOne\% on clean images to \QualityDarkMacroFOne\% at 0.4 brightness. This does not establish robustness on Android or field camera images; inherited corruption labels have not been re-adjudicated.
+ 
+-On the mobile device, image classification and urgency estimation from structured form selections provide complementary information. The application sends image labels and the LR score to the server, which stores the payload. The current adapter does not consume the LR score for clustering or ranking; it reads urgency or applies description keywords. LR is a five-flag surrogate fitted to synthetic OR labels, rather than free-text Vietnamese NLP. Trained text processing and learned fusion remain unfulfilled commitments in the available evidence. The research also examines data synchronization and system operation under unstable network conditions.
++On the mobile device, image classification and urgency estimation from structured form selections provide complementary information. The application sends image labels and the LR score to the server, which stores the payload. The current adapter does not consume the LR score for clustering or ranking; it reads urgency or applies description keywords. LR is a five-flag surrogate fitted to synthetic OR labels, rather than free-text Vietnamese NLP. Vietnamese rescue text processing and learned fusion in the application remain unfulfilled commitments. The research also examines data synchronization and system operation under unstable network conditions.
++
++A separate English CrisisMMD pilot trained TF-IDF text and linear feature-fusion classifiers, reaching macro-F1 \MMTextFOne\% and \MMFusionFOne\% on \MMTestN{} pairs from one held-out event. All paired effect CIs include zero; fusion superiority is not established. Vietnamese rescue NLP, priority labels and application fusion remain unfulfilled.
+ 
+ In weak-network simulations with bandwidth of 50 kbit/s and a round-trip time of 600 ms, both metadata-only and compressed-image modes succeeded in 257/257 attempts (100\%), compared with 230/257 (89.49\%) for original images. The two modes transmitting less data achieved higher transmission success rates than original images under the tested conditions. Each mode was measured separately on a computer; transmission over real mobile networks requires further validation.
+ 
+--- a/report/frontmatter/research-body-vi.tex
++++ b/report/frontmatter/research-body-vi.tex
+@@ -21,9 +21,11 @@
+ 
+ Đánh giá bổ sung trên ONNX CPU của model cắt tỉa dùng cùng 256 ảnh và tám biến đổi nhân tạo. Macro-F1 giảm từ \QualityCleanMacroFOne\% ở ảnh gốc xuống \QualityDarkMacroFOne\% khi nhân độ sáng với 0,4. Phép đo chưa xác nhận độ bền trên Android hoặc ảnh camera thực địa; nhãn kế thừa sau biến đổi chưa được thẩm định lại.
+ 
+-Tại thiết bị, hệ thống kết hợp hai nhánh phân tích: phân loại mức ngập từ hình ảnh và ước lượng mức độ khẩn cấp bằng Logistic Regression từ các thông tin do người dùng lựa chọn trên biểu mẫu. Ứng dụng gửi nhãn ảnh và điểm LR đến máy chủ; điểm LR được lưu trong payload nhưng adapter chưa dùng nó cho phân cụm hoặc xếp hạng, mà lấy khẩn cấp từ urgency hoặc từ khóa mô tả. LR dùng năm cờ có cấu trúc với nhãn OR, không phải NLP tiếng Việt tự do; chưa có bằng chứng mô hình fusion học chung và cam kết này chưa được chứng minh hoàn thành. Đề tài đồng thời nghiên cứu đồng bộ dữ liệu và hoạt động của hệ thống trong điều kiện mạng không ổn định.
++Ứng dụng phân loại mức ngập từ ảnh và tính điểm LR từ năm cờ biểu mẫu với nhãn OR tự sinh. Điểm LR được gửi và lưu, nhưng adapter chưa dùng cho phân cụm hoặc xếp hạng; khẩn cấp hiện lấy từ urgency hoặc từ khóa mô tả. LR không phải NLP tiếng Việt; xử lý tiếng Việt và fusion phục vụ cứu hộ trong ứng dụng vẫn chưa được chứng minh hoàn thành.
+ 
+-Trong thử nghiệm mạng yếu giả lập với băng thông 50 kbit/s và độ trễ khứ hồi 600 ms, chế độ chỉ gửi thông tin cơ bản và chế độ gửi ảnh nén đều thành công ở 257/257 lượt (100\%), trong khi gửi ảnh gốc đạt 230/257 lượt (89,49\%). Kết quả cho thấy hai chế độ gửi ít dữ liệu hơn có tỷ lệ truyền thành công cao hơn gửi ảnh gốc trong điều kiện thử nghiệm. Các phép đo được thực hiện riêng cho từng chế độ trên máy tính; khả năng truyền qua mạng di động thực tế cần được kiểm chứng thêm.
++Pilot CrisisMMD công khai bổ sung đã huấn luyện text TF-IDF và fusion tuyến tính, đạt macro-F1 \MMTextFOne\% và \MMFusionFOne\% trên \MMTestN{} cặp của một sự kiện test riêng. Các CI hiệu chứa 0, chưa xác lập ưu thế; benchmark tiếng Anh không thay đánh giá tiếng Việt hoặc ưu tiên cứu hộ.
++
++Trong mạng yếu giả lập (50 kbit/s, độ trễ khứ hồi 600 ms), gửi thông tin cơ bản và ảnh nén đều thành công 257/257 lượt; ảnh gốc đạt 230/257 (89,49\%). Các chế độ được đo riêng trên máy tính; chưa xác nhận khả năng truyền qua mạng di động thực tế.
+ 
+ RQ1 chưa xác lập Product hơn Additive độc lập (ARI 0,9072 so với 0,9191; Holm p=0,2560). RQ2 chưa xác lập lợi ích alignment chung (NDCG@5 revised 0,6669, random 0,6763); chỉ hỗ trợ bất biến exact ở grouping cố định. RQ3 trên 40 seed cho revised kém nearest-first về harm và trễ hạn mô phỏng. Một số p-value RQ2 chưa khớp replay, nên kiểm chứng thống kê còn một phần.
+ 
+--- a/report/scripts/export_results.py
++++ b/report/scripts/export_results.py
+@@ -9,6 +9,7 @@
+ from mobile_evidence import audit_mobile
+ from highlight_results import highlight_results
+ from export_image_quality import main as export_image_quality
++from export_multimodal import main as export_multimodal
+ 
+ ROOT = Path(__file__).resolve().parents[2]
+ OUT = ROOT / 'report/generated'
+@@ -75,6 +76,7 @@
+ 
+ def main():
+     export_image_quality()
++    export_multimodal()
+     (OUT / 'tables').mkdir(parents=True, exist_ok=True)
+     benchmarks = obj('report/config/benchmark-sources.json')
+     split = rows('products/fe/model/Edge Ai/split_train_val_test_mobilenetv3_large.csv')
+@@ -347,7 +349,8 @@
+                    'BenchmarkExecutorchVersion':base['metadata']['executorch_runtime']})
+     (OUT/'values.tex').write_text('% Generated from saved artifacts by scripts/export_results.py.\n'+
+                                 ''.join('\\newcommand{\\'+k+'}{'+str(v)+'}\n' for k,v in values.items())+
+-                                '\\input{generated/image-quality-values}\n')
++                                '\\input{generated/image-quality-values}\n'+
++                                '\\input{generated/multimodal-values}\n')
+     snapshot={'source_commit':subprocess.check_output(['git','rev-parse','HEAD'],cwd=ROOT,text=True).strip(),
+               'sources_sha256':SOURCES,'image_audit':{'rows':len(split),'missing':0,'md5_mismatch':0,'cross_split_groups':0},
+               'prediction_audits': PREDICTION_AUDITS,

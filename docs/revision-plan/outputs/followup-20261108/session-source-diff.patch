@@ -1,0 +1,360 @@
+--- before/report/README.md
++++ after/report/README.md
+@@ -3,6 +3,8 @@
+ Đề tài **THS2026-68: Hệ thống phân tích đa phương thức và phân cụm sự kiện cứu hộ bão lũ dựa trên Edge AI**. Chủ nhiệm Lê Thị Ngọc Ảnh; giảng viên hướng dẫn TS. Nguyễn Thanh Khoa; thành viên theo `resource/infoGroup.md`.
+ 
+ Bản sơ bộ đã có Mở đầu đủ sáu mục, bốn chương khoa học, Kết luận/kiến nghị, hai phụ lục, thông tin kết quả Việt–Anh và bản tin/tóm tắt Việt–Anh. Nội dung dựa trên thuyết minh, mã nguồn và artifact trong repo hiện tại. Đây chưa phải hồ sơ nghiệm thu đủ điều kiện nộp.
++
++**Bổ sung 08/11/2026:** [followup P02/P03/P04/P05/P07](../docs/revision-plan/outputs/followup-20261108/README.md) tích hợp phép đánh giá mới trên ONNX CPU của model cắt tỉa seed1024: clean+8 biến đổi,256ảnh,2.304dự đoán,0lỗi giải mã. Clean parity đạt trước inference suy giảm. Macro-F1 clean78,26%, blurσ2 68,31%, độ sáng×0,4 68,04%; không đo Android mới. Đã tăng truy vết split và xác minh danh tính bài trong chương trình ISDS; URL/license/IAA/expert/checksum split lúc train,8sai lệch RQ2,raw E2E và chapter metadata vẫn thiếu. Snapshot171trang/P08 dưới đây là lịch sử; receipt hiện tại nằm trong followup.
+ 
+ Snapshot rà soát hình thức trước đợt chỉnh sửa nội dung ngày **07/11/2026**: bản một mặt/hai mặt đều **165 trang**, gồm **105 trang thân bài**; trạng thái bài báo được cập nhật theo xác nhận người dùng và đã đối chiếu **48 hình, 37 bảng**. Xem [kết quả rà soát](audit/layout-2026-11-07.md) và [quy tắc biên soạn](RULES.md).
+ 
+--- before/report/generated/README.md
++++ after/report/generated/README.md
+@@ -11,10 +11,13 @@
+ Bộ xuất sử dụng Python chuẩn, không huấn luyện hoặc thay đổi artifact gốc. Nó thực hiện:
+ 
+ - Đối chiếu toàn bộ ảnh với đường dẫn tương đối và MD5 trong split; kiểm tra nhóm MD5/perceptual/split không vượt train/validation/test.
++
+ - Kiểm tra hash config, hash split, số ảnh và scope của các summary ảnh.
+ - Kiểm tra CSV dự đoán dùng đúng tập test; tính lại ma trận nhầm lẫn, Accuracy và macro-F1.
+ - Xuất 14 bảng: chia ảnh, ma trận/lớp, định dạng FP32, PTQ/QAT, audit metric, pruning, RQ1 benchmark/stress, RQ2 alignment/robustness/sensitivity và RQ3 hiệu ghép cặp theo seed và benchmark ứng dụng.
+ - Ghi SHA-256 của các nguồn trực tiếp, commit đầu vào và kết quả audit trong `provenance.json`.
++
++Phép bổ sung CPU ngày 08/11/2026 dùng `scripts/export_image_quality.py`, được gọi từ `export_results.py`. Exporter này chỉ đọc 2.304 hàng dự đoán đã đo, kiểm source/result hashes và tính lại Accuracy/macro-F1/recall high/lỗi nặng từ raw. Sinh `tables/image-quality-cpu.tex`, `image-quality-values.tex` và `image-quality-provenance.json`; không sửa generated tay. Nguồn là `docs/revision-plan/outputs/followup-20261108/phase-04/`, tách khỏi các benchmark cũ. Xem analysis/handoff để phân biệt 252 nhóm bootstrap với nguồn/sự kiện độc lập chưa xác minh, CI chưa hiệu chỉnh và CPU_ONLY. Build không chạy inference.
+ 
+ ## Bổ sung provenance ngày 07/11/2026
+ 
+--- before/report/chapters/02-data-methods/sections/data.tex
++++ after/report/chapters/02-data-methods/sections/data.tex
+@@ -42,6 +42,8 @@
+ 
+ Cách làm này giảm nguy cơ rò rỉ do ảnh trùng hoặc gần trùng, nhưng không chứng minh các tập độc lập hoàn toàn về nguồn hay sự kiện: hai ảnh cùng một trận ngập từ hai nguồn có thể rơi vào hai tập khác nhau. Bộ xuất kết quả đối chiếu đường dẫn và MD5 giữa bảng chia với các tệp ảnh hiện có (Mục~\ref{sec:04-evaluation-setup}).
+ 
++Đối chiếu bổ sung xác nhận 1.702 bản ghi sau làm sạch của seed 1024 khớp tám trường định danh, nhãn, mã băm và nhóm với bảng chia hiện tại; toàn bộ trường nhóm nguồn còn trống. Metadata checkpoint ghi seed 1024 và đường dẫn bảng chia dùng chung trong kho huấn luyện, nhưng chưa khôi phục được checksum của bảng chia tại thời điểm train. Sự khớp của bản ghi hiện có và đường dẫn lịch sử chưa chứng minh bytes của split đã dùng khi huấn luyện; nguồn ảnh, giấy phép, độ đồng thuận gán nhãn và xác nhận chuyên gia vẫn chưa có hồ sơ bổ sung.
++
+ \subsection{Dữ liệu khẩn cấp có cấu trúc}
+ Bảng tham chiếu liệt kê toàn bộ $2^5=32$ tổ hợp của năm cờ Boolean do nhóm chọn: không phản ứng (\texttt{unresponsive}), khó thở hoặc tím tái (\texttt{respiratory\_\allowbreak{}distress\_\allowbreak{}or\_\allowbreak{}cyanosis}), chảy máu nhiều (\texttt{heavy\_bleeding}), co giật (\texttt{active\_convulsions}) và chấn thương nguy cơ cao (\texttt{high\_risk\_trauma}). Nhãn dương theo quy tắc OR của nhóm: có ít nhất một cờ thì dương. Do duyệt đủ không gian tổ hợp, bảng có tính tất định và có thể kiểm tra từng dòng.
+ 
+--- before/report/chapters/04-evaluation/sections/setup.tex
++++ after/report/chapters/04-evaluation/sections/setup.tex
+@@ -1,6 +1,6 @@
+ \section{Thiết lập thực nghiệm}\label{sec:04-evaluation-setup}
+ \subsection{Phạm vi các phép đo}
+-Chương này tổng hợp kết quả đã lưu trong repo. Các bảng được xuất từ JSON/CSV, giữ số mẫu, split, cấu hình và đơn vị thống kê. Bộ xuất đối chiếu summary với CSV dự đoán; các sai khác, nếu có, được công bố ở phần kết quả. Mỗi nhóm benchmark mang nhãn seed riêng. Không có phép đo mới về điện thoại, mạng viễn thông hoặc người dùng trong lần biên soạn. Kiểm tra bổ sung của báo cáo là kiểm tra tệp ảnh/hash/split và tính nhất quán bảng số liệu.
++Chương này tổng hợp kết quả đã lưu trong repo và phép đánh giá bổ sung ảnh suy giảm nhân tạo trên CPU ngày 08/11/2026. Các bảng được xuất từ JSON/CSV, giữ số mẫu, split, cấu hình và đơn vị thống kê. Bộ xuất đối chiếu summary với CSV dự đoán; các sai khác, nếu có, được công bố ở phần kết quả. Mỗi nhóm benchmark mang nhãn seed riêng. Không có phép đo mới về điện thoại, mạng viễn thông hoặc người dùng trong lần biên soạn. Phép suy luận CPU bổ sung được tách riêng khỏi benchmark lịch sử và kiểm tra tệp ảnh/hash/split.
+ 
+ \begin{longtable}{P{.28\textwidth}P{.30\textwidth}P{.31\textwidth}}
+ \caption{Các nhóm thực nghiệm, dữ liệu và chỉ tiêu đánh giá}\label{tab:experiment-map}\\
+@@ -9,6 +9,7 @@
+ Phân loại ảnh và đối chiếu runtime FP32 & \ImageTest{} ảnh test, seed \BenchmarkSeed{} & Accuracy, macro-F1, độ trễ và đồng thuận dự đoán \\
+ Lượng tử hóa sau huấn luyện và khi tinh chỉnh (PTQ/QAT) & Cùng \ImageTest{} ảnh test, seed \QuantizationSeed{} & Chất lượng phân loại, dung lượng và độ trễ \\
+ Cắt tỉa có cấu trúc & Cùng \ImageTest{} ảnh test, seed \PruningSeed{} & Chất lượng phân loại, số tham số, dung lượng và độ trễ \\
++Ảnh suy giảm nhân tạo trên CPU & 256 ảnh, chín điều kiện ghép cặp; 252 nhóm split & Accuracy, macro-F1, recall high, lỗi nặng và CI ghép cặp \\
+ Nhận diện ảnh trên điện thoại thật & 32 cấu hình; 256 ảnh/runtime; bốn mẫu điện thoại & Accuracy, macro-F1, lỗi mức ngập, thời gian xử lý ảnh \\
+ Luồng xử lý và giao diện ứng dụng di động & Hai run, chín case/run trên một điện thoại & PASS/FAIL/NOT\_RUN; chế độ gửi và tính toàn vẹn bài nhận \\
+ Truyền dữ liệu dưới mạng yếu giả lập & 257 ảnh, ba cấu hình mạng, ba chế độ gửi & Tỷ lệ thành công, median/P95 độ trễ và số byte \\
+@@ -29,6 +30,15 @@
+ Đơn vị kích thước trong bảng sinh là MiB, tính byte chia $1024^2$. Nhãn MB trong các bản summary Markdown cũ được chuẩn hóa ở đây để mô tả phép biến đổi rõ ràng. Kích thước checkpoint có thể gồm trạng thái không cần suy luận, nên chỉ dùng dung lượng file không đủ để suy ra số phép tính.
+ 
+ Benchmark trên điện thoại đo lời gọi \texttt{classifyImage}, gồm giải mã, tiền xử lý và suy luận, nên có phạm vi rộng hơn predict CPU. Không dùng chênh lệch thời gian giữa hai phạm vi này để tính speedup. Thiết lập được mô tả ở Mục~\ref{sec:phone-benchmark-setup}; kết quả và lựa chọn model/runtime ở Mục~\ref{sec:phone-benchmark-results}.
++
++\subsection{Đánh giá ảnh suy giảm nhân tạo trên CPU}\label{sec:image-quality-cpu-setup}
++Phép bổ sung giữ nguyên ONNX seed 1024 cắt tỉa có mã băm khớp asset trong ứng dụng và artifact lịch sử. Runner dùng ONNX Runtime 1.23.2, NumPy 2.2.6 và Pillow 12.0.0 trong môi trường riêng, CPU một luồng. Ba ảnh validation được dùng kiểm khả năng chạy; không dùng test để chọn checkpoint, mức suy giảm hoặc ngưỡng. Sau đó, clean parity trên đủ 256 ảnh test yêu cầu đồng thuận top-1 100\% và xác suất khớp với sai số tuyệt đối $10^{-5}$, tương đối $10^{-4}$. Chỉ khi đạt gate mới chạy các điều kiện suy giảm.
++
++Tám điều kiện được khóa từ protocol trước gồm JPEG q50/q20; giảm cạnh ngắn về 128/64 pixel, giữ tỷ lệ và không phóng to; Gaussian blur với $\sigma=1/2$; nhân độ sáng với $0{,}7/0{,}4$. Mỗi biến đổi xuất phát độc lập từ cùng ảnh đã sửa hướng EXIF và đổi RGB, sau đó lưu PNG không mất mát. Đầu vào clean và mọi biến thể dùng cùng tiền xử lý letterbox bilinear $256\times256$, màu đệm $(124,116,104)$, chuẩn hóa ImageNet. Mã băm ảnh cha và từng biến thể được lưu; không sửa ảnh gốc hoặc chia lại tập.
++
++Có 2.304 dự đoán test ($256\times9$), nhưng chỉ có 256 ảnh gốc. CI 95\% dùng 5.000 bootstrap ghép cặp, seed 20261107, lấy mẫu lại 252 nhóm split và giữ mọi ảnh trong nhóm; cùng mẫu bootstrap được dùng cho cả chín điều kiện, tính lại macro-F1 ở mỗi lần. Nhóm split giúp giữ quan hệ gần trùng đã ghi nhận, chưa chứng minh độc lập nguồn hoặc sự kiện. Các CI là mô tả, chưa hiệu chỉnh đa so sánh; không thực hiện kiểm định giả thuyết trong phép bổ sung.
++
++Giữ mọi lỗi giải mã trong mẫu số và ghi riêng với lỗi cách ít nhất hai mức theo thứ tự non\_flood, low, medium, high. Không bật abstention hoặc tối ưu ngưỡng confidence. Thời gian predict và tiền xử lý cộng predict được lưu riêng trong một phiên CPU; đầu vào đo là PNG dẫn xuất, không bao gồm chi phí tạo biến thể hoặc nạp model. Phiên suy giảm nạp lại runtime, chưa có warmup riêng. Những thời gian này không thay thế classifyImage Android hoặc chi phí giải mã ảnh camera gốc; chưa chạy PTE hoặc benchmark ảnh suy giảm trên thiết bị.
+ 
+ \subsection{Thiết lập đánh giá mô hình nhận diện trên điện thoại}\label{sec:phone-benchmark-setup}
+ Phép đo trên ứng dụng Android chỉ đánh giá mô hình nhận diện mức ngập: chất lượng phân loại và thời gian xử lý ảnh của ONNX/ExecuTorch trên từng điện thoại. Đây không phải thực nghiệm E2E Android; không dùng benchmark này để đánh giá gửi SOS, GPS, đồng bộ nền hoặc SMS. Nguồn kết quả chính là các phiên benchmark đã lưu trên bốn mẫu điện thoại, có thông tin thiết bị và hash model để đối chiếu.
+--- before/report/chapters/04-evaluation/sections/results.tex
++++ after/report/chapters/04-evaluation/sections/results.tex
+@@ -126,6 +126,14 @@
+ \label{fig:compression-tradeoffs}
+ \end{figure}
+ 
++\subsection{Ảnh suy giảm nhân tạo: đánh giá ONNX trên CPU}\label{sec:image-quality-cpu-results}
++Bảng~\ref{tab:image-quality-cpu} trình bày đủ chín điều kiện của phép bổ sung ở Mục~\ref{sec:image-quality-cpu-setup}. Clean parity đạt đồng thuận top-1 100\% với artifact ONNX cắt tỉa lịch sử; sai khác xác suất lớn nhất xấp xỉ $8{,}34\times10^{-7}$, trong ngưỡng kiểm tra đã khóa. Accuracy clean là \QualityCleanAccuracy\%, macro-F1 \QualityCleanMacroFOne\% và recall high \QualityCleanHighRecall\%; đây là model cắt tỉa, khác FP32 gốc ở phần đầu chương.
++\input{generated/tables/image-quality-cpu}
++
++Với độ sáng nhân $0{,}4$, macro-F1 là \QualityDarkMacroFOne\%, chênh lệch so với clean là \QualityDarkDeltaFOne{} điểm phần trăm (CI 95\% ghép cặp [\QualityDarkCILow; \QualityDarkCIHigh]). Với blur $\sigma=2$, chênh lệch macro-F1 là \QualityBlurDeltaFOne{} điểm phần trăm (CI [\QualityBlurCILow; \QualityBlurCIHigh]). Không có lỗi giải mã trong 2.304 dự đoán. Toàn bộ hiệu ghép cặp và khoảng tin cậy cho tám điều kiện được lưu cùng dự đoán; không chọn điều kiện có số thuận lợi để kết luận chung về độ bền vững.
++
++Nhãn gốc được kế thừa, chưa có chuyên gia đánh giá lại tính giữ nguyên ngữ nghĩa sau biến đổi; blur hoặc giảm sáng có thể che dấu hiệu phân loại. Kết quả chỉ mô tả độ nhạy của model cố định với các phép biến đổi nhân tạo trên tập hiện có, chưa xác nhận chất lượng ảnh mưa thực địa, ảnh camera độc lập hoặc hiệu năng Android. Các dự đoán được giữ đầy đủ theo ảnh gốc; số biến thể không tăng cỡ mẫu độc lập.
++
+ \subsection{Khẩn cấp LR: độ khớp nhãn thay thế}
+ JSON v5 ghi fidelity trên 32 trạng thái tại threshold 0,5 bằng 1,0. Bảng so sánh với quy tắc cho thấy tất cả profile khớp nhãn OR. Các audit dataset/final gate ghi kiểm tra integrity; audit nguồn giữ các trạng thái có điều kiện và thay đổi sau rà soát, không chuyển mọi hạng mục thành một phát biểu ``pass'' vô điều kiện.
+ 
+@@ -181,7 +189,7 @@
+ 
+ Ước lượng điểm của phương pháp có chặn còn thấp hơn chỉ số người (0,6709) và ngẫu nhiên (0,6763). Những chênh lệch điểm này không tự chứng minh khác biệt thống kê. Vì grouping oracle đã loại lỗi phân cụm khỏi điều kiện RQ2, sự phù hợp yếu không thể quy hoàn toàn cho phân hoạch sai.
+ 
+-\paragraph{Giới hạn replay thống kê RQ2.} Tái phân tích từ bảng đã lưu khớp các hiệu trung bình, CI và so sánh NDCG chính. Có ba raw $p$ của Spearman khác số đã lưu, kéo theo năm giá trị Holm trong các họ liên quan. Sai khác vẫn còn khi dùng lại đúng phiên bản NumPy/pandas/SciPy của lần RQ2 gốc; chưa thể quy nguyên nhân cho phiên bản. Bảng metric đã làm tròn có thể làm thay đổi tie/rank, nhưng cơ chế này chưa được cô lập. Giữ số lịch sử và số replay riêng trong hồ sơ sai lệch, chưa chứng nhận tái lập toàn bộ suy luận RQ2. Các khác biệt này không đổi kết luận chưa xác lập lợi ích alignment chung.
++\paragraph{Giới hạn replay thống kê RQ2.} Tái phân tích từ bảng đã lưu khớp các hiệu trung bình, CI và so sánh NDCG chính. Có ba raw $p$ của Spearman khác số đã lưu, kéo theo năm giá trị Holm trong các họ liên quan. Cả 15 giá trị Holm alignment lịch sử đều khớp khi tính lại từ chính raw $p$ lịch sử, nên chưa thấy lỗi hiệu chỉnh Holm độc lập. Sai khác vẫn còn khi dùng lại đúng phiên bản NumPy/pandas/SciPy của lần RQ2 gốc; chưa thể quy nguyên nhân cho phiên bản. Notebook tính comparison trong bộ nhớ trước khi xuất bảng với 10 chữ số có nghĩa. Chưa tìm được vector chưa làm tròn để xác minh rank/tie và nhánh kiểm định của lần chạy gốc; mất độ chính xác khi xuất vẫn chỉ là giả thuyết giải thích. Giữ số lịch sử và số replay riêng cùng tám trường còn OPEN, chưa chứng nhận tái lập toàn bộ suy luận RQ2. Các khác biệt này không đổi kết luận chưa xác lập lợi ích alignment chung.
+ 
+ \subsection{RQ2: bất biến hẹp và thất bại dưới phối hợp}
+ \input{generated/tables/rq2-robustness}
+--- before/report/chapters/04-evaluation/sections/limitations.tex
++++ after/report/chapters/04-evaluation/sections/limitations.tex
+@@ -36,4 +36,4 @@
+ \paragraph{Giới hạn tái lập suy luận.} Hash manifest khớp chứng minh tính toàn vẹn artifact theo manifest, không tự chứng minh mỗi phép kiểm thống kê được tái lập. Ba raw $p$ Spearman và năm giá trị Holm liên quan của RQ2 chưa khớp replay từ bảng metric đã lưu, dù đã kiểm đúng phiên bản thư viện gốc. Vì vậy giữ trạng thái tái lập một phần, không xem các số này là đã được kiểm chứng lại đầy đủ. Kết luận âm về alignment chung không phụ thuộc vào việc chọn số lịch sử hay replay thuận lợi hơn.
+ 
+ 
+-\paragraph{Phạm vi các phase có điều kiện.} Chưa chạy suy luận clean/degraded hoặc phiên Android bổ sung trong đợt chỉnh sửa; chín đầu vào dẫn xuất của một ảnh validation chỉ kiểm bước chuẩn bị corruption. Không có kết quả robustness mới cho ảnh mờ, tối hoặc nén. Đã kiểm lại gói tài nguyên E2E và tìm raw qua working tree, các ref/lịch sử có sẵn; chưa phục hồi được các run Android/Web được nêu. Benchmark ảnh 32 JSON vẫn hợp lệ trong scope riêng, không thay thế E2E hay phiên đo lặp.
++\paragraph{Phạm vi các phase có điều kiện.} Phép bổ sung tại Mục~\ref{sec:image-quality-cpu-results} đã đánh giá clean và tám biến đổi nhân tạo trên ONNX CPU, giữ nguyên model và 256 ảnh test; chưa chạy PTE hoặc ảnh suy giảm trên Android. CI theo nhóm split không chứng minh độc lập nguồn/sự kiện và chưa hiệu chỉnh đa so sánh. Nhãn kế thừa chưa được chuyên gia thẩm định lại sau biến đổi; chưa có kết quả trên ảnh camera hiện trường độc lập. Đã kiểm lại gói tài nguyên E2E và mở rộng tìm raw qua working tree, ref/lịch sử và Drive; chưa phục hồi được các run Android/Web được nêu. Benchmark ảnh 32 JSON vẫn hợp lệ trong scope riêng, không thay thế E2E hay phiên đo lặp. Các khoảng trống URL/license/IAA, checksum split lúc train và xác nhận chuyên gia vẫn còn.
+--- before/report/chapters/conclusion.tex
++++ after/report/chapters/conclusion.tex
+@@ -16,7 +16,7 @@
+ \end{enumerate}
+ 
+ \addsec{Hạn chế của đề tài}
+-Chưa có thí nghiệm suy luận ảnh chất lượng kém có kiểm soát; bước chuẩn bị biến thể trên validation không cung cấp kết quả robustness. Ablation image-only/text-only/both hiện chưa đủ điều kiện vì target khác nhau, thiếu paired inputs và gold chung độc lập với công thức; không thể ghép Accuracy ảnh với fidelity OR. Cam kết NLP và fusion học chung vẫn chưa được chứng minh hoàn thành.
++Phép bổ sung đã đánh giá tám biến đổi ảnh nhân tạo và clean trên ONNX CPU với cùng 256 ảnh test, sau gate đồng thuận dự đoán lịch sử. Macro-F1 clean là \QualityCleanMacroFOne\%, với độ sáng nhân $0{,}4$ là \QualityDarkMacroFOne\%; kết quả chưa xác nhận độ bền với ảnh camera thực địa hoặc Android. Nhãn sau biến đổi chưa được thẩm định lại, nguồn ảnh và checksum split lúc train vẫn thiếu hồ sơ. Ablation image-only/text-only/both hiện chưa đủ điều kiện vì target khác nhau, thiếu paired inputs và gold chung độc lập với công thức; không thể ghép Accuracy ảnh với fidelity OR. Cam kết NLP và fusion học chung vẫn chưa được chứng minh hoàn thành.
+ 
+ Hệ thống chưa được đánh giá trong vận hành cứu hộ thực địa với người sử dụng và đơn vị chuyên môn. Luồng SMS đã có thành phần hỗ trợ, nhưng tỷ lệ giao tin và độ trễ qua mạng viễn thông/gateway thực tế chưa được kiểm chứng đầy đủ.
+ 
+--- before/report/frontmatter/research-body-vi.tex
++++ after/report/frontmatter/research-body-vi.tex
+@@ -18,6 +18,8 @@
+ 
+ \FormSection{4. Kết quả nghiên cứu:}
+ Đối với bài toán phân loại hình ảnh, mô hình được đánh giá trên tập kiểm thử gồm 256 ảnh. Với cấu hình seed 1024, mô hình đạt Accuracy \NewImageAccuracy\% và macro-F1 \NewImageMacroFOne\%, ghi nhận 3 lỗi nghiêm trọng. Thử nghiệm cắt tỉa mô hình đạt Accuracy \PruningAccuracy\% với \PruningCriticalCount{} lỗi nghiêm trọng.
++
++Đánh giá bổ sung trên ONNX CPU của model cắt tỉa dùng cùng 256 ảnh và tám biến đổi nhân tạo. Macro-F1 giảm từ \QualityCleanMacroFOne\% ở ảnh gốc xuống \QualityDarkMacroFOne\% khi nhân độ sáng với 0,4. Phép đo chưa xác nhận độ bền trên Android hoặc ảnh camera thực địa; nhãn kế thừa sau biến đổi chưa được thẩm định lại.
+ 
+ Tại thiết bị, hệ thống kết hợp hai nhánh phân tích: phân loại mức ngập từ hình ảnh và ước lượng mức độ khẩn cấp bằng Logistic Regression từ các thông tin do người dùng lựa chọn trên biểu mẫu. Ứng dụng gửi nhãn ảnh và điểm LR đến máy chủ; điểm LR được lưu trong payload nhưng adapter chưa dùng nó cho phân cụm hoặc xếp hạng, mà lấy khẩn cấp từ urgency hoặc từ khóa mô tả. LR dùng năm cờ có cấu trúc với nhãn OR, không phải NLP tiếng Việt tự do; chưa có bằng chứng mô hình fusion học chung và cam kết này chưa được chứng minh hoàn thành. Đề tài đồng thời nghiên cứu đồng bộ dữ liệu và hoạt động của hệ thống trong điều kiện mạng không ổn định.
+ 
+@@ -65,7 +67,7 @@
+ \hline
+ \end{tabular}\par
+ \endgroup
+-\noindent\textit{Bài báo được ghi nhận đã công bố theo xác nhận của nhóm ngày 07/11/2026. Hồ sơ hiện chưa đối chiếu được DOI, ngày online, số trang, tập và năm xuất bản ở cấp riêng bài; các trường này chưa cập nhật. Thông tin cấp quyển không thay thế minh chứng cấp bài.}
++\noindent\textit{Bài báo được ghi nhận đã công bố theo xác nhận của nhóm ngày 07/11/2026. Chương trình ISDS chính thức xác nhận mã bài 6444, tiêu đề và tám tác giả; chương trình chưa xác nhận chapter đã online. Hồ sơ hiện chưa đối chiếu được DOI, ngày online, số trang, tập và năm xuất bản ở cấp riêng bài; các trường này chưa cập nhật. Thông tin cấp quyển không thay thế minh chứng cấp bài.}
+ 
+ \FormSection{7. Đóng góp về mặt kinh tế -- xã hội, giáo dục và đào tạo, an ninh, quốc phòng và khả năng áp dụng của đề tài:}
+ Sản phẩm phục vụ đào tạo và nghiên cứu về Edge AI, tối ưu mô hình và quản lý thông tin cứu hộ. Hệ thống có tiềm năng hỗ trợ tiếp nhận, tổng hợp và phân loại yêu cầu khi mạng hạn chế; lợi ích về thời gian cứu hộ, chi phí và giảm thiệt hại chưa được kiểm chứng thực địa.
+--- before/report/frontmatter/research-body-en.tex
++++ after/report/frontmatter/research-body-en.tex
+@@ -20,6 +20,8 @@
+ 
+ For image classification, the model was evaluated on a test set of 256 images. Using seed 1024, the model achieved \NewImageAccuracy\% accuracy and \NewImageMacroFOne\% macro-F1, with three critical errors. The structured pruning experiment achieved \PruningAccuracy\% accuracy, with \PruningCriticalCount{} critical errors.
+ 
++Additional ONNX CPU screening of the pruned model used the same 256 images and eight synthetic corruptions. Macro-F1 decreased from \QualityCleanMacroFOne\% on clean images to \QualityDarkMacroFOne\% at 0.4 brightness. This does not establish robustness on Android or field camera images; inherited corruption labels have not been re-adjudicated.
++
+ On the mobile device, image classification and urgency estimation from structured form selections provide complementary information. The application sends image labels and the LR score to the server, which stores the payload. The current adapter does not consume the LR score for clustering or ranking; it reads urgency or applies description keywords. LR is a five-flag surrogate fitted to synthetic OR labels, rather than free-text Vietnamese NLP. Trained text processing and learned fusion remain unfulfilled commitments in the available evidence. The research also examines data synchronization and system operation under unstable network conditions.
+ 
+ In weak-network simulations with bandwidth of 50 kbit/s and a round-trip time of 600 ms, both metadata-only and compressed-image modes succeeded in 257/257 attempts (100\%), compared with 230/257 (89.49\%) for original images. The two modes transmitting less data achieved higher transmission success rates than original images under the tested conditions. Each mode was measured separately on a computer; transmission over real mobile networks requires further validation.
+@@ -34,7 +36,7 @@
+ \FormIndented{-- A web-based rescue information management system featuring a digital map for visualizing rescue locations and clustering related events.}
+ \FormIndented{-- A trained and optimized multimodal AI model package for analyzing rescue information and supporting deployment on mobile devices.}
+ \par\noindent The model package is a registered deliverable; the available image model and structured LR do not establish completion of the text-model and learned-fusion commitments.
+-\par\noindent In addition, the project registers a research bulletin, a research summary and a demonstration video of no more than two minutes, in accordance with Can Tho University's requirements. The paper ``Stress-Testing Product-Gated Clustering and Bounded Priority Ranking for Flood-Rescue Reports: A Synthetic Study'' is recorded as published based on the team confirmation dated 7 November 2026. Article-level DOI, online date, pages, volume and publication year have not been independently verified in the current dossier; book-level metadata does not resolve these fields.
++\par\noindent In addition, the project registers a research bulletin, a research summary and a demonstration video of no more than two minutes, in accordance with Can Tho University's requirements. The paper ``Stress-Testing Product-Gated Clustering and Bounded Priority Ranking for Flood-Rescue Reports: A Synthetic Study'' is recorded as published based on the team confirmation dated 7 November 2026. The official ISDS program confirms paper 6444, its title and eight authors; it does not establish that the chapter is online. Article-level DOI, online date, pages, volume and publication year have not been independently verified in the current dossier; book-level metadata does not resolve these fields.
+ 
+ \FormSection{6. Effects, technology transfer means and applicability:}
+ The project outputs support education and research in edge image inference and rescue information management. They are intended for transfer to the School of Information and Communication Technology, Can Tho University, for educational use and further development.
+--- before/docs/revision-plan/README.md
++++ after/docs/revision-plan/README.md
+@@ -51,6 +51,8 @@
+ 
+ ## Kết quả thực thi chuỗi
+ 
++**Bổ sung ngày 08/11/2026:** đã tiếp tục P02/P03/P04/P05/P07 theo yêu cầu mới. [Gói followup](outputs/followup-20261108/README.md) có **2.304 dự đoán test ONNX CPU** clean+8 biến đổi sau clean parity; C5 chuyển sang PARTIAL/CPU_ONLY. P02 chưa có hồ sơ provenance/license/IAA/expert và checksum split lúc train; 8 sai lệch RQ2 còn OPEN; raw E2E/chapter DOI chưa khôi phục. Người dùng xác nhận chưa có hồ sơ bổ sung. Các handoff bên dưới và freeze P08 là snapshot trước đợt này, không phải kết quả kiểm cho PDF mới.
++
+ - [P01](outputs/phase-01/handoff.md): scope/claim/runtime E_i và D1–D3.
+ - [P02](outputs/phase-02/handoff.md): dữ liệu/LR/compression/measurement scopes từ artifact.
+ - [P03](outputs/phase-03/handoff.md): replay RQ; 8 sai lệch p-value/Holm RQ2 còn công khai.
+--- before/docs/revision-plan/05-traceability-matrix.md
++++ after/docs/revision-plan/05-traceability-matrix.md
+@@ -37,6 +37,8 @@
+ 
+ ## Trạng thái thực thi sau P01–P08
+ 
++**Snapshot trước followup 08/11/2026.** Trạng thái mới của P02/P03/P04/P05/P07 nằm ở [followup](outputs/followup-20261108/README.md): C5 hiện PARTIAL/CPU_ONLY nhờ 2.304 test predictions, chưa Android. Các trạng thái thiếu hồ sơ C1/C4/C6/C7/A1 vẫn giữ; receipt bố cục/build của PDF mới tách riêng trong followup, không tái dùng freeze dưới đây.
++
+ Nguồn quyết định/check/hash cuối: [P08 ledger](outputs/phase-08/final-review-status.csv), [validation](outputs/phase-08/validation.md), [response draft](outputs/phase-08/response-draft.md).
+ 
+ | ID | Status | Evidence | Gap / next action |
+--- before/report/scripts/export_results.py
++++ after/report/scripts/export_results.py
+@@ -8,6 +8,7 @@
+ import subprocess
+ from mobile_evidence import audit_mobile
+ from highlight_results import highlight_results
++from export_image_quality import main as export_image_quality
+ 
+ ROOT = Path(__file__).resolve().parents[2]
+ OUT = ROOT / 'report/generated'
+@@ -73,6 +74,7 @@
+ 
+ 
+ def main():
++    export_image_quality()
+     (OUT / 'tables').mkdir(parents=True, exist_ok=True)
+     benchmarks = obj('report/config/benchmark-sources.json')
+     split = rows('products/fe/model/Edge Ai/split_train_val_test_mobilenetv3_large.csv')
+@@ -344,7 +346,8 @@
+                    'BenchmarkOnnxVersion':base['metadata']['onnxruntime_version'],
+                    'BenchmarkExecutorchVersion':base['metadata']['executorch_runtime']})
+     (OUT/'values.tex').write_text('% Generated from saved artifacts by scripts/export_results.py.\n'+
+-                                ''.join('\\newcommand{\\'+k+'}{'+str(v)+'}\n' for k,v in values.items()))
++                                ''.join('\\newcommand{\\'+k+'}{'+str(v)+'}\n' for k,v in values.items())+
++                                '\\input{generated/image-quality-values}\n')
+     snapshot={'source_commit':subprocess.check_output(['git','rev-parse','HEAD'],cwd=ROOT,text=True).strip(),
+               'sources_sha256':SOURCES,'image_audit':{'rows':len(split),'missing':0,'md5_mismatch':0,'cross_split_groups':0},
+               'prediction_audits': PREDICTION_AUDITS,
+--- before/report/chapters/02-data-methods/sections/evaluation-design.tex
++++ after/report/chapters/02-data-methods/sections/evaluation-design.tex
+@@ -55,7 +55,7 @@
+ 
+ Các phép kiểm tra stress RQ1 báo cáo thay đổi trong từng phương pháp so với chính đối chứng của nó; chúng không phải kiểm định ưu thế giữa các phương pháp. Giữ các ranh giới này giúp trình bày đầy đủ kết quả âm và tránh diễn giải chọn lọc.
+ 
+-\paragraph{Phạm vi kiểm chứng bổ sung.} Lần chỉnh sửa này chỉ tính lại thống kê từ bảng CSV và checkpoint đã lưu, không chạy lại phân cụm, generator hoặc huấn luyện. RQ1 stress primary và replication được kiểm riêng, gồm 300 hàng hiệu ứng mỗi bundle, với 288 khoảng tin cậy bootstrap được tính lại và 12 hàng thiếu chỉ số được kiểm tra giữ trống; không gộp thành 80 run độc lập. Các bootstrap stress dùng 5.000 mẫu với seed suy từ protocol theo method/scenario/metric. Một CSV cơ sở RQ1 hiện thiếu newline cuối so với commit gốc, nhưng 400 bản ghi và mọi trường giống nhau; sai lệch byte được giữ, không gọi toàn bộ verifier lịch sử đã đạt. RQ3 replay dùng NumPy 2.5.1, pandas 3.0.3 và SciPy 1.18.0; RQ2 có kiểm bổ sung bằng đúng phiên bản gốc. Sai lệch $p$ RQ2 còn lại được nêu tại phần kết quả, không sửa số gốc để làm kiểm tra đạt.
++\paragraph{Phạm vi kiểm chứng bổ sung.} Phần tái kiểm RQ chỉ tính lại thống kê từ bảng CSV và checkpoint đã lưu, không chạy lại phân cụm, generator hoặc huấn luyện. RQ1 stress primary và replication được kiểm riêng, gồm 300 hàng hiệu ứng mỗi bundle, với 288 khoảng tin cậy bootstrap được tính lại và 12 hàng thiếu chỉ số được kiểm tra giữ trống; không gộp thành 80 run độc lập. Các bootstrap stress dùng 5.000 mẫu với seed suy từ protocol theo method/scenario/metric. Một CSV cơ sở RQ1 hiện thiếu newline cuối so với commit gốc, nhưng 400 bản ghi và mọi trường giống nhau; sai lệch byte được giữ, không gọi toàn bộ verifier lịch sử đã đạt. RQ3 replay dùng NumPy 2.5.1, pandas 3.0.3 và SciPy 1.18.0; RQ2 có kiểm bổ sung bằng đúng phiên bản gốc. Sai lệch $p$ RQ2 còn lại được nêu tại phần kết quả, không sửa số gốc để làm kiểm tra đạt.
+ 
+ \subsection{Quy trình xử lý và kiểm chứng kết quả}\label{sec:02-reproducibility}
+ Quy trình được mô tả theo thứ tự thao tác để làm rõ nơi sử dụng dữ liệu. Trước hết kiểm tra quy định đầu vào và cấu trúc dữ liệu, chỉ nạp tệp chứa thông tin quan sát. Kiểm tra miền số, timestamp và tọa độ; đưa báo cáo không đủ vị trí hoặc thời gian vào hàng xem xét. Từ các báo cáo đủ trường, xác định định danh payload, số củng cố và $Q_i$. Sau đó tính các thành phần tương đồng, ngưỡng quantile và cạnh top-$K$, rồi gọi bộ phát hiện cộng đồng. Với mỗi cụm dự đoán, xây họ bằng chứng từ fingerprint và envelope, tính các tổng hợp ở Công thức~\ref{eq:aggregate-e}--\ref{eq:aggregate-v}. Điểm $P_k$ đi cùng cụm vào scheduler nghiên cứu hoặc danh sách hỗ trợ điều phối. Chỉ sau khi lưu đầu ra và cấu hình, evaluator mới nối nhãn để tính chỉ số. Hàng xem xét được giữ trong output; loại khỏi bảng kết quả sẽ che mất khối lượng mà con người phải xử lý.
+--- /dev/null
++++ after/report/scripts/export_image_quality.py
+@@ -0,0 +1,90 @@
++#!/usr/bin/env python3
++"""Export the fixed-model CPU corruption screening from audited raw predictions."""
++from pathlib import Path
++import csv
++import hashlib
++import json
++
++ROOT = Path(__file__).resolve().parents[2]
++SOURCE = ROOT / 'docs/revision-plan/outputs/followup-20261108/phase-04'
++OUT = ROOT / 'report/generated'
++
++
++def sha(path):
++    return hashlib.sha256(path.read_bytes()).hexdigest()
++
++
++def rows(name):
++    with (SOURCE / name).open(encoding='utf-8', newline='') as stream:
++        return list(csv.DictReader(stream))
++
++
++def number(value, digits=2):
++    return f'{float(value):.{digits}f}'.replace('.', ',')
++
++
++def main():
++    validation = json.loads((SOURCE / 'validation.json').read_text())
++    assert validation['status'] == 'PASS_CPU_ONLY' and validation['test_predictions'] == 2304
++    gate = json.loads((SOURCE / 'clean-parity.json').read_text())
++    assert gate['status'] == 'PASS_CPU_ONLY'
++    for path, digest in json.loads((SOURCE / 'source-hashes.json').read_text()).items():
++        assert sha(ROOT / path) == digest, f'Changed input: {path}'
++    for path, digest in json.loads((SOURCE / 'result-hashes.json').read_text()).items():
++        assert sha(ROOT / path) == digest, f'Changed result: {path}'
++    metrics, predictions = rows('metrics.csv'), rows('predictions.csv')
++    assert len(metrics) == 9 and len(predictions) == 2304
++    by_condition = {r['condition']: r for r in metrics}
++    for condition, summary in by_condition.items():
++        selected = [r for r in predictions if r['condition'] == condition]
++        assert len(selected) == len({r['id'] for r in selected}) == 256
++        matrix = [[0] * 5 for _ in range(4)]
++        ordinal = [1, 2, 3, 0]
++        severe = 0
++        for r in selected:
++            actual, predicted = int(r['label_idx']), int(r['pred_idx'])
++            matrix[actual][predicted if r['status'] == 'OK' else 4] += 1
++            severe += r['status'] == 'OK' and abs(ordinal[actual] - ordinal[predicted]) >= 2
++        accuracy = sum(matrix[i][i] for i in range(4)) / 256
++        f1 = sum(2 * matrix[i][i] / (sum(matrix[i]) + sum(row[i] for row in matrix)) for i in range(4)) / 4
++        recall = matrix[2][2] / sum(matrix[2])
++        assert abs(accuracy - float(summary['accuracy'])) < 1e-12
++        assert abs(f1 - float(summary['macro_f1'])) < 1e-12
++        assert abs(recall - float(summary['recall_high'])) < 1e-12
++        assert severe == int(summary['ordinal_error_ge2_count'])
++    labels = ['Gốc', 'JPEG q50', 'JPEG q20', 'Cạnh ngắn 128', 'Cạnh ngắn 64',
++              r'Mờ $\sigma=1$', r'Mờ $\sigma=2$', r'Độ sáng $\times0{,}7$', r'Độ sáng $\times0{,}4$']
++    lines = [r'% Generated by scripts/export_image_quality.py; do not edit.',
++             r'\begin{table}[htbp]\centering\small',
++             r'\caption{Đánh giá ảnh suy giảm nhân tạo trên ONNX CPU: 256 ảnh test ghép cặp, seed 1024 cắt tỉa}\label{tab:image-quality-cpu}',
++             r'\begin{tabular}{lrrrr}',
++             r'\toprule Điều kiện & Accuracy (\%) & Macro-F1 (\%) & Recall high (\%) & Lỗi nặng \\',
++             r'\midrule']
++    for label, row in zip(labels, metrics):
++        lines.append(' & '.join([label, number(100 * float(row['accuracy'])),
++                                 number(100 * float(row['macro_f1'])),
++                                 number(100 * float(row['recall_high'])),
++                                 row['ordinal_error_ge2_count']]) + r' \\')
++    lines += [r'\bottomrule\end{tabular}', r'\end{table}', '']
++    (OUT / 'tables/image-quality-cpu.tex').write_text('\n'.join(lines))
++    effects = rows('paired-effects.csv')
++    macros = []
++    for prefix, condition in [('Clean', 'clean'), ('Dark', 'exposure_0.4')]:
++        row = by_condition[condition]
++        for metric, suffix in [('accuracy', 'Accuracy'), ('macro_f1', 'MacroFOne'), ('recall_high', 'HighRecall')]:
++            macros.append(r'\providecommand{\Quality' + prefix + suffix + '}{' + number(100 * float(row[metric])) + '}')
++    for prefix, condition in [('Dark', 'exposure_0.4'), ('Blur', 'blur_sigma_2')]:
++        effect = next(r for r in effects if r['condition'] == condition and r['metric'] == 'macro_f1')
++        for field, suffix in [('delta_degraded_minus_clean', 'DeltaFOne'), ('ci_low', 'CILow'), ('ci_high', 'CIHigh')]:
++            macros.append(r'\providecommand{\Quality' + prefix + suffix + '}{' + number(100 * float(effect[field])) + '}')
++    (OUT / 'image-quality-values.tex').write_text('\n'.join(macros) + '\n')
++    files = [SOURCE / name for name in ['protocol.json', 'source-hashes.json', 'result-hashes.json',
++             'clean-parity.json', 'predictions.csv', 'metrics.csv', 'paired-effects.csv', 'validation.json']]
++    files.append(Path(__file__))
++    (OUT / 'image-quality-provenance.json').write_text(json.dumps(
++        {str(p.relative_to(ROOT)): sha(p) for p in files}, indent=2) + '\n')
++    print('Image quality CPU: 2304 prediction rows, nine conditions; raw metrics verified and exported.')
++
++
++if __name__ == '__main__':
++    main()
+--- /dev/null
++++ after/report/generated/tables/image-quality-cpu.tex
+@@ -0,0 +1,17 @@
++% Generated by scripts/export_image_quality.py; do not edit.
++\begin{table}[htbp]\centering\small
++\caption{Đánh giá ảnh suy giảm nhân tạo trên ONNX CPU: 256 ảnh test ghép cặp, seed 1024 cắt tỉa}\label{tab:image-quality-cpu}
++\begin{tabular}{lrrrr}
++\toprule Điều kiện & Accuracy (\%) & Macro-F1 (\%) & Recall high (\%) & Lỗi nặng \\
++\midrule
++Gốc & 80,08 & 78,26 & 85,19 & 4 \\
++JPEG q50 & 77,34 & 75,27 & 79,63 & 5 \\
++JPEG q20 & 75,78 & 74,14 & 79,63 & 4 \\
++Cạnh ngắn 128 & 76,56 & 75,17 & 75,93 & 5 \\
++Cạnh ngắn 64 & 67,19 & 64,86 & 55,56 & 12 \\
++Mờ $\sigma=1$ & 76,17 & 74,12 & 79,63 & 4 \\
++Mờ $\sigma=2$ & 70,31 & 68,31 & 70,37 & 7 \\
++Độ sáng $\times0{,}7$ & 76,95 & 74,85 & 85,19 & 4 \\
++Độ sáng $\times0{,}4$ & 71,09 & 68,04 & 79,63 & 9 \\
++\bottomrule\end{tabular}
++\end{table}
+--- /dev/null
++++ after/report/generated/image-quality-values.tex
+@@ -0,0 +1,12 @@
++\providecommand{\QualityCleanAccuracy}{80,08}
++\providecommand{\QualityCleanMacroFOne}{78,26}
++\providecommand{\QualityCleanHighRecall}{85,19}
++\providecommand{\QualityDarkAccuracy}{71,09}
++\providecommand{\QualityDarkMacroFOne}{68,04}
++\providecommand{\QualityDarkHighRecall}{79,63}
++\providecommand{\QualityDarkDeltaFOne}{-10,22}
++\providecommand{\QualityDarkCILow}{-16,21}
++\providecommand{\QualityDarkCIHigh}{-4,21}
++\providecommand{\QualityBlurDeltaFOne}{-9,95}
++\providecommand{\QualityBlurCILow}{-16,00}
++\providecommand{\QualityBlurCIHigh}{-4,13}
+--- /dev/null
++++ after/report/generated/image-quality-provenance.json
+@@ -0,0 +1,11 @@
++{
++  "docs/revision-plan/outputs/followup-20261108/phase-04/protocol.json": "8666cdcc9afbe4f34959e45e02f694a55992ac3609228bc0bed87bf9ea806455",
++  "docs/revision-plan/outputs/followup-20261108/phase-04/source-hashes.json": "c3931cb7d259b7fe6c57032dbc1c3be6405d93c14d82d657e4788e064f04de1b",
++  "docs/revision-plan/outputs/followup-20261108/phase-04/result-hashes.json": "ed43586029d7d9c3fc970ff83e2525085a47ee0f4e7f4ad22b5ba5f559d56c3f",
++  "docs/revision-plan/outputs/followup-20261108/phase-04/clean-parity.json": "3664b47e9e6acc65fcb076649249f494faea25f08d60e7d2339c73cdf81d6b5e",
++  "docs/revision-plan/outputs/followup-20261108/phase-04/predictions.csv": "1abd0e1c5a0e086aa05331f213e4743d332e3f66305883865e80c66eed7b8fb0",
++  "docs/revision-plan/outputs/followup-20261108/phase-04/metrics.csv": "9fee07e398608966ee0a3c9c943f0a00614b381a066bc4b30fa8d04d17ba9689",
++  "docs/revision-plan/outputs/followup-20261108/phase-04/paired-effects.csv": "a271c0007ed4d2ca8c89d520dbf76169c8c0e9c28d9f362893fa4b68276d0fe4",
++  "docs/revision-plan/outputs/followup-20261108/phase-04/validation.json": "7112af6e3280fadda6e8449d5a753278c5f59765e26597e2baeddded05bccd7a",
++  "report/scripts/export_image_quality.py": "e3f7abb78ad28858d2b89b19feefc3eba407f965e30da2cafc8b03768e5e43b8"
++}

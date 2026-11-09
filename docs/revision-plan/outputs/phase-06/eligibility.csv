@@ -1,0 +1,11 @@
+gate,status,evidence,source,next_condition
+common_target,FAIL,image low/medium/high/non_flood; LR OR; ranking latent benefit,P02/data-card.md; training_img.ipynb; urgency_ei/data,Define one expert-confirmed target
+unit_report_ID,FAIL,image relative_path IDs not paired with LR profile_id or rescue report IDs,split CSV; urgency_training_SOURCE_FINAL.csv,Create authorized paired records
+paired_source_availability,FAIL,no paired real image/text/test gold located in bounded search,products/fe/model; thucnghiem/data; docs/dataset-search,Collect or intake paired data
+gold_independent_of_fusion,FAIL,LR labels generated OR; using same formula labels would be circular,urgency_ei/scripts/build_source_aligned_dataset.py,"Independent labels, evaluator separation"
+label_provenance_reliability,UNKNOWN,image annotator/IAA unknown; no common gold/expert dispatch,P02/data-card.md,Guideline and annotator/expert process
+group_split_leakage,UNKNOWN,MD5/group no overlap for images only; no common event/source split,P02/data-card.md,Group common paired split by source/event
+baseline_comparability,FAIL,no trained free-text model located; image/LR target metrics differ,snapshot 20refs; LR model JSON,Comparable models/target/budget
+license_privacy,UNKNOWN,per-image URL/license and paired-message permission absent,P02/data-card.md; docs/dataset-search,Authorized acquisition and privacy review
+missing_modality_policy,UNKNOWN,"app text-only upload is transport behavior, not evaluation policy",app payload/send policy,Specify masking/missingness independently
+uncertainty_and_analysis,PROTOCOL_ONLY,no comparable test IDs; statistical plan alone does not pass data gates,P03 protocol; feasibility.md,Predefine paired group CI/Holm after eligibility

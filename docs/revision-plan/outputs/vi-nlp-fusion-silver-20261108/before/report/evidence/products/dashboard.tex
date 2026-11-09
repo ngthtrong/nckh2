@@ -1,0 +1,26 @@
+\documentclass{template/ctu-report}
+\input{config/profiles}
+\input{config/metadata}
+\input{template/typography}
+\input{template/packages}
+\input{template/commands}
+\begin{document}
+\pagestyle{plain}
+\addchap{Website quản lý thông tin cứu hộ}
+Website cung cấp bản đồ vị trí yêu cầu, danh sách báo cáo và cụm sự kiện, hỗ trợ điều phối viên xem xét thông tin, phân công và cập nhật trạng thái xử lý.
+
+\begin{figure}[htbp]\centering
+\includegraphics[width=.96\textwidth,height=.25\textheight,keepaspectratio]{UI/dieuphoivien_da_loc/dieuphoivien/01_tong_quan_ban_do_dieu_phoi.png}
+\caption{Bản đồ, thống kê và danh sách cụm phục vụ điều phối}
+\end{figure}
+
+\begin{figure}[htbp]\centering
+\includegraphics[width=.96\textwidth,height=.25\textheight,keepaspectratio]{UI/dieuphoivien_da_loc/dieuphoivien/04_chi_tiet_bao_cao_cuu_ho.png}
+\caption{Xem chi tiết và cập nhật trạng thái báo cáo cứu hộ}
+\end{figure}
+
+\noindent\textbf{Thành phần sản phẩm:} giao diện web tại \RepoPath{products/be/static/}; máy chủ và lõi xử lý tại \RepoPath{products/be/}.
+
+Các ảnh sử dụng dữ liệu giả lập để minh họa chức năng, không phải số liệu cứu hộ thực tế. Quyết định xác minh, phân công và xử lý vẫn do người điều phối thực hiện.
+
+\end{document}

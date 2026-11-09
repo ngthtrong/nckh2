@@ -1,0 +1,56 @@
+\section{Tích hợp và thiết kế mở rộng đa phương thức}\label{sec:multimodal-design}
+\subsection{Ba mức tích hợp và phạm vi đã thực hiện}
+Đa phương thức trong hệ thống có thể chỉ việc cùng tiếp nhận ảnh, câu mô tả và vị trí; cũng có thể chỉ một mô hình học từ cặp ảnh--văn bản. Bảng~\ref{tab:fusion-levels} tách các mức để người đọc không hiểu việc lưu nhiều trường là đã huấn luyện fusion.
+\begin{longtable}{P{.23\textwidth}P{.36\textwidth}P{.30\textwidth}}
+\caption{Mức tích hợp dữ liệu và bằng chứng thực hiện}\label{tab:fusion-levels}\\
+\toprule Mức & Cách kết hợp & Bằng chứng và giới hạn \\\midrule\endfirsthead
+\toprule Mức & Cách kết hợp & Bằng chứng và giới hạn \\\midrule\endhead
+Tích hợp trường dữ liệu & Lưu ảnh, mô tả, tọa độ và cờ trong một báo cáo; ánh xạ trường vào lõi & Ứng dụng hiện tại; adapter còn chưa đọc điểm LR trong \texttt{E\_i} \\
+Kết hợp đầu ra & Trung bình xác suất hai classifier cùng dự đoán một nhãn & Đối chứng đã chạy trong pilot CrisisMMD; chưa hiệu chuẩn; không trung bình điểm mức ngập với điểm OR \\
+Kết hợp đặc trưng & Ghép biểu diễn ảnh và câu, học classifier trên target chung & Fusion tuyến tính đã chạy trong pilot; thiết kế tiếng Việt chưa huấn luyện hoặc tích hợp \\
+\bottomrule
+\end{longtable}
+
+Ứng dụng hiện tại tích hợp các trường bằng ánh xạ, heuristic và công thức xếp hạng ở Mục~\ref{sec:03-system-architecture}. Kết quả RQ1--RQ3 dùng các trường quan sát mô phỏng; chúng không đo tác động của một bộ mã hóa câu và ảnh học chung. Pilot công khai ở Mục~\ref{sec:multimodal-pilot} là tuyến nghiên cứu ngoại tuyến riêng, dùng nhãn informative, không đưa xác suất này vào $E_i$ hoặc $P_k$.
+
+\subsection{Fusion tuyến tính CrisisMMD đã huấn luyện}
+Nhánh văn bản TF-IDF unigram/bigram thực có 5.345 chiều sau khi fit vocabulary trên train. Nhánh ảnh lấy 576 chiều từ MobileNetV3 Small ImageNet giữ cố định. Đây là encoder khác với bộ phân loại mức ngập MobileNetV3-Large trong ứng dụng. Chuẩn hóa mỗi block bằng $z(v)=v/\max(\lVert v\rVert_2,\epsilon)$ với $\epsilon>0$, sau đó ghép:
+\begin{equation}
+ u=\frac{1}{\sqrt{2}}[z(v_{\mathrm{text}});z(v_{\mathrm{image}})],\qquad
+ p_{\mathrm{inf}}=\operatorname{sigmoid}(w^\top u+b).
+ \label{eq:pilot-fusion}
+\end{equation}
+Vector ghép có 5.921 chiều; classifier LR có regularization được chọn từ validation. Với block khác không, phép chia $\sqrt{2}$ cân bằng chuẩn của hai nhánh sau khi mỗi nhánh đã chuẩn hóa. Đây là phép nối trước một classifier tuyến tính, chưa có tương tác phi tuyến, cross-attention hoặc fine-tuning chung hai encoder. Công thức xác định cách pilot học kết hợp đặc trưng, không khẳng định một modality gây ra cải thiện.
+
+Hình~\ref{fig:multimodal-levels} đặt tuyến đã chạy bên cạnh tuyến tiếng Việt đề xuất. Các số hiệu năng và phép che block nằm trong phần kết quả; sơ đồ không gộp dữ liệu của hai nhiệm vụ.
+\begin{figure}[htbp]\centering
+\begin{tikzpicture}[>=Stealth,node distance=5mm and 7mm,font=\small,
+ box/.style={draw,rounded corners=2pt,align=center,text width=62mm,minimum height=12mm},
+ proposed/.style={box,dashed}]
+\node[box] (cp) {CrisisMMD: cặp ảnh--tweet\\target informative, đã có};
+\node[box,below=of cp] (ce) {TF-IDF + MobileNetV3 Small\\encoder ảnh frozen, L2 từng block};
+\node[box,below=of ce] (cf) {Nối đặc trưng $/\sqrt{2}$ + LR\\đã huấn luyện ngoại tuyến};
+\node[box,below=of cf] (co) {Informative / not informative\\không đưa vào điểm khẩn cấp};
+\node[proposed,right=of cp] (vp) {Ảnh + mô tả tiếng Việt + metadata\\cần dữ liệu ghép cặp và nhãn chung};
+\node[proposed,below=of vp] (ve) {Encoder ảnh + DistilBERT\\kiểm tra thiếu nguồn / chất lượng};
+\node[proposed,below=of ve] (vf) {Fusion đặc trưng, đầu phân loại\\yêu cầu hỗ trợ cứu hộ};
+\node[proposed,below=of vf] (vo) {Đầu ra + span + cờ mâu thuẫn\\người dùng / điều phối viên xác nhận};
+\foreach \a/\b in {cp/ce,ce/cf,cf/co,vp/ve,ve/vf,vf/vo}{\draw[->] (\a)--(\b);}
+\end{tikzpicture}
+\caption{Tuyến pilot đã thực hiện (nét liền) và thiết kế tiếng Việt chưa thực hiện (nét đứt)}
+\label{fig:multimodal-levels}
+\end{figure}
+
+\subsection{Thiết kế mở rộng cho báo cáo tiếng Việt}
+Phương án đề xuất dùng target nhị phân của Mục~\ref{sec:text-design} cho cả ảnh-only, text-only và fusion. Nhãn cần được người gán độc lập xác định từ hồ sơ ghép cặp theo hướng dẫn thống nhất; không lấy nhãn từ điểm mô hình, số cờ OR hoặc thứ tự do scheduler sinh. Ảnh-only có thể thiếu bằng chứng về một yêu cầu chỉ nêu bằng lời, nên cần báo lỗi theo nhóm thông tin sẵn có thay vì loại các trường hợp khó sau khi xem dự đoán. Nhãn nội dung này chỉ là một bước khảo sát để tiến tới phân tích cứu hộ, chưa đáp ứng đánh giá mức khẩn cấp hoặc ưu tiên nghiệp vụ.
+
+Nhánh ảnh dự kiến dùng backbone MobileNetV3-Large khởi tạo ImageNet, bỏ đầu bốn mức ngập; nhánh câu dùng DistilBERT đa ngôn ngữ theo Công thức~\ref{eq:text-proposed}. Trước hết giữ cố định encoder, chuẩn hóa và nối hai vector để học một đầu phân loại hai lớp bằng cross-entropy. Chỉ xem xét tinh chỉnh encoder trong một cấu hình bổ sung được chọn trên validation, tách khỏi cấu hình frozen. Không mặc định dùng checkpoint Dataset\_Flood làm bằng chứng chuyển miền: quan hệ nguồn giữa ảnh huấn luyện cũ và corpus mới còn phải kiểm tra.
+
+Metadata gồm report ID, thời điểm, nguồn và cờ có ảnh/có câu được dùng để ghép, chia nhóm và ghi trạng thái. Cấu hình cơ sở không đưa ID, đáp án xác minh, quyết định điều phối hoặc thông tin phát sinh sau tiếp nhận vào classifier. Nếu nghiên cứu thêm nhánh metadata, phải có ablation riêng và kiểm tra nguy cơ học tắt theo địa điểm/sự kiện. Các đại lượng mức ngập $F_i$, điểm LR, xác suất nội dung và confidence cần giữ tên, phiên bản và ngữ nghĩa riêng; phép kết hợp chúng vào ưu tiên cuối phải là một nghiên cứu khác có nhãn và đánh giá phù hợp.
+
+\subsection{Thiếu nguồn và mâu thuẫn}
+Phương án vận hành dự kiến có ba đường: đủ ảnh và câu thì dùng fusion; chỉ có một nguồn thì gọi classifier đơn đã huấn luyện cho nguồn đó; thiếu cả hai hoặc đầu vào không hợp lệ thì chuyển hàng xem xét. Ngưỡng chuyển xác minh và quy tắc báo thiếu phải được chọn trên validation, rồi báo cả tỷ lệ được xử lý tự động và tỷ lệ chuyển người kiểm tra. Không loại các hàng bị từ chối khi đánh giá khả năng phục vụ của toàn quy trình.
+
+Che một block của fusion đã train là phép thử nhạy cảm, không tương đương chuyển sang classifier đơn. Pilot đã cho thấy rủi ro này: mất ảnh làm recall informative của fusion giảm mạnh. Bởi vậy chính sách chuyển nhánh tiếng Việt vẫn phải đánh giá riêng trên cùng report IDs với điều kiện thiếu nguồn được khóa trước; không tuyên bố đã chịu lỗi chỉ nhờ có mã chọn nhánh.
+
+Với hai nguồn có vẻ khác nhau, hệ thống dự kiến giữ nguyên cả bằng chứng và cờ bất đồng, trả về các trường cần xác nhận như thời điểm chụp hoặc vị trí được mô tả. Ảnh không thấy người không đủ bác bỏ tin có người mắc kẹt ngoài khung hình; từ khóa phủ định không được tự biến thành cờ dương. Việc xác nhận của con người phải được ghi cùng phiên bản trước khi cập nhật trường cấu trúc. Thiết kế ablation và đánh giá thiếu nguồn ở Mục~\ref{sec:02-evaluation-design} là kế hoạch chưa thực hiện, không phải xác nhận fusion đã được triển khai trong ứng dụng.

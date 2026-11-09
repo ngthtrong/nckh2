@@ -1,0 +1,789 @@
+{
+  "errors": [],
+  "floats": [
+    {
+      "kind": "figure",
+      "number": "2.1",
+      "label": "fig:system-architecture",
+      "caption": "Kiến trúc chức năng và các tuyến trao đổi dữ liệu của hệ thống",
+      "printed_page": "12",
+      "pdf_page": 33
+    },
+    {
+      "kind": "figure",
+      "number": "2.2",
+      "label": "fig:overall-flowchart",
+      "caption": "Lưu đồ phối hợp bốn phân hệ và phản hồi trạng thái cứu hộ",
+      "printed_page": "13",
+      "pdf_page": 34
+    },
+    {
+      "kind": "figure",
+      "number": "2.3",
+      "label": "fig:mobile-architecture-layers",
+      "caption": "Phân lớp Flutter, hợp đồng domain và tích hợp nền tảng",
+      "printed_page": "15",
+      "pdf_page": 36
+    },
+    {
+      "kind": "figure",
+      "number": "2.4",
+      "label": "fig:data-relations",
+      "caption": "Quan hệ logic chính của lưu trữ; nét đứt biểu diễn liên hệ nghiệp vụ",
+      "printed_page": "17",
+      "pdf_page": 38
+    },
+    {
+      "kind": "figure",
+      "number": "2.5",
+      "label": "fig:database-cdm",
+      "caption": "Mô hình dữ liệu khái niệm (CDM) của hệ thống cứu hộ",
+      "printed_page": "18",
+      "pdf_page": 39
+    },
+    {
+      "kind": "figure",
+      "number": "2.6",
+      "label": "fig:database-ldm",
+      "caption": "Mô hình dữ liệu logic (LDM), định danh và cấu hình phân tích",
+      "printed_page": "20",
+      "pdf_page": 41
+    },
+    {
+      "kind": "figure",
+      "number": "2.7",
+      "label": "fig:database-pdm",
+      "caption": "Mô hình dữ liệu vật lý (PDM) đề xuất trên SQLite",
+      "printed_page": "21",
+      "pdf_page": 42
+    },
+    {
+      "kind": "figure",
+      "number": "2.8",
+      "label": "fig:urgency-current-proposed",
+      "caption": "Luồng khẩn cấp đang triển khai và phương án tích hợp đề xuất, chưa thực hiện",
+      "printed_page": "23",
+      "pdf_page": 44
+    },
+    {
+      "kind": "figure",
+      "number": "2.9",
+      "label": "fig:research-pipeline",
+      "caption": "Ranh giới dữ liệu quan sát, hàng xem xét và luồng đánh giá",
+      "printed_page": "24",
+      "pdf_page": 45
+    },
+    {
+      "kind": "figure",
+      "number": "2.10",
+      "label": "fig:usecase-overall",
+      "caption": "Sơ đồ Use Case tổng thể toàn hệ thống cứu hộ",
+      "printed_page": "26",
+      "pdf_page": 47
+    },
+    {
+      "kind": "figure",
+      "number": "2.11",
+      "label": "fig:usecase-mobile",
+      "caption": "Sơ đồ Use Case phân hệ ứng dụng di động phía người dân và đội cứu hộ",
+      "printed_page": "27",
+      "pdf_page": 48
+    },
+    {
+      "kind": "figure",
+      "number": "2.12",
+      "label": "fig:usecase-dashboard",
+      "caption": "Sơ đồ Use Case phân hệ Web Dashboard phục vụ điều phối tác chiến",
+      "printed_page": "28",
+      "pdf_page": 49
+    },
+    {
+      "kind": "figure",
+      "number": "2.13",
+      "label": "fig:flow-track-status",
+      "caption": "Quy trình tra cứu và đồng bộ tiến trình cứu hộ 4 trạng thái giữa ứng dụng và máy chủ",
+      "printed_page": "30",
+      "pdf_page": 51
+    },
+    {
+      "kind": "figure",
+      "number": "2.14",
+      "label": "fig:sync-sequence",
+      "caption": "Trình tự gửi lại message khi mất ACK sau khi server đã commit",
+      "printed_page": "31",
+      "pdf_page": 52
+    },
+    {
+      "kind": "figure",
+      "number": "2.15",
+      "label": "fig:flow-backend-dedup",
+      "caption": "Các đường tiếp nhận JSON sync, ảnh multipart và SMS gateway",
+      "printed_page": "33",
+      "pdf_page": 54
+    },
+    {
+      "kind": "figure",
+      "number": "2.16",
+      "label": "fig:user-workflow",
+      "caption": "Luồng nghiệp vụ từ khai báo tới xác minh và phản hồi",
+      "printed_page": "34",
+      "pdf_page": 55
+    },
+    {
+      "kind": "figure",
+      "number": "2.17",
+      "label": "fig:flow-sos-one-touch",
+      "caption": "Quy trình gửi tín hiệu cứu nạn khẩn cấp một chạm (One-Touch SOS) và lưu trữ cục bộ",
+      "printed_page": "35",
+      "pdf_page": 56
+    },
+    {
+      "kind": "figure",
+      "number": "2.18",
+      "label": "fig:flow-create-report",
+      "caption": "Quy trình tạo báo cáo chi tiết kèm ảnh hiện trường và suy luận On-device Edge AI",
+      "printed_page": "36",
+      "pdf_page": 57
+    },
+    {
+      "kind": "figure",
+      "number": "2.19",
+      "label": "fig:deployment-infrastructure",
+      "caption": "Sơ đồ triển khai hạ tầng các dịch vụ trong môi trường Docker Compose",
+      "printed_page": "37",
+      "pdf_page": 58
+    },
+    {
+      "kind": "figure",
+      "number": "2.20",
+      "label": "fig:flow-adaptive-send",
+      "caption": "Lưu đồ quyết định chế độ gửi thích ứng theo thông lượng mạng và độ tin cậy AI",
+      "printed_page": "40",
+      "pdf_page": 61
+    },
+    {
+      "kind": "figure",
+      "number": "2.21",
+      "label": "fig:status-flow",
+      "caption": "Biểu đồ chuyển trạng thái nghiệp vụ của ca cứu hộ do backend kiểm soát",
+      "printed_page": "41",
+      "pdf_page": 62
+    },
+    {
+      "kind": "figure",
+      "number": "2.22",
+      "label": "fig:flow-dispatch-lifecycle",
+      "caption": "Vòng đời tác nghiệp, thao tác API và kiểm soát trạng thái cứu hộ",
+      "printed_page": "42",
+      "pdf_page": 63
+    },
+    {
+      "kind": "figure",
+      "number": "2.23",
+      "label": "fig:flow-manual-intake",
+      "caption": "Quy trình tiếp nhận thông tin cứu hộ qua tổng đài và định vị thủ công",
+      "printed_page": "43",
+      "pdf_page": 64
+    },
+    {
+      "kind": "figure",
+      "number": "2.24",
+      "label": "fig:ui-1",
+      "caption": "Trang chủ và biểu mẫu gửi yêu cầu cứu hộ",
+      "printed_page": "44",
+      "pdf_page": 65
+    },
+    {
+      "kind": "figure",
+      "number": "2.25",
+      "label": "fig:ui-2",
+      "caption": "Lưu yêu cầu, hàng đợi SOS và lịch sử cứu hộ",
+      "printed_page": "45",
+      "pdf_page": 66
+    },
+    {
+      "kind": "figure",
+      "number": "2.26",
+      "label": "fig:ui-3",
+      "caption": "Hướng dẫn sử dụng, sơ cứu và danh bạ khẩn cấp",
+      "printed_page": "45",
+      "pdf_page": 66
+    },
+    {
+      "kind": "figure",
+      "number": "2.27",
+      "label": "fig:ui-4",
+      "caption": "Quản lý thông tin và mật khẩu của người dùng",
+      "printed_page": "46",
+      "pdf_page": 67
+    },
+    {
+      "kind": "figure",
+      "number": "2.28",
+      "label": "fig:ui-6",
+      "caption": "Tổng quan bản đồ và thống kê báo cáo cứu hộ",
+      "printed_page": "47",
+      "pdf_page": 68
+    },
+    {
+      "kind": "figure",
+      "number": "2.29",
+      "label": "fig:ui-7",
+      "caption": "Danh sách và chi tiết báo cáo cứu hộ",
+      "printed_page": "48",
+      "pdf_page": 69
+    },
+    {
+      "kind": "figure",
+      "number": "2.30",
+      "label": "fig:ui-8",
+      "caption": "Xác minh vị trí và tiếp nhận báo cáo thủ công",
+      "printed_page": "49",
+      "pdf_page": 70
+    },
+    {
+      "kind": "figure",
+      "number": "2.31",
+      "label": "fig:ui-9",
+      "caption": "Quản lý đội cứu hộ và tài khoản điều phối",
+      "printed_page": "50",
+      "pdf_page": 71
+    },
+    {
+      "kind": "figure",
+      "number": "3.1",
+      "label": "fig:method-pipeline",
+      "caption": "Các nhánh nghiên cứu và vị trí của ba câu hỏi nghiên cứu; khung nét đứt là bước đánh giá",
+      "printed_page": "52",
+      "pdf_page": 73
+    },
+    {
+      "kind": "figure",
+      "number": "3.2",
+      "label": "fig:image-model-design",
+      "caption": "Quy trình nhận diện ảnh và vị trí thay thế đầu phân loại trong mô hình",
+      "printed_page": "60",
+      "pdf_page": 81
+    },
+    {
+      "kind": "figure",
+      "number": "3.3",
+      "label": "fig:training-history",
+      "caption": "Loss theo 11 epoch đã lưu của model seed 1024",
+      "printed_page": "63",
+      "pdf_page": 84
+    },
+    {
+      "kind": "figure",
+      "number": "3.4",
+      "label": "fig:training-metrics",
+      "caption": "Các chỉ số train và validation theo epoch của model seed 1024",
+      "printed_page": "63",
+      "pdf_page": 84
+    },
+    {
+      "kind": "figure",
+      "number": "3.5",
+      "label": "fig:validation-recall",
+      "caption": "Recall validation theo từng lớp của model seed 1024",
+      "printed_page": "64",
+      "pdf_page": 85
+    },
+    {
+      "kind": "figure",
+      "number": "3.6",
+      "label": "fig:flow-ai-training-optimization",
+      "caption": "Pipeline quy trình huấn luyện, tối ưu nén mô hình và xuất runtime AI kép",
+      "printed_page": "66",
+      "pdf_page": 87
+    },
+    {
+      "kind": "figure",
+      "number": "3.7",
+      "label": "fig:multimodal-levels",
+      "caption": "Tuyến pilot đã thực hiện (nét liền) và thiết kế tiếng Việt chưa thực hiện (nét đứt)",
+      "printed_page": "71",
+      "pdf_page": 92
+    },
+    {
+      "kind": "figure",
+      "number": "3.8",
+      "label": "fig:flow-clustering-priority",
+      "caption": "Quy trình phân cụm đồ thị không gian Louvain và tính điểm ưu tiên cứu hộ $P(c)$",
+      "printed_page": "77",
+      "pdf_page": 98
+    },
+    {
+      "kind": "figure",
+      "number": "3.9",
+      "label": "fig:edge-chain",
+      "caption": "Ví dụ khái niệm: chặn chiều dài cạnh không chặn trực tiếp đường kính cộng đồng",
+      "printed_page": "79",
+      "pdf_page": 100
+    },
+    {
+      "kind": "figure",
+      "number": "4.1",
+      "label": "fig:image-confusion",
+      "caption": "Ma trận nhầm lẫn trên test của MobileNetV3-Large seed 1024",
+      "printed_page": "99",
+      "pdf_page": 120
+    },
+    {
+      "kind": "figure",
+      "number": "4.2",
+      "label": "fig:image-confusion-normalized",
+      "caption": "Ma trận nhầm lẫn test chuẩn hóa theo lớp thật của model seed 1024",
+      "printed_page": "100",
+      "pdf_page": 121
+    },
+    {
+      "kind": "figure",
+      "number": "4.3",
+      "label": "fig:image-examples",
+      "caption": "Các ví dụ phân loại sai trên validation của model seed 1024",
+      "printed_page": "101",
+      "pdf_page": 122
+    },
+    {
+      "kind": "figure",
+      "number": "4.4",
+      "label": "fig:confidence-calibration",
+      "caption": "Reliability và số mẫu theo confidence của mô hình FP32 trên tập test",
+      "printed_page": "102",
+      "pdf_page": 123
+    },
+    {
+      "kind": "figure",
+      "number": "4.5",
+      "label": "fig:compression-tradeoffs",
+      "caption": "Đánh đổi dung lượng--accuracy theo summary nén và độ trễ trước/sau cắt tỉa",
+      "printed_page": "108",
+      "pdf_page": 129
+    },
+    {
+      "kind": "figure",
+      "number": "4.6",
+      "label": "fig:rq1-baselines",
+      "caption": "ARI và CI 95\\% của năm biến thể đồ thị trên 40 run test RQ1",
+      "printed_page": "110",
+      "pdf_page": 131
+    },
+    {
+      "kind": "figure",
+      "number": "4.7",
+      "label": "fig:rq1-stress-report",
+      "caption": "Thay đổi ARI trong từng phương pháp so với đối chứng, 40 run test RQ1",
+      "printed_page": "112",
+      "pdf_page": 133
+    },
+    {
+      "kind": "figure",
+      "number": "4.8",
+      "label": "fig:rq2-alignment",
+      "caption": "Mức phù hợp xếp hạng với lợi ích mô phỏng trong điều kiện oracle grouping",
+      "printed_page": "113",
+      "pdf_page": 134
+    },
+    {
+      "kind": "figure",
+      "number": "4.9",
+      "label": "fig:rq2-robustness",
+      "caption": "Năm điều kiện RQ2 cho thấy bất biến exact và các giới hạn trước khai báo tăng/phối hợp",
+      "printed_page": "115",
+      "pdf_page": 136
+    },
+    {
+      "kind": "figure",
+      "number": "4.10",
+      "label": "fig:rq3-conditions-report",
+      "caption": "Trung bình mô tả theo điều kiện nguồn lực trên phân hoạch Product",
+      "printed_page": "117",
+      "pdf_page": 138
+    },
+    {
+      "kind": "table",
+      "number": "1.1",
+      "label": "tab:related-work",
+      "caption": "Nghiên cứu liên quan và quan hệ với đề tài",
+      "printed_page": "9",
+      "pdf_page": 30
+    },
+    {
+      "kind": "table",
+      "number": "2.1",
+      "label": "tab:sync-outcomes",
+      "caption": "Xử lý phản hồi của đường đồng bộ JSON",
+      "printed_page": "32",
+      "pdf_page": 53
+    },
+    {
+      "kind": "table",
+      "number": "2.2",
+      "label": "tab:send-policy",
+      "caption": "Chính sách chọn chế độ gửi trong mã hiện tại",
+      "printed_page": "38",
+      "pdf_page": 59
+    },
+    {
+      "kind": "table",
+      "number": "3.1",
+      "label": "tab:method-map",
+      "caption": "Ánh xạ nhánh nghiên cứu, dữ liệu, phương pháp và thước đo",
+      "printed_page": "52",
+      "pdf_page": 73
+    },
+    {
+      "kind": "table",
+      "number": "3.2",
+      "label": "tab:data-sources",
+      "caption": "Năm nhóm dữ liệu, bản chất và phạm vi sử dụng",
+      "printed_page": "54",
+      "pdf_page": 75
+    },
+    {
+      "kind": "table",
+      "number": "3.3",
+      "label": "tab:image-split",
+      "caption": "Phân bố bộ ảnh hiện tại theo tệp chia tập đã lưu",
+      "printed_page": "54",
+      "pdf_page": 75
+    },
+    {
+      "kind": "table",
+      "number": "3.4",
+      "label": "tab:label-criteria",
+      "caption": "Tiêu chí gán nhãn bốn mức ngập",
+      "printed_page": "55",
+      "pdf_page": 76
+    },
+    {
+      "kind": "table",
+      "number": "3.5",
+      "label": "tab:image-profile",
+      "caption": "Đặc điểm ảnh gốc theo lớp, tính từ header của 1.702 tệp",
+      "printed_page": "55",
+      "pdf_page": 76
+    },
+    {
+      "kind": "table",
+      "number": "3.6",
+      "label": "tab:data-process",
+      "caption": "Hồ sơ quy trình bộ ảnh hiện có và phương án hoàn thiện chưa thực hiện",
+      "printed_page": "56",
+      "pdf_page": 77
+    },
+    {
+      "kind": "table",
+      "number": "3.7",
+      "label": "tab:train-config",
+      "caption": "Cấu hình huấn luyện mô hình ảnh theo config đã lưu",
+      "printed_page": "62",
+      "pdf_page": 83
+    },
+    {
+      "kind": "table",
+      "number": "3.8",
+      "label": "tab:text-contract",
+      "caption": "Dự thảo hợp đồng phân tích văn bản tiếng Việt, chưa thực hiện",
+      "printed_page": "67",
+      "pdf_page": 88
+    },
+    {
+      "kind": "table",
+      "number": "3.9",
+      "label": "tab:text-roles",
+      "caption": "Vai trò văn bản và mức thực hiện của từng chức năng",
+      "printed_page": "69",
+      "pdf_page": 90
+    },
+    {
+      "kind": "table",
+      "number": "3.10",
+      "label": "tab:fusion-levels",
+      "caption": "Mức tích hợp dữ liệu và bằng chứng thực hiện",
+      "printed_page": "70",
+      "pdf_page": 91
+    },
+    {
+      "kind": "table",
+      "number": "3.11",
+      "label": "tab:cluster-params",
+      "caption": "Tham số của cấu hình Product (RQ1) và điểm ưu tiên",
+      "printed_page": "78",
+      "pdf_page": 99
+    },
+    {
+      "kind": "table",
+      "number": "3.12",
+      "label": "tab:vi-ablation-plan",
+      "caption": "Cấu hình ablation đề xuất cho nhiệm vụ yêu cầu cứu hộ tiếng Việt; chưa có kết quả",
+      "printed_page": "81",
+      "pdf_page": 102
+    },
+    {
+      "kind": "table",
+      "number": "3.13",
+      "label": "tab:camera-scenarios-plan",
+      "caption": "Kịch bản đánh giá ảnh camera/Android đề xuất; toàn bộ chưa thực hiện",
+      "printed_page": "83",
+      "pdf_page": 104
+    },
+    {
+      "kind": "table",
+      "number": "4.1",
+      "label": "tab:experiment-map",
+      "caption": "Các nhóm thực nghiệm, dữ liệu và chỉ tiêu đánh giá",
+      "printed_page": "89",
+      "pdf_page": 110
+    },
+    {
+      "kind": "table",
+      "number": "4.2",
+      "label": "tab:phone-benchmark-devices",
+      "caption": "Các mẫu điện thoại dùng đánh giá mô hình nhận diện",
+      "printed_page": "93",
+      "pdf_page": 114
+    },
+    {
+      "kind": "table",
+      "number": "4.3",
+      "label": "tab:weak-network-profiles",
+      "caption": "Ba cấu hình proxy của lượt đo mạng yếu",
+      "printed_page": "96",
+      "pdf_page": 117
+    },
+    {
+      "kind": "table",
+      "number": "4.4",
+      "label": "tab:confusion",
+      "caption": "Ma trận nhầm lẫn model seed 1024: hàng thật, cột dự đoán",
+      "printed_page": "98",
+      "pdf_page": 119
+    },
+    {
+      "kind": "table",
+      "number": "4.5",
+      "label": "tab:image-classes",
+      "caption": "Chất lượng model seed 1024 theo từng lớp",
+      "printed_page": "99",
+      "pdf_page": 120
+    },
+    {
+      "kind": "table",
+      "number": "4.6",
+      "label": "tab:pth_onnx_pte",
+      "caption": "So sánh ba định dạng mô hình trên cùng tập test (seed 1024)",
+      "printed_page": "103",
+      "pdf_page": 124
+    },
+    {
+      "kind": "table",
+      "number": "4.7",
+      "label": "tab:phone-model-quality",
+      "caption": "Chất lượng phân loại trung bình của bốn phương án trên điện thoại (\\%)",
+      "printed_page": "104",
+      "pdf_page": 125
+    },
+    {
+      "kind": "table",
+      "number": "4.8",
+      "label": "tab:phone-model-tradeoffs",
+      "caption": "Đánh đổi phát hiện ngập cao và sai lệch mức ngập",
+      "printed_page": "105",
+      "pdf_page": 126
+    },
+    {
+      "kind": "table",
+      "number": "4.9",
+      "label": "tab:phone-selected-runtimes",
+      "caption": "So sánh ONNX Runtime và ExecuTorch/PTE trên cùng điện thoại, model seed 1024 cắt tỉa",
+      "printed_page": "105",
+      "pdf_page": 126
+    },
+    {
+      "kind": "table",
+      "number": "4.10",
+      "label": "tab:fp32_ptq_qat",
+      "caption": "Đối chiếu FP32, PTQ và QAT trên cùng tập test (seed 1024)",
+      "printed_page": "106",
+      "pdf_page": 127
+    },
+    {
+      "kind": "table",
+      "number": "4.11",
+      "label": "tab:pruning_st",
+      "caption": "Đối chiếu trước và sau cắt tỉa có cấu trúc (seed 1024)",
+      "printed_page": "107",
+      "pdf_page": 128
+    },
+    {
+      "kind": "table",
+      "number": "4.12",
+      "label": "tab:image-quality-cpu",
+      "caption": "Đánh giá ảnh suy giảm nhân tạo trên ONNX CPU: 256 ảnh test ghép cặp, seed 1024 cắt tỉa",
+      "printed_page": "109",
+      "pdf_page": 130
+    },
+    {
+      "kind": "table",
+      "number": "4.13",
+      "label": "tab:rq1-benchmark",
+      "caption": "Kết quả RQ1 trên 40 run test của Generator 3.0",
+      "printed_page": "110",
+      "pdf_page": 131
+    },
+    {
+      "kind": "table",
+      "number": "4.14",
+      "label": "tab:rq1-stress",
+      "caption": "ARI dưới nhiễu cố định; đánh giá trên báo cáo gốc có liên kết sự kiện",
+      "printed_page": "112",
+      "pdf_page": 133
+    },
+    {
+      "kind": "table",
+      "number": "4.15",
+      "label": "tab:rq2-alignment",
+      "caption": "NDCG@5 với nhóm sự kiện oracle trên 40 seed Candidate 4.1",
+      "printed_page": "113",
+      "pdf_page": 134
+    },
+    {
+      "kind": "table",
+      "number": "4.16",
+      "label": "tab:rq2-robustness",
+      "caption": "Độ nhạy RQ2: R là score có chặn, L là legacy; thấp hơn là tốt hơn",
+      "printed_page": "114",
+      "pdf_page": 135
+    },
+    {
+      "kind": "table",
+      "number": "4.17",
+      "label": "tab:rq2-sensitivity",
+      "caption": "Khoảng NDCG@5 trung bình trong phân tích hằng số cục bộ RQ2",
+      "printed_page": "115",
+      "pdf_page": 136
+    },
+    {
+      "kind": "table",
+      "number": "4.18",
+      "label": "tab:rq3-effects",
+      "caption": "So sánh điểm có chặn trên phân hoạch Product: 40 cặp seed",
+      "printed_page": "116",
+      "pdf_page": 137
+    },
+    {
+      "kind": "table",
+      "number": "4.19",
+      "label": "tab:multimodal-pilot",
+      "caption": "Pilot CrisisMMD trên sự kiện lũ Sri Lanka; hai hàng cuối che modality khi suy luận",
+      "printed_page": "119",
+      "pdf_page": 140
+    },
+    {
+      "kind": "table",
+      "number": "4.20",
+      "label": "tab:multimodal-effects",
+      "caption": "Hiệu macro-F1 của fusion nối đặc trưng: bootstrap ghép cặp theo nhóm bản trùng, CI 95\\% chưa hiệu chỉnh",
+      "printed_page": "119",
+      "pdf_page": 140
+    },
+    {
+      "kind": "table",
+      "number": "4.21",
+      "label": "tab:rq-evidence-boundaries",
+      "caption": "Bằng chứng và giới hạn của RQ1--RQ3 trong phạm vi mô phỏng",
+      "printed_page": "120",
+      "pdf_page": 141
+    },
+    {
+      "kind": "table",
+      "number": "4.22",
+      "label": "tab:mobile-system-cases",
+      "caption": "Kết quả kiểm thử luồng xử lý và giao diện trên Samsung S10e",
+      "printed_page": "122",
+      "pdf_page": 143
+    },
+    {
+      "kind": "table",
+      "number": "4.23",
+      "label": "tab:mobile-system-network",
+      "caption": "Chế độ gửi của ba case có ảnh trên điện thoại thật",
+      "printed_page": "122",
+      "pdf_page": 143
+    },
+    {
+      "kind": "table",
+      "number": "4.24",
+      "label": "tab:historical-tests",
+      "caption": "Tổng hợp kết quả kiểm thử chức năng của hệ thống phần mềm",
+      "printed_page": "123",
+      "pdf_page": 144
+    },
+    {
+      "kind": "table",
+      "number": "4.25",
+      "label": "tab:web-e2e-results",
+      "caption": "Kết quả kiểm thử E2E trên web giả lập ngày 24/10/2026",
+      "printed_page": "124",
+      "pdf_page": 145
+    },
+    {
+      "kind": "table",
+      "number": "4.26",
+      "label": "tab:weak-network-new-results",
+      "caption": "Tỷ lệ thành công và độ trễ theo cấu hình mạng giả lập",
+      "printed_page": "125",
+      "pdf_page": 146
+    },
+    {
+      "kind": "table",
+      "number": "B.1",
+      "label": "tab:source-register",
+      "caption": "Các nhóm dữ liệu và phạm vi đánh giá",
+      "printed_page": "141",
+      "pdf_page": 162
+    },
+    {
+      "kind": "table",
+      "number": "B.2",
+      "label": "tab:phone-full-quality",
+      "caption": "Chất lượng phân loại của đủ 32 cấu hình điện thoại (\\%)",
+      "printed_page": "142",
+      "pdf_page": 163
+    },
+    {
+      "kind": "table",
+      "number": "B.3",
+      "label": "tab:phone-full-ordinal",
+      "caption": "Sai lệch thứ bậc của đủ 32 cấu hình điện thoại",
+      "printed_page": "144",
+      "pdf_page": 165
+    },
+    {
+      "kind": "table",
+      "number": "B.4",
+      "label": "tab:phone-full-latency",
+      "caption": "Thời gian xử lý ảnh của đủ 32 cấu hình điện thoại (ms)",
+      "printed_page": "145",
+      "pdf_page": 166
+    },
+    {
+      "kind": "table",
+      "number": "B.5",
+      "label": "tab:phone-full-classes",
+      "caption": "Chỉ số từng lớp của đủ 32 cấu hình điện thoại (\\%)",
+      "printed_page": "146",
+      "pdf_page": 167
+    },
+    {
+      "kind": "table",
+      "number": "B.6",
+      "label": "tab:proposal-map",
+      "caption": "Đối chiếu nội dung nghiên cứu với thuyết minh",
+      "printed_page": "151",
+      "pdf_page": 172
+    }
+  ]
+}

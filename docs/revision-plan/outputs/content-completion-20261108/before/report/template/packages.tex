@@ -1,0 +1,37 @@
+\usepackage{graphicx}
+\usepackage{pdflscape}
+\usepackage[figuresright]{rotating}
+% Rotated floats need balanced horizontal glue, independently of portrait floats.
+\setlength{\rotFPtop}{0pt plus 1fil}
+\setlength{\rotFPbot}{0pt plus 1fil}
+\graphicspath{{assets/figures/}{assets/diagrams/}}
+\usepackage{booktabs,longtable,tabularx,array}
+\usepackage{enumitem}
+\setlist{topsep=4bp,itemsep=2bp,parsep=0pt,partopsep=0pt}
+% Keep table text at the required body size, including generated tables.
+\newcommand{\ReportTableFont}{\normalsize}
+\AddToHook{env/tabular/begin}{\ReportTableFont}
+\AddToHook{env/tabularx/begin}{\ReportTableFont}
+\AddToHook{env/longtable/begin}{\ReportTableFont}
+\usepackage{flafter}
+\usepackage{placeins}
+% Let text fill a page before a pending float; chapter boundaries flush floats.
+% Automatic section barriers also strand short closing paragraphs before figures.
+\newlength{\ReportLandscapeImageHeight}
+\newenvironment{reportlandscapefigure}{%
+  \setlength{\ReportLandscapeImageHeight}{\dimexpr\textwidth-24mm\relax}%
+  \begin{sidewaysfigure}[p]\centering
+  % XeTeX/xdvipdfmx: rotate only the page that actually receives this float.
+  \special{pdf:put @thispage << /Rotate 90 >>}%
+}{\end{sidewaysfigure}}
+\newcolumntype{P}[1]{>{\raggedright\arraybackslash}p{#1}}
+\usepackage{amsmath}
+\usepackage{tikz}
+\usetikzlibrary{calc,arrows.meta,positioning,fit,backgrounds}
+\usepackage{pdfpages}
+\usepackage{xcolor}
+\usepackage[hidelinks,unicode,pdfencoding=auto]{hyperref}
+\usepackage{bookmark}
+\IfFileExists{xurl.sty}{\usepackage{xurl}}{}
+% Enable these only after installing texlive-science, when content needs them:
+% \usepackage{algorithm,algpseudocode,siunitx}

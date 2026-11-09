@@ -1,0 +1,562 @@
+# Nhiệm vụ: Lập kế hoạch chỉnh sửa và hoàn thiện đề tài NCKH THS2026-68 theo nhận xét Hội đồng nghiệm thu
+
+## 1. Bối cảnh
+
+Bạn là AI Research & Software Engineering Agent, đang làm việc trực tiếp trong repository của đề tài:
+
+**Xây dựng hệ thống phân tích đa phương thức và phân cụm sự kiện cứu hộ bão lũ dựa trên Edge AI (THS2026-68).**
+
+Đề tài đã hoàn thành giai đoạn nghiên cứu và được trình bày trước Hội đồng nghiệm thu. Hội đồng đưa ra nhiều nhận xét về:
+
+- Hình thức, cấu trúc và tính nhất quán của báo cáo tổng kết.
+- Mức độ hoàn thành các nội dung nghiên cứu đã đăng ký trong thuyết minh.
+- Sự thiếu rõ ràng trong phương pháp nghiên cứu, bộ dữ liệu và cách triển khai mô hình.
+- Tính thuyết phục của các thực nghiệm, đặc biệt là RQ1, RQ2 và RQ3.
+- Những thực nghiệm hoặc phân tích cần bổ sung.
+- Các hạn chế và hướng phát triển tiếp theo.
+
+**Mục tiêu của nhiệm vụ này không phải lập tức sửa toàn bộ repository**, mà là xây dựng một kế hoạch chỉnh sửa chi tiết, có căn cứ từ mã nguồn, dữ liệu, báo cáo và các kết quả thực nghiệm hiện có.
+
+Sau đó, chia kế hoạch thành nhiều phase, trong đó **mỗi phase phải có một prompt độc lập, đầy đủ ngữ cảnh**, có thể cung cấp trực tiếp cho Agent để thực hiện ở một phiên làm việc riêng.
+
+---
+
+## 2. Nguyên tắc bắt buộc
+
+### 2.1. Kiểm tra thực trạng trước khi đề xuất
+
+Trước khi lập kế hoạch, hãy khảo sát repository để xác định:
+
+1. Những thành phần đã được triển khai.
+2. Những nghiên cứu và thực nghiệm đã thực hiện.
+3. Những kết quả đã có nhưng chưa được đưa vào báo cáo.
+4. Những chức năng hoặc phương pháp có trong báo cáo nhưng chưa được triển khai đầy đủ.
+5. Những kết quả có thể tái phân tích mà không cần chạy lại.
+6. Những nội dung thực sự cần thực nghiệm bổ sung.
+7. Những vấn đề có thể chỉnh sửa ngay bằng cách sử dụng bằng chứng hiện có.
+
+Không được kết luận một chức năng hoặc thực nghiệm chưa tồn tại chỉ vì không tìm thấy trong thư mục đầu tiên được kiểm tra.
+
+Hãy xem xét các nhánh Git, notebook, script, cấu hình, tài liệu, kết quả thực nghiệm, checkpoint, bảng thống kê, hình ảnh và lịch sử commit khi cần thiết.
+
+Phân biệt rõ:
+
+- **Implemented:** Đã có mã nguồn triển khai.
+- **Executed:** Có bằng chứng đã thực thi.
+- **Evaluated:** Có kết quả đánh giá hợp lệ.
+- **Reported:** Đã được trình bày trong báo cáo.
+- **Missing:** Chưa tìm thấy bằng chứng.
+- **Unverified:** Chưa đủ thông tin để xác định.
+
+Không đánh đồng việc có mã nguồn với việc đã thực nghiệm thành công.
+
+### 2.2. Ưu tiên chỉnh sửa dựa trên bằng chứng hiện có
+
+Không mặc định rằng mọi nhận xét đều yêu cầu huấn luyện lại mô hình, xây dựng thêm chức năng hoặc chạy lại thực nghiệm.
+
+Ưu tiên xử lý theo thứ tự:
+
+1. Chỉnh sửa ngay những vấn đề có đủ thông tin.
+2. Phân tích lại kết quả thực nghiệm đã có.
+3. Tạo thêm bảng, biểu đồ hoặc phép tính từ dữ liệu kết quả đã lưu.
+4. Thực hiện kiểm thử hoặc benchmark nhẹ nếu thực sự cần.
+5. Chỉ đề xuất huấn luyện hoặc thực nghiệm mới khi có khoảng trống bằng chứng quan trọng.
+6. Đưa những nội dung chưa phù hợp với phạm vi nghiên cứu hiện tại vào phần hạn chế hoặc Future Work.
+
+Không thực hiện công việc phức tạp nếu có thể giải quyết vấn đề một cách khoa học bằng cách giải thích, đối chiếu hoặc tái phân tích kết quả hiện có.
+
+### 2.3. Bảo đảm tính trung thực khoa học
+
+- Không tự tạo kết quả thực nghiệm.
+- Không thay đổi số liệu để phương pháp đề xuất trông tốt hơn.
+- Không khẳng định phương pháp đề xuất vượt baseline nếu kết quả không chứng minh được.
+- Không biến dữ liệu mô phỏng thành dữ liệu thực tế.
+- Không xem mô hình xử lý trường dữ liệu có cấu trúc là mô hình NLP nếu không có cơ sở.
+- Không khẳng định đã hoàn thành nghiên cứu đa phương thức chỉ vì hệ thống tiếp nhận nhiều loại dữ liệu.
+- Không thay đổi trạng thái công bố bài báo khi chưa có bằng chứng xác nhận.
+- Không tuyên bố thực nghiệm đã chạy trên điện thoại nếu thực tế thực hiện trên máy tính.
+- Không tự động thay thế kết quả nghiên cứu cũ bằng kết quả mới mà chưa kiểm tra tính so sánh hợp lệ.
+
+Khi kết quả không tốt, cần giải thích nguyên nhân, phạm vi áp dụng và hạn chế thay vì che giấu.
+
+---
+
+## 3. Nội dung nhận xét của Hội đồng cần xử lý
+
+Hãy sử dụng tài liệu nhận xét Hội đồng trong repository (nếu có), báo cáo tổng kết và bản thuyết minh làm nguồn chính.
+
+Danh sách sau là các vấn đề đã được tổng hợp từ buổi nghiệm thu.
+
+### Nhóm A — Hình thức và trình bày báo cáo
+
+**A1.** Cập nhật trạng thái công bố khoa học của bài báo, sau khi xác minh thông tin xuất bản.
+
+**A2.** Xử lý những trang còn quá nhiều khoảng trắng dư thừa.
+
+**A3.** Bổ sung ảnh sinh viên chủ nhiệm tại trang thông tin cá nhân nếu có ảnh hợp lệ.
+
+**A4.** Kiểm tra và chỉnh sửa thứ tự đánh số hình, bảng và danh sách hình.
+
+**A5.** Chuẩn hóa toàn bộ định dạng, bố cục và trình bày báo cáo.
+
+### Nhóm B — Đối chiếu nội dung thực hiện với thuyết minh
+
+**B1.** Hội đồng nhận xét chưa có mô hình xử lý văn bản như nội dung đăng ký.
+
+Cần kiểm tra repository để xác định đã thực hiện nghiên cứu NLP nào, có notebook, checkpoint, dữ liệu hoặc kết quả thử nghiệm nào có thể dùng làm bằng chứng không.
+
+**B2.** Chưa giải thích đầy đủ kết quả nén và tối ưu mô hình AI trên di động.
+
+Cần phân tích các thử nghiệm PTQ, QAT, pruning hoặc phương pháp khác đã thực hiện. Làm rõ vì sao một số phương pháp không được lựa chọn triển khai.
+
+**B3.** Chưa thể hiện rõ mô hình hoặc phương pháp kết hợp dữ liệu đa phương thức.
+
+Cần xác định kiến trúc thực tế của hệ thống: xử lý độc lập, kết hợp ở mức quyết định, kết hợp đặc trưng hay mô hình học sâu đa phương thức.
+
+**B4.** Chưa làm rõ đóng góp của thành phần xử lý ngôn ngữ.
+
+Cần đối chiếu mục tiêu đăng ký, quá trình nghiên cứu và kết quả thực hiện.
+
+**B5.** Cần xem xét thực nghiệm ablation giữa các nguồn thông tin.
+
+Ví dụ:
+
+- Image-only.
+- Text-only.
+- Image + Text.
+
+Tuy nhiên, chỉ đề xuất thực nghiệm này nếu có thể định nghĩa một nhiệm vụ chung, dữ liệu đánh giá phù hợp và phép so sánh có ý nghĩa. Không ghép hai mô hình có đầu ra khác nhau rồi xem đó là một thí nghiệm ablation hợp lệ.
+
+### Nhóm C — Dữ liệu, mô hình và thực nghiệm
+
+**C1.** Chưa mô tả đầy đủ quy trình thu thập, làm sạch, gán nhãn và chia tập dữ liệu.
+
+**C2.** Chưa phân tích rõ chất lượng, kích thước, độ phân giải, định dạng và các đặc điểm kỹ thuật của ảnh trong dataset.
+
+**C3.** Chưa giải thích thuyết phục cơ chế xác định mức độ khẩn cấp từ các dấu hiệu do người dùng lựa chọn.
+
+Cần làm rõ vai trò của Logistic Regression, dữ liệu huấn luyện, nguồn nhãn, hệ số mô hình và sự khác biệt so với phương pháp cộng điểm thủ công.
+
+**C4.** Kết quả RQ1, RQ2, RQ3 chưa được phân tích và kết luận đủ sâu.
+
+Cần làm rõ:
+
+- Phương pháp nào vượt baseline, phương pháp nào không.
+- Khác biệt có ý nghĩa thống kê hay không.
+- Nguyên nhân khả dĩ của kết quả.
+- Các điều kiện mà phương pháp đề xuất hoạt động tốt hoặc kém.
+- Mức độ hỗ trợ hoặc bác bỏ giả thuyết nghiên cứu.
+- Kết luận chính xác có thể rút ra cho từng RQ.
+
+Đặc biệt quan tâm những trường hợp phương pháp đề xuất kém hơn baseline.
+
+**C5.** Chưa đánh giá đầy đủ ảnh hưởng của chất lượng hình ảnh đầu vào đến khả năng nhận diện trên thiết bị di động.
+
+**C6.** Một số thực nghiệm hiệu năng được thực hiện trên máy tính thay vì điện thoại.
+
+Cần phân biệt rõ các thuật toán chạy trên server với các thành phần chạy trực tiếp trên thiết bị, từ đó xác định những benchmark di động bổ sung thực sự cần thiết.
+
+Không chuyển thuật toán từ server sang điện thoại chỉ để tạo benchmark nếu điều đó trái với kiến trúc hệ thống.
+
+**C7.** Chưa làm rõ cơ sở chuyên môn hoặc quy định liên quan đến việc xác định mức độ ưu tiên cứu hộ.
+
+Cần kiểm tra căn cứ của những trọng số và tiêu chí đang sử dụng; phân biệt heuristic nghiên cứu với tiêu chí nghiệp vụ được xác nhận bởi cơ quan chuyên môn.
+
+### Nhóm D — Future Work
+
+**D1.** Nghiên cứu bổ sung phương pháp định vị bằng IP, Wi-Fi hoặc thông tin mạng bên cạnh GPS.
+
+**D2.** Nghiên cứu khả năng tiếp nhận yêu cầu cứu hộ bằng âm thanh hoặc giọng nói.
+
+**D3.** Xem xét các tình huống mất hoàn toàn kết nối hoặc người cần cứu hộ không có điện thoại.
+
+**Yêu cầu đặc biệt:** Ba nội dung Future Work có thể đưa vào báo cáo ngay dưới dạng hướng nghiên cứu đề xuất. Không bắt buộc phải triển khai hoặc chạy thực nghiệm mới.
+
+Tuy nhiên, cần phân biệt tính khả thi kỹ thuật; chẳng hạn định vị IP không mặc nhiên chính xác hơn GPS và lưu yêu cầu khi mất mạng không đồng nghĩa với việc truyền tin thành công.
+
+---
+
+## 4. Nhiệm vụ 1 — Audit toàn bộ repository
+
+Hãy bắt đầu bằng việc xác định cấu trúc repository và các nguồn thông tin có thể sử dụng.
+
+Tập trung kiểm tra:
+
+- Báo cáo tổng kết và nguồn tạo báo cáo nếu có.
+- Bản thuyết minh đã đăng ký.
+- Mã nguồn ứng dụng di động, backend và dashboard.
+- Dataset và quy trình tiền xử lý.
+- Các mô hình phân loại ảnh, xử lý văn bản, xác định mức độ khẩn cấp.
+- Các kỹ thuật tối ưu và nén mô hình.
+- Thuật toán phân cụm và xếp hạng ưu tiên.
+- Notebook và script thực nghiệm RQ1, RQ2, RQ3.
+- Các thí nghiệm trên thiết bị di động và mạng yếu.
+- File cấu hình, kết quả đánh giá, log, biểu đồ và bảng số liệu.
+- Các nhánh Git liên quan.
+
+Nếu một tài liệu chỉ có dạng PDF, hãy tìm nguồn gốc có thể chỉnh sửa được. Không mặc định phải chỉnh trực tiếp PDF.
+
+Lập bản đồ quan hệ:
+
+**Nhận xét Hội đồng → Nội dung thuyết minh → Thành phần repository → Kết quả hiện có → Vị trí báo cáo cần chỉnh sửa.**
+
+Ghi nhận đường dẫn tệp và bằng chứng cụ thể cho từng nhận định.
+
+---
+
+## 5. Nhiệm vụ 2 — Xây dựng ma trận chỉnh sửa chi tiết
+
+Với tất cả nhận xét A1–D3, hãy lập bảng có các cột:
+
+| Trường | Nội dung |
+|---|---|
+| ID | Mã nhận xét |
+| Nhận xét | Nội dung Hội đồng yêu cầu |
+| Hiện trạng | Những gì repository đã thực hiện |
+| Bằng chứng | Đường dẫn mã nguồn, notebook, bảng kết quả, phần báo cáo |
+| Khoảng trống | Những gì còn thiếu hoặc chưa được giải thích |
+| Hướng xử lý | Các bước thực hiện cụ thể |
+| Phân loại | Chỉnh sửa ngay / Tái phân tích / Cần thực nghiệm / Future Work |
+| Mức ưu tiên | Critical / High / Medium / Low |
+| Phụ thuộc | Dữ liệu, thí nghiệm hoặc phase khác cần hoàn thành trước |
+| Đầu ra | File hoặc kết quả cần tạo |
+| Tiêu chí hoàn thành | Điều kiện có thể kiểm chứng để xác nhận đã xử lý |
+
+Một nhận xét có thể yêu cầu nhiều hành động. Không ép tất cả nhận xét vào cùng một cách giải quyết.
+
+Đặc biệt, cần phân biệt:
+
+- Nội dung hoàn toàn chưa thực hiện.
+- Nội dung đã thực hiện nhưng chưa có kết quả đánh giá.
+- Nội dung đã có kết quả nhưng trình bày chưa rõ.
+- Nội dung đã có đầy đủ bằng chứng và chỉ cần sửa báo cáo.
+
+---
+
+## 6. Nhiệm vụ 3 — Xác định những thực nghiệm thực sự cần bổ sung
+
+Sau khi audit, hãy tạo danh sách các thực nghiệm được đề xuất.
+
+Với mỗi thực nghiệm, cần trình bày:
+
+1. Tên và mục tiêu thực nghiệm.
+2. Nhận xét Hội đồng mà thực nghiệm giải quyết.
+3. Vì sao kết quả hiện có chưa đủ.
+4. Research Question hoặc giả thuyết cụ thể.
+5. Dataset cần sử dụng.
+6. Model hoặc thuật toán tham gia.
+7. Baseline.
+8. Các biến độc lập và biến kiểm soát.
+9. Metrics và phương pháp phân tích thống kê.
+10. Quy trình thực hiện.
+11. Script/notebook hiện có có thể tái sử dụng.
+12. Tài nguyên tính toán cần thiết.
+13. Kết quả cần lưu và cách kiểm chứng.
+14. Vị trí bổ sung kết quả vào báo cáo.
+15. Mức độ cần thiết và chi phí thực hiện tương đối.
+16. Tiêu chí quyết định có nên thực hiện hay không.
+
+Chia các đề xuất thành ba mức:
+
+- **Required:** Thiếu bằng chứng quan trọng để giải quyết nhận xét.
+- **Recommended:** Có thể nâng cao đáng kể tính thuyết phục.
+- **Optional:** Có giá trị mở rộng nhưng không thiết yếu cho việc hoàn thiện báo cáo nghiệm thu.
+
+Nếu có thể xử lý một vấn đề bằng việc chạy lại phép thống kê trên artifact có sẵn, không đề xuất huấn luyện lại toàn bộ mô hình.
+
+Nếu thực nghiệm yêu cầu dữ liệu mới, cần chỉ rõ tính khả thi, cách tạo dữ liệu hợp lệ và rủi ro về chất lượng nhãn.
+
+---
+
+## 7. Nhiệm vụ 4 — Xác định những nội dung có thể chỉnh sửa ngay
+
+Lập một danh sách riêng các nội dung không phụ thuộc thực nghiệm mới.
+
+Ưu tiên:
+
+- Chỉnh sửa hình thức báo cáo.
+- Bổ sung mô tả dataset từ thông tin đã lưu.
+- Giải thích các kết quả tối ưu mô hình đã có.
+- Làm rõ kiến trúc và phạm vi tích hợp đa phương thức.
+- Giải thích cách huấn luyện và tính điểm khẩn cấp.
+- Bổ sung thảo luận về kết quả RQ1, RQ2, RQ3.
+- Điều chỉnh kết luận để phản ánh cả kết quả tích cực và tiêu cực.
+- Làm rõ những nội dung chưa hoàn thành so với thuyết minh.
+- Bổ sung giới hạn nghiên cứu.
+- Bổ sung ngay ba hướng Future Work D1–D3.
+
+Phân biệt những chỉnh sửa có thể thực hiện hoàn toàn tự động với những nội dung cần người dùng cung cấp thông tin, ví dụ ảnh cá nhân hoặc thông tin công bố bài báo.
+
+---
+
+## 8. Nhiệm vụ 5 — Chia quá trình chỉnh sửa thành các phase
+
+Từ kết quả audit và ma trận chỉnh sửa, hãy thiết kế roadmap gồm các phase có thứ tự hợp lý.
+
+Có thể tham khảo cấu trúc sau, nhưng phải điều chỉnh dựa trên hiện trạng thực tế:
+
+**Phase 0 — Audit và lập kế hoạch**
+
+Kiểm kê repository, đối chiếu nhận xét, đánh giá bằng chứng và xác định công việc.
+
+**Phase 1 — Các chỉnh sửa có thể thực hiện ngay**
+
+Hoàn thiện báo cáo, hình thức, những phần giải thích đã có bằng chứng và Future Work.
+
+**Phase 2 — Hoàn thiện mô tả nghiên cứu và đối chiếu thuyết minh**
+
+Dữ liệu, kiến trúc mô hình, đa phương thức, NLP, Logistic Regression, tối ưu nén mô hình và phạm vi hoàn thành.
+
+**Phase 3 — Phân tích lại RQ1, RQ2, RQ3**
+
+Tái sử dụng kết quả có sẵn, kiểm tra baseline, tính thống kê bổ sung, phân tích kết quả âm và cải thiện phần Discussion/Conclusion.
+
+**Phase 4 — Thực nghiệm bổ sung cần thiết**
+
+Chỉ thực hiện các thực nghiệm được xác định là cần thiết sau quá trình audit, ví dụ ablation, chất lượng ảnh hoặc benchmark di động.
+
+Phase này có thể tách thành nhiều phase nhỏ độc lập nếu các thí nghiệm khác nhau đáng kể.
+
+**Phase 5 — Tích hợp kết quả và hoàn thiện báo cáo**
+
+Cập nhật bảng, hình, nhận xét, kết luận, giới hạn và sự nhất quán giữa các chương.
+
+**Phase 6 — Kiểm chứng cuối cùng**
+
+Build báo cáo, kiểm tra hình thức, nguồn trích dẫn, số liệu, khả năng tái lập và mức độ giải quyết từng nhận xét của Hội đồng.
+
+Không bắt buộc duy trì đúng sáu phase nếu có cấu trúc tốt hơn.
+
+Mỗi phase cần có:
+
+- Mục tiêu.
+- Danh sách nhận xét được xử lý.
+- Phạm vi công việc.
+- Đầu vào.
+- Các bước thực hiện.
+- Đầu ra.
+- Phụ thuộc.
+- Tiêu chí hoàn thành.
+- Cách kiểm chứng.
+- Rủi ro.
+- Điều kiện chuyển sang phase tiếp theo.
+
+Các phase cần hạn chế thay đổi trùng lặp cùng một thành phần và cần có thứ tự phụ thuộc hợp lý.
+
+---
+
+## 9. Nhiệm vụ 6 — Tạo prompt hoàn chỉnh cho từng phase
+
+Đây là yêu cầu quan trọng nhất.
+
+**Sau khi xác định roadmap, phải tạo ra một prompt riêng cho từng phase.**
+
+Mỗi prompt phải có khả năng hoạt động độc lập khi được cung cấp cho một Agent mới trong cùng repository.
+
+Không được viết các prompt quá ngắn như:
+
+> Tiếp tục thực hiện Phase 3 theo kế hoạch trước đó.
+
+Thay vào đó, mỗi prompt phải chứa đầy đủ:
+
+### A. Bối cảnh nghiên cứu
+
+- Tên đề tài.
+- Mục tiêu chung.
+- Vấn đề Hội đồng đã nhận xét.
+- Tình trạng thực hiện có liên quan.
+- Tại sao phase này cần thiết.
+
+### B. Trạng thái và nguồn dữ liệu
+
+- Các file, thư mục, module liên quan.
+- Các kết quả hiện có.
+- Các tài liệu cần đọc.
+- Những điều đã được xác minh.
+- Những giả định cần kiểm tra lại.
+- Các artifact bàn giao từ phase trước nếu có.
+
+### C. Mục tiêu của phase
+
+Nêu rõ kết quả khoa học hoặc kỹ thuật cần đạt được.
+
+### D. Danh sách tác vụ
+
+Chia thành những tác vụ cụ thể, theo trình tự thực hiện.
+
+Mỗi tác vụ cần xác định:
+
+- Cần đọc hoặc sửa những gì.
+- Cần tạo những gì.
+- Có cần chạy code hay thực nghiệm không.
+- Kết quả được lưu tại đâu.
+- Cần kiểm tra điều gì sau khi hoàn thành.
+
+### E. Nguyên tắc thực hiện
+
+- Bảo toàn kết quả thực nghiệm cũ.
+- Không tự tạo bằng chứng.
+- Không chỉnh sửa ngoài phạm vi khi chưa cần thiết.
+- Không xóa dữ liệu hoặc artifact quan trọng.
+- Không làm thay đổi hành vi hệ thống ngoài mục tiêu của phase nếu không có lý do rõ ràng.
+- Phân biệt số liệu đã có với số liệu mới.
+- Bảo đảm khả năng tái lập.
+
+### F. Deliverables
+
+Liệt kê cụ thể các file cần cập nhật hoặc tạo mới, bảng kết quả, biểu đồ, script, phần báo cáo và tài liệu bàn giao.
+
+### G. Acceptance criteria
+
+Xác định điều kiện kiểm tra khách quan để kết luận phase đã hoàn thành.
+
+### H. Final report
+
+Yêu cầu Agent sau khi thực hiện phase phải báo cáo:
+
+1. Công việc đã hoàn thành.
+2. File đã tạo hoặc chỉnh sửa.
+3. Kết quả kiểm thử/thực nghiệm.
+4. Các nhận xét Hội đồng đã được giải quyết.
+5. Những vấn đề chưa giải quyết.
+6. Các quyết định kỹ thuật hoặc khoa học quan trọng.
+7. Thông tin cần bàn giao cho phase tiếp theo.
+
+**Mỗi prompt phải tự chứa đầy đủ ngữ cảnh. Không được phụ thuộc vào lịch sử chat để hiểu nhiệm vụ.**
+
+Prompt có thể tham chiếu đến file kế hoạch và artifact trong repository, nhưng phải nêu rõ đường dẫn và mục đích của chúng.
+
+Nếu file chưa được tạo ở thời điểm lập kế hoạch, cần ghi rõ đó là artifact dự kiến từ phase trước và hướng xử lý khi file chưa tồn tại.
+
+---
+
+## 10. Cấu trúc file kế hoạch và prompt
+
+Hãy tạo thư mục tài liệu kế hoạch, ví dụ:
+
+```text
+docs/revision-plan/
+├── README.md
+├── 00-repository-audit.md
+├── 01-review-matrix.md
+├── 02-experiment-gap-analysis.md
+├── 03-immediate-fixes.md
+├── 04-phase-roadmap.md
+├── 05-traceability-matrix.md
+└── prompts/
+    ├── phase-01.md
+    ├── phase-02.md
+    ├── phase-03.md
+    ├── phase-04.md
+    ├── phase-05.md
+    └── ...
+```
+
+Có thể thay đổi số lượng và tên phase theo kết quả khảo sát.
+
+Yêu cầu:
+
+- `README.md`: Giới thiệu, thứ tự thực hiện, cách sử dụng các prompt.
+- `00-repository-audit.md`: Hiện trạng repository và bằng chứng.
+- `01-review-matrix.md`: Ma trận xử lý toàn bộ nhận xét Hội đồng.
+- `02-experiment-gap-analysis.md`: Danh sách thực nghiệm cần hoặc không cần bổ sung và lý do.
+- `03-immediate-fixes.md`: Những chỉnh sửa có thể thực hiện ngay.
+- `04-phase-roadmap.md`: Roadmap, quan hệ phụ thuộc và tiêu chí hoàn thành.
+- `05-traceability-matrix.md`: Ánh xạ từng nhận xét đến phase, tác vụ, bằng chứng và đầu ra.
+- `prompts/phase-XX.md`: Prompt độc lập để thực thi từng phase.
+
+Các tài liệu này phải nhất quán với nhau.
+
+---
+
+## 11. Yêu cầu về việc phân chia phase
+
+Hãy tối ưu kế hoạch theo các tiêu chí:
+
+**Thứ nhất — Giảm công việc dư thừa**
+
+Không chạy lại thí nghiệm nếu artifact hiện có đã đủ để kết luận.
+
+**Thứ hai — Ưu tiên giá trị nghiên cứu**
+
+Những vấn đề ảnh hưởng đến tính đúng đắn khoa học, mức độ hoàn thành thuyết minh và khả năng bảo vệ kết quả cần được ưu tiên.
+
+**Thứ ba — Tách biệt công việc độc lập**
+
+Những công việc có thể tiến hành riêng biệt nên được chia thành các phase hoặc subphase phù hợp.
+
+**Thứ tư — Dễ kiểm soát tiến độ**
+
+Không tạo phase quá lớn, bao gồm nhiều việc không liên quan và khó xác định đã hoàn thành hay chưa.
+
+**Thứ năm — Tăng khả năng tái sử dụng**
+
+Script, dữ liệu đã xử lý, bảng kết quả và biểu đồ cần được tổ chức để có thể tái tạo và sử dụng trong các phần báo cáo khác nhau.
+
+**Thứ sáu — Không làm mất kết quả nghiên cứu ban đầu**
+
+Nếu cần thay đổi phương pháp, mô hình hoặc kết quả, phải giữ khả năng truy vết và so sánh trước/sau.
+
+---
+
+## 12. Đầu ra cuối cùng của nhiệm vụ lập kế hoạch
+
+Sau khi khảo sát repository, hãy trả lời trong chat bằng tiếng Việt, với cấu trúc:
+
+### Phần 1 — Đánh giá tổng thể
+
+- Đề tài hiện đã hoàn thành những gì?
+- Những vấn đề quan trọng nhất mà Hội đồng nêu ra là gì?
+- Những vấn đề nào thực sự cần bổ sung nghiên cứu?
+- Những nội dung nào chỉ cần chỉnh sửa báo cáo?
+
+### Phần 2 — Ma trận xử lý nhận xét
+
+Bảng tổng hợp toàn bộ các nhận xét, hiện trạng, giải pháp và mức ưu tiên.
+
+### Phần 3 — Danh sách thực nghiệm bổ sung
+
+Nêu rõ thực nghiệm bắt buộc, khuyến nghị, tùy chọn và những thực nghiệm không nên thực hiện, kèm lý do.
+
+### Phần 4 — Danh sách chỉnh sửa ngay
+
+Liệt kê các nội dung có thể sửa mà không cần thực nghiệm bổ sung, đặc biệt bao gồm Future Work.
+
+### Phần 5 — Roadmap theo phase
+
+Nêu thứ tự, mục tiêu, phụ thuộc, đầu ra và mức độ phức tạp tương đối.
+
+### Phần 6 — Danh sách prompt đã tạo
+
+Cung cấp tên file, đường dẫn và mục đích của từng prompt.
+
+### Phần 7 — Khuyến nghị trình tự thực hiện
+
+Đề xuất phase nên triển khai đầu tiên và giải thích lý do.
+
+---
+
+## 13. Giới hạn của lần thực hiện hiện tại
+
+**Trong lần chạy prompt này, chỉ thực hiện AUDIT và LẬP KẾ HOẠCH.**
+
+Được phép:
+
+- Đọc và phân tích repository.
+- Kiểm tra Git history và các nhánh.
+- Kiểm tra các artifact đã có.
+- Thực hiện những thao tác kiểm tra an toàn, không phá hủy.
+- Tạo các tài liệu kế hoạch và prompt trong `docs/revision-plan/`.
+
+Chưa được phép:
+
+- Chỉnh sửa báo cáo nghiên cứu chính thức.
+- Thay đổi thuật toán hoặc source code ứng dụng.
+- Huấn luyện lại mô hình.
+- Chạy những thực nghiệm tốn nhiều tài nguyên.
+- Ghi đè kết quả nghiên cứu đã có.
+- Xóa hoặc di chuyển dữ liệu quan trọng.
+
+Việc chỉnh sửa thực tế sẽ được thực hiện sau, thông qua các prompt riêng của từng phase.
+
+**Hãy bắt đầu bằng việc audit toàn bộ repository, xây dựng ma trận nhận xét và tạo roadmap cùng các prompt độc lập cho từng phase. Không bỏ qua các kết quả thực nghiệm hiện có và không lập kế hoạch chỉ dựa trên suy đoán.**

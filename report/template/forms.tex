@@ -16,7 +16,7 @@
       \raisebox{-\height}{\includegraphics[page=#1]{assets/template-headers.pdf}}}}}}
 \newcounter{officialsection}
 \newcommand{\FormGeometry}[4]{%
-  \newgeometry{left=#1bp,right=#2bp,top=56.7bp,bottom=56.7bp,headheight=22bp,footskip=10mm}%
+  \newgeometry{twoside=false,left=#1bp,right=#2bp,top=56.7bp,bottom=56.7bp,headheight=22bp,footskip=10mm}%
   \def\FormFirstSkip{\dimexpr#3bp-56.7bp\relax}%
   \fontsize{#4bp}{\dimexpr#4bp*115/100\relax}\selectfont
   \setlength{\topskip}{#4bp}}
@@ -82,13 +82,22 @@
   \FormTextAt{424.60}{192.01}{12}{\makebox[0pt][c]{\bfseries Người hướng dẫn}}%
   \FormTextAt{424.60}{302.41}{12}{\makebox[0pt][c]{\bfseries\SupervisorName}}}
 \newcommand{\StudentPhoto}{%
-  \AddToShipoutPictureFG*{\AtPageUpperLeft{%
-    \put(\LenToUnit{417bp},\LenToUnit{-156.15bp}){%
-      \setlength{\fboxsep}{0pt}\setlength{\fboxrule}{.5bp}%
-      \raisebox{-\height}{\fbox{\parbox[t][95.25bp][t]{78.25bp}{\centering
-        \fontsize{12bp}{13.8bp}\selectfont\vspace{4.03bp}Ảnh 4 x 6\\
-        \href{https://drive.google.com/file/d/1l94xrw48SyKZvul8le54HbLgO0nCEPG_/view}{%
-          \textcolor{blue}{CHÈN FILE\\ẢNH\\VÀO Ô\\NÀY}}}}}}}}}
+  \AddToShipoutPictureFG*{%
+    \AtPageUpperLeft{%
+      \put(\LenToUnit{417bp},\LenToUnit{-156.15bp}){%
+        \setlength{\fboxsep}{0pt}\setlength{\fboxrule}{.5bp}%
+        \raisebox{-\height}{%
+          \fbox{%
+            \makebox[78.25bp][c]{%
+              % RGB8 copy of HT34.PNG; avoids its unsupported 16-bit PNG soft mask.
+              \includegraphics[width=78.25bp,height=95.25bp,keepaspectratio]{assets/HT34-print.png}%
+            }%
+          }%
+        }%
+      }%
+    }%
+  }%
+}
 \newcommand{\StudentSignature}{%
   \FormTextAt{387.31}{553.49}{12}{Ngày \ldots\ tháng \ldots\ năm \ldots}%
   \FormTextAt{125.20}{567.29}{12}{\bfseries Xác nhận của Đại học Cần Thơ}%
@@ -99,7 +108,7 @@
   \def\CoverIsSub{0}\def\CoverTop{419.14}\def\CoverLeft{69.12}\def\CoverRight{76.16}%
   \def\CoverSubName{Sub}\ifx\CoverKind\CoverSubName
     \def\CoverIsSub{1}\def\CoverTop{412.18}\def\CoverLeft{85.7}\def\CoverRight{92.74}\fi
-  \newgeometry{left=\CoverLeft bp,right=\CoverRight bp,top=\CoverTop bp,bottom=56.7bp,headheight=22bp,footskip=10mm}%
+  \newgeometry{twoside=false,left=\CoverLeft bp,right=\CoverRight bp,top=\CoverTop bp,bottom=56.7bp,headheight=22bp,footskip=10mm}%
   \thispagestyle{empty}\setstretch{1}\fontsize{18bp}{20.7bp}\selectfont
   \setlength{\topskip}{18bp}\setlength{\parskip}{0pt}%
 }{\clearpage\restoregeometry\endgroup}

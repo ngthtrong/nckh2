@@ -1,0 +1,53 @@
+\section{Thiết kế phân tích văn bản tiếng Việt đề xuất}\label{sec:text-design}
+\subsection{Nhiệm vụ và đầu ra}
+Phần này là \textbf{thiết kế đề xuất, chưa huấn luyện hoặc đánh giá trên tin cứu hộ tiếng Việt}. Thuyết minh đặt ra hướng phân tích văn bản tự do bằng DistilBERT; bảng LR năm cờ ở Mục~\ref{sec:02-urgency-lr} chỉ xử lý lựa chọn trên biểu mẫu nên không thực hiện nhiệm vụ này. Pilot TF-IDF trên CrisisMMD đã đọc câu tự do, nhưng dùng nhãn informative tiếng Anh, được đánh giá riêng ở Mục~\ref{sec:multimodal-pilot}.
+
+Nhiệm vụ phân loại dự kiến trước hết xác định \emph{tin có yêu cầu hỗ trợ cứu hộ} hay \emph{tin không có yêu cầu hỗ trợ cứu hộ}. Đây là nhãn nội dung của một báo cáo, không phải mức ngập trong ảnh, xác suất nguy kịch hoặc thứ tự điều phối. Một tin đề nghị hỗ trợ có thể thiếu dấu hiệu nguy cấp; một ảnh ngập sâu cũng chưa xác định có người đang cần cứu. Các trường trích xuất chỉ hỗ trợ xác minh và bổ sung biểu mẫu, chưa tự động trở thành $E_i$ hoặc $P_k$.
+
+Bảng~\ref{tab:text-contract} nêu dự thảo đầu vào, đầu ra và quy tắc gán nhãn. Các định nghĩa cần được thử gán nhãn và thống nhất với người có chuyên môn trước khi thu nhận thành corpus; báo cáo chưa có nhãn chuyên gia cho nhiệm vụ này.
+\begin{longtable}{P{.21\textwidth}P{.36\textwidth}P{.32\textwidth}}
+\caption{Dự thảo hợp đồng phân tích văn bản tiếng Việt, chưa thực hiện}\label{tab:text-contract}\\
+\toprule Thành phần & Định nghĩa đề xuất & Xử lý thiếu hoặc chưa rõ \\\midrule\endfirsthead
+\toprule Thành phần & Định nghĩa đề xuất & Xử lý thiếu hoặc chưa rõ \\\midrule\endhead
+Đầu vào & Mô tả gốc, report ID và phiên bản văn bản; giữ quan hệ với ảnh nếu có & Rỗng hoặc chỉ có ký hiệu: đánh dấu thiếu, không suy thành nhãn âm \\
+Yêu cầu hỗ trợ & Nội dung đề nghị cứu, sơ tán, tiếp tế hoặc hỗ trợ người đang gặp khó khăn do thiên tai & Tin dẫn lại, phủ định, tin đã giải quyết hoặc không rõ thời điểm: chuyển phân xử theo hướng dẫn gán nhãn \\
+Không có yêu cầu hỗ trợ & Tin thời tiết, chia sẻ kiến thức hoặc mô tả không có đề nghị hỗ trợ theo định nghĩa đã thống nhất & Không dùng việc thiếu từ ``cứu'' làm điều kiện đủ để gán âm \\
+Địa điểm và số người & Giữ chuỗi địa điểm và đoạn văn bản chỉ số người; phân biệt tổng số với nhóm con & Không tự cộng ``ba người, một trẻ nhỏ'' thành bốn; thiếu thì để trống \\
+Dấu hiệu nguy cấp & Trả đoạn văn bản chứa dấu hiệu, trạng thái phủ định và nguồn trích & ``Không khó thở'' không tương đương khó thở; chưa biết không tương đương không có \\
+Đầu ra xác minh & Nhãn nội dung, điểm classifier, các span trích xuất và cờ thiếu/mâu thuẫn & Điểm chưa hiệu chuẩn không được gọi là xác suất cứu hộ thành công \\
+\bottomrule
+\end{longtable}
+
+\subsection{Tiền xử lý và kiến trúc dự kiến}
+Chuỗi xử lý dự kiến gồm chuẩn hóa Unicode và khoảng trắng, giữ dấu tiếng Việt, chữ số và phủ định; thay URL hoặc định danh cá nhân bằng token nhất quán nhưng giữ bản gốc có kiểm soát để đối chiếu. Từ viết tắt chỉ được mở rộng bằng từ điển có phiên bản, ghi lại cả chuỗi ban đầu. Không tự sửa một tin ngắn thành câu chứa thông tin người gửi chưa khai báo. Các bước học từ dữ liệu, gồm từ điển bổ sung và lựa chọn độ dài, chỉ dùng train hoặc validation.
+
+DistilBERT dùng chưng cất tri thức để tạo bộ mã hóa văn bản có thể tinh chỉnh cho nhiệm vụ hạ nguồn~\citep{sanh2019distilbert}. Để cụ thể hóa hướng này cho tiếng Việt, phương án khởi đầu là checkpoint đa ngôn ngữ có phân biệt hoa/thường, thay vì mặc định dùng checkpoint chỉ dành cho tiếng Anh. Model card mô tả sáu tầng, chiều ẩn 768 và khoảng 134 triệu tham số~\citep{distilbertMultilingualCard}; các thông số đó không chứng minh phù hợp bộ nhớ hoặc độ trễ của điện thoại đích. Tokenizer phải đi cùng revision checkpoint; khả năng phân loại cứu hộ tiếng Việt vẫn cần đo trên dữ liệu của đề tài.
+
+Thiết kế đầu phân loại được đề xuất như sau. Với các trạng thái token $h_t$ và attention mask $a_t$, lấy trung bình có mask, sau đó dùng dropout và một lớp tuyến tính hai đầu ra:
+\begin{equation}
+ h_{\mathrm{text}}=\frac{\sum_t a_th_t}{\max(1,\sum_t a_t)},\qquad
+ p_{\mathrm{text}}=\operatorname{softmax}\!\left(W\,\operatorname{Dropout}(h_{\mathrm{text}})+b\right).
+ \label{eq:text-proposed}
+\end{equation}
+Đây là lựa chọn thiết kế của nhóm, không phải cấu hình đã chạy. Cấu hình khởi đầu dự kiến dùng tối đa 256 token, dropout 0,2, batch 16, AdamW với learning rate thử $10^{-5}$ hoặc $2\times10^{-5}$, tối đa năm epoch và dừng sớm sau hai epoch validation không cải thiện. Tin dài phải lưu cờ bị cắt và tỷ lệ token bị cắt; chỉ mở rộng độ dài hoặc dùng cửa sổ nếu quyết định đó được chọn trên validation trước khi khóa test.
+
+Hàm mục tiêu dự kiến là cross-entropy trên nhãn nội dung. Trọng số lớp, nếu cần, chỉ suy từ train. Checkpoint được chọn bằng macro-F1 validation, khi hòa ưu tiên cấu hình đơn giản hơn rồi epoch sớm hơn; không dùng test để chọn ngưỡng hoặc epoch. TF-IDF + LR cần được huấn luyện lại trên cùng corpus tiếng Việt làm đối chứng, không mang nguyên số CrisisMMD sang. Sau khi khóa quy tắc và cấu hình, đánh giá Accuracy, macro-F1, precision/recall từng lớp, confusion matrix và độ bất định theo nhóm nguồn/sự kiện như Mục~\ref{sec:02-evaluation-design}; mọi ô kết quả tiếng Việt hiện là \emph{chưa đo}.
+
+Trích xuất thông tin là bước riêng: phương án ban đầu dùng mẫu số lượng, từ điển địa danh và luật phủ định có phiên bản, trả lại vị trí đoạn trích (span) thay vì chỉ một giá trị. Nếu mở rộng thành đầu gán nhãn token, cần corpus span và đánh giá precision/recall/F1 thực thể riêng; chất lượng phân loại câu không xác nhận chất lượng trích xuất. Địa điểm trong câu chỉ là gợi ý, không tự thay tọa độ đã xác minh.
+
+\subsection{Vai trò của văn bản trong quy trình}
+Bảng~\ref{tab:text-roles} phân biệt đóng góp đã quan sát với chức năng mới được thiết kế. Văn bản có thể bổ sung nhu cầu không nhìn thấy trong ảnh, nhưng tính đúng của lời khai vẫn cần xác minh.
+\begin{longtable}{P{.23\textwidth}P{.38\textwidth}P{.28\textwidth}}
+\caption{Vai trò văn bản và mức thực hiện của từng chức năng}\label{tab:text-roles}\\
+\toprule Vai trò & Bước sử dụng và thông tin bổ sung & Trạng thái \\\midrule\endfirsthead
+\toprule Vai trò & Bước sử dụng và thông tin bổ sung & Trạng thái \\\midrule\endhead
+Phân loại nội dung & TF-IDF + LR đọc câu và dự đoán informative trên CrisisMMD & Đã thực hiện pilot tiếng Anh; không phải nhãn yêu cầu cứu hộ tiếng Việt \\
+Gợi ý khẩn cấp hiện tại & Adapter dò từ khóa trong mô tả khi không có trường urgency & Heuristic đã có; chưa đánh giá NLP tiếng Việt \\
+Phát hiện yêu cầu hỗ trợ & DistilBERT dự kiến phân loại theo Bảng~\ref{tab:text-contract} & Thiết kế đề xuất, chưa huấn luyện \\
+Trích thông tin & Địa điểm, số người, dấu hiệu và phủ định để người dùng xác nhận & Thiết kế đề xuất, chưa có đánh giá span \\
+Bổ sung ngữ cảnh cho ảnh & Văn bản nêu nhu cầu, thời điểm hoặc người bị ảnh hưởng mà ảnh không thể hiện & Fusion CrisisMMD đã chạy trên informative; fusion cứu hộ tiếng Việt chưa thực hiện \\
+\bottomrule
+\end{longtable}
+
+\paragraph{Ví dụ minh họa, không phải mẫu thực nghiệm.}
+Tin tự soạn ``Nhà tôi ở thôn A đang ngập, có ba người gồm một trẻ nhỏ, cần thuyền đưa ra; chưa ai bị thương'' minh họa một yêu cầu hỗ trợ. Đầu ra mong muốn bằng lời gồm địa điểm ``thôn A'', tổng số ba người, một trẻ nhỏ là nhóm con và dấu hiệu bị thương được phủ định. Không gán confidence hoặc điểm khẩn cấp thực nghiệm cho câu này. Nếu ảnh chỉ cho thấy một đoạn đường, hai nguồn chưa chắc mâu thuẫn: ảnh có thể không chụp trong nhà. Trước khi cập nhật trường cấu trúc, giao diện dự kiến yêu cầu người gửi hoặc điều phối viên xác nhận thông tin còn thiếu.

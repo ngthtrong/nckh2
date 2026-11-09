@@ -1,0 +1,59 @@
+{
+  "version": "crisismmd_event_holdout_pilot_v1",
+  "date": "2026-11-08",
+  "timezone": "Asia/Taipei",
+  "status": "LOCKED_BEFORE_DOWNLOAD_TRAINING_AND_TEST_PREDICTIONS",
+  "authorization": "User requested implementation of P09-P14 and chose public benchmark plus Vietnamese annotation kit; research implementation choices are authorized.",
+  "scope": "Exploratory English public-data benchmark; not Vietnamese NLP, urgency, dispatch, mobile or field validation",
+  "task": "Binary informativeness, only official pairs whose text and image informativeness labels agree",
+  "label_order": ["not_informative", "informative"],
+  "source_repo": "firojalam/multimodal_social_media",
+  "source_revision": "8862149a36f485f980cfd6ac719cba65e296647c",
+  "image_repo": "QCRI/CrisisMMD",
+  "image_revision": "10a5626ba112ab9c50369c473a2062bcf205d708",
+  "license": "CC-BY-NC-SA-4.0 as declared by QCRI; local noncommercial research; raw content and model artifacts not published",
+  "split": {
+    "test_event": "srilanka_floods",
+    "validation_event": "hurricane_maria",
+    "train": "All other events from the union of the three official agreed-label splits",
+    "max_train_pairs": 3000,
+    "max_validation_pairs": 600,
+    "test_cap": null,
+    "selection": "Sort independent metadata groups by SHA256(seed + pair_id), no label balancing; choose one pair per tweet/normalized-text connected group; exclude groups spanning events",
+    "seed": 20261108,
+    "leakage_audit": "Union by tweet_id, normalized cleaned text, exact image SHA256 and dHash Hamming <=4; drop all selected components spanning splits before training; preserve same remaining IDs across configurations",
+    "not_official_benchmark": true
+  },
+  "text": {
+    "preprocessing": "Unicode NFKC; remove URLs, @mentions and leading RT; collapse whitespace; no generated/translated text; preserve source encoding artifacts",
+    "features": "TF-IDF word unigrams+bigrams, max_features=20000, min_df=2, sublinear_tf=true, L2; fit training only"
+  },
+  "image": {
+    "encoder": "torchvision MobileNetV3 Small IMAGENET1K_V1, frozen features+avgpool, 576 dimensions",
+    "preprocessing": "EXIF transpose, RGB, official weights.transforms(): resize short edge256 bilinear, center crop224, ImageNet normalization",
+    "normalization": "L2 per sample",
+    "fine_tuning": false
+  },
+  "models": ["majority", "text_tfidf_lr", "image_frozen_lr", "mean_probability", "feature_concat_lr"],
+  "classifier": {
+    "type": "LogisticRegression",
+    "solver": "liblinear",
+    "class_weight": "balanced",
+    "C_grid": [0.1, 1.0, 10.0],
+    "max_iter": 2000,
+    "seed": 20261108,
+    "selection": "highest validation macro-F1; ties choose lower C; all text/image/concat share grid; threshold .5 fixed",
+    "fusion": "concatenate L2 text/image blocks divided by sqrt(2); train a linear classifier on common labels; additive learned feature fusion, no interaction layer or joint encoder training"
+  },
+  "missing_modality": "Diagnostic only: zero one normalized feature block of fixed concat model; no retraining, no missing-modality robustness claim",
+  "metrics": ["macro_f1", "accuracy", "recall_informative", "balanced_accuracy", "confusion_matrix"],
+  "analysis": {
+    "primary_contrasts": ["feature_concat_lr - text_tfidf_lr", "feature_concat_lr - image_frozen_lr", "feature_concat_lr - mean_probability"],
+    "bootstrap": "paired percentile 95% CIs over image/text/tweet duplicate groups in test, 2000 draws, same draws all contrasts; single held-out event, conditional intervals only",
+    "multiple_comparisons": "exploratory unadjusted CIs; report all contrasts; no familywise significance or superiority declaration",
+    "replication": "one deterministic split and convex-classifier seed, no multi-event replication or deep-training seed variance claim"
+  },
+  "failures": "Download/decode failures recorded, never silently replaced; any remaining failures block model comparison pending disposition; dataset selection committed before training",
+  "budget": "CPU-only, <=3000 train +600 dev +all agreed Sri Lanka pairs; <=60min per pipeline command; no full encoder training",
+  "completion": "source/selection/image hashes, leakage audit, cached embeddings, fitted artifacts, validation selection, test predictions, effect CIs and bounded interpretation; original rescue claims remain separate"
+}

@@ -1,0 +1,29 @@
+{
+  "status": "COMPLETED_AND_SELECTED_BEFORE_TEST_PREDICTIONS",
+  "model_sha256": "668a962f2fb8a95b7adbe8cb675a1977262f1006358a4b04c537980ee11e1bed",
+  "protocol_sha256": "5f73e56e3cc5bb67b34bd201a5d63d321d3ffeb12b8c70f44b365c63509d86ab",
+  "dataset_sha256": "be5b757943226c1f87913fab1f71917a7f4ef245e740e78a136ff57d5ba5c051",
+  "feature_sha256": "aab549faa1e9668240ab649541fc129dca33e7e7be52a9c3e4b467139a9cd8cc",
+  "selected_C": {
+    "text_tfidf_lr": 0.1,
+    "image_frozen_lr": 10.0,
+    "feature_concat_lr": 1.0
+  },
+  "train_n": 2971,
+  "dev_n": 589,
+  "text_dimensions": 5345,
+  "image_dimensions": 576,
+  "encoder_frozen": true,
+  "training_seed": 20261108,
+  "python": "3.12.3",
+  "packages": {
+    "numpy": "2.2.6",
+    "scipy": "1.16.3",
+    "scikit-learn": "1.6.1",
+    "torch": "2.5.1+cpu",
+    "torchvision": "0.20.1+cpu",
+    "Pillow": "12.0.0",
+    "joblib": "1.5.2"
+  },
+  "limits": "Linear additive feature fusion; no learned cross-modal interactions or jointly fine-tuned encoders; English informativeness only"
+}

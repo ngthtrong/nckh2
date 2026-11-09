@@ -1,0 +1,46 @@
+{
+  "status": "NOT_RUN_INFERENCE",
+  "primary_target": "seed1024 pruning PTE Android; exact app asset hash in environment.json",
+  "CPU_optional_target": "same seed pruning ONNX exact hash; would be a separate scope",
+  "test_ids": "same locked256; SHA1(relative_path)[:12]",
+  "class_order": [
+    "low",
+    "medium",
+    "high",
+    "non_flood"
+  ],
+  "ordinal": {
+    "non_flood": 0,
+    "low": 1,
+    "medium": 2,
+    "high": 3
+  },
+  "preprocess": "EXIF -> RGB -> bilinear letterbox256, pad124/116/104 -> ImageNet normalize NCHW",
+  "conditions": [
+    "clean",
+    "JPEG q50",
+    "JPEG q20",
+    "short_edge128 no upscaling",
+    "short_edge64 no upscaling",
+    "Gaussian blur sigma1",
+    "Gaussian blur sigma2",
+    "exposure .7",
+    "exposure .4"
+  ],
+  "control": "independent corruption from same clean image, no compounded transforms; deterministic/no RNG",
+  "unit": "original image or split_group, never variants x images",
+  "metrics": [
+    "Accuracy",
+    "macroF1",
+    "recall high",
+    "ordinal error>=2",
+    "confidence/abstention",
+    "mean/P50/P95 timing"
+  ],
+  "statistical_plan": "paired bootstrap image/split_group; recompute F1 in resample;5000 draws seed20261107; Holm eight predefined clean-vs-corruption contrasts per primary endpoint family",
+  "CPU_budget": "2304/model max; validate clean agreement with exact same-runtime artifact first",
+  "Android_budget": "clean+4 severe variants,1280/session,max3sessions; controlled thermal/battery/warmup/order/rest",
+  "gate": "needs actual runtime runner validation and clean parity; Android additionally attached device/APK/session metadata",
+  "executed": "one validation image nine derived smoke inputs, no inference",
+  "label_uncertainty": "synthetic transformations may obscure flooding cues; retain decode/semantic failures, no silent deletion"
+}

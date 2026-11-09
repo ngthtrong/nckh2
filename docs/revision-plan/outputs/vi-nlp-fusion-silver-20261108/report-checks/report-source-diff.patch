@@ -1,0 +1,454 @@
+--- before/report/README.md
++++ after/report/README.md
+@@ -1,4 +1,6 @@
+ # Báo cáo tổng kết NCKH sinh viên — bản nội dung sơ bộ
++
++**Thực nghiệm bổ sung tiếng Việt dịch/nhãn AI (08/11/2026):** đã chạy TF-IDF, DistilBERT frozen và fine-tuning encoder, nhánh ảnh và fusion trên 179/58/59 cặp train/validation/test. Fusion frozen đạt macro-F1 64,91%, recall request 33,33% (2/6); T2 trung bình ba seed đạt macro-F1 50,73%. Kết quả, đối chứng, CI và giới hạn đã được đưa vào chương đánh giá, thiết kế, kết luận và các biểu mẫu Việt–Anh. [Bàn giao hiện tại](../docs/revision-plan/outputs/vi-nlp-fusion-silver-20261108/handoff.md) ghi receipt PDF mới. Bản dịch/nhãn AI không phải corpus tiếng Việt gốc hoặc gold chuyên gia; app, raw RQ và tám sai lệch RQ2 giữ nguyên. Các số trang và nhận định “chưa chạy” trong các đoạn bên dưới là snapshot của đợt tương ứng.
+ 
+ **Bổ sung nội dung ND-01–ND-06 (08/11/2026):** đã hoàn thiện phần phản hồi nhận xét 02–15 theo [kế hoạch](../docs/revision-plan/report-content-completion-02-15.md). Chương 3 có thiết kế văn bản và fusion tiếng Việt; phần đánh giá có ablation, camera/Android đề xuất và bàn luận RQ từ kết quả đã lưu. Hai bản in 194 trang, 50 hình/48 bảng, đã build/check và xem trang thay đổi; bản tin Việt/Anh 1/1 trang, tóm tắt 2/3 trang. [Bàn giao](../docs/revision-plan/outputs/content-completion-20261108/handoff.md) tách nội dung đã viết với thực nghiệm chưa làm. Không train/inference hoặc thống kê mới; LR chưa được adapter tiêu thụ, NLP/fusion tiếng Việt chưa triển khai và tám sai lệch RQ2 giữ nguyên.
+ 
+--- before/report/frontmatter/research-body-vi.tex
++++ after/report/frontmatter/research-body-vi.tex
+@@ -15,16 +15,16 @@
+ \FormSection{4. Kết quả nghiên cứu:}
+ Trên 256 ảnh test, model seed 1024 đạt Accuracy \NewImageAccuracy\%, macro-F1 \NewImageMacroFOne\% và 3 lỗi nặng; cắt tỉa đạt Accuracy \PruningAccuracy\% với \PruningCriticalCount{} lỗi nặng. Trên ONNX CPU của model cắt tỉa với cùng 256 ảnh và tám biến đổi nhân tạo, macro-F1 clean đạt \QualityCleanMacroFOne\%, giảm còn \QualityDarkMacroFOne\% khi nhân độ sáng 0,4. Chưa xác nhận độ bền Android/ảnh camera; nhãn sau biến đổi chưa được thẩm định lại.
+ 
+-App tính LR từ năm cờ với nhãn OR tự sinh rồi gửi, lưu điểm; adapter chưa dùng LR cho phân cụm/xếp hạng, mà lấy urgency hoặc từ khóa mô tả. LR không phải NLP tiếng Việt. Pilot CrisisMMD đã huấn luyện text TF-IDF và fusion tuyến tính, đạt macro-F1 \MMTextFOne\% và \MMFusionFOne\% trên \MMTestN{} cặp của một sự kiện test. Các CI hiệu chứa 0; benchmark tiếng Anh với nhãn informative không thay đánh giá khẩn cấp hoặc cứu hộ tiếng Việt.
++App tính LR từ năm cờ với nhãn OR rồi gửi và lưu điểm; adapter chưa dùng LR cho phân cụm/xếp hạng mà lấy urgency hoặc từ khóa. LR không phải NLP tiếng Việt. Pilot CrisisMMD informative tiếng Anh đạt macro-F1 text \MMTextFOne\%, fusion \MMFusionFOne\%; các CI hiệu chứa 0.
+ 
+-Báo cáo bổ sung thiết kế DistilBERT, fusion cùng nhiệm vụ nhận diện yêu cầu hỗ trợ trong tin tiếng Việt, ablation và đánh giá camera/Android; các phương án này chưa được huấn luyện, tích hợp hoặc đo bổ sung.
++Pilot bổ sung dùng văn bản dịch tiếng Việt và nhãn AI, gồm \VISilverTrainN/\VISilverDevN/\VISilverTestN{} cặp train/validation/test. Đã huấn luyện classifier văn bản, fine-tuning DistilBERT và fusion offline; macro-F1 fusion frozen là \VISilverFusionFOne\%, recall request \VISilverFusionRecall\%. Nhãn dựa câu nguồn, không phải gold người độc lập; corpus bản địa và fusion trong app chưa được xác nhận. Trích xuất thông tin và đánh giá camera/Android vẫn là kế hoạch.
+ 
+ Trong mạng yếu giả lập trên máy tính (50 kbit/s, độ trễ khứ hồi 600 ms), metadata và ảnh nén đều thành công 257/257 lượt, ảnh gốc 230/257 (89,49\%); các chế độ được đo riêng, chưa xác nhận mạng di động thực.
+ 
+ RQ1 chưa xác lập Product hơn Additive độc lập (ARI 0,9072 so với 0,9191; Holm p=0,2560). RQ2 chưa xác lập lợi ích alignment chung (NDCG@5 revised 0,6669, random 0,6763), chỉ hỗ trợ bất biến exact khi grouping cố định. RQ3 trên 40 seed cho revised kém nearest-first về harm và trễ hạn mô phỏng. Ba raw p Spearman và năm Holm RQ2 chưa khớp replay. Các kết quả hiện có hỗ trợ đánh giá nguyên mẫu, chưa xác nhận hiệu quả cứu hộ thực địa.
+ 
+ \FormSection{5. Sản phẩm:}
+-Ba sản phẩm đăng ký gồm ứng dụng di động hỗ trợ gửi cầu cứu và AI; website bản đồ quản lý, phân cụm thông tin; bộ mô hình AI đa phương thức huấn luyện, tinh chỉnh và tối ưu. Bằng chứng đã có gồm mô hình ảnh, LR có cấu trúc và pilot CrisisMMD riêng; chưa chứng minh hoàn thành NLP tiếng Việt hoặc fusion cứu hộ trong app.
++Ba sản phẩm đăng ký gồm ứng dụng di động hỗ trợ gửi cầu cứu và AI; website bản đồ quản lý, phân cụm thông tin; bộ mô hình AI đa phương thức huấn luyện, tinh chỉnh và tối ưu. Bằng chứng đã có gồm mô hình ảnh, LR có cấu trúc và pilot CrisisMMD riêng; chưa xác nhận NLP trên tin tiếng Việt gốc hoặc fusion cứu hộ trong app.
+ \par\noindent Sản phẩm theo quy định gồm bản tin, báo cáo tóm tắt và video giới thiệu tối đa 02 phút.
+ 
+ \FormSection{6. Công bố khoa học từ kết quả nghiên cứu của đề tài, hoặc nhận xét, đánh giá của cơ sở đã áp dụng các kết quả nghiên cứu (nếu có):}
+--- before/report/frontmatter/research-body-en.tex
++++ after/report/frontmatter/research-body-en.tex
+@@ -20,9 +20,9 @@
+ 
+ Additional ONNX CPU screening of the pruned model used the same 256 images and eight synthetic corruptions. Macro-F1 decreased from \QualityCleanMacroFOne\% on clean images to \QualityDarkMacroFOne\% at 0.4 brightness. This does not establish robustness on Android or field camera images; inherited corruption labels have not been re-adjudicated.
+ 
+-The app sends image labels and the LR score to the server for storage. Its adapter reads urgency or description keywords and does not consume LR for clustering or ranking. LR is a five-flag surrogate fitted to synthetic OR labels, not free-text Vietnamese NLP. Vietnamese rescue NLP and application fusion remain unfulfilled. The report proposes DistilBERT and fusion for detecting rescue-assistance requests in Vietnamese messages, with ablation and camera/Android evaluation plans; these extensions have not been trained, integrated or measured.
++The app sends image labels and the LR score for storage; the adapter uses urgency or description keywords for clustering/ranking. Five-flag LR fitted to synthetic OR labels is not free-text NLP. The English CrisisMMD informativeness pilot reaches text/fusion macro-F1 of \MMTextFOne\%/\MMFusionFOne\%; effect CIs include zero.
+ 
+-A separate English CrisisMMD pilot trained TF-IDF text and linear feature-fusion classifiers, reaching macro-F1 \MMTextFOne\% and \MMFusionFOne\% on \MMTestN{} pairs from one held-out event. All paired effect CIs include zero; fusion superiority is not established. Vietnamese rescue NLP, priority labels and application fusion remain unfulfilled.
++A separate pilot uses AI-translated Vietnamese text and AI labels: \VISilverTrainN{} training, \VISilverDevN{} development and \VISilverTestN{} test pairs. Text classifiers, DistilBERT fine-tuning and frozen feature fusion were run offline; frozen fusion reaches \VISilverFusionFOne\% macro-F1 and \VISilverFusionRecall\% request recall. Labels derive from source text, not independent human gold. Native-Vietnamese evaluation and application fusion remain unfulfilled; information extraction and camera/Android evaluation remain proposed.
+ 
+ In weak-network simulations with bandwidth of 50 kbit/s and a round-trip time of 600 ms, both metadata-only and compressed-image modes succeeded in 257/257 attempts (100\%), compared with 230/257 (89.49\%) for original images. The two modes transmitting less data achieved higher transmission success rates than original images under the tested conditions. Each mode was measured separately on a computer; transmission over real mobile networks requires further validation.
+ 
+--- before/report/generated/README.md
++++ after/report/generated/README.md
+@@ -7,6 +7,8 @@
+ ```
+ 
+ `make -C report content`, bản nội dung hai mặt và bốn sản phẩm riêng tự gọi bước xuất trước khi biên dịch. Không chỉnh tay `values.tex`, `tables/*.tex` hoặc `provenance.json`.
++
++Pilot tiếng Việt dịch/nhãn AI ngày 08/11/2026 được xuất bởi `scripts/export_vi_silver.py`, gọi từ `export_results.py`. Nguồn ở `docs/revision-plan/outputs/vi-nlp-fusion-silver-20261108/`: 59 ID test chung, 531 hàng dự đoán của chín cấu hình frozen và 177 hàng của ba seed fine-tuning, không phải 708 mẫu độc lập. Exporter yêu cầu receipt kiểm metric/CI, T2 và cập nhật trọng số encoder; kiểm hash kết quả rồi sinh `vi-silver-values.tex`, hai bảng `vi-silver-*.tex` và provenance riêng. Build chỉ đọc kết quả, không huấn luyện hoặc suy luận. Nhãn tham chiếu do AI gán từ câu nguồn, không phải gold ảnh–văn bản của chuyên gia; không gộp với task informative của pilot trước.
+ 
+ Bộ xuất sử dụng Python chuẩn, không huấn luyện hoặc thay đổi artifact gốc. Nó thực hiện:
+ 
+--- before/report/generated/values.tex
++++ after/report/generated/values.tex
+@@ -53,3 +53,4 @@
+ \newcommand{\BenchmarkExecutorchVersion}{1.4.1}
+ \input{generated/image-quality-values}
+ \input{generated/multimodal-values}
++\input{generated/vi-silver-values}
+--- before/report/bibliography/articles.bib
++++ after/report/bibliography/articles.bib
+@@ -209,7 +209,8 @@
+   eprint = {1910.01108},
+   archivePrefix = {arXiv},
+   url = {https://arxiv.org/abs/1910.01108v4},
+-  note = {Version 4, revised March 2020}
++  note = {Version 4, revised March 2020},
++  keywords = {articles}
+ }
+ 
+ @misc{distilbertMultilingualCard,
+@@ -217,5 +218,6 @@
+   title = {Model Card for {DistilBERT} base multilingual (cased)},
+   url = {https://huggingface.co/distilbert/distilbert-base-multilingual-cased},
+   urldate = {2026-11-08},
+-  note = {Accessed November 8, 2026; model documentation}
+-}
++  note = {Accessed November 8, 2026; model documentation},
++  keywords = {articles}
++}
+--- before/report/chapters/conclusion.tex
++++ after/report/chapters/conclusion.tex
+@@ -4,11 +4,11 @@
+ 
+ Đối với mô hình thị giác máy tính, kiến trúc MobileNetV3-Large đạt độ chính xác (Accuracy) \NewImageAccuracy\% và macro-F1 \NewImageMacroFOne\% trên tập test gồm \ImageTest{} ảnh của bộ dữ liệu đã chia; tính độc lập hoàn toàn theo nguồn và sự kiện chưa được xác nhận. Mô hình được xuất sang định dạng ONNX và PTE để thực thi lần lượt bằng ONNX Runtime và ExecuTorch; các phép đối chiếu trên CPU ghi nhận đồng thuận top-1 với mô hình PTH lần lượt là \CpuOnnxAgreement\% và \CpuPteAgreement\% trên cùng tập test. Lượng tử hóa giảm dung lượng từ 16,04 MiB (FP32) xuống 4,51 MiB (PTQ) và 4,57 MiB (QAT), nhưng Accuracy giảm tương ứng từ \NewImageAccuracy\% xuống \PTQAccuracy\% và \QATAccuracy\%; QAT có macro-F1 \QATMacroFOne\% (Bảng~\ref{tab:fp32_ptq_qat}). Kết quả cho thấy lợi ích về dung lượng đi kèm suy giảm chất lượng; cần đánh giá lỗi phân loại và hiệu năng trên thiết bị đích trước khi lựa chọn phương án triển khai.
+ 
+-Logistic Regression tái hiện nhãn OR trên bảng 32 trạng thái của năm cờ, không phải NLP hoặc kết quả xác nhận lâm sàng. App tính, gửi điểm LR và backend lưu payload, nhưng adapter hiện chỉ dùng urgency hoặc từ khóa mô tả cho đầu vào khẩn cấp của lõi; chưa chứng minh LR tham gia xếp hạng. Việc tiếp nhận nhiều loại dữ liệu và kết hợp bằng công thức chưa chứng minh học fusion. Các cam kết NLP và bộ mô hình đa phương thức trong thuyết minh còn chưa được chứng minh hoàn thành.
++Logistic Regression tái hiện nhãn OR trên bảng 32 trạng thái của năm cờ, không phải NLP hoặc kết quả xác nhận lâm sàng. App tính, gửi điểm LR và backend lưu payload, nhưng adapter hiện chỉ dùng urgency hoặc từ khóa mô tả cho đầu vào khẩn cấp của lõi; chưa chứng minh LR tham gia xếp hạng. Riêng việc tiếp nhận nhiều trường và kết hợp bằng công thức trong ứng dụng chưa phải học fusion; các pilot học fusion ngoại tuyến có phạm vi riêng. Các cam kết NLP và bộ mô hình đa phương thức trong thuyết minh còn chưa được chứng minh hoàn thành.
+ 
+-Đợt bổ sung đã huấn luyện nhánh văn bản TF-IDF, nhánh ảnh frozen và classifier fusion tuyến tính trên CrisisMMD, cùng ablation trên \MMTestN{} cặp của một sự kiện lũ giữ riêng. Macro-F1 của text, ảnh và fusion lần lượt \MMTextFOne\%, \MMImageFOne\% và \MMFusionFOne\%; các CI hiệu giữa fusion và đối chứng đều chứa 0, chưa xác lập ưu thế. Phép thử này cung cấp bằng chứng phương pháp trên thông tin thiên tai công khai được nguồn mô tả tiếng Anh, không thay thế cam kết xử lý tiếng Việt, ưu tiên cứu hộ hoặc triển khai trên thiết bị. Nhãn informative không được đưa vào trường khẩn cấp của backend.
++Pilot informative CrisisMMD đã huấn luyện TF-IDF, ảnh frozen và fusion trên \MMTestN{} cặp test của một sự kiện. Macro-F1 text, ảnh và fusion lần lượt là \MMTextFOne\%, \MMImageFOne\% và \MMFusionFOne\%; các CI hiệu chứa 0, chưa xác lập ưu thế. Kết quả trên corpus nguồn mô tả tiếng Anh không xác nhận NLP tiếng Việt, ưu tiên cứu hộ hoặc triển khai trên thiết bị; nhãn informative không được đưa vào trường khẩn cấp của backend.
+ 
+-Báo cáo bổ sung thiết kế DistilBERT tiếng Việt và fusion (Mục~\ref{sec:text-design}--\ref{sec:multimodal-design}) cho cùng nhiệm vụ nhận diện yêu cầu hỗ trợ. Các trường trích xuất phục vụ xác minh, không tự tạo ưu tiên cuối. Kiến trúc, huấn luyện, xử lý thiếu/mâu thuẫn, ablation và kế hoạch camera/Android đã được đặc tả; corpus ghép cặp, mô hình tiếng Việt và phép đo xác nhận vẫn chưa có.
++Pilot silver ở Mục~\ref{sec:vi-silver-pilot} đã chạy 18 fit head và sáu phiên fine-tuning trên 179/58/59 cặp train/validation/test dịch từ CrisisMMD. Fusion frozen đạt macro-F1 \VISilverFusionFOne\%, recall request \VISilverFusionRecall\%; fine-tuning văn bản đạt macro-F1 trung bình \VISilverFineFOne\% qua ba seed chọn bằng validation. Nhãn AI từ câu nguồn và sự kiện test đã được xem trước giới hạn đây là bằng chứng phát triển trên dữ liệu dịch. Corpus tiếng Việt gốc, gold độc lập, trích xuất và camera/Android vẫn cần đánh giá riêng.
+ 
+ Về giải thuật, RQ1 chưa xác lập ưu thế chung của Product so với Additive độc lập: ARI lần lượt 0,9072 và 0,9191, $p_{\mathrm{Holm}}=0{,}2560$; bản sao năm lần làm chất lượng phân cụm suy giảm mạnh. RQ2 hỗ trợ bất biến exact ở grouping cố định nhưng chưa xác lập lợi ích alignment chung: NDCG@5 revised là 0,6669 so với random 0,6763; phối hợp confidence cao vẫn gây sai lệch ưu tiên. Ba raw $p$ Spearman và năm Holm liên quan còn chưa khớp replay, được giữ là tám trường chưa giải quyết về tái lập. RQ3 dùng 40 seed sau trung bình ba điều kiện nguồn lực; revised kém nearest-first về harm và trễ hạn mô phỏng, chưa xác lập lợi ích chung so với legacy. Các kết quả này không chứng minh hiệu quả cứu hộ thực địa.
+ 
+@@ -20,7 +20,7 @@
+ \end{enumerate}
+ 
+ \addsec{Hạn chế của đề tài}
+-Phép bổ sung đã đánh giá tám biến đổi ảnh nhân tạo và clean trên ONNX CPU với cùng 256 ảnh test, sau gate đồng thuận dự đoán lịch sử. Macro-F1 clean là \QualityCleanMacroFOne\%, với độ sáng nhân $0{,}4$ là \QualityDarkMacroFOne\%; kết quả chưa xác nhận độ bền với ảnh camera thực địa hoặc Android. Nhãn sau biến đổi chưa được thẩm định lại, nguồn ảnh và checksum split lúc train vẫn thiếu hồ sơ. Ablation image-only/text-only/both cho nhiệm vụ nhận diện yêu cầu hỗ trợ tiếng Việt vẫn là kế hoạch, thiếu paired inputs và gold chung; ưu tiên cứu hộ cũng chưa có gold độc lập với công thức. Không thể ghép Accuracy ảnh với fidelity OR để thay một phép so sánh chung nhiệm vụ. Pilot informative bổ sung không đóng khoảng trống đó. Cam kết NLP tiếng Việt và fusion trong ứng dụng vẫn chưa được chứng minh hoàn thành.
++Phép bổ sung đã đánh giá tám biến đổi ảnh nhân tạo và clean trên ONNX CPU với cùng 256 ảnh test, sau gate đồng thuận dự đoán lịch sử. Macro-F1 clean là \QualityCleanMacroFOne\%, với độ sáng nhân $0{,}4$ là \QualityDarkMacroFOne\%; kết quả chưa xác nhận độ bền với ảnh camera thực địa hoặc Android. Nhãn sau biến đổi chưa được thẩm định lại, nguồn ảnh và checksum split lúc train vẫn thiếu hồ sơ. Ablation image-only/text-only/both đã chạy trong pilot silver bản dịch, nhưng ablation xác nhận trên tin cứu hộ tiếng Việt gốc vẫn thiếu paired inputs và gold độc lập; ưu tiên cứu hộ cũng chưa có gold độc lập với công thức. Không thể ghép Accuracy ảnh với fidelity OR để thay một phép so sánh chung nhiệm vụ. Cả pilot informative và pilot silver bản dịch đều không đóng khoảng trống gold đó. Cam kết NLP tiếng Việt và fusion trong ứng dụng vẫn chưa được chứng minh hoàn thành.
+ 
+ Hệ thống chưa được đánh giá trong vận hành cứu hộ thực địa với người sử dụng và đơn vị chuyên môn. Luồng SMS đã có thành phần hỗ trợ, nhưng tỷ lệ giao tin và độ trễ qua mạng viễn thông/gateway thực tế chưa được kiểm chứng đầy đủ.
+ 
+@@ -30,7 +30,7 @@
+ \addsec{Hướng nghiên cứu tiếp theo}
+ Trên cơ sở các kết quả đạt được, các hướng phát triển tiếp theo của đề tài bao gồm:
+ \begin{itemize}
+-\item Triển khai và thẩm định thiết kế phân tích tin nhắn tiếng Việt ở Mục~\ref{sec:text-design} cùng fusion ở Mục~\ref{sec:multimodal-design}; trước hết cần corpus, nhãn và ablation cho nhiệm vụ nhận diện yêu cầu hỗ trợ. Trích xuất thông tin và dấu hiệu nguy cấp cần xác nhận riêng, không suy hiệu năng từ pilot informative;
++\item Mở rộng từ pilot silver sang thẩm định trên tin cứu hộ tiếng Việt gốc theo Mục~\ref{sec:text-design}--\ref{sec:multimodal-design}; cần corpus, nhãn độc lập và ablation xác nhận. Trích xuất thông tin và dấu hiệu nguy cấp cần đánh giá riêng, không suy hiệu năng từ informative hoặc nhãn AI trên bản dịch;
+ \item Mở rộng thử nghiệm phần cứng: triển khai thử nghiệm trên đa dạng các dòng điện thoại Android và iOS thực tế, đánh giá chi tiết mức độ tiêu thụ pin và độ trễ suy luận trong nhiều điều kiện môi trường;
+ \item Nghiên cứu định vị nhiều nguồn (GPS, Wi-Fi, mạng di động, IP và địa chỉ/mốc do người dùng xác nhận), lưu nguồn, thời điểm và độ bất định của từng ước lượng. Không mặc định IP chính xác hơn GPS; Wi-Fi cần cơ sở tham chiếu và hạ tầng phù hợp. Khi thiếu hoặc mâu thuẫn tọa độ, cần người xác nhận hoặc chuyển hàng xem xét, không tạo vị trí giả; quyền riêng tư phải được đánh giá trước thí điểm;
+ \item Nghiên cứu tiếp nhận âm thanh theo chuỗi audio $\rightarrow$ nhận dạng tiếng nói (ASR) $\rightarrow$ trích xuất vị trí, số người, dấu hiệu nguy cấp $\rightarrow$ người gửi hoặc điều phối viên xác nhận. Cần đánh giá tiếng Việt địa phương, tiếng mưa/gió, nhiều người nói, lỗi chép sai và độ trễ trên thiết bị; chưa có mô hình hoặc số đo ASR trong kết quả hiện tại;
+--- before/report/chapters/introduction.tex
++++ after/report/chapters/introduction.tex
+@@ -51,7 +51,7 @@
+     \item \textbf{Thu thập và xử lý dữ liệu:} Khảo sát các nghiên cứu về nhận diện ảnh, phân tích văn bản, Edge AI và phân cụm; chuẩn hóa, gán nhãn dữ liệu phục vụ huấn luyện và đánh giá.
+     \item \textbf{Phân tích yêu cầu và thiết kế hệ thống:} Xác định chức năng, yêu cầu hiệu năng và khả năng hoạt động khi mạng gián đoạn; thiết kế kiến trúc, cơ sở dữ liệu và luồng trao đổi giữa ứng dụng với máy chủ.
+     \item \textbf{Huấn luyện và tối ưu mô hình:} Huấn luyện MobileNetV3-Large; so sánh chuyển đổi định dạng, lượng tử hóa và cắt tỉa trên cùng tập kiểm thử theo độ chính xác, kích thước và độ trễ. Kết quả CPU máy tính và điện thoại được phân tích riêng. Pilot CrisisMMD bổ sung huấn luyện các bộ phân loại chỉ văn bản, chỉ ảnh và fusion đặc trưng cho cùng nhãn informative, đánh giá trên một sự kiện giữ riêng; nhiệm vụ này độc lập với phân loại mức ngập và các RQ.
+-    \item \textbf{Thiết kế mở rộng, chưa thực hiện:} Đặc tả phân tích tin cứu hộ tiếng Việt theo phương án DistilBERT, vai trò trích xuất thông tin và hợp nhất ảnh--văn bản; đề xuất ablation cùng nhiệm vụ và quy trình đánh giá ảnh camera/Android. Các thiết kế chưa tạo ra mô hình tiếng Việt, dữ liệu ghép cặp hoặc số đo thiết bị mới.
++    \item \textbf{Pilot tiếng Việt dịch và thiết kế mở rộng:} Đã chạy classifier TF-IDF, DistilBERT frozen cộng LR và fusion với ảnh MobileNetV3-Large trên bản dịch tiếng Việt từ CrisisMMD, dùng nhãn silver do AI gán từ văn bản nguồn (Mục~\ref{sec:vi-silver-pilot}). Đây là bằng chứng phát triển hồi cứu, chưa có gold độc lập hoặc tin cứu hộ tiếng Việt gốc. Thiết kế xác nhận trên dữ liệu gốc, trích xuất thông tin và quy trình ảnh camera/Android vẫn cần thực hiện riêng.
+     \item \textbf{Phân cụm và xếp hạng:} Xây dựng đồ thị từ vị trí, thời gian và ngữ cảnh; so sánh chất lượng phân cụm, độ ổn định điểm ưu tiên và kết quả điều phối mô phỏng khi có dữ liệu thiếu, nhiễu hoặc trùng lặp. Cấu hình được chọn trên tập hiệu chỉnh trước khi đánh giá trên tập kiểm thử; các phương pháp dùng cùng điều kiện nhiễu trong mỗi lần chạy.
+     \item \textbf{Phát triển và kiểm thử phần mềm:} Xây dựng ứng dụng Flutter, backend Python và dashboard; kiểm tra tạo, lưu, gửi, đồng bộ báo cáo và khả năng truyền dữ liệu dưới mạng yếu giả lập.
+     \item \textbf{Đánh giá kết quả:} Đối chiếu dự đoán, cấu hình và bảng số liệu đã lưu; so sánh các phương pháp bằng chỉ số và phép kiểm định phù hợp với từng bài toán. Thiết kế đánh giá và cách phân tích thống kê được trình bày trong chương Phương pháp nghiên cứu.
+@@ -73,8 +73,8 @@
+ \begin{itemize}
+     \item \textbf{Thời gian:} 06 tháng, từ tháng 05/2026 đến tháng 10/2026.
+     \item \textbf{Nội dung và nền tảng:} Phân tích thông tin cứu hộ bằng AI tại thiết bị; tạo, lưu và gửi báo cáo qua HTTP hoặc SMS gateway; đồng bộ khi có mạng; phân cụm, xếp hạng và hiển thị trên ứng dụng di động, web. Phân cụm xử lý các tập báo cáo hiện có, dashboard cập nhật theo chu kỳ; quyết định điều phối vẫn do con người thực hiện.
+-    \item \textbf{Dữ liệu:} Bộ \texttt{Dataset\_Flood} phục vụ phân loại bốn mức ngập; FloodNet là nguồn tổng quan. CrisisMMD đã được dùng trong pilot riêng với \MMTrainN{} cặp train, \MMDevN{} validation và \MMTestN{} test cho nhãn informative; dữ liệu và nhãn không được gộp vào Dataset\_Flood. RQ1 dùng dữ liệu bán tổng hợp Generator 3.0; RQ2/RQ3 dùng dữ liệu tổng hợp Candidate 4.1. Các nguồn này không tạo thành một chuỗi kiểm chứng cứu hộ trên cùng tập mẫu; chưa có corpus ảnh--tin cứu hộ tiếng Việt ghép cặp được xác nhận.
+-    \item \textbf{Phân tích ảnh và thông tin khẩn cấp:} Đánh giá riêng mô hình nhận diện mức ngập và các phương án tối ưu trên CPU, điện thoại; không khái quát hiệu năng cho mọi thiết bị. Logistic Regression ước lượng điểm khẩn cấp từ các lựa chọn có cấu trúc trên ứng dụng. Điểm LR được gửi và lưu trong payload, nhưng adapter hiện chưa dùng điểm này cho phân cụm, xếp hạng; đầu vào khẩn cấp của lõi lấy từ trường urgency hoặc từ khóa mô tả. LR không xử lý tin nhắn tiếng Việt tự do. Mục~\ref{sec:text-design} và Mục~\ref{sec:multimodal-design} bổ sung thiết kế nhận diện yêu cầu hỗ trợ cứu hộ trong tin tiếng Việt và fusion cho cùng nhiệm vụ; đây là phương án nghiên cứu chưa huấn luyện hoặc tích hợp, không thay thế trạng thái cam kết còn thiếu.
++    \item \textbf{Dữ liệu:} Bộ \texttt{Dataset\_Flood} phục vụ phân loại bốn mức ngập; FloodNet là nguồn tổng quan. CrisisMMD đã được dùng trong pilot riêng với \MMTrainN{} cặp train, \MMDevN{} validation và \MMTestN{} test cho nhãn informative; dữ liệu và nhãn không được gộp vào Dataset\_Flood. RQ1 dùng dữ liệu bán tổng hợp Generator 3.0; RQ2/RQ3 dùng dữ liệu tổng hợp Candidate 4.1. Pilot silver bổ sung dùng một phần cặp CrisisMMD với bản dịch tiếng Việt và nhãn AI từ văn bản nguồn, không tạo corpus tin tiếng Việt gốc được chuyên gia xác nhận. Các nguồn này không tạo thành một chuỗi kiểm chứng cứu hộ trên cùng tập mẫu.
++    \item \textbf{Phân tích ảnh và thông tin khẩn cấp:} Đánh giá riêng mô hình nhận diện mức ngập và các phương án tối ưu trên CPU, điện thoại; không khái quát hiệu năng cho mọi thiết bị. Logistic Regression ước lượng điểm khẩn cấp từ các lựa chọn có cấu trúc trên ứng dụng. Điểm LR được gửi và lưu trong payload, nhưng adapter hiện chưa dùng điểm này cho phân cụm, xếp hạng; đầu vào khẩn cấp của lõi lấy từ trường urgency hoặc từ khóa mô tả. LR không xử lý tin nhắn tiếng Việt tự do. Mục~\ref{sec:text-design} và Mục~\ref{sec:multimodal-design} phân biệt thiết kế xác nhận tiếng Việt gốc với pilot silver bản dịch đã chạy ở Mục~\ref{sec:vi-silver-pilot}. Pilot chưa được tích hợp vào ứng dụng và không đóng các cam kết còn thiếu về dữ liệu gốc, gold hoặc đánh giá nghiệp vụ.
+     \item \textbf{Mạng và giới hạn ứng dụng:} Nghiên cứu cơ chế lưu báo cáo trên thiết bị và gửi lại khi kết nối với máy chủ được khôi phục. Hệ thống hỗ trợ tiếp nhận, tổng hợp và hiển thị thông tin; quyết định điều phối do con người thực hiện. Không nghiên cứu dự báo khí tượng--thủy văn hoặc điều hành cứu hộ tự động.
+ \end{itemize}
+ 
+--- before/report/scripts/build.py
++++ after/report/scripts/build.py
+@@ -3,6 +3,7 @@
+ import argparse
+ import os
+ from pathlib import Path
++import re
+ import shutil
+ import subprocess
+ import sys
+@@ -103,7 +104,17 @@
+     marker = out / '.bibliography-backend'
+     previous_aux = out / f'{job}.aux'
+     incompatible_aux = previous_aux.exists() and ('\\abx@aux' in previous_aux.read_text(errors='replace')) != use_biber
+-    if incompatible_aux or (marker.exists() and marker.read_text().strip() != backend):
++    numbering_incomplete = False
++    if use_biber and previous_aux.exists():
++        cached = previous_aux.read_text(errors='replace')
++        cited = set(re.findall(r'\\abx@aux@cite\{[^{}]*\}\{([^{}]+)\}', cached))
++        numbered = {key for key, number in re.findall(
++            r'\\abx@aux@number\{[^{}]*\}\{([^{}]+)\}\{[^{}]*\}\{[^{}]*\}\{(\d+)\}', cached)
++                    if int(number) > 0}
++        numbering_incomplete = bool(cited - numbered)
++    # Deferred biblatex numbers can retain zero for an entry formerly omitted
++    # from the grouped bibliography. Rebuild auxiliary data after fixing it.
++    if incompatible_aux or numbering_incomplete or (marker.exists() and marker.read_text().strip() != backend):
+         for pattern in ['*.aux', '*.bbl', '*.blg', '*.bcf', '*.run.xml', '*.toc', '*.lof', '*.lot', '*.out']:
+             for artifact in out.rglob(pattern):
+                 artifact.unlink()
+--- before/report/scripts/export_results.py
++++ after/report/scripts/export_results.py
+@@ -10,6 +10,7 @@
+ from highlight_results import highlight_results
+ from export_image_quality import main as export_image_quality
+ from export_multimodal import main as export_multimodal
++from export_vi_silver import main as export_vi_silver
+ 
+ ROOT = Path(__file__).resolve().parents[2]
+ OUT = ROOT / 'report/generated'
+@@ -77,6 +78,7 @@
+ def main():
+     export_image_quality()
+     export_multimodal()
++    export_vi_silver()
+     (OUT / 'tables').mkdir(parents=True, exist_ok=True)
+     benchmarks = obj('report/config/benchmark-sources.json')
+     split = rows('products/fe/model/Edge Ai/split_train_val_test_mobilenetv3_large.csv')
+@@ -350,7 +352,8 @@
+     (OUT/'values.tex').write_text('% Generated from saved artifacts by scripts/export_results.py.\n'+
+                                 ''.join('\\newcommand{\\'+k+'}{'+str(v)+'}\n' for k,v in values.items())+
+                                 '\\input{generated/image-quality-values}\n'+
+-                                '\\input{generated/multimodal-values}\n')
++                                '\\input{generated/multimodal-values}\n'+
++                                '\\input{generated/vi-silver-values}\n')
+     snapshot={'source_commit':subprocess.check_output(['git','rev-parse','HEAD'],cwd=ROOT,text=True).strip(),
+               'sources_sha256':SOURCES,'image_audit':{'rows':len(split),'missing':0,'md5_mismatch':0,'cross_split_groups':0},
+               'prediction_audits': PREDICTION_AUDITS,
+--- before/report/scripts/check_report.py
++++ after/report/scripts/check_report.py
+@@ -38,6 +38,16 @@
+     if args.release and entries == 0:
+         errors.append('Chưa có tài liệu tham khảo thực sự trong bibliography/.')
+     out = ROOT / args.build_dir
++    # With deferred numbering, cited but unprinted entries can silently render [0].
++    auxiliary = '\n'.join(p.read_text(errors='replace') for p in out.rglob('*.aux'))
++    cited = set(re.findall(r'\\abx@aux@cite\{[^{}]*\}\{([^{}]+)\}', auxiliary))
++    if cited:
++        assigned = {key: int(number) for key, number in re.findall(
++            r'\\abx@aux@number\{[^{}]*\}\{([^{}]+)\}\{[^{}]*\}\{[^{}]*\}\{(\d+)\}', auxiliary)}
++        missing = sorted(key for key in cited if assigned.get(key, 0) <= 0)
++        if missing:
++            errors.append('Trích dẫn chưa được đánh số dương trong danh mục: ' + ', '.join(missing))
++        print(f'Trích dẫn đã có số trong danh mục: {len(cited) - len(missing)}/{len(cited)}')
+     figure_provenance = ROOT / 'generated/figure-provenance.json'
+     if figure_provenance.exists():
+         provenance = json.loads(figure_provenance.read_text())
+--- before/report/appendices/supplementary-results.tex
++++ after/report/appendices/supplementary-results.tex
+@@ -11,6 +11,7 @@
+ Nhận diện trên điện thoại & Hai seed 159/1024, mô hình gốc và cắt tỉa, ONNX/PTE & 32 cấu hình trên bốn máy; 256 ảnh mỗi cấu hình \\
+ Đánh giá khẩn cấp & Logistic Regression từ các dấu hiệu có cấu trúc & 32 trạng thái tổng hợp \\
+ Pilot ảnh--văn bản & CrisisMMD; TF-IDF, encoder ảnh frozen và fusion tuyến tính & \MMTrainN{} train, \MMDevN{} validation, \MMTestN{} test; nhãn informative, một sự kiện test \\
++Pilot tiếng Việt silver & Cặp CrisisMMD dịch sang tiếng Việt; DistilBERT frozen và fine-tuning, ảnh Large frozen, LR/fusion & 179 train, 58 validation, 59 test; nhãn AI từ văn bản nguồn, không phải gold ghép cặp độc lập \\
+ Suy giảm chất lượng ảnh & ONNX CPU của mô hình cắt tỉa seed 1024 & Cùng 256 ảnh test; clean và tám biến đổi nhân tạo, chưa phải ảnh camera độc lập \\
+ Phân cụm RQ1 & Generator 3.0; đối chứng và thử nghiệm với nhiễu, bản sao & 40 lần chạy kiểm thử; 1.400 lượt phân cụm trong thử nghiệm nhiễu \\
+ Xếp hạng RQ2 & Candidate 4.1; chất lượng và độ ổn định điểm ưu tiên & 40 seed kiểm thử \\
+@@ -29,13 +30,13 @@
+ \caption{Đối chiếu nội dung nghiên cứu với thuyết minh}\label{tab:proposal-map}\\
+ \toprule Nội dung đăng ký & Nội dung đã thực hiện & Thiết kế bổ sung trong báo cáo & Phần chưa đánh giá \\\midrule\endfirsthead
+ \toprule Nội dung đăng ký & Nội dung đã thực hiện & Thiết kế bổ sung trong báo cáo & Phần chưa đánh giá \\\midrule\endhead
+-Thu thập và xử lý dữ liệu & Dataset\_Flood bốn lớp; CrisisMMD đã dùng riêng cho informative; Generator 3.0 và Candidate 4.1 cho RQ (Mục~\ref{sec:02-data-methods-data}) & Quy trình thu thập, sàng lọc, làm sạch, gán nhãn, chia tập và quản lý phiên bản & Nguồn/giấy phép và độ đồng thuận của ảnh cũ; corpus cứu hộ tiếng Việt ghép cặp \\
++Thu thập và xử lý dữ liệu & Dataset\_Flood bốn lớp; CrisisMMD cho informative và pilot silver bản dịch; Generator 3.0 và Candidate 4.1 cho RQ (Mục~\ref{sec:02-data-methods-data}) & Quy trình thu thập, sàng lọc, làm sạch, gán nhãn, chia tập và quản lý phiên bản & Nguồn/giấy phép và độ đồng thuận của ảnh cũ; corpus tin cứu hộ tiếng Việt gốc với gold độc lập \\
+ Phân tích yêu cầu, thiết kế hệ thống & Yêu cầu, kiến trúc, cơ sở dữ liệu và đồng bộ (Chương~\ref{chap:03-system}) & Luồng điểm tách LR, khẩn cấp adapter và đầu ra NLP; xử lý thiếu/mâu thuẫn (Mục~\ref{sec:multimodal-design}) & Nối LR hoặc fusion mới vào lõi và xác nhận ý nghĩa nghiệp vụ \\
+ Mô hình ảnh và tối ưu hóa & MobileNetV3-Large, FP32/PTQ/QAT/cắt tỉa; benchmark CPU và điện thoại (Mục~\ref{sec:image-design}) & Giải thích đánh đổi chất lượng, lỗi nặng, byte và độ trễ; quy trình ảnh camera & Ảnh hiện trường độc lập; độ bền suy giảm trên Android và phép đo pin \\
+-Phân tích văn bản theo phương án DistilBERT & LR năm cờ nhãn OR; baseline văn bản TF-IDF trên CrisisMMD tiếng Anh & Kiến trúc, nhãn dự thảo, huấn luyện và đánh giá tin cứu hộ tiếng Việt (Mục~\ref{sec:text-design}) & Corpus, nhãn chuyên gia và mô hình tiếng Việt; LR năm cờ không hoàn thành thay NLP \\
+-Bộ mô hình đa phương thức & Tiếp nhận nhiều trường trong app; fusion đặc trưng tuyến tính informative offline (Mục~\ref{sec:multimodal-pilot}) & Fusion tiếng Việt cho cùng nhiệm vụ nhận diện yêu cầu hỗ trợ; fallback thiếu nguồn (Mục~\ref{sec:multimodal-design}) & Huấn luyện/đánh giá tiếng Việt, tích hợp app và hiệu chuẩn; informative không là urgency \\
++Phân tích văn bản theo phương án DistilBERT & TF-IDF, DistilBERT frozen cộng LR và fine-tuning encoder ba seed trên bản dịch tiếng Việt với nhãn AI (Mục~\ref{sec:vi-silver-pilot}); LR năm cờ là nhánh riêng & Thiết kế xác nhận trên tin cứu hộ tiếng Việt gốc và gold độc lập (Mục~\ref{sec:text-design}) & Corpus gốc, gold chuyên gia và xác nhận nghiệp vụ; fine-tuning trên nhãn AI chưa đóng khoảng trống này \\
++Bộ mô hình đa phương thức & Tiếp nhận nhiều trường trong app; fusion informative và silver bản dịch đã chạy ngoại tuyến (Mục~\ref{sec:vi-silver-pilot}) & Fusion xác nhận trên gold tiếng Việt gốc; fallback trong vận hành (Mục~\ref{sec:multimodal-design}) & Gold ghép cặp độc lập, tích hợp app và hiệu chuẩn; request và informative không là urgency \\
+ Phát triển phần mềm & Flutter, backend Python và dashboard; lưu và gửi lại khi có kết nối (Chương~\ref{chap:03-system}) & Quy trình xác minh đầu ra mới trước khi sử dụng & Chưa triển khai NLP/fusion mới trong app; raw E2E được báo cáo chưa khôi phục \\
+-Kiểm thử và ablation & Metric ảnh; ablation ảnh/text/fusion trên cùng \MMTestN{} test IDs CrisisMMD & Ablation chung nhãn cứu hộ tiếng Việt và kịch bản camera/Android (Mục~\ref{sec:02-evaluation-design}) & Dữ liệu, nhãn và phép thử tiếng Việt; không ghép Accuracy ảnh với độ khớp OR \\
++Kiểm thử và ablation & Metric ảnh; ablation informative và silver, mỗi pilot giữ test IDs chung trong nhiệm vụ riêng & Ablation gold tiếng Việt gốc và kịch bản camera/Android (Mục~\ref{sec:02-evaluation-design}) & Gold và phép thử xác nhận tiếng Việt gốc; không ghép Accuracy ảnh với độ khớp OR \\
+ Thực nghiệm mạng yếu & Proxy trên máy tính và tài liệu kiểm thử ứng dụng (Chương~\ref{chap:04-evaluation}) & Ghi rõ điều kiện phiên đo và phạm vi diễn giải & Mạng viễn thông/SMS thật; raw E2E và phép đo thiết bị lặp có kiểm soát \\
+ Đánh giá thuật toán & RQ1--RQ3 theo từng bộ mô phỏng (Bảng~\ref{tab:method-map}) & Phân tích câu trả lời, đối chứng, cơ chế khả dĩ và giới hạn & Ba raw $p$ Spearman và năm Holm RQ2 chưa khớp; chưa xác nhận cứu hộ thực địa \\
+ \bottomrule
+--- before/report/deliverables/content/bulletin-en.tex
++++ after/report/deliverables/content/bulletin-en.tex
+@@ -14,9 +14,9 @@
+ 
+ \FormLine{Methodology: Train MobileNetV3-Large and evaluate image classification, clustering, ranking and dispatch separately using saved artifacts and simulation datasets.}
+ 
+-\FormLine{Project activities: Image AI, structured urgency, persistent queues, adaptive sending, synchronization and dashboard. Proposed DistilBERT/fusion for detecting rescue-assistance requests in Vietnamese messages, ablation and camera/Android protocols remain unimplemented and unmeasured.}
++\FormLine{Project activities: Image AI, structured urgency, persistent queues, adaptive sending, synchronization and dashboard. A translated-Vietnamese/AI-silver pilot runs NLP and offline fusion; native data, information extraction and camera/Android evaluation remain open.}
+ 
+-\FormLine{Research results: The original seed-1024 model achieves \NewImageAccuracy\% accuracy and \NewImageMacroFOne\% macro-F1 on 256 CPU test images, with three critical errors. Quantization reduces size and accuracy. Phone benchmarks cover 32 configurations on four devices. The app, backend and dashboard were developed; five-flag LR is not free-text NLP and its score is not used by the ranking adapter. An English CrisisMMD fusion pilot reaches \MMFusionFOne\% macro-F1; effect CIs include zero. Vietnamese NLP and application fusion remain unfulfilled.}
++\FormLine{Research results: The original seed-1024 model achieves \NewImageAccuracy\% accuracy and \NewImageMacroFOne\% macro-F1 on 256 CPU test images, with three critical errors. Quantization reduces size and accuracy. Phone benchmarks cover 32 configurations on four devices. The app, backend and dashboard were developed; five-flag LR is not free-text NLP and its score is not used by the ranking adapter. An English CrisisMMD fusion pilot reaches \MMFusionFOne\% macro-F1; effect CIs include zero. A translated-Vietnamese/AI-silver pilot reaches \VISilverFusionFOne\% frozen-fusion macro-F1 and \VISilverFusionRecall\% request recall; independent human gold and application fusion remain open.}
+ 
+ \FormLine{Research new finding: RQ1 does not establish Product superiority; RQ2 does not establish general alignment gains and retains three raw Spearman and five Holm replay differences. RQ3 favors nearest-first over revised priority on simulated harm and deadline misses. Field rescue benefits remain unmeasured.}
+ 
+--- before/report/deliverables/content/bulletin-vi.tex
++++ after/report/deliverables/content/bulletin-vi.tex
+@@ -14,9 +14,9 @@
+ 
+ \FormLine{Phương pháp nghiên cứu: Kết hợp nghiên cứu tài liệu, xây dựng và chuẩn hóa dữ liệu, huấn luyện và tối ưu mô hình AI cho thiết bị di động. Thiết kế ứng dụng, máy chủ và giao diện quản lý; thực nghiệm đánh giá chất lượng nhận diện, phân cụm, xếp hạng ưu tiên, tốc độ xử lý và khả năng truyền dữ liệu trong điều kiện mạng yếu giả lập.}
+ 
+-\FormLine{Nội dung nghiên cứu: Xây dựng và tối ưu mô hình nhận diện ảnh cứu hộ trên thiết bị di động; thu thập thông tin về vị trí và mức độ khẩn cấp; phát triển cơ chế lưu trữ, gửi lại và đồng bộ dữ liệu khi kết nối mạng không ổn định. Nghiên cứu phân cụm, ưu tiên và bản đồ. Bổ sung thiết kế DistilBERT/fusion nhận diện yêu cầu hỗ trợ trong tin tiếng Việt, ablation và đánh giá camera/Android; chưa triển khai hoặc đo các phương án này.}
++\FormLine{Nội dung nghiên cứu: Xây dựng và tối ưu mô hình nhận diện ảnh cứu hộ trên thiết bị di động; thu thập thông tin về vị trí và mức độ khẩn cấp; phát triển cơ chế lưu trữ, gửi lại và đồng bộ dữ liệu khi kết nối mạng không ổn định. Nghiên cứu phân cụm, ưu tiên và bản đồ. Pilot văn bản dịch tiếng Việt/nhãn AI đã chạy NLP và fusion offline; corpus bản địa, trích xuất thông tin và camera/Android chưa được xác nhận.}
+ 
+-\FormLine{Kết quả đạt được: Mô hình gốc seed 1024 đạt Accuracy \NewImageAccuracy\%, macro-F1 \NewImageMacroFOne\% trên 256 ảnh CPU, có 3 lỗi nặng. Lượng tử hóa giảm dung lượng và độ chính xác; có 32 phiên benchmark ảnh trên bốn điện thoại. LR năm cờ không phải NLP; adapter chưa dùng điểm LR. Đã có ứng dụng, backend và dashboard. Pilot CrisisMMD tiếng Anh đạt macro-F1 fusion \MMFusionFOne\%, nhưng CI hiệu còn chứa 0; chưa xác nhận NLP tiếng Việt hoặc fusion trong ứng dụng.}
++\FormLine{Kết quả đạt được: Mô hình gốc seed 1024 đạt Accuracy \NewImageAccuracy\%, macro-F1 \NewImageMacroFOne\% trên 256 ảnh CPU, có 3 lỗi nặng. Lượng tử hóa giảm dung lượng và độ chính xác; có 32 phiên benchmark ảnh trên bốn điện thoại. LR năm cờ không phải NLP; adapter chưa dùng điểm LR. Đã có ứng dụng, backend và dashboard. Pilot CrisisMMD tiếng Anh đạt macro-F1 fusion \MMFusionFOne\%, nhưng CI hiệu còn chứa 0; Pilot tiếng Việt dịch/nhãn AI đạt macro-F1 fusion frozen \VISilverFusionFOne\%, recall request \VISilverFusionRecall\%; chưa có gold người độc lập hoặc fusion trong app.}
+ 
+ \FormLine{Ý nghĩa: RQ1 chưa xác lập Product hơn Additive; RQ2 chưa xác lập lợi ích alignment chung; RQ3 cho revised kém nearest-first về harm và trễ hạn mô phỏng. Ba raw p Spearman và năm Holm RQ2 chưa khớp replay. Chưa đo hiệu quả cứu hộ thực địa.}
+ 
+--- before/report/chapters/04-evaluation/sections/results.tex
++++ after/report/chapters/04-evaluation/sections/results.tex
+@@ -249,6 +249,7 @@
+ \paragraph{Trả lời RQ3.} Sai phân hoạch có hệ quả bất lợi trong các phép so sánh đã thử; revised priority chưa xác lập lợi ích chung so với legacy và thua nearest-first về harm/trễ hạn trong bundle này. Chi phí đi lại và ràng buộc lịch là cơ chế khả dĩ để nghiên cứu tiếp, chưa phải chẩn đoán nhân quả đã được thực nghiệm xác nhận.
+ 
+ \input{chapters/04-evaluation/sections/multimodal-pilot}
++\input{chapters/04-evaluation/sections/vi-silver-pilot}
+ 
+ \subsection{Bàn luận xuyên các tầng}
+ Bảng~\ref{tab:rq-evidence-boundaries} tổng hợp câu trả lời và ranh giới diễn giải của ba RQ, giữ riêng thuộc tính phương pháp với chất lượng quyết định.
+--- before/report/chapters/04-evaluation/sections/limitations.tex
++++ after/report/chapters/04-evaluation/sections/limitations.tex
+@@ -2,9 +2,9 @@
+ Các kết quả trong chương này cần được diễn giải trong phạm vi dữ liệu, thiết bị và điều kiện đo đã sử dụng.
+ 
+ \paragraph{Pilot đa phương thức công khai.}
+-Phép bổ sung CrisisMMD ở Mục~\ref{sec:multimodal-pilot} có nhánh đọc câu và fusion đặc trưng được huấn luyện trên common target, nhưng chỉ thử một split theo sự kiện và một seed classifier. Corpus được nguồn mô tả tiếng Anh, chỉ giữ cặp nhãn thống nhất và giới hạn số train/validation; chưa có nhãn ưu tiên cứu hộ hoặc đánh giá tiếng Việt. CI ghép cặp chưa hiệu chỉnh đều chứa 0, không xác lập fusion vượt trội. Recall informative của fusion giảm mạnh khi che nhánh ảnh; chưa xác nhận khả năng chịu thiếu modality, hiệu chuẩn xác suất hoặc chạy Android. Các nhóm gần trùng không đại diện cho nhiều sự kiện test độc lập.
++Phép bổ sung CrisisMMD ở Mục~\ref{sec:multimodal-pilot} có nhánh đọc câu và fusion đặc trưng được huấn luyện trên common target, nhưng chỉ thử một split theo sự kiện và một seed classifier. Corpus được nguồn mô tả tiếng Anh, chỉ giữ cặp nhãn thống nhất và giới hạn số train/validation; pilot informative này không đánh giá tiếng Việt hoặc ưu tiên cứu hộ. Pilot bản dịch tiếng Việt dùng nhãn AI có phạm vi riêng ở Mục~\ref{sec:vi-silver-pilot}. CI ghép cặp chưa hiệu chỉnh đều chứa 0, không xác lập fusion vượt trội. Recall informative của fusion giảm mạnh khi che nhánh ảnh; chưa xác nhận khả năng chịu thiếu modality, hiệu chuẩn xác suất hoặc chạy Android. Các nhóm gần trùng không đại diện cho nhiều sự kiện test độc lập.
+ 
+-Thiết kế văn bản và fusion tiếng Việt ở Mục~\ref{sec:text-design}--\ref{sec:multimodal-design}, cùng ablation ở Mục~\ref{sec:vi-ablation-plan}, làm rõ cách nghiên cứu tiếp theo nhưng chưa tạo bằng chứng thực nghiệm. Nhãn có/không có yêu cầu hỗ trợ cứu hộ trong tin là dự thảo, chưa được chuyên gia xác nhận và chưa có corpus để đánh giá tính nhất quán. Một ảnh đơn lẻ có thể không cung cấp đủ dấu hiệu cho nhãn yêu cầu, còn tin ngắn có thể thiếu thông tin; cần kiểm tra tính quan sát được của nhãn trước khi diễn giải chênh lệch giữa các modality. Phương án fallback và hàng xác minh vẫn cần đánh giá độ bao phủ, lỗi và khối lượng xử lý của con người.
++Thiết kế xác nhận trên tin tiếng Việt gốc ở Mục~\ref{sec:text-design}--\ref{sec:multimodal-design}, cùng ablation ở Mục~\ref{sec:vi-ablation-plan}, vẫn thiếu gold độc lập. Pilot silver đã dịch và gán nhãn AI cho 300 cặp, loại bốn ca không chắc chắn trước fit, giữ 179/58/59 cặp train/validation/test. Nhãn từ văn bản nguồn, không dựa trên ảnh và chưa có nhãn người gán hoặc xác nhận chuyên môn. Vì vậy metric so với nhãn silver chỉ mô tả mức khớp với quyết định AI, không xác nhận nhãn yêu cầu khách quan hoặc gold ghép cặp. Một ảnh đơn lẻ có thể không cung cấp đủ dấu hiệu cho nhãn yêu cầu, còn tin ngắn có thể thiếu thông tin; cần kiểm tra tính quan sát được của nhãn trước khi diễn giải chênh lệch giữa các modality. Bản dịch có thể thay đổi cách diễn đạt hoặc mất thông tin; nguồn được mô tả tiếng Anh nhưng chưa audit ngôn ngữ từng hàng. Chọn mẫu tăng tỷ lệ từ khóa hỗ trợ và giữ một sự kiện Sri Lanka đã được xem trong pilot trước tạo giới hạn chọn mẫu và test quen thuộc. CI trong sự kiện không ước lượng được chuyển miền sang nhiều sự kiện hoặc tin tiếng Việt gốc. Encoder frozen và 18 lần fit head không được gọi là fine-tuning chung hai encoder. Phương án fallback và hàng xác minh vẫn cần đánh giá độ bao phủ, lỗi và khối lượng xử lý của con người.
+ 
+ \paragraph{Dữ liệu mô phỏng.}
+ Các phép đánh giá phân cụm, xếp hạng và điều phối dùng dữ liệu tổng hợp hoặc bán tổng hợp. Chúng cho phép đối chiếu các phương pháp trong những tình huống được kiểm soát, nhưng chưa đại diện đầy đủ cho hành vi báo tin, nhu cầu và nguồn lực cứu hộ ngoài thực địa. Các chỉ số lợi ích, tổn thất và trễ hạn trong mô phỏng không được xem là hiệu quả cứu hộ đã quan sát thực tế.
+--- before/report/chapters/02-data-methods/sections/data.tex
++++ after/report/chapters/02-data-methods/sections/data.tex
+@@ -85,5 +85,7 @@
+ \subsection{CrisisMMD cho pilot ảnh--văn bản}
+ Pilot đã sử dụng dữ liệu CrisisMMD \citep{alam2018crisismmd} có nhãn informative thống nhất giữa hai nguồn để huấn luyện các classifier văn bản, ảnh và fusion. Sau lọc trùng xuyên split, giữ 2.971 cặp train, 589 validation và 701 test; test là sự kiện lũ Sri Lanka, validation là Maria, còn train thuộc năm sự kiện khác. Cách chia và ngưỡng được khóa riêng cho pilot. Nguồn mô tả corpus bằng tiếng Anh, nhưng chưa có đánh giá ngôn ngữ từng hàng. Nhãn mô tả tính hữu ích thông tin của bài đăng, không mô tả độ sâu ngập, mức nguy cấp hoặc thứ tự điều phối. Quy trình chọn mẫu và kết quả ở Mục~\ref{sec:multimodal-pilot}; không nhập các cặp này vào Dataset\_Flood hoặc các RQ mô phỏng.
+ 
++\paragraph{Tập con dịch tiếng Việt và nhãn AI.} Đợt pilot ở Mục~\ref{sec:vi-silver-pilot} dùng 300 cặp chọn từ cohort CrisisMMD trên đây, dịch văn bản và gán lại task request bằng AI theo chỉ đạo bổ sung. Giữ riêng bốn ca chưa rõ nghĩa, còn \VISilverTrainN/\VISilverDevN/\VISilverTestN{} cặp theo split sự kiện cũ. Đây là dữ liệu dẫn xuất từ cùng nguồn, không phải nguồn độc lập thứ sáu hoặc corpus người Việt gửi tin; nhãn AI chỉ đọc câu nguồn, không có nhãn người độc lập hay độ đồng thuận được xác nhận.
++
+ \subsection{Lưu trữ và truy vết}
+ Các bảng số liệu và hình định lượng được sinh từ artifact đã lưu bằng script, kèm bản ghi nguồn và mã băm trong hồ sơ provenance. Bảng thiết kế và sơ đồ giải thích được biên soạn trong nguồn LaTeX, phân biệt với kết quả thực nghiệm. Dữ liệu, seed, cấu hình và kết quả của từng lần chạy được giữ cùng nhau để tái lập; quy trình cụ thể ở Mục~\ref{sec:02-reproducibility}.
+--- before/report/chapters/02-data-methods/sections/evaluation-design.tex
++++ after/report/chapters/02-data-methods/sections/evaluation-design.tex
+@@ -4,13 +4,13 @@
+ 
+ Hai phép kiểm tra cần phân biệt. Trong score-invariance test, grouping được giữ cố định trước và sau perturbation, nên chỉ đo tầng điểm. Trong end-to-end test, grouping được dự đoán lại và có thể đổi. Đầu ra của phép thứ nhất không là bằng chứng cho phép thứ hai. Trong RQ1 stress, multiplicity có thể đổi đồ thị trước khi tính điểm; trong RQ2, nhóm oracle được khóa để chẩn đoán riêng tầng điểm.
+ 
+-\subsection{Thiết kế ablation cứu hộ tiếng Việt --- chưa thực hiện}\label{sec:vi-ablation-plan}
+-Thiết kế này đánh giá vai trò bổ sung của ảnh và văn bản trong cùng một nhiệm vụ, tách khỏi ablation informative đã thực hiện trên CrisisMMD ở Mục~\ref{sec:multimodal-pilot}. Nhãn dự thảo là \emph{có yêu cầu hỗ trợ cứu hộ trong tin} hoặc \emph{không có yêu cầu hỗ trợ cứu hộ}. Người gán nhãn xem toàn bộ báo cáo ghép cặp theo sổ tay dự kiến ở Mục~\ref{sec:text-design}; trường hợp không đủ thông tin được đưa vào hàng xác minh, không tự gán âm. Đây là định nghĩa nghiên cứu đề xuất, chưa có corpus tiếng Việt hoặc xác nhận chuyên môn cho các nhãn này. Nhãn chung không phải mức ngập bốn lớp, nhãn OR năm cờ hay mức độ nguy cấp.
++\subsection{Thiết kế ablation xác nhận tiếng Việt gốc --- chưa thực hiện}\label{sec:vi-ablation-plan}
++Thiết kế này đánh giá vai trò bổ sung của ảnh và văn bản trên tin cứu hộ tiếng Việt gốc với gold độc lập, tách khỏi ablation informative ở Mục~\ref{sec:multimodal-pilot} và pilot silver bản dịch ở Mục~\ref{sec:vi-silver-pilot}. Pilot silver đã chạy các nhánh văn bản/ảnh/fusion trên cùng target và test IDs của nó, nhưng nhãn AI từ câu nguồn chưa thực hiện thiết kế gold ghép cặp dưới đây. Nhãn dự thảo là \emph{có yêu cầu hỗ trợ cứu hộ trong tin} hoặc \emph{không có yêu cầu hỗ trợ cứu hộ}. Người gán nhãn xem toàn bộ báo cáo ghép cặp theo sổ tay dự kiến ở Mục~\ref{sec:text-design}; trường hợp không đủ thông tin được đưa vào hàng xác minh, không tự gán âm. Đây là định nghĩa nghiên cứu đề xuất, chưa có corpus tin cứu hộ tiếng Việt gốc với gold độc lập hoặc xác nhận chuyên môn cho các nhãn này. Nhãn chung không phải mức ngập bốn lớp, nhãn OR năm cờ hay mức độ nguy cấp.
+ 
+ Mỗi mẫu dự kiến có ID báo cáo nối ảnh, văn bản, nhóm nguồn và sự kiện; mọi cấu hình trong Bảng~\ref{tab:vi-ablation-plan} nhận đúng cùng danh sách ID và nhãn. Ảnh có thể không biểu đạt được một yêu cầu chỉ xuất hiện trong câu, còn văn bản ngắn có thể bỏ sót chi tiết nhìn thấy trong ảnh. Do đó, so sánh đo thông tin dự đoán của từng nguồn đối với nhãn chung, không mặc định mọi nguồn đều đủ để suy ra nhãn. Mức ngập dự đoán không được đổi trực tiếp thành nhãn yêu cầu cứu hộ để tạo đối chứng.
+ 
+ \begin{longtable}{P{.13\textwidth}P{.16\textwidth}P{.19\textwidth}P{.25\textwidth}P{.12\textwidth}}
+-\caption{Cấu hình ablation đề xuất cho nhiệm vụ yêu cầu cứu hộ tiếng Việt; chưa có kết quả}\label{tab:vi-ablation-plan}\\
++\caption{Ablation xác nhận trên tin tiếng Việt gốc và gold độc lập; chưa thực hiện}\label{tab:vi-ablation-plan}\\
+ \toprule Cấu hình & Đầu vào & Đầu ra chung & Cách đánh giá & Trạng thái \\\midrule\endfirsthead
+ \toprule Cấu hình & Đầu vào & Đầu ra chung & Cách đánh giá & Trạng thái \\\midrule\endhead
+ Chỉ ảnh & Ảnh của ID ghép cặp & Xác suất nhãn yêu cầu cứu hộ & Đầu phân loại riêng được học theo nhãn chung; không dùng Accuracy mức ngập thay thế & Chưa thực hiện \\
+@@ -25,7 +25,7 @@
+ 
+ \paragraph{Chỉ số và thiếu nguồn.} Chỉ số chính dự kiến là macro-F1; báo thêm precision/recall của lớp yêu cầu cứu hộ, Accuracy, ma trận nhầm lẫn và phân bố nhãn theo sự kiện. Phân tích chính dùng cặp đầy đủ nguồn, với danh sách test ID cố định. Tập thiếu ảnh hoặc thiếu văn bản được giữ như các tầng đánh giá riêng, báo số mẫu và tỷ lệ được xử lý; chuyển sang bộ phân loại đơn là một chính sách cần đánh giá riêng. Che block của fusion cố định chỉ đo độ nhạy mất nguồn, không thay cho huấn luyện nhánh đơn hoặc chứng minh fallback hoạt động. Trường hợp thiếu cả hai nguồn, mâu thuẫn hoặc từ chối dự đoán được ghi riêng, không âm thầm loại khỏi mẫu số vận hành.
+ 
+-\paragraph{Phân tích sai số và độ bất định dự kiến.} Lưu dự đoán của mọi cấu hình theo ID để đối chiếu các cặp sai khác; phân loại lỗi theo tin thiếu thông tin, viết tắt, ảnh không liên quan và hai nguồn mâu thuẫn. Hiệu macro-F1 dự kiến dùng bootstrap ghép cặp theo nhóm sự kiện/nguồn đã khóa, báo CI và số nhóm độc lập; ít sự kiện phải giữ giới hạn suy luận tương ứng. Nếu thực hiện kiểm định nhiều đối chứng, cần khóa trước họ so sánh và cách hiệu chỉnh. Chưa có dự đoán, CI hoặc $p$-value cho thiết kế tiếng Việt; mọi ô kết quả hiện là \emph{Chưa đo}.
++\paragraph{Phân tích sai số và độ bất định dự kiến.} Lưu dự đoán của mọi cấu hình theo ID để đối chiếu các cặp sai khác; phân loại lỗi theo tin thiếu thông tin, viết tắt, ảnh không liên quan và hai nguồn mâu thuẫn. Hiệu macro-F1 dự kiến dùng bootstrap ghép cặp theo nhóm sự kiện/nguồn đã khóa, báo CI và số nhóm độc lập; ít sự kiện phải giữ giới hạn suy luận tương ứng. Nếu thực hiện kiểm định nhiều đối chứng, cần khóa trước họ so sánh và cách hiệu chỉnh. Chưa có dự đoán, CI hoặc $p$-value cho thiết kế xác nhận trên gold tiếng Việt gốc; các ô của thiết kế này vẫn là \emph{Chưa đo}. Kết quả và CI có điều kiện của pilot bản dịch nhãn AI được báo riêng ở Mục~\ref{sec:vi-silver-pilot}, không chuyển thành bằng chứng gold.
+ 
+ \subsection{Thiết kế đánh giá ảnh camera và Android --- chưa thực hiện}\label{sec:camera-evaluation-plan}
+ Kế hoạch mở rộng tách hai câu hỏi: model phân loại còn đúng khi chất lượng ảnh thay đổi hay không, và mỗi runtime xử lý ảnh mất bao lâu trên một điện thoại xác định. Kết quả biến đổi nhân tạo ONNX CPU ở Mục~\ref{sec:image-quality-cpu-results} mới hỗ trợ câu hỏi thứ nhất trong tập ảnh hiện có; benchmark Android lịch sử dùng tập ảnh cố định, chưa xác nhận kết hợp cả hai câu hỏi trên ảnh camera độc lập.
+--- before/report/chapters/02-data-methods/sections/scope.tex
++++ after/report/chapters/02-data-methods/sections/scope.tex
+@@ -1,10 +1,10 @@
+ \section{Phạm vi của phương pháp}\label{sec:02-scope}
+ Phương pháp trong chương này có ba giới hạn cần giữ khi đọc kết quả. Thứ nhất, dữ liệu phân cụm và xếp hạng là bán tổng hợp hoặc tổng hợp, nên kết quả RQ1--RQ3 mô tả hành vi của thuật toán dưới các điều kiện mô phỏng có kiểm soát, không phải hiệu quả trên báo cáo cứu hộ thực tế. Thứ hai, bộ ảnh do nhóm thu thập và gán nhãn, chưa có giấy phép cho từng ảnh, chưa có mẫu chụp thực địa độc lập và chưa đo độ đồng thuận giữa người gán nhãn. Thứ ba, các hằng số của $Q_i$ và điểm ưu tiên là heuristic của nhóm, chưa được chuyên gia cứu hộ xác nhận.
+ 
+-Đối với thông tin khẩn cấp, đề tài sử dụng Logistic Regression từ các lựa chọn có cấu trúc trên biểu mẫu, thay cho phương án phân tích văn bản tiếng Việt tự do dự kiến ban đầu. Đây là surrogate trên năm cờ với nhãn OR tự sinh, không phải xác suất nguy kịch đã được hiệu chuẩn trên dữ liệu thực. Trong phạm vi repository và các ref đã khảo sát, chưa tìm thấy mô hình văn bản tiếng Việt tự do được huấn luyện hoặc đánh giá như cam kết DistilBERT. Nhánh NLP của ứng dụng mới có tiếp nhận mô tả và heuristic từ khóa; chưa chứng minh hoàn thành cam kết nghiên cứu. Pilot văn bản tiếng Anh bổ sung ở Mục~\ref{sec:multimodal-pilot} có nhiệm vụ riêng, không thay thế đánh giá tiếng Việt hoặc nguy cấp.
++Đối với thông tin khẩn cấp, đề tài sử dụng Logistic Regression từ các lựa chọn có cấu trúc trên biểu mẫu, thay cho phương án phân tích văn bản tiếng Việt tự do dự kiến ban đầu. Đây là surrogate trên năm cờ với nhãn OR tự sinh, không phải xác suất nguy kịch đã được hiệu chuẩn trên dữ liệu thực. Nhánh NLP của ứng dụng mới có tiếp nhận mô tả và heuristic từ khóa; chưa tích hợp mô hình văn bản mới. Ngoài pilot informative tiếng Anh ở Mục~\ref{sec:multimodal-pilot}, Mục~\ref{sec:vi-silver-pilot} đã thực nghiệm classifier văn bản và fusion trên bản dịch tiếng Việt với nhãn silver do AI gán từ câu nguồn. Pilot này có DistilBERT frozen cộng LR và nhánh fine-tuning encoder riêng, không thay đánh giá trên tin cứu hộ tiếng Việt gốc, gold độc lập hoặc mức nguy cấp.
+ 
+ Cần phân biệt ba mức: tiếp nhận ảnh, mô tả và vị trí; tích hợp các trường bằng công thức, ánh xạ và heuristic; học một mô hình fusion trên dữ liệu ghép cặp. Ứng dụng cứu hộ có hai mức đầu với khoảng trống nối điểm LR vào adapter. Đợt bổ sung đã huấn luyện fusion đặc trưng tuyến tính trên CrisisMMD, chưa tích hợp vào ứng dụng và chưa fine-tuning chung hai encoder. Nguồn tham chiếu dấu hiệu IITT không xác nhận các trọng số điều phối của nhóm. Sửa cách mô tả phạm vi và benchmark bổ trợ không đồng nghĩa đã hoàn thành các cam kết còn thiếu.
+ 
+-Mục~\ref{sec:text-design} và Mục~\ref{sec:multimodal-design} bổ sung kiến trúc, đầu vào/đầu ra và quy trình xác minh cho văn bản và fusion tiếng Việt. Đây là thiết kế nghiên cứu chưa thực hiện, với target đề xuất là có/không có yêu cầu hỗ trợ cứu hộ; chưa phải phân loại mức nguy cấp hoặc chính sách ưu tiên đã xác nhận. Nội dung nghiên cứu được đối chiếu với thuyết minh ở Mục~\ref{sec:proposal-comparison}; giới hạn của các phép thử được trình bày ở Mục~\ref{sec:04-evaluation-limitations}.
++Mục~\ref{sec:text-design} và Mục~\ref{sec:multimodal-design} bổ sung kiến trúc, đầu vào/đầu ra và quy trình xác minh cho văn bản và fusion tiếng Việt. Pilot silver đã triển khai so sánh trên dữ liệu dịch cho nhãn có/không có yêu cầu hỗ trợ; thiết kế xác nhận trên tin tiếng Việt gốc với gold độc lập vẫn chưa thực hiện. Cả hai phạm vi đều khác phân loại mức nguy cấp hoặc chính sách ưu tiên đã xác nhận. Nội dung nghiên cứu được đối chiếu với thuyết minh ở Mục~\ref{sec:proposal-comparison}; giới hạn của các phép thử được trình bày ở Mục~\ref{sec:04-evaluation-limitations}.
+ 
+-Ablation ảnh/văn bản/cả hai đã thực hiện cho nhiệm vụ informative của CrisisMMD, với target và test IDs chung. Đối với nhiệm vụ ưu tiên cứu hộ tiếng Việt, vẫn thiếu report ID ghép cặp và gold độc lập chung. Mask các trường $F/E$ mô phỏng chỉ là phân tích độ nhạy nguồn thông tin có cấu trúc, không thay thế ablation mô hình ảnh--văn bản. Cần vượt các điều kiện dữ liệu và nhãn trước khi khóa protocol cứu hộ, không đổi target để coi benchmark bổ trợ là bằng chứng cùng nhiệm vụ.
++Ablation ảnh/văn bản/cả hai đã thực hiện cho nhiệm vụ informative của CrisisMMD và pilot yêu cầu hỗ trợ trên bản dịch tiếng Việt, mỗi pilot giữ target/test IDs riêng. Nhãn silver của pilot sau được gán từ văn bản nguồn, không phải gold được người gán xem cả ảnh và câu. Đối với nhiệm vụ ưu tiên cứu hộ tiếng Việt, vẫn thiếu report ID ghép cặp và gold độc lập chung. Mask các trường $F/E$ mô phỏng chỉ là phân tích độ nhạy nguồn thông tin có cấu trúc, không thay thế ablation mô hình ảnh--văn bản. Cần vượt các điều kiện dữ liệu và nhãn trước khi khóa protocol cứu hộ, không đổi target để coi benchmark bổ trợ là bằng chứng cùng nhiệm vụ.
+--- before/report/chapters/02-data-methods/sections/text-design.tex
++++ after/report/chapters/02-data-methods/sections/text-design.tex
+@@ -1,12 +1,12 @@
+-\section{Thiết kế phân tích văn bản tiếng Việt đề xuất}\label{sec:text-design}
++\section{Phân tích văn bản tiếng Việt: thiết kế và pilot silver}\label{sec:text-design}
+ \subsection{Nhiệm vụ và đầu ra}
+-Phần này là \textbf{thiết kế đề xuất, chưa huấn luyện hoặc đánh giá trên tin cứu hộ tiếng Việt}. Thuyết minh đặt ra hướng phân tích văn bản tự do bằng DistilBERT; bảng LR năm cờ ở Mục~\ref{sec:02-urgency-lr} chỉ xử lý lựa chọn trên biểu mẫu nên không thực hiện nhiệm vụ này. Pilot TF-IDF trên CrisisMMD đã đọc câu tự do, nhưng dùng nhãn informative tiếng Anh, được đánh giá riêng ở Mục~\ref{sec:multimodal-pilot}.
++Phần này phân biệt \textbf{thiết kế xác nhận trên tin cứu hộ tiếng Việt gốc} với \textbf{pilot silver đã thực hiện trên bản dịch do AI tạo}. Thuyết minh đặt ra hướng phân tích văn bản tự do bằng DistilBERT; bảng LR năm cờ ở Mục~\ref{sec:02-urgency-lr} chỉ xử lý lựa chọn trên biểu mẫu nên không thực hiện nhiệm vụ này. Pilot informative tiếng Anh nằm ở Mục~\ref{sec:multimodal-pilot}. Pilot tiếng Việt dịch ở Mục~\ref{sec:vi-silver-pilot} đã huấn luyện head từ TF-IDF, DistilBERT giữ cố định và nhánh fine-tuning encoder riêng; nhãn AI chưa phải gold độc lập hoặc đánh giá trên tin tiếng Việt gốc.
+ 
+ Nhiệm vụ phân loại dự kiến trước hết xác định \emph{tin có yêu cầu hỗ trợ cứu hộ} hay \emph{tin không có yêu cầu hỗ trợ cứu hộ}. Đây là nhãn nội dung của một báo cáo, không phải mức ngập trong ảnh, xác suất nguy kịch hoặc thứ tự điều phối. Một tin đề nghị hỗ trợ có thể thiếu dấu hiệu nguy cấp; một ảnh ngập sâu cũng chưa xác định có người đang cần cứu. Các trường trích xuất chỉ hỗ trợ xác minh và bổ sung biểu mẫu, chưa tự động trở thành $E_i$ hoặc $P_k$.
+ 
+ Bảng~\ref{tab:text-contract} nêu dự thảo đầu vào, đầu ra và quy tắc gán nhãn. Các định nghĩa cần được thử gán nhãn và thống nhất với người có chuyên môn trước khi thu nhận thành corpus; báo cáo chưa có nhãn chuyên gia cho nhiệm vụ này.
+ \begin{longtable}{P{.21\textwidth}P{.36\textwidth}P{.32\textwidth}}
+-\caption{Dự thảo hợp đồng phân tích văn bản tiếng Việt, chưa thực hiện}\label{tab:text-contract}\\
++\caption{Dự thảo hợp đồng phân tích tin cứu hộ tiếng Việt gốc, chưa thẩm định}\label{tab:text-contract}\\
+ \toprule Thành phần & Định nghĩa đề xuất & Xử lý thiếu hoặc chưa rõ \\\midrule\endfirsthead
+ \toprule Thành phần & Định nghĩa đề xuất & Xử lý thiếu hoặc chưa rõ \\\midrule\endhead
+ Đầu vào & Mô tả gốc, report ID và phiên bản văn bản; giữ quan hệ với ảnh nếu có & Rỗng hoặc chỉ có ký hiệu: đánh dấu thiếu, không suy thành nhãn âm \\
+@@ -29,9 +29,9 @@
+  p_{\mathrm{text}}=\operatorname{softmax}\!\left(W\,\operatorname{Dropout}(h_{\mathrm{text}})+b\right).
+  \label{eq:text-proposed}
+ \end{equation}
+-Đây là lựa chọn thiết kế của nhóm, không phải cấu hình đã chạy. Cấu hình khởi đầu dự kiến dùng tối đa 256 token, dropout 0,2, batch 16, AdamW với learning rate thử $10^{-5}$ hoặc $2\times10^{-5}$, tối đa năm epoch và dừng sớm sau hai epoch validation không cải thiện. Tin dài phải lưu cờ bị cắt và tỷ lệ token bị cắt; chỉ mở rộng độ dài hoặc dùng cửa sổ nếu quyết định đó được chọn trên validation trước khi khóa test.
++Đây là lựa chọn đầu phân loại của nhóm. Pilot silver đã chạy kiến trúc này với tối đa 128 token, dropout 0,2, batch hiệu dụng 16, AdamW với hai learning rate $10^{-5}$ và $2\times10^{-5}$, tối đa năm epoch và dừng sớm sau hai epoch validation không cải thiện; không có câu bị cắt trong corpus pilot. Thiết kế xác nhận trên tin tiếng Việt gốc dự kiến xét tối đa 256 token. Tin dài phải lưu cờ bị cắt và tỷ lệ token bị cắt; chỉ mở rộng độ dài hoặc dùng cửa sổ nếu quyết định đó được chọn trên validation trước khi khóa test.
+ 
+-Hàm mục tiêu dự kiến là cross-entropy trên nhãn nội dung. Trọng số lớp, nếu cần, chỉ suy từ train. Checkpoint được chọn bằng macro-F1 validation, khi hòa ưu tiên cấu hình đơn giản hơn rồi epoch sớm hơn; không dùng test để chọn ngưỡng hoặc epoch. TF-IDF + LR cần được huấn luyện lại trên cùng corpus tiếng Việt làm đối chứng, không mang nguyên số CrisisMMD sang. Sau khi khóa quy tắc và cấu hình, đánh giá Accuracy, macro-F1, precision/recall từng lớp, confusion matrix và độ bất định theo nhóm nguồn/sự kiện như Mục~\ref{sec:02-evaluation-design}; mọi ô kết quả tiếng Việt hiện là \emph{chưa đo}.
++Công thức~\ref{eq:text-proposed} áp dụng cho nhánh fine-tuning; nhánh frozen dùng LR trên đặc trưng giữ cố định. Fine-tuning tối ưu cross-entropy với trọng số lớp chỉ suy từ train. Checkpoint chọn bằng macro-F1 validation, khi hòa giữ epoch sớm hơn; learning rate chọn theo trung bình ba seed, không dùng test để chọn ngưỡng hoặc epoch. TF-IDF + LR được huấn luyện trên cùng corpus pilot làm đối chứng, không mang nguyên số informative của CrisisMMD sang nhiệm vụ mới. Các cấu hình và kết quả nằm ở Mục~\ref{sec:vi-silver-pilot}. Các chỉ số xác nhận trên corpus tin cứu hộ tiếng Việt gốc với gold độc lập vẫn \emph{chưa đo}; thiết kế thước đo và đơn vị suy luận ở Mục~\ref{sec:02-evaluation-design} áp dụng cho nghiên cứu chính sau này.
+ 
+ Trích xuất thông tin là bước riêng: phương án ban đầu dùng mẫu số lượng, từ điển địa danh và luật phủ định có phiên bản, trả lại vị trí đoạn trích (span) thay vì chỉ một giá trị. Nếu mở rộng thành đầu gán nhãn token, cần corpus span và đánh giá precision/recall/F1 thực thể riêng; chất lượng phân loại câu không xác nhận chất lượng trích xuất. Địa điểm trong câu chỉ là gợi ý, không tự thay tọa độ đã xác minh.
+ 
+@@ -42,10 +42,10 @@
+ \toprule Vai trò & Bước sử dụng và thông tin bổ sung & Trạng thái \\\midrule\endfirsthead
+ \toprule Vai trò & Bước sử dụng và thông tin bổ sung & Trạng thái \\\midrule\endhead
+ Phân loại nội dung & TF-IDF + LR đọc câu và dự đoán informative trên CrisisMMD & Đã thực hiện pilot tiếng Anh; không phải nhãn yêu cầu cứu hộ tiếng Việt \\
+-Gợi ý khẩn cấp hiện tại & Adapter dò từ khóa trong mô tả khi không có trường urgency & Heuristic đã có; chưa đánh giá NLP tiếng Việt \\
+-Phát hiện yêu cầu hỗ trợ & DistilBERT dự kiến phân loại theo Bảng~\ref{tab:text-contract} & Thiết kế đề xuất, chưa huấn luyện \\
++Gợi ý khẩn cấp hiện tại & Adapter dò từ khóa trong mô tả khi không có trường urgency & Heuristic trong app; không được thay bằng đầu ra pilot silver \\
++Phát hiện yêu cầu hỗ trợ & DistilBERT frozen cộng LR và fine-tuning encoder trên câu tiếng Việt dịch; nhãn AI từ văn bản nguồn & Đã chạy pilot silver; chưa xác nhận trên tin tiếng Việt gốc hoặc gold chuyên gia \\
+ Trích thông tin & Địa điểm, số người, dấu hiệu và phủ định để người dùng xác nhận & Thiết kế đề xuất, chưa có đánh giá span \\
+-Bổ sung ngữ cảnh cho ảnh & Văn bản nêu nhu cầu, thời điểm hoặc người bị ảnh hưởng mà ảnh không thể hiện & Fusion CrisisMMD đã chạy trên informative; fusion cứu hộ tiếng Việt chưa thực hiện \\
++Bổ sung ngữ cảnh cho ảnh & Văn bản nêu nhu cầu, thời điểm hoặc người bị ảnh hưởng mà ảnh không thể hiện & Đã chạy informative và pilot silver tiếng Việt dịch; fusion cứu hộ tiếng Việt gốc chưa xác nhận \\
+ \bottomrule
+ \end{longtable}
+ 
+--- before/report/chapters/02-data-methods/sections/multimodal-design.tex
++++ after/report/chapters/02-data-methods/sections/multimodal-design.tex
+@@ -6,12 +6,12 @@
+ \toprule Mức & Cách kết hợp & Bằng chứng và giới hạn \\\midrule\endfirsthead
+ \toprule Mức & Cách kết hợp & Bằng chứng và giới hạn \\\midrule\endhead
+ Tích hợp trường dữ liệu & Lưu ảnh, mô tả, tọa độ và cờ trong một báo cáo; ánh xạ trường vào lõi & Ứng dụng hiện tại; adapter còn chưa đọc điểm LR trong \texttt{E\_i} \\
+-Kết hợp đầu ra & Trung bình xác suất hai classifier cùng dự đoán một nhãn & Đối chứng đã chạy trong pilot CrisisMMD; chưa hiệu chuẩn; không trung bình điểm mức ngập với điểm OR \\
+-Kết hợp đặc trưng & Ghép biểu diễn ảnh và câu, học classifier trên target chung & Fusion tuyến tính đã chạy trong pilot; thiết kế tiếng Việt chưa huấn luyện hoặc tích hợp \\
++Kết hợp đầu ra & Trung bình xác suất hai classifier cùng dự đoán một nhãn & Đã chạy trong pilot informative và silver; chưa hiệu chuẩn; không trung bình mức ngập với OR \\
++Kết hợp đặc trưng & Ghép biểu diễn ảnh và câu, học classifier trên target chung & Fusion tuyến tính đã chạy trên informative và bản dịch tiếng Việt nhãn AI; chưa tích hợp app hoặc xác nhận trên tin tiếng Việt gốc \\
+ \bottomrule
+ \end{longtable}
+ 
+-Ứng dụng hiện tại tích hợp các trường bằng ánh xạ, heuristic và công thức xếp hạng ở Mục~\ref{sec:03-system-architecture}. Kết quả RQ1--RQ3 dùng các trường quan sát mô phỏng; chúng không đo tác động của một bộ mã hóa câu và ảnh học chung. Pilot công khai ở Mục~\ref{sec:multimodal-pilot} là tuyến nghiên cứu ngoại tuyến riêng, dùng nhãn informative, không đưa xác suất này vào $E_i$ hoặc $P_k$.
++Ứng dụng hiện tại tích hợp các trường bằng ánh xạ, heuristic và công thức xếp hạng ở Mục~\ref{sec:03-system-architecture}. Kết quả RQ1--RQ3 dùng các trường quan sát mô phỏng; chúng không đo tác động của một bộ mã hóa câu và ảnh học chung. Pilot công khai ở Mục~\ref{sec:multimodal-pilot} dùng nhãn informative; pilot silver ở Mục~\ref{sec:vi-silver-pilot} dùng yêu cầu hỗ trợ gán bởi AI từ văn bản nguồn và bản dịch tiếng Việt. Hai tuyến đều chạy ngoại tuyến, không đưa xác suất này vào $E_i$ hoặc $P_k$.
+ 
+ \subsection{Fusion tuyến tính CrisisMMD đã huấn luyện}
+ Nhánh văn bản TF-IDF unigram/bigram thực có 5.345 chiều sau khi fit vocabulary trên train. Nhánh ảnh lấy 576 chiều từ MobileNetV3 Small ImageNet giữ cố định. Đây là encoder khác với bộ phân loại mức ngập MobileNetV3-Large trong ứng dụng. Chuẩn hóa mỗi block bằng $z(v)=v/\max(\lVert v\rVert_2,\epsilon)$ với $\epsilon>0$, sau đó ghép:
+@@ -22,7 +22,7 @@
+ \end{equation}
+ Vector ghép có 5.921 chiều; classifier LR có regularization được chọn từ validation. Với block khác không, phép chia $\sqrt{2}$ cân bằng chuẩn của hai nhánh sau khi mỗi nhánh đã chuẩn hóa. Đây là phép nối trước một classifier tuyến tính, chưa có tương tác phi tuyến, cross-attention hoặc fine-tuning chung hai encoder. Công thức xác định cách pilot học kết hợp đặc trưng, không khẳng định một modality gây ra cải thiện.
+ 
+-Hình~\ref{fig:multimodal-levels} đặt tuyến đã chạy bên cạnh tuyến tiếng Việt đề xuất. Các số hiệu năng và phép che block nằm trong phần kết quả; sơ đồ không gộp dữ liệu của hai nhiệm vụ.
++Hình~\ref{fig:multimodal-levels} đặt tuyến informative đã chạy bên cạnh thiết kế xác nhận trên tin cứu hộ tiếng Việt gốc. Nhánh silver được mô tả riêng dưới đây và ở Mục~\ref{sec:vi-silver-pilot}; sơ đồ không biến dữ liệu dịch và nhãn AI thành corpus tiếng Việt gốc hoặc gold ghép cặp.
+ \begin{figure}[htbp]\centering
+ \begin{tikzpicture}[>=Stealth,node distance=5mm and 7mm,font=\small,
+  box/.style={draw,rounded corners=2pt,align=center,text width=62mm,minimum height=12mm},
+@@ -31,17 +31,22 @@
+ \node[box,below=of cp] (ce) {TF-IDF + MobileNetV3 Small\\encoder ảnh frozen, L2 từng block};
+ \node[box,below=of ce] (cf) {Nối đặc trưng $/\sqrt{2}$ + LR\\đã huấn luyện ngoại tuyến};
+ \node[box,below=of cf] (co) {Informative / not informative\\không đưa vào điểm khẩn cấp};
+-\node[proposed,right=of cp] (vp) {Ảnh + mô tả tiếng Việt + metadata\\cần dữ liệu ghép cặp và nhãn chung};
++\node[proposed,right=of cp] (vp) {Ảnh + tin tiếng Việt gốc + metadata\\cần dữ liệu ghép cặp và gold độc lập};
+ \node[proposed,below=of vp] (ve) {Encoder ảnh + DistilBERT\\kiểm tra thiếu nguồn / chất lượng};
+ \node[proposed,below=of ve] (vf) {Fusion đặc trưng, đầu phân loại\\yêu cầu hỗ trợ cứu hộ};
+ \node[proposed,below=of vf] (vo) {Đầu ra + span + cờ mâu thuẫn\\người dùng / điều phối viên xác nhận};
+ \foreach \a/\b in {cp/ce,ce/cf,cf/co,vp/ve,ve/vf,vf/vo}{\draw[->] (\a)--(\b);}
+ \end{tikzpicture}
+-\caption{Tuyến pilot đã thực hiện (nét liền) và thiết kế tiếng Việt chưa thực hiện (nét đứt)}
++\caption{Tuyến informative đã thực hiện và thiết kế xác nhận tiếng Việt gốc; pilot silver trình bày riêng}
+ \label{fig:multimodal-levels}
+ \end{figure}
+ 
+-\subsection{Thiết kế mở rộng cho báo cáo tiếng Việt}
++\subsection{Pilot silver trên bản dịch tiếng Việt đã thực hiện}
++Theo phạm vi bổ sung được người dùng cho phép, 300 cặp có sẵn được AI dịch và gán nhãn từ văn bản nguồn; bốn trường hợp không chắc chắn được giữ trong inventory và loại trước fit. Pilot giữ 179 train, 58 validation và 59 test. DistilBERT cung cấp 768 đặc trưng, MobileNetV3-Large ImageNet cung cấp 960 đặc trưng; cả hai encoder giữ cố định. TF-IDF, các head LR và hai kiểu nối đặc trưng được chọn qua 18 lần fit trên CPU. Phần kết quả ở Mục~\ref{sec:vi-silver-pilot} phân biệt các nhánh và đối chứng cùng đầu vào.
++
++Nhãn silver xuất phát từ \emph{văn bản nguồn}, không do người gán độc lập xem cả ảnh và câu; bản dịch cùng lượt có thể thêm thiên lệch ngôn ngữ. Corpus được nguồn mô tả tiếng Anh nhưng chưa được audit ngôn ngữ từng hàng. Sự kiện Sri Lanka test đã xuất hiện trong pilot trước, nên đây là bằng chứng phát triển hồi cứu trên dữ liệu dịch, chưa phải phép xác nhận mới hoặc corpus tin cứu hộ tiếng Việt gốc. Không đóng điều kiện gold của nghiên cứu chính hoặc cổng dữ liệu human bằng nhãn AI.
++
++\subsection{Thiết kế mở rộng cho báo cáo tiếng Việt gốc}
+ Phương án đề xuất dùng target nhị phân của Mục~\ref{sec:text-design} cho cả ảnh-only, text-only và fusion. Nhãn cần được người gán độc lập xác định từ hồ sơ ghép cặp theo hướng dẫn thống nhất; không lấy nhãn từ điểm mô hình, số cờ OR hoặc thứ tự do scheduler sinh. Ảnh-only có thể thiếu bằng chứng về một yêu cầu chỉ nêu bằng lời, nên cần báo lỗi theo nhóm thông tin sẵn có thay vì loại các trường hợp khó sau khi xem dự đoán. Nhãn nội dung này chỉ là một bước khảo sát để tiến tới phân tích cứu hộ, chưa đáp ứng đánh giá mức khẩn cấp hoặc ưu tiên nghiệp vụ.
+ 
+ Nhánh ảnh dự kiến dùng backbone MobileNetV3-Large khởi tạo ImageNet, bỏ đầu bốn mức ngập; nhánh câu dùng DistilBERT đa ngôn ngữ theo Công thức~\ref{eq:text-proposed}. Trước hết giữ cố định encoder, chuẩn hóa và nối hai vector để học một đầu phân loại hai lớp bằng cross-entropy. Chỉ xem xét tinh chỉnh encoder trong một cấu hình bổ sung được chọn trên validation, tách khỏi cấu hình frozen. Không mặc định dùng checkpoint Dataset\_Flood làm bằng chứng chuyển miền: quan hệ nguồn giữa ảnh huấn luyện cũ và corpus mới còn phải kiểm tra.
+@@ -53,4 +58,4 @@
+ 
+ Che một block của fusion đã train là phép thử nhạy cảm, không tương đương chuyển sang classifier đơn. Pilot đã cho thấy rủi ro này: mất ảnh làm recall informative của fusion giảm mạnh. Bởi vậy chính sách chuyển nhánh tiếng Việt vẫn phải đánh giá riêng trên cùng report IDs với điều kiện thiếu nguồn được khóa trước; không tuyên bố đã chịu lỗi chỉ nhờ có mã chọn nhánh.
+ 
+-Với hai nguồn có vẻ khác nhau, hệ thống dự kiến giữ nguyên cả bằng chứng và cờ bất đồng, trả về các trường cần xác nhận như thời điểm chụp hoặc vị trí được mô tả. Ảnh không thấy người không đủ bác bỏ tin có người mắc kẹt ngoài khung hình; từ khóa phủ định không được tự biến thành cờ dương. Việc xác nhận của con người phải được ghi cùng phiên bản trước khi cập nhật trường cấu trúc. Thiết kế ablation và đánh giá thiếu nguồn ở Mục~\ref{sec:02-evaluation-design} là kế hoạch chưa thực hiện, không phải xác nhận fusion đã được triển khai trong ứng dụng.
++Với hai nguồn có vẻ khác nhau, hệ thống dự kiến giữ nguyên cả bằng chứng và cờ bất đồng, trả về các trường cần xác nhận như thời điểm chụp hoặc vị trí được mô tả. Ảnh không thấy người không đủ bác bỏ tin có người mắc kẹt ngoài khung hình; từ khóa phủ định không được tự biến thành cờ dương. Việc xác nhận của con người phải được ghi cùng phiên bản trước khi cập nhật trường cấu trúc. Thiết kế ablation xác nhận trên gold tiếng Việt gốc ở Mục~\ref{sec:02-evaluation-design} vẫn chưa thực hiện. Các phép thử silver ở Mục~\ref{sec:vi-silver-pilot} có phạm vi riêng, không xác nhận fusion đã được triển khai trong ứng dụng hoặc chính sách fallback đã được đánh giá trong vận hành.

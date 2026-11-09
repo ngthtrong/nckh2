@@ -1,0 +1,7 @@
+scope,source,unit,timing,status,limits
+CPU predict,seed1024/*/all_predictions.csv,256 test images per runtime,predict only; excludes decode/preprocess/load,RECOMPUTED,one saved session; same scope and bundle only for speedup
+Android classifyImage,"seed159,1024/mobile/**/*.json",32 sessions; 256 shared test images; 4 devices,"decode + preprocess + inference, excludes package read",32 RAW VERIFIED,8192 repeated predictions not independent images; APK/thermal/repeats unknown
+Server clustering,RQ CSV/checkpoints,40 run/seed pairs,server clustering distinct from on-device inference,P03,simulated batch analysis
+Proxy transmission PC,thuc_nghiem_nq/experiment_weak_network/results/20261005-102040/weak_network.csv,"2313 requests, 257 validation images x3 modes x3 profiles",proxy transfer/request,RAW_PRESENT,not cell; no Flutter/model/adaptive policy
+Android UI and service E2E,report setup/system-tests narrative,"2 reported runs x9 cases, service/UI/dashboard scopes",case includes waits/manual/observations,REPORTED_UNVERIFIED_RAW,missing raw/log/APK; Case8 failure retained
+Web E2E,thuc_nghiem_nq/experiment_e2e/RESULTS.md,2 reported runs; seeded DB not app-created reports,desktop web,REPORTED_UNVERIFIED_RAW,no native mobile AI or real SMS

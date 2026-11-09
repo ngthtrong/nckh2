@@ -8,6 +8,8 @@ Tiền xử lý là một phần của mô hình: cùng một ảnh gốc có th
 \end{equation}
 Khi chuyển môi trường cần kiểm tra thứ tự RGB, hướng EXIF, cách làm tròn kích thước letterbox, vị trí đệm và phép nội suy. Vì vậy, khi nhãn của CPU và ứng dụng khác nhau, bước kiểm tra đầu tiên là parity tensor và mã băm asset; chưa có căn cứ quy lỗi ngay cho ONNX hay ExecuTorch.
 
+Chuỗi giải mã và chuẩn hóa chỉ đưa ảnh về cùng hợp đồng đầu vào; nó không bảo đảm ảnh đủ thông tin để phân loại. Ảnh tối có thể che mốc nước, ảnh rung làm mất biên người hoặc xe, còn ảnh nén mạnh có thể làm thay đổi kết cấu. Phóng ảnh nhỏ lên không phục hồi được các chi tiết đó. Giữ tỷ lệ bằng letterbox cũng có đánh đổi: một cảnh rất rộng hoặc cao chỉ chiếm một phần tensor, nên vật thể tham chiếu càng nhỏ. Bởi vậy cần đọc thống kê tệp ở Bảng~\ref{tab:image-profile} cùng phân tích lỗi và phép thử suy giảm CPU ở Mục~\ref{sec:image-quality-cpu-results}; chưa dùng các thao tác tiền xử lý như bằng chứng mô hình đã bền vững với ảnh camera.
+
 \subsection{Backbone, đầu phân loại và đầu ra}
 MobileNetV3 kết hợp depthwise convolution, inverted residual, cơ chế điều tiết kênh squeeze-and-excitation và các hàm kích hoạt được chọn theo kiến trúc \citep{howard2019mobilenetv3}. Việc chọn kiến trúc này là một giả thuyết triển khai cần kiểm chứng bằng dữ liệu của đề tài và runtime được dùng.
 
@@ -70,6 +72,8 @@ Weighted sampler, class-weight loss & Tắt \\
 Checkpoint được lựa chọn ưu tiên theo accuracy trên tập validation. Nếu accuracy nằm trong vùng sai số 0,005 so với cực đại đã thấy, checkpoint có tỷ lệ lỗi nặng thấp hơn có thể được chọn. Do đó checkpoint được giữ không nhất thiết là epoch có accuracy cao nhất đơn thuần. Test là bước đánh giá sau lựa chọn, không được đưa vào scheduler hoặc quy tắc chọn checkpoint.
 
 Hình huấn luyện trong báo cáo được cập nhật từ config và artifact seed \BenchmarkSeed{}. Notebook được dùng để giải thích cơ chế; benchmark runtime được chọn thuộc seed \BenchmarkSeed{}, lượng tử hóa seed \QuantizationSeed{} và benchmark mobile của phương án triển khai dùng seed 1024. Các cấu hình mobile seed 159 được giữ làm đối chứng trong phần so sánh mô hình. Seed huấn luyện không tự xác nhận manifest chia tập của phiên mới.
+Hình~\ref{fig:training-history} trình bày diễn biến loss theo các epoch đã lưu.
+
 \begin{figure}[htbp]\centering
 \includegraphics[width=\textwidth]{training-loss.pdf}
 \caption{Loss theo 11 epoch đã lưu của model seed 1024}
@@ -77,14 +81,14 @@ Hình huấn luyện trong báo cáo được cập nhật từ config và artif
 \end{figure}
 \begin{figure}[htbp]\centering
 \includegraphics[width=\textwidth]{training-metrics.pdf}
-\caption{Các chỉ số train và validation theo epoch của model seed 1024}
+\caption{Các chỉ số train và validation theo epoch của model seed 1024}\label{fig:training-metrics}
 \end{figure}
 \begin{figure}[htbp]\centering
 \includegraphics[width=\textwidth]{validation-recall.pdf}
-\caption{Recall validation theo từng lớp của model seed 1024}
+\caption{Recall validation theo từng lớp của model seed 1024}\label{fig:validation-recall}
 \end{figure}
 
-Train loss có xu hướng giảm trong các hàng đã lưu, trong khi validation accuracy dao động. Khoảng cách train--validation ở cuối history cho thấy cần giữ quy tắc chọn trên validation và đánh giá test độc lập. Chỉ từ CSV chưa thể kết luận mọi dao động là overfitting hoặc phiên đã dừng đúng cơ chế early stopping; cần đối chiếu log và metadata checkpoint để xác định nguyên nhân hoặc epoch được xuất cuối.
+Hình~\ref{fig:training-metrics} trình bày các chỉ số train và validation; Hình~\ref{fig:validation-recall} tách recall validation theo từng lớp. Train loss có xu hướng giảm trong các hàng đã lưu, trong khi validation accuracy dao động. Khoảng cách train--validation ở cuối history cho thấy cần giữ quy tắc chọn trên validation và đánh giá test độc lập. Chỉ từ CSV chưa thể kết luận mọi dao động là overfitting hoặc phiên đã dừng đúng cơ chế early stopping; cần đối chiếu log và metadata checkpoint để xác định nguyên nhân hoặc epoch được xuất cuối.
 
 \subsection{Tối ưu hóa mô hình: PTQ, QAT và cắt tỉa}\label{sec:02-optimization}
 Ba cơ chế này khác nhau và được đánh giá riêng (Hình~\ref{fig:flow-ai-training-optimization}). Lượng tử hóa ánh xạ số thực $x$ sang số nguyên $x_q$ theo scale $\delta_q>0$ và zero-point $z_q$:
@@ -96,12 +100,16 @@ PTQ xác định các tham số sau huấn luyện từ dữ liệu calibration;
 
 Cắt tỉa có cấu trúc thay đổi kênh hoặc nhóm tham số của mạng. Trong artifact hiện tại, phương pháp \texttt{global\_group\_magnitude\_channel} có target ratio 0,01; số tham số trước và sau là 4.207.156 và 4.145.694, với cấu hình lưu trong benchmark seed \PruningSeed{}. Lợi ích được kiểm tra bằng tệp thực, dự đoán và timing cùng runtime: giảm tham số, giảm byte và tăng tốc là ba kết quả riêng. Chương~\ref{chap:04-evaluation} giữ cả trường hợp giảm dung lượng nhưng runtime chậm hơn.
 
-\begin{landscape}
-\begin{figure}[p]
+Lượng tử hóa thay đổi biểu diễn số và đường thực thi toán tử, còn cắt tỉa thay đổi cấu trúc mạng. Vì vậy QAT không đồng nghĩa với cắt tỉa, và một tệp được gọi là INT8 không tự bảo đảm mọi toán tử chạy nhanh hơn FP32 trên mọi runtime. Kích thước tệp còn phụ thuộc kiểu đóng gói và metadata. Khi đánh giá lựa chọn triển khai, cần so trong cùng phiên: Accuracy và macro-F1 để thấy chất lượng chung; recall high cùng số lỗi nặng để thấy kiểu thất bại; dung lượng asset thực để thấy chi phí lưu/truyền; trung vị và P95 để thấy độ trễ. Không ghép độ trễ thấp nhất của các phiên khác nhau vào một thứ hạng chung.
+
+\begin{reportlandscapefigure}
 \centering
-\setlength{\abovecaptionskip}{4pt}
-\includegraphics[width=\linewidth]{flow_09_ai_training_optimization.pdf}
+
+\includegraphics[width=\linewidth,height=\ReportLandscapeImageHeight,keepaspectratio]{flow_09_ai_training_optimization.pdf}
 \caption{Pipeline quy trình huấn luyện, tối ưu nén mô hình và xuất runtime AI kép}
 \label{fig:flow-ai-training-optimization}
-\end{figure}
-\end{landscape}
+\end{reportlandscapefigure}
+
+\paragraph{Phân tích lỗi và phạm vi suy luận.} Đối chiếu prediction seed 1024 trên cùng 256 ID cho FP32/PTQ/QAT cho recall lớp high lần lượt 74,07\%/64,81\%/74,07\%, trong khi số lỗi lệch ít nhất hai mức là 3/17/45. Recall high riêng lẻ không đủ kết luận chất lượng QAT: recall medium chỉ 11,67\% và nhiều nhầm lẫn sang mức thấp hơn hoặc cao hơn. Đây là mô tả lỗi đã quan sát, chưa cô lập nguyên nhân QAT. Sau pruning, số tham số giảm từ 4.207.156 xuống 4.145.694 (khoảng 1,46\%); chênh lệch byte checkpoint PTH còn chịu ảnh hưởng metadata/optimizer. Vì vậy giảm byte, giảm tham số và tăng tốc được xem là ba kết quả riêng; so tốc độ phải cùng runtime và cùng phạm vi predict.
+
+\paragraph{Cơ sở lựa chọn cho nguyên mẫu.} Nhánh cắt tỉa seed 1024 được dùng cho nguyên mẫu và phép thử suy giảm CPU vì đã có asset xuất cùng benchmark: Accuracy 80,08\%, macro-F1 78,26\% và recall high 85,19\% trên test đã lưu. Đổi lại, số lỗi nặng là 4 so với 3 của baseline; trong phiên cắt tỉa, ONNX có trung vị predict khoảng 17,02 ms so với 10,28 ms của baseline ONNX, còn PTE khoảng 59,20 ms so với 30,28 ms của baseline PTE. Lựa chọn này ưu tiên chất lượng phân loại quan sát được trong một nguyên mẫu nghiên cứu, không chứng minh cắt tỉa tăng tốc. PTQ phù hợp để khảo sát giảm dung lượng nhưng đánh đổi chất lượng; QAT của phiên này cần phân tích lỗi trước khi cân nhắc sử dụng. Kết quả chưa chứng minh QAT luôn kém, và việc so nhiều nhánh trên cùng test chưa thay thế xác nhận độc lập cho lựa chọn cuối.

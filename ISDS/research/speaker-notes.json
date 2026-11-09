@@ -1,0 +1,158 @@
+[
+  {
+    "slide": 1,
+    "title": "Title",
+    "seconds": 20,
+    "notes": "Good morning. I will present paper 6444, Stress-Testing Product-Gated Clustering and Bounded Priority Ranking for Flood-Rescue Reports: A Synthetic Study. This work asks whether safeguards at the clustering and scoring stages actually translate into better simulated dispatch. The study is from the College of Information and Communication Technology, Can Tho University, and is funded by Can Tho University under project THS2026-68."
+  },
+  {
+    "slide": 2,
+    "title": "Presentation overview",
+    "seconds": 15,
+    "notes": "The presentation has five parts. I will introduce the problem and the two experimental datasets, explain the graph and priority methods, define the research questions and metrics, present results for RQ1 through RQ3, and finish with limitations and the next validation steps."
+  },
+  {
+    "slide": 3,
+    "title": "Research background and problem",
+    "seconds": 45,
+    "notes": "During a flood, several people may report the same physical incident, while two distinct incidents may be close in location and time. Some reports may be duplicated, incomplete, or unrelated to a genuine incident. We therefore need to distinguish a report from an incident: a report is an observation or claim, while an incident is the physical event we hope to act on. If one incident becomes several predicted destinations, a scheduler may waste trips. If distinct incidents are merged, some people may remain unserved. Our concern is how these representation errors affect the final schedule, rather than only whether the reports look well grouped. Social-sensing research provides the broader motivation [6]."
+  },
+  {
+    "slide": 4,
+    "title": "Related work and research gap",
+    "seconds": 45,
+    "notes": "Prior work provides useful pieces of this problem. Social sensing extracts events from streams [6]. CrisisMMD offers multimodal social-media content for disaster-response tasks [7]. FloodNet provides high-resolution aerial imagery for post-flood scene understanding [8]; it is not a linked stream of individual rescue requests. Humanitarian logistics also shows that effectiveness, speed, equity, and operational cost can compete [5]. These precedents motivate our study, but do not validate our particular rescue priority rule. The gap examined here is the propagation of false splits, false merges, and noise into a scheduler that cannot consult the incident truth. We evaluate those stages separately."
+  },
+  {
+    "slide": 5,
+    "title": "Observable pipeline and study contributions",
+    "seconds": 50,
+    "notes": "Each observable report enters the pipeline through its location, timestamp, flood and urgency evidence, population claim, vulnerability evidence, and a confidence heuristic. Reports missing location or time are routed to manual review. Eligible reports form a sparse weighted graph. Community detection produces predicted clusters, duplicate families support a bounded priority score, and a batch scheduler acts on those predicted destinations. Incident identity, benefit, deadline, and harm are withheld until predictions and the schedule are fixed. The contributions are a checkable edge-localization bound, exact-copy invariance under fixed evidence grouping and inputs, and an audit of downstream dispatch. The manual-review path is specified, but empirical missingness robustness was not established by RQ1."
+  },
+  {
+    "slide": 6,
+    "title": "Generator 3.0: semi-synthetic construction",
+    "seconds": 60,
+    "notes": "The word semi-synthetic applies specifically to the geographic and historical context. Copernicus EMSR848 provides the Central Viet Nam flood context [9], OpenStreetMap supplies geographic anchors [10], and WorldPop supplies population-reference cells [11]. The generator then creates 16 latent incidents per run and multiple reports around each incident. Location and time variation, evidence values, trapped-person claims, vulnerability, duplicates, and coordinated nonincident campaigns are simulated. Population reference is not observed trapped-person truth. Across 80 runs there are 26,288 reports. Only observable inputs enter inference; incident links and attack labels are reserved for evaluation. This construction supports controlled tests. It does not turn simulated reports into field observations, and the available bundle does not preserve raw source snapshots or row-level source lineage."
+  },
+  {
+    "slide": 7,
+    "title": "Candidate 4.1: a separate synthetic suite",
+    "seconds": 50,
+    "notes": "RQ2 and RQ3 use a different artifact bundle, Candidate 4.1. It contains 80 datasets, 16 incidents per dataset, and 30,229 reports. Geometry, incident timing, need, reports, duplicates, and attack scenarios are generated procedurally. Independent outcome parameters define simulated benefit, deadlines, service demand, access, and harm. They are not algebraic transformations of the proposed priority score. Candidate 4.1 is fully synthetic and is not claimed to be EMSR848-anchored. Using generated truth makes controlled perturbations and paired policy comparisons possible. The trade-off is limited external validity. The two suites test different stages; they must not be presented as one empirical chain on the same sample."
+  },
+  {
+    "slide": 8,
+    "title": "Product and Additive edge weights",
+    "seconds": 70,
+    "notes": "Here each node is a report and an edge weight describes observable similarity. G measures geographic proximity, T measures temporal proximity, and C measures contextual similarity in flood and urgency evidence. The admission terms are one only when location and time are available. Product multiplies the spatial gate G by the weighted temporal-plus-contextual affinity. Additive sums the three weighted terms. Consider reports that are similar in time and content but far apart: the Product spatial factor attenuates their whole non-geographic contribution, whereas Additive can retain contributions from time and context. Bilateral filtering is a structural precedent for spatial-range multiplication [2]; the complete report formulas belong to this paper. After thresholding, top-k neighbor retention and symmetrization, we obtain a sparse graph. The Product bound limits individual retained-edge distance under its stated positive-threshold conditions. Long chains can still connect geographically separated nodes, so this is not an unconditional compactness guarantee for an entire cluster."
+  },
+  {
+    "slide": 9,
+    "title": "Louvain: from graph to communities",
+    "seconds": 50,
+    "notes": "Product and Additive define edge weights. Louvain performs the subsequent community detection [1]. It starts with individual nodes in their own communities, considers moving nodes to neighboring communities when modularity increases, and then aggregates the communities into a smaller graph. These phases repeat. Modularity compares within-community link weight with a degree-based null model; it is not agreement with incident labels. Our animation is a small pedagogical illustration of this logic. Product Louvain means Louvain on the Product graph; Additive Louvain means the same detector on the Additive graph. Product Leiden changes the community detector while retaining the Product graph. Graph composition and community detection are therefore distinct choices."
+  },
+  {
+    "slide": 10,
+    "title": "Duplicate-aware bounded priority",
+    "seconds": 55,
+    "notes": "After clustering, exact and near-duplicate reports are grouped into evidence families. Family maxima reduce the influence of repeated copies, confidence gates the evidence, population claims are clipped and logarithmically compressed, and vulnerability amplification saturates through a hyperbolic tangent. With nonnegative normalized weights and the stated parameter constraints, priority remains between zero and mu, with mu at most two. An exact transport copy cannot change the family-wise maxima when grouping and all score inputs remain fixed. This is a narrow mathematical property. It does not authenticate a source, validate the confidence heuristic, or show that the resulting ranking reflects rescue benefit. Expert validation remains necessary [5]."
+  },
+  {
+    "slide": 11,
+    "title": "Research questions",
+    "seconds": 40,
+    "notes": "We now state the three questions precisely. RQ1 asks whether independently selected Product composition improves clustering over independently selected Additive composition. RQ2 asks whether the duplicate-aware score aligns with independently generated benefit under report-level stresses. RQ3 asks how predicted split, merge, and noise errors propagate into dispatch. Each question addresses a different endpoint. A strong clustering metric cannot stand in for a ranking metric, and a stable score cannot stand in for an operational outcome. This distinction guides both the experiment design and the interpretation of the negative findings."
+  },
+  {
+    "slide": 12,
+    "title": "Evaluation protocol",
+    "seconds": 50,
+    "notes": "Both suites use 20 development, 20 calibration, and 40 held-out test units. Selection happens on calibration data, and the tested configurations are fixed before the stress evaluation. RQ2 supplies oracle incident grouping to isolate the ranking rule. RQ3 uses predicted clusters and locks scheduling before evaluator truth is joined. Paired comparisons use the same runs or seeds for candidate and comparator. Bootstrap intervals describe uncertainty, while Wilcoxon tests and Holm adjustment follow the exported comparison families. These procedures answer related but different questions, so an interval and an adjusted p-value need not lead to identical threshold decisions. In RQ3, we average the three resource conditions within each seed and retain 40 paired observations, not 120 independent samples."
+  },
+  {
+    "slide": 13,
+    "title": "Reported metrics: clustering",
+    "seconds": 55,
+    "notes": "Adjusted Rand Index (ARI) compares a predicted partition with the incident partition after correcting pair agreement for chance [3]. One indicates identical grouping, and a value near zero corresponds to chance-level agreement under the index's reference model; negative values are possible. An ARI of 0.91 does not mean that 91 percent of reports were classified correctly. Pairwise F1 asks which pairs of reports are grouped together. Pair precision is reduced by false merges, while pair recall is reduced by false splits; F1 balances them. In fixed-copy stresses, evaluation uses the original incident-linked reports, keeping the evaluation unit consistent across multiplicities. Geographic diameter and fake-destination diagnostics add operational context but answer different questions."
+  },
+  {
+    "slide": 14,
+    "title": "Reported metrics: ranking and stability",
+    "seconds": 65,
+    "notes": "Normalized Discounted Cumulative Gain (NDCG) at five measures the quality of the first five ranked incidents relative to the best possible order [4]. In this implementation, the gain is the independently simulated nonnegative benefit itself. Discounted Cumulative Gain (DCG) sums those benefits in predicted order with a logarithmic position discount, and NDCG divides by the ideal DCG. The notebook uses scikit-learn's linear-gain ndcg_score, not the alternative two-to-the-relevance-minus-one convention. A score near one means a nearly ideal top-five order under the simulated benefit definition; it does not represent a probability of a correct rescue decision. Priority drift measures normalized absolute score change after perturbation, and top-five churn measures membership change in the top-five set. Lower drift or churn means greater stability, which can coexist with a poor benefit ranking."
+  },
+  {
+    "slide": 15,
+    "title": "Reported metrics: dispatch outcomes",
+    "seconds": 45,
+    "notes": "We focus on two lower-is-better outcomes. Simulated harm combines lateness beyond a generated deadline and grace interval with a service-capacity penalty. Its units are model units, not measured injuries, lives lost, or monetary damage. Deadline-miss rate is the fraction of incidents whose simulated response time exceeds their generated deadline. The evaluator assigns an unserved incident the fixed response horizon used by the simulation. Other diagnostics include unserved incidents, duplicate trips, fake trips, arrival times, workload, and equity. These metrics expose operational consequences of the predicted destinations, but their values and trade-offs remain conditional on the simulation assumptions."
+  },
+  {
+    "slide": 16,
+    "title": "RQ1: clustering comparison",
+    "seconds": 65,
+    "notes": "On the 40 held-out Generator-3.0 runs, Additive Louvain has mean ARI 0.9191 and Product Louvain 0.9072. Product minus independently tuned Additive is minus 0.01184, with an unadjusted bootstrap interval from minus 0.02257 to minus 0.00240. The Holm-adjusted Wilcoxon p-value is 0.2560, so the tested comparison does not establish a Product composition advantage. Product versus matched-density Additive also has adjusted p equal to 0.2560. Matching edge density reduces one difference between graph constructions but does not identify a causal operator effect. Notice the operational diagnostic as well: the Product pipeline has zero fake absorption but a 16.49 percent false-destination rate, because fake-only reports can form their own destinations. Avoiding genuine clusters is not the same as rejecting misinformation."
+  },
+  {
+    "slide": 17,
+    "title": "RQ1: fixed stresses and graph changes",
+    "seconds": 70,
+    "notes": "The map animation compares the same report set and locked graph settings under separate fixed stress conditions. It is not a streaming flood model or evidence of online updating. The aggregate heatmap evaluates 40 held-out runs under location noise of 100 or 300 metres, timestamp noise of 15 or 60 minutes, and exact copies at multiplicity two or five. All tested location and timestamp noise levels reduce mean ARI. No method leads in every condition. Twofold copies slightly increase the four graph variants' ARI, whereas fivefold copies reduce their means to approximately 0.30. Product's mean paired change under fivefold copies is minus 0.6108. These two multiplicities do not identify a universal collapse threshold or show a beneficial effect of duplication. The graph construction may be sensitive to thresholding and top-k retention, but this experiment does not isolate that mechanism."
+  },
+  {
+    "slide": 18,
+    "title": "RQ2: copies and adversarial reports",
+    "seconds": 55,
+    "notes": "With oracle grouping, exact copies at two, five, and ten times multiplicity produce zero revised score drift when the evidence grouping and score inputs remain fixed. Legacy drift increases from 0.0026 to 0.0086 and 0.0148. This matches the narrow family-wise invariance property. Now compare the coordinated high-confidence campaign: revised drift is 0.1688, versus 0.0309 for legacy, and the revised false-priority lift is 0.8828. The revised score can therefore be stable to literal copies yet vulnerable to coordinated apparently credible evidence. Other stresses also show trade-offs: sensitivity to low-confidence urgency, population, and vulnerability inflation can be greater than for legacy. We must report these adverse cases alongside the invariance result."
+  },
+  {
+    "slide": 19,
+    "title": "RQ2: alignment with simulated benefit",
+    "seconds": 55,
+    "notes": "Revised NDCG at five is 0.6669 with a bootstrap interval from 0.6306 to 0.7018. Its mean is slightly above legacy by 0.0121, but the Holm-adjusted comparison is not significant. Population-only and random ordering have point estimates of 0.6709 and 0.6763. Those point estimates alone do not establish significant differences. The conclusion is that general benefit alignment is unestablished, not that a random policy has been proven superior. Spearman correlation is minus 0.0304 with an interval spanning zero, and top-five overlap is 0.285. Because this evaluation already uses the correct incident grouping supplied by the generator, the weak alignment cannot be explained solely by upstream clustering errors."
+  },
+  {
+    "slide": 20,
+    "title": "RQ3: dispatch consequences",
+    "seconds": 70,
+    "notes": "The points show descriptive means for each resource condition, with 40 test seeds per condition. Primary inference averages the three conditions within each seed. On the Product partition, revised priority increases mean simulated harm by 14.34 relative to legacy and reduces deadline misses by 1.88 percentage points. Neither difference is significant after Holm correction, with p-values 0.563 and 0.247. Revised is worse than nearest-first on both harm and deadline misses in the adjusted comparisons. Nearest-first also has lower descriptive means in every tested resource condition. One plausible explanation is that a need-based score does not fully capture travel costs and scheduling constraints, but this mechanism was not isolated. These results show consequences under the simulation; they do not establish nearest-first as a field rescue policy."
+  },
+  {
+    "slide": 21,
+    "title": "Discussion and threats to validity",
+    "seconds": 50,
+    "notes": "There are three levels of evidence. The mathematical level gives conditional retained-edge localization and exact-copy invariance. The empirical level tests clustering, ranking, and scheduling within these generators and configurations. The field level would require representative observations, valid operational objectives, and deployment evidence. Our results reach the first two levels, with important negative findings. The suites are separate, the reports and outcomes are synthetic, and the geographic anchors do not establish representative source lineage. RQ1 does not empirically test missingness, the confidence heuristic is not a calibrated truth probability, and the priority objective lacks expert endorsement. Runtime extraction costs, source authenticity, actual harm, and out-of-distribution transfer remain unvalidated."
+  },
+  {
+    "slide": 22,
+    "title": "Conclusion",
+    "seconds": 40,
+    "notes": "Three conclusions follow. Product gating has a conditional edge-localization property, but no general clustering advantage is established and graph clustering degrades under strong exact-copy stress. Family-wise scoring is invariant to exact copies under fixed grouping and inputs, but benefit alignment and resistance to coordinated high-confidence attacks remain unestablished. Finally, these upstream properties do not ensure better dispatch: the tested revised rule provides no general advantage over legacy and has worse harm and deadline outcomes than nearest-first. Each endpoint requires its own validation. The study provides reproducible synthetic diagnostics, not a validated rescue policy."
+  },
+  {
+    "slide": 23,
+    "title": "Future work",
+    "seconds": 40,
+    "notes": "The next steps follow directly from the evidence gaps. First, acquire a documented field-report sample with independently annotated physical-incident linkage and preserve source snapshots and lineage. Second, define and validate priority trade-offs with experienced rescue practitioners, rather than treating the current constants as policy. Third, test source and mechanism shifts beyond the present generators. Finally, evaluate ranking together with travel, access, service demand, and fleet constraints, using independently supported operational outcomes. These are proposed validation steps, not completed experiments. The current code and archived artifact support reproducibility [12], while later stress additions must be identified separately from the release."
+  },
+  {
+    "slide": 24,
+    "title": "References: methods and evaluation",
+    "seconds": 5,
+    "notes": "These references support community detection, the spatial-range precedent, clustering and ranking metrics, humanitarian objectives, and social sensing. The displayed bibliographic entries correspond to numbered citations used in the presentation."
+  },
+  {
+    "slide": 25,
+    "title": "References: data and application context",
+    "seconds": 5,
+    "notes": "These references describe the disaster datasets, geographic and population sources, and the study artifact. Geographic source references document context and data construction; they do not establish field validation of our simulated reports."
+  },
+  {
+    "slide": 26,
+    "title": "Questions and discussion",
+    "seconds": 5,
+    "notes": "Thank you for your attention. I welcome questions about the conditional guarantees, the two synthetic suites, the adverse findings, and what additional evidence would be needed before considering operational use."
+  }
+]

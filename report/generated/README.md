@@ -8,13 +8,24 @@ python3 report/scripts/export_results.py
 
 `make -C report content`, bản nội dung hai mặt và bốn sản phẩm riêng tự gọi bước xuất trước khi biên dịch. Không chỉnh tay `values.tex`, `tables/*.tex` hoặc `provenance.json`.
 
+Pilot tiếng Việt dịch/nhãn AI ngày 08/11/2026 được xuất bởi `scripts/export_vi_silver.py`, gọi từ `export_results.py`. Nguồn ở `docs/revision-plan/outputs/vi-nlp-fusion-silver-20261108/`: 59 ID test chung, 531 hàng dự đoán của chín cấu hình frozen và 177 hàng của ba seed fine-tuning, không phải 708 mẫu độc lập. Exporter yêu cầu receipt kiểm metric/CI, T2 và cập nhật trọng số encoder; kiểm hash kết quả rồi sinh `vi-silver-values.tex`, hai bảng `vi-silver-*.tex` và provenance riêng. Build chỉ đọc kết quả, không huấn luyện hoặc suy luận. Nhãn tham chiếu do AI gán từ câu nguồn, không phải gold ảnh–văn bản của chuyên gia; không gộp với task informative của pilot trước.
+
 Bộ xuất sử dụng Python chuẩn, không huấn luyện hoặc thay đổi artifact gốc. Nó thực hiện:
 
 - Đối chiếu toàn bộ ảnh với đường dẫn tương đối và MD5 trong split; kiểm tra nhóm MD5/perceptual/split không vượt train/validation/test.
+
 - Kiểm tra hash config, hash split, số ảnh và scope của các summary ảnh.
 - Kiểm tra CSV dự đoán dùng đúng tập test; tính lại ma trận nhầm lẫn, Accuracy và macro-F1.
 - Xuất 14 bảng: chia ảnh, ma trận/lớp, định dạng FP32, PTQ/QAT, audit metric, pruning, RQ1 benchmark/stress, RQ2 alignment/robustness/sensitivity và RQ3 hiệu ghép cặp theo seed và benchmark ứng dụng.
 - Ghi SHA-256 của các nguồn trực tiếp, commit đầu vào và kết quả audit trong `provenance.json`.
+
+Phép bổ sung CPU ngày 08/11/2026 dùng `scripts/export_image_quality.py`, được gọi từ `export_results.py`. Exporter này chỉ đọc 2.304 hàng dự đoán đã đo, kiểm source/result hashes và tính lại Accuracy/macro-F1/recall high/lỗi nặng từ raw. Sinh `tables/image-quality-cpu.tex`, `image-quality-values.tex` và `image-quality-provenance.json`; không sửa generated tay. Nguồn là `docs/revision-plan/outputs/followup-20261108/phase-04/`, tách khỏi các benchmark cũ. Xem analysis/handoff để phân biệt 252 nhóm bootstrap với nguồn/sự kiện độc lập chưa xác minh, CI chưa hiệu chỉnh và CPU_ONLY. Build không chạy inference.
+
+## Bổ sung provenance ngày 07/11/2026
+
+Đường benchmark điện thoại mới dùng `build_phone_report_tables.py` với 32 JSON của seed159/1024, tách khỏi nguồn mobile seed42 lịch sử trong benchmark-sources.json. P02 đã đối chiếu metric/ID/nhãn và hash cả 32 phiên. Các CSV phụ README phone từng nhắc nhưng chưa hiện diện không được xem như output đã có.
+
+`export_revision_profiles.py` bổ sung bảng đặc điểm ảnh từ P02 image-profile.csv, kèm revision-profile-provenance.json; Makefile results gọi cùng các exporter hiện có. Không chạy model để sinh bảng này. Báo cáo thống kê và giới hạn cập nhật ở `../../docs/revision-plan/outputs/phase-02/handoff.md`; replay RQ và sai lệch còn lại ở phase-03. Phần seed42 bên dưới giữ thông tin đường dữ liệu lịch sử, không mô tả đầy đủ benchmark phone32 mới.
 
 ## Chọn nguồn benchmark và chuyển sang seed 1024
 

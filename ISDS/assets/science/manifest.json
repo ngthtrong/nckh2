@@ -1,0 +1,758 @@
+{
+  "schema": "isds-science-assets/1.0",
+  "inputs": {
+    "thucnghiem/results/cij_baseline_benchmark_results/benchmark_summary.csv": "de854e0c710b7dea3d0d2b316d927d9159572edb053e84e9cd7620240337bc0e",
+    "thucnghiem/results/rq1_results/aggregate/rq1_stress_paired_effects.csv": "d515bae27ecb91381787a827cad70ee5a09e8edb54b7b40a5a3e25cf5148495e",
+    "thucnghiem/results/rq2_results/rq2_summary.csv": "e2b5d6ccdf2e53291476ea8307a73ac9876d05038f88bcc203d655813b67296b",
+    "thucnghiem/results/rq3_results/rq3_dispatch_test.csv": "7745b83d838051818875749b1ff85ba32d7698f13d39ff99805f6380f00c9449",
+    "thucnghiem/results/RQ1_Reviewer_Stress_Colab.ipynb": "d8b61dd709e3d032f54219a35f41c142a6632ddac2133daab3e53e53779fab7e",
+    "thucnghiem/results/rq1_results/protocol.json": "4672808e4ac6b30bc99b06fdd3d875b84e6946dca4e063e7a1d1d9e0c614f402",
+    "thucnghiem/data/gold/run_041/algorithm_input.json": "bf21a264f0192e4179d9a2e59d1b486018b691448938fb38513b97ae019f2f7a",
+    "thucnghiem/data/gold/run_041/ground_truth.json": "38c794b03e98ebf984881ac61514ccc8cc1f0b7ecdc63e9ad1c2e7c48d813997",
+    "thucnghiem/results/rq1_results/checkpoints/run_041__baseline.json": "6e1d28e574151f8ce425d8ccb91915bbf2c9f49cded8d55db0893bcf50fe2939",
+    "thucnghiem/results/rq1_results/checkpoints/run_041__gps_noise_100m.json": "07ae020c986112d12b02b9a81e58cea06db3818bf07c00200943f0c3f72b2e4c",
+    "thucnghiem/results/rq1_results/checkpoints/run_041__gps_noise_300m.json": "6b059448ec93ffdc9323914c8f5e6126314b6f00e345e4b7c1764759970b3395",
+    "thucnghiem/results/rq1_results/checkpoints/run_041__time_noise_15min.json": "034c4b2b017e1a0baa5369abedd24cf80d4cd263bd78177f2e7fa363014535dc",
+    "thucnghiem/results/rq1_results/checkpoints/run_041__time_noise_60min.json": "6cbc03d32644527582be7e5cef46f7623eb852e8edfed7beaacad857c92f52bb",
+    "thucnghiem/results/rq1_results/checkpoints/run_041__exact_transport_copy_2x.json": "bc1dfd6dfb737068993e5ce6a815c60c15551fb70cb962253062647958ab0a48",
+    "thucnghiem/results/rq1_results/checkpoints/run_041__exact_transport_copy_5x.json": "a2c0d8f4710cb4763d1fbe88e2f0f2ae0429ca0a90bd2950777f3d2dcebcacc4"
+  },
+  "assets": {
+    "rq1_ari_ci.png": {
+      "kind": "exported-result chart",
+      "dimensions_px": [
+        1600,
+        712
+      ],
+      "caption": "Selected RQ1 comparators; means and bootstrap 95% CIs across 40 held-out runs. The axis spans 0–1; selected comparators are not the complete benchmark.",
+      "source_files": [
+        "thucnghiem/results/cij_baseline_benchmark_results/benchmark_summary.csv"
+      ],
+      "sha256": "e4d49838a67088267be0123ea118d8f65af90f9a07caf27ecd7e4b349d875988"
+    },
+    "rq1_stress_heatmap.png": {
+      "kind": "exported-result chart",
+      "dimensions_px": [
+        1600,
+        720
+      ],
+      "caption": "Mean paired change in ARI from each method’s control across 40 held-out runs, using original incident-linked reports. Descriptive heatmap; no between-method test is implied.",
+      "source_files": [
+        "thucnghiem/results/rq1_results/aggregate/rq1_stress_paired_effects.csv"
+      ],
+      "sha256": "78bfaa555aadd9a8dac889649bb62f14bba4f80f089fa10c02f5d6e9807764c4"
+    },
+    "rq2_ndcg_ci.png": {
+      "kind": "exported-result chart",
+      "dimensions_px": [
+        1600,
+        712
+      ],
+      "caption": "Benefit alignment under oracle incident grouping; means and bootstrap 95% CIs over 40 Candidate-4.1 held-out seeds. Point-estimate order is not a significance test.",
+      "source_files": [
+        "thucnghiem/results/rq2_results/rq2_summary.csv"
+      ],
+      "sha256": "d8211746ccedfc234c46ef0c12b957dfe78a8868d54cfe4cd7652e4a06cef0d9"
+    },
+    "rq2_priority_drift.png": {
+      "kind": "exported-result chart",
+      "dimensions_px": [
+        1600,
+        712
+      ],
+      "caption": "Controlled Candidate-4.1 perturbations; normalized absolute priority drift. Revised exact-copy invariance assumes fixed evidence grouping and score inputs. High-confidence campaign remains a failure case.",
+      "source_files": [
+        "thucnghiem/results/rq2_results/rq2_summary.csv"
+      ],
+      "sha256": "0f9b0a47d56e70072e294a1e12a5e87e5d5f4f77fb39b697cc5d47fb779884ff"
+    },
+    "rq3_dispatch.png": {
+      "kind": "exported-result chart",
+      "dimensions_px": [
+        1600,
+        736
+      ],
+      "caption": "Product-partition means by resource condition; lower is better for harm and deadline misses. The three conditions are not additional independent samples; inferential analysis first averages conditions within seed.",
+      "source_files": [
+        "thucnghiem/results/rq3_results/rq3_dispatch_test.csv"
+      ],
+      "sha256": "9ac214af7da2e88219d3c6a3aa568e014ee7e92197d3ec2a5a93b3093883ebfd"
+    },
+    "graph_stress.gif": {
+      "kind": "one-run original-method replay followed by exported cohort summary",
+      "dimensions_px": [
+        1600,
+        720
+      ],
+      "frames": 8,
+      "duration_ms": 22800,
+      "frame_durations_ms": [
+        2400,
+        2400,
+        2400,
+        2400,
+        2400,
+        2400,
+        2400,
+        6000
+      ],
+      "poster": "graph_stress.png",
+      "sha256": "6aef4a6d7723e7b8e92e3c9dfe1eeed9e2549fdb08a24bfa9f5c1e6648813d0f",
+      "values": [
+        {
+          "scenario": "baseline",
+          "methods": {
+            "product_cij_louvain": {
+              "scenario": "baseline",
+              "method": "product_cij_louvain",
+              "ari_replay": 0.8294589574997709,
+              "ari_checkpoint": 0.8294589574997709,
+              "n_edges_replay": 1577,
+              "n_edges_checkpoint": 1577,
+              "ari_matches": true,
+              "n_edges_match": true
+            },
+            "additive_cij_louvain": {
+              "scenario": "baseline",
+              "method": "additive_cij_louvain",
+              "ari_replay": 0.8294589574997709,
+              "ari_checkpoint": 0.8294589574997709,
+              "n_edges_replay": 1515,
+              "n_edges_checkpoint": 1515,
+              "ari_matches": true,
+              "n_edges_match": true
+            }
+          }
+        },
+        {
+          "scenario": "gps_noise_100m",
+          "methods": {
+            "product_cij_louvain": {
+              "scenario": "gps_noise_100m",
+              "method": "product_cij_louvain",
+              "ari_replay": 0.8183026521782093,
+              "ari_checkpoint": 0.8183026521782093,
+              "n_edges_replay": 1582,
+              "n_edges_checkpoint": 1582,
+              "ari_matches": true,
+              "n_edges_match": true
+            },
+            "additive_cij_louvain": {
+              "scenario": "gps_noise_100m",
+              "method": "additive_cij_louvain",
+              "ari_replay": 0.8183026521782093,
+              "ari_checkpoint": 0.8183026521782093,
+              "n_edges_replay": 1516,
+              "n_edges_checkpoint": 1516,
+              "ari_matches": true,
+              "n_edges_match": true
+            }
+          }
+        },
+        {
+          "scenario": "gps_noise_300m",
+          "methods": {
+            "product_cij_louvain": {
+              "scenario": "gps_noise_300m",
+              "method": "product_cij_louvain",
+              "ari_replay": 0.7170173915508801,
+              "ari_checkpoint": 0.7170173915508801,
+              "n_edges_replay": 1594,
+              "n_edges_checkpoint": 1594,
+              "ari_matches": true,
+              "n_edges_match": true
+            },
+            "additive_cij_louvain": {
+              "scenario": "gps_noise_300m",
+              "method": "additive_cij_louvain",
+              "ari_replay": 0.772378067059038,
+              "ari_checkpoint": 0.772378067059038,
+              "n_edges_replay": 1524,
+              "n_edges_checkpoint": 1524,
+              "ari_matches": true,
+              "n_edges_match": true
+            }
+          }
+        },
+        {
+          "scenario": "time_noise_15min",
+          "methods": {
+            "product_cij_louvain": {
+              "scenario": "time_noise_15min",
+              "method": "product_cij_louvain",
+              "ari_replay": 0.7980322137963769,
+              "ari_checkpoint": 0.7980322137963769,
+              "n_edges_replay": 1579,
+              "n_edges_checkpoint": 1579,
+              "ari_matches": true,
+              "n_edges_match": true
+            },
+            "additive_cij_louvain": {
+              "scenario": "time_noise_15min",
+              "method": "additive_cij_louvain",
+              "ari_replay": 0.7980322137963769,
+              "ari_checkpoint": 0.7980322137963769,
+              "n_edges_replay": 1488,
+              "n_edges_checkpoint": 1488,
+              "ari_matches": true,
+              "n_edges_match": true
+            }
+          }
+        },
+        {
+          "scenario": "time_noise_60min",
+          "methods": {
+            "product_cij_louvain": {
+              "scenario": "time_noise_60min",
+              "method": "product_cij_louvain",
+              "ari_replay": 0.7980322137963769,
+              "ari_checkpoint": 0.7980322137963769,
+              "n_edges_replay": 1574,
+              "n_edges_checkpoint": 1574,
+              "ari_matches": true,
+              "n_edges_match": true
+            },
+            "additive_cij_louvain": {
+              "scenario": "time_noise_60min",
+              "method": "additive_cij_louvain",
+              "ari_replay": 0.7960298892106372,
+              "ari_checkpoint": 0.7960298892106372,
+              "n_edges_replay": 1493,
+              "n_edges_checkpoint": 1493,
+              "ari_matches": true,
+              "n_edges_match": true
+            }
+          }
+        },
+        {
+          "scenario": "exact_transport_copy_2x",
+          "methods": {
+            "product_cij_louvain": {
+              "scenario": "exact_transport_copy_2x",
+              "method": "product_cij_louvain",
+              "ari_replay": 0.8019342639877877,
+              "ari_checkpoint": 0.8019342639877877,
+              "n_edges_replay": 3337,
+              "n_edges_checkpoint": 3337,
+              "ari_matches": true,
+              "n_edges_match": true
+            },
+            "additive_cij_louvain": {
+              "scenario": "exact_transport_copy_2x",
+              "method": "additive_cij_louvain",
+              "ari_replay": 0.787786152251445,
+              "ari_checkpoint": 0.787786152251445,
+              "n_edges_replay": 3314,
+              "n_edges_checkpoint": 3314,
+              "ari_matches": true,
+              "n_edges_match": true
+            }
+          }
+        },
+        {
+          "scenario": "exact_transport_copy_5x",
+          "methods": {
+            "product_cij_louvain": {
+              "scenario": "exact_transport_copy_5x",
+              "method": "product_cij_louvain",
+              "ari_replay": 0.2891453703140963,
+              "ari_checkpoint": 0.2891453703140963,
+              "n_edges_replay": 8094,
+              "n_edges_checkpoint": 8094,
+              "ari_matches": true,
+              "n_edges_match": true
+            },
+            "additive_cij_louvain": {
+              "scenario": "exact_transport_copy_5x",
+              "method": "additive_cij_louvain",
+              "ari_replay": 0.28562063396606807,
+              "ari_checkpoint": 0.28562063396606807,
+              "n_edges_replay": 8105,
+              "n_edges_checkpoint": 8105,
+              "ari_matches": true,
+              "n_edges_match": true
+            }
+          }
+        }
+      ],
+      "aggregate_poster": "graph_stress_summary.png",
+      "aggregate_source": "thucnghiem/results/rq1_results/aggregate/rq1_stress_paired_effects.csv",
+      "aggregate_values": {
+        "product_cij_louvain": {
+          "gps_noise_100m": -0.011587864765788556,
+          "gps_noise_300m": -0.1256014118221726,
+          "time_noise_15min": -0.034975884619382766,
+          "time_noise_60min": -0.16302288567180334,
+          "exact_transport_copy_2x": 0.024167833083970424,
+          "exact_transport_copy_5x": -0.6107969632103082
+        },
+        "additive_cij_louvain": {
+          "gps_noise_100m": -0.022004745541367065,
+          "gps_noise_300m": -0.1564926822231336,
+          "time_noise_15min": -0.03755188988345583,
+          "time_noise_60min": -0.15448415852585515,
+          "exact_transport_copy_2x": 0.014620733531934152,
+          "exact_transport_copy_5x": -0.6219603608745865
+        },
+        "additive_cij_louvain_matched_density": {
+          "gps_noise_100m": -0.018624922208315332,
+          "gps_noise_300m": -0.09824747594328835,
+          "time_noise_15min": -0.04374162801902631,
+          "time_noise_60min": -0.18987344117344476,
+          "exact_transport_copy_2x": 0.020765246713180543,
+          "exact_transport_copy_5x": -0.6056588517852184
+        },
+        "product_cij_leiden": {
+          "gps_noise_100m": -0.011783124634507956,
+          "gps_noise_300m": -0.12530345392950548,
+          "time_noise_15min": -0.0314809733699017,
+          "time_noise_60min": -0.156056884444348,
+          "exact_transport_copy_2x": 0.014778189594575076,
+          "exact_transport_copy_5x": -0.6200647208353616
+        },
+        "geo_time_dbscan": {
+          "gps_noise_100m": -0.030024074887768537,
+          "gps_noise_300m": -0.12691573858134142,
+          "time_noise_15min": -0.012200220676192506,
+          "time_noise_60min": -0.05461421920147412,
+          "exact_transport_copy_2x": 0.0,
+          "exact_transport_copy_5x": 0.0
+        }
+      },
+      "caption": "Observable geographic window of run041 under seven separate fixed conditions, drawn using the original notebook graph and stress functions. Two compositions use their independently locked settings. ARI uses original incident-linked reports over the full run. The final frame separately shows the exported mean paired ARI changes across 40 held-out runs; it is not inferred from the one-run reproduction. This is a reproduction for explanation, not an added experiment.",
+      "limitations": [
+        "Up to 450 strongest visible edges are drawn per panel; graph and ARI use the full run.",
+        "Node colors identify predicted communities locally and are not stable incident IDs.",
+        "Copy reports share positions; rings show multiplicity."
+      ]
+    },
+    "graph_stress.png": {
+      "kind": "static first-frame poster",
+      "dimensions_px": [
+        1600,
+        720
+      ],
+      "sha256": "9ed2b48458bd63ea8e6fdfcc8a053cff5d9fe79a71440578f1ba3b4653269566"
+    },
+    "graph_stress_summary.png": {
+      "kind": "static final-frame aggregate poster",
+      "dimensions_px": [
+        1600,
+        720
+      ],
+      "source_files": [
+        "thucnghiem/results/rq1_results/aggregate/rq1_stress_paired_effects.csv"
+      ],
+      "sha256": "eca80950e9a486bead8ac13bc729959ec220fa8f69a3ea596df9005eebd5a477"
+    },
+    "louvain_schematic.gif": {
+      "kind": "pedagogical schematic",
+      "dimensions_px": [
+        1600,
+        720
+      ],
+      "frames": 4,
+      "duration_ms": 12000,
+      "poster": "louvain_schematic.png",
+      "sha256": "320f9609481901835895679f5e6016d69685a9a84c1ff9555b0c7ec1c880686e",
+      "caption": "Schematic two-phase Louvain explanation: move nodes to improve modularity, aggregate communities, and repeat. Node placement and colors are illustrative rather than experimental observations.",
+      "source_reference": "Blondel et al. (2008), Fast unfolding of communities in large networks, doi:10.1088/1742-5468/2008/10/P10008"
+    },
+    "louvain_schematic.png": {
+      "kind": "static first-frame schematic poster",
+      "dimensions_px": [
+        1600,
+        720
+      ],
+      "sha256": "d1038a3e0363dbe3472c660c340270a18f473b7b96fcb6df7daa1e11a7437dae"
+    }
+  },
+  "numeric_values": {
+    "rq1_ari_ci": {
+      "additive_cij_louvain": {
+        "ari_mean": 0.9190636765304436,
+        "ari_ci95_low": 0.8995230647815519,
+        "ari_ci95_high": 0.9380766690270615
+      },
+      "product_cij_leiden": {
+        "ari_mean": 0.9164882806585426,
+        "ari_ci95_low": 0.8978625110603503,
+        "ari_ci95_high": 0.9350545483055244
+      },
+      "product_cij_louvain": {
+        "ari_mean": 0.9072205230334893,
+        "ari_ci95_low": 0.8863860866990636,
+        "ari_ci95_high": 0.9271163961511172
+      },
+      "additive_cij_louvain_matched_density": {
+        "ari_mean": 0.8973309471470075,
+        "ari_ci95_low": 0.8762697176994383,
+        "ari_ci95_high": 0.9174759257872698
+      },
+      "coordinate_kmeans": {
+        "ari_mean": 0.8176380302773076,
+        "ari_ci95_low": 0.7976202180575386,
+        "ari_ci95_high": 0.8383657868415234
+      },
+      "geo_time_dbscan": {
+        "ari_mean": 0.4978129333708591,
+        "ari_ci95_low": 0.45893441663920304,
+        "ari_ci95_high": 0.5365634955578013
+      }
+    },
+    "rq1_stress_heatmap": {
+      "product_cij_louvain": {
+        "gps_noise_100m": -0.011587864765788556,
+        "gps_noise_300m": -0.1256014118221726,
+        "time_noise_15min": -0.034975884619382766,
+        "time_noise_60min": -0.16302288567180334,
+        "exact_transport_copy_2x": 0.024167833083970424,
+        "exact_transport_copy_5x": -0.6107969632103082
+      },
+      "additive_cij_louvain": {
+        "gps_noise_100m": -0.022004745541367065,
+        "gps_noise_300m": -0.1564926822231336,
+        "time_noise_15min": -0.03755188988345583,
+        "time_noise_60min": -0.15448415852585515,
+        "exact_transport_copy_2x": 0.014620733531934152,
+        "exact_transport_copy_5x": -0.6219603608745865
+      },
+      "additive_cij_louvain_matched_density": {
+        "gps_noise_100m": -0.018624922208315332,
+        "gps_noise_300m": -0.09824747594328835,
+        "time_noise_15min": -0.04374162801902631,
+        "time_noise_60min": -0.18987344117344476,
+        "exact_transport_copy_2x": 0.020765246713180543,
+        "exact_transport_copy_5x": -0.6056588517852184
+      },
+      "product_cij_leiden": {
+        "gps_noise_100m": -0.011783124634507956,
+        "gps_noise_300m": -0.12530345392950548,
+        "time_noise_15min": -0.0314809733699017,
+        "time_noise_60min": -0.156056884444348,
+        "exact_transport_copy_2x": 0.014778189594575076,
+        "exact_transport_copy_5x": -0.6200647208353616
+      },
+      "geo_time_dbscan": {
+        "gps_noise_100m": -0.030024074887768537,
+        "gps_noise_300m": -0.12691573858134142,
+        "time_noise_15min": -0.012200220676192506,
+        "time_noise_60min": -0.05461421920147412,
+        "exact_transport_copy_2x": 0.0,
+        "exact_transport_copy_5x": 0.0
+      }
+    },
+    "rq2_ndcg_ci": {
+      "duplicate_aware_robust": {
+        "mean": 0.666889741,
+        "ci95": [
+          0.630573585791977,
+          0.7018339735459405
+        ]
+      },
+      "legacy_raw": {
+        "mean": 0.6547713427,
+        "ci95": [
+          0.6228742253092528,
+          0.6849560580617219
+        ]
+      },
+      "population_only": {
+        "mean": 0.6709379529,
+        "ci95": [
+          0.6471053904027629,
+          0.6954605383428879
+        ]
+      },
+      "urgency_only": {
+        "mean": 0.6351784554,
+        "ci95": [
+          0.6057204842141946,
+          0.6640759743503963
+        ]
+      },
+      "random": {
+        "mean": 0.6763222735,
+        "ci95": [
+          0.6405248169558695,
+          0.7099514476359288
+        ]
+      }
+    },
+    "rq2_priority_drift": {
+      "duplicate_aware_robust": {
+        "exact_duplicate_2x": 0.0,
+        "exact_duplicate_5x": 0.0,
+        "exact_duplicate_10x": 0.0,
+        "coordinated_high_confidence_campaign": 0.1687725
+      },
+      "legacy_raw": {
+        "exact_duplicate_2x": 0.00262625,
+        "exact_duplicate_5x": 0.00858,
+        "exact_duplicate_10x": 0.01484375,
+        "coordinated_high_confidence_campaign": 0.0308925
+      }
+    },
+    "rq3_dispatch": {
+      "latent_harm:revised_priority": {
+        "lean_hue": 691.3702076825,
+        "nominal_dual_depot": 315.01318123500005,
+        "regional_surge": 113.52885071
+      },
+      "latent_harm:legacy_priority": {
+        "lean_hue": 653.7933667375,
+        "nominal_dual_depot": 303.1618589025,
+        "regional_surge": 119.93258042475
+      },
+      "latent_harm:nearest_first": {
+        "lean_hue": 585.5511880050001,
+        "nominal_dual_depot": 229.99920196425,
+        "regional_surge": 94.707931807
+      },
+      "deadline_miss_rate:revised_priority": {
+        "lean_hue": 91.875,
+        "nominal_dual_depot": 84.53125,
+        "regional_surge": 66.71875
+      },
+      "deadline_miss_rate:legacy_priority": {
+        "lean_hue": 92.03125,
+        "nominal_dual_depot": 85.9375,
+        "regional_surge": 70.78125
+      },
+      "deadline_miss_rate:nearest_first": {
+        "lean_hue": 82.03125,
+        "nominal_dual_depot": 63.125,
+        "regional_surge": 44.84375
+      }
+    }
+  },
+  "limitations": [
+    "All study results are limited to the tested synthetic artifact suites.",
+    "A one-run graph replay is an explanatory reproduction, not an additional experiment.",
+    "GIF condition sequence is presentation order, not an observed event timeline."
+  ],
+  "typography": {
+    "body": "Readex Pro",
+    "gif_headings": "K2D",
+    "symbol_fallback": "K2D for arrows, DejaVu Sans only for glyphs absent from both CTU families",
+    "fonts": [
+      {
+        "path": "ISDS/fonts/barlow/Barlow-Bold.ttf",
+        "family": "Barlow",
+        "sha256": "84e6a4d61e7c3e21f3c50ea6a4f7e5303a3467864c038be6ea3759bab8d547f9"
+      },
+      {
+        "path": "ISDS/fonts/barlow/Barlow-Regular.ttf",
+        "family": "Barlow",
+        "sha256": "95aa02c7c43096e0dd44d787ba6216864a67157e402adab59b35572e0c1577ea"
+      },
+      {
+        "path": "ISDS/fonts/k2d/K2D-Bold.ttf",
+        "family": "K2D",
+        "sha256": "0876882908abb4ee3bcf9f73007128dddd52b77fe36414101fb12da0a67edb3d"
+      },
+      {
+        "path": "ISDS/fonts/k2d/K2D-Regular.ttf",
+        "family": "K2D",
+        "sha256": "bfab1193b93b9200455119c968f0ccac24b68d2408d26a8123a4c3c01fb11821"
+      },
+      {
+        "path": "ISDS/fonts/readexpro/ReadexPro-Bold.ttf",
+        "family": "Readex Pro",
+        "sha256": "c1dbd4e03541a4a4274fb7508e6a7fad4c6a9ab01d3ecb13f035c325e724b5b2"
+      },
+      {
+        "path": "ISDS/fonts/readexpro/ReadexPro-Regular.ttf",
+        "family": "Readex Pro",
+        "sha256": "8842308589dfb11f0dbdd5151f6802ba445ac776b6377afaa678e04f0c45b9a0"
+      }
+    ]
+  },
+  "presentation_style": {
+    "bottom_caption_footnotes": false,
+    "provenance_placement": "manifest and speaker notes; essential visual qualifiers directly below GIF heading"
+  },
+  "replay": {
+    "run_id": "run_041",
+    "source_notebook": "thucnghiem/results/RQ1_Reviewer_Stress_Colab.ipynb",
+    "cells": [
+      6,
+      8
+    ],
+    "function_names": [
+      "copy_x",
+      "deterministic_rng",
+      "graph_for",
+      "load_input",
+      "load_truth",
+      "louvain",
+      "pair_matrices",
+      "predict",
+      "read_json",
+      "threshold_knn",
+      "transform_input",
+      "with_local_coordinates"
+    ],
+    "extracted_functions_sha256": "37e363d19c6af273d50ecd12ab45b71a6c72bff52afcf98f8677261c91b3b575",
+    "runtime_versions": {
+      "numpy": "2.5.4",
+      "networkx": "3.7",
+      "python_louvain": "0.16"
+    },
+    "original_checkpoint_comparisons": [
+      {
+        "scenario": "baseline",
+        "method": "product_cij_louvain",
+        "ari_replay": 0.8294589574997709,
+        "ari_checkpoint": 0.8294589574997709,
+        "n_edges_replay": 1577,
+        "n_edges_checkpoint": 1577,
+        "ari_matches": true,
+        "n_edges_match": true
+      },
+      {
+        "scenario": "baseline",
+        "method": "additive_cij_louvain",
+        "ari_replay": 0.8294589574997709,
+        "ari_checkpoint": 0.8294589574997709,
+        "n_edges_replay": 1515,
+        "n_edges_checkpoint": 1515,
+        "ari_matches": true,
+        "n_edges_match": true
+      },
+      {
+        "scenario": "gps_noise_100m",
+        "method": "product_cij_louvain",
+        "ari_replay": 0.8183026521782093,
+        "ari_checkpoint": 0.8183026521782093,
+        "n_edges_replay": 1582,
+        "n_edges_checkpoint": 1582,
+        "ari_matches": true,
+        "n_edges_match": true
+      },
+      {
+        "scenario": "gps_noise_100m",
+        "method": "additive_cij_louvain",
+        "ari_replay": 0.8183026521782093,
+        "ari_checkpoint": 0.8183026521782093,
+        "n_edges_replay": 1516,
+        "n_edges_checkpoint": 1516,
+        "ari_matches": true,
+        "n_edges_match": true
+      },
+      {
+        "scenario": "gps_noise_300m",
+        "method": "product_cij_louvain",
+        "ari_replay": 0.7170173915508801,
+        "ari_checkpoint": 0.7170173915508801,
+        "n_edges_replay": 1594,
+        "n_edges_checkpoint": 1594,
+        "ari_matches": true,
+        "n_edges_match": true
+      },
+      {
+        "scenario": "gps_noise_300m",
+        "method": "additive_cij_louvain",
+        "ari_replay": 0.772378067059038,
+        "ari_checkpoint": 0.772378067059038,
+        "n_edges_replay": 1524,
+        "n_edges_checkpoint": 1524,
+        "ari_matches": true,
+        "n_edges_match": true
+      },
+      {
+        "scenario": "time_noise_15min",
+        "method": "product_cij_louvain",
+        "ari_replay": 0.7980322137963769,
+        "ari_checkpoint": 0.7980322137963769,
+        "n_edges_replay": 1579,
+        "n_edges_checkpoint": 1579,
+        "ari_matches": true,
+        "n_edges_match": true
+      },
+      {
+        "scenario": "time_noise_15min",
+        "method": "additive_cij_louvain",
+        "ari_replay": 0.7980322137963769,
+        "ari_checkpoint": 0.7980322137963769,
+        "n_edges_replay": 1488,
+        "n_edges_checkpoint": 1488,
+        "ari_matches": true,
+        "n_edges_match": true
+      },
+      {
+        "scenario": "time_noise_60min",
+        "method": "product_cij_louvain",
+        "ari_replay": 0.7980322137963769,
+        "ari_checkpoint": 0.7980322137963769,
+        "n_edges_replay": 1574,
+        "n_edges_checkpoint": 1574,
+        "ari_matches": true,
+        "n_edges_match": true
+      },
+      {
+        "scenario": "time_noise_60min",
+        "method": "additive_cij_louvain",
+        "ari_replay": 0.7960298892106372,
+        "ari_checkpoint": 0.7960298892106372,
+        "n_edges_replay": 1493,
+        "n_edges_checkpoint": 1493,
+        "ari_matches": true,
+        "n_edges_match": true
+      },
+      {
+        "scenario": "exact_transport_copy_2x",
+        "method": "product_cij_louvain",
+        "ari_replay": 0.8019342639877877,
+        "ari_checkpoint": 0.8019342639877877,
+        "n_edges_replay": 3337,
+        "n_edges_checkpoint": 3337,
+        "ari_matches": true,
+        "n_edges_match": true
+      },
+      {
+        "scenario": "exact_transport_copy_2x",
+        "method": "additive_cij_louvain",
+        "ari_replay": 0.787786152251445,
+        "ari_checkpoint": 0.787786152251445,
+        "n_edges_replay": 3314,
+        "n_edges_checkpoint": 3314,
+        "ari_matches": true,
+        "n_edges_match": true
+      },
+      {
+        "scenario": "exact_transport_copy_5x",
+        "method": "product_cij_louvain",
+        "ari_replay": 0.2891453703140963,
+        "ari_checkpoint": 0.2891453703140963,
+        "n_edges_replay": 8094,
+        "n_edges_checkpoint": 8094,
+        "ari_matches": true,
+        "n_edges_match": true
+      },
+      {
+        "scenario": "exact_transport_copy_5x",
+        "method": "additive_cij_louvain",
+        "ari_replay": 0.28562063396606807,
+        "ari_checkpoint": 0.28562063396606807,
+        "n_edges_replay": 8105,
+        "n_edges_checkpoint": 8105,
+        "ari_matches": true,
+        "n_edges_match": true
+      }
+    ],
+    "geographic_window": {
+      "selection": "largest predicted control community, without truth labels",
+      "center_local_km": [
+        -0.0758016266282264,
+        11.55972990801703
+      ],
+      "half_width_km": 1.25
+    }
+  },
+  "build_script": {
+    "path": "ISDS/scripts/build_science_assets.py",
+    "sha256": "1925a24fda284a1d20981da38f52936ae9dd598361fa821d6bbbc565083ac9bf",
+    "command": "/tmp/isds-build-venv/bin/python ISDS/scripts/build_science_assets.py"
+  }
+}
