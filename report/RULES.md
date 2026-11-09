@@ -5,6 +5,8 @@
 ## Khổ giấy, chữ và tiêu đề
 
 - Thân bài dùng A4, Times New Roman 13 bp, giãn dòng 1,3; lề trái 30 mm, các lề còn lại 20 mm. Không giảm chữ hoặc lề để ép nội dung vào trang.
+- Ngoại lệ theo yêu cầu ngày 09/11/2026: bốn bảng benchmark chi tiết B.2–B.5 dùng chữ 9,5 bp, giãn dòng đơn và hai khối cột theo seed để rút gọn phụ lục; giữ đầy đủ số liệu, đơn vị, chú thích và tiêu đề lặp khi sang trang. Hình reliability và điều phối nguồn lực dùng trang dọc, cùng luồng nội dung.
+- Danh mục tài liệu tham khảo giữ cỡ chữ thân bài và giãn dòng 1,15 để hạn chế trang cuối chỉ có một vài tài liệu; không thay đổi nội dung hoặc thứ tự tài liệu.
 - Cấu hình chữ và khoảng cách tập trung trong `template/ctu-report.cls` và `template/typography.tex`. Các biểu mẫu hành chính giữ cấu hình riêng theo mẫu gốc.
 - Bìa và biểu mẫu dùng tọa độ cố định theo mẫu, với `twoside=false` trong cấu hình lề riêng; khi quay về thân bài, khôi phục chế độ in của quyển. Không để trang chẵn tự đảo lề làm lệch nội dung so với logo hoặc khung mẫu.
 - Dùng `\chapter`, `\section`, `\subsection` theo thứ bậc; không gõ số đề mục bằng tay. Tiêu đề phải đi cùng phần nội dung tiếp theo.
@@ -34,6 +36,7 @@
 - Phân biệt phần đề xuất, phần đã triển khai và kết quả đã được kiểm chứng. Giữ rõ nguồn số liệu, seed, tập dữ liệu, điều kiện đo và giới hạn; chỉnh bố cục không làm thay đổi kết quả nghiên cứu.
 - Bài báo của đề tài được ghi **đã công bố** theo xác nhận của người dùng ngày 07/11/2026. Đồng bộ thông tin trong phần kết quả nghiên cứu và tóm tắt Việt–Anh qua nguồn dùng chung `frontmatter/research-body-vi.tex` và `research-body-en.tex`.
 - Số tập, năm xuất bản, trang và DOI chỉ bổ sung khi có thông tin tương ứng. Trường chưa được cung cấp ghi “Chưa cập nhật”, tránh nhầm với trạng thái chưa công bố.
+- Thông tin bổ sung theo người dùng ngày 09/11/2026: Communications in Computer and Information Science (CCIS), Springer Nature; kỷ yếu ISDS 2026, Part II, volume 3253, năm xuất bản ghi trực tiếp **2026**. Tên chuỗi và volume đã đối chiếu [Springer](https://link.springer.com/book/9789819274079); năm phát hành 2026 được phân biệt với năm bản quyền 2027 trên trang nhà xuất bản.
 
 ## Kiểm tra trước khi bàn giao
 

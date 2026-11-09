@@ -3,6 +3,8 @@ Phần này trình bày đủ 32 cấu hình nhận diện trên điện thoại
 
 Mã cấu hình có dạng \texttt{seed-biến thể-máy-runtime}. B là baseline, P là cắt tỉa; RM15 là realme 15, RN11 là Redmi Note 11, RN13 là Redmi Note 13 và S10e là Samsung S10e. O là ONNX, T là ExecuTorch/PTE. Ví dụ, \texttt{1024-P-RN13-T} là seed 1024 cắt tỉa chạy PTE trên Redmi Note 13. Thông tin thiết bị, dataset và phạm vi đo được mô tả ở Mục~\ref{sec:phone-benchmark-setup}.
 
+Các bảng chi tiết được chia thành hai khối cột song song: seed 159 ở bên trái và seed 1024 ở bên phải. Đọc từng khối từ trên xuống; tiêu đề cột được lặp lại khi bảng sang trang.
+
 \subsection{Chất lượng phân loại theo cấu hình}
 Accuracy (Acc.) là tỷ lệ dự đoán đúng; P/R/F1 macro là trung bình có trọng số bằng nhau của chỉ số tương ứng ở bốn lớp. Macro-Recall cũng chính là balanced accuracy trong bài toán này. Các giá trị phần trăm được làm tròn hai chữ số; CSV giữ độ chính xác cao hơn.
 \input{generated/tables/phone-full-quality}
@@ -21,8 +23,10 @@ Lỗi nặng là số ảnh có $|e_i|\geq2$. Khoảng cách giữa các mức �
 Mean là trung bình thời gian từng ảnh; P50/P95 dùng nearest-rank sau khi loại năm lượt warmup khỏi latency. Đơn vị là ms; phạm vi là giải mã, tiền xử lý và suy luận trong \texttt{classifyImage}. Bảng giữ thời gian riêng từng máy, không dùng thời gian tổng hợp thay cho kết quả từng thiết bị.
 \input{generated/tables/phone-full-latency}
 
+% Finish the three single-page tables before the per-class multipage table.
+\FloatBarrier
 \subsection{Precision, Recall và F1 theo từng lớp}
-Bảng gồm 128 hàng, tương ứng 32 cấu hình nhân bốn lớp. Cột số ảnh là số mẫu thật của lớp trong test; không phải số ảnh model dự đoán vào lớp đó. F1 được tính riêng từ Precision/Recall từng lớp, sau đó mới lấy trung bình để có macro-F1. Việc hai runtime có cùng nhãn top-1 làm các chỉ số này bằng nhau trong từng cặp máy/model, nhưng không chứng minh vector xác suất của hai runtime giống tuyệt đối.
+Bảng gồm 128 hàng, tương ứng 32 cấu hình nhân bốn lớp. P và R lần lượt là Precision và Recall. Cột số ảnh là số mẫu thật của lớp trong test; không phải số ảnh model dự đoán vào lớp đó. F1 được tính riêng từ Precision/Recall từng lớp, sau đó mới lấy trung bình để có macro-F1. Việc hai runtime có cùng nhãn top-1 làm các chỉ số này bằng nhau trong từng cặp máy/model, nhưng không chứng minh vector xác suất của hai runtime giống tuyệt đối.
 \input{generated/tables/phone-full-classes}
 
 \subsection{Cách tổng hợp kết quả}

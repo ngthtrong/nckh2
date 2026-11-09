@@ -38,13 +38,11 @@ Trong hình, T là nhãn thật, P là dự đoán, conf là xác suất lớp d
 \subsection{Confidence và chính sách gửi metadata}
 Các phân tích confidence dưới đây thuộc benchmark FP32 seed \BenchmarkSeed{} và dùng CSV dự đoán đi kèm. ECE của phiên benchmark là \ImageECE{} và Brier \ImageBrier{}.
 Hình~\ref{fig:confidence-calibration} được tính từ dự đoán FP32 trên 256 ảnh test với bin rộng 0,1. Đường reliability so sánh confidence trung bình với tỷ lệ đúng trong mỗi bin; biểu đồ số mẫu cho biết một điểm trên đường có bao nhiêu quan sát. Đây là phép mô tả trên split hiện tại, không phải kết quả đã hiệu chuẩn lại mô hình. Giá trị ECE nêu trên được lấy theo cấu hình artifact gốc, không tính lại ECE từ các bin minh họa này.
-\begin{reportlandscapefigure}
-\centering
-
-\includegraphics[width=\linewidth,height=\ReportLandscapeImageHeight,keepaspectratio]{confidence-calibration.pdf}
+\begin{figure}[htbp]\centering
+\includegraphics[width=\linewidth]{confidence-calibration.pdf}
 \caption{Reliability và số mẫu theo confidence của mô hình FP32 trên tập test}
 \label{fig:confidence-calibration}
-\end{reportlandscapefigure}
+\end{figure}
 
 Ở ngưỡng $p\geq0{,}90$, CSV được chọn có \HighConfidenceCount/\ImageTest{} ảnh (\HighConfidenceCoverage\%), trong đó \HighConfidenceCorrect{} dự đoán đúng. Kết quả này bổ sung thông tin cho chính sách gửi metadata; nó không bảo đảm mọi ảnh camera mới có confidence cao đều đúng. Ngưỡng 0,90 là cấu hình ứng dụng đang có, không được chọn lại từ phân tích này. Nếu dùng tập test để chỉnh ngưỡng, cần tập xác nhận mới để đánh giá quyết định sau điều chỉnh.
 
@@ -234,13 +232,11 @@ So với gần nhất trước, score có chặn kém hơn về harm và trễ h
 
 Hình~\ref{fig:rq3-conditions-report} trình bày kết quả mô tả theo từng điều kiện nguồn lực trên phân hoạch Product.
 
-\begin{reportlandscapefigure}
-\centering
-
-\includegraphics[width=\linewidth,height=\ReportLandscapeImageHeight,keepaspectratio]{../paper/figures/rq3_dispatch_conditions.pdf}
+\begin{figure}[htbp]\centering
+\includegraphics[width=\linewidth]{../paper/figures/rq3_dispatch_conditions.pdf}
 \caption{Trung bình mô tả theo điều kiện nguồn lực trên phân hoạch Product}
 \label{fig:rq3-conditions-report}
-\end{reportlandscapefigure}
+\end{figure}
 
 Gần nhất trước có harm và trễ hạn trung bình thấp hơn trong mọi điều kiện được thử. Một diễn giải có thể là score theo nhu cầu chưa biểu diễn đủ chi phí đi lại và ràng buộc lịch; đây là giả thuyết giải thích, chưa được cô lập bằng thực nghiệm cơ chế. Kết quả không xác lập gần nhất trước là chính sách thực địa tối ưu.
 
