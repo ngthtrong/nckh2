@@ -1,0 +1,171 @@
+{
+  "status": "DEVELOPMENT_REANALYSIS",
+  "n_images": 256,
+  "n_split_groups": 252,
+  "predictions_sha256": "0811b81bd451a8f46939f25a1a5a1eb3bd7f69217e81f2e15128d4fbb73e0b12",
+  "split_sha256": "f7b52cd25411d4d1df2f7f80745a2cf430819773854345798cf7e093e3bcba45",
+  "bootstrap_draws": 2000,
+  "metrics": {
+    "onnx_fp32": {
+      "accuracy": 0.7578125,
+      "macro_f1": 0.7426491791647138,
+      "recall_high": 0.7407407407407407,
+      "critical_errors": 3,
+      "mae_levels": 0.25390625,
+      "confusion_class_order": [
+        "low",
+        "medium",
+        "high",
+        "non_flood"
+      ],
+      "confusion": [
+        [
+          34,
+          14,
+          0,
+          8
+        ],
+        [
+          11,
+          42,
+          6,
+          1
+        ],
+        [
+          2,
+          12,
+          40,
+          0
+        ],
+        [
+          8,
+          0,
+          0,
+          78
+        ]
+      ]
+    },
+    "ptq_int8": {
+      "accuracy": 0.66796875,
+      "macro_f1": 0.6436168387451474,
+      "recall_high": 0.6481481481481481,
+      "critical_errors": 17,
+      "mae_levels": 0.41015625,
+      "confusion_class_order": [
+        "low",
+        "medium",
+        "high",
+        "non_flood"
+      ],
+      "confusion": [
+        [
+          39,
+          4,
+          0,
+          13
+        ],
+        [
+          25,
+          22,
+          9,
+          4
+        ],
+        [
+          10,
+          6,
+          35,
+          3
+        ],
+        [
+          11,
+          0,
+          0,
+          75
+        ]
+      ]
+    },
+    "qat_int8": {
+      "accuracy": 0.453125,
+      "macro_f1": 0.41370691624227107,
+      "recall_high": 0.7222222222222222,
+      "critical_errors": 49,
+      "mae_levels": 0.79296875,
+      "confusion_class_order": [
+        "low",
+        "medium",
+        "high",
+        "non_flood"
+      ],
+      "confusion": [
+        [
+          26,
+          3,
+          10,
+          17
+        ],
+        [
+          24,
+          5,
+          18,
+          13
+        ],
+        [
+          8,
+          2,
+          39,
+          5
+        ],
+        [
+          27,
+          4,
+          9,
+          46
+        ]
+      ]
+    }
+  },
+  "pairs": {
+    "onnx_fp32 -> ptq_int8": {
+      "correct_to_wrong": 36,
+      "wrong_to_correct": 13,
+      "mcnemar_exact_p_unadjusted": 0.001402688503695515,
+      "delta_accuracy": -0.08984375,
+      "delta_macro_f1": -0.09903234041956643,
+      "delta_macro_f1_ci95_unadjusted": [
+        -0.15752918478148226,
+        -0.03983778488810243
+      ],
+      "mcnemar_holm_p": 0.001402688503695515
+    },
+    "onnx_fp32 -> qat_int8": {
+      "correct_to_wrong": 97,
+      "wrong_to_correct": 19,
+      "mcnemar_exact_p_unadjusted": 8.63000312092898e-14,
+      "delta_accuracy": -0.3046875,
+      "delta_macro_f1": -0.3289422629224428,
+      "delta_macro_f1_ci95_unadjusted": [
+        -0.4002904684329263,
+        -0.2556297421789351
+      ],
+      "mcnemar_holm_p": 2.5890009362786943e-13
+    },
+    "ptq_int8 -> qat_int8": {
+      "correct_to_wrong": 75,
+      "wrong_to_correct": 20,
+      "mcnemar_exact_p_unadjusted": 1.1639663841105044e-08,
+      "delta_accuracy": -0.21484375,
+      "delta_macro_f1": -0.22990992250287634,
+      "delta_macro_f1_ci95_unadjusted": [
+        -0.30307193413020056,
+        -0.16088853684617882
+      ],
+      "mcnemar_holm_p": 2.3279327682210088e-08
+    }
+  },
+  "limits": [
+    "Exact McNemar assumes independent paired units; residual event/source dependence is unresolved",
+    "Bootstrap groups are recorded split groups, not proven independent events",
+    "Macro-F1 intervals unadjusted; Holm family covers all listed McNemar contrasts",
+    "Previously viewed test, no independent confirmation or field-effectiveness claim"
+  ]
+}

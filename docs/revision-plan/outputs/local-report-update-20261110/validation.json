@@ -1,0 +1,188 @@
+{
+  "status": "ARTIFACT_CHECKED_NOT_SCIENTIFIC_ACCEPTANCE",
+  "date": "2026-11-10",
+  "timezone": "Asia/Taipei",
+  "run_id": "local-20261110-04",
+  "scope": "Report revision from saved local artifacts; no new training or inference",
+  "commands": {
+    "make -C report content": 0,
+    "make -C report content-twoside": 0,
+    "make -C report check": 0,
+    "python3 report/scripts/check_report.py --build-dir build/content-twoside": 0,
+    "float_reference_checks_both_variants": 0,
+    "git diff --check": 0
+  },
+  "pdfs": {
+    "content": {
+      "pages": 197,
+      "target_pages": [
+        7,
+        8,
+        9,
+        10,
+        11,
+        131,
+        132,
+        145,
+        165,
+        173
+      ],
+      "sha256": "9171dbbf8c1d56dd3c6310ca5fc7fec03bfbdcd3480c4c51d07af4bd6a93b9bb",
+      "font_rows": 138,
+      "all_fonts_embedded": true
+    },
+    "bulletin-vi": {
+      "pages": 1,
+      "target_pages": [],
+      "sha256": "bbe6a42ff24de10033471860b90a708c8c2f63d4585ae04ea1668f8eb9b329e4",
+      "font_rows": 10,
+      "all_fonts_embedded": true
+    },
+    "bulletin-en": {
+      "pages": 1,
+      "target_pages": [],
+      "sha256": "9b6ebaf6d3dea810ba3b23b81d11d1ca7198f82e24d1b13c87d8be1422ad1008",
+      "font_rows": 9,
+      "all_fonts_embedded": true
+    },
+    "summary-vi": {
+      "pages": 2,
+      "target_pages": [],
+      "sha256": "7d7fd82443ae834fc15bc94a98d68e80fdaac73ade007c2427d4572dd82010d5",
+      "font_rows": 11,
+      "all_fonts_embedded": true
+    },
+    "summary-en": {
+      "pages": 3,
+      "target_pages": [],
+      "sha256": "28bb07827fe0bff1f962725e5e0c64d1386cc398beaf62029e56be2a8b6f2c6a",
+      "font_rows": 7,
+      "all_fonts_embedded": true
+    },
+    "content-twoside": {
+      "pages": 197,
+      "sha256": "14f7080a1ca6559bfc9ae337436250bbc6207bf1980483848ea9bb68c5d7c33e",
+      "font_rows": 138,
+      "all_fonts_embedded": true,
+      "target_pages": [
+        131,
+        132
+      ]
+    }
+  },
+  "body_pages": 138,
+  "figures": 50,
+  "tables": 53,
+  "numbered_citations": 27,
+  "evidence_validation": {
+    "captured_files": 47,
+    "metric_configurations": 23,
+    "bootstrap": "IMPORTED_NOT_RERUN",
+    "training_and_inference": "NOT_RUN",
+    "seed43_checkpoint_source": "HASH_MATCHED_ARCHIVE_ENTRIES",
+    "extracted_seed43_checkpoints": "HASH_MISMATCH_PRESERVED",
+    "source_manifest_sha256": "6a5a5e4c41a763f5481c5bf399cbd2199c01a7c1c67c0e18f429ec8a4a919cac",
+    "exporter_sha256": "7ecab3995e5903c83144fc3b4e26c898678495095f22a8712e6c2cf836e5f1c1"
+  },
+  "visual_review": {
+    "status": "REVIEWED",
+    "pages": [
+      "content 131-132",
+      "content 145",
+      "content 165-166",
+      "content 173-174",
+      "content 157-158",
+      "content-twoside 131-132",
+      "bulletin vi/en 1",
+      "summary vi 1-2",
+      "summary en 1-3"
+    ]
+  },
+  "acronym_check": {
+    "status": "partial",
+    "coverage": {
+      "body": "checked",
+      "abstract_en": "not_requested",
+      "abstract_zh": "not_requested"
+    },
+    "findings": 9,
+    "scope": "Saved excerpts only; advisory partial coverage"
+  },
+  "source_comments_sha256": "7c19e9237995a9827656f3ea097caa8231bda7cdad0e477ed22b90dbb674c7a1",
+  "remaining_comments": "docs/revision-plan/remaining-comments-20261110.md",
+  "source_sha256": {
+    "report/chapters/conclusion.tex": "c7dbb7fc343ecb29f9c1028b4adeee9d918bc6506700215daf5dc336bcbd55a9",
+    "report/chapters/introduction.tex": "69629c1891f900be48ce109c4a113be4240f7993a62f3b81b24e78990a8a2257",
+    "report/chapters/04-evaluation/chapter.tex": "48edab5f4ecad2ea10d4e3519619efeed039fe96e06cc3c061a9f6568f3008e3",
+    "report/chapters/01-foundations/chapter.tex": "4ff2322d33f22ae5a94c6a8d6f6421f838933fae80a1c3cd7f38908b17510328",
+    "report/chapters/03-system/chapter.tex": "763d78ea593c9c2227b17172c91e9c5d96615dc7b939bb20f2e145be5784877f",
+    "report/chapters/02-data-methods/chapter.tex": "e92f54f922c4c11f50ed48654c7d5daba4c52893fe00af7e5ada510495f1125c",
+    "report/chapters/04-evaluation/sections/results.tex": "8b7261a581ab25a771b24afe5e5a17b18bbcb8bcb13a198cf48a053de972944b",
+    "report/chapters/04-evaluation/sections/system-tests.tex": "2ba2d26d6a92a3d7883480b1b32c85dbc92205765da5be61a94e61c14358d7cf",
+    "report/chapters/04-evaluation/sections/local-image-update.tex": "be5b180e5a4e73283c1c5b6a316057627b425df3b192b900d8a7d0e9719fce8d",
+    "report/chapters/04-evaluation/sections/multimodal-pilot.tex": "8e5c6a52424750e35215ef21fd81e9d0f231cebc91f9a698e2097835b8c10bee",
+    "report/chapters/04-evaluation/sections/limitations.tex": "6e9445f4c9590fbfda832002928a059b5fc2113d73c355f75014d43cf34d0235",
+    "report/chapters/04-evaluation/sections/vi-silver-pilot.tex": "472ea456313d2311d0201c015d76a1c6087921fe0cb2f03323a0247fe97d91b0",
+    "report/chapters/04-evaluation/sections/setup.tex": "2d08b31f2f472ecc6819ddae99062dff7119989b42b21b38e4eeecbf16e6946e",
+    "report/chapters/01-foundations/sections/related-work.tex": "beca2b96ea75554f67bc6fb631fe617a0681c40be56853e0b621fc5fa541afc3",
+    "report/chapters/01-foundations/sections/background.tex": "faf5196376e51b036087efc6acd00280f43d5d12da31c98b51aac0a53fd377ea",
+    "report/chapters/03-system/sections/implementation.tex": "ed57d479337ef0397427c11d73984922fef6c8959a67638938cf82f0264d7d28",
+    "report/chapters/03-system/sections/architecture.tex": "ce7473717c202db612fd0e80c57ba4539c6f26f92f6a9755634fcdc0142aa6dd",
+    "report/chapters/03-system/sections/nonfunctional-requirements.tex": "cae16a770950776f5a11aa50a84a93932db02a02fd7ffc7ff6fe22b8167729a6",
+    "report/chapters/03-system/sections/incomplete-data.tex": "65493a17f097cf7712ce22e81ad15e40f029099204cf05ee3df6c2adfe638996",
+    "report/chapters/03-system/sections/synchronization.tex": "62fc238002dfc03d98c373ed672337648c0bf1af983b4f8e2a6aee7241f5647a",
+    "report/chapters/03-system/sections/functional-requirements.tex": "644a14c1708bca615d24c8269827e1ea055cdb3ff3c52f13513c8b0c20111cb7",
+    "report/chapters/03-system/sections/user-interfaces.tex": "3ed40cd740c621dd11e137296d9bb258f3aee98f60b7c090b5c39782dae75bc4",
+    "report/chapters/02-data-methods/sections/data.tex": "b931d57eeada07aebc61f3be65e005d6fa9b2e8a0db34946963c846cbeb719c6",
+    "report/chapters/02-data-methods/sections/evaluation-design.tex": "27a1edc3f935c7a269be74d2293c9897cfcb628b9b3724671aba88034456a50b",
+    "report/chapters/02-data-methods/sections/methods.tex": "e8f0641e48b79d558d0be2a3338e69e42d9882121f92968d5bff0cd008cc6709",
+    "report/chapters/02-data-methods/sections/overview.tex": "a2a5277c1bc535f0ad841267f10c19b7086bfe7e2538110026f54139695759bd",
+    "report/chapters/02-data-methods/sections/image-design.tex": "be60c8cdea726efe26672a68d892b30909ceed927a53c11823501106db652173",
+    "report/chapters/02-data-methods/sections/scope.tex": "80f0060db2df74393a63921254d089e271baad37cfbc4614de5712c19606b901",
+    "report/chapters/02-data-methods/sections/text-design.tex": "59ef38110744899b9dcb27974c580cef54fb11e9ae0a731f522082e508658c5e",
+    "report/chapters/02-data-methods/sections/multimodal-design.tex": "6d4413a8880ed3d0d8774a07eab4d27d9d34609fdfb23409392d5e9b587b20b1",
+    "report/appendices/phone-benchmarks.tex": "e12f3bd295b22ac7a6d0803db489f27c02c0d87dac46722bdadd8cf8db043355",
+    "report/appendices/supplementary-results.tex": "1866aca6ecddbddaa9eb009cf92d09c5302be207930e8ee9ee19fb4b087ad320",
+    "report/appendices/reproducibility.tex": "5529b280a234f0f1f569d821e1b58e14fc805c7037f7d5bb329d62a9eaf4dd7c",
+    "report/frontmatter/research-info-vi.tex": "067fc4deafb9ce5ceee03abb84125347f12cd3149bc9eed04b1cf2cbc3af94b5",
+    "report/frontmatter/abbreviations.tex": "669f875fa98a9a76460183c44dd7a0e46be0a1222c18c124637c2ae3a87f0edf",
+    "report/frontmatter/research-info-en.tex": "d6023caddc516f026170783c168898975ec7f2bbd343b1fafdb252ef66a7ddf2",
+    "report/frontmatter/research-body-vi.tex": "17f7f6f1c817748b2e55d421c437affd67e3c8d41765e774c961a89e9bdcba35",
+    "report/frontmatter/research-body-en.tex": "328c7b800a4311d9d64bba090850e0ef32772808d3c608c050fec9af540e0d54",
+    "report/frontmatter/principal-investigator.tex": "4f40e1fae9a42e791c8f83b3253a94487a9e81ba80168660206ea16611591d10",
+    "report/frontmatter/cover.tex": "dd766807caae47087a55ff16b861475eac214d4c8a964f2584ebe69fa7cf9925",
+    "report/frontmatter/title-page.tex": "cf0e8632e9555cfce9422941afaaccf09477a48ee2f85e4574140b0cd7f561e6",
+    "report/frontmatter/participants.tex": "ed295ba1f760e15bbef474087b01d405d775b24d94dc9490fbf396ddfa152823",
+    "report/deliverables/content/summary-vi.tex": "d2475c2f32460b0713c35e3bbbd6fafd000111022bfc882fd2a96ee9e0ddf940",
+    "report/deliverables/content/bulletin-en.tex": "3c071ea59bee34827b2bbe6b7b3453d1f4512a7ffc3d2d97fe9392b167ee0aa2",
+    "report/deliverables/content/bulletin-vi.tex": "92c0bf0f090c7a451561de67e3e097a2694088e4f27f7a9a92130c0929bf772d",
+    "report/deliverables/content/summary-en.tex": "172f8b98cae5b54577b8ff80bc5c82ef1dd8db88355b4ea33589647fa1e87b7b",
+    "report/scripts/export_local_experiments.py": "7ecab3995e5903c83144fc3b4e26c898678495095f22a8712e6c2cf836e5f1c1",
+    "report/scripts/export_results.py": "e1c60e76a1fb70ca50a3d0f6728d4711aab7820e83fb7cd29f55f6a4697145d9",
+    "report/scripts/export_vi_silver.py": "eb97acebad61b97c262f10990fffb2521c382c70d344b4188b476cb9f604209e",
+    "docs/revision-plan/remaining-comments-20261110.md": "70f012872c5a5eaa547c43921fecb7e09a84879571c57e3b129b40c9e47c3e40"
+  },
+  "not_run": [
+    "new training",
+    "new model inference",
+    "bootstrap replay during report revision",
+    "Android/E2E/SMS tests",
+    "field experiments",
+    "check-release"
+  ],
+  "unchanged": [
+    "official comments",
+    "original local evidence",
+    "original model checkpoints",
+    "app/backend",
+    "historical image and phone benchmarks",
+    "RQ1-RQ3"
+  ],
+  "limitations": [
+    "AI-silver is not native Vietnamese or human gold",
+    "Partial tensor diagnostics do not isolate a root cause",
+    "Known test sets do not create independent confirmation",
+    "Two extracted seed-43 checkpoints mismatch receipts; archived entries match",
+    "Administrative placeholder and remaining committee concerns are not cleared"
+  ]
+}

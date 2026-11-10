@@ -1,0 +1,117 @@
+      MINISTRY OF EDUCATION AND TRAINING
+              CAN THO UNIVERSITY
+
+
+
+             INFORMATION ON RESEARCH RESULTS
+
+
+1. General information:
+
+     Project code: THS2026-68
+
+     Project title: Development of an Edge AI-based System for Multimodal Analysis
+     and Clustering of Flood Rescue Events
+
+     Project coordinator: Lê Thị Ngọc Ảnh
+
+     Implementing institution: Trường Công nghệ Thông tin và Truyền thông, Đại học
+     Cần Thơ
+
+     Duration: May–October 2026 (six months).
+
+2. Objective(s):
+
+Develop an AI-based mobile system to receive and analyze flood rescue information and
+support decision-making under unstable network conditions, with the aim of reducing loss
+of life and property damage.
+
+3. Creativeness and innovativeness:
+
+The project proposes an integrated approach combining multimodal data analysis, Edge
+AI and intelligent rescue-event clustering within a unified system.
+
+Instead of relying entirely on centralized server processing, the proposed system aims to
+perform AI inference directly on mobile devices using optimized lightweight deep learn-
+ing models, thereby reducing computational requirements and the transmission of large
+data files.
+
+Furthermore, the integration of location, time and rescue information for identifying and
+grouping related events is intended to reduce duplicate reports and support visualization
+of rescue situations on a digital map.
+
+4. Research results:
+
+On 256 test images, the seed-1024 baseline achieved 75.78% accuracy and 74.26% macro-
+F1 with three critical errors. Historical pruning reached 80.08% accuracy with 4 criti-
+cal errors; exact McNemar 𝑝 = 0.1173 did not establish improvement. An additional
+5/10/20% pruning grid selected 5% using validation, but test macro-F1 fell to 68,14%.
+Partial PTQ/QAT tensor diagnostics have not isolated the cause of degradation.
+
+Additional ONNX CPU screening of the pruned model used the same 256 images and
+eight synthetic corruptions. Macro-F1 decreased from 78,26% on clean images to 68,04%
+at 0.4 brightness. This does not establish robustness on Android or field camera images;
+inherited corruption labels have not been re-adjudicated.
+
+The app sends image labels and the LR score for storage; the adapter uses urgency or
+description keywords for clustering/ranking. Five-flag LR fitted to synthetic OR labels
+is not free-text NLP. The English CrisisMMD informativeness pilot reaches text/fusion
+macro-F1 of 76,60%/78,35%; effect CIs include zero.
+
+A separate AI-translated Vietnamese/AI-silver pilot uses 179 training, 58 development
+and 59 test pairs. Frozen fusion reaches 64,91% macro-F1 and 33,33% request recall.
+A CUDA DistilBERT fine-tuning replay averages 52,29% macro-F1 and 22,22% request
+recall across three seeds on the same test set. Native-Vietnamese data, independent human
+gold, information extraction and application fusion remain unvalidated.
+
+In weak-network simulations with bandwidth of 50 kbit/s and a round-trip time of 600 ms,
+both metadata-only and compressed-image modes succeeded in 257/257 attempts (100%),
+compared with 230/257 (89.49%) for original images. The two modes transmitting less
+data achieved higher transmission success rates than original images under the tested con-
+ditions. Each mode was measured separately on a computer; transmission over real mobile
+networks requires further validation.
+
+RQ1 does not establish Product superiority over independently selected Additive (ARI
+0.9072 versus 0.9191; Holm p=0.2560). RQ2 supports exact-copy invariance under fixed
+grouping, without establishing general alignment gains (revised NDCG@5 0.6669 ver-
+sus random 0.6763). Across 40 seed-level pairs, revised priority performs worse than
+nearest-first on simulated harm and deadline misses. Three raw Spearman p-values and
+five related Holm values remain unreconciled in RQ2 replay.
+
+The available results demonstrate the feasibility of selected prototype components in a
+research environment. They do not yet establish improvements in real-world rescue co-
+ordination or disaster response effectiveness.
+
+5. Products:
+
+The project registers three main scientific and technological products:
+
+     – A mobile application supporting disaster rescue, integrating AI models and rescue
+     request submission functions.
+
+     – A web-based rescue information management system featuring a digital map for
+     visualizing rescue locations and clustering related events.
+
+     – A trained and optimized multimodal AI model package for analyzing rescue infor-
+     mation and supporting deployment on mobile devices.
+
+The model package is registered; the image model, structured LR and separate Crisis-
+MMD pilot do not establish completion of Vietnamese NLP and rescue fusion in the ap-
+plication.
+
+In addition, the project registers a research bulletin, a research summary and a demon-
+stration video of no more than two minutes, in accordance with Can Tho University’s
+requirements. The paper “Stress-Testing Product-Gated Clustering and Bounded Prior-
+ity Ranking for Flood-Rescue Reports: A Synthetic Study” has been published in the
+ISDS 2026 proceedings, Part II, in Communications in Computer and Information Sci-
+ence (CCIS), volume 3253, Springer Nature, 2026.
+
+6. Effects, technology transfer means and applicability:
+
+The outputs support education and research in edge image inference and rescue informa-
+tion management, with planned transfer to Can Tho University’s School of Information
+and Communication Technology. Before field pilots, text processing, fusion, device and
+network behavior, synchronization and event clustering require validation with rescue
+professionals. Real-world rescue effectiveness and socioeconomic benefits remain un-
+measured.
+

@@ -1,0 +1,265 @@
+{
+  "metadata": {
+    "config": "D:\\thanhtrong\\notebook_bundle\\local-work\\local-20261110-04\\products\\fe\\model\\Edge Ai\\seed1024\\config_mobilenetv3_large.json",
+    "config_sha256": "1a14408bd2f42c9c06aba419ec3862fefec109c4e1030fa2a354ca8522a46779",
+    "split_csv": "D:\\thanhtrong\\notebook_bundle\\local-work\\local-20261110-04\\products\\fe\\model\\Edge Ai\\split_train_val_test_mobilenetv3_large.csv",
+    "split_csv_sha256": "f7b52cd25411d4d1df2f7f80745a2cf430819773854345798cf7e093e3bcba45",
+    "dataset_dir": "D:\\thanhtrong\\notebook_bundle\\local-work\\local-20261110-04\\products\\fe\\model\\Dataset_Flood",
+    "full_test_count": 256,
+    "seed": 1024,
+    "evaluation_scope": "full_test",
+    "comparison": "original checkpoint vs fine-tuned structured pruning",
+    "source_checkpoint_sha256": "6d4ef6fff1b59e8ac5d3165f935f28214b935ee377e21ecf16e3b0627be3d9ae",
+    "structured_model": "D:\\thanhtrong\\notebook_bundle\\local-work\\local-20261110-04\\bundle-results\\image_pruning\\ratio-0.050\\flood_mobilenetv3_large_structured_best.pt",
+    "structured_model_sha256": "1680023bef5cf19ba07187cce4ec13bfd308b13d383908c8f89e25d0b5380cc1",
+    "structured_model_training": {
+      "pruning": {
+        "method": "global_group_magnitude_channel",
+        "target_ratio": 0.05,
+        "round_to": null,
+        "parameter_count_before": 4207156,
+        "parameter_count_after": 3841262
+      },
+      "best_epoch": 6,
+      "validation_metrics_at_best_epoch": {
+        "accuracy": 0.7665369649805448,
+        "balanced_accuracy": 0.7442750315714765,
+        "macro_f1": 0.7446061805162992,
+        "ece": 0.07595479859452306,
+        "brier_score": 0.345258363575051,
+        "confusion_matrix": [
+          [
+            43,
+            7,
+            1,
+            6
+          ],
+          [
+            7,
+            39,
+            14,
+            1
+          ],
+          [
+            4,
+            15,
+            34,
+            0
+          ],
+          [
+            5,
+            0,
+            0,
+            81
+          ]
+        ],
+        "per_class": {
+          "low": {
+            "precision": 0.7288135593220338,
+            "recall": 0.7543859649122807,
+            "f1": 0.7413793103448276,
+            "support": 57
+          },
+          "medium": {
+            "precision": 0.639344262295082,
+            "recall": 0.639344262295082,
+            "f1": 0.639344262295082,
+            "support": 61
+          },
+          "high": {
+            "precision": 0.6938775510204082,
+            "recall": 0.6415094339622641,
+            "f1": 0.6666666666666666,
+            "support": 53
+          },
+          "non_flood": {
+            "precision": 0.9204545454545454,
+            "recall": 0.9418604651162791,
+            "f1": 0.9310344827586207,
+            "support": 86
+          }
+        },
+        "critical_error_count": 6,
+        "critical_error_rate": 0.023346303501945526,
+        "mean_severity_distance": 0.25680933852140075,
+        "loss": 0.7931254408702776
+      },
+      "parameter_count": 3841262
+    },
+    "parameter_count_before": 4207156,
+    "parameter_count_after": 3841262,
+    "pytorch_version": "2.13.0+cu130",
+    "evaluation_split": "test",
+    "n_images": 256,
+    "class_order": [
+      "low",
+      "medium",
+      "high",
+      "non_flood"
+    ],
+    "input_size": 256,
+    "output_type": "probabilities",
+    "preprocess": "EXIF -> RGB -> letterbox BILINEAR -> ImageNet NCHW",
+    "timing": "CPU máy tính; batch=1; 3 warmup/model không tính vào latency; không gồm load model, preprocessing, validation, logging; tổng là tổng thời gian gọi predict, không phải wall-clock toàn pipeline; không phải latency mobile",
+    "critical_distance": 2
+  },
+  "classification_metrics": {
+    "baseline": {
+      "accuracy": 0.7578125,
+      "balanced_accuracy": 0.7387150855174109,
+      "macro_f1": 0.7426491791647138,
+      "ece": 0.04124164185486732,
+      "brier_score": 0.3426190873148673,
+      "confusion_matrix": [
+        [
+          34,
+          14,
+          0,
+          8
+        ],
+        [
+          11,
+          42,
+          6,
+          1
+        ],
+        [
+          2,
+          12,
+          40,
+          0
+        ],
+        [
+          8,
+          0,
+          0,
+          78
+        ]
+      ],
+      "per_class": {
+        "low": {
+          "precision": 0.6181818181818182,
+          "recall": 0.6071428571428571,
+          "f1": 0.6126126126126126,
+          "support": 56
+        },
+        "medium": {
+          "precision": 0.6176470588235294,
+          "recall": 0.7,
+          "f1": 0.65625,
+          "support": 60
+        },
+        "high": {
+          "precision": 0.8695652173913043,
+          "recall": 0.7407407407407407,
+          "f1": 0.8,
+          "support": 54
+        },
+        "non_flood": {
+          "precision": 0.896551724137931,
+          "recall": 0.9069767441860465,
+          "f1": 0.9017341040462428,
+          "support": 86
+        }
+      },
+      "critical_error_count": 3,
+      "critical_error_rate": 0.01171875,
+      "mean_severity_distance": 0.25390625,
+      "latency_ms_mean": 10.770113671640047,
+      "latency_ms_median": 10.645949994795956,
+      "latency_ms_p95": 12.191099998744903,
+      "latency_ms_min": 9.337199997389689,
+      "latency_ms_max": 16.19409999693744,
+      "latency_ms_total": 2757.149099939852,
+      "file": "D:\\thanhtrong\\notebook_bundle\\local-work\\local-20261110-04\\products\\fe\\model\\Edge Ai\\seed1024\\flood_mobilenetv3_large_best.pth",
+      "sha256": "6d4ef6fff1b59e8ac5d3165f935f28214b935ee377e21ecf16e3b0627be3d9ae",
+      "bytes": 50864227
+    },
+    "structured_pruned": {
+      "accuracy": 0.703125,
+      "balanced_accuracy": 0.6825404515811493,
+      "macro_f1": 0.68140308586574,
+      "ece": 0.06981111003551632,
+      "brier_score": 0.3991228653623771,
+      "confusion_matrix": [
+        [
+          27,
+          13,
+          2,
+          14
+        ],
+        [
+          11,
+          37,
+          11,
+          1
+        ],
+        [
+          1,
+          12,
+          41,
+          0
+        ],
+        [
+          8,
+          2,
+          1,
+          75
+        ]
+      ],
+      "per_class": {
+        "low": {
+          "precision": 0.574468085106383,
+          "recall": 0.48214285714285715,
+          "f1": 0.5242718446601942,
+          "support": 56
+        },
+        "medium": {
+          "precision": 0.578125,
+          "recall": 0.6166666666666667,
+          "f1": 0.5967741935483871,
+          "support": 60
+        },
+        "high": {
+          "precision": 0.7454545454545455,
+          "recall": 0.7592592592592593,
+          "f1": 0.7522935779816514,
+          "support": 54
+        },
+        "non_flood": {
+          "precision": 0.8333333333333334,
+          "recall": 0.872093023255814,
+          "f1": 0.8522727272727273,
+          "support": 86
+        }
+      },
+      "critical_error_count": 7,
+      "critical_error_rate": 0.02734375,
+      "mean_severity_distance": 0.328125,
+      "latency_ms_mean": 10.349171483994724,
+      "latency_ms_median": 10.34780000190949,
+      "latency_ms_p95": 11.443374991358723,
+      "latency_ms_min": 8.842599985655397,
+      "latency_ms_max": 17.467099998611957,
+      "latency_ms_total": 2649.387899902649,
+      "file": "D:\\thanhtrong\\notebook_bundle\\local-work\\local-20261110-04\\bundle-results\\image_pruning\\ratio-0.050\\flood_mobilenetv3_large_structured_best.pt",
+      "sha256": "1680023bef5cf19ba07187cce4ec13bfd308b13d383908c8f89e25d0b5380cc1",
+      "bytes": 15621385
+    }
+  },
+  "pairwise_comparison": {
+    "baseline_vs_structured_pruned": {
+      "top1_agreement": 0.78125,
+      "max_abs_diff": 0.7844074964523315,
+      "mean_abs_diff": 0.08646481484174728,
+      "rmse": 0.14428656085555042,
+      "l1_mean": 0.34585922956466675,
+      "l2_mean": 0.21715649962425232,
+      "cosine_similarity_mean": 0.9297164082527161,
+      "js_divergence_mean": 0.03829214205104142,
+      "probabilities_close": false,
+      "atol": 1e-05,
+      "rtol": 0.0001
+    }
+  }
+}

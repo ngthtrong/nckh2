@@ -16,7 +16,7 @@
 
 \FormLine{Nội dung nghiên cứu: Xây dựng và tối ưu mô hình nhận diện ảnh cứu hộ trên thiết bị di động; thu thập thông tin về vị trí và mức độ khẩn cấp; phát triển cơ chế lưu trữ, gửi lại và đồng bộ dữ liệu khi kết nối mạng không ổn định. Nghiên cứu phân cụm, ưu tiên và bản đồ. Pilot văn bản dịch tiếng Việt/nhãn AI đã chạy NLP và fusion offline; corpus bản địa, trích xuất thông tin và camera/Android chưa được xác nhận.}
 
-\FormLine{Kết quả đạt được: Mô hình gốc seed 1024 đạt Accuracy \NewImageAccuracy\%, macro-F1 \NewImageMacroFOne\% trên 256 ảnh CPU, có 3 lỗi nặng. Lượng tử hóa giảm dung lượng và độ chính xác; có 32 phiên benchmark ảnh trên bốn điện thoại. LR năm cờ không phải NLP; adapter chưa dùng điểm LR. Đã có ứng dụng, backend và dashboard. Pilot CrisisMMD tiếng Anh đạt macro-F1 fusion \MMFusionFOne\%, nhưng CI hiệu còn chứa 0; Pilot tiếng Việt dịch/nhãn AI đạt macro-F1 fusion frozen \VISilverFusionFOne\%, recall request \VISilverFusionRecall\%; chưa có gold người độc lập hoặc fusion trong app.}
+\FormLine{Kết quả đạt được: Baseline đạt Accuracy \NewImageAccuracy\%, macro-F1 \NewImageMacroFOne\% trên 256 ảnh; benchmark gồm 32 cấu hình trên bốn điện thoại. McNemar chưa xác lập cải thiện pruning; thử 5/10/20\% chưa bảo toàn chất lượng. Fusion bản dịch/nhãn AI đã được nhóm kiểm tra đạt macro-F1 \VISilverFusionFOne\%, recall request \VISilverFusionRecall\%; T2 CUDA đạt trung bình \VISilverFineFOne\%. Nhóm xác nhận đã tích hợp NLP/fusion mobile và khắc phục lỗi gửi bài lúc mất mạng.}
 
 \FormLine{Ý nghĩa: RQ1 chưa xác lập Product hơn Additive; RQ2 chưa xác lập lợi ích alignment chung; RQ3 cho revised kém nearest-first về harm và trễ hạn mô phỏng. Ba raw p Spearman và năm Holm RQ2 chưa khớp replay. Chưa đo hiệu quả cứu hộ thực địa.}
 

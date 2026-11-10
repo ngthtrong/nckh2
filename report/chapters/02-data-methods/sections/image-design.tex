@@ -75,17 +75,22 @@ Hình huấn luyện trong báo cáo được cập nhật từ config và artif
 Hình~\ref{fig:training-history} trình bày diễn biến loss theo các epoch đã lưu.
 
 \begin{figure}[htbp]\centering
-\includegraphics[width=\textwidth]{training-loss.pdf}
+\begin{minipage}[t]{.485\linewidth}\centering
+\includegraphics[width=\linewidth]{training-loss.pdf}
 \caption{Loss theo 11 epoch đã lưu của model seed 1024}
 \label{fig:training-history}
-\end{figure}
-\begin{figure}[htbp]\centering
-\includegraphics[width=\textwidth]{training-metrics.pdf}
-\caption{Các chỉ số train và validation theo epoch của model seed 1024}\label{fig:training-metrics}
-\end{figure}
-\begin{figure}[htbp]\centering
-\includegraphics[width=\textwidth]{validation-recall.pdf}
-\caption{Recall validation theo từng lớp của model seed 1024}\label{fig:validation-recall}
+\end{minipage}\hfill
+\begin{minipage}[t]{.485\linewidth}\centering
+\includegraphics[width=\linewidth]{training-metrics.pdf}
+\caption{Các chỉ số train và validation theo epoch của model seed 1024}
+\label{fig:training-metrics}
+\end{minipage}
+\par\medskip
+\begin{minipage}[t]{.485\linewidth}\centering
+\includegraphics[width=\linewidth]{validation-recall.pdf}
+\caption{Recall validation theo từng lớp của model seed 1024}
+\label{fig:validation-recall}
+\end{minipage}
 \end{figure}
 
 Hình~\ref{fig:training-metrics} trình bày các chỉ số train và validation; Hình~\ref{fig:validation-recall} tách recall validation theo từng lớp. Train loss có xu hướng giảm trong các hàng đã lưu, trong khi validation accuracy dao động. Khoảng cách train--validation ở cuối history cho thấy cần giữ quy tắc chọn trên validation và đánh giá test độc lập. Chỉ từ CSV chưa thể kết luận mọi dao động là overfitting hoặc phiên đã dừng đúng cơ chế early stopping; cần đối chiếu log và metadata checkpoint để xác định nguyên nhân hoặc epoch được xuất cuối.
@@ -96,9 +101,11 @@ Ba cơ chế này khác nhau và được đánh giá riêng (Hình~\ref{fig:flo
 x_q=\operatorname{clip}\bigl(\operatorname{round}(x/\delta_q)+z_q\bigr),\qquad
 \widehat x=\delta_q(x_q-z_q).
 \end{equation}
-PTQ xác định các tham số sau huấn luyện từ dữ liệu calibration; QAT mô phỏng tác động lượng tử hóa trong quá trình tinh chỉnh. Cấu hình PTQ dùng lượng tử hóa QDQ với trọng số INT8 theo từng kênh và activation UINT8. Calibration dùng ảnh train phân tầng với seed \QuantizationSeed{} theo cấu hình đã lưu, không dùng test để hiệu chỉnh. QAT là một nhánh riêng, có artifact và validation riêng. Tài liệu ONNX Runtime nêu rằng lượng tử hóa có thể làm giảm chất lượng và cung cấp công cụ so sánh tensor để tìm tầng sai lệch \citep{onnxQuantization}; đây là căn cứ cho kế hoạch phân tích nhánh QAT, chưa phải chẩn đoán nguyên nhân suy giảm đã thực hiện.
+PTQ xác định các tham số sau huấn luyện từ dữ liệu calibration; QAT mô phỏng tác động lượng tử hóa trong quá trình tinh chỉnh. Cấu hình PTQ dùng lượng tử hóa QDQ với trọng số INT8 theo từng kênh và activation UINT8. Calibration dùng ảnh train phân tầng với seed \QuantizationSeed{} theo cấu hình đã lưu, không dùng test để hiệu chỉnh. QAT là một nhánh riêng, có artifact và validation riêng. Tài liệu ONNX Runtime nêu rằng lượng tử hóa có thể làm giảm chất lượng và cung cấp công cụ so sánh tensor để tìm tầng sai lệch \citep{onnxQuantization}; đây là cơ sở cho phép chẩn đoán tensor bổ sung ở Mục~\ref{sec:local-image-update}, chưa phải bằng chứng đã xác định nguyên nhân suy giảm.
 
 Cắt tỉa có cấu trúc thay đổi kênh hoặc nhóm tham số của mạng. Trong artifact hiện tại, phương pháp \texttt{global\_group\_magnitude\_channel} có target ratio 0,01; số tham số trước và sau là 4.207.156 và 4.145.694, với cấu hình lưu trong benchmark seed \PruningSeed{}. Lợi ích được kiểm tra bằng tệp thực, dự đoán và timing cùng runtime: giảm tham số, giảm byte và tăng tốc là ba kết quả riêng. Chương~\ref{chap:04-evaluation} giữ cả trường hợp giảm dung lượng nhưng runtime chậm hơn.
+
+Phép bổ sung tại Mục~\ref{sec:local-image-update} thử tỷ lệ mục tiêu 5/10/20\% với cùng split, chọn tỷ lệ bằng macro-F1 validation rồi mới đánh giá cấu hình được chọn trên test. Bảng ứng viên giữ kết quả validation, không dùng test để chọn trong grid mới. Phép này không tạo test độc lập mới hoặc thay model pruning 1\% lịch sử trong nguyên mẫu. Chẩn đoán activation PTQ/QAT cũng đã chạy trên một ảnh validation cố định, nhưng mức ghép tensor còn hạn chế nên chưa cô lập được nguyên nhân giảm chất lượng.
 
 Lượng tử hóa thay đổi biểu diễn số và đường thực thi toán tử, còn cắt tỉa thay đổi cấu trúc mạng. Vì vậy QAT không đồng nghĩa với cắt tỉa, và một tệp được gọi là INT8 không tự bảo đảm mọi toán tử chạy nhanh hơn FP32 trên mọi runtime. Kích thước tệp còn phụ thuộc kiểu đóng gói và metadata. Khi đánh giá lựa chọn triển khai, cần so trong cùng phiên: Accuracy và macro-F1 để thấy chất lượng chung; recall high cùng số lỗi nặng để thấy kiểu thất bại; dung lượng asset thực để thấy chi phí lưu/truyền; trung vị và P95 để thấy độ trễ. Không ghép độ trễ thấp nhất của các phiên khác nhau vào một thứ hạng chung.
 

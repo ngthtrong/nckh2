@@ -139,6 +139,16 @@ Tùy vào môi trường chạy Flutter app, cấu hình `kServerBaseUrl` trong 
 - Batch store-and-forward của app. `UPDATE_RESCUE_STATUS` chỉ được xử lý khi request có phiên
   đăng nhập dashboard (cookie hoặc `Authorization: Bearer`), ngược lại `rejected UNAUTHENTICATED`.
 
+### Khử bản sao trước đồ thị
+
+Adapter dùng chính sách `exact-model-and-content-v1`: nhóm bản có cùng trường mô hình, mô tả,
+liên hệ và định danh ảnh trước khi tính quantile/top-k. Nội dung khác vẫn là nút riêng; không
+thêm ngưỡng gần trùng. `graphDeduplication` lưu ánh xạ nút chuẩn về ID báo cáo gốc và số bản
+sao loại khỏi đầu vào đồ thị; dashboard vẫn nhận mọi ID gốc. ETag có namespace chính sách để
+không dùng lại kết quả cache của phiên adapter trước. Thay đổi này không sửa kết quả RQ lịch sử.
+
+Kiểm hồi quy: `.venv/bin/python -m unittest test_graph_transport_dedup test_cluster_service`.
+
 ### `POST /api/sms/inbound` (SMS gateway)
 - Một điện thoại/dịch vụ SMS gateway chuyển tiếp tin tới tổng đài; bật bằng `RESCUE_SMS_GATEWAY_TOKEN`
   (gửi qua header `X-Gateway-Token` hoặc `?token=`).

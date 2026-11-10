@@ -1,0 +1,87 @@
+{
+  "status": "EXECUTED_AGAINST_AI_SILVER_LABELS",
+  "task": "vi_translated_silver_request_v1",
+  "label_origin": "AI_SILVER_TEXT_ONLY",
+  "dataset_sha256": "04f44a9d0af284804dff5052b540a2286b1db666e133cbee7c1d4140c32dc55d",
+  "protocol_sha256": "e9abccbd4e681e6131c2d3a60a9d732580295aa1a4176b2b03dee764ff682ea2",
+  "t2_protocol_sha256": "4e855edc6def7edd5d04769196b5c89c0d941eb9c31af541ecfee0fca0748197",
+  "training_receipt_sha256": "0140d5a1cee769fc2249f654f2bef39db875cacb3efcc3847f72dec389f94cd6",
+  "predictions_sha256": "c30387bee335395b4a051497ca015b4a03e533ac79a4d21cbc364a1581ffe192",
+  "metrics_sha256": "cd1385b69fe855c05f7576200f7d26b288ed8b8cd977dc6cdbb8b8634595f43f",
+  "selected_learning_rate": 2e-05,
+  "seeds": [
+    17,
+    29,
+    43
+  ],
+  "n_test": 59,
+  "prediction_rows": 177,
+  "threshold": 0.5,
+  "seed_metrics": [
+    {
+      "seed": 17,
+      "n": 59,
+      "accuracy": 0.7966101694915254,
+      "macro_f1": 0.5137362637362637,
+      "precision_request": 0.125,
+      "recall_request": 0.16666666666666666,
+      "tn": 46,
+      "fp": 7,
+      "fn": 5,
+      "tp": 1
+    },
+    {
+      "seed": 29,
+      "n": 59,
+      "accuracy": 0.7966101694915254,
+      "macro_f1": 0.5137362637362637,
+      "precision_request": 0.125,
+      "recall_request": 0.16666666666666666,
+      "tn": 46,
+      "fp": 7,
+      "fn": 5,
+      "tp": 1
+    },
+    {
+      "seed": 43,
+      "n": 59,
+      "accuracy": 0.7627118644067796,
+      "macro_f1": 0.5411111111111111,
+      "precision_request": 0.16666666666666666,
+      "recall_request": 0.3333333333333333,
+      "tn": 43,
+      "fp": 10,
+      "fn": 4,
+      "tp": 2
+    }
+  ],
+  "summary": {
+    "accuracy": {
+      "mean": 0.7853107344632768,
+      "min": 0.7627118644067796,
+      "max": 0.7966101694915254
+    },
+    "macro_f1": {
+      "mean": 0.5228612128612128,
+      "min": 0.5137362637362637,
+      "max": 0.5411111111111111
+    },
+    "precision_request": {
+      "mean": 0.13888888888888887,
+      "min": 0.125,
+      "max": 0.16666666666666666
+    },
+    "recall_request": {
+      "mean": 0.2222222222222222,
+      "min": 0.16666666666666666,
+      "max": 0.3333333333333333
+    }
+  },
+  "encoder_fine_tuning": true,
+  "elapsed_seconds_total": 42.01499999999942,
+  "limits": [
+    "No independent human/expert gold or native-Vietnamese rescue data",
+    "Three seed models evaluated on the same test IDs, not three independent datasets",
+    "No joint image/text encoder fine-tuning, Android or rescue-effectiveness validation"
+  ]
+}

@@ -1,35 +1,12 @@
-\section{Kết quả đầy đủ của benchmark nhận diện trên điện thoại}\label{sec:phone-full-results}
-Phần này trình bày đủ 32 cấu hình nhận diện trên điện thoại, làm căn cứ cho ba bảng tóm tắt và kết luận tại Mục~\ref{sec:phone-benchmark-results}. Không loại cấu hình kém thuận lợi. Mỗi cấu hình dùng cùng 256 ảnh test, gồm 86 non\_flood, 56 low, 60 medium và 54 high; mỗi ảnh có một dự đoán trong từng phiên. Các phiên dùng lại ảnh nên không làm tăng số ảnh độc lập lên 8.192.
+\section{Kết quả nhận diện trên điện thoại}\label{sec:phone-full-results}
+Các Bảng~\ref{tab:phone-full-quality}--\ref{tab:phone-full-classes} giữ đủ 32 cấu hình, mỗi cấu hình dùng cùng 256 ảnh test. Mã cấu hình có dạng \texttt{seed-biến thể-máy-runtime}: B/P là baseline/pruning; RM15, RN11, RN13 và S10e là bốn mẫu máy; O/T là ONNX/PTE. Hai khối cột lần lượt là seed 159 và 1024. Thiết lập và kết quả tổng hợp ở Mục~\ref{sec:phone-benchmark-setup} và Mục~\ref{sec:phone-benchmark-results}.
 
-Mã cấu hình có dạng \texttt{seed-biến thể-máy-runtime}. B là baseline, P là cắt tỉa; RM15 là realme 15, RN11 là Redmi Note 11, RN13 là Redmi Note 13 và S10e là Samsung S10e. O là ONNX, T là ExecuTorch/PTE. Ví dụ, \texttt{1024-P-RN13-T} là seed 1024 cắt tỉa chạy PTE trên Redmi Note 13. Thông tin thiết bị, dataset và phạm vi đo được mô tả ở Mục~\ref{sec:phone-benchmark-setup}.
+Accuracy, precision, recall và F1 được báo theo phần trăm; macro là trung bình đều bốn lớp. Lỗi nặng là chênh ít nhất hai mức theo thứ tự non\_flood, low, medium, high. Với sai lệch mức \(e_i\), \(\mathrm{MAE}=\sum_i|e_i|/n\), \(\mathrm{RMSE}=\sqrt{\sum_i e_i^2/n}\). Thời gian tính bằng ms trong \texttt{classifyImage}; P50/P95 dùng nearest-rank sau khi loại năm lượt làm nóng.
 
-Các bảng chi tiết được chia thành hai khối cột song song: seed 159 ở bên trái và seed 1024 ở bên phải. Đọc từng khối từ trên xuống; tiêu đề cột được lặp lại khi bảng sang trang.
-
-\subsection{Chất lượng phân loại theo cấu hình}
-Accuracy (Acc.) là tỷ lệ dự đoán đúng; P/R/F1 macro là trung bình có trọng số bằng nhau của chỉ số tương ứng ở bốn lớp. Macro-Recall cũng chính là balanced accuracy trong bài toán này. Các giá trị phần trăm được làm tròn hai chữ số; CSV giữ độ chính xác cao hơn.
 \input{generated/tables/phone-full-quality}
-
-\subsection{Sai lệch thứ bậc và lỗi nặng}
-Đặt $s(\mathrm{non\_flood})=0$, $s(\mathrm{low})=1$, $s(\mathrm{medium})=2$, $s(\mathrm{high})=3$. Với $e_i=s(\hat y_i)-s(y_i)$ và $n=256$, hai chỉ số bổ sung được tính như sau:
-\[
-\operatorname{MAE}=\frac{1}{n}\sum_{i=1}^{n}|e_i|,
-\qquad
-\operatorname{RMSE}=\sqrt{\frac{1}{n}\sum_{i=1}^{n}e_i^2}.
-\]
-Lỗi nặng là số ảnh có $|e_i|\geq2$. Khoảng cách giữa các mức được quy ước bằng một, không phải độ sâu ngập hay chi phí cứu hộ. MAE/RMSE chưa có trong JSON gốc; chúng được tính lại từ dự đoán, không chạy suy luận mới và không sửa dữ liệu nguồn.
 \input{generated/tables/phone-full-ordinal}
-
-\subsection{Thời gian xử lý theo cấu hình}
-Mean là trung bình thời gian từng ảnh; P50/P95 dùng nearest-rank sau khi loại năm lượt warmup khỏi latency. Đơn vị là ms; phạm vi là giải mã, tiền xử lý và suy luận trong \texttt{classifyImage}. Bảng giữ thời gian riêng từng máy, không dùng thời gian tổng hợp thay cho kết quả từng thiết bị.
 \input{generated/tables/phone-full-latency}
-
-% Finish the three single-page tables before the per-class multipage table.
 \FloatBarrier
-\subsection{Precision, Recall và F1 theo từng lớp}
-Bảng gồm 128 hàng, tương ứng 32 cấu hình nhân bốn lớp. P và R lần lượt là Precision và Recall. Cột số ảnh là số mẫu thật của lớp trong test; không phải số ảnh model dự đoán vào lớp đó. F1 được tính riêng từ Precision/Recall từng lớp, sau đó mới lấy trung bình để có macro-F1. Việc hai runtime có cùng nhãn top-1 làm các chỉ số này bằng nhau trong từng cặp máy/model, nhưng không chứng minh vector xác suất của hai runtime giống tuyệt đối.
 \input{generated/tables/phone-full-classes}
 
-\subsection{Cách tổng hợp kết quả}
-Các bảng được tổng hợp từ 32 phiên đo sau khi đối chiếu số ảnh, nhãn thật, dự đoán, ma trận nhầm lẫn và thời gian xử lý. Số liệu chi tiết cùng dự đoán từng ảnh được lưu trong bộ dữ liệu thực nghiệm bàn giao.
-
-Bảng tóm tắt bốn phương án ở Chương~\ref{chap:04-evaluation} lấy trung bình chỉ số của tám phiên máy--môi trường thực thi; số lỗi nặng cũng lấy trung bình nên có thể không nguyên. Các bảng trong phụ lục này giữ kết quả riêng từng cấu hình, không thay bằng một ma trận gộp các ảnh được dùng lại.
+Bảng theo lớp có 128 hàng, tương ứng bốn lớp trong mỗi cấu hình; số ảnh là số mẫu thật. Các phiên dùng lại cùng test, không tạo 8.192 ảnh độc lập. Bảng tổng hợp ở Chương~\ref{chap:04-evaluation} lấy trung bình tám phiên máy--runtime cho mỗi phương án; các bảng tại đây giữ từng cấu hình.

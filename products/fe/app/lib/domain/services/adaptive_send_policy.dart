@@ -23,7 +23,14 @@ class AdaptiveSendPolicy {
     }
     if (!hasImage) return (mode: SendMode.textOnly, throughputKbps: null);
 
-    final kbps = await network.probeThroughputKbps();
+    int? kbps;
+    try {
+      kbps = await network.probeThroughputKbps();
+    } catch (_) {
+      // A link/plugin failure is a failed measurement, not a lost report.
+      // Keep the persisted outbox and let the normal fallback report its status.
+      kbps = null;
+    }
     final mode = chooseMode(
       hasData: kbps != null,
       confidence: confidence,

@@ -6,6 +6,11 @@ Ngô Thanh Vũ và cộng sự sử dụng ảnh biển báo giao thông, YOLOv1
 
 Hai hướng trên có thể bổ sung bối cảnh cho hệ thống nếu sau này có nguồn dữ liệu và phép ghép không gian phù hợp. Tuy nhiên, trong repo hiện tại, chúng là tài liệu tổng quan, chưa phải dịch vụ được tích hợp hoặc dữ liệu huấn luyện của mô hình. Khoảng trống mà đề tài khảo sát nằm ở liên kết báo cáo, xử lý gửi lại khi mạng gián đoạn và kiểm tra hệ quả của thứ tự ưu tiên sau khi thông tin được tiếp nhận.
 
+\subsection{Ảnh mặt đất và mô hình gọn cho tình huống khẩn cấp}
+Lee và Joo giới thiệu AlleyFloodNet cho phát hiện có/không ngập từ ảnh mặt đất ở các khu vực đô thị dễ tổn thương, như hẻm và nhà bán hầm~\citep{lee2025alleyfloodnet}. Công trình nhấn mạnh ảnh ở góc nhìn gần và nhiều điều kiện ánh sáng. Đây là đối chiếu sát nguồn ảnh người dân, nhưng nhiệm vụ nhị phân khác phân loại bốn mức ngập của đề tài; không đối sánh trực tiếp Accuracy giữa hai bộ dữ liệu.
+
+Kyrkou và Theocharides đề xuất EmergencyNet cho phân loại cảnh khẩn cấp từ ảnh UAV, dùng kết hợp đặc trưng tích chập giãn nở để giảm chi phí tính toán~\citep{kyrkou2020emergencynet}. Công trình cung cấp đối chiếu về mô hình gọn tại biên. Tuy nhiên, ảnh trên không khác ảnh điện thoại, và kết hợp đặc trưng trong mạng ảnh khác fusion ảnh--văn bản của báo cáo. Tốc độ của công trình không được dùng thay phép đo trên thiết bị của đề tài.
+
 \subsection{So sánh theo đầu vào, đầu ra và điều kiện áp dụng}
 Bảng~\ref{tab:related-work} so sánh các hướng ở mức bài toán, tránh đặt Accuracy phân loại cạnh F1 phân vùng như thể chúng đo cùng một nhiệm vụ. Các công trình được lựa chọn để giải thích từng thành phần của hệ thống; bảng không phải tổng quan hệ thống với tiêu chí tìm kiếm bao phủ toàn bộ ngành.
 \begin{longtable}{P{.23\textwidth}P{.31\textwidth}P{.35\textwidth}}
@@ -16,9 +21,13 @@ Doan và Le-Thi~\citep{doan2025sar} & Cặp ảnh SAR; phát hiện thay đổi 
 Ngô Thanh Vũ và cộng sự~\citep{ngo2025urban} & Ảnh biển báo; ước lượng độ sâu nhờ tham chiếu hình học & Cần vật chuẩn và thông số; khác phân loại mức ngập tương đối \\
 CrisisMMD \citep{alam2018crisismmd} & Bài đăng ảnh--văn bản thiên tai; nhãn phục vụ phân tích nhân đạo & Đã dùng nhãn informative trong pilot riêng ở Mục~\ref{sec:multimodal-pilot}; không phải nhãn mức ngập hoặc khẩn cấp cứu hộ tiếng Việt \\
 FloodNet \citep{rahnemoonfar2021floodnet} & Ảnh UAV hậu thiên tai; hiểu cảnh và nhãn theo pixel & Góc nhìn trên không khác ảnh người dân; không suy ra parity dữ liệu \\
+AlleyFloodNet \citep{lee2025alleyfloodnet} & Ảnh mặt đất; phân loại có/không ngập & Gần bối cảnh ảnh người dân, khác nhãn bốn mức; không phải dữ liệu huấn luyện của đề tài \\
+EmergencyNet \citep{kyrkou2020emergencynet} & Ảnh UAV; phân loại cảnh khẩn cấp bằng CNN gọn & Tham chiếu thiết kế tại biên, khác góc nhìn và khác fusion ảnh--văn bản \\
 MobileNetV3 \citep{howard2019mobilenetv3} & Ảnh; đặc trưng và phân loại với thiết kế cho thiết bị di động & Kiến trúc backbone của đề tài; vẫn cần tinh chỉnh và đo từng runtime \\
 Louvain/Leiden \citep{blondel2008louvain,traag2019leiden} & Đồ thị có trọng số; cộng đồng nút & Không tự xác minh sự kiện thật; kết quả phụ thuộc cách dựng cạnh \\
 Bundle Protocol v7 \citep{rfc9171} & Bundle trong mạng gián đoạn; lưu và chuyển tiếp qua các nút & Chuẩn tham chiếu DTN; outbox HTTP hiện tại chưa triển khai BPv7 \\
 Đề tài hiện tại & Báo cáo ảnh/mô tả/vị trí; cụm và danh sách hỗ trợ điều phối & Nguyên mẫu và thực nghiệm tổng hợp; còn cần dữ liệu/kiểm chứng vận hành \\
 \bottomrule
 \end{longtable}
+
+Điểm đóng góp của đề tài nằm ở tích hợp suy luận ảnh, lưu và gửi lại báo cáo, bản đồ cùng lõi liên kết sự kiện và ưu tiên trong một nguyên mẫu. Khác các công trình tập trung nhận diện ảnh, báo cáo kiểm tra cả multiplicity và hệ quả của thứ tự điều phối bằng đối chứng đơn giản. Kết quả hiện có chưa xác lập ưu thế thuật toán hoặc lợi ích nghiệp vụ tổng quát; đóng góp tích hợp và câu hỏi thực nghiệm cần được đánh giá riêng.

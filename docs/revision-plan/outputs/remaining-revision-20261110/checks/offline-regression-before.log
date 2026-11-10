@@ -1,0 +1,65 @@
+00:00 +0: loading /home/ngthtrong/nckh2/products/fe/app/test/offline_submission_regression_test.dart
+00:00 +0: SOS survives disposal during a lost ACK
+Không lấy được GPS: MissingPluginException(No implementation found for method checkPermission on channel flutter.baseflow.com/geolocator)
+00:00 +0 -1: SOS survives disposal during a lost ACK [E]
+  A AppController was used after being disposed.
+  Once you have called dispose() on a AppController, it can no longer be used.
+  package:flutter/src/foundation/change_notifier.dart 184:9       ChangeNotifier.debugAssertNotDisposed.<fn>
+  package:flutter/src/foundation/change_notifier.dart 191:6       ChangeNotifier.debugAssertNotDisposed
+  package:flutter/src/foundation/change_notifier.dart 414:27      ChangeNotifier.notifyListeners
+  package:app/presentation/controllers/app_controller.dart 635:7  AppController.sendSos
+  
+00:00 +0 -1: SOS does not start after disposal
+00:00 +0 -2: SOS does not start after disposal [E]
+  A AppController was used after being disposed.
+  Once you have called dispose() on a AppController, it can no longer be used.
+  package:flutter/src/foundation/change_notifier.dart 184:9       ChangeNotifier.debugAssertNotDisposed.<fn>
+  package:flutter/src/foundation/change_notifier.dart 191:6       ChangeNotifier.debugAssertNotDisposed
+  package:flutter/src/foundation/change_notifier.dart 414:27      ChangeNotifier.notifyListeners
+  package:app/presentation/controllers/app_controller.dart 610:5  AppController.sendSos
+  test/offline_submission_regression_test.dart 109:40             main.<fn>
+  
+00:00 +0 -2: post survives disposal during a lost ACK
+Không lấy được GPS: MissingPluginException(No implementation found for method checkPermission on channel flutter.baseflow.com/geolocator)
+00:00 +0 -3: post survives disposal during a lost ACK [E]
+  A AppController was used after being disposed.
+  Once you have called dispose() on a AppController, it can no longer be used.
+  package:flutter/src/foundation/change_notifier.dart 184:9       ChangeNotifier.debugAssertNotDisposed.<fn>
+  package:flutter/src/foundation/change_notifier.dart 191:6       ChangeNotifier.debugAssertNotDisposed
+  package:flutter/src/foundation/change_notifier.dart 414:27      ChangeNotifier.notifyListeners
+  package:app/presentation/controllers/app_controller.dart 713:7  AppController.submitPost
+  
+00:00 +0 -3: post does not start after disposal
+00:00 +0 -4: post does not start after disposal [E]
+  A AppController was used after being disposed.
+  Once you have called dispose() on a AppController, it can no longer be used.
+  package:flutter/src/foundation/change_notifier.dart 184:9       ChangeNotifier.debugAssertNotDisposed.<fn>
+  package:flutter/src/foundation/change_notifier.dart 191:6       ChangeNotifier.debugAssertNotDisposed
+  package:flutter/src/foundation/change_notifier.dart 414:27      ChangeNotifier.notifyListeners
+  package:app/presentation/controllers/app_controller.dart 673:5  AppController.submitPost
+  test/offline_submission_regression_test.dart 82:52              main.submitPost
+  test/offline_submission_regression_test.dart 109:52             main.<fn>
+  
+00:00 +0 -4: sync finishing after disposal leaves the queue intact
+00:00 +0 -5: sync finishing after disposal leaves the queue intact [E]
+  A AppController was used after being disposed.
+  Once you have called dispose() on a AppController, it can no longer be used.
+  package:flutter/src/foundation/change_notifier.dart 184:9       ChangeNotifier.debugAssertNotDisposed.<fn>
+  package:flutter/src/foundation/change_notifier.dart 191:6       ChangeNotifier.debugAssertNotDisposed
+  package:flutter/src/foundation/change_notifier.dart 414:27      ChangeNotifier.notifyListeners
+  package:app/presentation/controllers/app_controller.dart 872:5  AppController.syncPending
+  
+00:00 +0 -5: probe failure selects fallback rather than failing submission
+00:00 +0 -6: probe failure selects fallback rather than failing submission [E]
+  SocketException: Link lost during probe
+  test/offline_submission_regression_test.dart 63:21           _Network.probeThroughputKbps
+  package:app/domain/services/adaptive_send_policy.dart 26:32  AdaptiveSendPolicy.decide
+  
+00:00 +0 -6: Some tests failed.
+
+Failing tests:
+  /home/ngthtrong/nckh2/products/fe/app/test/offline_submission_regression_test.dart: SOS does not start after disposal
+  /home/ngthtrong/nckh2/products/fe/app/test/offline_submission_regression_test.dart: SOS survives disposal during a lost ACK
+  /home/ngthtrong/nckh2/products/fe/app/test/offline_submission_regression_test.dart: post does not start after disposal
+  /home/ngthtrong/nckh2/products/fe/app/test/offline_submission_regression_test.dart: post survives disposal during a lost ACK
+  ... and 2 more

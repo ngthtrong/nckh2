@@ -1,0 +1,714 @@
+/home/ngthtrong/nckh2/products/be/.venv/lib/python3.12/site-packages/fastapi/testclient.py:1: StarletteDeprecationWarning: Using `httpx` with `starlette.testclient` is deprecated; install `httpx2` instead.
+  from starlette.testclient import TestClient as TestClient  # noqa
+[12:03:47] [INFO] Đã kiểm tra cấu trúc bảng SQLite (reports, messages_dedup, report_events, teams, sessions).
+[12:03:47] [INFO] [AUTH] Đã tạo tài khoản quản trị 'admin'.
+[12:03:47] [WARNING] Tài khoản quản trị đang dùng mật khẩu mặc định; đặt RESCUE_ADMIN_PASSWORD hoặc đổi mật khẩu trên dashboard trước khi triển khai thật.
+test_equal_scalar_features_do_not_merge_different_text (test_graph_transport_dedup.GraphTransportDedupTest.test_equal_scalar_features_do_not_merge_different_text) ... ok
+test_multiplicity_does_not_change_graph_or_priority (test_graph_transport_dedup.GraphTransportDedupTest.test_multiplicity_does_not_change_graph_or_priority) ... ok
+test_review_keeps_all_original_ids (test_graph_transport_dedup.GraphTransportDedupTest.test_review_keeps_all_original_ids) ... ok
+test_recomputes_only_when_version_changes (test_cluster_service.ClusterServiceTest.test_recomputes_only_when_version_changes) ... [12:03:47] [INFO] [CLUSTER] Tính lại: 6 cụm từ 12 báo cáo trong 0.00 s
+[12:03:47] [INFO] [CLUSTER] Tính lại: 6 cụm từ 11 báo cáo trong 0.00 s
+ok
+test_slow_compute_serves_last_result_and_refreshes_in_background (test_cluster_service.ClusterServiceTest.test_slow_compute_serves_last_result_and_refreshes_in_background) ... [12:03:47] [INFO] [CLUSTER] Tính lại: 6 cụm từ 12 báo cáo trong 0.00 s
+[12:03:47] [INFO] [CLUSTER] Tính lại: 6 cụm từ 12 báo cáo trong 0.00 s
+ok
+test_deterministic (test_cluster_service.ComputeClustersTest.test_deterministic) ... ok
+test_empty (test_cluster_service.ComputeClustersTest.test_empty) ... ok
+test_high_flood_incident_ranks_first (test_cluster_service.ComputeClustersTest.test_high_flood_incident_ranks_first) ... ok
+test_missing_location_goes_to_review (test_cluster_service.ComputeClustersTest.test_missing_location_goes_to_review) ... ok
+test_resolved_reports_excluded (test_cluster_service.ComputeClustersTest.test_resolved_reports_excluded) ... ok
+test_separates_distant_incidents (test_cluster_service.ComputeClustersTest.test_separates_distant_incidents) ... ok
+test_confidence_eq1_counts_distinct_payloads (test_cluster_service.PaperFormulaTest.test_confidence_eq1_counts_distinct_payloads) ... ok
+test_fast_corroboration_matches_all_pairs_loop (test_cluster_service.PaperFormulaTest.test_fast_corroboration_matches_all_pairs_loop) ... ok
+test_near_duplicates_are_connected_components (test_cluster_service.PaperFormulaTest.test_near_duplicates_are_connected_components) ... ok
+test_pair_matrix_matches_scalar_product_similarity (test_cluster_service.PaperFormulaTest.test_pair_matrix_matches_scalar_product_similarity) ... ok
+test_priority_constants_match_paper (test_cluster_service.PaperFormulaTest.test_priority_constants_match_paper) ... ok
+test_threshold_uses_all_eligible_pairs (test_cluster_service.PaperFormulaTest.test_threshold_uses_all_eligible_pairs) ... ok
+test_epoch_ms_created_at (test_cluster_service.ToReportV2Test.test_epoch_ms_created_at) ... ok
+test_maps_app_fields (test_cluster_service.ToReportV2Test.test_maps_app_fields) ... ok
+test_non_flood_label_and_missing_text (test_cluster_service.ToReportV2Test.test_non_flood_label_and_missing_text) ... ok
+test_payload_algorithm_fields_take_precedence (test_cluster_service.ToReportV2Test.test_payload_algorithm_fields_take_precedence) ... ok
+test_create_message_is_idempotent (test_contract.ContractTest.test_create_message_is_idempotent) ... [12:03:48] [INFO] Đã kiểm tra cấu trúc bảng SQLite (reports, messages_dedup, report_events, teams, sessions).
+[12:03:48] [INFO] [SYNC] Bắt đầu xử lý batch 1 messages
+[12:03:48] [INFO] [CRUD][INSERT] Report ID=rescue-10492 | GPS=(10.7769, 106.7009) | Ảnh=None | Size=0B
+[12:03:48] [INFO] [SYNC][ACCEPTED] msg=message-1 op=CREATE_RESCUE_RECORD record=rescue-10492
+[12:03:48] [INFO] [SYNC] Batch xong: 1 accepted, 0 rejected, 0 duplicate, 0 retry_later
+[12:03:48] [INFO] [SYNC] Bắt đầu xử lý batch 1 messages
+[12:03:48] [INFO] [SYNC] Batch xong: 0 accepted, 0 rejected, 1 duplicate, 0 retry_later
+ok
+test_create_rolls_back_when_dedup_write_fails (test_contract.ContractTest.test_create_rolls_back_when_dedup_write_fails) ... [12:03:48] [INFO] Đã kiểm tra cấu trúc bảng SQLite (reports, messages_dedup, report_events, teams, sessions).
+[12:03:48] [INFO] [SYNC] Bắt đầu xử lý batch 1 messages
+[12:03:48] [INFO] [CRUD][INSERT] Report ID=must-rollback | GPS=(10.0, 106.0) | Ảnh=None | Size=0B
+[12:03:48] [ERROR] [SYNC][ERROR] msg=message-rollback: lỗi server, đã rollback message này
+Traceback (most recent call last):
+  File "/home/ngthtrong/nckh2/products/be/storage.py", line 1304, in process_sync_messages
+    result = _process_message(conn, msg, now_utc, operator)
+             ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/ngthtrong/nckh2/products/be/storage.py", line 1260, in _process_message
+    _record_dedup(conn, msg, res_data)
+  File "/home/ngthtrong/nckh2/products/be/storage.py", line 1164, in _record_dedup
+    conn.execute(
+sqlite3.IntegrityError: forced dedup failure
+[12:03:48] [INFO] [SYNC] Batch xong: 0 accepted, 0 rejected, 0 duplicate, 1 retry_later
+ok
+test_dashboard_and_sync_share_status_rules (test_contract.ContractTest.test_dashboard_and_sync_share_status_rules) ... [12:03:48] [INFO] Đã kiểm tra cấu trúc bảng SQLite (reports, messages_dedup, report_events, teams, sessions).
+[12:03:48] [INFO] [CRUD][INSERT] Report ID=r1 | GPS=(16.0, 108.0) | Ảnh=None | Size=0B
+[12:03:48] [INFO] [CRUD][STATUS] r1: processing -> v2 dispatched (-)
+[12:03:48] [INFO] [SYNC] Bắt đầu xử lý batch 1 messages
+[12:03:48] [WARNING] [SYNC][REJECTED] msg=status-1 op=UPDATE_RESCUE_STATUS code=INVALID_STATUS_TRANSITION
+[12:03:48] [INFO] [SYNC] Batch xong: 0 accepted, 1 rejected, 0 duplicate, 0 retry_later
+ok
+test_image_upload_keeps_first_created_at (test_contract.ContractTest.test_image_upload_keeps_first_created_at) ... [12:03:48] [INFO] Đã kiểm tra cấu trúc bảng SQLite (reports, messages_dedup, report_events, teams, sessions).
+[12:03:48] [INFO] [CRUD][INSERT] Report ID=r1 | GPS=(16.0, 108.0) | Ảnh=None | Size=0B
+[12:03:48] [INFO] [CRUD][MERGE(image_filename, image_local_path, image_url, image_sha256, image_size_bytes)] Report ID=r1 | GPS=(16.0, 108.0) | Ảnh=None | Size=0B
+ok
+test_legacy_schema_migrates_to_processing (test_contract.ContractTest.test_legacy_schema_migrates_to_processing) ... [12:03:48] [INFO] Đã kiểm tra cấu trúc bảng SQLite (reports, messages_dedup, report_events, teams, sessions).
+ok
+test_report_statuses_for_app_polling (test_contract.ContractTest.test_report_statuses_for_app_polling) ... [12:03:48] [INFO] Đã kiểm tra cấu trúc bảng SQLite (reports, messages_dedup, report_events, teams, sessions).
+[12:03:48] [INFO] [CRUD][INSERT] Report ID=a | GPS=(None, None) | Ảnh=None | Size=0B
+[12:03:48] [INFO] [CRUD][INSERT] Report ID=b | GPS=(None, None) | Ảnh=None | Size=0B
+[12:03:48] [INFO] [CRUD][STATUS] b: processing -> v2 dispatched (-)
+ok
+test_rfc8785_number_serialization (test_contract.ContractTest.test_rfc8785_number_serialization) ... ok
+test_status_route_precedes_report_id_route (test_contract.ContractTest.test_status_route_precedes_report_id_route) ... ok
+test_admin_reset_password_logs_user_out (test_dashboard_api.DashboardApiTest.test_admin_reset_password_logs_user_out) ... [12:03:48] [INFO] Đã kiểm tra cấu trúc bảng SQLite (reports, messages_dedup, report_events, teams, sessions).
+[12:03:48] [INFO] [CRUD][DELETE] Đã xóa sạch 0 báo cáo, messages_dedup và report_events.
+[12:03:48] [INFO] [AUTH] u249d6a3df9 đăng nhập từ testclient
+[12:03:48] [INFO] HTTP Request: POST http://testserver/api/auth/login "HTTP/1.1 200 OK"
+[12:03:48] [INFO] [AUTH] u192f3e7b9d đăng nhập từ testclient
+[12:03:48] [INFO] HTTP Request: POST http://testserver/api/auth/login "HTTP/1.1 200 OK"
+[12:03:48] [INFO] [AUTH] u249d6a3df9 sửa tài khoản u192f3e7b9d: [] + đặt lại mật khẩu
+[12:03:48] [INFO] HTTP Request: PATCH http://testserver/api/operators/3 "HTTP/1.1 200 OK"
+[12:03:48] [INFO] HTTP Request: GET http://testserver/api/teams "HTTP/1.1 401 Unauthorized"
+ok
+test_app_sms_keeps_full_2000_character_description (test_dashboard_api.DashboardApiTest.test_app_sms_keeps_full_2000_character_description) ... [12:03:48] [INFO] Đã kiểm tra cấu trúc bảng SQLite (reports, messages_dedup, report_events, teams, sessions).
+[12:03:48] [INFO] [CRUD][DELETE] Đã xóa sạch 0 báo cáo, messages_dedup và report_events.
+[12:03:48] [INFO] [CRUD][INSERT] Report ID=post-full-sms-description | GPS=(None, None) | Ảnh=None | Size=0B
+[12:03:48] [INFO] [SMS] 0900 -> post-full-sms-description (mới, định dạng SOS)
+[12:03:48] [INFO] HTTP Request: POST http://testserver/api/sms/inbound "HTTP/1.1 201 Created"
+ok
+test_app_sos_sms_merges_with_later_sync (test_dashboard_api.DashboardApiTest.test_app_sos_sms_merges_with_later_sync) ... [12:03:48] [INFO] Đã kiểm tra cấu trúc bảng SQLite (reports, messages_dedup, report_events, teams, sessions).
+[12:03:48] [INFO] [CRUD][DELETE] Đã xóa sạch 1 báo cáo, messages_dedup và report_events.
+[12:03:48] [INFO] [CRUD][INSERT] Report ID=sos-1790000000000-a1b2c3d4e5f6 | GPS=(16.05, 108.2) | Ảnh=None | Size=0B
+[12:03:48] [INFO] [SMS] +84900000001 -> sos-1790000000000-a1b2c3d4e5f6 (mới, định dạng SOS)
+[12:03:48] [INFO] HTTP Request: POST http://testserver/api/sms/inbound "HTTP/1.1 201 Created"
+[12:03:48] [INFO] [CRUD][MERGE(không đổi)] Report ID=sos-1790000000000-a1b2c3d4e5f6 | GPS=(16.05, 108.2) | Ảnh=None | Size=0B
+[12:03:48] [INFO] [SMS] +84900000001 -> sos-1790000000000-a1b2c3d4e5f6 (gộp, định dạng SOS)
+[12:03:48] [INFO] HTTP Request: POST http://testserver/api/sms/inbound "HTTP/1.1 200 OK"
+[12:03:48] [INFO] ==> [POST /sync/messages] Nhận batch 1 messages (514 bytes)
+[12:03:48] [INFO] [SYNC] Bắt đầu xử lý batch 1 messages
+[12:03:48] [INFO] [CRUD][MERGE(owner_client_id, created_at, ai_tags, raw_payload)] Report ID=sos-1790000000000-a1b2c3d4e5f6 | GPS=(16.05, 108.2) | Ảnh=None | Size=0B
+[12:03:48] [INFO] [SYNC][ACCEPTED] msg=m1 op=CREATE_RESCUE_RECORD record=sos-1790000000000-a1b2c3d4e5f6
+[12:03:48] [INFO] [SYNC] Batch xong: 1 accepted, 0 rejected, 0 duplicate, 0 retry_later
+[12:03:48] [INFO] HTTP Request: POST http://testserver/sync/messages "HTTP/1.1 200 OK"
+ok
+test_backup_download_is_valid_sqlite (test_dashboard_api.DashboardApiTest.test_backup_download_is_valid_sqlite) ... [12:03:48] [INFO] Đã kiểm tra cấu trúc bảng SQLite (reports, messages_dedup, report_events, teams, sessions).
+[12:03:48] [INFO] [CRUD][DELETE] Đã xóa sạch 1 báo cáo, messages_dedup và report_events.
+[12:03:48] [INFO] [CRUD][INSERT] Report ID=r1 | GPS=(16.05, 108.2) | Ảnh=None | Size=0B
+[12:03:48] [INFO] [AUTH] ub433e8b855 đăng nhập từ testclient
+[12:03:48] [INFO] HTTP Request: POST http://testserver/api/auth/login "HTTP/1.1 200 OK"
+[12:03:48] [INFO] [BACKUP] ub433e8b855 tải bản sao lưu rescue_reports_20261110_040348.db
+[12:03:48] [INFO] HTTP Request: GET http://testserver/api/admin/backup "HTTP/1.1 200 OK"
+ok
+test_backup_includes_images (test_dashboard_api.DashboardApiTest.test_backup_includes_images) ... [12:03:48] [INFO] Đã kiểm tra cấu trúc bảng SQLite (reports, messages_dedup, report_events, teams, sessions).
+[12:03:48] [INFO] [CRUD][DELETE] Đã xóa sạch 1 báo cáo, messages_dedup và report_events.
+[12:03:48] [INFO] [AUTH] ub433e8b855 đăng nhập từ testclient
+[12:03:48] [INFO] HTTP Request: POST http://testserver/api/auth/login "HTTP/1.1 200 OK"
+[12:03:48] [INFO] [BACKUP] ub433e8b855 tải bản sao lưu rescue_backup_20261110_040348.zip
+[12:03:48] [INFO] HTTP Request: GET http://testserver/api/admin/backup?images=1 "HTTP/1.1 200 OK"
+ok
+test_bootstrap_admin_from_environment (test_dashboard_api.DashboardApiTest.test_bootstrap_admin_from_environment) ... [12:03:48] [INFO] Đã kiểm tra cấu trúc bảng SQLite (reports, messages_dedup, report_events, teams, sessions).
+[12:03:48] [INFO] [CRUD][DELETE] Đã xóa sạch 0 báo cáo, messages_dedup và report_events.
+[12:03:49] [INFO] [AUTH] Đã tạo tài khoản quản trị 'chief'.
+[12:03:49] [INFO] [AUTH] chief đăng nhập từ testclient
+[12:03:49] [INFO] HTTP Request: POST http://testserver/api/auth/login "HTTP/1.1 200 OK"
+ok
+test_bulk_status_reports_each_failure (test_dashboard_api.DashboardApiTest.test_bulk_status_reports_each_failure) ... [12:03:49] [INFO] Đã kiểm tra cấu trúc bảng SQLite (reports, messages_dedup, report_events, teams, sessions).
+[12:03:49] [INFO] [CRUD][DELETE] Đã xóa sạch 0 báo cáo, messages_dedup và report_events.
+[12:03:49] [INFO] [CRUD][INSERT] Report ID=a | GPS=(16.05, 108.2) | Ảnh=None | Size=0B
+[12:03:49] [INFO] [CRUD][INSERT] Report ID=b | GPS=(16.05, 108.2) | Ảnh=None | Size=0B
+[12:03:49] [INFO] [CRUD][INSERT] Report ID=c | GPS=(16.05, 108.2) | Ảnh=None | Size=0B
+[12:03:49] [INFO] [CRUD][STATUS] b: processing -> v2 dispatched (-)
+[12:03:49] [INFO] [AUTH] ub433e8b855 đăng nhập từ testclient
+[12:03:49] [INFO] HTTP Request: POST http://testserver/api/auth/login "HTTP/1.1 200 OK"
+[12:03:49] [INFO] [CRUD][STATUS][BULK] 1/3 -> dispatched (Điều phối A)
+[12:03:49] [INFO] HTTP Request: POST http://testserver/api/reports/bulk-status "HTTP/1.1 200 OK"
+ok
+test_cancel_requires_reason_and_is_terminal (test_dashboard_api.DashboardApiTest.test_cancel_requires_reason_and_is_terminal) ... [12:03:49] [INFO] Đã kiểm tra cấu trúc bảng SQLite (reports, messages_dedup, report_events, teams, sessions).
+[12:03:49] [INFO] [CRUD][DELETE] Đã xóa sạch 3 báo cáo, messages_dedup và report_events.
+[12:03:49] [INFO] [CRUD][INSERT] Report ID=r1 | GPS=(16.05, 108.2) | Ảnh=None | Size=0B
+[12:03:49] [INFO] [AUTH] ub433e8b855 đăng nhập từ testclient
+[12:03:49] [INFO] HTTP Request: POST http://testserver/api/auth/login "HTTP/1.1 200 OK"
+[12:03:49] [INFO] HTTP Request: PATCH http://testserver/api/reports/r1/status "HTTP/1.1 400 Bad Request"
+[12:03:49] [INFO] [CRUD][STATUS] r1: processing -> v2 cancelled (Điều phối A)
+[12:03:49] [INFO] HTTP Request: PATCH http://testserver/api/reports/r1/status "HTTP/1.1 200 OK"
+[12:03:49] [INFO] HTTP Request: GET http://testserver/api/reports/r1 "HTTP/1.1 200 OK"
+[12:03:49] [INFO] HTTP Request: PATCH http://testserver/api/reports/r1/status "HTTP/1.1 409 Conflict"
+[12:03:49] [INFO] HTTP Request: PATCH http://testserver/api/reports/r1/status "HTTP/1.1 409 Conflict"
+[12:03:49] [INFO] HTTP Request: PATCH http://testserver/api/reports/r1/status "HTTP/1.1 409 Conflict"
+[12:03:49] [INFO] [CLUSTER] Tính lại: 0 cụm từ 0 báo cáo trong 0.00 s
+[12:03:49] [INFO] HTTP Request: GET http://testserver/api/clusters "HTTP/1.1 200 OK"
+ok
+test_changes_feed_is_incremental_and_resets_on_wipe (test_dashboard_api.DashboardApiTest.test_changes_feed_is_incremental_and_resets_on_wipe) ... [12:03:49] [INFO] Đã kiểm tra cấu trúc bảng SQLite (reports, messages_dedup, report_events, teams, sessions).
+[12:03:49] [INFO] [CRUD][DELETE] Đã xóa sạch 1 báo cáo, messages_dedup và report_events.
+[12:03:49] [INFO] [CRUD][INSERT] Report ID=r1 | GPS=(16.05, 108.2) | Ảnh=None | Size=0B
+[12:03:49] [INFO] [AUTH] ub433e8b855 đăng nhập từ testclient
+[12:03:49] [INFO] HTTP Request: POST http://testserver/api/auth/login "HTTP/1.1 200 OK"
+[12:03:49] [INFO] HTTP Request: GET http://testserver/api/reports/changes?since=0 "HTTP/1.1 200 OK"
+[12:03:49] [INFO] HTTP Request: GET http://testserver/api/reports/changes?since=12&epoch=441b1cf06c8a6c54 "HTTP/1.1 200 OK"
+[12:03:49] [INFO] [CRUD][INSERT] Report ID=r2 | GPS=(16.05, 108.2) | Ảnh=None | Size=0B
+[12:03:49] [INFO] HTTP Request: GET http://testserver/api/reports/changes?since=12&epoch=441b1cf06c8a6c54 "HTTP/1.1 200 OK"
+[12:03:49] [INFO] [CRUD][DELETE] Đã xóa sạch 2 báo cáo, messages_dedup và report_events.
+[12:03:49] [INFO] [CRUD][INSERT] Report ID=r3 | GPS=(16.05, 108.2) | Ảnh=None | Size=0B
+[12:03:49] [INFO] HTTP Request: GET http://testserver/api/reports/changes?since=14&epoch=441b1cf06c8a6c54 "HTTP/1.1 200 OK"
+ok
+test_cleanup_removes_expired_sessions_and_old_dedup (test_dashboard_api.DashboardApiTest.test_cleanup_removes_expired_sessions_and_old_dedup) ... [12:03:49] [INFO] Đã kiểm tra cấu trúc bảng SQLite (reports, messages_dedup, report_events, teams, sessions).
+[12:03:49] [INFO] [CRUD][DELETE] Đã xóa sạch 1 báo cáo, messages_dedup và report_events.
+ok
+test_clusters_have_stable_key_and_etag (test_dashboard_api.DashboardApiTest.test_clusters_have_stable_key_and_etag) ... [12:03:49] [INFO] Đã kiểm tra cấu trúc bảng SQLite (reports, messages_dedup, report_events, teams, sessions).
+[12:03:49] [INFO] [CRUD][DELETE] Đã xóa sạch 0 báo cáo, messages_dedup và report_events.
+[12:03:49] [INFO] [CRUD][INSERT] Report ID=k0 | GPS=(16.05, 108.2) | Ảnh=None | Size=0B
+[12:03:49] [INFO] [CRUD][INSERT] Report ID=k1 | GPS=(16.0505, 108.2) | Ảnh=None | Size=0B
+[12:03:49] [INFO] [CRUD][INSERT] Report ID=k2 | GPS=(16.051000000000002, 108.2) | Ảnh=None | Size=0B
+[12:03:49] [INFO] [CRUD][INSERT] Report ID=k3 | GPS=(16.0515, 108.2) | Ảnh=None | Size=0B
+[12:03:49] [INFO] [AUTH] ub433e8b855 đăng nhập từ testclient
+[12:03:49] [INFO] HTTP Request: POST http://testserver/api/auth/login "HTTP/1.1 200 OK"
+[12:03:49] [INFO] [CLUSTER] Tính lại: 3 cụm từ 4 báo cáo trong 0.00 s
+[12:03:49] [INFO] HTTP Request: GET http://testserver/api/clusters "HTTP/1.1 200 OK"
+[12:03:49] [INFO] HTTP Request: GET http://testserver/api/clusters "HTTP/1.1 304 Not Modified"
+[12:03:49] [INFO] HTTP Request: GET http://testserver/api/clusters "HTTP/1.1 304 Not Modified"
+[12:03:49] [INFO] [CRUD][INSERT] Report ID=k9 | GPS=(16.05, 108.2) | Ảnh=None | Size=0B
+[12:03:49] [INFO] [CLUSTER] Tính lại: 4 cụm từ 5 báo cáo trong 0.00 s
+[12:03:49] [INFO] HTTP Request: GET http://testserver/api/clusters "HTTP/1.1 200 OK"
+ok
+test_create_ignores_client_status (test_dashboard_api.DashboardApiTest.test_create_ignores_client_status) ... [12:03:49] [INFO] Đã kiểm tra cấu trúc bảng SQLite (reports, messages_dedup, report_events, teams, sessions).
+[12:03:49] [INFO] [CRUD][DELETE] Đã xóa sạch 5 báo cáo, messages_dedup và report_events.
+[12:03:49] [INFO] ==> [POST /sync/messages] Nhận batch 1 messages (461 bytes)
+[12:03:49] [INFO] [SYNC] Bắt đầu xử lý batch 1 messages
+[12:03:49] [INFO] [CRUD][INSERT] Report ID=r1 | GPS=(16.05, 108.2) | Ảnh=None | Size=0B
+[12:03:49] [INFO] [SYNC][ACCEPTED] msg=m1 op=CREATE_RESCUE_RECORD record=r1
+[12:03:49] [INFO] [SYNC] Batch xong: 1 accepted, 0 rejected, 0 duplicate, 0 retry_later
+[12:03:49] [INFO] HTTP Request: POST http://testserver/sync/messages "HTTP/1.1 200 OK"
+ok
+test_dashboard_endpoints_require_login_but_app_endpoints_do_not (test_dashboard_api.DashboardApiTest.test_dashboard_endpoints_require_login_but_app_endpoints_do_not) ... [12:03:49] [INFO] Đã kiểm tra cấu trúc bảng SQLite (reports, messages_dedup, report_events, teams, sessions).
+[12:03:49] [INFO] [CRUD][DELETE] Đã xóa sạch 1 báo cáo, messages_dedup và report_events.
+[12:03:49] [INFO] [CRUD][INSERT] Report ID=r1 | GPS=(16.05, 108.2) | Ảnh=None | Size=0B
+[12:03:49] [INFO] HTTP Request: GET http://testserver/api/reports "HTTP/1.1 401 Unauthorized"
+[12:03:49] [INFO] HTTP Request: GET http://testserver/api/clusters "HTTP/1.1 401 Unauthorized"
+[12:03:49] [INFO] HTTP Request: GET http://testserver/api/stats "HTTP/1.1 401 Unauthorized"
+[12:03:49] [INFO] HTTP Request: GET http://testserver/api/teams "HTTP/1.1 401 Unauthorized"
+[12:03:49] [INFO] HTTP Request: GET http://testserver/api/reports/r1 "HTTP/1.1 401 Unauthorized"
+[12:03:49] [INFO] HTTP Request: GET http://testserver/api/export "HTTP/1.1 401 Unauthorized"
+[12:03:49] [INFO] HTTP Request: GET http://testserver/api/reports/changes "HTTP/1.1 401 Unauthorized"
+[12:03:49] [INFO] HTTP Request: DELETE http://testserver/api/reports "HTTP/1.1 401 Unauthorized"
+[12:03:49] [INFO] HTTP Request: PATCH http://testserver/api/reports/r1/status "HTTP/1.1 401 Unauthorized"
+[12:03:49] [INFO] HTTP Request: GET http://testserver/api/reports/status?ids=r1 "HTTP/1.1 200 OK"
+[12:03:49] [INFO] ==> [PROBE] Đo throughput client (trả về 65536 bytes)
+[12:03:49] [INFO] HTTP Request: GET http://testserver/probe "HTTP/1.1 200 OK"
+[12:03:49] [INFO] HTTP Request: GET http://testserver/ "HTTP/1.1 200 OK"
+ok
+test_export_csv_and_geojson (test_dashboard_api.DashboardApiTest.test_export_csv_and_geojson) ... [12:03:49] [INFO] Đã kiểm tra cấu trúc bảng SQLite (reports, messages_dedup, report_events, teams, sessions).
+[12:03:49] [INFO] [CRUD][DELETE] Đã xóa sạch 1 báo cáo, messages_dedup và report_events.
+[12:03:49] [INFO] [CRUD][INSERT] Report ID=r1 | GPS=(16.05, 108.2) | Ảnh=None | Size=0B
+[12:03:49] [INFO] [CRUD][INSERT] Report ID=r2 | GPS=(None, None) | Ảnh=None | Size=0B
+[12:03:49] [INFO] [AUTH] ub433e8b855 đăng nhập từ testclient
+[12:03:49] [INFO] HTTP Request: POST http://testserver/api/auth/login "HTTP/1.1 200 OK"
+[12:03:49] [INFO] [CLUSTER] Tính lại: 1 cụm từ 2 báo cáo trong 0.00 s
+[12:03:49] [INFO] HTTP Request: GET http://testserver/api/export?format=csv "HTTP/1.1 200 OK"
+[12:03:49] [INFO] HTTP Request: GET http://testserver/api/export?format=geojson&status=processing "HTTP/1.1 200 OK"
+[12:03:50] [INFO] HTTP Request: GET http://testserver/api/export?format=xml "HTTP/1.1 400 Bad Request"
+ok
+test_forwarded_for_only_trusted_from_proxies (test_dashboard_api.DashboardApiTest.test_forwarded_for_only_trusted_from_proxies) ... [12:03:50] [INFO] Đã kiểm tra cấu trúc bảng SQLite (reports, messages_dedup, report_events, teams, sessions).
+[12:03:50] [INFO] [CRUD][DELETE] Đã xóa sạch 2 báo cáo, messages_dedup và report_events.
+ok
+test_free_text_sms_goes_to_review (test_dashboard_api.DashboardApiTest.test_free_text_sms_goes_to_review) ... [12:03:50] [INFO] Đã kiểm tra cấu trúc bảng SQLite (reports, messages_dedup, report_events, teams, sessions).
+[12:03:50] [INFO] [CRUD][DELETE] Đã xóa sạch 0 báo cáo, messages_dedup và report_events.
+[12:03:50] [INFO] [CRUD][INSERT] Report ID=sms-0b3752f9be1b8f58 | GPS=(None, None) | Ảnh=None | Size=0B
+[12:03:50] [INFO] [SMS] 0911222333 -> sms-0b3752f9be1b8f58 (mới, tin tự do)
+[12:03:50] [INFO] HTTP Request: POST http://testserver/api/sms/inbound?token=gw-secret "HTTP/1.1 201 Created"
+[12:03:50] [INFO] [AUTH] ub433e8b855 đăng nhập từ testclient
+[12:03:50] [INFO] HTTP Request: POST http://testserver/api/auth/login "HTTP/1.1 200 OK"
+[12:03:50] [INFO] [CLUSTER] Tính lại: 0 cụm từ 1 báo cáo trong 0.00 s
+[12:03:50] [INFO] HTTP Request: GET http://testserver/api/clusters "HTTP/1.1 200 OK"
+[12:03:50] [INFO] HTTP Request: GET http://testserver/api/reports?source=sms "HTTP/1.1 200 OK"
+[12:03:50] [INFO] HTTP Request: POST http://testserver/api/sms/inbound "HTTP/1.1 400 Bad Request"
+ok
+test_healthz (test_dashboard_api.DashboardApiTest.test_healthz) ... [12:03:50] [INFO] Đã kiểm tra cấu trúc bảng SQLite (reports, messages_dedup, report_events, teams, sessions).
+[12:03:50] [INFO] [CRUD][DELETE] Đã xóa sạch 1 báo cáo, messages_dedup và report_events.
+[12:03:50] [INFO] HTTP Request: GET http://testserver/healthz "HTTP/1.1 200 OK"
+[12:03:50] [INFO] HTTP Request: GET http://testserver/healthz "HTTP/1.1 200 OK"
+ok
+test_invalid_location_accuracy_is_rejected (test_dashboard_api.DashboardApiTest.test_invalid_location_accuracy_is_rejected) ... [12:03:50] [INFO] Đã kiểm tra cấu trúc bảng SQLite (reports, messages_dedup, report_events, teams, sessions).
+[12:03:50] [INFO] [CRUD][DELETE] Đã xóa sạch 0 báo cáo, messages_dedup và report_events.
+ok
+test_invalid_message_is_rejected_without_failing_batch (test_dashboard_api.DashboardApiTest.test_invalid_message_is_rejected_without_failing_batch) ... [12:03:50] [INFO] Đã kiểm tra cấu trúc bảng SQLite (reports, messages_dedup, report_events, teams, sessions).
+[12:03:50] [INFO] [CRUD][DELETE] Đã xóa sạch 0 báo cáo, messages_dedup và report_events.
+[12:03:50] [INFO] ==> [POST /sync/messages] Nhận batch 6 messages (1513 bytes)
+[12:03:50] [INFO] [SYNC] Bắt đầu xử lý batch 6 messages
+[12:03:50] [WARNING] [SYNC][REJECTED] msg=m1 code=INVALID_PAYLOAD (lat/lng phải là số trong phạm vi [-90, 90] / [-180, 180])
+[12:03:50] [WARNING] [SYNC][REJECTED] msg=m2 code=INVALID_PAYLOAD
+[12:03:50] [WARNING] [SYNC][REJECTED] msg=m3 code=INVALID_PAYLOAD (lat/lng phải là số trong phạm vi [-90, 90] / [-180, 180])
+[12:03:50] [WARNING] [SYNC][REJECTED] msg=m4 code=INVALID_PAYLOAD (lat và lng phải cùng có giá trị hoặc cùng null)
+[12:03:50] [INFO] [CRUD][INSERT] Report ID=good | GPS=(16.05, 108.2) | Ảnh=None | Size=0B
+[12:03:50] [INFO] [SYNC][ACCEPTED] msg=m5 op=CREATE_RESCUE_RECORD record=good
+[12:03:50] [INFO] [SYNC] Batch xong: 1 accepted, 5 rejected, 0 duplicate, 0 retry_later
+[12:03:50] [INFO] HTTP Request: POST http://testserver/sync/messages "HTTP/1.1 200 OK"
+[12:03:50] [INFO] HTTP Request: POST http://testserver/sync/messages "HTTP/1.1 400 Bad Request"
+ok
+test_ip_limit_applies_across_usernames (test_dashboard_api.DashboardApiTest.test_ip_limit_applies_across_usernames) ... [12:03:50] [INFO] Đã kiểm tra cấu trúc bảng SQLite (reports, messages_dedup, report_events, teams, sessions).
+[12:03:50] [INFO] [CRUD][DELETE] Đã xóa sạch 1 báo cáo, messages_dedup và report_events.
+[12:03:50] [WARNING] [AUTH] Đăng nhập sai từ testclient (tài khoản: doan0)
+[12:03:50] [INFO] HTTP Request: POST http://testserver/api/auth/login "HTTP/1.1 401 Unauthorized"
+[12:03:50] [WARNING] [AUTH] Đăng nhập sai từ testclient (tài khoản: doan1)
+[12:03:50] [INFO] HTTP Request: POST http://testserver/api/auth/login "HTTP/1.1 401 Unauthorized"
+[12:03:50] [WARNING] [AUTH] Đăng nhập sai từ testclient (tài khoản: doan2)
+[12:03:50] [INFO] HTTP Request: POST http://testserver/api/auth/login "HTTP/1.1 401 Unauthorized"
+[12:03:50] [WARNING] [AUTH] Đăng nhập sai từ testclient (tài khoản: doan3)
+[12:03:50] [INFO] HTTP Request: POST http://testserver/api/auth/login "HTTP/1.1 401 Unauthorized"
+[12:03:50] [WARNING] [AUTH] Đăng nhập sai từ testclient (tài khoản: doan4)
+[12:03:50] [INFO] HTTP Request: POST http://testserver/api/auth/login "HTTP/1.1 401 Unauthorized"
+[12:03:50] [WARNING] [AUTH] Đăng nhập sai từ testclient (tài khoản: doan5)
+[12:03:50] [INFO] HTTP Request: POST http://testserver/api/auth/login "HTTP/1.1 401 Unauthorized"
+[12:03:50] [WARNING] [AUTH] Đăng nhập sai từ testclient (tài khoản: doan6)
+[12:03:50] [INFO] HTTP Request: POST http://testserver/api/auth/login "HTTP/1.1 401 Unauthorized"
+[12:03:50] [WARNING] [AUTH] Đăng nhập sai từ testclient (tài khoản: doan7)
+[12:03:50] [INFO] HTTP Request: POST http://testserver/api/auth/login "HTTP/1.1 401 Unauthorized"
+[12:03:50] [WARNING] [AUTH] Đăng nhập sai từ testclient (tài khoản: doan8)
+[12:03:50] [INFO] HTTP Request: POST http://testserver/api/auth/login "HTTP/1.1 401 Unauthorized"
+[12:03:51] [WARNING] [AUTH] Đăng nhập sai từ testclient (tài khoản: doan9)
+[12:03:51] [INFO] HTTP Request: POST http://testserver/api/auth/login "HTTP/1.1 401 Unauthorized"
+[12:03:51] [WARNING] [AUTH] Đăng nhập sai từ testclient (tài khoản: doan10)
+[12:03:51] [INFO] HTTP Request: POST http://testserver/api/auth/login "HTTP/1.1 401 Unauthorized"
+[12:03:51] [WARNING] [AUTH] Đăng nhập sai từ testclient (tài khoản: doan11)
+[12:03:51] [INFO] HTTP Request: POST http://testserver/api/auth/login "HTTP/1.1 401 Unauthorized"
+[12:03:51] [WARNING] [AUTH] Đăng nhập sai từ testclient (tài khoản: doan12)
+[12:03:51] [INFO] HTTP Request: POST http://testserver/api/auth/login "HTTP/1.1 401 Unauthorized"
+[12:03:51] [WARNING] [AUTH] Đăng nhập sai từ testclient (tài khoản: doan13)
+[12:03:51] [INFO] HTTP Request: POST http://testserver/api/auth/login "HTTP/1.1 401 Unauthorized"
+[12:03:51] [WARNING] [AUTH] Đăng nhập sai từ testclient (tài khoản: doan14)
+[12:03:51] [INFO] HTTP Request: POST http://testserver/api/auth/login "HTTP/1.1 401 Unauthorized"
+[12:03:51] [WARNING] [AUTH] Đăng nhập sai từ testclient (tài khoản: doan15)
+[12:03:51] [INFO] HTTP Request: POST http://testserver/api/auth/login "HTTP/1.1 401 Unauthorized"
+[12:03:51] [WARNING] [AUTH] Đăng nhập sai từ testclient (tài khoản: doan16)
+[12:03:51] [INFO] HTTP Request: POST http://testserver/api/auth/login "HTTP/1.1 401 Unauthorized"
+[12:03:51] [WARNING] [AUTH] Đăng nhập sai từ testclient (tài khoản: doan17)
+[12:03:51] [INFO] HTTP Request: POST http://testserver/api/auth/login "HTTP/1.1 401 Unauthorized"
+[12:03:51] [WARNING] [AUTH] Đăng nhập sai từ testclient (tài khoản: doan18)
+[12:03:51] [INFO] HTTP Request: POST http://testserver/api/auth/login "HTTP/1.1 401 Unauthorized"
+[12:03:51] [WARNING] [AUTH] Đăng nhập sai từ testclient (tài khoản: doan19)
+[12:03:51] [INFO] HTTP Request: POST http://testserver/api/auth/login "HTTP/1.1 401 Unauthorized"
+[12:03:51] [INFO] HTTP Request: POST http://testserver/api/auth/login "HTTP/1.1 429 Too Many Requests"
+ok
+test_last_admin_cannot_be_removed (test_dashboard_api.DashboardApiTest.test_last_admin_cannot_be_removed) ... [12:03:51] [INFO] Đã kiểm tra cấu trúc bảng SQLite (reports, messages_dedup, report_events, teams, sessions).
+[12:03:51] [INFO] [CRUD][DELETE] Đã xóa sạch 0 báo cáo, messages_dedup và report_events.
+[12:03:51] [INFO] [AUTH] u249d6a3df9 đăng nhập từ testclient
+[12:03:51] [INFO] HTTP Request: POST http://testserver/api/auth/login "HTTP/1.1 200 OK"
+[12:03:51] [INFO] HTTP Request: PATCH http://testserver/api/operators/14 "HTTP/1.1 409 Conflict"
+[12:03:51] [INFO] HTTP Request: PATCH http://testserver/api/operators/14 "HTTP/1.1 409 Conflict"
+[12:03:51] [INFO] HTTP Request: PATCH http://testserver/api/operators/9999 "HTTP/1.1 404 Not Found"
+ok
+test_list_filters_sort_and_pagination (test_dashboard_api.DashboardApiTest.test_list_filters_sort_and_pagination) ... [12:03:51] [INFO] Đã kiểm tra cấu trúc bảng SQLite (reports, messages_dedup, report_events, teams, sessions).
+[12:03:51] [INFO] [CRUD][DELETE] Đã xóa sạch 0 báo cáo, messages_dedup và report_events.
+[12:03:51] [INFO] [CRUD][INSERT] Report ID=sos-1 | GPS=(16.05, 108.2) | Ảnh=None | Size=0B
+[12:03:51] [INFO] [CRUD][INSERT] Report ID=post-2 | GPS=(16.05, 108.2) | Ảnh=None | Size=0B
+[12:03:51] [INFO] [CRUD][INSERT] Report ID=sos-3 | GPS=(None, None) | Ảnh=None | Size=0B
+[12:03:51] [INFO] [CRUD][STATUS] post-2: processing -> v2 dispatched (-)
+[12:03:51] [INFO] [AUTH] ub433e8b855 đăng nhập từ testclient
+[12:03:51] [INFO] HTTP Request: POST http://testserver/api/auth/login "HTTP/1.1 200 OK"
+[12:03:51] [INFO] HTTP Request: GET http://testserver/api/reports?status=dispatched "HTTP/1.1 200 OK"
+[12:03:52] [INFO] HTTP Request: GET http://testserver/api/reports?q=g%E1%BA%A5p "HTTP/1.1 200 OK"
+[12:03:52] [INFO] HTTP Request: GET http://testserver/api/reports?q=SOS&sort=createdAt "HTTP/1.1 200 OK"
+[12:03:52] [INFO] HTTP Request: GET http://testserver/api/reports?hasLocation=false "HTTP/1.1 200 OK"
+[12:03:52] [INFO] HTTP Request: GET http://testserver/api/reports?vulnerable=any "HTTP/1.1 200 OK"
+[12:03:52] [INFO] HTTP Request: GET http://testserver/api/reports?sendMode=textOnly "HTTP/1.1 200 OK"
+[12:03:52] [INFO] HTTP Request: GET http://testserver/api/reports?sort=-people "HTTP/1.1 200 OK"
+[12:03:52] [INFO] HTTP Request: GET http://testserver/api/reports?since=2026-11-10T03:48:52.047278%2B00:00 "HTTP/1.1 200 OK"
+[12:03:52] [INFO] HTTP Request: GET http://testserver/api/reports?pageSize=2&page=2&sort=createdAt "HTTP/1.1 200 OK"
+[12:03:52] [INFO] HTTP Request: GET http://testserver/api/reports?sort=bogus "HTTP/1.1 400 Bad Request"
+[12:03:52] [INFO] HTTP Request: GET http://testserver/api/reports?limit=5000 "HTTP/1.1 200 OK"
+ok
+test_location_accuracy_survives_sms_and_sync (test_dashboard_api.DashboardApiTest.test_location_accuracy_survives_sms_and_sync) ... [12:03:52] [INFO] Đã kiểm tra cấu trúc bảng SQLite (reports, messages_dedup, report_events, teams, sessions).
+[12:03:52] [INFO] [CRUD][DELETE] Đã xóa sạch 3 báo cáo, messages_dedup và report_events.
+[12:03:52] [INFO] [CRUD][INSERT] Report ID=sos-location-accuracy | GPS=(10.0, 106.0) | Ảnh=None | Size=0B
+[12:03:52] [INFO] [SMS] 0900 -> sos-location-accuracy (mới, định dạng SOS)
+[12:03:52] [INFO] HTTP Request: POST http://testserver/api/sms/inbound "HTTP/1.1 201 Created"
+[12:03:52] [INFO] ==> [POST /sync/messages] Nhận batch 1 messages (485 bytes)
+[12:03:52] [INFO] [SYNC] Bắt đầu xử lý batch 1 messages
+[12:03:52] [INFO] [CRUD][MERGE(owner_client_id, created_at, description, raw_payload)] Report ID=sos-location-accuracy | GPS=(10.0, 106.0) | Ảnh=None | Size=0B
+[12:03:52] [INFO] [SYNC][ACCEPTED] msg=m1 op=CREATE_RESCUE_RECORD record=sos-location-accuracy
+[12:03:52] [INFO] [SYNC] Batch xong: 1 accepted, 0 rejected, 0 duplicate, 0 retry_later
+[12:03:52] [INFO] HTTP Request: POST http://testserver/sync/messages "HTTP/1.1 200 OK"
+ok
+test_login_logout_and_bearer_token (test_dashboard_api.DashboardApiTest.test_login_logout_and_bearer_token) ... [12:03:52] [INFO] Đã kiểm tra cấu trúc bảng SQLite (reports, messages_dedup, report_events, teams, sessions).
+[12:03:52] [INFO] [CRUD][DELETE] Đã xóa sạch 1 báo cáo, messages_dedup và report_events.
+[12:03:52] [WARNING] [AUTH] Đăng nhập sai từ testclient (tài khoản: ub433e8b855)
+[12:03:52] [INFO] HTTP Request: POST http://testserver/api/auth/login "HTTP/1.1 401 Unauthorized"
+[12:03:52] [INFO] [AUTH] ub433e8b855 đăng nhập từ testclient
+[12:03:52] [INFO] HTTP Request: POST http://testserver/api/auth/login "HTTP/1.1 200 OK"
+[12:03:52] [INFO] HTTP Request: GET http://testserver/api/auth/me "HTTP/1.1 200 OK"
+[12:03:52] [INFO] HTTP Request: GET http://testserver/api/auth/me "HTTP/1.1 200 OK"
+[12:03:52] [INFO] HTTP Request: GET http://testserver/api/teams "HTTP/1.1 200 OK"
+[12:03:52] [INFO] HTTP Request: POST http://testserver/api/auth/logout "HTTP/1.1 200 OK"
+[12:03:52] [INFO] HTTP Request: GET http://testserver/api/auth/me "HTTP/1.1 200 OK"
+[12:03:52] [INFO] HTTP Request: GET http://testserver/api/teams "HTTP/1.1 401 Unauthorized"
+ok
+test_login_rate_limited_after_repeated_failures (test_dashboard_api.DashboardApiTest.test_login_rate_limited_after_repeated_failures) ... [12:03:52] [INFO] Đã kiểm tra cấu trúc bảng SQLite (reports, messages_dedup, report_events, teams, sessions).
+[12:03:52] [INFO] [CRUD][DELETE] Đã xóa sạch 0 báo cáo, messages_dedup và report_events.
+[12:03:52] [WARNING] [AUTH] Đăng nhập sai từ testclient (tài khoản: ub433e8b855)
+[12:03:52] [INFO] HTTP Request: POST http://testserver/api/auth/login "HTTP/1.1 401 Unauthorized"
+[12:03:52] [WARNING] [AUTH] Đăng nhập sai từ testclient (tài khoản: ub433e8b855)
+[12:03:52] [INFO] HTTP Request: POST http://testserver/api/auth/login "HTTP/1.1 401 Unauthorized"
+[12:03:52] [WARNING] [AUTH] Đăng nhập sai từ testclient (tài khoản: ub433e8b855)
+[12:03:52] [INFO] HTTP Request: POST http://testserver/api/auth/login "HTTP/1.1 401 Unauthorized"
+[12:03:52] [WARNING] [AUTH] Đăng nhập sai từ testclient (tài khoản: ub433e8b855)
+[12:03:52] [INFO] HTTP Request: POST http://testserver/api/auth/login "HTTP/1.1 401 Unauthorized"
+[12:03:52] [WARNING] [AUTH] Đăng nhập sai từ testclient (tài khoản: ub433e8b855)
+[12:03:52] [INFO] HTTP Request: POST http://testserver/api/auth/login "HTTP/1.1 401 Unauthorized"
+[12:03:52] [INFO] HTTP Request: POST http://testserver/api/auth/login "HTTP/1.1 429 Too Many Requests"
+ok
+test_model_and_benchmark_resources_require_admin_role (test_dashboard_api.DashboardApiTest.test_model_and_benchmark_resources_require_admin_role) ... [12:03:52] [INFO] Đã kiểm tra cấu trúc bảng SQLite (reports, messages_dedup, report_events, teams, sessions).
+[12:03:52] [INFO] [CRUD][DELETE] Đã xóa sạch 0 báo cáo, messages_dedup và report_events.
+[12:03:52] [INFO] HTTP Request: GET http://testserver/api/admin/models "HTTP/1.1 401 Unauthorized"
+[12:03:52] [INFO] HTTP Request: GET http://testserver/api/admin/models/pte "HTTP/1.1 401 Unauthorized"
+[12:03:52] [INFO] HTTP Request: GET http://testserver/api/admin/models/onnx "HTTP/1.1 401 Unauthorized"
+[12:03:52] [INFO] HTTP Request: GET http://testserver/api/benchmark/package "HTTP/1.1 401 Unauthorized"
+[12:03:52] [INFO] [AUTH] rhna đăng nhập từ testclient
+[12:03:52] [INFO] HTTP Request: POST http://testserver/api/auth/login "HTTP/1.1 200 OK"
+[12:03:52] [INFO] HTTP Request: GET http://testserver/api/admin/models "HTTP/1.1 403 Forbidden"
+[12:03:52] [INFO] HTTP Request: GET http://testserver/api/admin/models/pte "HTTP/1.1 403 Forbidden"
+[12:03:52] [INFO] HTTP Request: GET http://testserver/api/admin/models/onnx "HTTP/1.1 403 Forbidden"
+[12:03:52] [INFO] HTTP Request: GET http://testserver/api/benchmark/package "HTTP/1.1 403 Forbidden"
+[12:03:52] [INFO] HTTP Request: POST http://testserver/api/auth/logout "HTTP/1.1 200 OK"
+[12:03:52] [INFO] [AUTH] ub433e8b855 đăng nhập từ testclient
+[12:03:52] [INFO] HTTP Request: POST http://testserver/api/auth/login "HTTP/1.1 200 OK"
+[12:03:52] [INFO] HTTP Request: GET http://testserver/api/admin/models "HTTP/1.1 200 OK"
+[12:03:52] [INFO] HTTP Request: GET http://testserver/api/admin/models/pte "HTTP/1.1 200 OK"
+[12:03:52] [INFO] HTTP Request: GET http://testserver/api/admin/models/onnx "HTTP/1.1 200 OK"
+[12:03:52] [INFO] HTTP Request: GET http://testserver/api/admin/models/invalid "HTTP/1.1 404 Not Found"
+[12:03:52] [INFO] HTTP Request: GET http://testserver/api/admin/models "HTTP/1.1 503 Service Unavailable"
+[12:03:52] [INFO] HTTP Request: GET http://testserver/api/admin/models/pte "HTTP/1.1 503 Service Unavailable"
+[12:03:52] [INFO] [BENCHMARK] ub433e8b855 tải gói benchmark
+[12:03:52] [INFO] HTTP Request: GET http://testserver/api/benchmark/package "HTTP/1.1 200 OK"
+[12:03:52] [INFO] HTTP Request: POST http://testserver/api/auth/logout "HTTP/1.1 200 OK"
+[12:03:52] [INFO] HTTP Request: GET http://testserver/api/admin/models "HTTP/1.1 401 Unauthorized"
+ok
+test_note_and_manual_location_for_review_report (test_dashboard_api.DashboardApiTest.test_note_and_manual_location_for_review_report) ... [12:03:52] [INFO] Đã kiểm tra cấu trúc bảng SQLite (reports, messages_dedup, report_events, teams, sessions).
+[12:03:52] [INFO] [CRUD][DELETE] Đã xóa sạch 0 báo cáo, messages_dedup và report_events.
+[12:03:52] [INFO] [CRUD][INSERT] Report ID=nogps | GPS=(None, None) | Ảnh=None | Size=0B
+[12:03:52] [INFO] [AUTH] ub433e8b855 đăng nhập từ testclient
+[12:03:52] [INFO] HTTP Request: POST http://testserver/api/auth/login "HTTP/1.1 200 OK"
+[12:03:52] [INFO] [CLUSTER] Tính lại: 0 cụm từ 1 báo cáo trong 0.00 s
+[12:03:52] [INFO] HTTP Request: GET http://testserver/api/clusters "HTTP/1.1 200 OK"
+[12:03:52] [INFO] HTTP Request: POST http://testserver/api/reports/nogps/notes "HTTP/1.1 400 Bad Request"
+[12:03:52] [INFO] HTTP Request: POST http://testserver/api/reports/nogps/notes "HTTP/1.1 201 Created"
+[12:03:52] [INFO] HTTP Request: PUT http://testserver/api/reports/nogps/location "HTTP/1.1 400 Bad Request"
+[12:03:53] [INFO] HTTP Request: PUT http://testserver/api/reports/nogps/location "HTTP/1.1 200 OK"
+[12:03:53] [INFO] [CLUSTER] Tính lại: 1 cụm từ 1 báo cáo trong 0.00 s
+[12:03:53] [INFO] HTTP Request: GET http://testserver/api/clusters "HTTP/1.1 200 OK"
+[12:03:53] [INFO] HTTP Request: GET http://testserver/api/reports/nogps/history "HTTP/1.1 200 OK"
+[12:03:53] [INFO] [CRUD][MERGE(image_filename, image_local_path, image_url, image_sha256, image_size_bytes)] Report ID=nogps | GPS=(None, None) | Ảnh=None | Size=0B
+ok
+test_only_report_owner_can_fill_blanks (test_dashboard_api.DashboardApiTest.test_only_report_owner_can_fill_blanks) ... [12:03:53] [INFO] Đã kiểm tra cấu trúc bảng SQLite (reports, messages_dedup, report_events, teams, sessions).
+[12:03:53] [INFO] [CRUD][DELETE] Đã xóa sạch 1 báo cáo, messages_dedup và report_events.
+[12:03:53] [INFO] ==> [POST /sync/messages] Nhận batch 1 messages (402 bytes)
+[12:03:53] [INFO] [SYNC] Bắt đầu xử lý batch 1 messages
+[12:03:53] [INFO] [CRUD][INSERT] Report ID=r1 | GPS=(None, None) | Ảnh=None | Size=0B
+[12:03:53] [INFO] [SYNC][ACCEPTED] msg=m1 op=CREATE_RESCUE_RECORD record=r1
+[12:03:53] [INFO] [SYNC] Batch xong: 1 accepted, 0 rejected, 0 duplicate, 0 retry_later
+[12:03:53] [INFO] HTTP Request: POST http://testserver/sync/messages "HTTP/1.1 200 OK"
+[12:03:53] [INFO] HTTP Request: POST http://testserver/api/reports "HTTP/1.1 409 Conflict"
+[12:03:53] [INFO] HTTP Request: POST http://testserver/api/reports "HTTP/1.1 409 Conflict"
+[12:03:53] [INFO] ==> [POST /sync/messages] Nhận batch 1 messages (441 bytes)
+[12:03:53] [INFO] [SYNC] Bắt đầu xử lý batch 1 messages
+[12:03:53] [WARNING] [CRUD][CONFLICT] Report ID=r1: client khác chủ báo cáo, không bổ sung
+[12:03:53] [WARNING] [SYNC][REJECTED] msg=m-attacker code=REPORT_ID_CONFLICT
+[12:03:53] [INFO] [SYNC] Batch xong: 0 accepted, 1 rejected, 0 duplicate, 0 retry_later
+[12:03:53] [INFO] HTTP Request: POST http://testserver/sync/messages "HTTP/1.1 200 OK"
+[12:03:53] [INFO] ==> [POST /api/reports] r1 | lat=16.05, lng=108.2
+[12:03:53] [INFO] [CRUD][SAVE_IMAGE] r1_f5a8de84a179.jpg (68 bytes) -> /tmp/tmps6be4g0x/uploads/r1_f5a8de84a179.jpg
+[12:03:53] [INFO] [CRUD][MERGE(description, lat, lng, location_source, image_filename, image_local_path, image_url, image_sha256, image_size_bytes, raw_payload)] Report ID=r1 | GPS=(16.05, 108.2) | Ảnh=r1_f5a8de84a179.jpg | Size=68B
+[12:03:53] [INFO] HTTP Request: POST http://testserver/api/reports "HTTP/1.1 201 Created"
+ok
+test_operator_accounts_and_roles (test_dashboard_api.DashboardApiTest.test_operator_accounts_and_roles) ... [12:03:53] [INFO] Đã kiểm tra cấu trúc bảng SQLite (reports, messages_dedup, report_events, teams, sessions).
+[12:03:53] [INFO] [CRUD][DELETE] Đã xóa sạch 1 báo cáo, messages_dedup và report_events.
+[12:03:53] [INFO] [AUTH] u249d6a3df9 đăng nhập từ testclient
+[12:03:53] [INFO] HTTP Request: POST http://testserver/api/auth/login "HTTP/1.1 200 OK"
+[12:03:53] [INFO] [AUTH] u249d6a3df9 tạo tài khoản dieuphoi1 (operator)
+[12:03:53] [INFO] HTTP Request: POST http://testserver/api/operators "HTTP/1.1 201 Created"
+[12:03:53] [INFO] HTTP Request: POST http://testserver/api/operators "HTTP/1.1 409 Conflict"
+[12:03:53] [INFO] HTTP Request: POST http://testserver/api/operators "HTTP/1.1 400 Bad Request"
+[12:03:53] [INFO] HTTP Request: POST http://testserver/api/operators "HTTP/1.1 400 Bad Request"
+[12:03:53] [INFO] [AUTH] dieuphoi1 đăng nhập từ testclient
+[12:03:53] [INFO] HTTP Request: POST http://testserver/api/auth/login "HTTP/1.1 200 OK"
+[12:03:53] [INFO] HTTP Request: GET http://testserver/api/operators "HTTP/1.1 403 Forbidden"
+[12:03:53] [INFO] HTTP Request: GET http://testserver/api/admin/backup "HTTP/1.1 403 Forbidden"
+[12:03:53] [INFO] HTTP Request: DELETE http://testserver/api/reports "HTTP/1.1 403 Forbidden"
+[12:03:53] [INFO] HTTP Request: GET http://testserver/api/teams "HTTP/1.1 200 OK"
+[12:03:53] [INFO] HTTP Request: POST http://testserver/api/auth/password "HTTP/1.1 400 Bad Request"
+[12:03:53] [INFO] [AUTH] dieuphoi1 đổi mật khẩu
+[12:03:53] [INFO] HTTP Request: POST http://testserver/api/auth/password "HTTP/1.1 200 OK"
+[12:03:53] [INFO] HTTP Request: GET http://testserver/api/auth/me "HTTP/1.1 200 OK"
+[12:03:53] [INFO] [AUTH] u249d6a3df9 sửa tài khoản dieuphoi1: ['active']
+[12:03:53] [INFO] HTTP Request: PATCH http://testserver/api/operators/22 "HTTP/1.1 200 OK"
+[12:03:53] [INFO] HTTP Request: GET http://testserver/api/teams "HTTP/1.1 401 Unauthorized"
+[12:03:53] [WARNING] [AUTH] Đăng nhập sai từ testclient (tài khoản: dieuphoi1)
+[12:03:53] [INFO] HTTP Request: POST http://testserver/api/auth/login "HTTP/1.1 401 Unauthorized"
+ok
+test_operator_creates_hotline_report (test_dashboard_api.DashboardApiTest.test_operator_creates_hotline_report) ... [12:03:53] [INFO] Đã kiểm tra cấu trúc bảng SQLite (reports, messages_dedup, report_events, teams, sessions).
+[12:03:53] [INFO] [CRUD][DELETE] Đã xóa sạch 0 báo cáo, messages_dedup và report_events.
+[12:03:53] [INFO] HTTP Request: POST http://testserver/api/reports/manual "HTTP/1.1 401 Unauthorized"
+[12:03:53] [INFO] [AUTH] u754ef8791c đăng nhập từ testclient
+[12:03:53] [INFO] HTTP Request: POST http://testserver/api/auth/login "HTTP/1.1 200 OK"
+[12:03:53] [INFO] HTTP Request: POST http://testserver/api/reports/manual "HTTP/1.1 400 Bad Request"
+[12:03:53] [INFO] HTTP Request: POST http://testserver/api/reports/manual "HTTP/1.1 400 Bad Request"
+[12:03:53] [INFO] [CRUD][INSERT] Report ID=hotline-1794283433500-103c66 | GPS=(16.06, 108.21) | Ảnh=None | Size=0B
+[12:03:53] [INFO] [HOTLINE] Tổng đài 1 tạo báo cáo hotline-1794283433500-103c66
+[12:03:53] [INFO] HTTP Request: POST http://testserver/api/reports/manual "HTTP/1.1 201 Created"
+[12:03:53] [INFO] HTTP Request: GET http://testserver/api/reports/hotline-1794283433500-103c66/history "HTTP/1.1 200 OK"
+ok
+test_resolved_cannot_become_cancelled_via_sync (test_dashboard_api.DashboardApiTest.test_resolved_cannot_become_cancelled_via_sync) ... [12:03:53] [INFO] Đã kiểm tra cấu trúc bảng SQLite (reports, messages_dedup, report_events, teams, sessions).
+[12:03:53] [INFO] [CRUD][DELETE] Đã xóa sạch 1 báo cáo, messages_dedup và report_events.
+[12:03:53] [INFO] [CRUD][INSERT] Report ID=r1 | GPS=(16.05, 108.2) | Ảnh=None | Size=0B
+[12:03:53] [INFO] [CRUD][STATUS] r1: processing -> v2 resolved (-)
+[12:03:53] [INFO] [SYNC] Bắt đầu xử lý batch 1 messages
+[12:03:53] [WARNING] [SYNC][REJECTED] msg=m1 op=UPDATE_RESCUE_STATUS code=INVALID_STATUS_TRANSITION
+[12:03:53] [INFO] [SYNC] Batch xong: 0 accepted, 1 rejected, 0 duplicate, 0 retry_later
+ok
+test_restored_sender_reconciles_sequence_and_keeps_attachment_ownership (test_dashboard_api.DashboardApiTest.test_restored_sender_reconciles_sequence_and_keeps_attachment_ownership) ... [12:03:53] [INFO] Đã kiểm tra cấu trúc bảng SQLite (reports, messages_dedup, report_events, teams, sessions).
+[12:03:53] [INFO] [CRUD][DELETE] Đã xóa sạch 1 báo cáo, messages_dedup và report_events.
+[12:03:53] [INFO] ==> [POST /sync/messages] Nhận batch 1 messages (449 bytes)
+[12:03:53] [INFO] [SYNC] Bắt đầu xử lý batch 1 messages
+[12:03:53] [INFO] [CRUD][INSERT] Report ID=old-report | GPS=(16.05, 108.2) | Ảnh=None | Size=0B
+[12:03:53] [INFO] [SYNC][ACCEPTED] msg=m1 op=CREATE_RESCUE_RECORD record=old-report
+[12:03:53] [INFO] [SYNC] Batch xong: 1 accepted, 0 rejected, 0 duplicate, 0 retry_later
+[12:03:53] [INFO] HTTP Request: POST http://testserver/sync/messages "HTTP/1.1 200 OK"
+[12:03:53] [INFO] ==> [POST /sync/messages] Nhận batch 1 messages (458 bytes)
+[12:03:53] [INFO] [SYNC] Bắt đầu xử lý batch 1 messages
+[12:03:53] [INFO] [CRUD][INSERT] Report ID=latest-report | GPS=(16.05, 108.2) | Ảnh=None | Size=0B
+[12:03:53] [INFO] [SYNC][ACCEPTED] msg=m1000 op=CREATE_RESCUE_RECORD record=latest-report
+[12:03:53] [INFO] [SYNC] Batch xong: 1 accepted, 0 rejected, 0 duplicate, 0 retry_later
+[12:03:53] [INFO] HTTP Request: POST http://testserver/sync/messages "HTTP/1.1 200 OK"
+[12:03:53] [INFO] ==> [POST /sync/messages] Nhận batch 1 messages (457 bytes)
+[12:03:53] [INFO] [SYNC] Bắt đầu xử lý batch 1 messages
+[12:03:53] [INFO] [CRUD][INSERT] Report ID=other-report | GPS=(16.05, 108.2) | Ảnh=None | Size=0B
+[12:03:53] [INFO] [SYNC][ACCEPTED] msg=m9000 op=CREATE_RESCUE_RECORD record=other-report
+[12:03:53] [INFO] [SYNC] Batch xong: 1 accepted, 0 rejected, 0 duplicate, 0 retry_later
+[12:03:53] [INFO] HTTP Request: POST http://testserver/sync/messages "HTTP/1.1 200 OK"
+[12:03:53] [INFO] ==> [POST /sync/messages] Nhận batch 1 messages (460 bytes)
+[12:03:53] [INFO] [SYNC] Bắt đầu xử lý batch 1 messages
+[12:03:53] [WARNING] [SYNC][REJECTED] msg=restored-m1 code=SEQUENCE_REUSED
+[12:03:53] [INFO] [SYNC] Batch xong: 0 accepted, 1 rejected, 0 duplicate, 0 retry_later
+[12:03:53] [INFO] HTTP Request: POST http://testserver/sync/messages "HTTP/1.1 200 OK"
+[12:03:53] [INFO] ==> [POST /sync/messages] Nhận batch 1 messages (466 bytes)
+[12:03:53] [INFO] [SYNC] Bắt đầu xử lý batch 1 messages
+[12:03:53] [INFO] [CRUD][INSERT] Report ID=restored-sos | GPS=(16.05, 108.2) | Ảnh=None | Size=0B
+[12:03:53] [INFO] [SYNC][ACCEPTED] msg=restored-m1001 op=CREATE_RESCUE_RECORD record=restored-sos
+[12:03:53] [INFO] [SYNC] Batch xong: 1 accepted, 0 rejected, 0 duplicate, 0 retry_later
+[12:03:53] [INFO] HTTP Request: POST http://testserver/sync/messages "HTTP/1.1 200 OK"
+[12:03:53] [INFO] ==> [POST /sync/messages] Nhận batch 1 messages (466 bytes)
+[12:03:53] [INFO] [SYNC] Bắt đầu xử lý batch 1 messages
+[12:03:53] [INFO] [SYNC] Batch xong: 0 accepted, 0 rejected, 1 duplicate, 0 retry_later
+[12:03:53] [INFO] HTTP Request: POST http://testserver/sync/messages "HTTP/1.1 200 OK"
+[12:03:53] [INFO] ==> [POST /api/reports] old-report | lat=16.05, lng=108.2
+[12:03:53] [INFO] [CRUD][SAVE_IMAGE] old-report_f5a8de84a179.jpg (68 bytes) -> /tmp/tmps6be4g0x/uploads/old-report_f5a8de84a179.jpg
+[12:03:53] [INFO] [CRUD][MERGE(image_filename, image_local_path, image_url, image_sha256, image_size_bytes, raw_payload)] Report ID=old-report | GPS=(16.05, 108.2) | Ảnh=old-report_f5a8de84a179.jpg | Size=68B
+[12:03:53] [INFO] HTTP Request: POST http://testserver/api/reports "HTTP/1.1 201 Created"
+[12:03:53] [INFO] ==> [POST /api/reports] restored-sos | lat=16.05, lng=108.2
+[12:03:53] [INFO] [CRUD][SAVE_IMAGE] restored-sos_f5a8de84a179.jpg (68 bytes) -> /tmp/tmps6be4g0x/uploads/restored-sos_f5a8de84a179.jpg
+[12:03:53] [INFO] [CRUD][MERGE(image_filename, image_local_path, image_url, image_sha256, image_size_bytes, raw_payload)] Report ID=restored-sos | GPS=(16.05, 108.2) | Ảnh=restored-sos_f5a8de84a179.jpg | Size=68B
+[12:03:53] [INFO] HTTP Request: POST http://testserver/api/reports "HTTP/1.1 201 Created"
+ok
+test_same_id_fills_blanks_but_never_overwrites (test_dashboard_api.DashboardApiTest.test_same_id_fills_blanks_but_never_overwrites) ... [12:03:53] [INFO] Đã kiểm tra cấu trúc bảng SQLite (reports, messages_dedup, report_events, teams, sessions).
+[12:03:53] [INFO] [CRUD][DELETE] Đã xóa sạch 4 báo cáo, messages_dedup và report_events.
+[12:03:53] [INFO] ==> [POST /sync/messages] Nhận batch 1 messages (402 bytes)
+[12:03:53] [INFO] [SYNC] Bắt đầu xử lý batch 1 messages
+[12:03:53] [INFO] [CRUD][INSERT] Report ID=r1 | GPS=(None, None) | Ảnh=None | Size=0B
+[12:03:53] [INFO] [SYNC][ACCEPTED] msg=m1 op=CREATE_RESCUE_RECORD record=r1
+[12:03:53] [INFO] [SYNC] Batch xong: 1 accepted, 0 rejected, 0 duplicate, 0 retry_later
+[12:03:53] [INFO] HTTP Request: POST http://testserver/sync/messages "HTTP/1.1 200 OK"
+[12:03:53] [INFO] ==> [POST /api/reports] r1 | lat=16.05, lng=108.2
+[12:03:53] [INFO] [CRUD][SAVE_IMAGE] r1_f5a8de84a179.jpg (68 bytes) -> /tmp/tmps6be4g0x/uploads/r1_f5a8de84a179.jpg
+[12:03:53] [INFO] [CRUD][MERGE(description, lat, lng, location_source, image_filename, image_local_path, image_url, image_sha256, image_size_bytes, raw_payload)] Report ID=r1 | GPS=(16.05, 108.2) | Ảnh=r1_f5a8de84a179.jpg | Size=68B
+[12:03:53] [INFO] HTTP Request: POST http://testserver/api/reports "HTTP/1.1 201 Created"
+[12:03:53] [INFO] ==> [POST /api/reports] r1 | lat=0.0, lng=0.0
+[12:03:53] [INFO]     - r1 đã có ảnh, giữ ảnh đầu tiên
+[12:03:53] [INFO] [CRUD][MERGE(không đổi)] Report ID=r1 | GPS=(0.0, 0.0) | Ảnh=None | Size=0B
+[12:03:53] [INFO] HTTP Request: POST http://testserver/api/reports "HTTP/1.1 201 Created"
+ok
+test_severe_only_app_sms_preserves_urgency_features (test_dashboard_api.DashboardApiTest.test_severe_only_app_sms_preserves_urgency_features) ... [12:03:53] [INFO] Đã kiểm tra cấu trúc bảng SQLite (reports, messages_dedup, report_events, teams, sessions).
+[12:03:53] [INFO] [CRUD][DELETE] Đã xóa sạch 1 báo cáo, messages_dedup và report_events.
+[12:03:53] [INFO] [CRUD][INSERT] Report ID=sos-severe-only | GPS=(None, None) | Ảnh=None | Size=0B
+[12:03:53] [INFO] [SMS] 0900 -> sos-severe-only (mới, định dạng SOS)
+[12:03:53] [INFO] HTTP Request: POST http://testserver/api/sms/inbound "HTTP/1.1 201 Created"
+[12:03:53] [INFO] [CRUD][MERGE(không đổi)] Report ID=sos-severe-only | GPS=(None, None) | Ảnh=None | Size=0B
+[12:03:53] [INFO] [SMS] 0900 -> sos-severe-only (gộp, định dạng SOS)
+[12:03:53] [INFO] HTTP Request: POST http://testserver/api/sms/inbound "HTTP/1.1 200 OK"
+ok
+test_sms_after_app_sync_logs_contact (test_dashboard_api.DashboardApiTest.test_sms_after_app_sync_logs_contact) ... [12:03:53] [INFO] Đã kiểm tra cấu trúc bảng SQLite (reports, messages_dedup, report_events, teams, sessions).
+[12:03:53] [INFO] [CRUD][DELETE] Đã xóa sạch 1 báo cáo, messages_dedup và report_events.
+[12:03:53] [INFO] ==> [POST /sync/messages] Nhận batch 1 messages (469 bytes)
+[12:03:53] [INFO] [SYNC] Bắt đầu xử lý batch 1 messages
+[12:03:53] [INFO] [CRUD][INSERT] Report ID=sos-1790000000001-000000000001 | GPS=(16.05, 108.2) | Ảnh=None | Size=0B
+[12:03:53] [INFO] [SYNC][ACCEPTED] msg=m1 op=CREATE_RESCUE_RECORD record=sos-1790000000001-000000000001
+[12:03:53] [INFO] [SYNC] Batch xong: 1 accepted, 0 rejected, 0 duplicate, 0 retry_later
+[12:03:53] [INFO] HTTP Request: POST http://testserver/sync/messages "HTTP/1.1 200 OK"
+[12:03:53] [INFO] [CRUD][MERGE(raw_payload)] Report ID=sos-1790000000001-000000000001 | GPS=(None, None) | Ảnh=None | Size=0B
+[12:03:53] [INFO] [SMS] 0900 -> sos-1790000000001-000000000001 (gộp, định dạng SOS)
+[12:03:53] [INFO] HTTP Request: POST http://testserver/api/sms/inbound "HTTP/1.1 200 OK"
+ok
+test_sms_gateway_requires_configured_token (test_dashboard_api.DashboardApiTest.test_sms_gateway_requires_configured_token) ... [12:03:53] [INFO] Đã kiểm tra cấu trúc bảng SQLite (reports, messages_dedup, report_events, teams, sessions).
+[12:03:53] [INFO] [CRUD][DELETE] Đã xóa sạch 1 báo cáo, messages_dedup và report_events.
+[12:03:53] [INFO] HTTP Request: POST http://testserver/api/sms/inbound "HTTP/1.1 403 Forbidden"
+[12:03:53] [INFO] HTTP Request: POST http://testserver/api/sms/inbound "HTTP/1.1 401 Unauthorized"
+ok
+test_sms_report_is_claimed_by_first_app_client_only (test_dashboard_api.DashboardApiTest.test_sms_report_is_claimed_by_first_app_client_only) ... [12:03:53] [INFO] Đã kiểm tra cấu trúc bảng SQLite (reports, messages_dedup, report_events, teams, sessions).
+[12:03:53] [INFO] [CRUD][DELETE] Đã xóa sạch 0 báo cáo, messages_dedup và report_events.
+[12:03:54] [INFO] [CRUD][INSERT] Report ID=sos-1790000000002-00000000000a | GPS=(None, None) | Ảnh=None | Size=0B
+[12:03:54] [INFO] [SMS] 0900 -> sos-1790000000002-00000000000a (mới, định dạng SOS)
+[12:03:54] [INFO] HTTP Request: POST http://testserver/api/sms/inbound "HTTP/1.1 201 Created"
+[12:03:54] [INFO] ==> [POST /sync/messages] Nhận batch 1 messages (469 bytes)
+[12:03:54] [INFO] [SYNC] Bắt đầu xử lý batch 1 messages
+[12:03:54] [INFO] [CRUD][MERGE(owner_client_id, created_at, description, lat, lng, location_source, raw_payload)] Report ID=sos-1790000000002-00000000000a | GPS=(16.05, 108.2) | Ảnh=None | Size=0B
+[12:03:54] [INFO] [SYNC][ACCEPTED] msg=m1 op=CREATE_RESCUE_RECORD record=sos-1790000000002-00000000000a
+[12:03:54] [INFO] [SYNC] Batch xong: 1 accepted, 0 rejected, 0 duplicate, 0 retry_later
+[12:03:54] [INFO] HTTP Request: POST http://testserver/sync/messages "HTTP/1.1 200 OK"
+[12:03:54] [INFO] HTTP Request: POST http://testserver/api/reports "HTTP/1.1 409 Conflict"
+[12:03:54] [INFO] [AUTH] ub433e8b855 đăng nhập từ testclient
+[12:03:54] [INFO] HTTP Request: POST http://testserver/api/auth/login "HTTP/1.1 200 OK"
+[12:03:54] [INFO] [CRUD][INSERT] Report ID=hotline-1794283434100-9d15a5 | GPS=(16.0, 108.0) | Ảnh=None | Size=0B
+[12:03:54] [INFO] [HOTLINE] Điều phối A tạo báo cáo hotline-1794283434100-9d15a5
+[12:03:54] [INFO] HTTP Request: POST http://testserver/api/reports/manual "HTTP/1.1 201 Created"
+[12:03:54] [INFO] [CRUD][INSERT] Report ID=sms-264c7ee7411ac786 | GPS=(None, None) | Ảnh=None | Size=0B
+[12:03:54] [INFO] [SMS] 0911 -> sms-264c7ee7411ac786 (mới, tin tự do)
+[12:03:54] [INFO] HTTP Request: POST http://testserver/api/sms/inbound "HTTP/1.1 201 Created"
+[12:03:54] [INFO] HTTP Request: POST http://testserver/api/reports "HTTP/1.1 409 Conflict"
+[12:03:54] [INFO] HTTP Request: POST http://testserver/api/reports "HTTP/1.1 409 Conflict"
+ok
+test_stats_response_times (test_dashboard_api.DashboardApiTest.test_stats_response_times) ... [12:03:54] [INFO] Đã kiểm tra cấu trúc bảng SQLite (reports, messages_dedup, report_events, teams, sessions).
+[12:03:54] [INFO] [CRUD][DELETE] Đã xóa sạch 3 báo cáo, messages_dedup và report_events.
+[12:03:54] [INFO] [CRUD][INSERT] Report ID=r1 | GPS=(16.05, 108.2) | Ảnh=None | Size=0B
+[12:03:54] [INFO] [CRUD][STATUS] r1: processing -> v2 dispatched (-)
+[12:03:54] [INFO] [CRUD][STATUS] r1: dispatched -> v3 resolved (-)
+[12:03:54] [INFO] [CRUD][INSERT] Report ID=r2 | GPS=(None, None) | Ảnh=None | Size=0B
+[12:03:54] [INFO] [AUTH] ub433e8b855 đăng nhập từ testclient
+[12:03:54] [INFO] HTTP Request: POST http://testserver/api/auth/login "HTTP/1.1 200 OK"
+[12:03:54] [INFO] HTTP Request: GET http://testserver/api/stats "HTTP/1.1 200 OK"
+ok
+test_status_change_is_logged_with_operator_and_team (test_dashboard_api.DashboardApiTest.test_status_change_is_logged_with_operator_and_team) ... [12:03:54] [INFO] Đã kiểm tra cấu trúc bảng SQLite (reports, messages_dedup, report_events, teams, sessions).
+[12:03:54] [INFO] [CRUD][DELETE] Đã xóa sạch 2 báo cáo, messages_dedup và report_events.
+[12:03:54] [INFO] [CRUD][INSERT] Report ID=r1 | GPS=(16.05, 108.2) | Ảnh=None | Size=0B
+[12:03:54] [INFO] [AUTH] u543b35b146 đăng nhập từ testclient
+[12:03:54] [INFO] HTTP Request: POST http://testserver/api/auth/login "HTTP/1.1 200 OK"
+[12:03:54] [INFO] [TEAM] Nguyễn Văn B thêm đội Đội 1
+[12:03:54] [INFO] HTTP Request: POST http://testserver/api/teams "HTTP/1.1 201 Created"
+[12:03:54] [INFO] [CRUD][STATUS] r1: processing -> v2 dispatched (Nguyễn Văn B)
+[12:03:54] [INFO] HTTP Request: PATCH http://testserver/api/reports/r1/status "HTTP/1.1 200 OK"
+[12:03:54] [INFO] HTTP Request: GET http://testserver/api/reports/r1/history "HTTP/1.1 200 OK"
+[12:03:54] [INFO] HTTP Request: GET http://testserver/api/reports/r1 "HTTP/1.1 200 OK"
+[12:03:54] [INFO] HTTP Request: GET http://testserver/api/teams "HTTP/1.1 200 OK"
+ok
+test_status_update_via_sync_requires_dashboard_session (test_dashboard_api.DashboardApiTest.test_status_update_via_sync_requires_dashboard_session) ... [12:03:54] [INFO] Đã kiểm tra cấu trúc bảng SQLite (reports, messages_dedup, report_events, teams, sessions).
+[12:03:54] [INFO] [CRUD][DELETE] Đã xóa sạch 1 báo cáo, messages_dedup và report_events.
+[12:03:54] [INFO] [CRUD][INSERT] Report ID=r1 | GPS=(16.05, 108.2) | Ảnh=None | Size=0B
+[12:03:54] [INFO] ==> [POST /sync/messages] Nhận batch 1 messages (326 bytes)
+[12:03:54] [INFO] [SYNC] Bắt đầu xử lý batch 1 messages
+[12:03:54] [WARNING] [SYNC][REJECTED] msg=m1 op=UPDATE_RESCUE_STATUS code=UNAUTHENTICATED
+[12:03:54] [INFO] [SYNC] Batch xong: 0 accepted, 1 rejected, 0 duplicate, 0 retry_later
+[12:03:54] [INFO] HTTP Request: POST http://testserver/sync/messages "HTTP/1.1 200 OK"
+[12:03:54] [INFO] [AUTH] u960fec748a đăng nhập từ testclient
+[12:03:54] [INFO] HTTP Request: POST http://testserver/api/auth/login "HTTP/1.1 200 OK"
+[12:03:54] [INFO] ==> [POST /sync/messages] Nhận batch 1 messages (326 bytes)
+[12:03:54] [INFO] [SYNC] Bắt đầu xử lý batch 1 messages
+[12:03:54] [INFO] [SYNC][ACCEPTED] msg=m2 op=UPDATE_RESCUE_STATUS r1: processing->v9 cancelled
+[12:03:54] [INFO] [SYNC] Batch xong: 1 accepted, 0 rejected, 0 duplicate, 0 retry_later
+[12:03:54] [INFO] HTTP Request: POST http://testserver/sync/messages "HTTP/1.1 200 OK"
+[12:03:54] [INFO] HTTP Request: GET http://testserver/api/reports/r1/history "HTTP/1.1 200 OK"
+ok
+test_summary_quantiles (test_dashboard_api.DashboardApiTest.test_summary_quantiles) ... [12:03:54] [INFO] Đã kiểm tra cấu trúc bảng SQLite (reports, messages_dedup, report_events, teams, sessions).
+[12:03:54] [INFO] [CRUD][DELETE] Đã xóa sạch 1 báo cáo, messages_dedup và report_events.
+ok
+test_summary_sms_receives_full_description_from_later_sync (test_dashboard_api.DashboardApiTest.test_summary_sms_receives_full_description_from_later_sync) ... [12:03:54] [INFO] Đã kiểm tra cấu trúc bảng SQLite (reports, messages_dedup, report_events, teams, sessions).
+[12:03:54] [INFO] [CRUD][DELETE] Đã xóa sạch 0 báo cáo, messages_dedup và report_events.
+[12:03:54] [INFO] [CRUD][INSERT] Report ID=sos-summary-full-description | GPS=(16.05, 108.2) | Ảnh=None | Size=0B
+[12:03:54] [INFO] [SMS] +84900000001 -> sos-summary-full-description (mới, định dạng SOS)
+[12:03:54] [INFO] HTTP Request: POST http://testserver/api/sms/inbound "HTTP/1.1 201 Created"
+[12:03:54] [INFO] ==> [POST /sync/messages] Nhận batch 1 messages (3028 bytes)
+[12:03:54] [INFO] [SYNC] Bắt đầu xử lý batch 1 messages
+[12:03:54] [INFO] [CRUD][MERGE(owner_client_id, created_at, description, raw_payload)] Report ID=sos-summary-full-description | GPS=(16.05, 108.2) | Ảnh=None | Size=0B
+[12:03:54] [INFO] [SYNC][ACCEPTED] msg=m1 op=CREATE_RESCUE_RECORD record=sos-summary-full-description
+[12:03:54] [INFO] [SYNC] Batch xong: 1 accepted, 0 rejected, 0 duplicate, 0 retry_later
+[12:03:54] [INFO] HTTP Request: POST http://testserver/sync/messages "HTTP/1.1 200 OK"
+ok
+test_sync_rejects_duplicate_keys_and_uses_error_codes (test_dashboard_api.DashboardApiTest.test_sync_rejects_duplicate_keys_and_uses_error_codes) ... [12:03:54] [INFO] Đã kiểm tra cấu trúc bảng SQLite (reports, messages_dedup, report_events, teams, sessions).
+[12:03:54] [INFO] [CRUD][DELETE] Đã xóa sạch 1 báo cáo, messages_dedup và report_events.
+[12:03:54] [INFO] HTTP Request: POST http://testserver/sync/messages "HTTP/1.1 400 Bad Request"
+[12:03:54] [INFO] HTTP Request: POST http://testserver/sync/messages "HTTP/1.1 400 Bad Request"
+[12:03:54] [INFO] HTTP Request: POST http://testserver/sync/messages "HTTP/1.1 400 Bad Request"
+ok
+test_team_management_and_assignment (test_dashboard_api.DashboardApiTest.test_team_management_and_assignment) ... [12:03:54] [INFO] Đã kiểm tra cấu trúc bảng SQLite (reports, messages_dedup, report_events, teams, sessions).
+[12:03:54] [INFO] [CRUD][DELETE] Đã xóa sạch 0 báo cáo, messages_dedup và report_events.
+[12:03:54] [INFO] [CRUD][INSERT] Report ID=r1 | GPS=(16.05, 108.2) | Ảnh=None | Size=0B
+[12:03:54] [INFO] [AUTH] ub433e8b855 đăng nhập từ testclient
+[12:03:54] [INFO] HTTP Request: POST http://testserver/api/auth/login "HTTP/1.1 200 OK"
+[12:03:54] [INFO] [TEAM] Điều phối A thêm đội Đội A
+[12:03:54] [INFO] HTTP Request: POST http://testserver/api/teams "HTTP/1.1 201 Created"
+[12:03:54] [INFO] HTTP Request: POST http://testserver/api/teams "HTTP/1.1 409 Conflict"
+[12:03:54] [INFO] HTTP Request: POST http://testserver/api/teams "HTTP/1.1 400 Bad Request"
+[12:03:54] [INFO] HTTP Request: PUT http://testserver/api/reports/r1/team "HTTP/1.1 200 OK"
+[12:03:54] [INFO] [TEAM] Điều phối A sửa đội Đội A
+[12:03:54] [INFO] HTTP Request: PATCH http://testserver/api/teams/2 "HTTP/1.1 200 OK"
+[12:03:54] [INFO] [CRUD][INSERT] Report ID=r2 | GPS=(16.05, 108.2) | Ảnh=None | Size=0B
+[12:03:54] [INFO] HTTP Request: PUT http://testserver/api/reports/r2/team "HTTP/1.1 409 Conflict"
+[12:03:54] [INFO] HTTP Request: PUT http://testserver/api/reports/r1/team "HTTP/1.1 200 OK"
+ok
+test_unknown_status_on_create_becomes_processing (test_dashboard_api.DashboardApiTest.test_unknown_status_on_create_becomes_processing) ... [12:03:54] [INFO] Đã kiểm tra cấu trúc bảng SQLite (reports, messages_dedup, report_events, teams, sessions).
+[12:03:54] [INFO] [CRUD][DELETE] Đã xóa sạch 2 báo cáo, messages_dedup và report_events.
+[12:03:54] [INFO] [CRUD][INSERT] Report ID=r1 | GPS=(16.05, 108.2) | Ảnh=None | Size=0B
+ok
+test_upload_rejects_bad_meta_and_non_images (test_dashboard_api.DashboardApiTest.test_upload_rejects_bad_meta_and_non_images) ... [12:03:54] [INFO] Đã kiểm tra cấu trúc bảng SQLite (reports, messages_dedup, report_events, teams, sessions).
+[12:03:54] [INFO] [CRUD][DELETE] Đã xóa sạch 1 báo cáo, messages_dedup và report_events.
+[12:03:54] [INFO] HTTP Request: POST http://testserver/api/reports "HTTP/1.1 400 Bad Request"
+[12:03:54] [INFO] HTTP Request: POST http://testserver/api/reports "HTTP/1.1 400 Bad Request"
+[12:03:54] [INFO] HTTP Request: POST http://testserver/api/reports "HTTP/1.1 400 Bad Request"
+[12:03:54] [INFO] HTTP Request: POST http://testserver/api/reports "HTTP/1.1 400 Bad Request"
+[12:03:54] [INFO] HTTP Request: POST http://testserver/api/reports "HTTP/1.1 400 Bad Request"
+[12:03:54] [INFO] ==> [POST /api/reports] x1 | lat=None, lng=None
+[12:03:54] [INFO] HTTP Request: POST http://testserver/api/reports "HTTP/1.1 415 Unsupported Media Type"
+[12:03:54] [INFO] ==> [POST /api/reports] x2 | lat=None, lng=None
+[12:03:54] [ERROR] Ảnh không khớp meta! Client: sha256:00 (None B), thực tế: sha256:f5a8de84a179dac7e6bbc3ca031b66d94956199af4de216d76633f522f770d0c (68 B)
+[12:03:54] [INFO] HTTP Request: POST http://testserver/api/reports "HTTP/1.1 400 Bad Request"
+[12:03:54] [INFO] ==> [POST /api/reports] x3 | lat=None, lng=None
+[12:03:54] [ERROR] Ảnh không khớp meta! Client: sha256:f5a8de84a179dac7e6bbc3ca031b66d94956199af4de216d76633f522f770d0c (69 B), thực tế: sha256:f5a8de84a179dac7e6bbc3ca031b66d94956199af4de216d76633f522f770d0c (68 B)
+[12:03:54] [INFO] HTTP Request: POST http://testserver/api/reports "HTTP/1.1 400 Bad Request"
+[12:03:54] [INFO] ==> [POST /api/reports] x4 | lat=None, lng=None
+[12:03:54] [INFO] HTTP Request: POST http://testserver/api/reports "HTTP/1.1 400 Bad Request"
+[12:03:54] [INFO] HTTP Request: POST http://testserver/api/reports "HTTP/1.1 400 Bad Request"
+ok
+test_uploaded_image_name_is_chosen_by_server (test_dashboard_api.DashboardApiTest.test_uploaded_image_name_is_chosen_by_server) ... [12:03:54] [INFO] Đã kiểm tra cấu trúc bảng SQLite (reports, messages_dedup, report_events, teams, sessions).
+[12:03:54] [INFO] [CRUD][DELETE] Đã xóa sạch 0 báo cáo, messages_dedup và report_events.
+[12:03:55] [INFO] ==> [POST /api/reports] sos-1 | lat=16.0, lng=108.0
+[12:03:55] [INFO] [CRUD][SAVE_IMAGE] sos-1_f5a8de84a179.jpg (68 bytes) -> /tmp/tmps6be4g0x/uploads/sos-1_f5a8de84a179.jpg
+[12:03:55] [INFO] [CRUD][INSERT] Report ID=sos-1 | GPS=(16.0, 108.0) | Ảnh=sos-1_f5a8de84a179.jpg | Size=68B
+[12:03:55] [INFO] HTTP Request: POST http://testserver/api/reports "HTTP/1.1 201 Created"
+[12:03:55] [INFO] [AUTH] ub433e8b855 đăng nhập từ testclient
+[12:03:55] [INFO] HTTP Request: POST http://testserver/api/auth/login "HTTP/1.1 200 OK"
+[12:03:55] [INFO] HTTP Request: GET http://testserver/uploads/sos-1_f5a8de84a179.jpg "HTTP/1.1 200 OK"
+ok
+test_uploads_require_login (test_dashboard_api.DashboardApiTest.test_uploads_require_login) ... [12:03:55] [INFO] Đã kiểm tra cấu trúc bảng SQLite (reports, messages_dedup, report_events, teams, sessions).
+[12:03:55] [INFO] [CRUD][DELETE] Đã xóa sạch 1 báo cáo, messages_dedup và report_events.
+[12:03:55] [INFO] HTTP Request: GET http://testserver/uploads/x.jpg "HTTP/1.1 401 Unauthorized"
+[12:03:55] [INFO] [AUTH] ub433e8b855 đăng nhập từ testclient
+[12:03:55] [INFO] HTTP Request: POST http://testserver/api/auth/login "HTTP/1.1 200 OK"
+[12:03:55] [INFO] HTTP Request: GET http://testserver/uploads/x.jpg "HTTP/1.1 200 OK"
+ok
+test_wipe_disabled_by_default (test_dashboard_api.DashboardApiTest.test_wipe_disabled_by_default) ... [12:03:55] [INFO] Đã kiểm tra cấu trúc bảng SQLite (reports, messages_dedup, report_events, teams, sessions).
+[12:03:55] [INFO] [CRUD][DELETE] Đã xóa sạch 0 báo cáo, messages_dedup và report_events.
+[12:03:55] [INFO] [AUTH] ub433e8b855 đăng nhập từ testclient
+[12:03:55] [INFO] HTTP Request: POST http://testserver/api/auth/login "HTTP/1.1 200 OK"
+[12:03:55] [INFO] HTTP Request: DELETE http://testserver/api/reports "HTTP/1.1 403 Forbidden"
+ok
+
+----------------------------------------------------------------------
+Ran 78 tests in 7.470s
+
+OK

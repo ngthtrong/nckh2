@@ -8,18 +8,19 @@ Trong các bảng so sánh, \textbf{chữ đậm} đánh dấu giá trị mô t�
 Model mới được dùng cho các hình phân loại là MobileNetV3-Large với seed 1024. Trên 256 ảnh test, artifact ghi Accuracy \NewImageAccuracy\%, macro-F1 \NewImageMacroFOne\% và balanced accuracy 73,87\%. Bảng~\ref{tab:confusion} và \ref{tab:image-classes} đã được tính đối chiếu từ ma trận với JSON metric của chính model này.
 \input{generated/tables/confusion}
 \input{generated/tables/image-classes}
-Hình~\ref{fig:image-confusion} biểu diễn số ảnh của từng cặp nhãn thật và nhãn dự đoán trên tập test.
+Hình~\ref{fig:image-confusion} biểu diễn số ảnh theo cặp nhãn thật--dự đoán; Hình~\ref{fig:image-confusion-normalized} chuẩn hóa theo lớp thật để đối chiếu tỷ lệ giữa các lớp.
 
 \begin{figure}[htbp]\centering
-\includegraphics[width=.86\textwidth]{image-confusion.pdf}
+\begin{minipage}[t]{.485\linewidth}\centering
+\includegraphics[width=\linewidth]{image-confusion.pdf}
 \caption{Ma trận nhầm lẫn trên test của MobileNetV3-Large seed 1024}
 \label{fig:image-confusion}
-\end{figure}
-Hình~\ref{fig:image-confusion-normalized} chuẩn hóa ma trận theo lớp thật để đối chiếu tỷ lệ dự đoán giữa các lớp.
-
-\begin{figure}[htbp]\centering
-\includegraphics[width=.86\textwidth]{image-confusion-normalized.pdf}
-\caption{Ma trận nhầm lẫn test chuẩn hóa theo lớp thật của model seed 1024}\label{fig:image-confusion-normalized}
+\end{minipage}\hfill
+\begin{minipage}[t]{.485\linewidth}\centering
+\includegraphics[width=\linewidth]{image-confusion-normalized.pdf}
+\caption{Ma trận nhầm lẫn test chuẩn hóa theo lớp thật của model seed 1024}
+\label{fig:image-confusion-normalized}
+\end{minipage}
 \end{figure}
 Recall non\_flood là 90,70\%; recall high là 74,07\%. Trong 54 ảnh high, 12 ảnh bị dự đoán medium và 2 ảnh bị dự đoán low. Có 3 lỗi cách ít nhất hai mức severity (1,17\% test). Đây là chỉ số theo thứ tự mức ngập, chưa đo hệ quả cứu hộ.
 
@@ -124,9 +125,11 @@ Hình~\ref{fig:compression-tradeoffs} đặt dung lượng, accuracy và độ t
 \begin{figure}[htbp]\centering
 \setlength{\abovecaptionskip}{4pt}
 \includegraphics[width=\textwidth]{compression-tradeoffs.pdf}
-\caption{Đánh đổi dung lượng--accuracy theo summary nén và độ trễ trước/sau cắt tỉa}
+\caption{Đánh đổi dung lượng--accuracy và độ trễ trước/sau cắt tỉa trong benchmark lịch sử}
 \label{fig:compression-tradeoffs}
 \end{figure}
+
+\input{chapters/04-evaluation/sections/local-image-update}
 
 \subsection{Ảnh suy giảm nhân tạo: đánh giá ONNX trên CPU}\label{sec:image-quality-cpu-results}
 Bảng~\ref{tab:image-quality-cpu} trình bày đủ chín điều kiện của phép bổ sung ở Mục~\ref{sec:image-quality-cpu-setup}. Clean parity đạt đồng thuận top-1 100\% với artifact ONNX cắt tỉa lịch sử; sai khác xác suất lớn nhất xấp xỉ $8{,}34\times10^{-7}$, trong ngưỡng kiểm tra đã khóa. Accuracy clean là \QualityCleanAccuracy\%, macro-F1 \QualityCleanMacroFOne\% và recall high \QualityCleanHighRecall\%; đây là model cắt tỉa, khác FP32 gốc ở phần đầu chương.
@@ -163,7 +166,7 @@ Product Leiden có ARI 0,9165; phép so sánh với Product Louvain sau Holm có
 
 Một phát hiện vận hành là Product có fake absorption và fake rejection đều bằng không, nhưng false-destination rate 16,49\%. Tin giả không hòa vào điểm thật nhưng tạo điểm đến giả riêng. Vì thế, tỷ lệ hấp thụ bằng không không được gọi là chống tin giả hiệu quả. Nếu scheduler coi các cụm giả là điểm cần đi, chúng vẫn tiêu tốn nguồn lực.
 
-\paragraph{Cơ chế khả dĩ và điều kiện áp dụng.} Cổng không gian của Product hạn chế trọng số cạnh xa ngay cả khi thời gian và ngữ cảnh giống nhau; đây là tính chất của công thức, không bảo đảm phân hoạch đúng hơn. Sau chọn quantile và top-$K$, cấu hình Additive riêng có thể giữ tập cạnh khác và phù hợp generator hơn. So sánh khớp mật độ chỉ gần bằng tổng mức làm thưa, chưa khớp từng cạnh, phân bố trọng số hay nghiệm Louvain. Khi thêm bản sao, quantile toàn cục và cạnh tranh láng giềng có thể đổi, nên bảo đảm trên từng cạnh chưa bảo đảm cộng đồng bất biến. Các cơ chế này nhất quán với thiết kế và stress đã quan sát nhưng chưa được cô lập bằng ablation cơ chế. Kết luận áp dụng cho 40 run test của Generator 3.0, không tự chuyển sang báo cáo cứu hộ thực.
+\paragraph{Cơ chế khả dĩ và điều kiện áp dụng.} Cổng không gian của Product hạn chế trọng số cạnh xa ngay cả khi thời gian và ngữ cảnh giống nhau; đây là tính chất của công thức, không bảo đảm phân hoạch đúng hơn. Sau chọn quantile và top-$k$, cấu hình Additive riêng có thể giữ tập cạnh khác và phù hợp generator hơn. So sánh khớp mật độ chỉ gần bằng tổng mức làm thưa, chưa khớp từng cạnh, phân bố trọng số hay nghiệm Louvain. Khi thêm bản sao, quantile toàn cục và cạnh tranh láng giềng có thể đổi, nên bảo đảm trên từng cạnh chưa bảo đảm cộng đồng bất biến. Các cơ chế này nhất quán với thiết kế và stress đã quan sát nhưng chưa được cô lập bằng ablation cơ chế. Kết luận áp dụng cho 40 run test của Generator 3.0, không tự chuyển sang báo cáo cứu hộ thực.
 
 \paragraph{Trả lời RQ1.} Chưa xác lập Product cải thiện chất lượng chung so với Additive được chọn độc lập. ARI và hiệu trung bình nghiêng về Additive trong bundle này; $p_{\mathrm{Holm}}>0{,}05$ không chứng minh hai phương pháp tương đương. So sánh khớp mật độ và Leiden cũng chưa xác nhận ưu thế chung của Product Louvain.
 

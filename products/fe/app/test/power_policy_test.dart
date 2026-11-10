@@ -159,6 +159,9 @@ void main() {
   test(
     'register, retain, cancel, and rearm the unique background schedule',
     () async {
+      // The facade selects the host implementation on first construction;
+      // construct it before installing the fake so Linux cannot replace it.
+      Workmanager();
       final previous = WorkmanagerPlatform.instance;
       final scheduler = Scheduler();
       WorkmanagerPlatform.instance = scheduler;

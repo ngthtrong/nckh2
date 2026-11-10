@@ -29,6 +29,25 @@
   \fi
   \includepdf[pages=-,fitpaper=true,pagecommand={\thispagestyle{empty}}]{#3}}
 \newwrite\ReportMetricsFile
+\ExplSyntaxOn
+\NewDocumentCommand{\EnglishNumber}{m}{%
+  \group_begin:
+  \tl_set:Nx \l_tmpa_tl {#1}
+  \tl_replace_all:Nnn \l_tmpa_tl {,} {.}
+  \tl_use:N \l_tmpa_tl
+  \group_end:}
+\ExplSyntaxOff
+% Continuous report numbering for appended product/author evidence. The source
+% PDFs remain unchanged; only their isolated footer number is covered.
+\newcommand{\NumberedEvidencePDF}[3][-]{%
+  \clearpage\pdfbookmark[1]{#2}{numbered.evidence.#3}%
+  \includepdf[pages=#1,fitpaper=false,pagecommand={%
+    \thispagestyle{empty}%
+    \begin{tikzpicture}[remember picture,overlay]
+      \fill[white] (current page.south west) rectangle ([yshift=16mm]current page.south east);
+      \node[anchor=south,font=\normalfont\normalsize] at ([yshift=8mm]current page.south) {\thepage};
+      \node[anchor=north,font=\normalfont\footnotesize] at ([yshift=-6mm]current page.north) {#2};
+    \end{tikzpicture}}]{#3}}
 \AtBeginDocument{\immediate\openout\ReportMetricsFile=\jobname.metrics}
 \newcommand{\ReportMetric}[2]{\immediate\write\ReportMetricsFile{#1=#2}}
 \AtEndDocument{\immediate\closeout\ReportMetricsFile}

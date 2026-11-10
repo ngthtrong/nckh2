@@ -1,45 +1,26 @@
 \chapter{Kết quả và tư liệu bổ sung}\label{chap:supplementary}
-\section{Danh mục dữ liệu và kết quả thực nghiệm}
-Bảng~\ref{tab:source-register} tóm tắt các nhóm dữ liệu và phạm vi đánh giá. Thông tin bổ sung về thực nghiệm được trình bày ở Phụ lục~\ref{chap:reproducibility}; kết quả chi tiết trên điện thoại ở Mục~\ref{sec:phone-full-results}.
-
-\begin{longtable}{P{.22\textwidth}P{.39\textwidth}P{.28\textwidth}}
-\caption{Các nhóm dữ liệu và phạm vi đánh giá}\label{tab:source-register}\\
-\toprule Nhóm & Dữ liệu và mô hình & Phạm vi \\\midrule\endfirsthead
-\toprule Nhóm & Dữ liệu và mô hình & Phạm vi \\\midrule\endhead
-Phân loại ảnh & \ImageTotal{} ảnh, chia cố định thành tập huấn luyện, xác thực và kiểm thử & \ImageTest{} ảnh kiểm thử, bốn lớp \\
-Chuyển đổi và tối ưu mô hình & MobileNetV3-Large seed 1024; FP32, PTQ, QAT và cắt tỉa & Cùng tập kiểm thử; so sánh trong từng phiên đo CPU \\
-Nhận diện trên điện thoại & Hai seed 159/1024, mô hình gốc và cắt tỉa, ONNX/PTE & 32 cấu hình trên bốn máy; 256 ảnh mỗi cấu hình \\
-Đánh giá khẩn cấp & Logistic Regression từ các dấu hiệu có cấu trúc & 32 trạng thái tổng hợp \\
-Pilot ảnh--văn bản & CrisisMMD; TF-IDF, encoder ảnh frozen và fusion tuyến tính & \MMTrainN{} train, \MMDevN{} validation, \MMTestN{} test; nhãn informative, một sự kiện test \\
-Pilot tiếng Việt silver & Cặp CrisisMMD dịch sang tiếng Việt; DistilBERT frozen và fine-tuning, ảnh Large frozen, LR/fusion & 179 train, 58 validation, 59 test; nhãn AI từ văn bản nguồn, không phải gold ghép cặp độc lập \\
-Suy giảm chất lượng ảnh & ONNX CPU của mô hình cắt tỉa seed 1024 & Cùng 256 ảnh test; clean và tám biến đổi nhân tạo, chưa phải ảnh camera độc lập \\
-Phân cụm RQ1 & Generator 3.0; đối chứng và thử nghiệm với nhiễu, bản sao & 40 lần chạy kiểm thử; 1.400 lượt phân cụm trong thử nghiệm nhiễu \\
-Xếp hạng RQ2 & Candidate 4.1; chất lượng và độ ổn định điểm ưu tiên & 40 seed kiểm thử \\
-Điều phối RQ3 & Candidate 4.1; ba điều kiện nguồn lực & So sánh theo 40 seed, lấy trung bình điều kiện trong mỗi seed \\
-\bottomrule
-\end{longtable}
-
-Các bộ dữ liệu phân cụm, xếp hạng và điều phối là dữ liệu tổng hợp hoặc bán tổng hợp. Kết quả trên các bộ dữ liệu này được phân tích riêng với kết quả nhận diện ảnh và kiểm thử phần mềm.
+Dữ liệu và phạm vi từng phép đánh giá được trình bày tại Mục~\ref{sec:02-data-methods-data}; phụ lục này giữ kết quả điện thoại, bảng đối chiếu thuyết minh và các sơ đồ, giao diện bổ sung.
 
 \input{appendices/phone-benchmarks}
 
 \section{Đối chiếu nội dung nghiên cứu với thuyết minh}\label{sec:proposal-comparison}
-Thuyết minh (mục 15.2) liệt kê các hoạt động nghiên cứu. Bảng~\ref{tab:proposal-map} tách nội dung đăng ký, bằng chứng đã có, thiết kế bổ sung và phần chưa đánh giá. Việc đã viết đủ thiết kế phản hồi không có nghĩa đã thực hiện hoặc được xác nhận hoàn thành cam kết.
+Bảng~\ref{tab:proposal-map} tóm tắt nội dung thực hiện và phần cần phát triển tiếp.
 
-\begingroup\setlength{\tabcolsep}{3pt}
-\begin{longtable}{P{.19\textwidth}P{.26\textwidth}P{.26\textwidth}P{.23\textwidth}}
+\begin{longtable}{P{.20\textwidth}P{.43\textwidth}P{.28\textwidth}}
 \caption{Đối chiếu nội dung nghiên cứu với thuyết minh}\label{tab:proposal-map}\\
-\toprule Nội dung đăng ký & Nội dung đã thực hiện & Thiết kế bổ sung trong báo cáo & Phần chưa đánh giá \\\midrule\endfirsthead
-\toprule Nội dung đăng ký & Nội dung đã thực hiện & Thiết kế bổ sung trong báo cáo & Phần chưa đánh giá \\\midrule\endhead
-Thu thập và xử lý dữ liệu & Dataset\_Flood bốn lớp; CrisisMMD cho informative và pilot silver bản dịch; Generator 3.0 và Candidate 4.1 cho RQ (Mục~\ref{sec:02-data-methods-data}) & Quy trình thu thập, sàng lọc, làm sạch, gán nhãn, chia tập và quản lý phiên bản & Nguồn/giấy phép và độ đồng thuận của ảnh cũ; corpus tin cứu hộ tiếng Việt gốc với gold độc lập \\
-Phân tích yêu cầu, thiết kế hệ thống & Yêu cầu, kiến trúc, cơ sở dữ liệu và đồng bộ (Chương~\ref{chap:03-system}) & Luồng điểm tách LR, khẩn cấp adapter và đầu ra NLP; xử lý thiếu/mâu thuẫn (Mục~\ref{sec:multimodal-design}) & Nối LR hoặc fusion mới vào lõi và xác nhận ý nghĩa nghiệp vụ \\
-Mô hình ảnh và tối ưu hóa & MobileNetV3-Large, FP32/PTQ/QAT/cắt tỉa; benchmark CPU và điện thoại (Mục~\ref{sec:image-design}) & Giải thích đánh đổi chất lượng, lỗi nặng, byte và độ trễ; quy trình ảnh camera & Ảnh hiện trường độc lập; độ bền suy giảm trên Android và phép đo pin \\
-Phân tích văn bản theo phương án DistilBERT & TF-IDF, DistilBERT frozen cộng LR và fine-tuning encoder ba seed trên bản dịch tiếng Việt với nhãn AI (Mục~\ref{sec:vi-silver-pilot}); LR năm cờ là nhánh riêng & Thiết kế xác nhận trên tin cứu hộ tiếng Việt gốc và gold độc lập (Mục~\ref{sec:text-design}) & Corpus gốc, gold chuyên gia và xác nhận nghiệp vụ; fine-tuning trên nhãn AI chưa đóng khoảng trống này \\
-Bộ mô hình đa phương thức & Tiếp nhận nhiều trường trong app; fusion informative và silver bản dịch đã chạy ngoại tuyến (Mục~\ref{sec:vi-silver-pilot}) & Fusion xác nhận trên gold tiếng Việt gốc; fallback trong vận hành (Mục~\ref{sec:multimodal-design}) & Gold ghép cặp độc lập, tích hợp app và hiệu chuẩn; request và informative không là urgency \\
-Phát triển phần mềm & Flutter, backend Python và dashboard; lưu và gửi lại khi có kết nối (Chương~\ref{chap:03-system}) & Quy trình xác minh đầu ra mới trước khi sử dụng & Chưa triển khai NLP/fusion mới trong app; raw E2E được báo cáo chưa khôi phục \\
-Kiểm thử và ablation & Metric ảnh; ablation informative và silver, mỗi pilot giữ test IDs chung trong nhiệm vụ riêng & Ablation gold tiếng Việt gốc và kịch bản camera/Android (Mục~\ref{sec:02-evaluation-design}) & Gold và phép thử xác nhận tiếng Việt gốc; không ghép Accuracy ảnh với độ khớp OR \\
-Thực nghiệm mạng yếu & Proxy trên máy tính và tài liệu kiểm thử ứng dụng (Chương~\ref{chap:04-evaluation}) & Ghi rõ điều kiện phiên đo và phạm vi diễn giải & Mạng viễn thông/SMS thật; raw E2E và phép đo thiết bị lặp có kiểm soát \\
-Đánh giá thuật toán & RQ1--RQ3 theo từng bộ mô phỏng (Bảng~\ref{tab:method-map}) & Phân tích câu trả lời, đối chứng, cơ chế khả dĩ và giới hạn & Ba raw $p$ Spearman và năm Holm RQ2 chưa khớp; chưa xác nhận cứu hộ thực địa \\
+\toprule Nội dung & Kết quả thực hiện & Phạm vi tiếp theo \\\midrule\endfirsthead
+\toprule Nội dung & Kết quả thực hiện & Phạm vi tiếp theo \\\midrule\endhead
+Dữ liệu & Bộ ảnh tự chụp/web; CrisisMMD và bản dịch tiếng Việt đã được nhóm kiểm tra; dữ liệu mô phỏng RQ & Hồ sơ nguồn, đồng thuận nhãn và test độc lập \\
+Thiết kế hệ thống & Flutter, FastAPI, Web GIS; lưu cục bộ, gửi lại và đồng bộ trạng thái & Ngữ nghĩa đầu vào với đơn vị sử dụng \\
+Mô hình ảnh & MobileNetV3-Large; benchmark bốn máy; pruning 5/10/20\% và McNemar & Ảnh camera độc lập \\
+Văn bản tiếng Việt & TF-IDF, DistilBERT frozen và fine-tuning ba seed; bản dịch/nhãn AI được rà soát & Tin thu nhận trực tiếp và nhãn độc lập \\
+Đa phương thức & Fusion/ablation offline; nhóm xác nhận đã tích hợp NLP/fusion vào mobile & Dữ liệu ghép cặp mới và thiếu nguồn \\
+Phần mềm & Sửa lỗi gửi lúc mất mạng theo xác nhận nhóm; kiểm hồi quy, tích hợp Linux và khử bản sao exact & Mạng di động và SMS thật \\
+Phân cụm, xếp hạng & RQ1--RQ3 có đối chứng; giữ kết quả âm và giới hạn tái lập RQ2 & Dữ liệu thực hoặc kịch bản được xác nhận nghiệp vụ \\
+Điều phối và ứng dụng & Nguyên mẫu hỗ trợ xác minh, hiển thị và phân công & Chi phí di chuyển và thí điểm là hướng phát triển \\
 \bottomrule
 \end{longtable}
-\endgroup
+
+\input{appendices/system-storage-details}
+\input{chapters/03-system/sections/user-interfaces}
+\input{appendices/system-flow-details}

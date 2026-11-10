@@ -605,7 +605,7 @@ class AppController extends ChangeNotifier with WidgetsBindingObserver {
   }
 
   Future<RescueRecord?> sendSos() async {
-    if (isBusy) return null;
+    if (_disposed || isBusy) return null;
     isBusy = true;
     notifyListeners();
 
@@ -626,19 +626,19 @@ class AppController extends ChangeNotifier with WidgetsBindingObserver {
         chooseMode: () => _decideSendMode(hasImage: false, confidence: 0),
       );
       isBusy = false;
-      notifyListeners();
+      if (!_disposed) notifyListeners();
       _scheduleRetry();
       _scheduleStatusPoll();
       return record;
     } catch (_) {
       isBusy = false;
-      notifyListeners();
+      if (!_disposed) notifyListeners();
       return null;
     }
   }
 
   Future<RescueRecord?> retrySosSms() async {
-    if (isBusy) return null;
+    if (_disposed || isBusy) return null;
     final record = latestSos;
     if (record == null) return null;
     isBusy = true;
@@ -667,7 +667,7 @@ class AppController extends ChangeNotifier with WidgetsBindingObserver {
     required String? imagePath,
     required List<AiTag> aiTags,
   }) async {
-    if (isBusy) return null;
+    if (_disposed || isBusy) return null;
     submissionError = null;
     isBusy = true;
     notifyListeners();
@@ -703,14 +703,14 @@ class AppController extends ChangeNotifier with WidgetsBindingObserver {
       _scheduleRetry();
       _scheduleStatusPoll();
       isBusy = false;
-      notifyListeners();
+      if (!_disposed) notifyListeners();
       return record;
     } catch (error) {
       submissionError = error is FormatException
           ? error.message
           : 'Chưa hoàn tất gửi báo cáo. Nội dung form vẫn được giữ; hãy thử lại.';
       isBusy = false;
-      notifyListeners();
+      if (!_disposed) notifyListeners();
       return null;
     }
   }
@@ -860,6 +860,7 @@ class AppController extends ChangeNotifier with WidgetsBindingObserver {
   }
 
   Future<void> syncPending({bool immediate = true}) async {
+    if (_disposed) return;
     try {
       await _syncPendingRecordsUseCase(immediate: immediate);
     } finally {
@@ -869,6 +870,7 @@ class AppController extends ChangeNotifier with WidgetsBindingObserver {
       }
       _scheduleRetry();
     }
+    if (_disposed) return;
     notifyListeners();
     await refreshStatuses();
   }

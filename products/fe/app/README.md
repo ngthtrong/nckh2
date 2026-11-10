@@ -1,5 +1,12 @@
 # App cứu hộ Android
 
+Đợt khắc phục 10/11/2026 giữ thao tác gửi đã lưu khi controller bị đóng trong lúc chờ phản hồi;
+không thông báo lại giao diện đã dispose hoặc bắt đầu gửi mới từ controller đã đóng. Lỗi probe
+được xử lý như phép đo mạng thất bại và đi theo fallback, không làm mất báo cáo.
+Kiểm hồi quy tại [offline_submission_regression_test.dart](test/offline_submission_regression_test.dart);
+[hồ sơ kiểm thử](../../../docs/revision-plan/outputs/remaining-revision-20261110/README.md) phân biệt
+unit/widget, Linux–backend và phần Android/SMS thật còn cần thiết bị.
+
 App Flutter gửi báo cáo/SOS tới backend Docker, lưu hàng đợi khi offline và đồng
 bộ lại khi có mạng. Model PTE và Logistic Regression E_i được đóng gói trong APK.
 Bản `user` chỉ chạy PTE; bản `admin` có thêm ONNX và công cụ benchmark.

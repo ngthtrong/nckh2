@@ -72,14 +72,22 @@ def validate_floats(out):
         kind = 'figure' if match.group(1) in ['figure', 'reportlandscapefigure'] else 'table'
         captions = list(re.finditer(r'\\caption(?:\[[^\]]*\])?\s*', block))
         labels = re.findall(r'\\label\{((?:fig|tab):[^}]+)\}', block)
-        if len(captions) != 1 or len(labels) != 1:
-            errors.append(f'{kind}: cần đúng một caption và một label: {labels}')
+        if not captions or len(captions) != len(labels) or (kind == 'table' and len(captions) != 1):
+            errors.append(f'{kind}: mỗi caption cần đúng một label, bảng có một caption: {labels}')
             continue
-        title, _ = group(block, captions[0].end())
-        label = labels[0]
-        expected[kind].append((label, title))
-        if kind == 'figure' and label not in references:
-            errors.append('Hình chưa được tham chiếu trong nội dung: ' + label)
+        # Independent figures can share one float in minipage columns/rows.
+        # Keep their numbering, source order and PDF checks separate.
+        for index, caption in enumerate(captions):
+            title, end = group(block, caption.end())
+            next_caption = captions[index + 1].start() if index + 1 < len(captions) else len(block)
+            caption_labels = re.findall(r'\\label\{((?:fig|tab):[^}]+)\}', block[end:next_caption])
+            if len(caption_labels) != 1:
+                errors.append(f'{kind}: caption cần một label ngay sau nó: {caption_labels}')
+                continue
+            label = caption_labels[0]
+            expected[kind].append((label, title))
+            if kind == 'figure' and label not in references:
+                errors.append('Hình chưa được tham chiếu trong nội dung: ' + label)
     all_labels = re.findall(r'\\label\{([^}]+)\}', source)
     for label, count in Counter(all_labels).items():
         if count > 1:

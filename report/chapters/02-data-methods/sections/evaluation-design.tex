@@ -1,55 +1,52 @@
 \section{Thiết kế đánh giá}\label{sec:02-evaluation-design}
+\begin{table}[htbp]\centering\small
+\caption{Chỉ tiêu đánh giá theo thành phần và phạm vi bằng chứng}\label{tab:objective-metrics}
+\begin{tabular}{P{.19\textwidth}P{.40\textwidth}P{.30\textwidth}}\toprule
+Thành phần & Chỉ tiêu & Đơn vị và điều kiện \\\midrule
+Ảnh mức ngập & Accuracy, macro-F1, recall high, lỗi lệch từ hai mức; byte, median/P95 & Cùng ID ảnh và runtime; chọn bằng validation \\
+Văn bản/fusion & Macro-F1, precision/recall request, confusion và CI ghép cặp & Cùng nhiệm vụ, nhãn và ID test; tách silver với gold \\
+Truyền báo cáo & Tỷ lệ tiếp nhận, P50/P95, byte, mất/trùng và phục hồi hàng đợi & Từng ID, thất bại giữ trong mẫu số; phân biệt HTTP với SMS \\
+Phân cụm/xếp hạng & ARI, F1 cặp, NDCG, overlap, drift; harm/trễ hạn mô phỏng & Ghép cặp theo seed, giữ đối chứng đơn giản và nhãn độc lập \\
+\bottomrule\end{tabular}
+\end{table}
+
 \subsection{Giao thức dữ liệu và đơn vị độc lập}
 Đơn vị đánh giá thay đổi theo bài toán (Bảng~\ref{tab:method-map}): một ảnh với bộ phân loại; một run với RQ1; một seed với RQ2 và RQ3. Tham số của RQ1 được chọn bằng grid trên 20 run calibration, còn 40 run test không dùng để chọn tham số; chi tiết đối chứng và điều kiện stress ở Mục~\ref{sec:04-evaluation-setup}. Với mô hình ảnh, test không tham gia scheduler, quy tắc chọn checkpoint hay calibration lượng tử hóa. Với mọi nhánh, nhãn thật chỉ được nối sau khi dự đoán và cấu hình đã được lưu.
 
 Hai phép kiểm tra cần phân biệt. Trong score-invariance test, grouping được giữ cố định trước và sau perturbation, nên chỉ đo tầng điểm. Trong end-to-end test, grouping được dự đoán lại và có thể đổi. Đầu ra của phép thứ nhất không là bằng chứng cho phép thứ hai. Trong RQ1 stress, multiplicity có thể đổi đồ thị trước khi tính điểm; trong RQ2, nhóm oracle được khóa để chẩn đoán riêng tầng điểm.
 
-\subsection{Thiết kế ablation xác nhận tiếng Việt gốc --- chưa thực hiện}\label{sec:vi-ablation-plan}
-Thiết kế này đánh giá vai trò bổ sung của ảnh và văn bản trên tin cứu hộ tiếng Việt gốc với gold độc lập, tách khỏi ablation informative ở Mục~\ref{sec:multimodal-pilot} và pilot silver bản dịch ở Mục~\ref{sec:vi-silver-pilot}. Pilot silver đã chạy các nhánh văn bản/ảnh/fusion trên cùng target và test IDs của nó, nhưng nhãn AI từ câu nguồn chưa thực hiện thiết kế gold ghép cặp dưới đây. Nhãn dự thảo là \emph{có yêu cầu hỗ trợ cứu hộ trong tin} hoặc \emph{không có yêu cầu hỗ trợ cứu hộ}. Người gán nhãn xem toàn bộ báo cáo ghép cặp theo sổ tay dự kiến ở Mục~\ref{sec:text-design}; trường hợp không đủ thông tin được đưa vào hàng xác minh, không tự gán âm. Đây là định nghĩa nghiên cứu đề xuất, chưa có corpus tin cứu hộ tiếng Việt gốc với gold độc lập hoặc xác nhận chuyên môn cho các nhãn này. Nhãn chung không phải mức ngập bốn lớp, nhãn OR năm cờ hay mức độ nguy cấp.
+\subsection{Đánh giá mở rộng ảnh--văn bản}\label{sec:vi-ablation-plan}
+Ablation đã chạy trong từng pilot với cùng nhiệm vụ và ID test. Bước tiếp theo dùng tin thu nhận trực tiếp, nhãn độc lập và nhóm sự kiện trước chia tập. Các cấu hình trong Bảng~\ref{tab:vi-ablation-plan} cùng dự đoán request/no\_request; chọn model, ngưỡng và trọng số bằng validation, báo macro-F1, precision/recall request và CI ghép cặp theo nhóm. Trường hợp thiếu hoặc mâu thuẫn nguồn được đánh giá riêng.
 
-Mỗi mẫu dự kiến có ID báo cáo nối ảnh, văn bản, nhóm nguồn và sự kiện; mọi cấu hình trong Bảng~\ref{tab:vi-ablation-plan} nhận đúng cùng danh sách ID và nhãn. Ảnh có thể không biểu đạt được một yêu cầu chỉ xuất hiện trong câu, còn văn bản ngắn có thể bỏ sót chi tiết nhìn thấy trong ảnh. Do đó, so sánh đo thông tin dự đoán của từng nguồn đối với nhãn chung, không mặc định mọi nguồn đều đủ để suy ra nhãn. Mức ngập dự đoán không được đổi trực tiếp thành nhãn yêu cầu cứu hộ để tạo đối chứng.
+\begin{table}[htbp]\centering
+\caption{Các cấu hình cho phép xác nhận ảnh--văn bản tiếp theo}\label{tab:vi-ablation-plan}
+\begin{tabular}{P{.26\textwidth}P{.64\textwidth}}\toprule
+Cấu hình & Đầu vào và cách đánh giá \\\midrule
+Chỉ ảnh & Ảnh cùng ID; học đầu phân loại theo nhãn request \\
+Chỉ văn bản & Văn bản cùng ID; DistilBERT hoặc TF-IDF + LR \\
+Ảnh và văn bản & Nối đặc trưng; giữ cùng test và ngân sách lựa chọn \\
+Kết hợp đơn giản & Trung bình xác suất hai nhánh đơn \\
+Lớp đa số & Nhãn cố định theo tần suất train \\
+\bottomrule\end{tabular}
+\end{table}
 
-\begin{longtable}{P{.13\textwidth}P{.16\textwidth}P{.19\textwidth}P{.25\textwidth}P{.12\textwidth}}
-\caption{Ablation xác nhận trên tin tiếng Việt gốc và gold độc lập; chưa thực hiện}\label{tab:vi-ablation-plan}\\
-\toprule Cấu hình & Đầu vào & Đầu ra chung & Cách đánh giá & Trạng thái \\\midrule\endfirsthead
-\toprule Cấu hình & Đầu vào & Đầu ra chung & Cách đánh giá & Trạng thái \\\midrule\endhead
-Chỉ ảnh & Ảnh của ID ghép cặp & Xác suất nhãn yêu cầu cứu hộ & Đầu phân loại riêng được học theo nhãn chung; không dùng Accuracy mức ngập thay thế & Chưa thực hiện \\
-Chỉ văn bản & Câu tiếng Việt của cùng ID & Cùng nhãn yêu cầu cứu hộ & Bộ phân loại ở Mục~\ref{sec:text-design}; giữ cùng tập test và thước đo & Chưa thực hiện \\
-Ảnh và văn bản & Hai nguồn của cùng ID & Cùng nhãn yêu cầu cứu hộ & Fusion đề xuất ở Mục~\ref{sec:multimodal-design}; chọn cấu hình bằng validation & Chưa thực hiện \\
-Kết hợp đơn giản & Xác suất từ hai nhánh đơn & Cùng nhãn yêu cầu cứu hộ & Trung bình xác suất; mọi hiệu chuẩn hoặc trọng số chỉ được fit trên validation & Chưa thực hiện \\
-Lớp đa số & Chỉ tần suất nhãn train & Một nhãn cố định & Đối chứng kiểm tra ảnh hưởng mất cân bằng; không chọn theo nhãn test & Chưa thực hiện \\
-\bottomrule
-\end{longtable}
+\subsection{Đánh giá camera và Android dự kiến}\label{sec:camera-evaluation-plan}
+Kế hoạch này chưa thực hiện. Tập camera phải độc lập với dữ liệu chọn model, nhóm theo cảnh/sự kiện và kiểm lại nhãn khi dấu hiệu bị che. Bảng~\ref{tab:camera-scenarios-plan} nêu các điều kiện; mức biến đổi và số lượt đo được khóa trước test.
 
-\paragraph{Chia tập và khóa lựa chọn.} Quy trình đề xuất nhóm bản sao, gần trùng và các báo cáo cùng sự kiện trước khi chia train/validation/test; một nhóm không được đi qua nhiều tập. Sổ tay nhãn, cách giải quyết bất đồng, điều kiện loại mẫu mơ hồ và kế hoạch giữ một sự kiện ngoài train phải được chốt trước dự đoán test. Khi chưa biết nhóm nguồn hoặc sự kiện, cần công bố giới hạn độc lập và chưa gọi phép chia theo hàng là kiểm chứng chuyển sự kiện. Bộ từ vựng, encoder được tinh chỉnh, chuẩn hóa và đầu phân loại chỉ học trên train; chọn checkpoint, ngưỡng, trọng số kết hợp và hiệu chuẩn bằng validation. Cần giữ ngân sách lựa chọn được định trước cho từng cấu hình, lưu cả cấu hình không được chọn và không điều chỉnh theo test.
+\begin{table}[htbp]\centering
+\caption{Điều kiện camera/Android cho lần đánh giá tiếp theo}\label{tab:camera-scenarios-plan}
+\begin{tabular}{P{.27\textwidth}P{.63\textwidth}}\toprule
+Điều kiện & Nội dung kiểm tra \\\midrule
+Ánh sáng & Mất mốc ngập khi tối hoặc chói \\
+Mưa, che khuất & Giọt nước, vật cản và nhãn còn quan sát được \\
+Rung, mờ & Mất biên vật thể và mốc độ sâu \\
+Góc chụp & Phối cảnh và các hướng nhìn cùng cảnh \\
+Độ phân giải & Chi tiết trước resize/letterbox \\
+Nén, định dạng & JPEG, EXIF, giải mã và thứ tự màu \\
+\bottomrule\end{tabular}
+\end{table}
 
-\paragraph{Chỉ số và thiếu nguồn.} Chỉ số chính dự kiến là macro-F1; báo thêm precision/recall của lớp yêu cầu cứu hộ, Accuracy, ma trận nhầm lẫn và phân bố nhãn theo sự kiện. Phân tích chính dùng cặp đầy đủ nguồn, với danh sách test ID cố định. Tập thiếu ảnh hoặc thiếu văn bản được giữ như các tầng đánh giá riêng, báo số mẫu và tỷ lệ được xử lý; chuyển sang bộ phân loại đơn là một chính sách cần đánh giá riêng. Che block của fusion cố định chỉ đo độ nhạy mất nguồn, không thay cho huấn luyện nhánh đơn hoặc chứng minh fallback hoạt động. Trường hợp thiếu cả hai nguồn, mâu thuẫn hoặc từ chối dự đoán được ghi riêng, không âm thầm loại khỏi mẫu số vận hành.
-
-\paragraph{Phân tích sai số và độ bất định dự kiến.} Lưu dự đoán của mọi cấu hình theo ID để đối chiếu các cặp sai khác; phân loại lỗi theo tin thiếu thông tin, viết tắt, ảnh không liên quan và hai nguồn mâu thuẫn. Hiệu macro-F1 dự kiến dùng bootstrap ghép cặp theo nhóm sự kiện/nguồn đã khóa, báo CI và số nhóm độc lập; ít sự kiện phải giữ giới hạn suy luận tương ứng. Nếu thực hiện kiểm định nhiều đối chứng, cần khóa trước họ so sánh và cách hiệu chỉnh. Chưa có dự đoán, CI hoặc $p$-value cho thiết kế xác nhận trên gold tiếng Việt gốc; các ô của thiết kế này vẫn là \emph{Chưa đo}. Kết quả và CI có điều kiện của pilot bản dịch nhãn AI được báo riêng ở Mục~\ref{sec:vi-silver-pilot}, không chuyển thành bằng chứng gold.
-
-\subsection{Thiết kế đánh giá ảnh camera và Android --- chưa thực hiện}\label{sec:camera-evaluation-plan}
-Kế hoạch mở rộng tách hai câu hỏi: model phân loại còn đúng khi chất lượng ảnh thay đổi hay không, và mỗi runtime xử lý ảnh mất bao lâu trên một điện thoại xác định. Kết quả biến đổi nhân tạo ONNX CPU ở Mục~\ref{sec:image-quality-cpu-results} mới hỗ trợ câu hỏi thứ nhất trong tập ảnh hiện có; benchmark Android lịch sử dùng tập ảnh cố định, chưa xác nhận kết hợp cả hai câu hỏi trên ảnh camera độc lập.
-
-Bảng~\ref{tab:camera-scenarios-plan} định nghĩa các nhóm tình huống cần có trong một đợt đo sau. Mức biến đổi và số lượt lặp phải được chốt trước test, không chọn sau khi xem kết quả. Ảnh thu lại cùng cảnh không hoàn toàn đồng nhất về nội dung; cần gắn ID cảnh và để người gán nhãn kiểm tra nhãn còn quan sát được. Với biến đổi số, mọi phiên bản nối về cùng ảnh cha. Trường hợp không còn đủ dấu hiệu nhận diện phải ghi riêng khả năng đánh giá nhãn, thay vì bắt buộc kế thừa nhãn gốc.
-
-\begin{longtable}{P{.14\textwidth}P{.28\textwidth}P{.26\textwidth}P{.21\textwidth}}
-\caption{Kịch bản đánh giá ảnh camera/Android đề xuất; toàn bộ chưa thực hiện}\label{tab:camera-scenarios-plan}\\
-\toprule Điều kiện & Đầu vào và thao tác dự kiến & Lỗi cần quan sát & Chỉ số sẽ đo \\\midrule\endfirsthead
-\toprule Điều kiện & Đầu vào và thao tác dự kiến & Lỗi cần quan sát & Chỉ số sẽ đo \\\midrule\endhead
-Ánh sáng & Cùng cảnh ở nhiều mức sáng; thêm biến đổi số từ ảnh cha để tách phép biến đổi có kiểm soát & Mất đường mực nước, vùng tối bị nhầm lớp; confidence cao khi sai & Macro-F1, recall high, lỗi nặng theo mức sáng \\
-Mưa và che khuất & Ảnh camera có giọt nước/vật cản được ghi metadata; tách khỏi blur số & Dấu hiệu bị che, vật cản bị nhận làm nước; nhãn không còn xác định & Ma trận nhầm lẫn, tỷ lệ không đánh giá được nhãn \\
-Rung và mờ & Cảnh được chụp lại có rung; đối chiếu riêng với blur số trên cùng ảnh cha & Biên vật thể và mốc độ sâu bị mất & Macro-F1, lỗi nặng, số lần từ chối/lỗi xử lý \\
-Góc chụp & Các hướng nhìn của cùng cảnh, lưu ID cảnh và chú thích góc & Thay đổi phối cảnh, mốc độ sâu không còn thấy & Recall từng lớp và lỗi theo nhóm cảnh \\
-Độ phân giải & Cùng ảnh gốc, giảm kích thước theo các mức khóa trước; giữ tỷ lệ & Chi tiết nhỏ mất trước letterbox, phóng to không khôi phục thông tin & Macro-F1, recall high, thời gian tiền xử lý \\
-Nén và định dạng & Giữ ảnh gốc, tạo bản JPEG tại mức khóa trước; ghi codec và byte & Khối nén, sai hướng EXIF, lỗi giải mã hoặc thứ tự màu & Chất lượng phân loại, byte, tỷ lệ lỗi, độ trễ \\
-\bottomrule
-\end{longtable}
-
-Chất lượng được so trên cùng ID ảnh và cùng model/tiền xử lý, báo hiệu so với ảnh tham chiếu theo nhóm cảnh; không coi số biến thể hoặc số runtime là số cảnh độc lập. Tập camera xác nhận phải độc lập với dữ liệu đã dùng chọn model, bao gồm nguồn/sự kiện khi có thể truy vết. Nếu dùng kết quả để sửa model hoặc ngưỡng, cần tách một tập xác nhận mới. Các kết quả dự kiến chỉ hỗ trợ nhiệm vụ mức ngập; không tự chứng minh hiệu quả của quyết định cứu hộ.
-
-\paragraph{Quy trình ghi thời gian và lỗi.} Đo riêng giải mã/sửa hướng ảnh, resize/chuẩn hóa, lời gọi suy luận và tổng \texttt{classifyImage}; thời gian nạp model ghi một lần riêng. Ranh giới đồng hồ cần đồng bộ với runtime, tránh tính trùng công việc bất đồng bộ. Khóa trước số warmup, số lượt lặp, thứ tự chạy và thời gian nghỉ; luân phiên thứ tự runtime/điều kiện để giảm ảnh hưởng nóng máy. Báo P50/P95 trong phiên và độ biến động giữa phiên, đồng thời ghi tỷ lệ giải mã/thực thi thất bại trên mọi lần gọi. Chất lượng được báo theo ảnh; timing lặp chỉ tạo thêm quan sát thời gian, không tăng số ảnh độc lập. Pin/RAM chỉ được kết luận khi có phép đo riêng.
-
-Biểu mẫu phiên đo cần chứa ID phiên, thời điểm, thiết bị/SoC/RAM, Android, trạng thái pin/nhiệt/tải, runtime/provider/số luồng, hash APK/commit, hash model và thứ tự lớp, phiên bản tiền xử lý, hash ảnh và ID ảnh cha/cảnh, điều kiện, nhãn và người xác nhận, kết quả/probability, mốc thời gian từng bước và mã lỗi. Các trường thiết bị hoặc xác nhận chưa có phải giữ trống có lý do; chưa điền số đo Android cho ảnh suy giảm trong báo cáo này. Cách triển khai phiên đề xuất được nêu ở Mục~\ref{sec:camera-session-plan}.
+Mỗi phiên lưu thiết bị, APK/model, tiền xử lý, ID ảnh/cảnh, nhãn, dự đoán và lỗi. Báo Accuracy, macro-F1, recall high, lỗi nặng và P50/P95; tách tiền xử lý, suy luận và tổng lời gọi. Quy trình phiên ở Mục~\ref{sec:camera-session-plan}.
 
 \subsection{Thước đo phân loại ảnh}\label{sec:02-metrics-image}
 Các thước đo gồm Accuracy, macro-F1, balanced accuracy, ma trận nhầm lẫn và lỗi nặng. Với $\mathcal Y$ là tập bốn lớp và $\operatorname{Prec}_c,\operatorname{Rec}_c$ là precision và recall của lớp $c$,
@@ -96,6 +93,8 @@ RQ3 tạo lịch từ cụm dự đoán và điểm ưu tiên, sau đó evaluato
 ``Cải thiện'' trong bảng ghép cặp được tính theo hướng tốt của từng thước đo. Khi harm thấp hơn là tốt hơn, $\Delta$ bằng harm đối chứng trừ harm candidate; khi tỷ lệ phục vụ cao hơn là tốt hơn, hướng trừ đổi lại. CSV còn giữ cột candidate-minus-comparator, nên cần xem hướng của thước đo trước khi dùng dấu. Chênh lệch tỷ lệ được báo bằng điểm phần trăm để tránh nhầm với phần trăm thay đổi tương đối.
 
 \subsection{Suy luận thống kê}
+Đối với pruning ảnh, McNemar exact dùng số ảnh chuyển đúng$\to$sai và sai$\to$đúng sau khi ghép cùng ID test. Hiệu macro-F1 sau trừ trước có CI percentile từ 2.000 bootstrap draw theo nhóm split; CI chưa hiệu chỉnh, còn Holm giữ đúng họ tương phản của từng artifact. Các nhóm này chưa được xác nhận độc lập theo nguồn/sự kiện. Kiểm định thay đổi đúng/sai và CI macro-F1 xét hai đại lượng khác nhau; không suy tương đương từ $p>0{,}05$. Kết quả được trình bày tại Mục~\ref{sec:local-image-update}.
+
 Với mỗi seed, hai phương pháp được đánh giá trên cùng dữ liệu để tạo hiệu ghép cặp. Bootstrap lấy mẫu lại theo run hoặc seed thay vì theo từng báo cáo có tương quan. RQ1 dùng 10.000 resample cho so sánh chính; RQ2 và RQ3 dùng 5.000. Kiểm định Wilcoxon và hiệu chỉnh Holm theo các họ giả thuyết đã xuất giúp kiểm soát việc xét nhiều chỉ số và đối chứng.
 
 Trong RQ3, ba điều kiện nguồn lực thuộc cùng một seed được lấy trung bình trước, giữ 40 cặp seed. Bảng cũ có $40\times3=120$ hàng điều kiện chỉ phục vụ chẩn đoán; coi tất cả là mẫu độc lập sẽ sai đơn vị suy luận. Khoảng tin cậy bootstrap chưa hiệu chỉnh và kiểm định Wilcoxon có Holm là hai thủ tục khác nhau, nên một CI không chứa không không tự cho phép bỏ qua kết luận của kiểm định đã hiệu chỉnh.
@@ -105,6 +104,6 @@ Các phép kiểm tra stress RQ1 báo cáo thay đổi trong từng phương ph�
 \paragraph{Phạm vi kiểm chứng bổ sung.} Phần tái kiểm RQ chỉ tính lại thống kê từ bảng CSV và checkpoint đã lưu, không chạy lại phân cụm, generator hoặc huấn luyện. RQ1 stress primary và replication được kiểm riêng, gồm 300 hàng hiệu ứng mỗi bundle, với 288 khoảng tin cậy bootstrap được tính lại và 12 hàng thiếu chỉ số được kiểm tra giữ trống; không gộp thành 80 run độc lập. Các bootstrap stress dùng 5.000 mẫu với seed suy từ protocol theo method/scenario/metric. Một CSV cơ sở RQ1 hiện thiếu newline cuối so với commit gốc, nhưng 400 bản ghi và mọi trường giống nhau; sai lệch byte được giữ, không gọi toàn bộ verifier lịch sử đã đạt. RQ3 replay dùng NumPy 2.5.1, pandas 3.0.3 và SciPy 1.18.0; RQ2 có kiểm bổ sung bằng đúng phiên bản gốc. Sai lệch $p$ RQ2 còn lại được nêu tại phần kết quả, không sửa số gốc để làm kiểm tra đạt.
 
 \subsection{Quy trình xử lý và kiểm chứng kết quả}\label{sec:02-reproducibility}
-Quy trình được mô tả theo thứ tự thao tác để làm rõ nơi sử dụng dữ liệu. Trước hết kiểm tra quy định đầu vào và cấu trúc dữ liệu, chỉ nạp tệp chứa thông tin quan sát. Kiểm tra miền số, timestamp và tọa độ; đưa báo cáo không đủ vị trí hoặc thời gian vào hàng xem xét. Từ các báo cáo đủ trường, xác định định danh payload, số củng cố và $Q_i$. Sau đó tính các thành phần tương đồng, ngưỡng quantile và cạnh top-$K$, rồi gọi bộ phát hiện cộng đồng. Với mỗi cụm dự đoán, xây họ bằng chứng từ fingerprint và envelope, tính các tổng hợp ở Công thức~\ref{eq:aggregate-e}--\ref{eq:aggregate-v}. Điểm $P_k$ đi cùng cụm vào scheduler nghiên cứu hoặc danh sách hỗ trợ điều phối. Chỉ sau khi lưu đầu ra và cấu hình, evaluator mới nối nhãn để tính chỉ số. Hàng xem xét được giữ trong output; loại khỏi bảng kết quả sẽ che mất khối lượng mà con người phải xử lý.
+Quy trình được mô tả theo thứ tự thao tác để làm rõ nơi sử dụng dữ liệu. Trước hết kiểm tra quy định đầu vào và cấu trúc dữ liệu, chỉ nạp tệp chứa thông tin quan sát. Kiểm tra miền số, timestamp và tọa độ; đưa báo cáo không đủ vị trí hoặc thời gian vào hàng xem xét. Từ các báo cáo đủ trường, xác định định danh payload, số củng cố và $Q_i$. Sau đó tính các thành phần tương đồng, ngưỡng quantile và cạnh top-$k$, rồi gọi bộ phát hiện cộng đồng. Với mỗi cụm dự đoán, xây họ bằng chứng từ fingerprint và envelope, tính các tổng hợp ở Công thức~\ref{eq:aggregate-e}--\ref{eq:aggregate-v}. Điểm $P_k$ đi cùng cụm vào scheduler nghiên cứu hoặc danh sách hỗ trợ điều phối. Chỉ sau khi lưu đầu ra và cấu hình, evaluator mới nối nhãn để tính chỉ số. Hàng xem xét được giữ trong output; loại khỏi bảng kết quả sẽ che mất khối lượng mà con người phải xử lý.
 
 Đầu ra một lần chạy chứa định danh dữ liệu, seed, config canonical JSON, commit, checksum, danh sách báo cáo được nhận, bị từ chối hoặc đưa vào xem xét, nhãn dự đoán và thời gian. Bảng tổng hợp chỉ được sinh từ các lần chạy cùng protocol. Nếu một lần thất bại, cần giữ trạng thái lỗi và mẫu số thay vì bỏ hàng rồi tính trên những run còn lại; đây là điều kiện để kết quả âm, timeout hoặc từ chối dữ liệu vẫn quan sát được.

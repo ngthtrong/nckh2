@@ -1,0 +1,14 @@
+\subsection{Khắc phục phần mềm và kiểm hồi quy}\label{sec:software-revision-checks}
+\OfflineFixVI{} Đợt sửa ngày 10/11/2026 bổ sung guard vòng đời controller và fallback khi probe mạng lỗi. Sáu hồi quy không đạt trước sửa, đều đạt sau sửa; bản ghi đã lưu được giữ lại. Kết quả kiểm phần mềm ở Bảng~\ref{tab:software-revision-checks}.
+
+\begin{table}[htbp]\centering\small
+\caption{Bằng chứng phần mềm của đợt khắc phục mới}\label{tab:software-revision-checks}
+\begin{tabular}{P{.28\textwidth}P{.25\textwidth}P{.36\textwidth}}\toprule
+Phạm vi & Kết quả & Điều kiện \\\midrule
+Hồi quy lỗi gửi/đồng bộ & \SoftwareTargetedPass{} đạt sau sửa & Chờ phản hồi, đóng controller, lỗi probe; không giả lập kết quả SMS đã giao \\
+Flutter toàn bộ unit/widget & \SoftwareFlutterPass{} đạt, \SoftwareFlutterSkipped{} bỏ qua & Kiểm outbox, giữ phiên, tài khoản, trạng thái và các chức năng app \\
+Backend API và đồ thị & \SoftwareBackendPass{} đạt & Có \SoftwareGraphTests{} phép kiểm bản sao, nội dung khác và hàng xem xét \\
+App Linux--backend thật & \SoftwareLinuxPass{} kịch bản đạt & Mất mạng/phục hồi; gửi ảnh, nhận trạng thái và chặn sửa chéo; DB tạm riêng \\
+\bottomrule\end{tabular}
+\end{table}
+Backend khử bản sao exact trước quantile/top-$k$, giữ mọi ID gốc. Ba phép kiểm gồm nhân bản 2/5 lần, nội dung khác và hàng xem xét; fixture giữ số cặp, cạnh, ngưỡng, phân hoạch và ưu tiên. Hai kịch bản Linux--backend kiểm đường outbox, ảnh, phản hồi trạng thái và quyền sửa chéo; chúng không đo SMS hoặc mạng di động thật.

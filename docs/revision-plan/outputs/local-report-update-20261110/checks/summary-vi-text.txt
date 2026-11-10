@@ -1,0 +1,75 @@
+          BỘ GIÁO DỤC VÀ ĐÀO TẠO
+             ĐẠI HỌC CẦN THƠ
+
+
+                      BÁO CÁO TÓM TẮT
+          ĐỀ TÀI NGHIÊN CỨU KHOA HỌC CỦA SINH VIÊN
+
+1. Thông tin chung:
+- Mã số đề tài: THS2026-68
+- Tên đề tài: Xây dựng hệ thống phân tích đa phương thức và phân cụm sự kiện cứu hộ bão lũ dựa
+trên Edge AI
+- Sinh viên chủ nhiệm đề tài: Lê Thị Ngọc Ảnh
+- Lớp: DI2396F1 – Khóa 49; Trường/Khoa/Viện: Trường CNTT&TT.
+       Năm thứ: 4      Số năm đào tạo: 4,5
+- Người hướng dẫn: TS. Nguyễn Thanh Khoa
+2. Mục tiêu đề tài:
+Xây dựng hệ thống trí tuệ nhân tạo (AI) trên điện thoại để tiếp nhận, phân tích thông tin và hỗ trợ
+quyết định cứu hộ bão lũ khi mạng không ổn định, hướng tới giảm thiệt hại về người và tài sản.
+3. Tính mới và sáng tạo:
+Đề tài kết hợp suy luận ảnh tại biên, truyền dữ liệu theo kết nối và gom nhóm báo cáo từ vị trí, thời
+gian, nội dung để hỗ trợ xác minh trên bản đồ. Thiết kế mở rộng xử lý ngôn ngữ tự nhiên (NLP)
+và fusion tiếng Việt được trình bày riêng với phần đã thực hiện.
+4. Kết quả nghiên cứu:
+Trên 256 ảnh test, baseline seed 1024 đạt Accuracy 75.78%, macro-F1 74.26% và 3 lỗi nặng.
+Pruning lịch sử đạt Accuracy 80.08%, có 4 lỗi nặng; McNemar exact 𝑝 = 0,1173, chưa xác lập
+cải thiện. Thử thêm 5/10/20% chọn mức 5% bằng validation nhưng macro-F1 test còn 68,14%;
+chẩn đoán tensor PTQ/QAT chưa cô lập nguyên nhân suy giảm. Trên ONNX CPU của model
+pruning lịch sử, macro-F1 clean 78,26% giảm còn 68,04% khi nhân độ sáng 0,4; chưa xác nhận
+Android/camera hoặc nhãn sau biến đổi.
+App tính LR từ năm cờ với nhãn OR rồi gửi và lưu điểm; adapter chưa dùng LR cho phân cụm/xếp
+hạng mà lấy urgency hoặc từ khóa. LR không phải NLP tiếng Việt. Pilot CrisisMMD informative
+tiếng Anh đạt macro-F1 text 76,60%, fusion 78,35%; các CI hiệu chứa 0.
+Pilot bản dịch tiếng Việt/nhãn AI gồm 179/58/59 cặp train/validation/test. Fusion frozen đạt macro-
+F1 64,91%, recall request 33,33%; fine-tuning DistilBERT tái chạy CUDA đạt trung bình 52,29%
+và recall 22,22% qua ba seed trên cùng test. Corpus bản địa, gold người độc lập, trích xuất và fusion
+trong app chưa được xác nhận.
+Trong mạng yếu giả lập trên máy tính (50 kbit/s, độ trễ khứ hồi 600 ms), metadata và ảnh nén đều
+thành công 257/257 lượt, ảnh gốc 230/257 (89,49%); các chế độ được đo riêng, chưa xác nhận
+mạng di động thực.
+RQ1 chưa xác lập Product hơn Additive độc lập (ARI 0,9072 so với 0,9191; Holm p=0,2560). RQ2
+chưa xác lập lợi ích alignment chung (NDCG@5 revised 0,6669, random 0,6763), chỉ hỗ trợ bất
+biến exact khi grouping cố định. RQ3 trên 40 seed cho revised kém nearest-first về harm và trễ hạn
+mô phỏng. Ba raw p Spearman và năm Holm RQ2 chưa khớp replay. Các kết quả hiện có hỗ trợ
+đánh giá nguyên mẫu, chưa xác nhận hiệu quả cứu hộ thực địa.
+5. Sản phẩm:
+Ba sản phẩm đăng ký gồm ứng dụng di động hỗ trợ gửi cầu cứu và AI; website bản đồ quản
+lý, phân cụm thông tin; bộ mô hình AI đa phương thức huấn luyện, tinh chỉnh và tối ưu.
+Bằng chứng đã có gồm mô hình ảnh, LR có cấu trúc và pilot CrisisMMD riêng; chưa xác
+nhận NLP trên tin tiếng Việt gốc hoặc fusion cứu hộ trong app.
+Sản phẩm theo quy định gồm bản tin, báo cáo tóm tắt và video giới thiệu tối đa 02 phút.
+6. Công bố khoa học từ kết quả nghiên cứu của đề tài, hoặc nhận xét, đánh giá của cơ
+sở đã áp dụng các kết quả nghiên cứu (nếu có):
+                                Tác giả/                                   Năm
+ Stt    Tên bài báo           nhóm tác giả       Tên tạp chí Số tạp chí  xuất bản
+ 1. Stress-Testing        Thanh-Trong Nguyen;   Communica- 3253         2026
+     Product-Gated        Ngoc-Anh Le;          tions in
+     Clustering and       Nhu-Quynh Nguyen;     Computer
+     Bounded Priority     Tuong-Hung Cao;       and
+     Ranking for          Hung-Thinh Ngo;       Information
+     Flood-Rescue         Xuan-Phuong Chau;     Science
+     Reports: A           Lan Phuong Phan;      (CCIS),
+     Synthetic Study      Thanh-Khoa Nguyen     Springer
+                                                Nature; kỷ
+                                                yếu ISDS
+                                                2026, Part II
+                                                (Scopus Q3)
+7. Đóng góp về mặt kinh tế – xã hội, giáo dục và đào tạo, an ninh, quốc phòng và khả
+năng áp dụng của đề tài:
+Sản phẩm phục vụ đào tạo, nghiên cứu Edge AI và quản lý thông tin cứu hộ; lợi ích về thời
+gian, chi phí và giảm thiệt hại chưa được đo thực địa.
+8. Hiệu quả, phương thức chuyển giao kết quả nghiên cứu và khả năng áp dụng:
+Dự kiến chuyển giao cho Trường CNTT&TT, Đại học Cần Thơ để lưu trữ, giảng dạy và
+nghiên cứu. Trước khi áp dụng, cần hoàn thiện NLP/fusion, kiểm thử thiết bị, mạng, đồng
+bộ, phân cụm và đánh giá với đơn vị cứu hộ chuyên môn.
+

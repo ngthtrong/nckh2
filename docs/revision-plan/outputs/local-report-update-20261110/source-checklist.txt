@@ -1,0 +1,69 @@
+Tôi đã đối chiếu [nhận xét chính thức trong tmp.md](/home/ngthtrong/nckh2/tmp.md:1) với [content.pdf hiện tại](/home/ngthtrong/nckh2/report/build/content/content.pdf) và các nguồn liên quan trong `report/`. **Chưa chỉnh sửa báo cáo, cài đặt hay chạy thêm thực nghiệm.**
+
+Bản hiện tại có **191 trang PDF**, trong đó phần từ Mở đầu đến hết Kết luận là **134 trang**. Một số nhận xét đã có bổ sung: ảnh thẻ đã xuất hiện; danh mục có 27 tài liệu; đã chạy pilot DistilBERT/fusion trên bản dịch tiếng Việt với nhãn AI; Bảng B.6 đã cập nhật. Vì vậy, danh sách dưới đây tập trung vào phần còn cần hoàn thiện.
+
+*Số trang bên dưới là số in trong báo cáo; trường hợp dùng vị trí trang PDF sẽ ghi rõ.*
+
+**1. Chỉnh sửa bố cục và hình thức**
+
+| Mã | Việc cần thực hiện |
+|---|---|
+| BC-01 | **Sắp xếp lại Chương 2 sau khi rút gọn nội dung:** giữ kiến trúc và luồng xử lý chính trong thân bài; bố trí các chi tiết chuyển xuống phụ lục sao cho dễ tra cứu. |
+| BC-02 | **Rà lại ngắt trang, khoảng trắng và kích thước hình/bảng** sau khi biên tập. Giữ sơ đồ, ảnh giao diện đọc được; không tiếp tục giảm chữ hoặc lề để ép số trang. Các bảng B.2–B.5 đã được thu gọn trong bản hiện tại. |
+| BC-03 | **Thống nhất đánh số trang phần minh chứng.** Ba trang minh chứng sản phẩm hiện đều mang số trang riêng là “1”. Bản `content.pdf` đang đọc chưa ghép minh chứng bài báo, nên cần xử lý cả vị trí ghép và cách đánh số khi bổ sung. |
+| BC-04 | **Cập nhật mục lục, danh mục hình/bảng và tham chiếu chéo** sau khi đổi cấu trúc, chuyển nội dung hoặc ghép thêm minh chứng. |
+| BC-05 | **Chuẩn hóa trình bày tài liệu tham khảo**, nhất là ngoặc kép theo loại tài liệu, kiểu chữ, khoảng trắng, cách xuống dòng URL/DOI và ngày truy cập; rà trực tiếp các trang 135–137. |
+| BC-06 | **Thống nhất ký hiệu K/k theo ý nghĩa.** Dùng nhất quán một ký hiệu cho số láng giềng của đồ thị; vẫn phân biệt với chỉ số cụm và vị trí cắt trong NDCG@k. Hiện còn xen kẽ `top-K` và `top-k`. |
+| BC-07 | **Thống nhất cách trình bày số và thuật ngữ:** dấu thập phân theo ngôn ngữ Việt–Anh, phần trăm/điểm phần trăm, đơn vị thời gian và dung lượng, tên mô hình và từ viết tắt. |
+| BC-08 | **Kiểm tra lại PDF sau chỉnh sửa:** biểu mẫu, chân trang, bảng nhiều trang, hình ngang, phông chữ, trích dẫn và các bản in một mặt/hai mặt. |
+
+**2. Chỉnh sửa nội dung: thêm, bớt hoặc viết lại**
+
+| Mã | Việc cần thực hiện |
+|---|---|
+| ND-01 | **Rút gọn Chương 2**, hiện chiếm trang 11–50. Chọn lọc phần mô tả CSDL, API, đồng bộ, sơ đồ và giao diện; chuyển chi tiết triển khai, màn hình quản trị và hướng dẫn thao tác dài xuống phụ lục. |
+| ND-02 | **Rút gọn Kết luận**, hiện ở trang 132–134: tập trung vào đóng góp, câu trả lời RQ, hạn chế chính và bước tiếp theo; giảm việc nhắc lại toàn bộ số liệu và lịch sử kiểm chứng. |
+| ND-03 | **Giảm tên nội bộ và các câu cảnh báo lặp lại.** Giải thích tên cần thiết khi xuất hiện lần đầu; chuyển đường dẫn, mã run và chi tiết truy vết sang phụ lục. Gom giới hạn chung thành bảng hoặc đoạn chung, giữ cảnh báo riêng khi thực sự cần để hiểu kết quả. |
+| ND-04 | **Bổ sung tổng quan sát bài toán**, đặc biệt các công trình Hội đồng nêu là **AlleyFloodNet và EmergencyNet**. Hai tên này chưa xuất hiện trong PDF hiện tại; việc tăng từ 20 lên 27 tài liệu chưa tự giải quyết thiếu sót về phạm vi tổng quan. |
+| ND-05 | **Viết rõ điểm mới qua đối chiếu với nghiên cứu trước:** đầu vào, nhiệm vụ, xử lý tại biên, kết nối gián đoạn, chống trùng và hỗ trợ điều phối. Phân biệt đóng góp tích hợp nguyên mẫu với ưu thế thuật toán đã được chứng minh. |
+| ND-06 | **Cụ thể hóa mục tiêu bằng chỉ tiêu có thể đánh giá:** chất lượng ảnh/văn bản, lỗi nặng, độ trễ, tỷ lệ giao tin, phân cụm và xếp hạng. Giữ “giảm thiệt hại về người và tài sản” ở mức mục đích dài hạn vì chưa có phép đo thực địa. Không đặt chỉ tiêu hồi cứu chỉ để khớp kết quả đã có. |
+| ND-07 | **Thống nhất mô tả nhánh tiếng Việt:** đã có DistilBERT frozen và fine-tuning trên bản dịch/nhãn AI; phần còn thiếu là xác nhận trên tin tiếng Việt gốc, nhãn độc lập và tích hợp ứng dụng. Không tiếp tục mô tả chung rằng hoàn toàn chưa chạy NLP. |
+| ND-08 | **Thống nhất cách dùng “đa phương thức”:** tách tiếp nhận nhiều trường dữ liệu, kết hợp bằng heuristic/công thức và mô hình fusion được huấn luyện. Hai pilot fusion ngoại tuyến chưa chứng minh ứng dụng cứu hộ đã có fusion tiếng Việt hoạt động. |
+| ND-09 | **Hoàn thiện Bảng B.6 theo bằng chứng thực tế.** Bảng hiện đã phân biệt phần thực hiện và phần chưa đánh giá; cần đối chiếu từng cam kết với mô hình, dữ liệu, kết quả và minh chứng cụ thể, rồi đồng bộ lại khi có bổ sung. |
+| ND-10 | **Làm rõ tính độc lập của dữ liệu ảnh và quá trình chọn mô hình.** Phân biệt bảng chia tập đang có với split thực sự dùng lúc huấn luyện; phân biệt chọn checkpoint bằng validation với lựa chọn phương án triển khai sau khi đã xem nhiều kết quả test. |
+| ND-11 | **Cô đọng và làm rõ đánh đổi chất lượng ảnh:** Accuracy tăng sau cắt tỉa không có nghĩa mọi tiêu chí đều tốt hơn; lỗi nặng có thể tăng. Giữ rõ kết quả CPU, điện thoại, PTQ/QAT và từng seed; thống nhất giữa “mô hình được khuyến nghị” và “mô hình đã xác minh trong APK”. |
+| ND-12 | **Giữ kết luận đúng cho RQ1–RQ3 và rút gọn diễn giải:** chưa xác lập Product vượt Additive; chưa xác lập lợi ích xếp hạng chung; revised thua nearest-first trên các kết quả điều phối đã thử. Các kết luận này đã có trong bản hiện tại, cần bảo toàn khi biên tập. |
+| ND-13 | **Thống nhất mức khẳng định về kiểm thử phần mềm.** Một số đoạn vẫn dùng cách diễn đạt như đã xác nhận hoặc đang có raw, trong khi phần giới hạn ghi raw E2E chưa khôi phục. Tách rõ kết quả lịch sử được mô tả, kết quả có dữ liệu gốc kiểm lại được và phép thử mới. |
+| ND-14 | **Hoàn thiện thông tin hành chính:** điền ngày tháng thực tế và nhận xét do người hướng dẫn cung cấp. Các vị trí còn trống thấy ở trang PDF 17, 18 và 21. Ảnh thẻ đã có, không cần đưa việc chèn ảnh vào danh sách còn thiếu. |
+| ND-15 | **Nêu rõ điều kiện sử dụng và bảo vệ dữ liệu:** nguyên mẫu phục vụ nghiên cứu/đào tạo; thí điểm cần khắc phục lỗi, kiểm thử thực tế và có đơn vị cứu hộ tham gia. Làm rõ trách nhiệm xác minh, quyền truy cập và xử lý thông tin của người yếu thế. |
+| ND-16 | **Đồng bộ toàn bộ phần tóm tắt và sản phẩm đi kèm:** thông tin kết quả Việt–Anh, bản tin, báo cáo tóm tắt, kết luận, Bảng B.6 và minh chứng mô hình phải cùng phản ánh một phạm vi hoàn thành. |
+
+Các nội dung này tập trung ở [Chương 2](/home/ngthtrong/nckh2/report/chapters/03-system/chapter.tex), [phần thiết kế nghiên cứu](/home/ngthtrong/nckh2/report/chapters/02-data-methods/chapter.tex), [kết quả và kiểm thử](/home/ngthtrong/nckh2/report/chapters/04-evaluation/chapter.tex), cùng [Kết luận](/home/ngthtrong/nckh2/report/chapters/conclusion.tex).
+
+**3. Cần thêm bằng chứng: thu thập, phân tích, chạy thử hoặc cài đặt bổ sung**
+
+Trong nhóm này, một số việc có thể bắt đầu từ dự đoán đã lưu; một số cần dữ liệu, điện thoại hoặc mạng thật. Các mục phát triển và thí điểm được ghi riêng để tránh hiểu rằng tất cả đều phải hoàn thành trước khi sửa được báo cáo.
+
+| Mã | Việc cần thực hiện và bằng chứng cần có |
+|---|---|
+| MC-01 | **Bổ sung hồ sơ nguồn và quyền sử dụng ảnh:** URL/nguồn, sự kiện, thời điểm, giấy phép hoặc căn cứ sử dụng, liên kết tới ID ảnh. Giữ rõ trường chưa xác định, không suy nguồn từ tên tệp. |
+| MC-02 | **Đánh giá độ đồng thuận gán nhãn ảnh:** có nhãn độc lập của nhiều người, chỉ số đồng thuận, ma trận bất đồng và hồ sơ phân xử; bổ sung thẩm định chuyên môn cho các ca khó và lỗi lệch nhiều mức. |
+| MC-03 | **Xác nhận hoặc xây dựng lại train/validation/test độc lập theo nguồn/sự kiện.** Khôi phục checksum split lúc train nếu còn; nếu không chứng minh được, cần protocol mới và tập xác nhận độc lập cho mô hình đã chọn. |
+| MC-04 | **Bổ sung ảnh chụp thực địa bằng điện thoại và đánh giá camera/Android.** Bao gồm điều kiện tối, mưa, rung, che khuất, góc chụp, nén và định dạng; kiểm tra nhãn còn quan sát được. Phép suy giảm nhân tạo trên ONNX CPU đã có chỉ đáp ứng một phần. |
+| MC-05 | **Thực hiện kiểm định McNemar trước/sau cắt tỉa.** Ghép dự đoán theo cùng ID ảnh, lập số ca chuyển đúng→sai và sai→đúng; bổ sung chênh lệch chất lượng và khoảng tin cậy phù hợp. Có thể tận dụng dự đoán đã lưu nếu đủ điều kiện, chưa nhất thiết phải huấn luyện lại. |
+| MC-06 | **Chẩn đoán nguyên nhân suy giảm PTQ/QAT:** kiểm tra checkpoint, tiền xử lý, calibration, cấu hình lượng tử hóa và sai khác tensor/tầng trên dữ liệu phát triển. Cần bằng chứng khoanh vùng nguyên nhân; bảng confusion hiện tại mới mô tả hiện tượng. |
+| MC-07 | **Thử tỷ lệ cắt tỉa cao hơn.** Hiện target ratio là 0,01, số tham số giảm khoảng 1,46%. Cần so các mức nén có ý nghĩa hơn theo chất lượng, recall ngập cao, lỗi nặng, kích thước và độ trễ; chọn bằng validation trước phép xác nhận cuối. |
+| MC-08 | **Đối chiếu pipeline CPU–điện thoại và đo lặp hiệu năng.** Kiểm tra giải mã, resize, chuẩn hóa, nhãn và asset; ghi hash APK/commit/model, runtime, nhiệt độ và tải. Đã có 32 cấu hình trên bốn điện thoại; phần thiếu là kiểm soát phiên đo và xác nhận độc lập cho lựa chọn cuối. Pin/RAM cần phép đo riêng nếu đưa ra kết luận. |
+| MC-09 | **Xây dựng corpus tin cứu hộ tiếng Việt gốc**, có nguồn, quyền sử dụng, nhóm sự kiện và nhãn người gán độc lập. Với fusion, cần ảnh–văn bản ghép theo cùng báo cáo và kiểm tra khả năng xác định nhãn từ từng nguồn. |
+| MC-10 | **Huấn luyện/đánh giá NLP trên corpus tiếng Việt gốc:** so DistilBERT với đối chứng đơn giản, chọn cấu hình bằng validation, báo chất lượng và lỗi trên test giữ riêng. Trích xuất địa điểm, số người, phủ định hoặc dấu hiệu nguy cấp cần nhãn span và đánh giá riêng nếu tiếp tục giữ các chức năng này. |
+| MC-11 | **Đánh giá fusion bằng ablation có cùng nhiệm vụ và tập test:** chỉ ảnh, chỉ văn bản, kết hợp đơn giản và fusion; kiểm tra thêm thiếu nguồn, mâu thuẫn và chuyển người xác minh. Pilot hiện tại có recall request 2/6 và CI chưa xác lập ưu thế, nên chưa đủ cho kết luận về cứu hộ tiếng Việt thực tế. |
+| MC-12 | **Cài đặt và kiểm thử đường tích hợp app–backend–mô hình.** Hiện app gửi `E_i` nhưng adapter lấy `urgency` hoặc từ khóa. Cần chốt ngữ nghĩa, phiên bản và thứ tự ưu tiên của các nguồn rồi kiểm tra tới đầu ra phân cụm/xếp hạng; không đưa xác suất “có yêu cầu hỗ trợ” trực tiếp thành mức khẩn cấp. |
+| MC-13 | **Cài đặt khử bản sao trước khi dựng đồ thị và đánh giá lại.** Giữ ánh xạ từ bản chuẩn về báo cáo gốc; kiểm tra lại quantile/top-K, sai gộp/sai tách và stress multiplicity. Chống gửi trùng HTTP và gom họ bằng chứng ở tầng điểm chưa thay thế việc này. |
+| MC-14 | **Đánh giá phân cụm/xếp hạng trên dữ liệu thật hoặc kịch bản sát thực tế hơn.** Cần nhãn sự kiện và ưu tiên độc lập, có tin thiếu, đến muộn, sai vị trí, bản sao và báo cáo phối hợp; giữ các đối chứng đơn giản và cùng điều kiện đánh giá. |
+| MC-15 | **Làm rõ tám sai lệch thống kê RQ2 còn mở:** khôi phục vector đầy đủ độ chính xác hoặc tái lập có lưu đầy đủ đầu vào, cách xử lý tie và phép kiểm; đối chiếu ba raw p Spearman và năm Holm. Giữ riêng kết quả lịch sử và kết quả tính lại. |
+| MC-16 | **Khôi phục hồ sơ E2E và sửa lỗi gửi lúc mất mạng.** Nếu không khôi phục được raw lịch sử, chạy phiên mới có log, video/ảnh, APK/commit và ID báo cáo. Tái hiện lỗi thoát app/mất phiên, sửa nguyên nhân rồi kiểm thử hồi quy; việc bài được gửi lại sau đó chưa chứng minh lỗi đã hết. |
+| MC-17 | **Kiểm thử mạng yếu trên điện thoại và mạng di động thật.** Đo tỷ lệ giao, độ trễ, mất/nhân đôi dữ liệu, lưu qua đóng/mở app và đồng bộ sau phục hồi; kiểm tra thêm mất ACK và phản hồi đến muộn. Số liệu proxy máy tính hiện có chưa thay thế phép thử này. |
+| MC-18 | **Kiểm thử SMS thật tới gateway/backend.** Phân biệt hệ điều hành nhận lệnh gửi, gateway nhận tin và backend ghi nhận; đo thất bại, độ trễ và khả năng gộp SMS với HTTP cùng báo cáo khi Internet trở lại. |
+| MC-19 | **Bổ sung minh chứng công bố ở cấp bài báo:** bản bài hoặc xác nhận tương ứng, thông tin kỷ yếu gắn đúng bài; bổ sung DOI/số trang khi có căn cứ. Sau đó ghép và đánh số theo BC-03. |
+| MC-20 | **Theo hướng phát triển Hội đồng kiến nghị:** thiết kế và thử chính sách điều phối xét chi phí di chuyển, năng lực đội và thời hạn; so với nearest-first và chính sách hiện có. Làm rõ phần mô phỏng đã có trước khi xác định phần phải cài thêm. |
+| MC-21 | **Trước thí điểm thực địa:** có đơn vị cứu hộ tham gia xây dựng kịch bản, đánh giá tiêu chí ưu tiên và quy trình xác minh; kiểm thử bảo vệ dữ liệu, quyền truy cập và xử lý thông tin người yếu thế. Chỉ kết luận hiệu quả nghiệp vụ trong phạm vi thực sự đã đo. |

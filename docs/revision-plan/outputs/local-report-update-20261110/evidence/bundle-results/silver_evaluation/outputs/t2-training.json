@@ -1,0 +1,156 @@
+{
+  "status": "SIX_CANDIDATES_SELECTED_BEFORE_TEST_PREDICTIONS",
+  "task": "vi_translated_silver_request_v1",
+  "label_origin": "AI_SILVER_TEXT_ONLY",
+  "dataset_sha256": "04f44a9d0af284804dff5052b540a2286b1db666e133cbee7c1d4140c32dc55d",
+  "protocol_sha256": "e9abccbd4e681e6131c2d3a60a9d732580295aa1a4176b2b03dee764ff682ea2",
+  "t2_protocol_sha256": "4e855edc6def7edd5d04769196b5c89c0d941eb9c31af541ecfee0fca0748197",
+  "features_receipt_sha256": "0b79cb550312bb37d57a65c58b5ebcd147d87f545968f5ab9013f958cebfeb5e",
+  "text_encoder": "distilbert/distilbert-base-multilingual-cased",
+  "text_revision": "45c032ab32cc946ad88a166f7cb282f58c753c2e",
+  "text_weights_sha256": "fcf002be901b9ad708e0df430b8d18deaa4b3fe3519e24e9017a5ee17ca2c228",
+  "text_files_sha256": {
+    "config.json": "67ab80c9a476e7c2d189cd03f95d297b04bd1d90e99765323af155ab6308960e",
+    "model.safetensors": "fcf002be901b9ad708e0df430b8d18deaa4b3fe3519e24e9017a5ee17ca2c228",
+    "tokenizer.json": "f4a4d5bf7301717e261fafbe26e1eb967f6ba4cb3ae0ab7a29f4642ec229f386",
+    "tokenizer_config.json": "0f6d13e6f4da6f9e24f22ada6bc3be571123d858d7c0c05a8a7cd55a9c23c2e8",
+    "vocab.txt": "fe0fda7c425b48c516fc8f160d594c8022a0808447475c1a7c6d6479763f310c"
+  },
+  "history_sha256": "2ed151dcfb82f99ca2326eac85ecf76381ffdc4afe016bcd93d2fdfd825e3dbb",
+  "model_selection_sha256": "cd602711aa867e0128e473422c9d2537c34b88453ece776aaad2bbe31792134a",
+  "candidate_models": [
+    {
+      "learning_rate": 1e-05,
+      "seed": 17,
+      "best_epoch": 1,
+      "dev_macro_f1": 0.4368932038834951,
+      "epochs_run": 3,
+      "trainable_parameters": 134735618,
+      "checkpoint": "thucnghiem\\vi_rescue\\models\\t2\\lr-1e-05-seed-17\\best-epoch-1.pt",
+      "checkpoint_sha256": "d52798e20f7307cd362dd3d3d2c58290846a4fa0db04419989076a31d9c86f7a",
+      "elapsed_seconds": 5.2189999999973224
+    },
+    {
+      "learning_rate": 1e-05,
+      "seed": 29,
+      "best_epoch": 1,
+      "dev_macro_f1": 0.47126436781609193,
+      "epochs_run": 3,
+      "trainable_parameters": 134735618,
+      "checkpoint": "thucnghiem\\vi_rescue\\models\\t2\\lr-1e-05-seed-29\\best-epoch-1.pt",
+      "checkpoint_sha256": "b91dbeb162ab1a1fd0b42b582fc24a09ee6bf7299bf2a4db4164e30f378eecf3",
+      "elapsed_seconds": 4.969000000011874
+    },
+    {
+      "learning_rate": 1e-05,
+      "seed": 43,
+      "best_epoch": 1,
+      "dev_macro_f1": 0.4368932038834951,
+      "epochs_run": 3,
+      "trainable_parameters": 134735618,
+      "checkpoint": "thucnghiem\\vi_rescue\\models\\t2\\lr-1e-05-seed-43\\best-epoch-1.pt",
+      "checkpoint_sha256": "0a656aeee75b175d4d60a366043e7a99df8ced3e6ac954b716fa411798323b09",
+      "elapsed_seconds": 4.76600000000326
+    },
+    {
+      "learning_rate": 2e-05,
+      "seed": 17,
+      "best_epoch": 2,
+      "dev_macro_f1": 0.6073500967117988,
+      "epochs_run": 4,
+      "trainable_parameters": 134735618,
+      "checkpoint": "thucnghiem\\vi_rescue\\models\\t2\\lr-2e-05-seed-17\\best-epoch-2.pt",
+      "checkpoint_sha256": "805645a73aeb36912e6a3d3b6b66c78661a9715f8000b1d2799dc973c00ea965",
+      "elapsed_seconds": 6.562999999994645
+    },
+    {
+      "learning_rate": 2e-05,
+      "seed": 29,
+      "best_epoch": 4,
+      "dev_macro_f1": 0.6538252848616386,
+      "epochs_run": 5,
+      "trainable_parameters": 134735618,
+      "checkpoint": "thucnghiem\\vi_rescue\\models\\t2\\lr-2e-05-seed-29\\best-epoch-4.pt",
+      "checkpoint_sha256": "7e32b2d8cbb015d60f19233ddd79a335f0a858b8f9ce0c9144c10e21f3357c7a",
+      "elapsed_seconds": 8.718999999997322
+    },
+    {
+      "learning_rate": 2e-05,
+      "seed": 43,
+      "best_epoch": 2,
+      "dev_macro_f1": 0.6054421768707483,
+      "epochs_run": 4,
+      "trainable_parameters": 134735618,
+      "checkpoint": "thucnghiem\\vi_rescue\\models\\t2\\lr-2e-05-seed-43\\best-epoch-2.pt",
+      "checkpoint_sha256": "d6bc8acfe7ae7a9e7d695561b4d8210ffd5accaa843d8b019d5dcbe9397b6aad",
+      "elapsed_seconds": 6.60899999999674
+    }
+  ],
+  "selected_models": [
+    {
+      "learning_rate": 2e-05,
+      "seed": 17,
+      "best_epoch": 2,
+      "dev_macro_f1": 0.6073500967117988,
+      "epochs_run": 4,
+      "trainable_parameters": 134735618,
+      "checkpoint": "thucnghiem\\vi_rescue\\models\\t2\\lr-2e-05-seed-17\\best-epoch-2.pt",
+      "checkpoint_sha256": "805645a73aeb36912e6a3d3b6b66c78661a9715f8000b1d2799dc973c00ea965",
+      "elapsed_seconds": 6.562999999994645
+    },
+    {
+      "learning_rate": 2e-05,
+      "seed": 29,
+      "best_epoch": 4,
+      "dev_macro_f1": 0.6538252848616386,
+      "epochs_run": 5,
+      "trainable_parameters": 134735618,
+      "checkpoint": "thucnghiem\\vi_rescue\\models\\t2\\lr-2e-05-seed-29\\best-epoch-4.pt",
+      "checkpoint_sha256": "7e32b2d8cbb015d60f19233ddd79a335f0a858b8f9ce0c9144c10e21f3357c7a",
+      "elapsed_seconds": 8.718999999997322
+    },
+    {
+      "learning_rate": 2e-05,
+      "seed": 43,
+      "best_epoch": 2,
+      "dev_macro_f1": 0.6054421768707483,
+      "epochs_run": 4,
+      "trainable_parameters": 134735618,
+      "checkpoint": "thucnghiem\\vi_rescue\\models\\t2\\lr-2e-05-seed-43\\best-epoch-2.pt",
+      "checkpoint_sha256": "d6bc8acfe7ae7a9e7d695561b4d8210ffd5accaa843d8b019d5dcbe9397b6aad",
+      "elapsed_seconds": 6.60899999999674
+    }
+  ],
+  "selected_learning_rate": 2e-05,
+  "learning_rate_mean_dev_macro_f1": {
+    "1e-05": 0.4483502585276941,
+    "2e-05": 0.6222058528147286
+  },
+  "class_weights_from_train": [
+    0.5524691343307495,
+    5.264705657958984
+  ],
+  "class_order": [
+    "no_request",
+    "request"
+  ],
+  "train_n": 179,
+  "dev_n": 58,
+  "physical_batch_size": 4,
+  "effective_batch_size": 16,
+  "gradient_accumulation": "weighted summed CE / effective-batch weight sum",
+  "max_length": 128,
+  "max_epochs": 5,
+  "epochs_run_total": 22,
+  "encoder_fine_tuning": true,
+  "cpu_threads": 4,
+  "torch": "2.13.0+cu130",
+  "device": "cuda",
+  "gpu": "NVIDIA GeForce RTX 5060 Laptop GPU",
+  "elapsed_seconds_training": 39.09399999999732,
+  "source_sha256": {
+    "fine_tune.py": "271fc49c1817ad8132157e649d32660f471147a428b160e8e27da7860239cf52",
+    "common.py": "2ba80e5e94327be923bbc644ac1f5e98e5cdaabd8758313017a6a538635f0ae5"
+  },
+  "limits": "AI-translated silver labels, one known event holdout; not independent native-Vietnamese or operational validation"
+}

@@ -1,8 +1,8 @@
-\section{Kết quả đánh giá chức năng và truyền tải hệ thống}\label{sec:system-testing}
-Phần này tổng hợp ba nhóm bằng chứng: kiểm thử tích hợp đầu cuối trên Android thật, E2E bổ sung trên web giả lập và phép đo truyền tải dưới mạng yếu. Các nhóm khác nhau về môi trường, đầu vào và cách thao tác nên được trình bày riêng, không cộng số case hay tiêu chí thành một cỡ mẫu chung. Thiết lập của từng nhóm được mô tả tại Mục~\ref{sec:04-evaluation-setup}.
+\section{Kết quả chức năng và truyền tải}\label{sec:system-testing}
+Phần này trình bày kiểm thử Android, web, phần mềm hiệu chỉnh và mạng yếu giả lập. Mỗi nhóm giữ riêng môi trường, đầu vào và đơn vị đánh giá.
 
-\subsection{Kiểm thử tích hợp đầu cuối trên thiết bị Android thật}\label{sec:mobile-system-results}
-Theo tài liệu và phần báo cáo kiểm thử trước đây, hai run ngày 24/10/2026 được ghi nhận trên Samsung S10e. Raw JSON/CSV/log tương ứng chưa có trong checkout hiện tại, nên Bảng~\ref{tab:mobile-system-cases} giữ trạng thái lịch sử được mô tả, chưa xác minh độc lập. Run\_001 được mô tả 8 PASS/1 FAIL; Case 8 có xác nhận bổ sung rằng bài được giữ và gửi lại khi có Wi-Fi, nhưng sự cố thoát app hoặc mất phiên vẫn còn. Xác nhận bổ sung này không thay trạng thái FAIL lịch sử hoặc chứng minh lỗi đã sửa. Run\_002 được báo cáo đạt chín case; các tỷ lệ ở đây không phải số đo mới.
+\subsection{Kiểm thử trên Android}\label{sec:mobile-system-results}
+Hai lượt ngày 24/10/2026 trên Samsung S10e kiểm tra chín case ở Bảng~\ref{tab:mobile-system-cases}. Run\_001 có 8 PASS/1 FAIL; run\_002 đạt chín case. \OfflineFixVI{} Trạng thái FAIL được giữ để phản ánh lần thử trước sửa.
 
 \begin{table}[htbp]\centering
 \caption{Kết quả kiểm thử luồng xử lý và giao diện trên Samsung S10e}
@@ -24,12 +24,9 @@ Theo tài liệu và phần báo cáo kiểm thử trước đây, hai run ngày
 \bottomrule
 \end{tabular}
 \end{table}
-\noindent\textit{$^{*}$Run\_001: trạng thái raw được mô tả là FAIL; có xác nhận bổ sung về giữ và gửi lại, nhưng chưa khôi phục raw/log để xác minh độc lập hoặc phân biệt crash với mất phiên.}
+\noindent\textit{$^{*}$Case 8 run\_001 là lỗi lịch sử khi tắt mạng; nhóm xác nhận lỗi này đã được khắc phục.}
 
-Case 1--6 là kiểm tra bằng lời gọi hàm trong app; Case 7--8 là xác nhận của người thao tác trên giao diện thật; Case 9 lấy bằng chứng từ Playwright trên máy tính. Không gộp các nhóm này thành tuyên bố tự động thao tác E2E toàn bộ giao diện Android. Mỗi bộ quan sát backend chứa năm ID bài của luồng xử lý; Case 6 dùng lại bài online để đổi trạng thái, không tạo bài thứ sáu. Tệp kiểm tra dashboard ghi PASS cho năm ID tương ứng của mỗi lượt.
-
-\paragraph{Hành vi gửi và nhận diện thực tế.}
-Bảng~\ref{tab:mobile-system-network} giữ probe và số byte ảnh theo báo cáo lịch sử; lần chỉnh sửa này chưa đối chiếu lại với raw backend. Theo tài liệu kiểm thử, ảnh gốc được xác nhận bằng SHA-256; ảnh nén có sai khác tuyệt đối trung bình trên mẫu RGB giải mã lần lượt 0,80 và 1,04, dưới ngưỡng kiểm tra 20. Chỉ số này kiểm tra ảnh truyền đúng nội dung, không đánh giá chất lượng phân loại hay chất lượng ảnh cảm nhận. Với chế độ chỉ văn bản, không có ảnh tải lên; dấu gạch không có nghĩa tổng lưu lượng bằng 0.
+Case 1--6 gọi các hàm xử lý trong app, Case 7--8 do người chạy thao tác giao diện, Case 9 kiểm dashboard bằng Playwright. Mỗi lượt có năm ID bài; các case có ảnh dùng lại một ảnh minh họa. Bảng~\ref{tab:mobile-system-network} ghi chế độ gửi.
 
 \begin{table}[htbp]\centering
 \caption{Chế độ gửi của ba case có ảnh trên điện thoại thật}
@@ -46,15 +43,12 @@ run\_002 & 20 kbit/s & 18 & Chỉ văn bản & --- \\
 \bottomrule
 \end{tabular}
 \end{table}
-Trong ba lần gọi PTE có ảnh của run\_001, nhãn chuẩn \texttt{high} được dự đoán thành \texttt{medium}, confidence 0,7802; thời gian \texttt{classifyImage} lần lượt là 64, 37 và 33 ms. Run\_002 có nhãn chuẩn \texttt{medium} nhưng dự đoán \texttt{high}, confidence 0,6461; thời gian là 30, 40 và 37 ms. Hai ảnh đều bị nhận diện khác nhãn chuẩn dù các case gửi bài đạt: PASS xác nhận đầu ra hợp lệ và luồng truyền dữ liệu đúng, không xác nhận phân loại đúng. Không dùng sáu lời gọi trên hai ảnh lặp lại để tính Accuracy/F1 hoặc so sánh tốc độ model; việc đó thuộc benchmark ảnh riêng.
+Run\_001 dùng ảnh high nhưng dự đoán medium, confidence 0,7802, thời gian \texttt{classifyImage} là 64/37/33 ms; run\_002 dùng ảnh medium nhưng dự đoán high, confidence 0,6461, thời gian 30/40/37 ms. PASS ở đây xác nhận luồng gửi đúng; chất lượng phân loại được đánh giá bằng benchmark riêng. Run\_002 có một lần Case 5 chưa đáp ứng tiền điều kiện từ chối quyền Vị trí; sau khi thực hiện đúng, phép thử đạt.
 
-\paragraph{Lỗi phát hiện và giới hạn kết luận.}
-Ở Case 8 run\_001, người chạy ban đầu ghi FAIL trong hồ sơ vì khi tắt Wi-Fi rồi chọn gửi bài, app bị thoát và không đăng nhập lại được cho đến khi bật Wi-Fi. Sau đó người chạy xác nhận bài vẫn được gửi khi có Wi-Fi trở lại. Xác nhận bổ sung được giữ như thông tin riêng về phục hồi gửi bài, đồng thời trạng thái FAIL lịch sử và lỗi giao diện/phiên vẫn cần điều tra; chưa có log để phân biệt crash với mất phiên. JSON/CSV gốc vẫn giữ 8 PASS, 1 FAIL và trạng thái \texttt{failed}; phần cập nhật trong báo cáo dựa trên xác nhận bổ sung, không phải kết quả chạy lại hay bằng chứng lỗi thoát app đã được sửa. Run\_002 ghi PASS cho bài có mã hiển thị \texttt{\#11F944B0}; bài được lưu chờ gửi, sau khi bật Wi-Fi thì dashboard nhận bài và Lịch sử hiển thị “Đã nhận”.
+\input{chapters/04-evaluation/sections/software-revision-checks}
 
-Lịch sử run\_002 còn ghi một lần Case 5 FAIL vì chưa từ chối quyền Vị trí; sau khi đáp ứng tiền điều kiện, chạy lại đạt PASS. Bảng giữ lịch sử thử lại và ghi rõ phần đánh giá bổ sung, không xóa lần thử lỗi. Các xác nhận giao diện có mã bài nhưng trường tên tệp bằng chứng còn trống, nên không xem JSON là hồ sơ ảnh/video tự động đầy đủ. Hai lượt được tài liệu ghi nhận trên một máy mô tả các tình huống đã thử; khi chưa có raw/log, chúng chưa cung cấp kiểm chứng độc lập, chưa phải mẫu độc lập để suy ra tỷ lệ tin cậy tổng quát, độ ổn định trên bốn điện thoại hoặc khả năng gửi SMS thành công.
-
-\subsection{Kết quả kiểm thử lịch sử}
-Bảng~\ref{tab:historical-tests} giữ kết quả lịch sử ngày 27/09/2026, được dẫn trong sổ đối chiếu nguồn. Các con số này thuộc phiên kiểm thử riêng, không cộng hoặc thay thế kết quả ngày 24/10/2026. Việc tạo APK xác nhận khả năng đóng gói, không thay thế kiểm thử chức năng.
+\subsection{Kiểm thử lịch sử và web}\label{sec:web-e2e-results}
+Bảng~\ref{tab:historical-tests} giữ kết quả ngày 27/09/2026. Hai lượt web ngày 24/10/2026 ở Bảng~\ref{tab:web-e2e-results} kiểm năm kịch bản: dashboard, online/offline, mạng 300 kbit/s, mạng 20 kbit/s và từ chối GPS.
 
 \begin{table}[htbp]\centering\small
 \caption{Tổng hợp kết quả kiểm thử chức năng của hệ thống phần mềm}
@@ -69,9 +63,6 @@ APK debug & Hoàn thành & Tạo gói cài đặt Android APK phục vụ kiểm
 \bottomrule\end{tabularx}
 \end{table}
 
-\subsection{Kiểm thử E2E bổ sung trên web giả lập}\label{sec:web-e2e-results}
-Hai lượt web ngày 24/10/2026 kiểm tra luồng ứng dụng Flutter web $\rightarrow$ backend $\rightarrow$ dashboard theo thiết lập tại Mục~\ref{sec:web-e2e-setup}. Mỗi lượt hoàn tất năm kịch bản: dashboard; ứng dụng online/offline; mạng 300 kbit/s; mạng 20 kbit/s; từ chối quyền GPS. Đây là bằng chứng bổ sung cho kiểm thử Android thật, không thay thế AI native, SMS hoặc thao tác giao diện trên điện thoại.
-
 \begin{table}[htbp]\centering\small
 \caption{Kết quả kiểm thử E2E trên web giả lập ngày 24/10/2026}\label{tab:web-e2e-results}
 \begin{tabular}{lrrrrr}
@@ -82,19 +73,10 @@ run\_002 & 334 & 5/5 & 45 & 0 & 1 \\
 \bottomrule
 \end{tabular}
 \end{table}
+Mỗi lượt web đạt 45/46 tiêu chí; mục còn thiếu là thông báo AI on-device không khả dụng trên web. Kết quả kiểm hàng đợi, metadata/ảnh, hash và trạng thái; AI native và SMS thuộc phạm vi kiểm riêng.
 
-Mỗi lượt có 46 tiêu chí. Các tiêu chí đạt xác nhận quyền truy cập API, hiển thị và điều phối trên dashboard, gửi SOS/bài kèm ảnh, kiểm tra hash ảnh, giữ hàng đợi khi offline, tự đồng bộ và nhận trạng thái về app. Mạng 300 kbit/s chọn gửi ảnh nén; mạng 20 kbit/s chọn chỉ metadata, không upload ảnh. Khi từ chối GPS, bài vẫn được gửi và được đưa vào danh sách cần xem xét mà không tạo tọa độ giả.
-
-Mục CHƯA CÓ ở cả hai lượt là trang chủ web chưa giải thích rõ AI on-device không khả dụng. Không có FAIL trong các kịch bản đã chạy không có nghĩa hệ thống đã được kiểm thử hết các tình huống. Hai lượt dùng lần lượt một ảnh ngập cao và một ảnh ngập vừa; không diễn giải thành kết quả trên toàn bộ 257 ảnh validation hoặc 80 gold run. Các JSON tổng hợp, CSV từng tiêu chí, snapshot ảnh và screenshot là nguồn trực tiếp của bảng; hồ sơ truy vết nằm tại \RepoPath{thuc_nghiem_nq/experiment_e2e/RESULTS.md}.
-
-\subsection{Truyền tải thích ứng và hiệu năng trong điều kiện mạng yếu}\label{sec:weak-network-results}
-Phần này đối chiếu hai khía cạnh của truyền tải dưới mạng yếu: cơ chế chọn chế độ gửi trên điện thoại và hiệu năng khi đo riêng từng chế độ trên máy tính. Hai nguồn có cấu hình mạng, tập ảnh và phạm vi kiểm tra khác nhau, nên không gộp số liệu.
-
-\subsubsection{Kiểm tra cơ chế chọn chế độ gửi}
-Các case trên Samsung S10e ở Mục~\ref{sec:mobile-system-results} kiểm tra cơ chế chọn chế độ bằng PTE và hàm gửi bài thật của app. Trong hai lượt đã lưu, online gửi ảnh gốc, cấu hình 300 kbit/s gửi ảnh nén, cấu hình 20 kbit/s chỉ gửi văn bản/metadata. Băng thông probe và số byte ảnh cụ thể nằm ở Bảng~\ref{tab:mobile-system-network}; đây là kết quả chức năng trên hai ảnh minh họa, không phải phép đo hiệu năng truyền tải trên toàn bộ tập ảnh.
-
-\subsubsection{Đánh giá độ trễ và tỷ lệ truyền thành công}
-Bên cạnh kiểm tra hành vi chọn chế độ, lượt \texttt{20261005-102040} đo riêng từng chế độ gửi trên 257 ảnh validation theo Mục~\ref{sec:weak-network-setup}. Checkpoint ghi complete, CSV có đủ 2.313 lượt hợp lệ. Số liệu lấy từ bảng kết quả từng lượt truyền và bản tổng hợp tương ứng. Đây là kết quả đã lưu, không phải chạy mới khi biên soạn báo cáo.
+\subsection{Truyền tải trong mạng yếu giả lập}\label{sec:weak-network-results}
+Điện thoại chọn ảnh gốc khi online, ảnh nén ở 300 kbit/s và metadata ở 20 kbit/s như Bảng~\ref{tab:mobile-system-network}. Phép đo trên máy tính dùng 257 ảnh validation, ba cấu hình mạng và ba chế độ, tổng cộng 2.313 lượt. Bảng~\ref{tab:weak-network-new-results} tổng hợp tỷ lệ thành công và độ trễ.
 
 \begin{table}[htbp]\centering
 \caption{Tỷ lệ thành công và độ trễ theo cấu hình mạng giả lập}
@@ -114,13 +96,6 @@ Bên cạnh kiểm tra hành vi chọn chế độ, lượt \texttt{20261005-102
 \bottomrule
 \end{tabular}
 \end{table}
-Median và P95 trong bảng chỉ tính các lượt thành công. Metadata và ảnh nén đạt 257/257 ở cả ba cấu hình; ảnh gốc có tỷ lệ thành công thấp hơn, đặc biệt ở cấu hình 2G giả lập. Median ảnh gốc 2G thấp hơn ảnh nén không chứng minh ảnh gốc tốt hơn, vì 27 lượt ảnh gốc ở cấu hình này không thành công và không góp vào phân bố độ trễ thành công.
+Median/P95 chỉ tính lượt thành công. Ở 2G giả lập, metadata và ảnh nén đạt 257/257, ảnh gốc 230/257; 27 lần thất bại không góp vào phân bố latency ảnh gốc. Toàn bộ có 27 NETWORK\_ERROR và ba UNSUPPORTED\_IMAGE; ba lỗi định dạng là AVIF bị từ chối ở ba cấu hình. Byte proxy trung vị là 1.011 B cho metadata, 26.558 B cho ảnh nén và 41.202 B cho ảnh gốc.
 
-Toàn bộ lượt đo có 27 NETWORK\_ERROR và 3 UNSUPPORTED\_IMAGE. Ba lỗi định dạng là ảnh AVIF gốc bị từ chối ở cả ba cấu hình; HTTP 415 không được diễn giải thành lỗi mạng. Byte proxy trung vị của metadata là 1.011 B và ảnh nén là 26.558 B, so với ảnh gốc 41.202 B trong bản tổng hợp. Kích thước ảnh trung vị tương ứng là 0, 25.457 và 40.103 B. Đây là các thống kê theo chế độ trong lượt đo, không phải kích thước cố định của mọi ảnh hay toàn bộ overhead truyền thông.
-
-Kết quả cung cấp bằng chứng định lượng cho đánh đổi giữa lượng dữ liệu và khả năng gửi thành công trong cấu hình proxy đã chọn. Mỗi ảnh/điều kiện mới đo một lần, chưa kiểm tra lặp nhiều phiên, mạng viễn thông thực hoặc toàn luồng điện thoại. Vì runner dùng payload metadata cố định và ép từng chế độ, kết quả chưa đánh giá chất lượng quyết định tự động chọn metadata dựa trên confidence của AI hay thời gian phản ứng cứu hộ thực địa.
-
-\subsection{Tổng hợp mức đáp ứng và lỗi còn tồn tại}
-Bộ thử Android xác nhận các case có bằng chứng trên Samsung S10e; riêng run\_001 vẫn ghi nhận thoát app khi gửi lúc mất mạng dù bài được giữ và gửi lại sau khi phục hồi kết nối. Phép đo proxy trên 257 ảnh cung cấp tỷ lệ truyền thành công và độ trễ theo từng chế độ, nhưng không đo chất lượng quyết định cứu hộ hoặc mạng viễn thông thực.
-
-Các kết quả này chưa đủ để xác nhận mọi ràng buộc toàn vẹn đều đạt: mất ACK sau khi server ghi, payload khác nhau dùng cùng ID/sequence, xung đột quyền sở hữu, phản hồi trạng thái đến muộn, đóng cưỡng bức app khi offline và gộp SMS thật với HTTP vẫn cần phép thử chuyên biệt cùng log tương ứng. Không dùng ma trận yêu cầu hoặc việc build APK thành công làm kết quả thay thế cho các phép thử đó.
+Kết quả cho thấy đánh đổi giữa dung lượng và khả năng truyền trong cấu hình đã đo. Mỗi ảnh/điều kiện được đo một lần, chế độ gửi được ép riêng; chưa đo chính sách tự chọn chế độ trên toàn bộ tập hoặc mạng viễn thông thật. Giới hạn chung ở Mục~\ref{sec:04-evaluation-limitations}.

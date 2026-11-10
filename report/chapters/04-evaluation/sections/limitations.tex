@@ -1,46 +1,18 @@
 \section{Giới hạn của thực nghiệm}\label{sec:04-evaluation-limitations}
-Các kết quả trong chương này cần được diễn giải trong phạm vi dữ liệu, thiết bị và điều kiện đo đã sử dụng.
+\paragraph{Dữ liệu ảnh và nhãn.}
+Bộ ảnh gồm ảnh nhóm tự chụp và thu thập web; hồ sơ theo từng ID, quyền sử dụng ảnh web, đồng thuận nhãn và checksum split lúc train chưa đầy đủ. Nhóm gần trùng đã ghi nhận không bảo đảm độc lập nguồn/sự kiện. Các nhánh tối ưu dùng lại cùng test; cần tập camera độc lập để xác nhận lựa chọn cuối.
 
-\paragraph{Pilot đa phương thức công khai.}
-Phép bổ sung CrisisMMD ở Mục~\ref{sec:multimodal-pilot} có nhánh đọc câu và fusion đặc trưng được huấn luyện trên common target, nhưng chỉ thử một split theo sự kiện và một seed classifier. Corpus được nguồn mô tả tiếng Anh, chỉ giữ cặp nhãn thống nhất và giới hạn số train/validation; pilot informative này không đánh giá tiếng Việt hoặc ưu tiên cứu hộ. Pilot bản dịch tiếng Việt dùng nhãn AI có phạm vi riêng ở Mục~\ref{sec:vi-silver-pilot}. CI ghép cặp chưa hiệu chỉnh đều chứa 0, không xác lập fusion vượt trội. Recall informative của fusion giảm mạnh khi che nhánh ảnh; chưa xác nhận khả năng chịu thiếu modality, hiệu chuẩn xác suất hoặc chạy Android. Các nhóm gần trùng không đại diện cho nhiều sự kiện test độc lập.
+\paragraph{Văn bản và fusion.}
+Bản dịch tiếng Việt và nhãn AI đã được nhóm kiểm tra, có cách diễn đạt gần tin cứu hộ tiếng Việt. Dữ liệu vẫn có nguồn gốc dẫn xuất từ CrisisMMD; rà soát này chưa cung cấp chỉ số đồng thuận gán nhãn độc lập hoặc kiểm chứng trên nhiều sự kiện thu nhận trực tiếp. Test request chỉ có sáu mẫu dương trong một sự kiện đã được xem trước. CI chưa xác lập ưu thế fusion; trích xuất span, hiệu chuẩn và chính sách thiếu/mâu thuẫn nguồn cần đánh giá riêng.
 
-Thiết kế xác nhận trên tin tiếng Việt gốc ở Mục~\ref{sec:text-design}--\ref{sec:multimodal-design}, cùng ablation ở Mục~\ref{sec:vi-ablation-plan}, vẫn thiếu gold độc lập. Pilot silver đã dịch và gán nhãn AI cho 300 cặp, loại bốn ca không chắc chắn trước fit, giữ 179/58/59 cặp train/validation/test. Nhãn từ văn bản nguồn, không dựa trên ảnh và chưa có nhãn người gán hoặc xác nhận chuyên môn. Vì vậy metric so với nhãn silver chỉ mô tả mức khớp với quyết định AI, không xác nhận nhãn yêu cầu khách quan hoặc gold ghép cặp. Một ảnh đơn lẻ có thể không cung cấp đủ dấu hiệu cho nhãn yêu cầu, còn tin ngắn có thể thiếu thông tin; cần kiểm tra tính quan sát được của nhãn trước khi diễn giải chênh lệch giữa các modality. Bản dịch có thể thay đổi cách diễn đạt hoặc mất thông tin; nguồn được mô tả tiếng Anh nhưng chưa audit ngôn ngữ từng hàng. Chọn mẫu tăng tỷ lệ từ khóa hỗ trợ và giữ một sự kiện Sri Lanka đã được xem trong pilot trước tạo giới hạn chọn mẫu và test quen thuộc. CI trong sự kiện không ước lượng được chuyển miền sang nhiều sự kiện hoặc tin tiếng Việt gốc. Encoder frozen và 18 lần fit head không được gọi là fine-tuning chung hai encoder. Phương án fallback và hàng xác minh vẫn cần đánh giá độ bao phủ, lỗi và khối lượng xử lý của con người.
+\paragraph{Phạm vi mô phỏng.}
+RQ1--RQ3 dùng dữ liệu bán tổng hợp/tổng hợp. Bối cảnh địa lý, nhãn lợi ích và harm phục vụ so sánh có kiểm soát; hiệu quả cứu hộ thực địa chưa được đo. LR năm cờ học nhãn OR tổng hợp, chưa là mô hình nguy kịch được xác nhận chuyên môn. Các heuristic về số người, yếu thế và thời gian cần thống nhất với đơn vị sử dụng.
 
-\paragraph{Dữ liệu mô phỏng.}
-Các phép đánh giá phân cụm, xếp hạng và điều phối dùng dữ liệu tổng hợp hoặc bán tổng hợp. Chúng cho phép đối chiếu các phương pháp trong những tình huống được kiểm soát, nhưng chưa đại diện đầy đủ cho hành vi báo tin, nhu cầu và nguồn lực cứu hộ ngoài thực địa. Các chỉ số lợi ích, tổn thất và trễ hạn trong mô phỏng không được xem là hiệu quả cứu hộ đã quan sát thực tế.
+\paragraph{Thiết bị và mạng.}
+Benchmark gồm 32 cấu hình trên bốn điện thoại, dùng cùng 256 ảnh; chưa có đo lặp kiểm soát nhiệt/tải hoặc pin/RAM. CPU đo predict, ứng dụng đo \texttt{classifyImage}, nên không so speedup trực tiếp giữa hai phạm vi. Phép đo truyền tải dùng proxy, còn SMS và mạng viễn thông thật cần kiểm riêng. \OfflineFixVI{} Các kiểm hồi quy và tích hợp Linux ở Mục~\ref{sec:software-revision-checks} có phạm vi riêng.
 
-\paragraph{Tính đại diện của dữ liệu ảnh.}
-Tập ảnh Dataset\_Flood chưa bao quát mọi điều kiện chụp tại hiện trường, như ánh sáng yếu, mưa lớn, ảnh rung hoặc góc nhìn bị che khuất. Kết quả trên tập test phản ánh chất lượng với bộ dữ liệu đã chia; cần ảnh hiện trường độc lập để đánh giá khả năng áp dụng rộng hơn.
+\paragraph{Ảnh suy giảm và tối ưu mô hình.}
+Biến đổi CPU áp riêng lên ảnh test, chưa bao quát tổ hợp mưa, mờ, tối và góc chụp tại hiện trường; nhãn sau biến đổi chưa được thẩm định lại. Kế hoạch camera/Android tại Mục~\ref{sec:camera-evaluation-plan} và Mục~\ref{sec:camera-session-plan} chưa có kết quả. PTQ/QAT giảm dung lượng nhưng suy giảm chất lượng; chẩn đoán tensor chưa cô lập nguyên nhân. Pruning 5\% mới cũng chưa bảo toàn macro-F1 baseline. Chẩn đoán thêm và đo lặp hiệu năng/pin/RAM nằm ngoài đợt hiệu chỉnh này.
 
-Kịch bản camera/Android ở Mục~\ref{sec:camera-evaluation-plan} và quy trình phiên đo ở Mục~\ref{sec:camera-session-plan} là kế hoạch chưa thực hiện. Các biến đổi CPU riêng lẻ không tái tạo đầy đủ mưa, che khuất, rung và góc nhìn đồng thời; kế thừa nhãn cũng chưa bảo đảm dấu hiệu vẫn quan sát được sau biến đổi. Chưa có số đo chất lượng hoặc độ trễ cho tập camera xác nhận độc lập, chưa có căn cứ điền số hiệu năng hay tác động pin/RAM vào kế hoạch này.
-
-\paragraph{Thiết bị và số lượt đo.}
-Benchmark nhận diện được thực hiện trên bốn mẫu điện thoại, còn tài liệu mô tả hai run luồng xử lý và giao diện trên Samsung S10e nhưng raw/log hiện chưa được khôi phục. Số thiết bị và phiên đo còn giới hạn, chưa đủ để kết luận về mọi dòng Android hoặc độ ổn định dài hạn. Thời gian xử lý đã ghi cũng chưa đại diện cho mọi mức tải, nhiệt độ và tình trạng pin của thiết bị.
-
-\paragraph{Điều kiện mạng.}
-Các phép đo truyền tải định lượng chủ yếu dùng proxy giới hạn băng thông và độ trễ. Tài liệu kiểm thử điện thoại ghi nhận tình huống tắt/bật kết nối thật, chưa xác minh độc lập từ raw hiện có, nhưng chưa bao quát biến động vùng phủ sóng, tắc nghẽn và gián đoạn của mạng viễn thông trong thiên tai. Vì vậy, chỉ phần có raw được kiểm lại mới hỗ trợ xác minh trong phạm vi tương ứng, chưa thay thế đánh giá mạng ngoài thực địa.
-
-\paragraph{Đánh đổi khi lượng tử hóa.}
-Theo Bảng~\ref{tab:fp32_ptq_qat}, PTQ INT8 giảm dung lượng từ 16,04 xuống 4,51 MiB, nhưng Accuracy giảm từ \NewImageAccuracy\% xuống \PTQAccuracy\%. QAT INT8 có dung lượng 4,57 MiB, Accuracy \QATAccuracy\%, macro-F1 \QATMacroFOne\% và \QATCriticalCount{} lỗi nặng, đồng thời có trung vị độ trễ cao hơn FP32 trong cùng phiên đo. Vì vậy, giảm dung lượng chưa đủ để kết luận mô hình đáp ứng yêu cầu triển khai; cần phân tích lỗi phân loại, nhất là lỗi lệch từ hai mức, và kiểm tra lại chất lượng, độ trễ trên thiết bị đích trước khi sử dụng.
-
-Trong ảnh, split và MD5 khớp giảm một nguy cơ rò rỉ do bản trùng được ghi nhận, nhưng chưa chứng minh độc lập nguồn/sự kiện hoàn toàn. Nhiều nhánh tối ưu dùng cùng test; các kết quả là so sánh kỹ thuật đã lưu, chưa có protocol xác nhận độc lập để đánh giá một model được chọn sau khi xem nhiều kết quả. Không nên trình bày nhánh có số tốt nhất như một xác nhận cuối cùng không có lựa chọn hậu nghiệm.
-
-\subsection{Giới hạn giá trị ngoại tại}
-RQ1 là kiểm tra trong cùng generator; RQ2/RQ3 dùng generator tổng hợp riêng. Dữ liệu neo địa lý không biến báo cáo và harm thành quan sát thực địa, và hai bundle không tạo bằng chứng chuyển miền OOD. Ảnh web đã nén có thể khác ảnh camera về góc chụp, ánh sáng, kích thước và chất lượng. Các metric không thể tự ngoại suy sang vùng thiên tai và thiết bị khác.
-
-LR rút gọn dấu hiệu tham chiếu không triển khai toàn bộ IITT. Không có dữ liệu bệnh nhân hoặc nhãn chuyên gia cho gói này; không có cờ được chọn có thể do người dùng không biết hoặc không nhập. Đầu ra phải được giữ như thông tin hỗ trợ xác minh, và báo cáo không phát biểu hiệu quả y khoa từ bảng tổng hợp.
-
-\subsection{Giới hạn tích hợp và phép đo}
-Phép cộng số mắc kẹt/bị thương, đếm nhóm yếu thế và dùng receipt time khi thiếu created time cũng cần xác nhận ngữ nghĩa. Việc lõi khớp công thức không bảo đảm các heuristic đầu vào khớp thực tế.
-
-Các phiên CPU đo predict; benchmark app đo classifyImage và có metric được kiểm tra lại trên 256 ảnh/runtime. Nguồn app seed 42 lịch sử thiếu metadata thiết bị, APK/asset, thời điểm và phiên đo lặp. Bộ mới ở Mục~\ref{sec:phone-benchmark-results} đã có 32 cấu hình trên bốn máy, với metadata thiết bị, thời điểm và hash model/split, nhưng vẫn thiếu hash APK/commit và phép đo lặp có kiểm soát nhiệt độ/tải. Vì vậy, kết quả chưa xác nhận một APK cụ thể hoặc ưu thế hiệu năng trên mọi thiết bị. Không có bộ đo pin, tỷ lệ giao SMS hoặc thực nghiệm người dùng. Phép đo mạng yếu đã có 2.313 lượt trong cấu hình proxy ở Mục~\ref{sec:weak-network-results}, chưa phải mạng viễn thông thực hay phép đo toàn luồng Android. Các test lịch sử đủ mô tả ca đã kiểm tra, chưa bảo đảm mọi tính năng mới trên commit hiện tại đã được chạy lại.
-
-\subsection{Hướng xử lý từ kết quả âm}
-Đối với phân cụm, cần thử canonicalize transport copy trước tạo đồ thị và kiểm tra lại quantile/top-$k$ dưới multiplicity, đồng thời giữ baseline mật độ khớp. Đối với score, cần kiểm tra nguồn củng cố độc lập, chống campaign và xác định mục tiêu phù hợp với chuyên gia. Đối với scheduler, cần đưa chi phí đi lại, năng lực đội và bất định vào thiết kế mục tiêu.
-
-Đối với ảnh, PTQ cần được chọn theo trade-off dung lượng/recall/lỗi nặng thay vì chỉ kích thước; nhánh QAT cần phân tích lỗi trước triển khai. Với phần mềm, ưu tiên thống nhất cách hiểu và xử lý các trường dữ liệu và kiểm thử Android end-to-end. Các hướng này xuất phát từ kết quả đã quan sát, chưa được trình bày như cải thiện đã đạt.
-
-\paragraph{Giới hạn tái lập suy luận.} Hash manifest khớp chứng minh tính toàn vẹn artifact theo manifest, không tự chứng minh mỗi phép kiểm thống kê được tái lập. Ba raw $p$ Spearman và năm giá trị Holm liên quan của RQ2 chưa khớp replay từ bảng metric đã lưu, dù đã kiểm đúng phiên bản thư viện gốc. Vì vậy giữ trạng thái tái lập một phần, không xem các số này là đã được kiểm chứng lại đầy đủ. Kết luận âm về alignment chung không phụ thuộc vào việc chọn số lịch sử hay replay thuận lợi hơn.
-
-
-\paragraph{Phạm vi các phase có điều kiện.} Phép bổ sung tại Mục~\ref{sec:image-quality-cpu-results} đã đánh giá clean và tám biến đổi nhân tạo trên ONNX CPU, giữ nguyên model và 256 ảnh test; chưa chạy PTE hoặc ảnh suy giảm trên Android. CI theo nhóm split không chứng minh độc lập nguồn/sự kiện và chưa hiệu chỉnh đa so sánh. Nhãn kế thừa chưa được chuyên gia thẩm định lại sau biến đổi; chưa có kết quả trên ảnh camera hiện trường độc lập. Đã kiểm lại gói tài nguyên E2E và mở rộng tìm raw qua working tree, ref/lịch sử và Drive; chưa phục hồi được các run Android/Web được nêu. Benchmark ảnh 32 JSON vẫn hợp lệ trong scope riêng, không thay thế E2E hay phiên đo lặp. Các khoảng trống URL/license/IAA, checksum split lúc train và xác nhận chuyên gia vẫn còn.
+\paragraph{Tái lập và hướng phát triển.}
+Ba raw \(p\) Spearman và năm giá trị Holm RQ2 chưa khớp khi tái tính; kết luận chưa xác lập lợi ích alignment chung vẫn giữ. Backend đã khử bản sao exact trước tạo đồ thị, còn báo cáo gần trùng và dữ liệu thực cần đánh giá tiếp. Điều phối xét chi phí di chuyển và thí điểm cùng đơn vị cứu hộ được giữ ở hướng phát triển.

@@ -1,0 +1,108 @@
+{
+  "status": "DEVELOPMENT_REANALYSIS",
+  "n_images": 256,
+  "n_split_groups": 252,
+  "predictions_sha256": "cbec5aa9e87abfc79485bed85f01235b813b32a5321d5c3abc44f98cfaeb46fc",
+  "split_sha256": "f7b52cd25411d4d1df2f7f80745a2cf430819773854345798cf7e093e3bcba45",
+  "bootstrap_draws": 2000,
+  "metrics": {
+    "baseline": {
+      "accuracy": 0.7578125,
+      "macro_f1": 0.7426491791647138,
+      "recall_high": 0.7407407407407407,
+      "critical_errors": 3,
+      "mae_levels": 0.25390625,
+      "confusion_class_order": [
+        "low",
+        "medium",
+        "high",
+        "non_flood"
+      ],
+      "confusion": [
+        [
+          34,
+          14,
+          0,
+          8
+        ],
+        [
+          11,
+          42,
+          6,
+          1
+        ],
+        [
+          2,
+          12,
+          40,
+          0
+        ],
+        [
+          8,
+          0,
+          0,
+          78
+        ]
+      ]
+    },
+    "structured_pruned": {
+      "accuracy": 0.703125,
+      "macro_f1": 0.68140308586574,
+      "recall_high": 0.7592592592592593,
+      "critical_errors": 7,
+      "mae_levels": 0.328125,
+      "confusion_class_order": [
+        "low",
+        "medium",
+        "high",
+        "non_flood"
+      ],
+      "confusion": [
+        [
+          27,
+          13,
+          2,
+          14
+        ],
+        [
+          11,
+          37,
+          11,
+          1
+        ],
+        [
+          1,
+          12,
+          41,
+          0
+        ],
+        [
+          8,
+          2,
+          1,
+          75
+        ]
+      ]
+    }
+  },
+  "pairs": {
+    "baseline -> structured_pruned": {
+      "correct_to_wrong": 33,
+      "wrong_to_correct": 19,
+      "mcnemar_exact_p_unadjusted": 0.07039422106706228,
+      "delta_accuracy": -0.0546875,
+      "delta_macro_f1": -0.06124609329897379,
+      "delta_macro_f1_ci95_unadjusted": [
+        -0.12154501951942272,
+        -0.0017973224646134793
+      ],
+      "mcnemar_holm_p": 0.07039422106706228
+    }
+  },
+  "limits": [
+    "Exact McNemar assumes independent paired units; residual event/source dependence is unresolved",
+    "Bootstrap groups are recorded split groups, not proven independent events",
+    "Macro-F1 intervals unadjusted; Holm family covers all listed McNemar contrasts",
+    "Previously viewed test, no independent confirmation or field-effectiveness claim"
+  ]
+}

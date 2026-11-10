@@ -1,0 +1,441 @@
+diff --git a/report/README.md b/report/README.md
+index d3c90b81..cb0aebcd 100644
+--- a/report/README.md
++++ b/report/README.md
+@@ -1,5 +1,7 @@
+ # Báo cáo tổng kết NCKH sinh viên — bản nội dung sơ bộ
+ 
++**Cập nhật kết quả local (10/11/2026):** đã bổ sung McNemar/CI cho pruning lịch sử và pruning mới; thử mức 5/10/20% với chọn bằng validation; chẩn đoán tensor PTQ/QAT và bảng suy luận CPU mới. T2 CUDA trên cùng dữ liệu silver đạt macro-F1 trung bình 52,29%, recall request 22,22%; lần trước 50,73% được lưu riêng. Bảng B.6, Kết luận và biểu mẫu/bản tin Việt–Anh dùng cùng phạm vi mới; model nguyên mẫu, benchmark điện thoại và RQ1–RQ3 giữ nguyên. [Hồ sơ cập nhật](../docs/revision-plan/outputs/local-report-update-20261110/README.md) có minh chứng gọn và kiểm PDF; [danh sách còn lại](../docs/revision-plan/remaining-comments-20261110.md) phân biệt biên tập, bằng chứng và hướng phát triển. Các số trang và kết quả trong các mốc bên dưới là lịch sử.
++
+ **Rút gọn bố cục (09/11/2026):** bản một mặt/hai mặt còn **191 trang**, giảm **8 trang** so với bản 199 trang trước chỉnh sửa. B.2–B.5 dùng hai khối cột theo seed, chữ 9,5 bp; giữ nguyên đủ 32/32/32/128 bản ghi. Hình 4.4 và 4.10 chuyển về trang dọc cùng luồng nội dung. Đã thu gọn giãn dòng tài liệu tham khảo và cân lại cột bảng đối chiếu phụ lục. Xem [biên bản kiểm tra bố cục](audit/layout-2026-11-09.md).
+ 
+ **Cập nhật thông tin công bố (09/11/2026):** theo thông tin người dùng cung cấp và [trang Springer Part II](https://link.springer.com/book/9789819274079), biểu mẫu Việt–Anh dùng Communications in Computer and Information Science (CCIS), Springer Nature, volume **3253**, năm xuất bản **2026**. Năm được ghi trực tiếp theo yêu cầu người dùng; trang Springer ghi mốc phát hành tháng 12/2026 và năm bản quyền 2027 riêng biệt. DOI và số trang của chapter chưa được bổ sung. Các ghi chú thiếu volume/năm bên dưới là snapshot trước cập nhật này.
+diff --git a/report/appendices/reproducibility.tex b/report/appendices/reproducibility.tex
+index f7a040f0..4af704ab 100644
+--- a/report/appendices/reproducibility.tex
++++ b/report/appendices/reproducibility.tex
+@@ -50,6 +50,11 @@ Nguồn stress chính gồm protocol, manifest, selected configs, checkpoint t
+ 
+ Có 1.400 fit ở full batch. Smoke một run không chứng minh full batch hoàn thành. Nếu chạy lại, giữ kết quả trong thư mục riêng và so sánh với nguồn chính; không gộp với \texttt{rq1\_results\_v2} hoặc chọn bản có kết quả tốt hơn.
+ 
++\section{Minh chứng lần chạy local bổ sung}\label{sec:local-evidence}
++Gói minh chứng gọn nằm tại \RepoPath{docs/revision-plan/outputs/local-report-update-20261110/}. Manifest giữ hash 47 tệp sao chụp từ phiên \texttt{local-20261110-04}; script \RepoPath{report/scripts/export_local_experiments.py} kiểm hash, ID, tính lại 23 cấu hình/seed và các kiểm định McNemar--Holm từ prediction trước khi xuất ba bảng bổ sung. CI bootstrap được nhập từ artifact đã lưu, không chạy lại trong bước dựng báo cáo. Bộ xuất silver lấy nguồn từ bản sao chụp này; receipt T2 trước đó vẫn được giữ để đối chiếu macro-F1 50,73\% với 52,29\% của lần CUDA. Các kết quả frozen silver và public giữ nguyên, không được tính là thêm dữ liệu test độc lập.
++
++Hai checkpoint seed 43 trong thư mục giải nén không khớp receipt; hai entry tương ứng trong ZIP kết quả đã được đọc, kiểm CRC và SHA-256 khớp bản gốc. Hồ sơ \texttt{checkpoint-audit.json} lưu cả hash đang có và hash đúng trong ZIP; không sửa checkpoint hoặc chạy lại model khi biên tập. Các prediction/metric đã được kiểm độc lập, nhưng dùng lại hai checkpoint phải lấy bản khớp hash từ ZIP. Báo cáo không khẳng định đã tái lập toàn bộ huấn luyện trong môi trường ghim ban đầu.
++
+ \section{Tái lập và kiểm chứng kết quả RQ2/RQ3}
+ Nguồn RQ2 chứa summary, alignment, robustness, paired comparisons và sensitivity. Nguồn RQ3 chứa bảng theo điều kiện, bảng theo seed, destination assignments, partition losses và provenance tái phân tích. Bản theo seed là nguồn suy luận chính cho RQ3.
+ 
+diff --git a/report/appendices/supplementary-results.tex b/report/appendices/supplementary-results.tex
+index ece0813b..c0d8fbe0 100644
+--- a/report/appendices/supplementary-results.tex
++++ b/report/appendices/supplementary-results.tex
+@@ -33,11 +33,11 @@ Thuyết minh (mục 15.2) liệt kê các hoạt động nghiên cứu. Bảng~
+ \toprule Nội dung đăng ký & Nội dung đã thực hiện & Thiết kế bổ sung trong báo cáo & Phần chưa đánh giá \\\midrule\endhead
+ Thu thập và xử lý dữ liệu & Dataset\_Flood bốn lớp; CrisisMMD cho informative và pilot silver bản dịch; Generator 3.0 và Candidate 4.1 cho RQ (Mục~\ref{sec:02-data-methods-data}) & Quy trình thu thập, sàng lọc, làm sạch, gán nhãn, chia tập và quản lý phiên bản & Nguồn/giấy phép và độ đồng thuận của ảnh cũ; corpus tin cứu hộ tiếng Việt gốc với gold độc lập \\
+ Phân tích yêu cầu, thiết kế hệ thống & Yêu cầu, kiến trúc, cơ sở dữ liệu và đồng bộ (Chương~\ref{chap:03-system}) & Luồng điểm tách LR, khẩn cấp adapter và đầu ra NLP; xử lý thiếu/mâu thuẫn (Mục~\ref{sec:multimodal-design}) & Nối LR hoặc fusion mới vào lõi và xác nhận ý nghĩa nghiệp vụ \\
+-Mô hình ảnh và tối ưu hóa & MobileNetV3-Large, FP32/PTQ/QAT/cắt tỉa; benchmark CPU và điện thoại (Mục~\ref{sec:image-design}) & Giải thích đánh đổi chất lượng, lỗi nặng, byte và độ trễ; quy trình ảnh camera & Ảnh hiện trường độc lập; độ bền suy giảm trên Android và phép đo pin \\
+-Phân tích văn bản theo phương án DistilBERT & TF-IDF, DistilBERT frozen cộng LR và fine-tuning encoder ba seed trên bản dịch tiếng Việt với nhãn AI (Mục~\ref{sec:vi-silver-pilot}); LR năm cờ là nhánh riêng & Thiết kế xác nhận trên tin cứu hộ tiếng Việt gốc và gold độc lập (Mục~\ref{sec:text-design}) & Corpus gốc, gold chuyên gia và xác nhận nghiệp vụ; fine-tuning trên nhãn AI chưa đóng khoảng trống này \\
++Mô hình ảnh và tối ưu hóa & MobileNetV3-Large; benchmark CPU/điện thoại; bổ sung pruning 5/10/20\%, McNemar và chẩn đoán tensor (Mục~\ref{sec:local-image-update}) & Quy trình camera; xác nhận lại phương án nén theo chất lượng, lỗi nặng, byte và độ trễ & Test độc lập, nhãn chuyên gia; nguyên nhân PTQ/QAT; camera/Android và pin \\
++Phân tích văn bản theo phương án DistilBERT & TF-IDF, DistilBERT frozen và tái chạy fine-tuning CUDA ba seed trên bản dịch/nhãn AI (Mục~\ref{sec:vi-silver-pilot}); LR năm cờ là nhánh riêng & Xác nhận trên tin cứu hộ tiếng Việt gốc và gold độc lập (Mục~\ref{sec:text-design}) & Corpus gốc, gold chuyên gia, nhãn span và xác nhận nghiệp vụ; tích hợp ứng dụng \\
+ Bộ mô hình đa phương thức & Tiếp nhận nhiều trường trong app; fusion informative và silver bản dịch đã chạy ngoại tuyến (Mục~\ref{sec:vi-silver-pilot}) & Fusion xác nhận trên gold tiếng Việt gốc; fallback trong vận hành (Mục~\ref{sec:multimodal-design}) & Gold ghép cặp độc lập, tích hợp app và hiệu chuẩn; request và informative không là urgency \\
+ Phát triển phần mềm & Flutter, backend Python và dashboard; lưu và gửi lại khi có kết nối (Chương~\ref{chap:03-system}) & Quy trình xác minh đầu ra mới trước khi sử dụng & Chưa triển khai NLP/fusion mới trong app; raw E2E được báo cáo chưa khôi phục \\
+-Kiểm thử và ablation & Metric ảnh; ablation informative và silver, mỗi pilot giữ test IDs chung trong nhiệm vụ riêng & Ablation gold tiếng Việt gốc và kịch bản camera/Android (Mục~\ref{sec:02-evaluation-design}) & Gold và phép thử xác nhận tiếng Việt gốc; không ghép Accuracy ảnh với độ khớp OR \\
++Kiểm thử và ablation & Metric ảnh, McNemar/CI pruning; ablation informative và silver với ID test chung, kết quả frozen tái chạy giữ nguyên & Ablation gold tiếng Việt gốc và camera/Android (Mục~\ref{sec:02-evaluation-design}) & Test mới, gold độc lập, thiếu/mâu thuẫn modality và tích hợp; không ghép Accuracy ảnh với fidelity OR \\
+ Thực nghiệm mạng yếu & Proxy trên máy tính và tài liệu kiểm thử ứng dụng (Chương~\ref{chap:04-evaluation}) & Ghi rõ điều kiện phiên đo và phạm vi diễn giải & Mạng viễn thông/SMS thật; raw E2E và phép đo thiết bị lặp có kiểm soát \\
+ Đánh giá thuật toán & RQ1--RQ3 theo từng bộ mô phỏng (Bảng~\ref{tab:method-map}) & Phân tích câu trả lời, đối chứng, cơ chế khả dĩ và giới hạn & Ba raw $p$ Spearman và năm Holm RQ2 chưa khớp; chưa xác nhận cứu hộ thực địa \\
+ \bottomrule
+diff --git a/report/build/bulletin-en/bulletin-en.pdf b/report/build/bulletin-en/bulletin-en.pdf
+index 1ce050a5..e063a11c 100644
+Binary files a/report/build/bulletin-en/bulletin-en.pdf and b/report/build/bulletin-en/bulletin-en.pdf differ
+diff --git a/report/build/bulletin-vi/bulletin-vi.pdf b/report/build/bulletin-vi/bulletin-vi.pdf
+index e2a63c23..942bf066 100644
+Binary files a/report/build/bulletin-vi/bulletin-vi.pdf and b/report/build/bulletin-vi/bulletin-vi.pdf differ
+diff --git a/report/build/content-twoside/content.pdf b/report/build/content-twoside/content.pdf
+index c10d509f..547686e8 100644
+Binary files a/report/build/content-twoside/content.pdf and b/report/build/content-twoside/content.pdf differ
+diff --git a/report/build/content/content.pdf b/report/build/content/content.pdf
+index 80f3c006..7e957f19 100644
+Binary files a/report/build/content/content.pdf and b/report/build/content/content.pdf differ
+diff --git a/report/build/summary-en/summary-en.pdf b/report/build/summary-en/summary-en.pdf
+index 9d613b2f..58a33166 100644
+Binary files a/report/build/summary-en/summary-en.pdf and b/report/build/summary-en/summary-en.pdf differ
+diff --git a/report/build/summary-vi/summary-vi.pdf b/report/build/summary-vi/summary-vi.pdf
+index f1baa6cb..a9efb004 100644
+Binary files a/report/build/summary-vi/summary-vi.pdf and b/report/build/summary-vi/summary-vi.pdf differ
+diff --git a/report/chapters/02-data-methods/sections/evaluation-design.tex b/report/chapters/02-data-methods/sections/evaluation-design.tex
+index d982530c..2398761e 100644
+--- a/report/chapters/02-data-methods/sections/evaluation-design.tex
++++ b/report/chapters/02-data-methods/sections/evaluation-design.tex
+@@ -96,6 +96,8 @@ RQ3 tạo lịch từ cụm dự đoán và điểm ưu tiên, sau đó evaluato
+ ``Cải thiện'' trong bảng ghép cặp được tính theo hướng tốt của từng thước đo. Khi harm thấp hơn là tốt hơn, $\Delta$ bằng harm đối chứng trừ harm candidate; khi tỷ lệ phục vụ cao hơn là tốt hơn, hướng trừ đổi lại. CSV còn giữ cột candidate-minus-comparator, nên cần xem hướng của thước đo trước khi dùng dấu. Chênh lệch tỷ lệ được báo bằng điểm phần trăm để tránh nhầm với phần trăm thay đổi tương đối.
+ 
+ \subsection{Suy luận thống kê}
++Đối với pruning ảnh, McNemar exact dùng số ảnh chuyển đúng$\to$sai và sai$\to$đúng sau khi ghép cùng ID test. Hiệu macro-F1 sau trừ trước có CI percentile từ 2.000 bootstrap draw theo nhóm split; CI chưa hiệu chỉnh, còn Holm giữ đúng họ tương phản của từng artifact. Các nhóm này chưa được xác nhận độc lập theo nguồn/sự kiện. Kiểm định thay đổi đúng/sai và CI macro-F1 xét hai đại lượng khác nhau; không suy tương đương từ $p>0{,}05$. Kết quả được trình bày tại Mục~\ref{sec:local-image-update}.
++
+ Với mỗi seed, hai phương pháp được đánh giá trên cùng dữ liệu để tạo hiệu ghép cặp. Bootstrap lấy mẫu lại theo run hoặc seed thay vì theo từng báo cáo có tương quan. RQ1 dùng 10.000 resample cho so sánh chính; RQ2 và RQ3 dùng 5.000. Kiểm định Wilcoxon và hiệu chỉnh Holm theo các họ giả thuyết đã xuất giúp kiểm soát việc xét nhiều chỉ số và đối chứng.
+ 
+ Trong RQ3, ba điều kiện nguồn lực thuộc cùng một seed được lấy trung bình trước, giữ 40 cặp seed. Bảng cũ có $40\times3=120$ hàng điều kiện chỉ phục vụ chẩn đoán; coi tất cả là mẫu độc lập sẽ sai đơn vị suy luận. Khoảng tin cậy bootstrap chưa hiệu chỉnh và kiểm định Wilcoxon có Holm là hai thủ tục khác nhau, nên một CI không chứa không không tự cho phép bỏ qua kết luận của kiểm định đã hiệu chỉnh.
+diff --git a/report/chapters/02-data-methods/sections/image-design.tex b/report/chapters/02-data-methods/sections/image-design.tex
+index 5230eed0..37380344 100644
+--- a/report/chapters/02-data-methods/sections/image-design.tex
++++ b/report/chapters/02-data-methods/sections/image-design.tex
+@@ -96,10 +96,12 @@ Ba cơ chế này khác nhau và được đánh giá riêng (Hình~\ref{fig:flo
+ x_q=\operatorname{clip}\bigl(\operatorname{round}(x/\delta_q)+z_q\bigr),\qquad
+ \widehat x=\delta_q(x_q-z_q).
+ \end{equation}
+-PTQ xác định các tham số sau huấn luyện từ dữ liệu calibration; QAT mô phỏng tác động lượng tử hóa trong quá trình tinh chỉnh. Cấu hình PTQ dùng lượng tử hóa QDQ với trọng số INT8 theo từng kênh và activation UINT8. Calibration dùng ảnh train phân tầng với seed \QuantizationSeed{} theo cấu hình đã lưu, không dùng test để hiệu chỉnh. QAT là một nhánh riêng, có artifact và validation riêng. Tài liệu ONNX Runtime nêu rằng lượng tử hóa có thể làm giảm chất lượng và cung cấp công cụ so sánh tensor để tìm tầng sai lệch \citep{onnxQuantization}; đây là căn cứ cho kế hoạch phân tích nhánh QAT, chưa phải chẩn đoán nguyên nhân suy giảm đã thực hiện.
++PTQ xác định các tham số sau huấn luyện từ dữ liệu calibration; QAT mô phỏng tác động lượng tử hóa trong quá trình tinh chỉnh. Cấu hình PTQ dùng lượng tử hóa QDQ với trọng số INT8 theo từng kênh và activation UINT8. Calibration dùng ảnh train phân tầng với seed \QuantizationSeed{} theo cấu hình đã lưu, không dùng test để hiệu chỉnh. QAT là một nhánh riêng, có artifact và validation riêng. Tài liệu ONNX Runtime nêu rằng lượng tử hóa có thể làm giảm chất lượng và cung cấp công cụ so sánh tensor để tìm tầng sai lệch \citep{onnxQuantization}; đây là cơ sở cho phép chẩn đoán tensor bổ sung ở Mục~\ref{sec:local-image-update}, chưa phải bằng chứng đã xác định nguyên nhân suy giảm.
+ 
+ Cắt tỉa có cấu trúc thay đổi kênh hoặc nhóm tham số của mạng. Trong artifact hiện tại, phương pháp \texttt{global\_group\_magnitude\_channel} có target ratio 0,01; số tham số trước và sau là 4.207.156 và 4.145.694, với cấu hình lưu trong benchmark seed \PruningSeed{}. Lợi ích được kiểm tra bằng tệp thực, dự đoán và timing cùng runtime: giảm tham số, giảm byte và tăng tốc là ba kết quả riêng. Chương~\ref{chap:04-evaluation} giữ cả trường hợp giảm dung lượng nhưng runtime chậm hơn.
+ 
++Phép bổ sung tại Mục~\ref{sec:local-image-update} thử tỷ lệ mục tiêu 5/10/20\% với cùng split, chọn tỷ lệ bằng macro-F1 validation rồi mới đánh giá cấu hình được chọn trên test. Bảng ứng viên giữ kết quả validation, không dùng test để chọn trong grid mới. Phép này không tạo test độc lập mới hoặc thay model pruning 1\% lịch sử trong nguyên mẫu. Chẩn đoán activation PTQ/QAT cũng đã chạy trên một ảnh validation cố định, nhưng mức ghép tensor còn hạn chế nên chưa cô lập được nguyên nhân giảm chất lượng.
++
+ Lượng tử hóa thay đổi biểu diễn số và đường thực thi toán tử, còn cắt tỉa thay đổi cấu trúc mạng. Vì vậy QAT không đồng nghĩa với cắt tỉa, và một tệp được gọi là INT8 không tự bảo đảm mọi toán tử chạy nhanh hơn FP32 trên mọi runtime. Kích thước tệp còn phụ thuộc kiểu đóng gói và metadata. Khi đánh giá lựa chọn triển khai, cần so trong cùng phiên: Accuracy và macro-F1 để thấy chất lượng chung; recall high cùng số lỗi nặng để thấy kiểu thất bại; dung lượng asset thực để thấy chi phí lưu/truyền; trung vị và P95 để thấy độ trễ. Không ghép độ trễ thấp nhất của các phiên khác nhau vào một thứ hạng chung.
+ 
+ \begin{reportlandscapefigure}
+diff --git a/report/chapters/04-evaluation/sections/limitations.tex b/report/chapters/04-evaluation/sections/limitations.tex
+index eb58e3a1..9979d22c 100644
+--- a/report/chapters/04-evaluation/sections/limitations.tex
++++ b/report/chapters/04-evaluation/sections/limitations.tex
+@@ -38,7 +38,7 @@ Các phiên CPU đo predict; benchmark app đo classifyImage và có metric đư
+ \subsection{Hướng xử lý từ kết quả âm}
+ Đối với phân cụm, cần thử canonicalize transport copy trước tạo đồ thị và kiểm tra lại quantile/top-$k$ dưới multiplicity, đồng thời giữ baseline mật độ khớp. Đối với score, cần kiểm tra nguồn củng cố độc lập, chống campaign và xác định mục tiêu phù hợp với chuyên gia. Đối với scheduler, cần đưa chi phí đi lại, năng lực đội và bất định vào thiết kế mục tiêu.
+ 
+-Đối với ảnh, PTQ cần được chọn theo trade-off dung lượng/recall/lỗi nặng thay vì chỉ kích thước; nhánh QAT cần phân tích lỗi trước triển khai. Với phần mềm, ưu tiên thống nhất cách hiểu và xử lý các trường dữ liệu và kiểm thử Android end-to-end. Các hướng này xuất phát từ kết quả đã quan sát, chưa được trình bày như cải thiện đã đạt.
++Đối với ảnh, thử pruning 5/10/20\% và McNemar đã được bổ sung ở Mục~\ref{sec:local-image-update}; cấu hình 5\% được chọn chưa bảo toàn chất lượng baseline. Chẩn đoán tensor PTQ/QAT chỉ bao phủ một phần trên một ảnh validation, chưa giải thích được nguyên nhân suy giảm hoặc khác biệt QAT giữa hai lần đánh giá. Phương án tiếp theo cần được chọn theo dung lượng, recall, lỗi nặng và độ trễ trên dữ liệu phát triển rồi xác nhận bằng test độc lập. Với phần mềm, còn cần thống nhất ngữ nghĩa trường dữ liệu và kiểm thử Android end-to-end; các kết quả offline mới không thay bằng chứng này.
+ 
+ \paragraph{Giới hạn tái lập suy luận.} Hash manifest khớp chứng minh tính toàn vẹn artifact theo manifest, không tự chứng minh mỗi phép kiểm thống kê được tái lập. Ba raw $p$ Spearman và năm giá trị Holm liên quan của RQ2 chưa khớp replay từ bảng metric đã lưu, dù đã kiểm đúng phiên bản thư viện gốc. Vì vậy giữ trạng thái tái lập một phần, không xem các số này là đã được kiểm chứng lại đầy đủ. Kết luận âm về alignment chung không phụ thuộc vào việc chọn số lịch sử hay replay thuận lợi hơn.
+ 
+diff --git a/report/chapters/04-evaluation/sections/results.tex b/report/chapters/04-evaluation/sections/results.tex
+index 52097df3..a2e1bcf3 100644
+--- a/report/chapters/04-evaluation/sections/results.tex
++++ b/report/chapters/04-evaluation/sections/results.tex
+@@ -124,10 +124,12 @@ Hình~\ref{fig:compression-tradeoffs} đặt dung lượng, accuracy và độ t
+ \begin{figure}[htbp]\centering
+ \setlength{\abovecaptionskip}{4pt}
+ \includegraphics[width=\textwidth]{compression-tradeoffs.pdf}
+-\caption{Đánh đổi dung lượng--accuracy theo summary nén và độ trễ trước/sau cắt tỉa}
++\caption{Đánh đổi dung lượng--accuracy và độ trễ trước/sau cắt tỉa trong benchmark lịch sử}
+ \label{fig:compression-tradeoffs}
+ \end{figure}
+ 
++\input{chapters/04-evaluation/sections/local-image-update}
++
+ \subsection{Ảnh suy giảm nhân tạo: đánh giá ONNX trên CPU}\label{sec:image-quality-cpu-results}
+ Bảng~\ref{tab:image-quality-cpu} trình bày đủ chín điều kiện của phép bổ sung ở Mục~\ref{sec:image-quality-cpu-setup}. Clean parity đạt đồng thuận top-1 100\% với artifact ONNX cắt tỉa lịch sử; sai khác xác suất lớn nhất xấp xỉ $8{,}34\times10^{-7}$, trong ngưỡng kiểm tra đã khóa. Accuracy clean là \QualityCleanAccuracy\%, macro-F1 \QualityCleanMacroFOne\% và recall high \QualityCleanHighRecall\%; đây là model cắt tỉa, khác FP32 gốc ở phần đầu chương.
+ \input{generated/tables/image-quality-cpu}
+diff --git a/report/chapters/04-evaluation/sections/vi-silver-pilot.tex b/report/chapters/04-evaluation/sections/vi-silver-pilot.tex
+index b05ee4c0..0a17d17d 100644
+--- a/report/chapters/04-evaluation/sections/vi-silver-pilot.tex
++++ b/report/chapters/04-evaluation/sections/vi-silver-pilot.tex
+@@ -7,12 +7,12 @@ Giữ Sri Lanka làm test, Maria làm validation, năm sự kiện khác làm tr
+ 
+ \paragraph{Mô hình đã chạy.} TF-IDF thử word unigram/bigram và char 3--5; vocabulary chỉ fit train. Nhánh văn bản frozen dùng DistilBERT đa ngôn ngữ~\citep{sanh2019distilbert,distilbertMultilingualCard}, mean pooling có attention mask và 768 chiều. Nhánh ảnh dùng MobileNetV3-Large ImageNet frozen, 960 chiều, khác encoder Small của pilot informative và khác classifier mức ngập trong ứng dụng. Các nhánh đơn và fusion frozen chuẩn hóa L2; fusion nối hai block rồi chia $\sqrt{2}$, học LR cân bằng lớp với $C\in\{0{,}1;1;10\}$. Có 18 fit head được chọn bằng macro-F1 validation; ngưỡng giữ 0,5. DistilBERT frozen được chọn làm đối chứng chính từ validation trước test, không chọn lại theo kết quả test.
+ 
+-Nhánh riêng fine-tuning DistilBERT cập nhật encoder và đầu hai lớp trên cùng nhãn AI. Protocol bổ sung khóa trước dự đoán test: hai learning rate $10^{-5}$ và $2\times10^{-5}$, ba seed 17/29/43, tối đa năm epoch, patience 2, batch hiệu dụng 16 và dropout 0,2. Chọn learning rate theo trung bình validation của ba seed, giữ cả ba checkpoint tương ứng; không chỉ báo seed có test tốt nhất. Nhánh này không fine-tuning chung encoder ảnh--văn bản và không thay đổi tương phản chính của fusion frozen.
++Nhánh riêng fine-tuning DistilBERT cập nhật encoder và đầu hai lớp trên cùng nhãn AI. Protocol bổ sung khóa trước dự đoán test: hai learning rate $10^{-5}$ và $2\times10^{-5}$, ba seed 17/29/43, tối đa năm epoch, patience 2, batch hiệu dụng 16 và dropout 0,2. Chọn learning rate theo trung bình validation của ba seed, giữ cả ba checkpoint tương ứng; không chỉ báo seed có test tốt nhất. Bảng kết quả dùng lần tái chạy CUDA ngày 10/11/2026 trên RTX 5060 Laptop, chọn $2\times10^{-5}$; kiểm tra một tensor backbone ở mỗi checkpoint xác nhận trọng số thay đổi. Lần thực thi trước trên cùng dữ liệu đạt macro-F1 trung bình \VISilverPreviousFineFOne\% và được giữ riêng trong hồ sơ tái lập, không coi hai lần là hai bộ test độc lập. Nhánh này không fine-tuning chung encoder ảnh--văn bản và không thay đổi tương phản chính của fusion frozen.
+ 
+ Bảng~\ref{tab:vi-silver-pilot} trình bày các kết quả đã chạy trên cùng \VISilverTestN{} ID; recall $(+)$ là recall request. Hàng fine-tuning là trung bình ba seed, không tăng số cặp test độc lập lên ba lần. Hai hàng cuối chỉ che một block của fusion cố định, khác chuyển sang classifier đơn.
+ \input{generated/tables/vi-silver-pilot}
+ 
+-Fusion frozen đạt macro-F1 \VISilverFusionFOne\% và recall request \VISilverFusionRecall\%; nó dự đoán đúng hai trong sáu nhãn request, bỏ sót bốn. Lớp đa số đạt Accuracy 89,83\% nhưng recall request bằng không; vì vậy Accuracy riêng lẻ dễ che lỗi bỏ sót trong test lệch lớp. Fine-tuning DistilBERT đạt macro-F1 trung bình \VISilverFineFOne\%, khoảng min--max giữa seed $[\VISilverFineFOneLow;\VISilverFineFOneHigh]$; đây là biến động huấn luyện trên cùng dữ liệu, không phải CI qua nhiều quần thể.
++Fusion frozen đạt macro-F1 \VISilverFusionFOne\% và recall request \VISilverFusionRecall\%; nó dự đoán đúng hai trong sáu nhãn request, bỏ sót bốn. Lớp đa số đạt Accuracy 89,83\% nhưng recall request bằng không; vì vậy Accuracy riêng lẻ dễ che lỗi bỏ sót trong test lệch lớp. Fine-tuning DistilBERT đạt macro-F1 trung bình \VISilverFineFOne\%, khoảng min--max giữa seed $[\VISilverFineFOneLow;\VISilverFineFOneHigh]$, recall request trung bình \VISilverFineRecall\%; mỗi seed nhận đúng một hoặc hai trong sáu request. Đây là biến động huấn luyện trên cùng dữ liệu, không phải CI qua nhiều quần thể. Điểm T2 thấp hơn fusion frozen trong lần đánh giá này chưa phải một kiểm định chênh lệch giữa hai phương pháp.
+ 
+ Bảng~\ref{tab:vi-silver-effects} dùng 2.000 bootstrap draw ghép cặp theo 59 nhóm test, cùng draw cho mọi cấu hình. Các CI 95\% chưa hiệu chỉnh, có điều kiện trong một sự kiện và đối với nhãn AI; chúng không bao gồm sai số dịch hoặc sai nhãn. Hiệu fusion so với DistilBERT frozen là \VISilverFusionTextDelta{} điểm phần trăm, CI $[\VISilverFusionTextLow;\VISilverFusionTextHigh]$. Các CI đều chứa hoặc chạm 0, chưa xác lập ưu thế fusion. Không áp dụng tương phản này để so trực tiếp lợi ích fine-tuning với fusion có encoder cố định.
+ \input{generated/tables/vi-silver-effects}
+diff --git a/report/chapters/conclusion.tex b/report/chapters/conclusion.tex
+index e13c7b28..abc31308 100644
+--- a/report/chapters/conclusion.tex
++++ b/report/chapters/conclusion.tex
+@@ -1,14 +1,14 @@
+ \addchap{KẾT LUẬN VÀ HƯỚNG PHÁT TRIỂN}\label{chap:conclusion}
+ \addsec{Kết luận}
+-Nguyên mẫu kết nối ứng dụng Flutter có AI tại biên, máy chủ FastAPI phân cụm và bàn điều phối Web GIS. Hai run Android mới có mô tả trong báo cáo, chưa khôi phục raw JSON/CSV và log để xác minh độc lập. Case 8 run\_001 vẫn ghi 8 PASS/1 FAIL; giữ bài và gửi lại không xóa lỗi thoát app hoặc mất phiên. Benchmark ảnh có 32 JSON riêng, không thay bằng chứng E2E hoặc vận hành viễn thông thực địa.
++Nguyên mẫu kết nối ứng dụng Flutter có AI tại biên, máy chủ FastAPI phân cụm và bàn điều phối Web GIS. Hai lượt kiểm thử Android lịch sử có mô tả nhưng chưa khôi phục raw JSON/CSV và log. Case 8 run\_001 vẫn ghi 8 PASS/1 FAIL; gửi lại thành công không xóa lỗi thoát app hoặc mất phiên. Benchmark ảnh có 32 JSON riêng, không thay bằng chứng E2E hoặc vận hành viễn thông thực địa.
+ 
+-Đối với mô hình thị giác máy tính, kiến trúc MobileNetV3-Large đạt độ chính xác (Accuracy) \NewImageAccuracy\% và macro-F1 \NewImageMacroFOne\% trên tập test gồm \ImageTest{} ảnh của bộ dữ liệu đã chia; tính độc lập hoàn toàn theo nguồn và sự kiện chưa được xác nhận. Mô hình được xuất sang định dạng ONNX và PTE để thực thi lần lượt bằng ONNX Runtime và ExecuTorch; các phép đối chiếu trên CPU ghi nhận đồng thuận top-1 với mô hình PTH lần lượt là \CpuOnnxAgreement\% và \CpuPteAgreement\% trên cùng tập test. Lượng tử hóa giảm dung lượng từ 16,04 MiB (FP32) xuống 4,51 MiB (PTQ) và 4,57 MiB (QAT), nhưng Accuracy giảm tương ứng từ \NewImageAccuracy\% xuống \PTQAccuracy\% và \QATAccuracy\%; QAT có macro-F1 \QATMacroFOne\% (Bảng~\ref{tab:fp32_ptq_qat}). Kết quả cho thấy lợi ích về dung lượng đi kèm suy giảm chất lượng; cần đánh giá lỗi phân loại và hiệu năng trên thiết bị đích trước khi lựa chọn phương án triển khai.
++MobileNetV3-Large baseline đạt Accuracy \NewImageAccuracy\%, macro-F1 \NewImageMacroFOne\% trên \ImageTest{} ảnh test; tính độc lập nguồn/sự kiện chưa được xác nhận. McNemar bổ sung chưa xác lập cải thiện của pruning lịch sử ($p$ exact 0,1173). Thử pruning 5/10/20\% chọn mức 5\% bằng validation, giảm 8,70\% tham số nhưng macro-F1 test còn \LocalPrunedFOne\%, lỗi nặng tăng 3$\to$7. PTQ giảm dung lượng nhưng chất lượng suy giảm; chẩn đoán tensor PTQ/QAT còn hạn chế, chưa cô lập nguyên nhân. Các kết quả mới được giữ riêng với model nguyên mẫu và benchmark điện thoại (Mục~\ref{sec:local-image-update}).
+ 
+ Logistic Regression tái hiện nhãn OR trên bảng 32 trạng thái của năm cờ, không phải NLP hoặc kết quả xác nhận lâm sàng. App tính, gửi điểm LR và backend lưu payload, nhưng adapter hiện chỉ dùng urgency hoặc từ khóa mô tả cho đầu vào khẩn cấp của lõi; chưa chứng minh LR tham gia xếp hạng. Riêng việc tiếp nhận nhiều trường và kết hợp bằng công thức trong ứng dụng chưa phải học fusion; các pilot học fusion ngoại tuyến có phạm vi riêng. Các cam kết NLP và bộ mô hình đa phương thức trong thuyết minh còn chưa được chứng minh hoàn thành.
+ 
+ Pilot informative CrisisMMD đã huấn luyện TF-IDF, ảnh frozen và fusion trên \MMTestN{} cặp test của một sự kiện. Macro-F1 text, ảnh và fusion lần lượt là \MMTextFOne\%, \MMImageFOne\% và \MMFusionFOne\%; các CI hiệu chứa 0, chưa xác lập ưu thế. Kết quả trên corpus nguồn mô tả tiếng Anh không xác nhận NLP tiếng Việt, ưu tiên cứu hộ hoặc triển khai trên thiết bị; nhãn informative không được đưa vào trường khẩn cấp của backend.
+ 
+-Pilot silver ở Mục~\ref{sec:vi-silver-pilot} đã chạy 18 fit head và sáu phiên fine-tuning trên 179/58/59 cặp train/validation/test dịch từ CrisisMMD. Fusion frozen đạt macro-F1 \VISilverFusionFOne\%, recall request \VISilverFusionRecall\%; fine-tuning văn bản đạt macro-F1 trung bình \VISilverFineFOne\% qua ba seed chọn bằng validation. Nhãn AI từ câu nguồn và sự kiện test đã được xem trước giới hạn đây là bằng chứng phát triển trên dữ liệu dịch. Corpus tiếng Việt gốc, gold độc lập, trích xuất và camera/Android vẫn cần đánh giá riêng.
++Pilot silver ở Mục~\ref{sec:vi-silver-pilot} dùng 179 cặp train, 58 validation và 59 test từ bản dịch CrisisMMD. Fusion frozen đạt macro-F1 \VISilverFusionFOne\%, recall request \VISilverFusionRecall\%; lần fine-tuning CUDA đạt macro-F1 trung bình \VISilverFineFOne\%, recall request \VISilverFineRecall\% qua ba seed chọn bằng validation. Nhãn AI và test đã xem trước giới hạn đây là bằng chứng phát triển; corpus tiếng Việt gốc, gold độc lập, trích xuất và tích hợp ứng dụng vẫn cần đánh giá riêng.
+ 
+ Về giải thuật, RQ1 chưa xác lập ưu thế chung của Product so với Additive độc lập: ARI lần lượt 0,9072 và 0,9191, $p_{\mathrm{Holm}}=0{,}2560$; bản sao năm lần làm chất lượng phân cụm suy giảm mạnh. RQ2 hỗ trợ bất biến exact ở grouping cố định nhưng chưa xác lập lợi ích alignment chung: NDCG@5 revised là 0,6669 so với random 0,6763; phối hợp confidence cao vẫn gây sai lệch ưu tiên. Ba raw $p$ Spearman và năm Holm liên quan còn chưa khớp replay, được giữ là tám trường chưa giải quyết về tái lập. RQ3 dùng 40 seed sau trung bình ba điều kiện nguồn lực; revised kém nearest-first về harm và trễ hạn mô phỏng, chưa xác lập lợi ích chung so với legacy. Các kết quả này không chứng minh hiệu quả cứu hộ thực địa.
+ 
+diff --git a/report/deliverables/content/bulletin-en.tex b/report/deliverables/content/bulletin-en.tex
+index 7b32d7c4..a4d1a7c8 100644
+--- a/report/deliverables/content/bulletin-en.tex
++++ b/report/deliverables/content/bulletin-en.tex
+@@ -16,7 +16,7 @@
+ 
+ \FormLine{Project activities: Image AI, structured urgency, persistent queues, adaptive sending, synchronization and dashboard. A translated-Vietnamese/AI-silver pilot runs NLP and offline fusion; native data, information extraction and camera/Android evaluation remain open.}
+ 
+-\FormLine{Research results: The original seed-1024 model achieves \NewImageAccuracy\% accuracy and \NewImageMacroFOne\% macro-F1 on 256 CPU test images, with three critical errors. Quantization reduces size and accuracy. Phone benchmarks cover 32 configurations on four devices. The app, backend and dashboard were developed; five-flag LR is not free-text NLP and its score is not used by the ranking adapter. An English CrisisMMD fusion pilot reaches \MMFusionFOne\% macro-F1; effect CIs include zero. A translated-Vietnamese/AI-silver pilot reaches \VISilverFusionFOne\% frozen-fusion macro-F1 and \VISilverFusionRecall\% request recall; independent human gold and application fusion remain open.}
++\FormLine{Research results: The baseline reaches \NewImageAccuracy\% accuracy and \NewImageMacroFOne\% macro-F1 on 256 images, with three critical errors; phone benchmarks cover 32 configurations on four devices. McNemar does not establish historical pruning gains; a 5/10/20\% grid does not preserve quality. PTQ/QAT diagnostics remain partial. The app, backend and dashboard exist; the ranking adapter does not use LR scores. English CrisisMMD fusion reaches \MMFusionFOne\% macro-F1 with effect CIs including zero. On AI-translated/AI-silver text, fusion reaches \VISilverFusionFOne\% macro-F1 and \VISilverFusionRecall\% request recall; CUDA T2 averages \VISilverFineFOne\% macro-F1. Independent gold and application fusion remain open.}
+ 
+ \FormLine{Research new finding: RQ1 does not establish Product superiority; RQ2 does not establish general alignment gains and retains three raw Spearman and five Holm replay differences. RQ3 favors nearest-first over revised priority on simulated harm and deadline misses. Field rescue benefits remain unmeasured.}
+ 
+diff --git a/report/deliverables/content/bulletin-vi.tex b/report/deliverables/content/bulletin-vi.tex
+index 318e9e38..e1dc2c83 100644
+--- a/report/deliverables/content/bulletin-vi.tex
++++ b/report/deliverables/content/bulletin-vi.tex
+@@ -16,7 +16,7 @@
+ 
+ \FormLine{Nội dung nghiên cứu: Xây dựng và tối ưu mô hình nhận diện ảnh cứu hộ trên thiết bị di động; thu thập thông tin về vị trí và mức độ khẩn cấp; phát triển cơ chế lưu trữ, gửi lại và đồng bộ dữ liệu khi kết nối mạng không ổn định. Nghiên cứu phân cụm, ưu tiên và bản đồ. Pilot văn bản dịch tiếng Việt/nhãn AI đã chạy NLP và fusion offline; corpus bản địa, trích xuất thông tin và camera/Android chưa được xác nhận.}
+ 
+-\FormLine{Kết quả đạt được: Mô hình gốc seed 1024 đạt Accuracy \NewImageAccuracy\%, macro-F1 \NewImageMacroFOne\% trên 256 ảnh CPU, có 3 lỗi nặng. Lượng tử hóa giảm dung lượng và độ chính xác; có 32 phiên benchmark ảnh trên bốn điện thoại. LR năm cờ không phải NLP; adapter chưa dùng điểm LR. Đã có ứng dụng, backend và dashboard. Pilot CrisisMMD tiếng Anh đạt macro-F1 fusion \MMFusionFOne\%, nhưng CI hiệu còn chứa 0; Pilot tiếng Việt dịch/nhãn AI đạt macro-F1 fusion frozen \VISilverFusionFOne\%, recall request \VISilverFusionRecall\%; chưa có gold người độc lập hoặc fusion trong app.}
++\FormLine{Kết quả đạt được: Baseline đạt Accuracy \NewImageAccuracy\%, macro-F1 \NewImageMacroFOne\% trên 256 ảnh, có 3 lỗi nặng; có benchmark 32 cấu hình trên bốn điện thoại. McNemar chưa xác lập cải thiện pruning lịch sử; thử 5/10/20\% chưa bảo toàn chất lượng. Chẩn đoán PTQ/QAT còn một phần. Đã có app, backend, dashboard; adapter chưa dùng điểm LR. Fusion CrisisMMD đạt \MMFusionFOne\% macro-F1, CI hiệu chứa 0. Trên bản dịch/nhãn AI, fusion đạt \VISilverFusionFOne\%, recall request \VISilverFusionRecall\%; T2 CUDA đạt trung bình \VISilverFineFOne\% macro-F1. Chưa có gold độc lập hoặc fusion trong app.}
+ 
+ \FormLine{Ý nghĩa: RQ1 chưa xác lập Product hơn Additive; RQ2 chưa xác lập lợi ích alignment chung; RQ3 cho revised kém nearest-first về harm và trễ hạn mô phỏng. Ba raw p Spearman và năm Holm RQ2 chưa khớp replay. Chưa đo hiệu quả cứu hộ thực địa.}
+ 
+diff --git a/report/frontmatter/abbreviations.tex b/report/frontmatter/abbreviations.tex
+index 324a8dd1..cad6d3c2 100644
+--- a/report/frontmatter/abbreviations.tex
++++ b/report/frontmatter/abbreviations.tex
+@@ -8,6 +8,7 @@ ARI & Adjusted Rand Index -- chỉ số Rand hiệu chỉnh \\
+ CI & Confidence Interval -- khoảng tin cậy \\
+ CPU & Central Processing Unit -- bộ xử lý trung tâm \\
+ CSDL & Cơ sở dữ liệu \\
++CUDA & Compute Unified Device Architecture -- nền tảng tính toán song song của NVIDIA \\
+ DBSCAN & Density-Based Spatial Clustering of Applications with Noise \\
+ DTN & Delay-Tolerant Networking -- mạng chịu trễ/gián đoạn \\
+ E2E & End-to-End -- kiểm thử từ đầu tới cuối \\
+@@ -15,12 +16,14 @@ ECE & Expected Calibration Error -- sai số hiệu chuẩn kỳ vọng \\
+ EXIF & Exchangeable Image File Format -- metadata của ảnh \\
+ FP32 & Floating Point 32-bit -- số thực dấu phẩy động 32 bit \\
+ GPS & Global Positioning System -- hệ thống định vị toàn cầu \\
++GPU & Graphics Processing Unit -- bộ xử lý đồ họa \\
+ HTTP & Hypertext Transfer Protocol -- giao thức truyền siêu văn bản \\
+ IITT & Interagency Integrated Triage Tool \\
+ INT8 & Integer 8-bit -- biểu diễn số nguyên 8 bit \\
+ JCS & JSON Canonicalization Scheme -- chuẩn tắc hóa JSON \\
+ JSON & JavaScript Object Notation -- định dạng dữ liệu có cấu trúc \\
+ LR & Logistic Regression -- hồi quy logistic \\
++MAE & Mean Absolute Error -- sai số tuyệt đối trung bình \\
+ MiB & Mebibyte -- $2^{20}$ byte \\
+ NCHW & Batch, Channel, Height, Width -- bố trí tensor ảnh \\
+ NDCG & Normalized Discounted Cumulative Gain -- chỉ số phù hợp xếp hạng \\
+diff --git a/report/frontmatter/research-body-en.tex b/report/frontmatter/research-body-en.tex
+index a67071fc..193ba15e 100644
+--- a/report/frontmatter/research-body-en.tex
++++ b/report/frontmatter/research-body-en.tex
+@@ -16,13 +16,13 @@ Instead of relying entirely on centralized server processing, the proposed syste
+ Furthermore, the integration of location, time and rescue information for identifying and grouping related events is intended to reduce duplicate reports and support visualization of rescue situations on a digital map.
+ 
+ \FormSection{4. Research results:}
+-For image classification, the model was evaluated on a test set of 256 images. Using seed 1024, the model achieved \NewImageAccuracy\% accuracy and \NewImageMacroFOne\% macro-F1, with three critical errors. The structured pruning experiment achieved \PruningAccuracy\% accuracy, with \PruningCriticalCount{} critical errors.
++On 256 test images, the seed-1024 baseline achieved \NewImageAccuracy\% accuracy and \NewImageMacroFOne\% macro-F1 with three critical errors. Historical pruning reached \PruningAccuracy\% accuracy with \PruningCriticalCount{} critical errors; exact McNemar $p=0.1173$ did not establish improvement. An additional 5/10/20\% pruning grid selected 5\% using validation, but test macro-F1 fell to \LocalPrunedFOne\%. Partial PTQ/QAT tensor diagnostics have not isolated the cause of degradation.
+ 
+ Additional ONNX CPU screening of the pruned model used the same 256 images and eight synthetic corruptions. Macro-F1 decreased from \QualityCleanMacroFOne\% on clean images to \QualityDarkMacroFOne\% at 0.4 brightness. This does not establish robustness on Android or field camera images; inherited corruption labels have not been re-adjudicated.
+ 
+ The app sends image labels and the LR score for storage; the adapter uses urgency or description keywords for clustering/ranking. Five-flag LR fitted to synthetic OR labels is not free-text NLP. The English CrisisMMD informativeness pilot reaches text/fusion macro-F1 of \MMTextFOne\%/\MMFusionFOne\%; effect CIs include zero.
+ 
+-A separate pilot uses AI-translated Vietnamese text and AI labels: \VISilverTrainN{} training, \VISilverDevN{} development and \VISilverTestN{} test pairs. Text classifiers, DistilBERT fine-tuning and frozen feature fusion were run offline; frozen fusion reaches \VISilverFusionFOne\% macro-F1 and \VISilverFusionRecall\% request recall. Labels derive from source text, not independent human gold. Native-Vietnamese evaluation and application fusion remain unfulfilled; information extraction and camera/Android evaluation remain proposed.
++A separate AI-translated Vietnamese/AI-silver pilot uses \VISilverTrainN{} training, \VISilverDevN{} development and \VISilverTestN{} test pairs. Frozen fusion reaches \VISilverFusionFOne\% macro-F1 and \VISilverFusionRecall\% request recall. A CUDA DistilBERT fine-tuning replay averages \VISilverFineFOne\% macro-F1 and \VISilverFineRecall\% request recall across three seeds on the same test set. Native-Vietnamese data, independent human gold, information extraction and application fusion remain unvalidated.
+ 
+ In weak-network simulations with bandwidth of 50 kbit/s and a round-trip time of 600 ms, both metadata-only and compressed-image modes succeeded in 257/257 attempts (100\%), compared with 230/257 (89.49\%) for original images. The two modes transmitting less data achieved higher transmission success rates than original images under the tested conditions. Each mode was measured separately on a computer; transmission over real mobile networks requires further validation.
+ 
+diff --git a/report/frontmatter/research-body-vi.tex b/report/frontmatter/research-body-vi.tex
+index 86e85416..f2a4ba57 100644
+--- a/report/frontmatter/research-body-vi.tex
++++ b/report/frontmatter/research-body-vi.tex
+@@ -13,11 +13,11 @@ Xây dựng hệ thống trí tuệ nhân tạo (AI) trên điện thoại để
+ Đề tài kết hợp suy luận ảnh tại biên, truyền dữ liệu theo kết nối và gom nhóm báo cáo từ vị trí, thời gian, nội dung để hỗ trợ xác minh trên bản đồ. Thiết kế mở rộng xử lý ngôn ngữ tự nhiên (NLP) và fusion tiếng Việt được trình bày riêng với phần đã thực hiện.
+ 
+ \FormSection{4. Kết quả nghiên cứu:}
+-Trên 256 ảnh test, model seed 1024 đạt Accuracy \NewImageAccuracy\%, macro-F1 \NewImageMacroFOne\% và 3 lỗi nặng; cắt tỉa đạt Accuracy \PruningAccuracy\% với \PruningCriticalCount{} lỗi nặng. Trên ONNX CPU của model cắt tỉa với cùng 256 ảnh và tám biến đổi nhân tạo, macro-F1 clean đạt \QualityCleanMacroFOne\%, giảm còn \QualityDarkMacroFOne\% khi nhân độ sáng 0,4. Chưa xác nhận độ bền Android/ảnh camera; nhãn sau biến đổi chưa được thẩm định lại.
++Trên 256 ảnh test, baseline seed 1024 đạt Accuracy \NewImageAccuracy\%, macro-F1 \NewImageMacroFOne\% và 3 lỗi nặng. Pruning lịch sử đạt Accuracy \PruningAccuracy\%, có \PruningCriticalCount{} lỗi nặng; McNemar exact $p=0{,}1173$, chưa xác lập cải thiện. Thử thêm 5/10/20\% chọn mức 5\% bằng validation nhưng macro-F1 test còn \LocalPrunedFOne\%; chẩn đoán tensor PTQ/QAT chưa cô lập nguyên nhân suy giảm. Trên ONNX CPU của model pruning lịch sử, macro-F1 clean \QualityCleanMacroFOne\% giảm còn \QualityDarkMacroFOne\% khi nhân độ sáng 0,4; chưa xác nhận Android/camera hoặc nhãn sau biến đổi.
+ 
+ App tính LR từ năm cờ với nhãn OR rồi gửi và lưu điểm; adapter chưa dùng LR cho phân cụm/xếp hạng mà lấy urgency hoặc từ khóa. LR không phải NLP tiếng Việt. Pilot CrisisMMD informative tiếng Anh đạt macro-F1 text \MMTextFOne\%, fusion \MMFusionFOne\%; các CI hiệu chứa 0.
+ 
+-Pilot bổ sung dùng văn bản dịch tiếng Việt và nhãn AI, gồm \VISilverTrainN/\VISilverDevN/\VISilverTestN{} cặp train/validation/test. Đã huấn luyện classifier văn bản, fine-tuning DistilBERT và fusion offline; macro-F1 fusion frozen là \VISilverFusionFOne\%, recall request \VISilverFusionRecall\%. Nhãn dựa câu nguồn, không phải gold người độc lập; corpus bản địa và fusion trong app chưa được xác nhận. Trích xuất thông tin và đánh giá camera/Android vẫn là kế hoạch.
++Pilot bản dịch tiếng Việt/nhãn AI gồm \VISilverTrainN/\VISilverDevN/\VISilverTestN{} cặp train/validation/test. Fusion frozen đạt macro-F1 \VISilverFusionFOne\%, recall request \VISilverFusionRecall\%; fine-tuning DistilBERT tái chạy CUDA đạt trung bình \VISilverFineFOne\% và recall \VISilverFineRecall\% qua ba seed trên cùng test. Corpus bản địa, gold người độc lập, trích xuất và fusion trong app chưa được xác nhận.
+ 
+ Trong mạng yếu giả lập trên máy tính (50 kbit/s, độ trễ khứ hồi 600 ms), metadata và ảnh nén đều thành công 257/257 lượt, ảnh gốc 230/257 (89,49\%); các chế độ được đo riêng, chưa xác nhận mạng di động thực.
+ 
+diff --git a/report/generated/provenance.json b/report/generated/provenance.json
+index 0eae3ffd..6da0a0c4 100644
+--- a/report/generated/provenance.json
++++ b/report/generated/provenance.json
+@@ -1,5 +1,5 @@
+ {
+-  "source_commit": "c404cee1b4b91d6d2c1b125a7df995b80844b8f2",
++  "source_commit": "5b4816a0c4cc15db3af2615b5b273b2174234ac5",
+   "sources_sha256": {
+     "report/config/benchmark-sources.json": "34633e08d84f6c904c9635602fc9f67810014b586f34eb221f7c148fec6424a7",
+     "products/fe/model/Edge Ai/split_train_val_test_mobilenetv3_large.csv": "f7b52cd25411d4d1df2f7f80745a2cf430819773854345798cf7e093e3bcba45",
+diff --git a/report/generated/tables/vi-silver-pilot.tex b/report/generated/tables/vi-silver-pilot.tex
+index 34bb1bac..a758d9ad 100644
+--- a/report/generated/tables/vi-silver-pilot.tex
++++ b/report/generated/tables/vi-silver-pilot.tex
+@@ -6,7 +6,7 @@ Cấu hình & Macro-F1 (\%) & Acc. (\%) & Recall (+) (\%) \\ \midrule
+ Lớp đa số & 47,32 & 89,83 & 0,00 \\
+ TF-IDF + LR & 45,87 & 84,75 & 0,00 \\
+ DistilBERT frozen + LR & 44,13 & 66,10 & 16,67 \\
+-DistilBERT fine-tuning (TB 3 seed) & 50,73 & 78,53 & 16,67 \\
++DistilBERT fine-tuning CUDA (TB 3 seed) & 52,29 & 78,53 & 22,22 \\
+ Ảnh frozen + LR & 54,89 & 84,75 & 16,67 \\
+ TF-IDF + ảnh & 46,36 & 86,44 & 0,00 \\
+ DistilBERT frozen + ảnh & 64,91 & 88,14 & 33,33 \\
+diff --git a/report/generated/values.tex b/report/generated/values.tex
+index 6ca9bc0e..ae007382 100644
+--- a/report/generated/values.tex
++++ b/report/generated/values.tex
+@@ -54,3 +54,4 @@
+ \input{generated/image-quality-values}
+ \input{generated/multimodal-values}
+ \input{generated/vi-silver-values}
++\input{generated/local-experiment-values}
+diff --git a/report/generated/vi-silver-provenance.json b/report/generated/vi-silver-provenance.json
+index efe5ab37..bcb01e95 100644
+--- a/report/generated/vi-silver-provenance.json
++++ b/report/generated/vi-silver-provenance.json
+@@ -1,18 +1,21 @@
+ {
+-  "docs/revision-plan/outputs/vi-nlp-fusion-silver-20261108/verification.json": "c4c589d13817cd222e5f97e106e67f59073e9ef31199ff2f5cef9d896ee52d89",
+-  "docs/revision-plan/outputs/vi-nlp-fusion-silver-20261108/evaluation.json": "72fd4659edfa8165b8067276b6afcb5c3fa60014368fdc1f4f370f1762643e73",
+-  "docs/revision-plan/outputs/vi-nlp-fusion-silver-20261108/predictions.csv": "9516f4af95fadf55f05ea34e055917082b486d4905503e59af48a23ebd409a97",
+-  "docs/revision-plan/outputs/vi-nlp-fusion-silver-20261108/metrics.csv": "f76c49c80960e6e5c2008796dcc5eb9ded51637ce90c17129c5c643ca3a7c406",
+-  "docs/revision-plan/outputs/vi-nlp-fusion-silver-20261108/paired-effects.csv": "632bdbea729a8295c86770cb33612e39f862db9226462e045d4e767aaba4fe41",
+-  "docs/revision-plan/outputs/vi-nlp-fusion-silver-20261108/dataset-lock.json": "d459009652b5c6a65d42db0128d0cd6f5b21933342ebcadd4809de115005100d",
+-  "docs/revision-plan/outputs/vi-nlp-fusion-silver-20261108/features.json": "800cadedd8e03a3fab5c5e36495db2ba247321f39e2a5f3cd0740181e8772167",
+-  "docs/revision-plan/outputs/vi-nlp-fusion-silver-20261108/training.json": "599ac01ddd001fe99369a9d2e364dfb7591744c0beb19bd0d9ef545e26b46f1a",
+-  "docs/revision-plan/outputs/vi-nlp-fusion-silver-20261108/protocol.json": "e9abccbd4e681e6131c2d3a60a9d732580295aa1a4176b2b03dee764ff682ea2",
+-  "docs/revision-plan/outputs/vi-nlp-fusion-silver-20261108/t2-protocol.json": "4e855edc6def7edd5d04769196b5c89c0d941eb9c31af541ecfee0fca0748197",
+-  "docs/revision-plan/outputs/vi-nlp-fusion-silver-20261108/t2-training.json": "6ee624ba9dda15c58408aacc384e517f3aa2470540f1d6ae587fd5d8b253588d",
++  "docs/revision-plan/outputs/local-report-update-20261110/evidence/bundle-results/silver_evaluation/outputs/verification.json": "9d1dd4e649778c1eca4d738033733b6a3ed7a3f79be7b5bc3e7be6d756ff2fbc",
++  "docs/revision-plan/outputs/local-report-update-20261110/evidence/bundle-results/silver_evaluation/outputs/evaluation.json": "f59077b246d1178801024c500c26a691ce89357c21f135898a2b97ecada095c2",
++  "docs/revision-plan/outputs/local-report-update-20261110/evidence/bundle-results/silver_evaluation/outputs/predictions.csv": "24589511769a6de7b68c7c45cf7ad9f7aeea7ee58164a1a28b391fb71620c0b6",
++  "docs/revision-plan/outputs/local-report-update-20261110/evidence/bundle-results/silver_evaluation/outputs/metrics.csv": "f76c49c80960e6e5c2008796dcc5eb9ded51637ce90c17129c5c643ca3a7c406",
++  "docs/revision-plan/outputs/local-report-update-20261110/evidence/bundle-results/silver_evaluation/outputs/paired-effects.csv": "632bdbea729a8295c86770cb33612e39f862db9226462e045d4e767aaba4fe41",
++  "docs/revision-plan/outputs/local-report-update-20261110/evidence/bundle-results/silver_evaluation/outputs/dataset-lock.json": "d459009652b5c6a65d42db0128d0cd6f5b21933342ebcadd4809de115005100d",
++  "docs/revision-plan/outputs/local-report-update-20261110/evidence/bundle-results/silver_evaluation/outputs/features.json": "0b79cb550312bb37d57a65c58b5ebcd147d87f545968f5ab9013f958cebfeb5e",
++  "docs/revision-plan/outputs/local-report-update-20261110/evidence/bundle-results/silver_evaluation/outputs/training.json": "5b146cf61f11d5ac94e2dfb944c977e23651b6305291c72712240149d3687d2c",
++  "docs/revision-plan/outputs/local-report-update-20261110/evidence/bundle-results/silver_evaluation/outputs/protocol.json": "e9abccbd4e681e6131c2d3a60a9d732580295aa1a4176b2b03dee764ff682ea2",
++  "docs/revision-plan/outputs/local-report-update-20261110/evidence/bundle-results/silver_evaluation/outputs/t2-protocol.json": "4e855edc6def7edd5d04769196b5c89c0d941eb9c31af541ecfee0fca0748197",
++  "docs/revision-plan/outputs/local-report-update-20261110/evidence/bundle-results/silver_evaluation/outputs/t2-training.json": "0140d5a1cee769fc2249f654f2bef39db875cacb3efcc3847f72dec389f94cd6",
++  "docs/revision-plan/outputs/local-report-update-20261110/evidence/bundle-results/silver_evaluation/outputs/t2-evaluation.json": "6bb5d76f04c1385e640cf5bfdc519eae4c10a2f44232e71c13b48d800a1053e2",
++  "docs/revision-plan/outputs/local-report-update-20261110/evidence/bundle-results/silver_evaluation/outputs/t2-predictions.csv": "c30387bee335395b4a051497ca015b4a03e533ac79a4d21cbc364a1581ffe192",
++  "docs/revision-plan/outputs/local-report-update-20261110/evidence/bundle-results/silver_evaluation/outputs/t2-metrics.csv": "cd1385b69fe855c05f7576200f7d26b288ed8b8cd977dc6cdbb8b8634595f43f",
++  "docs/revision-plan/outputs/local-report-update-20261110/evidence/bundle-results/silver_evaluation/outputs/encoder-update-check.json": "3cce4655f8c968e4d4995c83035c2e765e3e3488bb76308fb45c780b58cc1dbb",
+   "docs/revision-plan/outputs/vi-nlp-fusion-silver-20261108/t2-evaluation.json": "3c4ce42a5c7e865f7798c903b2c1752fb35c0c6322ca020f5b2cd3f9b70039a2",
+-  "docs/revision-plan/outputs/vi-nlp-fusion-silver-20261108/t2-predictions.csv": "561a5a8f6fd60f140c668213bba6407055b27be6c511be817bfeebe553a43dcb",
+-  "docs/revision-plan/outputs/vi-nlp-fusion-silver-20261108/t2-metrics.csv": "e9ac716bda80622afb732ed2c817ff31cae1e48aea48912c05669a5ea5ef8287",
+-  "docs/revision-plan/outputs/vi-nlp-fusion-silver-20261108/encoder-update-check.json": "95807da5379beaa10863d34978592b21bef76931fa2cd5e0a4afb57c2aa8b4c9",
+-  "report/scripts/export_vi_silver.py": "a789970b99ca3280ec3dbe78690fe595a104b07ecd1ed952fd8a2936d765dde1"
++  "docs/revision-plan/outputs/local-report-update-20261110/source-manifest.json": "6a5a5e4c41a763f5481c5bf399cbd2199c01a7c1c67c0e18f429ec8a4a919cac",
++  "docs/revision-plan/outputs/local-report-update-20261110/checkpoint-audit.json": "397da75f6b40373964d93d5c0c21d11c1a09894a7f0aff21d4dcc8e0f8261ef1",
++  "report/scripts/export_vi_silver.py": "eb97acebad61b97c262f10990fffb2521c382c70d344b4188b476cb9f604209e"
+ }
+diff --git a/report/generated/vi-silver-values.tex b/report/generated/vi-silver-values.tex
+index 810223af..81137897 100644
+--- a/report/generated/vi-silver-values.tex
++++ b/report/generated/vi-silver-values.tex
+@@ -5,6 +5,7 @@
+ \providecommand{\VISilverPositiveN}{6}
+ \providecommand{\VISilverNegativeN}{53}
+ \providecommand{\VISilverExcludedN}{4}
++\providecommand{\VISilverPreviousFineFOne}{50,73}
+ \providecommand{\VISilverTfidfFOne}{45,87}
+ \providecommand{\VISilverTextFOne}{44,13}
+ \providecommand{\VISilverImageFOne}{54,89}
+@@ -19,12 +20,12 @@
+ \providecommand{\VISilverFusionMeanDelta}{8,61}
+ \providecommand{\VISilverFusionMeanLow}{0,00}
+ \providecommand{\VISilverFusionMeanHigh}{25,86}
+-\providecommand{\VISilverFineFOne}{50,73}
+-\providecommand{\VISilverFineFOneLow}{49,39}
+-\providecommand{\VISilverFineFOneHigh}{52,45}
++\providecommand{\VISilverFineFOne}{52,29}
++\providecommand{\VISilverFineFOneLow}{51,37}
++\providecommand{\VISilverFineFOneHigh}{54,11}
+ \providecommand{\VISilverFineAccuracy}{78,53}
+ \providecommand{\VISilverFineAccuracyLow}{76,27}
+-\providecommand{\VISilverFineAccuracyHigh}{81,36}
+-\providecommand{\VISilverFineRecall}{16,67}
++\providecommand{\VISilverFineAccuracyHigh}{79,66}
++\providecommand{\VISilverFineRecall}{22,22}
+ \providecommand{\VISilverFineRecallLow}{16,67}
+-\providecommand{\VISilverFineRecallHigh}{16,67}
++\providecommand{\VISilverFineRecallHigh}{33,33}
+diff --git a/report/main.pdf b/report/main.pdf
+index 80f3c006..7e957f19 100644
+Binary files a/report/main.pdf and b/report/main.pdf differ
+diff --git a/report/scripts/export_results.py b/report/scripts/export_results.py
+index b055558d..3ae5133d 100644
+--- a/report/scripts/export_results.py
++++ b/report/scripts/export_results.py
+@@ -11,6 +11,7 @@ from highlight_results import highlight_results
+ from export_image_quality import main as export_image_quality
+ from export_multimodal import main as export_multimodal
+ from export_vi_silver import main as export_vi_silver
++from export_local_experiments import main as export_local_experiments
+ 
+ ROOT = Path(__file__).resolve().parents[2]
+ OUT = ROOT / 'report/generated'
+@@ -78,6 +79,7 @@ def table(name, caption, label, columns, headers, data, note):
+ def main():
+     export_image_quality()
+     export_multimodal()
++    export_local_experiments()
+     export_vi_silver()
+     (OUT / 'tables').mkdir(parents=True, exist_ok=True)
+     benchmarks = obj('report/config/benchmark-sources.json')
+@@ -353,7 +355,8 @@ def main():
+                                 ''.join('\\newcommand{\\'+k+'}{'+str(v)+'}\n' for k,v in values.items())+
+                                 '\\input{generated/image-quality-values}\n'+
+                                 '\\input{generated/multimodal-values}\n'+
+-                                '\\input{generated/vi-silver-values}\n')
++                                '\\input{generated/vi-silver-values}\n'+
++                                '\\input{generated/local-experiment-values}\n')
+     snapshot={'source_commit':subprocess.check_output(['git','rev-parse','HEAD'],cwd=ROOT,text=True).strip(),
+               'sources_sha256':SOURCES,'image_audit':{'rows':len(split),'missing':0,'md5_mismatch':0,'cross_split_groups':0},
+               'prediction_audits': PREDICTION_AUDITS,
+diff --git a/report/scripts/export_vi_silver.py b/report/scripts/export_vi_silver.py
+index 569a35d6..9bd22ac7 100644
+--- a/report/scripts/export_vi_silver.py
++++ b/report/scripts/export_vi_silver.py
+@@ -9,7 +9,8 @@ from pathlib import Path
+ from statistics import mean
+ 
+ ROOT = Path(__file__).resolve().parents[2]
+-SOURCE = ROOT / 'docs/revision-plan/outputs/vi-nlp-fusion-silver-20261108'
++SOURCE = ROOT / 'docs/revision-plan/outputs/local-report-update-20261110/evidence/bundle-results/silver_evaluation/outputs'
++PREVIOUS = ROOT / 'docs/revision-plan/outputs/vi-nlp-fusion-silver-20261108'
+ OUT = ROOT / 'report/generated'
+ 
+ 
+@@ -51,6 +52,8 @@ def main():
+     values['PositiveN'] = data['counts']['test']['request']
+     values['NegativeN'] = data['counts']['test']['no_request']
+     values['ExcludedN'] = data['excluded_uncertain']
++    previous_t2 = json.loads((PREVIOUS / 't2-evaluation.json').read_text())
++    values['PreviousFineFOne'] = fmt(100 * previous_t2['summary']['macro_f1']['mean'])
+     for prefix, model in [('Tfidf', 'T0'), ('Text', 'T1'), ('Image', 'I0'), ('Fusion', 'F1')]:
+         values[prefix + 'FOne'] = fmt(100 * float(metrics[model]['macro_f1']))
+     values['FusionRecall'] = fmt(100 * float(metrics['F1']['recall_request']))
+@@ -84,7 +87,7 @@ def main():
+         macros.append(r'\providecommand{\VISilver' + key + '}{' + str(value) + '}')
+     (OUT / 'vi-silver-values.tex').write_text('\n'.join(macros) + '\n')
+     names = [('B0', 'Lớp đa số'), ('T0', 'TF-IDF + LR'), ('T1', 'DistilBERT frozen + LR'),
+-             ('T2', 'DistilBERT fine-tuning (TB 3 seed)'), ('I0', 'Ảnh frozen + LR'),
++             ('T2', 'DistilBERT fine-tuning CUDA (TB 3 seed)'), ('I0', 'Ảnh frozen + LR'),
+              ('F0', 'TF-IDF + ảnh'), ('F1', 'DistilBERT frozen + ảnh'), ('P0', 'Trung bình xác suất'),
+              ('F1_mask_image', 'Fusion che ảnh'), ('F1_mask_text', 'Fusion che văn bản')]
+     table = [r'% Generated by export_vi_silver.py; do not edit.',
+@@ -114,6 +117,11 @@ def main():
+              't2-training.json', 't2-evaluation.json', 't2-predictions.csv', 't2-metrics.csv',
+              'encoder-update-check.json']
+     provenance = {str((SOURCE / name).relative_to(ROOT)): sha(SOURCE / name) for name in files}
++    previous_receipt = PREVIOUS / 't2-evaluation.json'
++    provenance[str(previous_receipt.relative_to(ROOT))] = sha(previous_receipt)
++    capture = ROOT / 'docs/revision-plan/outputs/local-report-update-20261110'
++    for name in ['source-manifest.json', 'checkpoint-audit.json']:
++        provenance[str((capture / name).relative_to(ROOT))] = sha(capture / name)
+     provenance[str(Path(__file__).relative_to(ROOT))] = sha(Path(__file__))
+     (OUT / 'vi-silver-provenance.json').write_text(json.dumps(provenance, indent=2) + '\n')
+     print('Exported translated AI-silver pilot: 2 tables and scoped values')

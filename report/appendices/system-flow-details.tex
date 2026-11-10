@@ -1,0 +1,33 @@
+\section{Sơ đồ thao tác chi tiết}\label{sec:system-flow-details}
+Các sơ đồ sau bổ sung cho thiết kế đồng bộ ở Mục~\ref{sec:synchronization-design}.
+
+\begin{reportlandscapefigure}
+\centering
+
+\includegraphics[width=\linewidth,height=\ReportLandscapeImageHeight,keepaspectratio]{flow_04_track_rescue_status.pdf}
+\caption{Quy trình tra cứu và đồng bộ tiến trình cứu hộ 4 trạng thái giữa ứng dụng và máy chủ}
+\label{fig:flow-track-status}
+\end{reportlandscapefigure}
+
+\begin{reportlandscapefigure}
+\centering
+
+\includegraphics[width=\linewidth,height=\ReportLandscapeImageHeight,keepaspectratio]{flow_05_backend_ingest_dedup.pdf}
+\caption{Các đường tiếp nhận JSON sync, ảnh multipart và SMS gateway}
+\label{fig:flow-backend-dedup}
+\end{reportlandscapefigure}
+
+\begin{figure}[htbp]
+\centering
+\includegraphics[width=.95\textwidth,height=.78\textheight,keepaspectratio]{flow_01_sos_one_touch.pdf}
+\caption{Quy trình gửi tín hiệu cứu nạn khẩn cấp một chạm (One-Touch SOS) và lưu trữ cục bộ}
+\label{fig:flow-sos-one-touch}
+\end{figure}
+
+\begin{reportlandscapefigure}
+\centering
+
+\includegraphics[width=\linewidth,height=\ReportLandscapeImageHeight,keepaspectratio]{flow_02_create_report_edge_ai.pdf}
+\caption{Quy trình tạo báo cáo chi tiết kèm ảnh hiện trường và suy luận On-device Edge AI}
+\label{fig:flow-create-report}
+\end{reportlandscapefigure}

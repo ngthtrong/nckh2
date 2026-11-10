@@ -6,13 +6,7 @@ Trạng thái outbox mô tả việc truyền: \texttt{pending}, \texttt{in\_fli
 
 Hình~\ref{fig:flow-track-status} mô tả việc tra cứu và đồng bộ trạng thái nghiệp vụ giữa ứng dụng và máy chủ.
 
-\begin{reportlandscapefigure}
-\centering
 
-\includegraphics[width=\linewidth,height=\ReportLandscapeImageHeight,keepaspectratio]{flow_04_track_rescue_status.pdf}
-\caption{Quy trình tra cứu và đồng bộ tiến trình cứu hộ 4 trạng thái giữa ứng dụng và máy chủ}
-\label{fig:flow-track-status}
-\end{reportlandscapefigure}
 
 \subsection{Mất ACK sau commit và xử lý idempotency}
 Hình~\ref{fig:sync-sequence} mô tả ca mà server đã ghi dữ liệu nhưng ACK bị mất. Đây là một trường hợp khiến hệ thống chỉ ``gửi lại khi lỗi'' dễ tạo trùng nếu không giữ định danh. Theo quy tắc xử lý bản tin, ghi nghiệp vụ và ghi chống trùng nằm trong transaction của cùng message; gửi lại đúng message/hash trả kết quả duplicate. Khả năng retry kết hợp với kiểm tra định danh giữ tính nhất quán cho thao tác đã được server ghi.
@@ -43,13 +37,7 @@ Hash payload là SHA-256 sau chuẩn tắc hóa JSON theo chuẩn RFC 8785 \cite
 
 Hình~\ref{fig:flow-backend-dedup} đối chiếu ba đường tiếp nhận JSON sync, multipart và SMS. Với JSON \texttt{/sync/messages}, lỗi hợp đồng hoặc cấu trúc request được trả ở mức HTTP; vượt dung lượng trả mã 413. Khi request hợp lệ, kết quả từng message nằm trong \texttt{results} của phản hồi HTTP 200, gồm \texttt{accepted}, \texttt{duplicate}, \texttt{rejected} hoặc \texttt{retry\_later}. Xung đột ID/hash hoặc tái sử dụng sequence là lỗi của từng message. Đường multipart chống gửi lại bằng report ID, quyền bổ sung và hash ảnh; đường SMS dùng token gateway, giữ ID của SOS hoặc sinh ID theo nội dung tin, rồi tạo/gộp qua quy tắc lưu báo cáo. Tệp ảnh nằm ngoài transaction SQLite; không đồng nhất việc lưu tệp với commit của message JSON.
 
-\begin{reportlandscapefigure}
-\centering
 
-\includegraphics[width=\linewidth,height=\ReportLandscapeImageHeight,keepaspectratio]{flow_05_backend_ingest_dedup.pdf}
-\caption{Các đường tiếp nhận JSON sync, ảnh multipart và SMS gateway}
-\label{fig:flow-backend-dedup}
-\end{reportlandscapefigure}
 
 \subsection{Phân loại phản hồi và giới hạn retry}
 \begin{table}[htbp]\centering\small
@@ -97,19 +85,10 @@ Luồng trên cho thấy phân cụm và xếp hạng là thông tin hỗ trợ 
 
 Quy trình tạo SOS và lưu yêu cầu tại thiết bị được trình bày ở Hình~\ref{fig:flow-sos-one-touch}.
 
-\begin{figure}[htbp]
-\centering
-\includegraphics[width=.95\textwidth,height=.78\textheight,keepaspectratio]{flow_01_sos_one_touch.pdf}
-\caption{Quy trình gửi tín hiệu cứu nạn khẩn cấp một chạm (One-Touch SOS) và lưu trữ cục bộ}
-\label{fig:flow-sos-one-touch}
-\end{figure}
+
 
 Hình~\ref{fig:flow-create-report} mô tả quy trình tạo báo cáo có ảnh và suy luận AI tại thiết bị.
 
-\begin{reportlandscapefigure}
-\centering
 
-\includegraphics[width=\linewidth,height=\ReportLandscapeImageHeight,keepaspectratio]{flow_02_create_report_edge_ai.pdf}
-\caption{Quy trình tạo báo cáo chi tiết kèm ảnh hiện trường và suy luận On-device Edge AI}
-\label{fig:flow-create-report}
-\end{reportlandscapefigure}
+
+Các sơ đồ thao tác chi tiết theo từng chức năng được tập hợp tại Mục~\ref{sec:system-flow-details}; đường mất ACK, retry và đồng bộ ở trên là luồng chính.

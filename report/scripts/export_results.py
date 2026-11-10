@@ -11,6 +11,8 @@ from highlight_results import highlight_results
 from export_image_quality import main as export_image_quality
 from export_multimodal import main as export_multimodal
 from export_vi_silver import main as export_vi_silver
+from export_local_experiments import main as export_local_experiments
+from export_software_revision import main as export_software_revision
 
 ROOT = Path(__file__).resolve().parents[2]
 OUT = ROOT / 'report/generated'
@@ -34,7 +36,7 @@ def obj(relative):
 
 
 def fmt(value, digits=4):
-    return f'{float(value):.{digits}f}'
+    return f'{float(value):.{digits}f}'.replace('.', ',')
 
 
 def verify_predictions(artifact, relative, split):
@@ -78,7 +80,9 @@ def table(name, caption, label, columns, headers, data, note):
 def main():
     export_image_quality()
     export_multimodal()
+    export_local_experiments()
     export_vi_silver()
+    export_software_revision()
     (OUT / 'tables').mkdir(parents=True, exist_ok=True)
     benchmarks = obj('report/config/benchmark-sources.json')
     split = rows('products/fe/model/Edge Ai/split_train_val_test_mobilenetv3_large.csv')
@@ -353,7 +357,9 @@ def main():
                                 ''.join('\\newcommand{\\'+k+'}{'+str(v)+'}\n' for k,v in values.items())+
                                 '\\input{generated/image-quality-values}\n'+
                                 '\\input{generated/multimodal-values}\n'+
-                                '\\input{generated/vi-silver-values}\n')
+                                '\\input{generated/vi-silver-values}\n'+
+                                '\\input{generated/local-experiment-values}\n'+
+                                '\\input{generated/software-revision-values}\n')
     snapshot={'source_commit':subprocess.check_output(['git','rev-parse','HEAD'],cwd=ROOT,text=True).strip(),
               'sources_sha256':SOURCES,'image_audit':{'rows':len(split),'missing':0,'md5_mismatch':0,'cross_split_groups':0},
               'prediction_audits': PREDICTION_AUDITS,

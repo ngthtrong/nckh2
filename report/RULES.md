@@ -5,7 +5,7 @@
 ## Khổ giấy, chữ và tiêu đề
 
 - Thân bài dùng A4, Times New Roman 13 bp, giãn dòng 1,3; lề trái 30 mm, các lề còn lại 20 mm. Không giảm chữ hoặc lề để ép nội dung vào trang.
-- Ngoại lệ theo yêu cầu ngày 09/11/2026: bốn bảng benchmark chi tiết B.2–B.5 dùng chữ 9,5 bp, giãn dòng đơn và hai khối cột theo seed để rút gọn phụ lục; giữ đầy đủ số liệu, đơn vị, chú thích và tiêu đề lặp khi sang trang. Hình reliability và điều phối nguồn lực dùng trang dọc, cùng luồng nội dung.
+- Ngoại lệ theo yêu cầu ngày 09/11/2026: bốn bảng benchmark chi tiết trong Phụ lục B dùng chữ 9,5 bp, giãn dòng đơn và hai khối cột theo seed để rút gọn phụ lục; giữ đầy đủ số liệu, đơn vị, chú thích và tiêu đề lặp khi sang trang. Hình reliability và điều phối nguồn lực dùng trang dọc, cùng luồng nội dung.
 - Danh mục tài liệu tham khảo giữ cỡ chữ thân bài và giãn dòng 1,15 để hạn chế trang cuối chỉ có một vài tài liệu; không thay đổi nội dung hoặc thứ tự tài liệu.
 - Cấu hình chữ và khoảng cách tập trung trong `template/ctu-report.cls` và `template/typography.tex`. Các biểu mẫu hành chính giữ cấu hình riêng theo mẫu gốc.
 - Bìa và biểu mẫu dùng tọa độ cố định theo mẫu, với `twoside=false` trong cấu hình lề riêng; khi quay về thân bài, khôi phục chế độ in của quyển. Không để trang chẵn tự đảo lề làm lệch nội dung so với logo hoặc khung mẫu.
@@ -29,6 +29,7 @@
 - Đặt chú thích hình bên dưới, tên bảng bên trên; giữ cùng kiểu chữ và khoảng cách do template quy định. Tên phải mô tả được nội dung, dữ liệu hoặc điều kiện đánh giá cần thiết.
 - Giới thiệu và phân tích hình trong phần thuyết minh bằng `Hình~\ref{...}`; tham chiếu bảng bằng `Bảng~\ref{...}`. Không gõ số hình/bảng hoặc dùng số trong tên tệp làm số tham chiếu.
 - Nếu một nhóm biểu đồ có nhiều caption thì mỗi biểu đồ phải có label riêng. Ký hiệu (a), (b), (c) trong một hình ghép cùng dùng số hình của caption chung.
+- Các biểu đồ đối chiếu có thể đặt trong hai cột với caption và số hình riêng. Nhóm ba biểu đồ dùng hai hình ở hàng trên, hình thứ ba cùng chiều rộng căn giữa ở hàng dưới khi ba cột làm chữ quá nhỏ.
 - Sau khi thêm, xóa hoặc đổi thứ tự hình, biên dịch đến khi tham chiếu ổn định rồi đối chiếu nguồn, danh mục, số trang và chú thích trong PDF. Không chấp nhận nhãn trùng, tham chiếu chưa giải quyết hoặc hình tràn trang.
 
 ## Nội dung nghiên cứu và trạng thái công bố

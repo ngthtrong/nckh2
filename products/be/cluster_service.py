@@ -19,16 +19,19 @@ confidence, n_trapped — như bộ dữ liệu mô phỏng) thì dùng trực t
 from __future__ import annotations
 
 import hashlib
+import json
 import logging
 import math
 import re
 import threading
 import time
-from dataclasses import dataclass
+from dataclasses import dataclass, replace
 from datetime import datetime, timezone
 from typing import Any, Callable, Dict, List, Optional, Sequence, Tuple
 
 from rescue_core import GraphConfigV2, ReportV2, run_graph_clustering, score_clusters
+from rescue_core.contracts import validate_unique_report_ids
+from rescue_core.dedup import exact_fingerprint
 
 logger = logging.getLogger("rescue_mock_server")
 
@@ -43,6 +46,7 @@ DEFAULT_GRAPH_CONFIG = GraphConfigV2(
     resolution=1.2,
 )
 RANDOM_STATE = 42
+GRAPH_INPUT_POLICY = "exact-model-and-content-v1"
 
 _FLOOD_BY_LABEL = {"low": 0.33, "medium": 0.66, "high": 1.0, "non_flood": 0.0}
 
@@ -176,6 +180,38 @@ def _centroid(reports: Sequence[ReportV2]) -> Optional[Dict[str, float]]:
 CLOSED_STATUSES = frozenset({"resolved", "cancelled"})
 
 
+def _canonical_graph_input(
+    raw: Sequence[Dict[str, Any]], converted: Sequence[ReportV2],
+) -> Tuple[List[ReportV2], Dict[str, List[str]]]:
+    """Collapse exact model-visible AND content copies before quantile/top-k.
+
+    Receipt timestamps and transport IDs do not create new evidence. Different
+    text, contacts or image identities remain separate even when their scalar
+    model features agree. No fuzzy distance or learned threshold is introduced.
+    """
+    validate_unique_report_ids(converted)
+    raw_by_id = {str(row['id']): row for row in raw}
+    grouped: Dict[str, List[ReportV2]] = {}
+    for report in converted:
+        source = raw_by_id[report.report_id]
+        payload = source.get('payload') or {}
+        image_identity = payload.get('imageSha256') or source.get('imageUrl')
+        evidence = {'model': exact_fingerprint(report),
+                    'description': source.get('description') or '',
+                    'contact': source.get('contactPhone') or None,
+                    'image': image_identity or None}
+        key = hashlib.sha256(json.dumps(evidence, ensure_ascii=False, sort_keys=True,
+                                       separators=(',', ':'), allow_nan=False).encode('utf-8')).hexdigest()
+        grouped.setdefault(key, []).append(report)
+    nodes, members = [], {}
+    for key in sorted(grouped):
+        group = sorted(grouped[key], key=lambda r: r.report_id)
+        identity = 'evidence-' + key
+        nodes.append(replace(group[0], report_id=identity))
+        members[identity] = [row.report_id for row in group]
+    return nodes, members
+
+
 def compute_clusters(reports: Sequence[Dict[str, Any]]) -> Dict[str, Any]:
     """Phân cụm và xếp hạng ưu tiên các báo cáo chưa kết thúc.
 
@@ -204,19 +240,23 @@ def compute_clusters(reports: Sequence[Dict[str, Any]]) -> Dict[str, Any]:
             "totalReports": len(active),
         }
 
-    run = run_graph_clustering(converted, DEFAULT_GRAPH_CONFIG, random_state=RANDOM_STATE)
-    priorities = score_clusters(converted, run.labels)
-    by_id = {r.report_id: r for r in converted}
+    graph_reports, canonical_members = _canonical_graph_input(active, converted)
+    run = run_graph_clustering(graph_reports, DEFAULT_GRAPH_CONFIG, random_state=RANDOM_STATE)
+    labels_by_original = {report_id: label
+                          for node, label in zip(graph_reports, run.labels)
+                          for report_id in canonical_members[node.report_id]}
+    expanded_labels = [labels_by_original[row.report_id] for row in converted]
+    priorities = score_clusters(converted, expanded_labels)
 
     clusters = []
     for cluster_id, priority in priorities.items():
-        members = [by_id[report_id] for report_id in priority.report_ids]
         clusters.append({
             "clusterId": cluster_id,
             "clusterKey": min(priority.report_ids),
             "reportIds": list(priority.report_ids),
             "size": len(priority.report_ids),
-            "centroid": _centroid(members),
+            "centroid": _centroid([node for node, label in zip(graph_reports, run.labels)
+                                   if label == cluster_id]),
             "priority": priority.revised,
             "components": {
                 "E": priority.e_agg,
@@ -235,11 +275,18 @@ def compute_clusters(reports: Sequence[Dict[str, Any]]) -> Dict[str, Any]:
     return {
         "config": _config_dict(),
         "clusters": clusters,
-        "review": list(run.review_report_ids),
+        "review": [row.report_id for row in converted if not row.graph_eligible],
         "invalid": invalid,
         "totalReports": len(active),
         "candidatePairs": run.candidate_pairs,
         "retainedEdges": run.retained_edges,
+        "thresholdWeight": run.threshold_weight,
+        "graphDeduplication": {
+            "policy": GRAPH_INPUT_POLICY,
+            "canonicalReports": len(graph_reports),
+            "exactCopiesRemoved": len(converted) - len(graph_reports),
+            "groups": canonical_members,
+        },
     }
 
 
@@ -253,6 +300,7 @@ def _config_dict() -> Dict[str, Any]:
         "k": c.k,
         "resolution": c.resolution,
         "randomState": RANDOM_STATE,
+        "graphInputPolicy": GRAPH_INPUT_POLICY,
     }
 
 
@@ -331,7 +379,7 @@ class ClusterService:
             snapshot = ClusterSnapshot(
                 data=data,
                 version=version,
-                etag='"' + hashlib.sha256(version.encode("utf-8")).hexdigest()[:20] + '"',
+                etag='"' + hashlib.sha256((GRAPH_INPUT_POLICY + ':' + version).encode("utf-8")).hexdigest()[:20] + '"',
                 computed_at=datetime.now(timezone.utc).isoformat(timespec="seconds").replace("+00:00", "Z"),
                 duration_s=time.perf_counter() - started,
             )

@@ -1,0 +1,59 @@
+{
+  "version": "vi_silver_request_pilot_v1",
+  "status": "LOCKED_BEFORE_AI_LABELS_AND_TRAINING",
+  "date": "2026-11-08",
+  "timezone": "Asia/Taipei",
+  "authorization": "User explicitly permitted AI relabeling or finding labels, prioritizing report completion; translated Vietnamese silver pilot disclosed before execution.",
+  "task": "Presence of an explicit disaster-assistance request or unmet assistance need, including rescue/evacuation/supplies/donations; not urgency or dispatch priority",
+  "language": "AI-translated Vietnamese from English CrisisMMD; not native Vietnamese reports",
+  "labels": [
+    "no_request",
+    "request"
+  ],
+  "uncertain": "preserve inventory, exclude before model fitting, report counts; no substitution",
+  "label_origin": "single-pass Codex assistant/native subagents, one label per row; not human, expert, independent annotation or gold",
+  "label_view": "English source text only, not image; Vietnamese translation prepared in same pass",
+  "source_dataset_sha256": "be5b757943226c1f87913fab1f71917a7f4ef245e740e78a136ff57d5ba5c051",
+  "selection_sha256": "1030340080c137100093c59aecd4906b060709b81394923b7ac6fe3e3cb611a6",
+  "n_selected": 300,
+  "selection": "Within existing event splits, hash-sort; half broad help/need/donation/etc keyword candidates and half other text, one row per prior duplicate group; no metric-based selection. Enriched sampling, not natural prevalence.",
+  "split": "retain old event split: Sri Lanka test, Maria dev, other five train; earlier English pilot/test already seen, so retrospective development evidence",
+  "source_label_use": "Original informative labels not used as request labels; original agreed-label cohort selection bias retained",
+  "text_models": [
+    "TF-IDF word/char LR",
+    "frozen multilingual DistilBERT mean-pool LR"
+  ],
+  "image": "MobileNetV3-Large ImageNet frozen; optional old Small only if extraction unavailable, disclosed separately",
+  "fusion": "matched frozen DistilBERT/image blocks L2 concat /sqrt(2) with LR, plus TFIDF/image concat and arithmetic mean",
+  "classifier": {
+    "C_grid": [
+      0.1,
+      1,
+      10
+    ],
+    "class_weight": "balanced",
+    "solver": "liblinear",
+    "max_iter": 2000,
+    "threshold": 0.5,
+    "seed": 20261108
+  },
+  "distilbert": {
+    "repo": "distilbert/distilbert-base-multilingual-cased",
+    "max_length": 128,
+    "frozen": true,
+    "fine_tuning": "not part of this silver pilot; original T2 plan remains open"
+  },
+  "bootstrap": {
+    "unit": "prior duplicate groups within single held-out Sri Lanka event",
+    "draws": 2000,
+    "paired": true,
+    "adjusted": false
+  },
+  "deployment": "offline CPU only; no app/backend/model-serving changes",
+  "limits": [
+    "AI labels reflect source text, not independent pair gold",
+    "Translation errors, enrichment, small sample and known holdout prevent confirmatory conclusions",
+    "No operational urgency/rescue-effectiveness or native-Vietnamese claim",
+    "No human-approval record is fabricated and original human-data gate remains unchanged"
+  ]
+}

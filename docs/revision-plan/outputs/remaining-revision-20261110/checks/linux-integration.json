@@ -1,0 +1,20 @@
+{
+  "exit_code": 0,
+  "command": [
+    "/home/ngthtrong/flutter/bin/flutter",
+    "test",
+    "integration_test/system_test.dart",
+    "-d",
+    "linux",
+    "--dart-define=E2E_BACKEND=http://127.0.0.1:35347",
+    "--dart-define=SERVER_URL=http://127.0.0.1:59813",
+    "--dart-define=ALLOW_INSECURE_LAN=true",
+    "--dart-define=E2E_ADMIN_USER=revision-test",
+    "--dart-define=E2E_ADMIN_PASSWORD=local-only-revision-test",
+    "--dart-define=E2E_IMAGE=/home/ngthtrong/nckh2/products/fe/model/Dataset_Flood/high/flood_4791.jpg",
+    "--reporter",
+    "expanded"
+  ],
+  "backend": "Isolated temporary SQLite/uploads; loopback HTTP only",
+  "scope": "Linux app repository integration, not Android, physical mobile network or SMS"
+}

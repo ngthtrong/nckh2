@@ -1,0 +1,186 @@
+{
+  "status": "VERIFIED_WITHIN_AI_SILVER_PILOT",
+  "task": "vi_translated_silver_request_v1",
+  "checks": {
+    "task_and_ai_silver_scope": "PASS",
+    "dataset_protocol_feature_bindings": "PASS",
+    "prediction_model_receipt_and_source_hashes": "PASS",
+    "same_complete_test_ids_no_duplicates": "PASS",
+    "metadata_ai_labels_probabilities_and_threshold": "PASS",
+    "confusion_accuracy_precision_recall_macro_f1_independent_formulas": "PASS",
+    "evaluation_counts_and_one_event_scope": "PASS",
+    "paired_bootstrap_cis_replayed_from_independent_confusion_counts": "PASS",
+    "primary_dev_selection_and_unadjusted_contrast_metadata": "PASS",
+    "t2_optional_protocol_seed_ids_probabilities_and_independent_metrics": "PASS"
+  },
+  "check_count": 10,
+  "n_test": 59,
+  "groups": 59,
+  "prediction_rows": 531,
+  "evaluation_sha256": "f59077b246d1178801024c500c26a691ce89357c21f135898a2b97ecada095c2",
+  "predictions_sha256": "24589511769a6de7b68c7c45cf7ad9f7aeea7ee58164a1a28b391fb71620c0b6",
+  "verifier_sha256": "0d7f2729133689f9e110826ac98f4cc37adbf2bd821c6a15d88091fb0f0d05b4",
+  "metrics_independent": {
+    "B0": {
+      "n": 59,
+      "accuracy": 0.8983050847457628,
+      "macro_f1": 0.4732142857142857,
+      "precision_request": 0.0,
+      "recall_request": 0.0,
+      "tn": 53,
+      "fp": 0,
+      "fn": 6,
+      "tp": 0
+    },
+    "T0": {
+      "n": 59,
+      "accuracy": 0.847457627118644,
+      "macro_f1": 0.45871559633027525,
+      "precision_request": 0.0,
+      "recall_request": 0.0,
+      "tn": 50,
+      "fp": 3,
+      "fn": 6,
+      "tp": 0
+    },
+    "T1": {
+      "n": 59,
+      "accuracy": 0.6610169491525424,
+      "macro_f1": 0.4412878787878788,
+      "precision_request": 0.0625,
+      "recall_request": 0.16666666666666666,
+      "tn": 38,
+      "fp": 15,
+      "fn": 5,
+      "tp": 1
+    },
+    "I0": {
+      "n": 59,
+      "accuracy": 0.847457627118644,
+      "macro_f1": 0.5488530161427357,
+      "precision_request": 0.2,
+      "recall_request": 0.16666666666666666,
+      "tn": 49,
+      "fp": 4,
+      "fn": 5,
+      "tp": 1
+    },
+    "F0": {
+      "n": 59,
+      "accuracy": 0.864406779661017,
+      "macro_f1": 0.4636363636363636,
+      "precision_request": 0.0,
+      "recall_request": 0.0,
+      "tn": 51,
+      "fp": 2,
+      "fn": 6,
+      "tp": 0
+    },
+    "F1": {
+      "n": 59,
+      "accuracy": 0.8813559322033898,
+      "macro_f1": 0.64910790144435,
+      "precision_request": 0.4,
+      "recall_request": 0.3333333333333333,
+      "tn": 50,
+      "fp": 3,
+      "fn": 4,
+      "tp": 2
+    },
+    "P0": {
+      "n": 59,
+      "accuracy": 0.864406779661017,
+      "macro_f1": 0.562962962962963,
+      "precision_request": 0.25,
+      "recall_request": 0.16666666666666666,
+      "tn": 50,
+      "fp": 3,
+      "fn": 5,
+      "tp": 1
+    },
+    "F1_mask_image": {
+      "n": 59,
+      "accuracy": 0.8983050847457628,
+      "macro_f1": 0.4732142857142857,
+      "precision_request": 0.0,
+      "recall_request": 0.0,
+      "tn": 53,
+      "fp": 0,
+      "fn": 6,
+      "tp": 0
+    },
+    "F1_mask_text": {
+      "n": 59,
+      "accuracy": 0.8305084745762712,
+      "macro_f1": 0.5947802197802198,
+      "precision_request": 0.25,
+      "recall_request": 0.3333333333333333,
+      "tn": 47,
+      "fp": 6,
+      "fn": 4,
+      "tp": 2
+    }
+  },
+  "bootstrap_replayed": true,
+  "bootstrap_draws": 2000,
+  "T2": {
+    "status": "VERIFIED_T2_RECEIPTS_SELECTION_PREDICTIONS_AND_METRICS",
+    "seeds": [
+      17,
+      29,
+      43
+    ],
+    "n_test_per_seed": 59,
+    "prediction_rows": 177,
+    "metrics_independent": {
+      "17": {
+        "n": 59,
+        "accuracy": 0.7966101694915254,
+        "macro_f1": 0.5137362637362637,
+        "precision_request": 0.125,
+        "recall_request": 0.16666666666666666,
+        "tn": 46,
+        "fp": 7,
+        "fn": 5,
+        "tp": 1
+      },
+      "29": {
+        "n": 59,
+        "accuracy": 0.7966101694915254,
+        "macro_f1": 0.5137362637362637,
+        "precision_request": 0.125,
+        "recall_request": 0.16666666666666666,
+        "tn": 46,
+        "fp": 7,
+        "fn": 5,
+        "tp": 1
+      },
+      "43": {
+        "n": 59,
+        "accuracy": 0.7627118644067796,
+        "macro_f1": 0.5411111111111111,
+        "precision_request": 0.16666666666666666,
+        "recall_request": 0.3333333333333333,
+        "tn": 43,
+        "fp": 10,
+        "fn": 4,
+        "tp": 2
+      }
+    },
+    "mean_macro_f1": 0.5228612128612128,
+    "protocol_sha256": "4e855edc6def7edd5d04769196b5c89c0d941eb9c31af541ecfee0fca0748197",
+    "predictions_sha256": "c30387bee335395b4a051497ca015b4a03e533ac79a4d21cbc364a1581ffe192",
+    "metrics_sha256": "cd1385b69fe855c05f7576200f7d26b288ed8b8cd977dc6cdbb8b8634595f43f",
+    "training_receipt_sha256": "0140d5a1cee769fc2249f654f2bef39db875cacb3efcc3847f72dec389f94cd6",
+    "evaluation_receipt_sha256": "6bb5d76f04c1385e640cf5bfdc519eae4c10a2f44232e71c13b48d800a1053e2",
+    "selected_learning_rate": 2e-05,
+    "limits": "T2 development selection, model/receipt hashes and independent metric formulas checked; seed repetitions do not increase independent test sample size"
+  },
+  "scope": "Technical recomputation against AI silver labels, not scientific or expert validation",
+  "limits": [
+    "Vietnamese text was translated by AI from existing English CrisisMMD source text",
+    "AI source-text labels are not independent human or multimodal reference labels",
+    "The frozen fusion branch does not fine-tune encoders; any separate T2 result has its own status above",
+    "No native-Vietnamese, operational urgency, Android or real-world rescue-effectiveness claim"
+  ]
+}

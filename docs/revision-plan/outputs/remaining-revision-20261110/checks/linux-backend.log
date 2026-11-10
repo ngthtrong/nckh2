@@ -1,0 +1,39 @@
+[12:05:45] [INFO] Đã kiểm tra cấu trúc bảng SQLite (reports, messages_dedup, report_events, teams, sessions).
+[12:05:45] [INFO] [AUTH] Đã tạo tài khoản quản trị 'revision-test'.
+INFO:     Started server process [329563]
+INFO:     Waiting for application startup.
+INFO:     Application startup complete.
+INFO:     Uvicorn running on http://127.0.0.1:35347 (Press CTRL+C to quit)
+[12:05:45] [INFO] [CLUSTER] Tính lại: 0 cụm từ 0 báo cáo trong 0.00 s
+INFO:     127.0.0.1:53270 - "GET /healthz HTTP/1.1" 200 OK
+[12:06:17] [INFO] [AUTH] revision-test đăng nhập từ 127.0.0.1
+INFO:     127.0.0.1:51474 - "POST /api/auth/login HTTP/1.1" 200 OK
+[12:06:18] [INFO] ==> [POST /sync/messages] Nhận batch 1 messages (878 bytes)
+[12:06:18] [INFO] [SYNC] Bắt đầu xử lý batch 1 messages
+[12:06:18] [INFO] [CRUD][INSERT] Report ID=sos-1794283578182-4b975e317eac | GPS=(16.0544, 108.2022) | Ảnh=None | Size=0B
+[12:06:18] [INFO] [SYNC][ACCEPTED] msg=93a020ed-eec4-47d8-9e31-6f54723cc98e op=CREATE_RESCUE_RECORD record=sos-1794283578182-4b975e317eac
+[12:06:18] [INFO] [SYNC] Batch xong: 1 accepted, 0 rejected, 0 duplicate, 0 retry_later
+INFO:     127.0.0.1:51486 - "POST /sync/messages HTTP/1.1" 200 OK
+INFO:     127.0.0.1:51474 - "GET /api/reports/sos-1794283578182-4b975e317eac HTTP/1.1" 200 OK
+[12:06:18] [INFO] ==> [PROBE] Đo throughput client (trả về 65536 bytes)
+INFO:     127.0.0.1:51496 - "GET /probe?t=1794283578482 HTTP/1.1" 200 OK
+[12:06:18] [INFO] ==> [POST /sync/messages] Nhận batch 1 messages (873 bytes)
+[12:06:18] [INFO] [SYNC] Bắt đầu xử lý batch 1 messages
+[12:06:18] [INFO] [CRUD][INSERT] Report ID=post-1794283578517-a285f8e57932 | GPS=(None, None) | Ảnh=None | Size=0B
+[12:06:18] [INFO] [SYNC][ACCEPTED] msg=08c2ecec-e709-469e-96ba-5d1c26f3a38b op=CREATE_RESCUE_RECORD record=post-1794283578517-a285f8e57932
+[12:06:18] [INFO] [SYNC] Batch xong: 1 accepted, 0 rejected, 0 duplicate, 0 retry_later
+INFO:     127.0.0.1:51486 - "POST /sync/messages HTTP/1.1" 200 OK
+[12:06:18] [INFO] ==> [POST /api/reports] post-1794283578517-a285f8e57932 | lat=None, lng=None
+[12:06:18] [INFO] [CRUD][SAVE_IMAGE] post-1794283578517-a285f8e57932_d1c123841ecb.jpg (136191 bytes) -> /tmp/rescue-revision-e2e-e6gmm26j/uploads/post-1794283578517-a285f8e57932_d1c123841ecb.jpg
+[12:06:18] [INFO] [CRUD][MERGE(image_filename, image_local_path, image_url, image_sha256, image_size_bytes, raw_payload)] Report ID=post-1794283578517-a285f8e57932 | GPS=(None, None) | Ảnh=post-1794283578517-a285f8e57932_d1c123841ecb.jpg | Size=136191B
+INFO:     127.0.0.1:51512 - "POST /api/reports HTTP/1.1" 201 Created
+INFO:     127.0.0.1:51474 - "GET /api/reports/post-1794283578517-a285f8e57932 HTTP/1.1" 200 OK
+INFO:     127.0.0.1:51520 - "POST /api/reports HTTP/1.1" 409 Conflict
+INFO:     127.0.0.1:51474 - "GET /api/reports/post-1794283578517-a285f8e57932 HTTP/1.1" 200 OK
+[12:06:18] [INFO] [CRUD][STATUS] post-1794283578517-a285f8e57932: processing -> v2 dispatched (Quản trị viên)
+INFO:     127.0.0.1:51474 - "PATCH /api/reports/post-1794283578517-a285f8e57932/status HTTP/1.1" 200 OK
+INFO:     127.0.0.1:51486 - "GET /api/reports/status?ids=post-1794283578517-a285f8e57932%2Csos-1794283578182-4b975e317eac HTTP/1.1" 200 OK
+INFO:     Shutting down
+INFO:     Waiting for application shutdown.
+INFO:     Application shutdown complete.
+INFO:     Finished server process [329563]

@@ -20,7 +20,7 @@ Hai bộ báo cáo mô phỏng không đại diện cho báo cáo cứu hộ th�
 Mô hình dùng \ImageTotal{} ảnh sạch phân bố vào bốn mức. Thứ tự lớp được giữ thống nhất từ huấn luyện, xuất mô hình đến xử lý trong ứng dụng: \texttt{low}, \texttt{medium}, \texttt{high}, \texttt{non\_flood}.
 \input{generated/tables/image-split}
 
-\paragraph{Nguồn gốc.} Bộ ảnh do nhóm thu thập. Bản ghi hiện có chưa nối từng ảnh với URL, sự kiện gốc hoặc giấy phép; tên tệp không đủ để xác nhận nguồn ảnh. Hiện chưa có bản ghi nguồn và giấy phép cho từng ảnh, nên bộ ảnh chỉ dùng cho nghiên cứu và không phân phối lại khi chưa rà soát bản quyền. Ảnh web đã nén thường nhỏ và khác ảnh chụp trực tiếp bằng điện thoại; mô hình chưa được đánh giá riêng trên ảnh chụp thực địa.
+\paragraph{Nguồn gốc.} Theo xác nhận bổ sung của nhóm ngày 10/11/2026, bộ ảnh gồm cả ảnh nhóm tự chụp và ảnh nhóm tự thu thập từ web. Đây là thông tin ở mức bộ dữ liệu; chưa có ánh xạ đầy đủ từ từng ID tới loại nguồn, sự kiện, thời điểm và căn cứ sử dụng. Vì vậy không gọi toàn bộ tập là ảnh web, cũng không coi các ảnh tự chụp trong tập hiện có là một test camera thực địa độc lập. Không suy giấy phép của ảnh web từ việc nhóm đã tải hoặc lưu ảnh.
 
 \paragraph{Tiêu chí gán nhãn.} Nhãn theo hướng dẫn gán nhãn trong notebook huấn luyện (Bảng~\ref{tab:label-criteria}), dùng người và phương tiện trong ảnh làm mốc tham chiếu. Nhãn là chỉ dấu mức ngập hỗ trợ xếp hạng, không phải số đo độ sâu. Tài liệu của bộ ảnh không ghi số người gán nhãn hay độ đồng thuận giữa người gán, nên nhãn được xem là nhãn của nhóm theo hướng dẫn này. Ranh giới \texttt{low}/\texttt{medium} và \texttt{medium}/\texttt{high} phụ thuộc mốc tham chiếu nhìn thấy trong ảnh; đây là hai cặp lớp dễ nhầm nhất.
 
@@ -49,25 +49,8 @@ Cách làm này giảm nguy cơ rò rỉ do ảnh trùng hoặc gần trùng, nh
 
 Đối chiếu bổ sung xác nhận 1.702 bản ghi sau làm sạch của seed 1024 khớp tám trường định danh, nhãn, mã băm và nhóm với bảng chia hiện tại; toàn bộ trường nhóm nguồn còn trống. Metadata checkpoint ghi seed 1024 và đường dẫn bảng chia dùng chung trong kho huấn luyện, nhưng chưa khôi phục được checksum của bảng chia tại thời điểm train. Sự khớp của bản ghi hiện có và đường dẫn lịch sử chưa chứng minh bytes của split đã dùng khi huấn luyện; nguồn ảnh, giấy phép, độ đồng thuận gán nhãn và xác nhận chuyên gia vẫn chưa có hồ sơ bổ sung.
 
-\subsection{Quy trình dữ liệu hiện có và phương án hoàn thiện}\label{sec:data-process}
-Quy trình được mô tả theo sáu công đoạn: thu thập, sàng lọc, làm sạch, gán nhãn, chia tập và quản lý phiên bản. Đây là cách tổ chức hồ sơ để người đọc nhận biết dữ liệu hình thành và được kiểm tra thế nào; không suy ra rằng đã có nhật ký đầy đủ cho mọi lần thao tác lịch sử. Bảng~\ref{tab:data-process} phân biệt thông tin đang có với phần cần bổ sung.
-
-\begin{longtable}{P{.12\textwidth}P{.25\textwidth}P{.24\textwidth}P{.27\textwidth}}
-\caption{Hồ sơ quy trình bộ ảnh hiện có và phương án hoàn thiện chưa thực hiện}\label{tab:data-process}\\
-\toprule Công đoạn & Hồ sơ hiện có & Thông tin chưa có & Phương án hoàn thiện \\\midrule\endfirsthead
-\toprule Công đoạn & Hồ sơ hiện có & Thông tin chưa có & Phương án hoàn thiện \\\midrule\endhead
-Thu thập & Tệp ảnh và danh sách 1.702 bản ghi sau làm sạch; nguồn chung do nhóm thu thập & URL, sự kiện, thời điểm thu thập, giấy phép từng ảnh; mọi source\_group đang trống & Lập bản ghi nguồn theo từng ảnh khi có chứng từ; giữ trường chưa biết và lịch sử bổ sung \\
-Sàng lọc & Notebook loại ảnh không đọc được và thư mục chờ rà soát & Nhật ký tiếp nhận và lý do loại đầy đủ của các phiên lịch sử & Ghi ID đầu vào, lý do giữ/loại và khả năng nhìn thấy mốc; giữ riêng mẫu chưa quyết định \\
-Làm sạch & MD5, dHash và nhóm cảm nhận; quy tắc loại trùng xung đột lớp & Chưa chứng minh hết bản trùng ngữ nghĩa hoặc cùng sự kiện & Rà nhóm gần trùng, lưu quan hệ bản gốc--biến thể; không coi dHash là xác nhận nguồn độc lập \\
-Gán nhãn & Bốn lớp và tiêu chí thị giác ở Bảng~\ref{tab:label-criteria} & Số người gán, nhãn từng người, độ đồng thuận và phân xử & Hai người gán độc lập theo hướng dẫn khóa trước; giữ bất đồng, đo đồng thuận rồi phân xử có lý do \\
-Chia tập & Bảng cố định 1.189/257/256 ảnh; nhóm đã ghi không xuyên split & Checksum bảng chia lúc train; nhóm nguồn/sự kiện đầy đủ & Khóa nhóm nguồn trước chia khi có hồ sơ; lưu hash danh sách, seed, phiên bản quy tắc và ngày khóa \\
-Quản lý phiên bản & Config, prediction, model và provenance hiện có để đối chiếu & Chưa có lineage nguyên byte cho mọi phiên lịch sử & Tạo manifest phiên dữ liệu, hash tệp và nhãn, nhật ký đổi nhãn/nhóm; giữ snapshot cũ và lý do đổi \\
-\bottomrule
-\end{longtable}
-
-Trong phương án gán nhãn bổ sung, mỗi người cần ghi cả nhãn và tình trạng đủ/thiếu mốc tham chiếu. Không ép ảnh không đủ thông tin vào một mức ngập chỉ để tăng số mẫu. Độ đồng thuận cần được tính trên nhãn độc lập trước phân xử, kèm phân bố lớp và ma trận bất đồng; kết quả chưa đo không được điền bằng tỷ lệ dự kiến. Mẫu dùng thử hướng dẫn phải được tách khỏi tập test xác nhận. Đây là thiết kế hoàn thiện quy trình, chưa phải xác nhận đã có hai người gán hoặc chuyên gia thẩm định bộ ảnh hiện tại.
-
-Với phiên dữ liệu tiếp theo, bảng chia cần được khóa trước lựa chọn mô hình; mọi sửa nhãn hoặc bổ sung ảnh tạo một phiên mới thay vì ghi đè âm thầm. Nếu khôi phục được nguồn hoặc checksum cũ, hồ sơ bổ sung phải ghi rõ ngày và căn cứ khôi phục, không gán ngược thành metadata đã tồn tại lúc huấn luyện. Đối với CrisisMMD, dữ liệu được quản lý theo tweet ID, cặp ảnh--văn bản và sự kiện; nhãn informative giữ nguyên nhiệm vụ của pilot ở Mục~\ref{sec:multimodal-pilot}, không dùng làm nhãn mức ngập hoặc nguy cấp.
+\subsection{Quản lý và hoàn thiện dữ liệu}\label{sec:data-process}
+Quy trình gồm thu thập, sàng lọc, làm sạch, gán nhãn, chia tập và lưu phiên bản. Hồ sơ bổ sung cần gắn ID với nguồn/sự kiện và căn cứ sử dụng; giữ nhãn độc lập trước phân xử, báo độ đồng thuận và lưu checksum bảng chia. Khi đổi nhãn hoặc bổ sung ảnh, tạo phiên dữ liệu mới và giữ lịch sử. Các khoảng trống hiện có được tập hợp tại Mục~\ref{sec:04-evaluation-limitations}.
 
 \subsection{Dữ liệu khẩn cấp có cấu trúc}
 Bảng tham chiếu liệt kê toàn bộ $2^5=32$ tổ hợp của năm cờ Boolean do nhóm chọn: không phản ứng (\texttt{unresponsive}), khó thở hoặc tím tái (\texttt{respiratory\_\allowbreak{}distress\_\allowbreak{}or\_\allowbreak{}cyanosis}), chảy máu nhiều (\texttt{heavy\_bleeding}), co giật (\texttt{active\_convulsions}) và chấn thương nguy cơ cao (\texttt{high\_risk\_trauma}). Nhãn dương theo quy tắc OR của nhóm: có ít nhất một cờ thì dương. Do duyệt đủ không gian tổ hợp, bảng có tính tất định và có thể kiểm tra từng dòng.
@@ -85,7 +68,7 @@ Candidate 4.1 là bộ dữ liệu tổng hợp riêng cho độ bền vững c�
 \subsection{CrisisMMD cho pilot ảnh--văn bản}
 Pilot đã sử dụng dữ liệu CrisisMMD \citep{alam2018crisismmd} có nhãn informative thống nhất giữa hai nguồn để huấn luyện các classifier văn bản, ảnh và fusion. Sau lọc trùng xuyên split, giữ 2.971 cặp train, 589 validation và 701 test; test là sự kiện lũ Sri Lanka, validation là Maria, còn train thuộc năm sự kiện khác. Cách chia và ngưỡng được khóa riêng cho pilot. Nguồn mô tả corpus bằng tiếng Anh, nhưng chưa có đánh giá ngôn ngữ từng hàng. Nhãn mô tả tính hữu ích thông tin của bài đăng, không mô tả độ sâu ngập, mức nguy cấp hoặc thứ tự điều phối. Quy trình chọn mẫu và kết quả ở Mục~\ref{sec:multimodal-pilot}; không nhập các cặp này vào Dataset\_Flood hoặc các RQ mô phỏng.
 
-\paragraph{Tập con dịch tiếng Việt và nhãn AI.} Đợt pilot ở Mục~\ref{sec:vi-silver-pilot} dùng 300 cặp chọn từ cohort CrisisMMD trên đây, dịch văn bản và gán lại task request bằng AI theo chỉ đạo bổ sung. Giữ riêng bốn ca chưa rõ nghĩa, còn \VISilverTrainN/\VISilverDevN/\VISilverTestN{} cặp theo split sự kiện cũ. Đây là dữ liệu dẫn xuất từ cùng nguồn, không phải nguồn độc lập thứ sáu hoặc corpus người Việt gửi tin; nhãn AI chỉ đọc câu nguồn, không có nhãn người độc lập hay độ đồng thuận được xác nhận.
+\paragraph{Tập con dịch tiếng Việt và nhãn AI.} Đợt pilot ở Mục~\ref{sec:vi-silver-pilot} dùng 300 cặp chọn từ cohort CrisisMMD trên đây, dịch văn bản và gán lại task request bằng AI theo chỉ đạo bổ sung. Giữ riêng bốn ca chưa rõ nghĩa, còn \VISilverTrainN/\VISilverDevN/\VISilverTestN{} cặp theo split sự kiện cũ. Đây là dữ liệu dẫn xuất từ cùng nguồn, không phải nguồn độc lập thứ sáu hoặc corpus người Việt gửi tin; nhãn AI dựa trên câu nguồn. \VietnameseDataReviewVI{}
 
 \subsection{Lưu trữ và truy vết}
 Các bảng số liệu và hình định lượng được sinh từ artifact đã lưu bằng script, kèm bản ghi nguồn và mã băm trong hồ sơ provenance. Bảng thiết kế và sơ đồ giải thích được biên soạn trong nguồn LaTeX, phân biệt với kết quả thực nghiệm. Dữ liệu, seed, cấu hình và kết quả của từng lần chạy được giữ cùng nhau để tái lập; quy trình cụ thể ở Mục~\ref{sec:02-reproducibility}.

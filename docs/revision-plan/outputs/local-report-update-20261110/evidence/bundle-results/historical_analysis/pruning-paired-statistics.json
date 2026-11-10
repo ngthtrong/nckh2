@@ -1,0 +1,432 @@
+{
+  "status": "DEVELOPMENT_REANALYSIS",
+  "n_images": 256,
+  "n_split_groups": 252,
+  "predictions_sha256": "8d2baaef4d7b8b7def7c693c7ca8635354dc1e7689c983515c66badefdc14cdd",
+  "split_sha256": "f7b52cd25411d4d1df2f7f80745a2cf430819773854345798cf7e093e3bcba45",
+  "bootstrap_draws": 2000,
+  "metrics": {
+    "baseline_onnx": {
+      "accuracy": 0.7578125,
+      "macro_f1": 0.7426491791647138,
+      "recall_high": 0.7407407407407407,
+      "critical_errors": 3,
+      "mae_levels": 0.25390625,
+      "confusion_class_order": [
+        "low",
+        "medium",
+        "high",
+        "non_flood"
+      ],
+      "confusion": [
+        [
+          34,
+          14,
+          0,
+          8
+        ],
+        [
+          11,
+          42,
+          6,
+          1
+        ],
+        [
+          2,
+          12,
+          40,
+          0
+        ],
+        [
+          8,
+          0,
+          0,
+          78
+        ]
+      ]
+    },
+    "baseline_pte": {
+      "accuracy": 0.7578125,
+      "macro_f1": 0.7426491791647138,
+      "recall_high": 0.7407407407407407,
+      "critical_errors": 3,
+      "mae_levels": 0.25390625,
+      "confusion_class_order": [
+        "low",
+        "medium",
+        "high",
+        "non_flood"
+      ],
+      "confusion": [
+        [
+          34,
+          14,
+          0,
+          8
+        ],
+        [
+          11,
+          42,
+          6,
+          1
+        ],
+        [
+          2,
+          12,
+          40,
+          0
+        ],
+        [
+          8,
+          0,
+          0,
+          78
+        ]
+      ]
+    },
+    "baseline_pth": {
+      "accuracy": 0.7578125,
+      "macro_f1": 0.7426491791647138,
+      "recall_high": 0.7407407407407407,
+      "critical_errors": 3,
+      "mae_levels": 0.25390625,
+      "confusion_class_order": [
+        "low",
+        "medium",
+        "high",
+        "non_flood"
+      ],
+      "confusion": [
+        [
+          34,
+          14,
+          0,
+          8
+        ],
+        [
+          11,
+          42,
+          6,
+          1
+        ],
+        [
+          2,
+          12,
+          40,
+          0
+        ],
+        [
+          8,
+          0,
+          0,
+          78
+        ]
+      ]
+    },
+    "structured_onnx": {
+      "accuracy": 0.80078125,
+      "macro_f1": 0.782609661724706,
+      "recall_high": 0.8518518518518519,
+      "critical_errors": 4,
+      "mae_levels": 0.21484375,
+      "confusion_class_order": [
+        "low",
+        "medium",
+        "high",
+        "non_flood"
+      ],
+      "confusion": [
+        [
+          39,
+          10,
+          1,
+          6
+        ],
+        [
+          12,
+          38,
+          9,
+          1
+        ],
+        [
+          2,
+          6,
+          46,
+          0
+        ],
+        [
+          4,
+          0,
+          0,
+          82
+        ]
+      ]
+    },
+    "structured_pte": {
+      "accuracy": 0.80078125,
+      "macro_f1": 0.782609661724706,
+      "recall_high": 0.8518518518518519,
+      "critical_errors": 4,
+      "mae_levels": 0.21484375,
+      "confusion_class_order": [
+        "low",
+        "medium",
+        "high",
+        "non_flood"
+      ],
+      "confusion": [
+        [
+          39,
+          10,
+          1,
+          6
+        ],
+        [
+          12,
+          38,
+          9,
+          1
+        ],
+        [
+          2,
+          6,
+          46,
+          0
+        ],
+        [
+          4,
+          0,
+          0,
+          82
+        ]
+      ]
+    },
+    "structured_pth": {
+      "accuracy": 0.80078125,
+      "macro_f1": 0.782609661724706,
+      "recall_high": 0.8518518518518519,
+      "critical_errors": 4,
+      "mae_levels": 0.21484375,
+      "confusion_class_order": [
+        "low",
+        "medium",
+        "high",
+        "non_flood"
+      ],
+      "confusion": [
+        [
+          39,
+          10,
+          1,
+          6
+        ],
+        [
+          12,
+          38,
+          9,
+          1
+        ],
+        [
+          2,
+          6,
+          46,
+          0
+        ],
+        [
+          4,
+          0,
+          0,
+          82
+        ]
+      ]
+    }
+  },
+  "pairs": {
+    "baseline_onnx -> baseline_pte": {
+      "correct_to_wrong": 0,
+      "wrong_to_correct": 0,
+      "mcnemar_exact_p_unadjusted": 1.0,
+      "delta_accuracy": 0.0,
+      "delta_macro_f1": 0.0,
+      "delta_macro_f1_ci95_unadjusted": [
+        0.0,
+        0.0
+      ],
+      "mcnemar_holm_p": 1.0
+    },
+    "baseline_onnx -> baseline_pth": {
+      "correct_to_wrong": 0,
+      "wrong_to_correct": 0,
+      "mcnemar_exact_p_unadjusted": 1.0,
+      "delta_accuracy": 0.0,
+      "delta_macro_f1": 0.0,
+      "delta_macro_f1_ci95_unadjusted": [
+        0.0,
+        0.0
+      ],
+      "mcnemar_holm_p": 1.0
+    },
+    "baseline_onnx -> structured_onnx": {
+      "correct_to_wrong": 15,
+      "wrong_to_correct": 26,
+      "mcnemar_exact_p_unadjusted": 0.11727520595741225,
+      "delta_accuracy": 0.04296875,
+      "delta_macro_f1": 0.03996048255999218,
+      "delta_macro_f1_ci95_unadjusted": [
+        -0.009780973521333058,
+        0.09337344384007074
+      ],
+      "mcnemar_holm_p": 1.0
+    },
+    "baseline_onnx -> structured_pte": {
+      "correct_to_wrong": 15,
+      "wrong_to_correct": 26,
+      "mcnemar_exact_p_unadjusted": 0.11727520595741225,
+      "delta_accuracy": 0.04296875,
+      "delta_macro_f1": 0.03996048255999218,
+      "delta_macro_f1_ci95_unadjusted": [
+        -0.009780973521333058,
+        0.09337344384007074
+      ],
+      "mcnemar_holm_p": 1.0
+    },
+    "baseline_onnx -> structured_pth": {
+      "correct_to_wrong": 15,
+      "wrong_to_correct": 26,
+      "mcnemar_exact_p_unadjusted": 0.11727520595741225,
+      "delta_accuracy": 0.04296875,
+      "delta_macro_f1": 0.03996048255999218,
+      "delta_macro_f1_ci95_unadjusted": [
+        -0.009780973521333058,
+        0.09337344384007074
+      ],
+      "mcnemar_holm_p": 1.0
+    },
+    "baseline_pte -> baseline_pth": {
+      "correct_to_wrong": 0,
+      "wrong_to_correct": 0,
+      "mcnemar_exact_p_unadjusted": 1.0,
+      "delta_accuracy": 0.0,
+      "delta_macro_f1": 0.0,
+      "delta_macro_f1_ci95_unadjusted": [
+        0.0,
+        0.0
+      ],
+      "mcnemar_holm_p": 1.0
+    },
+    "baseline_pte -> structured_onnx": {
+      "correct_to_wrong": 15,
+      "wrong_to_correct": 26,
+      "mcnemar_exact_p_unadjusted": 0.11727520595741225,
+      "delta_accuracy": 0.04296875,
+      "delta_macro_f1": 0.03996048255999218,
+      "delta_macro_f1_ci95_unadjusted": [
+        -0.009780973521333058,
+        0.09337344384007074
+      ],
+      "mcnemar_holm_p": 1.0
+    },
+    "baseline_pte -> structured_pte": {
+      "correct_to_wrong": 15,
+      "wrong_to_correct": 26,
+      "mcnemar_exact_p_unadjusted": 0.11727520595741225,
+      "delta_accuracy": 0.04296875,
+      "delta_macro_f1": 0.03996048255999218,
+      "delta_macro_f1_ci95_unadjusted": [
+        -0.009780973521333058,
+        0.09337344384007074
+      ],
+      "mcnemar_holm_p": 1.0
+    },
+    "baseline_pte -> structured_pth": {
+      "correct_to_wrong": 15,
+      "wrong_to_correct": 26,
+      "mcnemar_exact_p_unadjusted": 0.11727520595741225,
+      "delta_accuracy": 0.04296875,
+      "delta_macro_f1": 0.03996048255999218,
+      "delta_macro_f1_ci95_unadjusted": [
+        -0.009780973521333058,
+        0.09337344384007074
+      ],
+      "mcnemar_holm_p": 1.0
+    },
+    "baseline_pth -> structured_onnx": {
+      "correct_to_wrong": 15,
+      "wrong_to_correct": 26,
+      "mcnemar_exact_p_unadjusted": 0.11727520595741225,
+      "delta_accuracy": 0.04296875,
+      "delta_macro_f1": 0.03996048255999218,
+      "delta_macro_f1_ci95_unadjusted": [
+        -0.009780973521333058,
+        0.09337344384007074
+      ],
+      "mcnemar_holm_p": 1.0
+    },
+    "baseline_pth -> structured_pte": {
+      "correct_to_wrong": 15,
+      "wrong_to_correct": 26,
+      "mcnemar_exact_p_unadjusted": 0.11727520595741225,
+      "delta_accuracy": 0.04296875,
+      "delta_macro_f1": 0.03996048255999218,
+      "delta_macro_f1_ci95_unadjusted": [
+        -0.009780973521333058,
+        0.09337344384007074
+      ],
+      "mcnemar_holm_p": 1.0
+    },
+    "baseline_pth -> structured_pth": {
+      "correct_to_wrong": 15,
+      "wrong_to_correct": 26,
+      "mcnemar_exact_p_unadjusted": 0.11727520595741225,
+      "delta_accuracy": 0.04296875,
+      "delta_macro_f1": 0.03996048255999218,
+      "delta_macro_f1_ci95_unadjusted": [
+        -0.009780973521333058,
+        0.09337344384007074
+      ],
+      "mcnemar_holm_p": 1.0
+    },
+    "structured_onnx -> structured_pte": {
+      "correct_to_wrong": 0,
+      "wrong_to_correct": 0,
+      "mcnemar_exact_p_unadjusted": 1.0,
+      "delta_accuracy": 0.0,
+      "delta_macro_f1": 0.0,
+      "delta_macro_f1_ci95_unadjusted": [
+        0.0,
+        0.0
+      ],
+      "mcnemar_holm_p": 1.0
+    },
+    "structured_onnx -> structured_pth": {
+      "correct_to_wrong": 0,
+      "wrong_to_correct": 0,
+      "mcnemar_exact_p_unadjusted": 1.0,
+      "delta_accuracy": 0.0,
+      "delta_macro_f1": 0.0,
+      "delta_macro_f1_ci95_unadjusted": [
+        0.0,
+        0.0
+      ],
+      "mcnemar_holm_p": 1.0
+    },
+    "structured_pte -> structured_pth": {
+      "correct_to_wrong": 0,
+      "wrong_to_correct": 0,
+      "mcnemar_exact_p_unadjusted": 1.0,
+      "delta_accuracy": 0.0,
+      "delta_macro_f1": 0.0,
+      "delta_macro_f1_ci95_unadjusted": [
+        0.0,
+        0.0
+      ],
+      "mcnemar_holm_p": 1.0
+    }
+  },
+  "limits": [
+    "Exact McNemar assumes independent paired units; residual event/source dependence is unresolved",
+    "Bootstrap groups are recorded split groups, not proven independent events",
+    "Macro-F1 intervals unadjusted; Holm family covers all listed McNemar contrasts",
+    "Previously viewed test, no independent confirmation or field-effectiveness claim"
+  ]
+}
