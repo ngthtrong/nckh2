@@ -1,8 +1,8 @@
 \section{Kiến trúc hệ thống}\label{sec:03-system-architecture}
 \subsection{Tổng thể các thành phần}
-Hệ thống cứu hộ khẩn cấp được thiết kế theo mô hình kiến trúc phân tán đa tầng, bao gồm ba phân hệ chính: (1) Ứng dụng di động biên trên nền Flutter cho phép người dân và lực lượng cứu hộ gửi báo cáo hiện trường, bổ sung vị trí, hình ảnh và tình trạng nạn nhân hoặc hộ dân cần hỗ trợ; (2) Máy chủ xử lý trung tâm nền FastAPI tích hợp lõi thuật toán \texttt{rescue\_core} phục vụ gom cụm đồ thị Louvain và xếp hạng ưu tiên đa tiêu chí $P(c)$; (3) Bàn điều phối Web GIS trên nền Leaflet phục vụ điều phối viên giám sát bản đồ sự cố và ra quyết định cứu trợ theo thời gian thực. Trạng thái nghiệp vụ được lưu trữ bền vững tại cơ sở dữ liệu SQLite (chế độ WAL), kết hợp cùng thư mục lưu trữ ảnh hiện trường (\texttt{uploads/}).
+Hệ thống gồm ứng dụng Flutter để gửi báo cáo hiện trường, máy chủ FastAPI để phân cụm Louvain và tính điểm ưu tiên $P(c)$, cùng Web GIS dùng Leaflet để hỗ trợ điều phối. SQLite ở chế độ WAL lưu trạng thái nghiệp vụ; ảnh được lưu riêng trên máy chủ.
 
-Mô hình học sâu phân loại ngập lụt MobileNetV3 và bộ quy tắc tính điểm khẩn cấp được triển khai trực tiếp tại biên (On-device Edge AI) nhằm trích xuất đặc trưng tức thời. Các Jupyter Notebook nghiên cứu đóng vai trò là môi trường đánh giá độc lập để kiểm chứng thuật toán và phân tích hiệu năng ngoại tuyến, hoàn toàn tách biệt khỏi quy trình vận hành trực tuyến của hệ thống.
+MobileNetV3 và mô hình khẩn cấp có cấu trúc chạy tại thiết bị. Notebook dùng cho thực nghiệm ngoại tuyến, tách với luồng xử lý báo cáo của ứng dụng.
 
 Hình~\ref{fig:system-architecture} trình bày các thành phần và tuyến trao đổi dữ liệu giữa ứng dụng, máy chủ và bàn điều phối.
 
@@ -14,7 +14,7 @@ Hình~\ref{fig:system-architecture} trình bày các thành phần và tuyến t
 \label{fig:system-architecture}
 \end{reportlandscapefigure}
 
-Hệ thống cho phép tiếp nhận đồng thời dữ liệu thực tế từ ứng dụng di động của người dân và các nguồn dữ liệu mô phỏng phục vụ diễn tập thực nghiệm. Các bản ghi dữ liệu mô phỏng được gắn cờ phân biệt rõ ràng, đảm bảo quy trình kiểm thử và trực quan hóa bản đồ không ảnh hưởng đến các yêu cầu cứu hộ thực tế.
+Bản ghi mô phỏng được gắn cờ để phân biệt với báo cáo từ ứng dụng.
 
 Luồng phối hợp giữa các phân hệ và phản hồi trạng thái được tổng hợp ở Hình~\ref{fig:overall-flowchart}.
 
@@ -32,12 +32,12 @@ Luồng phối hợp giữa các phân hệ và phản hồi trạng thái đư�
 \input{chapters/03-system/sections/data-models}
 
 \subsection{Dịch vụ phân cụm và hàng xem xét}
-Trong bản mã mobile/backend được đối chiếu tại repo, adapter \texttt{to\_report\_v2} chuyển báo cáo lưu trữ sang tuple thuật toán. Nhãn ngập được ánh xạ \texttt{non\_flood}$\mapsto0$, \texttt{low}$\mapsto0{,}33$, \texttt{medium}$\mapsto0{,}66$, \texttt{high}$\mapsto1$. Nếu payload có \texttt{flood}, dùng trường này. Ứng dụng gửi điểm LR trong trường \texttt{E\_i}; adapter hiện lấy $E$ từ trường \texttt{urgency} nếu có, nếu không thì suy từ mô tả bằng từ khóa. Adapter chưa đọc trực tiếp \texttt{E\_i}, nên đường nối từ điểm LR của ứng dụng đến điểm khẩn cấp của thuật toán chưa được tích hợp. $N$ hiện là số mắc kẹt cộng số bị thương; $V$ là số nhóm yếu thế được chọn khi không có trường trực tiếp.
+Trong bản mã được đối chiếu, bộ chuyển đổi (adapter) đưa báo cáo lưu trữ về các trường đầu vào thuật toán. Nhãn ngập ánh xạ \texttt{non\_flood}$\mapsto0$, \texttt{low}$\mapsto0{,}33$, \texttt{medium}$\mapsto0{,}66$, \texttt{high}$\mapsto1$; trường \texttt{flood} được dùng nếu có. Điểm LR được lưu trong \texttt{E\_i}, nhưng adapter lấy $E$ từ \texttt{urgency} hoặc từ khóa mô tả. $N$ là số mắc kẹt cộng số bị thương; nếu thiếu trường trực tiếp, $V$ là số nhóm yếu thế được chọn.
 
-Các ánh xạ chuyển thông tin định tính thành các đại lượng số học phục vụ giải thuật. Đây là tích hợp bằng công thức và heuristic từ các trường quan sát; fusion học được trên CrisisMMD là pilot ngoại tuyến riêng ở Mục~\ref{sec:multimodal-pilot}. Mục~\ref{sec:multimodal-design} trình bày tuyến pilot và thiết kế mở rộng tiếng Việt; tình trạng mobile do nhóm khác phụ trách được ghi riêng ở Mục~\ref{sec:mobile-integration-status}. Lược đồ phân tích đầy đủ ở trên là thiết kế đề xuất; cần phân biệt với adapter đang triển khai. Trọng số và tham số phân cụm, xếp hạng được cấu hình trong mã nguồn backend. Điều phối viên sử dụng kết quả trên dashboard để xem xét báo cáo, xác minh thông tin, giao đội và cập nhật trạng thái cứu hộ.
+Các ánh xạ trên dùng công thức và quy tắc kinh nghiệm; trọng số được cấu hình tại backend. Lược đồ đầy đủ ở phần trước là thiết kế đề xuất. Phương pháp fusion ở Mục~\ref{sec:multimodal-design}; tình trạng tích hợp mobile do nhóm khác phụ trách ở Mục~\ref{sec:mobile-integration-status}.
 
 \subsubsection{Luồng điểm khẩn cấp hiện tại và phương án nối điểm}
-Hình~\ref{fig:urgency-current-proposed} thể hiện rõ trường được lưu và trường được tiêu thụ. Nét đứt chỉ phương án cần triển khai, không phải đường dữ liệu đã hoạt động. Khi khóa \texttt{urgency} có mặt, adapter chuyển thành số hữu hạn rồi chặn về $[0,1]$; nếu không chuyển được hoặc số không hữu hạn thì trả giá trị thiếu. Chỉ khi không có khóa này mới dò từ khóa: mô tả không rỗng nhưng không khớp từ khóa nhận mặc định 0,4, còn mô tả rỗng trả giá trị thiếu. Vì vậy lỗi giá trị không tự chuyển sang nhánh từ khóa, và mức mặc định 0,4 chỉ là heuristic hiện hành.
+Hình~\ref{fig:urgency-current-proposed} phân biệt đường hiện có và phương án nối điểm bằng nét đứt. Nếu có khóa \texttt{urgency}, adapter chặn số hữu hạn về $[0,1]$; giá trị lỗi hoặc không hữu hạn được trả thành thiếu. Chỉ khi vắng khóa này mới dò từ khóa: mô tả không rỗng, không khớp nhận mặc định 0,4; mô tả rỗng trả thành thiếu. Lỗi giá trị không tự chuyển sang dò từ khóa.
 
 \begin{figure}[htbp]\centering
 \begin{tikzpicture}[>=Stealth,node distance=5mm and 7mm,font=\small,
@@ -62,19 +62,19 @@ Hình~\ref{fig:urgency-current-proposed} thể hiện rõ trường được lư
 \label{fig:urgency-current-proposed}
 \end{figure}
 
-Phương án mở rộng không ghi đè các điểm khác ngữ nghĩa vào cùng một trường. Giá trị LR phải đi cùng phiên bản hệ số và trạng thái từng cờ; không chọn cờ có thể là chưa khai báo, không đủ để khẳng định không có nguy cấp. Nếu LR và urgency cùng hiện diện nhưng bất đồng, cần giữ cả hai và chuyển xác minh theo chính sách được thống nhất, thay vì mặc định lấy cực đại hoặc trung bình. Chỉ sau khi xác định nguồn, quy tắc thiếu/mâu thuẫn và kiểm thử hợp đồng mới được nối một giá trị vào \texttt{ReportV2.E}. Xác suất informative hoặc xác suất có yêu cầu hỗ trợ của thiết kế văn bản không thay thế điểm khẩn cấp. Sơ đồ này mô tả đường ánh xạ của bản adapter được đối chiếu, không đại diện cho log của bản mobile do nhóm khác phụ trách. Phần sửa backend trong đợt này là canonicalization trước dựng đồ thị, không thay ngữ nghĩa các điểm khẩn cấp.
+Phương án nối điểm giữ riêng LR, urgency và nguồn của từng giá trị. LR đi cùng phiên bản hệ số và trạng thái cờ; cờ chưa chọn có thể là chưa khai báo. Khi các nguồn bất đồng, chính sách xác minh phải được thống nhất trước khi chọn giá trị cho \texttt{ReportV2.E}. Xác suất informative/request có ngữ nghĩa khác điểm khẩn cấp. Sơ đồ chỉ mô tả adapter được đối chiếu; sửa backend ngày 10/11/2026 là khử bản sao trước dựng đồ thị.
 
 Báo cáo resolved/cancelled được loại khỏi cụm đang hoạt động. Cụm được tính lại khi version dữ liệu liên quan thay đổi; nếu một lần tính kéo dài, dịch vụ có cơ chế cập nhật nền. \texttt{clusterId} có thể đổi giữa lần chạy, còn \texttt{clusterKey} dùng ID nhỏ nhất trong cụm để hỗ trợ giữ lựa chọn trên giao diện. Khóa này cũng có thể đổi khi thành viên thay đổi; các thao tác điều phối cần xác nhận danh sách hiện tại.
 
-Trước khi dựng đồ thị, adapter mới khử bản sao exact theo nội dung và trường quan sát, giữ ánh xạ ID gốc; số liệu kiểm hồi quy nằm ở Mục~\ref{sec:software-revision-checks}. Tình trạng nhánh NLP/fusion mobile do nhóm phát triển riêng phụ trách được ghi tại Mục~\ref{sec:mobile-integration-status}.
+Adapter khử bản sao exact theo nội dung và trường quan sát, giữ ánh xạ ID gốc; kiểm hồi quy ở Mục~\ref{sec:software-revision-checks}.
 
 \subsection{Dashboard và vòng phản hồi}
-Dashboard là HTML, ES module và CSS phục vụ từ backend hoặc nginx. Leaflet được tích hợp cục bộ để thư viện giao diện không cần phụ thuộc Internet bên ngoài khi triển khai mạng nội bộ. Giao diện polling báo cáo thay đổi và cụm mỗi 5 giây, dùng cursor/epoch và ETag để giảm tải so với tải lại toàn bộ.
+Dashboard được phục vụ từ backend hoặc nginx, nạp Leaflet cục bộ. Giao diện kiểm tra báo cáo và cụm thay đổi mỗi 5 giây, dùng cursor/epoch và ETag để hạn chế tải lại.
 
 Điều phối viên có thể lọc theo trạng thái/cụm, xem chi tiết, gán đội, ghi chú, cập nhật vị trí và chuyển trạng thái. API quản trị hỗ trợ quản lý tài khoản và sao lưu. Nhật ký \texttt{report\_events} ghi actor, nguồn và thời gian thao tác để theo dõi quá trình xử lý. Ứng dụng di động định kỳ đồng bộ trạng thái báo cáo từ máy chủ để hiển thị phản hồi kịp thời cho người dân.
 
 \subsection{Luồng xử lý dữ liệu và hỗ trợ điều phối}
-Sơ đồ tại Hình~\ref{fig:research-pipeline} thể hiện ranh giới phân tách dữ liệu của hệ thống: các trường thông tin quan sát trực tiếp được đưa vào giải thuật gom cụm đồ thị và xếp hạng ưu tiên; các báo cáo thiếu thông tin vị trí được chuyển vào hàng đợi xem xét riêng; trong khi nhãn thực tế được bảo toàn độc lập phục vụ kiểm chứng thực nghiệm. Trên hệ thống vận hành thực tế, danh sách ưu tiên đóng vai trò hỗ trợ điều phối viên ra quyết định phân bổ nguồn lực, đảm bảo tính linh hoạt và an toàn trong tác chiến cứu hộ.
+Hình~\ref{fig:research-pipeline} tách ba đường: trường quan sát đi vào phân cụm/xếp hạng; báo cáo thiếu vị trí vào hàng xem xét; nhãn đánh giá chỉ nối sau khi lưu dự đoán. Danh sách ưu tiên hỗ trợ điều phối viên xác minh và phân công.
 \begin{reportlandscapefigure}
 \centering
 \includegraphics[width=\linewidth,height=\ReportLandscapeImageHeight,keepaspectratio]{research_pipeline_report.pdf}

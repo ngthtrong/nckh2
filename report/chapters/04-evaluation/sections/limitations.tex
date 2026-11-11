@@ -9,10 +9,10 @@ Bản dịch tiếng Việt và nhãn AI đã được nhóm kiểm tra, có cá
 RQ1--RQ3 dùng dữ liệu bán tổng hợp/tổng hợp. Bối cảnh địa lý, nhãn lợi ích và harm phục vụ so sánh có kiểm soát; hiệu quả cứu hộ thực địa chưa được đo. LR năm cờ học nhãn OR tổng hợp, chưa là mô hình nguy kịch được xác nhận chuyên môn. Các heuristic về số người, yếu thế và thời gian cần thống nhất với đơn vị sử dụng.
 
 \paragraph{Thiết bị và mạng.}
-Benchmark gồm 32 cấu hình trên bốn điện thoại, dùng cùng 256 ảnh; chưa có đo lặp kiểm soát nhiệt/tải hoặc pin/RAM. CPU đo predict, ứng dụng đo \texttt{classifyImage}, nên không so speedup trực tiếp giữa hai phạm vi. Phép đo truyền tải dùng proxy, còn SMS và mạng viễn thông thật cần kiểm riêng. \OfflineFixVI{} Các kiểm hồi quy và tích hợp Linux ở Mục~\ref{sec:software-revision-checks} có phạm vi riêng.
+Benchmark gồm 32 cấu hình trên bốn điện thoại, dùng cùng 256 ảnh; chưa có đo lặp kiểm soát nhiệt/tải hoặc pin/RAM. CPU đo predict, ứng dụng đo \texttt{classifyImage}, nên không so speedup trực tiếp giữa hai phạm vi. Phép đo truyền tải dùng proxy, còn SMS và mạng viễn thông thật cần kiểm riêng. Khắc phục lỗi gửi khi mất mạng và kiểm hồi quy/tích hợp Linux ở Mục~\ref{sec:software-revision-checks}.
 
 \paragraph{Ảnh suy giảm và tối ưu mô hình.}
 Biến đổi CPU áp riêng lên ảnh test, chưa bao quát tổ hợp mưa, mờ, tối và góc chụp tại hiện trường; nhãn sau biến đổi chưa được thẩm định lại. Kế hoạch camera/Android tại Mục~\ref{sec:camera-evaluation-plan} và Mục~\ref{sec:camera-session-plan} chưa có kết quả. PTQ/QAT giảm dung lượng nhưng suy giảm chất lượng; chẩn đoán tensor chưa cô lập nguyên nhân. Pruning 5\% mới cũng chưa bảo toàn macro-F1 baseline. Chẩn đoán thêm và đo lặp hiệu năng/pin/RAM nằm ngoài đợt hiệu chỉnh này.
 
 \paragraph{Tái lập và hướng phát triển.}
-Ba raw \(p\) Spearman và năm giá trị Holm RQ2 chưa khớp khi tái tính; kết luận chưa xác lập lợi ích alignment chung vẫn giữ. Backend đã khử bản sao exact trước tạo đồ thị, còn báo cáo gần trùng và dữ liệu thực cần đánh giá tiếp. Điều phối xét chi phí di chuyển và thí điểm cùng đơn vị cứu hộ được giữ ở hướng phát triển.
+RQ2 còn ba raw \(p\) Spearman và năm Holm chưa khớp tái tính; chưa xác lập lợi ích alignment chung. Backend đã khử bản sao exact; đánh giá gần trùng/dữ liệu thực, điều phối xét chi phí di chuyển và thí điểm cùng đơn vị cứu hộ là các hướng tiếp theo.

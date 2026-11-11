@@ -8,7 +8,7 @@ Tiền xử lý là một phần của mô hình: cùng một ảnh gốc có th
 \end{equation}
 Khi chuyển môi trường cần kiểm tra thứ tự RGB, hướng EXIF, cách làm tròn kích thước letterbox, vị trí đệm và phép nội suy. Vì vậy, khi nhãn của CPU và ứng dụng khác nhau, bước kiểm tra đầu tiên là parity tensor và mã băm asset; chưa có căn cứ quy lỗi ngay cho ONNX hay ExecuTorch.
 
-Chuỗi giải mã và chuẩn hóa chỉ đưa ảnh về cùng hợp đồng đầu vào; nó không bảo đảm ảnh đủ thông tin để phân loại. Ảnh tối có thể che mốc nước, ảnh rung làm mất biên người hoặc xe, còn ảnh nén mạnh có thể làm thay đổi kết cấu. Phóng ảnh nhỏ lên không phục hồi được các chi tiết đó. Giữ tỷ lệ bằng letterbox cũng có đánh đổi: một cảnh rất rộng hoặc cao chỉ chiếm một phần tensor, nên vật thể tham chiếu càng nhỏ. Bởi vậy cần đọc thống kê tệp ở Bảng~\ref{tab:image-profile} cùng phân tích lỗi và phép thử suy giảm CPU ở Mục~\ref{sec:image-quality-cpu-results}; chưa dùng các thao tác tiền xử lý như bằng chứng mô hình đã bền vững với ảnh camera.
+Tiền xử lý thống nhất đầu vào nhưng không khôi phục chi tiết mất do tối, rung hoặc nén. Với cảnh quá rộng hoặc cao, letterbox còn làm vật thể tham chiếu nhỏ hơn trong tensor. Phân tích chất lượng ảnh ở Bảng~\ref{tab:image-profile} và phép thử suy giảm CPU ở Mục~\ref{sec:image-quality-cpu-results}; giới hạn camera ở Mục~\ref{sec:04-evaluation-limitations}.
 
 \subsection{Backbone, đầu phân loại và đầu ra}
 MobileNetV3 kết hợp depthwise convolution, inverted residual, cơ chế điều tiết kênh squeeze-and-excitation và các hàm kích hoạt được chọn theo kiến trúc \citep{howard2019mobilenetv3}. Việc chọn kiến trúc này là một giả thuyết triển khai cần kiểm chứng bằng dữ liệu của đề tài và runtime được dùng.
@@ -35,7 +35,7 @@ Với logit $z_c$, xác suất của lớp $c$ và nhãn dự đoán là
  p_c=\frac{\exp(z_c)}{\sum_{j=1}^{4}\exp(z_j)},\qquad \widehat y=\arg\max_c p_c.
  \label{eq:softmax}
 \end{equation}
-Xác suất softmax được dùng làm confidence trong ứng dụng. Đây là đầu ra của mô hình phân loại, cần kiểm tra calibration trước khi diễn giải như xác suất đúng, và không phải điểm $Q_i$ của công thức xếp hạng. Các script export bọc mô hình bằng softmax để xuất xác suất, nên nơi nhận phải biết output là probabilities hay logits, tránh áp softmax hai lần. Tệp manifest mô tả cấu hình và các yêu cầu sử dụng mô hình; tên tệp giống nhau không đủ xác nhận hai runtime dùng cùng trọng số. Khi kiểm tra parity phải giữ cả thứ tự lớp, tiền xử lý và loại output.
+Ứng dụng dùng xác suất softmax làm confidence, tách với $Q_i$ của xếp hạng; cần kiểm tra hiệu chuẩn trước khi diễn giải là xác suất đúng. Script xuất đã bọc softmax nên phía nhận không áp lại. Đối chiếu runtime phải kiểm hash trọng số, thứ tự lớp, tiền xử lý và loại đầu ra theo manifest.
 
 \subsection{Tăng cường dữ liệu và hàm mục tiêu}
 Notebook dùng tăng cường nhẹ trên tập train: lật ngang với xác suất 0,5; affine trong khoảng $\pm4^\circ$, dịch tối đa 3\% và scale 0,95--1,05; jitter brightness và contrast 0,12, saturation 0,08, hue 0,02. Validation và test chỉ chuyển tensor và chuẩn hóa sau bước EXIF--RGB--letterbox; các phép biến đổi không được thêm vào test khi tính metric cuối. Chúng tạo biến thể thị giác để huấn luyện, không tạo thêm hiện trường độc lập.
@@ -93,7 +93,7 @@ Hình~\ref{fig:training-history} trình bày diễn biến loss theo các epoch 
 \end{minipage}
 \end{figure}
 
-Hình~\ref{fig:training-metrics} trình bày các chỉ số train và validation; Hình~\ref{fig:validation-recall} tách recall validation theo từng lớp. Train loss có xu hướng giảm trong các hàng đã lưu, trong khi validation accuracy dao động. Khoảng cách train--validation ở cuối history cho thấy cần giữ quy tắc chọn trên validation và đánh giá test độc lập. Chỉ từ CSV chưa thể kết luận mọi dao động là overfitting hoặc phiên đã dừng đúng cơ chế early stopping; cần đối chiếu log và metadata checkpoint để xác định nguyên nhân hoặc epoch được xuất cuối.
+Hình~\ref{fig:training-metrics} và \ref{fig:validation-recall} cho thấy train loss giảm trong khi accuracy validation dao động. Khoảng cách cuối history cần được đọc cùng quy tắc chọn checkpoint trên validation. CSV chưa đủ xác định nguyên nhân dao động hoặc việc dừng đúng early stopping; cần log và metadata checkpoint.
 
 \subsection{Tối ưu hóa mô hình: PTQ, QAT và cắt tỉa}\label{sec:02-optimization}
 Ba cơ chế này khác nhau và được đánh giá riêng (Hình~\ref{fig:flow-ai-training-optimization}). Lượng tử hóa ánh xạ số thực $x$ sang số nguyên $x_q$ theo scale $\delta_q>0$ và zero-point $z_q$:
@@ -107,7 +107,7 @@ Cắt tỉa có cấu trúc thay đổi kênh hoặc nhóm tham số của mạn
 
 Phép bổ sung tại Mục~\ref{sec:local-image-update} thử tỷ lệ mục tiêu 5/10/20\% với cùng split, chọn tỷ lệ bằng macro-F1 validation rồi mới đánh giá cấu hình được chọn trên test. Bảng ứng viên giữ kết quả validation, không dùng test để chọn trong grid mới. Phép này không tạo test độc lập mới hoặc thay model pruning 1\% lịch sử trong nguyên mẫu. Chẩn đoán activation PTQ/QAT cũng đã chạy trên một ảnh validation cố định, nhưng mức ghép tensor còn hạn chế nên chưa cô lập được nguyên nhân giảm chất lượng.
 
-Lượng tử hóa thay đổi biểu diễn số và đường thực thi toán tử, còn cắt tỉa thay đổi cấu trúc mạng. Vì vậy QAT không đồng nghĩa với cắt tỉa, và một tệp được gọi là INT8 không tự bảo đảm mọi toán tử chạy nhanh hơn FP32 trên mọi runtime. Kích thước tệp còn phụ thuộc kiểu đóng gói và metadata. Khi đánh giá lựa chọn triển khai, cần so trong cùng phiên: Accuracy và macro-F1 để thấy chất lượng chung; recall high cùng số lỗi nặng để thấy kiểu thất bại; dung lượng asset thực để thấy chi phí lưu/truyền; trung vị và P95 để thấy độ trễ. Không ghép độ trễ thấp nhất của các phiên khác nhau vào một thứ hạng chung.
+Lượng tử hóa đổi biểu diễn số và đường thực thi toán tử; cắt tỉa đổi cấu trúc mạng. So sánh triển khai phải cùng phiên/runtime, xét chất lượng, lỗi nặng, dung lượng asset và median/P95 độ trễ. Tên INT8 hoặc kích thước checkpoint không tự xác định mức tăng tốc.
 
 \begin{reportlandscapefigure}
 \centering

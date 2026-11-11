@@ -28,6 +28,8 @@
     \addchap{Tài liệu tham khảo}
     \setstretch{1.15}%
     \urlstyle{same}%
+    % Keep https:// together; xurl may otherwise break after the scheme colon.
+    \appto\UrlSpecials{\do\:{\mathchar`\:}}%
     \raggedright
     \begin{english}
       \ifReportLegalCited
