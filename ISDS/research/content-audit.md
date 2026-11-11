@@ -2,6 +2,10 @@
 
 Prepared 2026-11-07. Scope: source-bound adaptation of the supplied manuscript into the user-approved 26-slide conference outline. No manuscript edits, new benchmark batch, scientific acceptance decision, or external manuscript upload was performed by this task.
 
+Updated 2026-11-11: the deck has been revised against the supplied suggestions. See [revision-summary.md](revision-summary.md) for the current slide mapping, source locators and illustration provenance. Slide numbers in the original audit table below refer to the original order; current order is machine-readable in [../slide-index.json](../slide-index.json). Research questions are now slide 5; Louvain is slide 10. The RQ1 stress slide now shows an always-visible static cohort heatmap as well as the original GIF. No scientific source data, manuscript, benchmark results or existing GIF frames were changed.
+
+Follow-up revision on the same date: slide 3 now uses three editable flood-report scenes; slide 6 has a redrawn observable/evaluator pipeline; slide 10 has a static, editable Louvain diagram including aggregate self-loops. The old Louvain GIF remains an archived local asset. Presenter-facing scripts and PPTX Notes contain English and Vietnamese without citations, source paths or timing metadata, as requested. Slide-level provenance is stored separately in [slide-sources.json](slide-sources.json).
+
 ## Authority and author metadata
 
 - Canonical title: **Stress-Testing Product-Gated Clustering and Bounded Priority Ranking for Flood-Rescue Reports: A Synthetic Study** (`paper/main.tex:61–62`).
@@ -53,8 +57,9 @@ No automatedRetractionWatchscreen, externalmodelreview, publicationapproval or h
 
 ## Speaking notes and language
 
-- `speaker-notes.json`: exactly26objects, each with slide,title,seconds,notes; total1,175seconds(~19.6minutes) and2,541words beforequestions. Timingis anallocation,notameasuredrehearsal.
-- `speaker-notes.md`: sameEnglishtextforhumanediting.
+- `talk-track.json`: 26 ordered English/Vietnamese pairs; 2,124 English words. This is spoken content, without citations or timing metadata.
+- `speaker-notes.json`: 26 records with slide, original_slide, title, notes_en, notes_vi and combined notes; the combined text is embedded unchanged in the PPTX.
+- `speaker-notes.md`: all 26 English slide scripts, followed by all 26 Vietnamese slide scripts. Each language section includes slide numbers and spoken content only.
 - No sources were replaced with generic disaster photographs. Generated diagrams and pedagogicalGIFs should be labeled as schematics or datasetvisualizations as appropriate.
 
 ## AI assistance record

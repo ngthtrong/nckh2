@@ -31,6 +31,8 @@ ASSETS = OUT / "assets"
 SCIENCE = ASSETS / "science"
 NATIVE = ASSETS / "native"
 TEMPLATE = ROOT / "CTU_PowerPoint_Template_English.pptx"
+if not TEMPLATE.exists():
+    TEMPLATE = ROOT / "templateCTU/ctu-slides/assets/CTU_PowerPoint_Template_English.pptx"
 BLUE, CYAN, TEAL = "0070C0", "00AFEF", "009988"
 INK, MUTED, ORANGE, RED = "17212B", "526474", "C97724", "AD363C"
 PALE, LINE, WHITE = "F0F6FA", "D6E3EC", "FFFFFF"
@@ -520,7 +522,10 @@ def build():
     dest=OUT/"ISDS2026_Paper_6444_Conference_Deck.pptx"
     prs.save(dest)
     (OUT/"slide-index.json").write_text(json.dumps([{"slide":i,"title":t} for i,t in enumerate(titles,1)],indent=2,ensure_ascii=False)+"\n")
-    source_files=[TEMPLATE,ROOT/"ID_8253_Chromatic_Anchoring_ISDS2026_Conference_Deck.pptx",ROOT/"paper/main.tex",ROOT/"paper/main.pdf",ROOT/"paper/references.bib"]
+    style_reference=ROOT/"ID_8253_Chromatic_Anchoring_ISDS2026_Conference_Deck.pptx"
+    if not style_reference.exists():
+        style_reference=OUT/"checks/reference/ID_8253_Chromatic_Anchoring_ISDS2026_Conference_Deck.pdf"
+    source_files=[TEMPLATE,style_reference,ROOT/"paper/main.tex",ROOT/"paper/main.pdf",ROOT/"paper/references.bib"]
     manifest={"slides":len(prs.slides),"overview_slide":2,"language":"English","target_duration_minutes":20,
               "inputs":{str(p.relative_to(ROOT)):hashlib.sha256(p.read_bytes()).hexdigest() for p in source_files},
               "deck_sha256":hashlib.sha256(dest.read_bytes()).hexdigest(),
@@ -537,4 +542,10 @@ def build():
 
 
 if __name__=="__main__":
-    build()
+    # Revise the working presentation in place so edits made in PowerPoint
+    # (including the cover and the repositioned overview) survive a rebuild.
+    # The original constructor remains available when starting without a deck.
+    if not (OUT/"ISDS2026_Paper_6444_Conference_Deck.pptx").exists():
+        build()
+    from revise_deck import revise
+    revise()

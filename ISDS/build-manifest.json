@@ -4,13 +4,13 @@
   "language": "English",
   "target_duration_minutes": 20,
   "inputs": {
-    "CTU_PowerPoint_Template_English.pptx": "057d5a620d64cf7f31e277118b841314ca1628e304e356fe69d4364111eecbf1",
-    "ID_8253_Chromatic_Anchoring_ISDS2026_Conference_Deck.pptx": "bcf5817f5f0048e466c746258ce1643e11ce6369787443c99549e7880efe05db",
     "paper/main.tex": "ff50cd7f3d42604ea7ef70da2d83344bd299482969d28f34111156b6a7e5cca5",
     "paper/main.pdf": "a75e32734be0e4a1abb66711caa0e05ea6ad1aa2de0fa2c02f0ee7af038cca59",
-    "paper/references.bib": "67f5b8d57c0899f4cf91149c3c356f3fe79aff07aee7d8e75318f04d63b362f6"
+    "paper/references.bib": "67f5b8d57c0899f4cf91149c3c356f3fe79aff07aee7d8e75318f04d63b362f6",
+    "templateCTU/ctu-slides/assets/CTU_PowerPoint_Template_English.pptx": "057d5a620d64cf7f31e277118b841314ca1628e304e356fe69d4364111eecbf1",
+    "ISDS/checks/reference/ID_8253_Chromatic_Anchoring_ISDS2026_Conference_Deck.pdf": "3c3624c01be13010d16fe7d6c24a5ef429d1f5f51277de66d202fc99730794d9"
   },
-  "deck_sha256": "551a06b26ecae1857a31a1ebac66ccfcb64c98c757c6cf5f06508b4a0d3110b6",
+  "deck_sha256": "845b1d5e505eeee5b68adc230aef0f5dd53d94391669da032b9e7bbcd7e27ce4",
   "template_layouts_used": [
     "Title Slide",
     "Title and Content"
@@ -25,13 +25,144 @@
   "colored_box_left_borders": false,
   "generation": "Native editable text/shapes; equations and source-backed charts/GIFs as embedded images.",
   "ai_assistance": "Academic-research-suite-guided content adaptation, diagrams, animation, and formatting; not an author approval or scientific validation.",
-  "pdf_sha256": "b5bf52e369582cc3e1a7096acb647ca2e88edd322492a8d5d13546c73f5247fb",
   "scripts": {
-    "ISDS/scripts/build_deck.py": "03d910b2a2628f245db7c1b34ffa7ea1a25d3ebd226d9cac3ccd2cbae12f5965",
+    "ISDS/scripts/build_deck.py": "f068996b25bcb4762663194855336c4b03c3da22ad22f79042bdf07630eb4e9b",
     "ISDS/scripts/build_science_assets.py": "1925a24fda284a1d20981da38f52936ae9dd598361fa821d6bbbc565083ac9bf",
-    "ISDS/scripts/render_deck.py": "50ffb8d5f3880a915932e4d29ac0206d4146a9eb45fcd6a7d1f43c810b7aefc5",
-    "ISDS/scripts/validate_deck.py": "df371fddd09cb2fe1255038a9436d23283141f429cc3adebfa4ae53fef900ada"
+    "ISDS/scripts/render_deck.py": "de3cfd74c28efbf0b65bee7134e2b1aaea9932baf24ab448422dad0a97cbfb8c",
+    "ISDS/scripts/revise_deck.py": "fa996c4c26f6a1bf4d7a16ab877de347c336bfd11c68acdc860fb4445c26fc62",
+    "ISDS/scripts/validate_deck.py": "74286dea5de323b930ef96c176cfbf0fe32703896e7e5a7970348d1957cb9efe"
   },
-  "notes_sha256": "59f3933c0eab9493573bbcaad746d215e7d58bda557e612a7038ad9e2c3280df",
-  "references_sha256": "9ed63803898ced1a30deca68ee8c73362333c3790d23290303d24bac38e9fabf"
+  "notes_sha256": "53607c2d80b6a7ba8c97a183258ac8b08773544b32e534d70a6abed7b18c5205",
+  "references_sha256": "9ed63803898ced1a30deca68ee8c73362333c3790d23290303d24bac38e9fabf",
+  "research_questions_slide": 5,
+  "revision": {
+    "date": "2026-11-11",
+    "input_deck_sha256": "f23e1af84108cd612d194ab04addd1fa51b0dbbf30c9be2b490db2896168a1a8",
+    "original_slide_order": [
+      1,
+      2,
+      3,
+      4,
+      11,
+      5,
+      6,
+      7,
+      8,
+      9,
+      10,
+      12,
+      13,
+      14,
+      15,
+      16,
+      17,
+      18,
+      19,
+      20,
+      21,
+      22,
+      23,
+      24,
+      25,
+      26
+    ],
+    "preserved": "Existing cover edits, overview geometry, masters, fonts, reference slides, unchanged scientific charts and the graph-stress GIF",
+    "content_sha256": "d4760a8e4df9c2c746bcb111649dfeb62354d2c8a8a2dac467fe57789c8be7c1",
+    "new_static_heatmap": {
+      "path": "ISDS/assets/science/rq1_stress_static.png",
+      "sha256": "c20286cc8ba6bc8633f0b9a834aff0f48ee68433852b77e3dac82633df8028c5",
+      "kind": "Existing exported cohort results, statically replotted; no fitting",
+      "input": "thucnghiem/results/rq1_results/aggregate/rq1_stress_paired_effects.csv",
+      "input_sha256": "d515bae27ecb91381787a827cad70ee5a09e8edb54b7b40a5a3e25cf5148495e",
+      "methods": [
+        "product_cij_louvain",
+        "additive_cij_louvain",
+        "additive_cij_louvain_matched_density",
+        "product_cij_leiden",
+        "geo_time_dbscan"
+      ],
+      "scenarios": [
+        "gps_noise_100m",
+        "gps_noise_300m",
+        "time_noise_15min",
+        "time_noise_60min",
+        "exact_transport_copy_2x",
+        "exact_transport_copy_5x"
+      ],
+      "mean_delta_ari": [
+        [
+          -0.011587864765788556,
+          -0.1256014118221726,
+          -0.034975884619382766,
+          -0.16302288567180334,
+          0.024167833083970424,
+          -0.6107969632103082
+        ],
+        [
+          -0.022004745541367065,
+          -0.1564926822231336,
+          -0.03755188988345583,
+          -0.15448415852585515,
+          0.014620733531934152,
+          -0.6219603608745865
+        ],
+        [
+          -0.018624922208315332,
+          -0.09824747594328835,
+          -0.04374162801902631,
+          -0.18987344117344476,
+          0.020765246713180543,
+          -0.6056588517852184
+        ],
+        [
+          -0.011783124634507956,
+          -0.12530345392950548,
+          -0.0314809733699017,
+          -0.156056884444348,
+          0.014778189594575076,
+          -0.6200647208353616
+        ],
+        [
+          -0.030024074887768537,
+          -0.12691573858134142,
+          -0.012200220676192506,
+          -0.05461421920147412,
+          0.0,
+          0.0
+        ]
+      ]
+    },
+    "new_editable_schematics": [
+      "three flood-report scenarios",
+      "observable-to-evaluator pipeline",
+      "static Louvain phases with aggregate self-loops",
+      "one generated run",
+      "separate data suites",
+      "far-apart report pair",
+      "copy handling versus claim verification",
+      "run-to-ARI evaluation",
+      "contribution/evidence matrix",
+      "stage-to-outcome conclusion"
+    ],
+    "benchmark_execution": false,
+    "external_images": false,
+    "visual_provenance": "Original editable schematics; invented teaching values explicitly labeled; result heatmap reads existing exports."
+  },
+  "historical_reference_inputs": {
+    "ID_8253_Chromatic_Anchoring_ISDS2026_Conference_Deck.pptx": {
+      "sha256": "bcf5817f5f0048e466c746258ce1643e11ce6369787443c99549e7880efe05db",
+      "status": "Original style-reference PPTX unavailable; not an input to this in-place revision",
+      "available_preview": "ISDS/checks/reference/ID_8253_Chromatic_Anchoring_ISDS2026_Conference_Deck.pdf"
+    }
+  },
+  "talk_track_sha256": "e706fbb74bbc994a08f82107e14a1de3dbb33901f3cab31b7090422489d97732",
+  "speaker_script_sha256": "b5e0ac3283ad1ade00325342cf7e006d19ed6fd404caa1f681d32824724830da",
+  "notes_generator_sha256": "3378c07f8b2ae2f92c972364e54e2333df7705a5f50cbb3d6d2a21b72d81b98d",
+  "speaker_script_languages": [
+    "English",
+    "Vietnamese"
+  ],
+  "speaker_script_order": "All 26 English slides, then all 26 Vietnamese slides; content only; no citations",
+  "slide_sources_sha256": "491bd555180b79bb6e2f9513f79758a315119f5fd5d61afbc6452c62c81771d4",
+  "pdf_sha256": "cb2477b7cdf17ccdbd2fe2bf22f63aa52d3bff86bfc2313be4e86aad45632e67"
 }
