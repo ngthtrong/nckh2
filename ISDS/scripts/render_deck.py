@@ -56,6 +56,8 @@ def main():
              'checks':font_checks},ensure_ascii=False,indent=2)+'\n')
     doc=fitz.open(pdf)
     folder=BASE/'checks/slides';folder.mkdir(parents=True,exist_ok=True)
+    for old in folder.glob('slide-*.png'):
+        if int(old.stem.rsplit('-',1)[1])>len(doc):old.unlink()
     text_layout=[]
     for i,page in enumerate(doc,1):
         page.get_pixmap(matrix=fitz.Matrix(1280/page.rect.width,720/page.rect.height),alpha=False).save(folder/f'slide-{i:02d}.png')
@@ -79,6 +81,8 @@ def main():
     canvas.save(BASE/'checks/contact-sheet.png')
     # Refresh the existing six-slide review sheets alongside the overview.
     review=BASE/'checks/review';review.mkdir(exist_ok=True)
+    for old in review.glob('slides-*.png'):
+        if int(old.stem.rsplit('-',1)[1])>len(doc):old.unlink()
     for start in range(0,len(doc),6):
         count=min(6,len(doc)-start);rows=(count+1)//2
         sheet=Image.new('RGB',(1952,rows*596+16),'#DCE5EC')

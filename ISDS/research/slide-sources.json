@@ -3,156 +3,246 @@
     "slide": 1,
     "original_slide": 1,
     "title": "Title",
+    "role": "main",
+    "hidden": false,
+    "merged_original_slides": [
+      1
+    ],
     "source_notes": ""
   },
   {
     "slide": 2,
     "original_slide": 2,
     "title": "Presentation overview",
+    "role": "main",
+    "hidden": false,
+    "merged_original_slides": [
+      2
+    ],
     "source_notes": "Source: paper/main.tex, Introduction and Related Work; presentation structure adapted from the supplied Paper 8253 deck."
   },
   {
     "slide": 3,
     "original_slide": 3,
     "title": "Many reports do not mean many incidents",
+    "role": "main",
+    "hidden": false,
+    "merged_original_slides": [
+      3
+    ],
     "source_notes": "Redrawn schematic: repeated reports, nearby distinct incidents and a false-only report cluster. No actual report locations or field imagery. Paper 6444, Introduction / RQ1 / RQ3."
   },
   {
     "slide": 4,
     "original_slide": 4,
     "title": "Related approaches and the study gap",
+    "role": "main",
+    "hidden": false,
+    "merged_original_slides": [
+      4
+    ],
     "source_notes": "[1] Blondel et al. (2008); [5] Gralla et al. (2014); [6] Sakaki et al. (2010); [7] CrisisMMD; [8] FloodNet."
   },
   {
     "slide": 5,
     "original_slide": 11,
     "title": "Research questions: do safeguards improve dispatch?",
+    "role": "main",
+    "hidden": false,
+    "merged_original_slides": [
+      11
+    ],
     "source_notes": "paper/main.tex:150–168, 486–543; RQs moved ahead of technical definitions."
   },
   {
     "slide": 6,
     "original_slide": 5,
     "title": "Observable pipeline: reports to a fixed schedule",
+    "role": "main",
+    "hidden": false,
+    "merged_original_slides": [
+      5
+    ],
     "source_notes": "Paper 6444, Figure 1 / Algorithms 1–2. Schematic observable-only inference and frozen-output evaluation. Missingness path is specified but not an empirically validated RQ1 result."
   },
   {
     "slide": 7,
-    "original_slide": 6,
-    "title": "Generator 3.0: what does one run contain?",
-    "source_notes": "paper/main.tex:441–454; thucnghiem/data/README.md; gold/run_001/run_manifest.json. [9–11]. Icons are schematic, not report images."
+    "original_slide": 7,
+    "title": "Two experimental suites for separate stage tests",
+    "role": "main",
+    "hidden": false,
+    "merged_original_slides": [
+      6,
+      7
+    ],
+    "source_notes": "paper/main.tex:441–454; thucnghiem/data/README.md; gold/run_001/run_manifest.json. [9–11]. Icons are schematic, not report images.\n\npaper/main.tex:441–469, 486–543. Candidate 4.1: 339–424 reports/dataset. Its outcomes are not inferred from the priority formula."
   },
   {
     "slide": 8,
-    "original_slide": 7,
-    "title": "Why two generators? Different questions need different truth",
-    "source_notes": "paper/main.tex:441–469, 486–543. Candidate 4.1: 339–424 reports/dataset. Its outcomes are not inferred from the priority formula."
-  },
-  {
-    "slide": 9,
     "original_slide": 8,
     "title": "Why test Product? Geography gates the whole affinity",
+    "role": "main",
+    "hidden": false,
+    "merged_original_slides": [
+      8
+    ],
     "source_notes": "paper/main.tex:250–325; [2] spatial–range product precedent. Pair values are invented teaching inputs, not benchmark results or tuned parameters. Retention thresholds and actual pipeline settings are not compared by this example."
   },
   {
-    "slide": 10,
-    "original_slide": 9,
-    "title": "Louvain: local moves and graph aggregation",
-    "source_notes": "Original editable schematic of Louvain local movement and graph aggregation; Blondel et al. (2008). Node positions and colors are pedagogical, not measured rescue data. Self-loops represent aggregate internal weights; detection approximates modularity optimization."
-  },
-  {
-    "slide": 11,
+    "slide": 9,
     "original_slide": 10,
     "title": "Bounded priority limits copies, not dishonest claims",
+    "role": "main",
+    "hidden": false,
+    "merged_original_slides": [
+      10
+    ],
     "source_notes": "paper/main.tex:380–421, 620–677. The confidence Q is a heuristic, not a calibrated probability of truth. Fixed-family exact copies differ from changed or coordinated payloads."
   },
   {
-    "slide": 12,
+    "slide": 10,
     "original_slide": 12,
     "title": "Evaluation protocol and information boundaries",
+    "role": "main",
+    "hidden": false,
+    "merged_original_slides": [
+      12
+    ],
     "source_notes": "Paper 6444, Experimental Design. RQ1 fixed stresses receive no retuning; RQ3 primary inference uses 40 seed-level pairs."
   },
   {
-    "slide": 13,
+    "slide": 11,
     "original_slide": 13,
-    "title": "One held-out run: compare groups with withheld truth",
-    "source_notes": "[3] Hubert & Arabie (1985); paper/main.tex:522–543. Six-dot partitions are schematic and have no displayed measured ARI. ARI is not percent correctly classified. Independent units are runs, not individual report pairs."
+    "title": "Three primary evaluation metrics",
+    "role": "main",
+    "hidden": false,
+    "merged_original_slides": [
+      13,
+      14,
+      15
+    ],
+    "source_notes": "Merged original metric slides 13–15. ARI is chance-adjusted partition agreement; NDCG uses linear independent-benefit gains; harm is synthetic model units. The response-time definition of deadline misses remains in the talk track and results."
   },
   {
-    "slide": 14,
-    "original_slide": 14,
-    "title": "Reported metrics: ranking and score stability",
-    "source_notes": "[4] Järvelin & Kekäläinen (2002); RQ2 notebook uses sklearn.ndcg_score with linear benefit gains. Spearman / overlap are secondary."
-  },
-  {
-    "slide": 15,
-    "original_slide": 15,
-    "title": "Reported metrics: dispatch outcomes",
-    "source_notes": "Paper 6444, RQ3; RQ3_EndToEnd_Dispatch_Colab.ipynb, outcomes and metrics. Other operational endpoints remain complementary."
-  },
-  {
-    "slide": 16,
+    "slide": 12,
     "original_slide": 16,
     "title": "RQ1: no Product composition advantage is established",
+    "role": "main",
+    "hidden": false,
+    "merged_original_slides": [
+      16
+    ],
     "source_notes": "paper/main.tex:548–591; benchmark_summary.csv. 16.49% is the fraction of predicted destinations that are false, not the fraction of fake reports. Zero fake absorption does not imply fake rejection. CIs are unadjusted bootstrap intervals."
   },
   {
-    "slide": 17,
+    "slide": 13,
     "original_slide": 17,
     "title": "RQ1: fivefold copies expose a major failure case",
+    "role": "main",
+    "hidden": false,
+    "merged_original_slides": [
+      17
+    ],
     "source_notes": "paper/main.tex:593–618; rq1_stress_paired_effects.csv. Displayed interval is the unadjusted paired-bootstrap 95% CI. MD = matched-density. Zero change for DBSCAN does not mean high absolute accuracy; two copy levels do not identify a collapse threshold."
   },
   {
-    "slide": 18,
+    "slide": 14,
     "original_slide": 18,
     "title": "RQ2: exact-copy stability has a narrow scope",
+    "role": "main",
+    "hidden": false,
+    "merged_original_slides": [
+      18
+    ],
     "source_notes": "Paper 6444, Table 3 / §4.2; exported RQ2 robustness summaries. Revised campaign drift .1688; legacy .0309."
   },
   {
-    "slide": 19,
+    "slide": 15,
     "original_slide": 19,
     "title": "RQ2: alignment with simulated benefit remains weak",
+    "role": "main",
+    "hidden": false,
+    "merged_original_slides": [
+      19
+    ],
     "source_notes": "Paper 6444, §4.2; exported RQ2 alignment summaries. Intervals: bootstrap 95%; linear independent-benefit gains."
   },
   {
-    "slide": 20,
+    "slide": 16,
     "original_slide": 20,
     "title": "RQ3: safeguards do not ensure better dispatch",
+    "role": "main",
+    "hidden": false,
+    "merged_original_slides": [
+      20
+    ],
     "source_notes": "Paper 6444, Figure 3 / §4.3; descriptive condition means. Primary tests average conditions within seed, retaining 40 pairs."
   },
   {
-    "slide": 21,
+    "slide": 17,
     "original_slide": 21,
     "title": "Three contributions, with explicit evidence limits",
+    "role": "main",
+    "hidden": false,
+    "merged_original_slides": [
+      21
+    ],
     "source_notes": "paper/main.tex:150–188, 250–325, 380–421, 756–800. Three contributions are conditional theory, invariant scoring and a staged downstream audit; simulated evidence does not validate source authenticity or field policy."
   },
   {
-    "slide": 22,
+    "slide": 18,
     "original_slide": 22,
-    "title": "Conclusion: stage safeguards do not establish dispatch benefit",
-    "source_notes": "paper/main.tex:756–800. Proved properties, within-generator results and deployment claims remain separate evidence layers."
+    "title": "Conclusion and future work",
+    "role": "main",
+    "hidden": false,
+    "merged_original_slides": [
+      22,
+      23
+    ],
+    "source_notes": "Merged original conclusion and future-work slides 22–23. Future work remains proposed: traceable report linkage, expert priorities and source/headcount checks, transfer/missingness, and joint ranking/scheduling evaluation. No field validity is established."
   },
   {
-    "slide": 23,
-    "original_slide": 23,
-    "title": "Future work: close the evidence gaps",
-    "source_notes": "Author-facing proposals derived from Paper 6444, Discussion and Threats to Validity; not completed field validation."
-  },
-  {
-    "slide": 24,
+    "slide": 19,
     "original_slide": 24,
     "title": "References (1 of 2)",
+    "role": "main",
+    "hidden": false,
+    "merged_original_slides": [
+      24
+    ],
     "source_notes": "Full bibliographic metadata and verification links: ISDS/research/references.json. Project artifact [12] is cited on the final slide."
   },
   {
-    "slide": 25,
+    "slide": 20,
     "original_slide": 25,
     "title": "References (2 of 2)",
+    "role": "main",
+    "hidden": false,
+    "merged_original_slides": [
+      25
+    ],
     "source_notes": "Full bibliographic metadata and verification links: ISDS/research/references.json. Project artifact [12] is cited on the final slide."
   },
   {
-    "slide": 26,
+    "slide": 21,
     "original_slide": 26,
     "title": "Thank you — Questions and discussion",
+    "role": "main",
+    "hidden": false,
+    "merged_original_slides": [
+      26
+    ],
     "source_notes": ""
+  },
+  {
+    "slide": 22,
+    "original_slide": 9,
+    "title": "Louvain: local moves and graph aggregation",
+    "role": "backup",
+    "hidden": true,
+    "merged_original_slides": [
+      9
+    ],
+    "source_notes": "Original editable schematic of Louvain local movement and graph aggregation; Blondel et al. (2008). Node positions and colors are pedagogical, not measured rescue data. Self-loops represent aggregate internal weights; detection approximates modularity optimization."
   }
 ]

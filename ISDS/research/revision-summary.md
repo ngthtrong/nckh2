@@ -1,5 +1,22 @@
 # Chỉnh sửa slide ISDS Paper 6444 — 11/11/2026
 
+## Bản rút gọn hiện tại
+
+Bộ hiện tại có **21 slide chính + 1 backup**. Thực hiện đúng bốn nhóm thay đổi:
+
+| Theo số trong bộ 26 slide trước | Sau rút gọn |
+|---|---|
+| 10 — Louvain | Backup 22, sau hỏi đáp, đặt ẩn khi trình chiếu; PDF vẫn có trang này |
+| 13 + 14 + 15 — độ đo | Slide 11 giải thích ARI, NDCG@5, Simulated harm |
+| 22 + 23 — Conclusion / Future work | Slide 18 có kết luận và cột bốn ý Future work |
+| 7 + 8 — Generator 3.0 / Why two generators | Slide 7 giữ so sánh hai bộ và thêm ba nguồn neo địa lý cho RQ1 |
+
+Hai trang tài liệu tham khảo hiện ở 19–20, hỏi đáp ở 21. Script và Notes được rút theo cùng thứ tự, tiếng Anh trước rồi tiếng Việt, không có trích dẫn hoặc thời gian gợi ý. Phần backup có nhãn riêng. Bìa, mục lục, hình stress đã sửa thủ công và các trang không gộp được giữ nguyên ngoài phần đánh số trang. Kiểm tra bảo toàn nằm trong `checks/compaction-preservation.json`.
+
+Các mục bên dưới lưu lịch sử bộ đầy đủ 26 slide trước khi rút gọn; số slide trong các mục lịch sử không phải số hiện tại.
+
+## Lịch sử bộ đầy đủ
+
 Đã cập nhật trực tiếp bộ 26 slide tiếng Anh. Giữ phong cách CTU, font, các chỉnh sửa thủ công ở bìa và vị trí danh sách Overview, hai slide tài liệu tham khảo và các biểu đồ/GIF khoa học hiện có. Không sửa bài báo hoặc chạy lại thực nghiệm.
 
 Theo yêu cầu bổ sung cùng ngày, slide 03 đã thay hình bằng ba cảnh báo cáo ngập lụt; slide 06 được vẽ lại với icon, nhánh xem xét thủ công và luồng đánh giá riêng; slide 10 thay GIF bằng sơ đồ Louvain tĩnh có thể chỉnh sửa, hiện đầy đủ trên PDF. Lời thuyết trình đã được viết lại cho cả 26 slide, toàn bộ tiếng Anh trước rồi toàn bộ tiếng Việt, không có trích dẫn, đường dẫn nguồn hoặc thời gian gợi ý. Notes trong PowerPoint cũng song ngữ và chỉ có nội dung nói.

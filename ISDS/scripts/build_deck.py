@@ -542,10 +542,8 @@ def build():
 
 
 if __name__=="__main__":
-    # Revise the working presentation in place so edits made in PowerPoint
-    # (including the cover and the repositioned overview) survive a rebuild.
-    # The original constructor remains available when starting without a deck.
+    # The checked-in editable deck is the source for current author edits.
     if not (OUT/"ISDS2026_Paper_6444_Conference_Deck.pptx").exists():
-        build()
-    from revise_deck import revise
-    revise()
+        raise SystemExit('Restore the canonical editable PPTX before rebuilding.')
+    from compact_deck import compact
+    compact()

@@ -613,4 +613,5 @@ def revise():
 
 
 if __name__ == "__main__":
-    revise()
+    from compact_deck import compact
+    compact()

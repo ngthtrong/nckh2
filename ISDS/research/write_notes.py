@@ -12,8 +12,9 @@ def write_notes():
     revision=json.loads((ROOT/'research/revision-content.json').read_text())
     index=json.loads((ROOT/'slide-index.json').read_text())
     titles={row['slide']:row['title'] for row in index}
-    if [row['slide'] for row in content] != list(range(1,27)):
-        raise ValueError('Expected 26 ordered bilingual talk-track entries')
+    count=len(index)
+    if [row['slide'] for row in content] != list(range(1,count+1)) or len(revision['order'])!=count:
+        raise ValueError('Talk-track entries must match the current slide index')
     notes=[]
     for row,original in zip(content,revision['order']):
         english=row['english'].strip();vietnamese=row['vietnamese'].strip()
@@ -23,6 +24,7 @@ def write_notes():
             raise ValueError(f"Non-spoken citation or metadata on slide {row['slide']}")
         notes.append({'slide':row['slide'],'original_slide':original,
                       'title':titles[row['slide']],
+                      'role':row.get('role','main'),
                       'notes_en':english,'notes_vi':vietnamese,
                       'notes':'English\n\n'+english+'\n\nTiếng Việt\n\n'+vietnamese})
     (ROOT/'research/speaker-notes.json').write_text(json.dumps(notes,ensure_ascii=False,indent=2)+'\n')
@@ -30,9 +32,10 @@ def write_notes():
     for language,key in [('English','notes_en'),('Tiếng Việt','notes_vi')]:
         lines += [f'# {language}','']
         for row in notes:
-            lines += [f"## Slide {row['slide']:02d}",'',row[key],'']
+            suffix=' (Backup)' if row['role']=='backup' else ''
+            lines += [f"## Slide {row['slide']:02d}{suffix}",'',row[key],'']
     (ROOT/'speaker-notes.md').write_text('\n'.join(lines))
-    print(f"26 slides; English then Vietnamese; {sum(len(row['notes_en'].split()) for row in notes)} English words")
+    print(f"{count} slides including backup; English then Vietnamese; {sum(len(row['notes_en'].split()) for row in notes)} English words")
     return notes
 
 

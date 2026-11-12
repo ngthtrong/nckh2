@@ -6,6 +6,8 @@ Updated 2026-11-11: the deck has been revised against the supplied suggestions. 
 
 Follow-up revision on the same date: slide 3 now uses three editable flood-report scenes; slide 6 has a redrawn observable/evaluator pipeline; slide 10 has a static, editable Louvain diagram including aggregate self-loops. The old Louvain GIF remains an archived local asset. Presenter-facing scripts and PPTX Notes contain English and Vietnamese without citations, source paths or timing metadata, as requested. Slide-level provenance is stored separately in [slide-sources.json](slide-sources.json).
 
+Latest compaction (2026-11-11): the current deck contains 21 main slides and one hidden Louvain backup (slide 22), after the closing slide. Original full-deck slides 7–8 are merged at current 7; metrics 13–15 at current 11; conclusion/future work 22–23 at current 18. Current references are 19–20 and closing is 21. Existing author edits and all unmerged slide bodies are preserved, apart from page numbers and the backup section label. Earlier paragraphs and the claim table below describe the historical full deck; use slide-index.json for current positions.
+
 ## Authority and author metadata
 
 - Canonical title: **Stress-Testing Product-Gated Clustering and Bounded Priority Ranking for Flood-Rescue Reports: A Synthetic Study** (`paper/main.tex:61–62`).
@@ -57,9 +59,9 @@ No automatedRetractionWatchscreen, externalmodelreview, publicationapproval or h
 
 ## Speaking notes and language
 
-- `talk-track.json`: 26 ordered English/Vietnamese pairs; 2,124 English words. This is spoken content, without citations or timing metadata.
-- `speaker-notes.json`: 26 records with slide, original_slide, title, notes_en, notes_vi and combined notes; the combined text is embedded unchanged in the PPTX.
-- `speaker-notes.md`: all 26 English slide scripts, followed by all 26 Vietnamese slide scripts. Each language section includes slide numbers and spoken content only.
+- `talk-track.json`: 22 ordered English/Vietnamese pairs, including one marked backup; 1,829 English words. This is spoken content, without citations or timing metadata.
+- `speaker-notes.json`: 22 records with slide, original_slide, title, notes_en, notes_vi and combined notes; the combined text is embedded unchanged in the PPTX.
+- `speaker-notes.md`: all 22 English slide scripts, followed by all 22 Vietnamese slide scripts, with the backup marked in each language. Each language section includes slide numbers and spoken content only.
 - No sources were replaced with generic disaster photographs. Generated diagrams and pedagogicalGIFs should be labeled as schematics or datasetvisualizations as appropriate.
 
 ## AI assistance record
