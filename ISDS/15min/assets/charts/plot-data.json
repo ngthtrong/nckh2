@@ -1,0 +1,292 @@
+{
+  "clustering": {
+    "labels": [
+      "Additive Louvain",
+      "Product Leiden",
+      "Convex Louvain",
+      "Product Louvain",
+      "Matched-density Additive",
+      "Coordinate K-means",
+      "Spatial agglomerative",
+      "HDBSCAN",
+      "Geo-time DBSCAN",
+      "DBSCAN, all features"
+    ],
+    "values": [
+      0.9190636765304436,
+      0.9164882806585426,
+      0.9134686463484215,
+      0.9072205230334893,
+      0.8973309471470075,
+      0.8176380302773076,
+      0.6234892253883443,
+      0.5204658989812547,
+      0.4978129333708591,
+      0.4740699210904852
+    ],
+    "ci95": [
+      [
+        0.8995230647815519,
+        0.9380766690270615
+      ],
+      [
+        0.8978625110603503,
+        0.9350545483055244
+      ],
+      [
+        0.8939796641946467,
+        0.932006234665398
+      ],
+      [
+        0.8863860866990636,
+        0.9271163961511172
+      ],
+      [
+        0.8762697176994383,
+        0.9174759257872698
+      ],
+      [
+        0.7976202180575386,
+        0.8383657868415234
+      ],
+      [
+        0.5963806309626805,
+        0.6494108379504535
+      ],
+      [
+        0.4564954374136317,
+        0.5811085455098546
+      ],
+      [
+        0.45893441663920304,
+        0.5365634955578013
+      ],
+      [
+        0.4272652542310618,
+        0.5201314186444067
+      ]
+    ],
+    "holm_p_product_vs_additive": 0.256,
+    "source": "thucnghiem/results/cij_baseline_benchmark_results/benchmark_summary.csv",
+    "source_sha256": "de854e0c710b7dea3d0d2b316d927d9159572edb053e84e9cd7620240337bc0e"
+  },
+  "clustering_stress": {
+    "methods": [
+      "Additive Louvain",
+      "Product Louvain",
+      "Product Leiden",
+      "Matched-density Additive",
+      "Geo-time DBSCAN"
+    ],
+    "conditions": [
+      "Control",
+      "Location \u00b1100 m",
+      "Location \u00b1300 m",
+      "Time \u00b115 min",
+      "Time \u00b160 min",
+      "Copies 2\u00d7",
+      "Copies 5\u00d7"
+    ],
+    "mean_ari": [
+      [
+        0.9190636765304436,
+        0.8970589309890766,
+        0.7625709943073101,
+        0.8815117866469878,
+        0.7645795180045886,
+        0.9336844100623779,
+        0.29710331565585724
+      ],
+      [
+        0.9072205230334893,
+        0.8956326582677008,
+        0.7816191112113167,
+        0.8722446384141065,
+        0.744197637361686,
+        0.9313883561174597,
+        0.29642355982318114
+      ],
+      [
+        0.9164882806585426,
+        0.9047051560240348,
+        0.7911848267290372,
+        0.885007307288641,
+        0.7604313962141946,
+        0.9312664702531178,
+        0.29642355982318114
+      ],
+      [
+        0.8973309471470072,
+        0.8787060249386919,
+        0.7990834712037189,
+        0.853589319127981,
+        0.7074575059735625,
+        0.9180961938601879,
+        0.2916720953617889
+      ],
+      [
+        0.49781293337085913,
+        0.4677888584830906,
+        0.3708971947895177,
+        0.48561271269466666,
+        0.443198714169385,
+        0.49781293337085913,
+        0.49781293337085913
+      ]
+    ],
+    "source": "thucnghiem/results/rq1_results/aggregate/rq1_stress_summary.csv",
+    "source_sha256": "a9079c7248b889bab20a4c96948a5a7c47cff99b78331b4f7f368f568420e24a"
+  },
+  "ranking": {
+    "ndcg_at_5": {
+      "Revised priority": {
+        "mean": 0.666889741,
+        "ci95": [
+          0.630573585791977,
+          0.7018339735459405
+        ]
+      },
+      "Legacy priority": {
+        "mean": 0.6547713427,
+        "ci95": [
+          0.6228742253092528,
+          0.6849560580617219
+        ]
+      },
+      "Population only": {
+        "mean": 0.6709379529,
+        "ci95": [
+          0.6471053904027629,
+          0.6954605383428879
+        ]
+      },
+      "Random ordering": {
+        "mean": 0.6763222735,
+        "ci95": [
+          0.6405248169558695,
+          0.7099514476359288
+        ]
+      }
+    },
+    "priority_drift": {
+      "Exact copies 2\u00d7": {
+        "revised": 0.0,
+        "legacy": 0.00262625
+      },
+      "Exact copies 5\u00d7": {
+        "revised": 0.0,
+        "legacy": 0.00858
+      },
+      "Exact copies 10\u00d7": {
+        "revised": 0.0,
+        "legacy": 0.01484375
+      },
+      "Near copies": {
+        "revised": 0.00164328125,
+        "legacy": 0.005459375
+      },
+      "Inflated people count": {
+        "revised": 0.0696225,
+        "legacy": 0.014015
+      },
+      "Coordinated campaign": {
+        "revised": 0.1687725,
+        "legacy": 0.0308925
+      }
+    },
+    "note": "Six of the eleven robustness scenarios in paper Table 3 are plotted.",
+    "source": "thucnghiem/results/rq2_results/rq2_summary.csv",
+    "source_sha256": "e2b5d6ccdf2e53291476ea8307a73ac9876d05038f88bcc203d655813b67296b"
+  },
+  "dispatch": {
+    "direction": "Revised minus comparator; positive means more simulated harm or more missed deadlines.",
+    "comparisons": {
+      "legacy_priority": {
+        "latent_harm": {
+          "mean_difference": 14.34147785,
+          "holm_p": 0.5627134221
+        },
+        "deadline_miss_rate": {
+          "mean_difference": -0.01875,
+          "holm_p": 0.2472569036
+        }
+      },
+      "nearest_first": {
+        "latent_harm": {
+          "mean_difference": 69.88463928,
+          "holm_p": 4.091609844e-05
+        },
+        "deadline_miss_rate": {
+          "mean_difference": 0.1770833333,
+          "holm_p": 1.174528414e-06
+        }
+      }
+    },
+    "partition_contrasts": {
+      "direction": "Product partition minus comparator partition under revised priority; positive means worse.",
+      "vs": {
+        "additive_cij_matched_density": {
+          "latent_harm": {
+            "mean_difference": 18.3357465,
+            "holm_p": 0.0001683821174
+          },
+          "deadline_miss_rate": {
+            "mean_difference": 0.0109375,
+            "holm_p": 0.0761284146
+          }
+        },
+        "oracle": {
+          "latent_harm": {
+            "mean_difference": 36.68563657,
+            "holm_p": 0.002032152821
+          },
+          "deadline_miss_rate": {
+            "mean_difference": 0.05208333333,
+            "holm_p": 0.003000501785
+          }
+        }
+      }
+    },
+    "source": "thucnghiem/results/rq3_results/rq3_paired_comparisons_seed.csv",
+    "source_sha256": "fcefab896fbf419d9b080d2f4012676accdceb25b6971e0b695821261ce80461"
+  },
+  "method_grouping": {
+    "kind": "diagram",
+    "equations": "paper/main.tex Eq. (3), Algorithm 1",
+    "curve": {
+      "sigma_m": 700.0,
+      "alpha": 1.0,
+      "beta": 0.5,
+      "gamma": 0.5,
+      "T": 1,
+      "C": 1,
+      "product": "G",
+      "additive": "(alpha*G+beta+gamma)/(alpha+beta+gamma)"
+    }
+  },
+  "method_priority": {
+    "kind": "diagram",
+    "equations": "paper/main.tex Eq. (4), Algorithm 2",
+    "constants": {
+      "omega": [
+        0.34,
+        0.33,
+        0.33
+      ],
+      "mu": 2,
+      "s": 10,
+      "N_ref": 500,
+      "V_cap": 50
+    }
+  },
+  "dataset_boundary": {
+    "kind": "diagram",
+    "source": "paper/main.tex Sections 2-3, Algorithm 1, data contract",
+    "splits": {
+      "development": 20,
+      "calibration": 20,
+      "test": 40
+    },
+    "incidents_per_run": 16
+  }
+}

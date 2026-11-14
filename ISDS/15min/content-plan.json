@@ -1,0 +1,192 @@
+[
+  {
+    "slide": 1,
+    "title": "Title",
+    "section": "INTRODUCTION",
+    "seconds": 25,
+    "purpose_vi": "Giới thiệu phạm vi bài nói: từ báo cáo chưa chắc chắn đến quyết định điều phối.",
+    "english": "Hello everyone. In this study, we look at a practical question in flood rescue. How can we use reports that may be wrong or repeated to group incidents, set priorities, and plan rescue trips? I will first explain the problem and how we create the test data. Then I will present the results for each step.",
+    "vietnamese": "Kính chào quý thầy cô và các anh chị. Nghiên cứu này xem xét một câu hỏi thực tiễn trong cứu hộ ngập lụt: làm sao chuyển nhiều báo cáo chưa chắc chắn thành nhóm sự cố, thứ tự ưu tiên và quyết định điều phối? Tôi sẽ bắt đầu từ bài toán và cách mô phỏng, sau đó trình bày những điều thực nghiệm cho biết về từng quyết định.",
+    "role": "main"
+  },
+  {
+    "slide": 2,
+    "title": "Overview",
+    "section": "OVERVIEW",
+    "seconds": 15,
+    "purpose_vi": "Giới thiệu sáu phần của bài nói trước khi đặt bài toán.",
+    "english": "I will start with the rescue-report problem and related work. Then I will explain the dataset and the methods. Finally, I will present the results, the conclusions, and the next steps.",
+    "vietnamese": "Tôi sẽ bắt đầu từ bài toán báo cáo cứu hộ và các nghiên cứu liên quan. Sau đó là dataset và phương pháp. Cuối cùng là kết quả, kết luận và các bước tiếp theo.",
+    "role": "main"
+  },
+  {
+    "slide": 3,
+    "title": "Introduction: The rescue-report problem",
+    "section": "INTRODUCTION",
+    "seconds": 85,
+    "purpose_vi": "Đặt người nghe vào vai điều phối; phân biệt thông tin nhận được với điều cần quyết định.",
+    "english": "Imagine that you are managing rescue teams in this flooded neighborhood. Several families are asking for help, but only a few teams can travel at the same time. You cannot see the whole situation. You only receive reports: a location, a time, perhaps a picture, and claims about people or urgent needs. Some reports are incomplete. Others are repeated or wrong. This picture is an example we created. It does not show a real rescue operation. Before sending a boat, you need to answer three questions. Which reports describe the same incident? Which incident should come first? And which trips are possible with the teams you have? These three questions connect the reports to the use of limited resources.",
+    "vietnamese": "Hãy hình dung chúng ta đang điều phối ứng phó ngập lụt tại khu dân cư này. Nhiều hộ đang cần hỗ trợ, nhưng chỉ có một số đội có thể di chuyển cùng lúc. Người điều phối không nhìn thấy toàn bộ tình hình. Thông tin chỉ đến dưới dạng báo cáo: vị trí, thời gian, có thể có ảnh, cùng lời khai về số người hoặc mức khẩn cấp. Các báo cáo ấy có thể thiếu, lặp hoặc không chính xác. Đây là hình minh họa giả định để đặt bài toán, không phải tư liệu triển khai thực tế. Trước khi cử thuyền, người điều phối cần trả lời ba câu hỏi. Những báo cáo nào thuộc cùng một sự cố? Sự cố nào cần được chú ý trước? Và những chuyến đi nào khả thi với các đội đang có? Ba câu hỏi này nối các báo cáo với việc sử dụng nguồn lực hạn chế.",
+    "role": "main"
+  },
+  {
+    "slide": 4,
+    "title": "Introduction: Why grouping matters",
+    "section": "INTRODUCTION",
+    "seconds": 85,
+    "purpose_vi": "Cho thấy ba kiểu sai và hậu quả; dẫn đến yêu cầu đánh giá cả chuỗi.",
+    "english": "These three examples show why we need to group reports carefully. In the first, several messages describe one home. If we treat each message as a different destination, we may send teams to the same place several times. In the second, two nearby homes are separate incidents. If we group them together, we may miss one need. In the third, several reports point to a place where there is no real incident. Many messages saying the same thing do not prove that it is true. These mistakes change the destinations before we rank them. Ranking and planning add their own problems: repeated or exaggerated claims may receive too much priority, and travel takes time. So we test all three steps. Success at one step does not promise success at the next.",
+    "vietnamese": "Ba cảnh này cho thấy vì sao cần gom báo cáo đúng. Ở cảnh đầu, nhiều tin cùng nói về một ngôi nhà. Nếu coi mỗi tin là một điểm đến, các đội có thể bị điều đến đó lặp lại. Ở cảnh thứ hai, hai nhà gần nhau lại là hai sự cố khác nhau. Gộp nhầm có thể che khuất một nhu cầu. Ở cảnh thứ ba, nhiều báo cáo chỉ đến một nơi không tồn tại sự cố thật. Nhiều tin nói cùng một điều chưa đủ chứng minh điều đó đúng. Các lỗi này làm thay đổi tập điểm đến ngay trước bước xếp hạng. Xếp hạng và lập lịch còn có khó khăn riêng: lời khai lặp hoặc bị thổi phồng có thể được ưu tiên quá mức, và di chuyển tốn thời gian. Vì vậy chúng tôi đánh giá cả ba bước. Kết quả tốt ở một bước không bảo đảm kết quả tốt ở bước tiếp theo.",
+    "role": "main"
+  },
+  {
+    "slide": 5,
+    "title": "Related work: The gap between steps",
+    "section": "RELATED WORK",
+    "seconds": 60,
+    "purpose_vi": "Nêu vai trò ba hướng nghiên cứu và đúng khoảng trống mà bài kiểm tra.",
+    "english": "Three research areas help us build this system. Crisis sensing finds useful disaster information in social media posts and flood images. But a useful message does not tell us which incident it describes. Community detection groups related reports. But a group is not always a real rescue destination. Humanitarian logistics studies how to share resources and plan routes. Its results depend on the destinations and needs it receives. Our question connects these areas. What happens to rescue plans when reports are split into wrong groups, separate incidents are joined, or false reports create a destination? We test whether the methods used to control these problems lead to better rescue plans. We test this in three steps: grouping, ranking, and rescue planning.",
+    "vietnamese": "Ba hướng nghiên cứu cung cấp những thành phần nền tảng. Cảm biến khủng hoảng giúp trích xuất thông tin thiên tai từ bài đăng mạng xã hội và ảnh ngập lụt, nhưng phát hiện một tin liên quan chưa xác định được sự cố vật lý phía sau. Phát hiện cộng đồng giúp gom báo cáo có liên quan, nhưng một cụm chưa tự động trở thành điểm cứu hộ đã được xác minh. Điều phối nhân đạo nghiên cứu phân bổ và định tuyến dưới nhiều mục tiêu, song quyết định phụ thuộc vào tập điểm đến và nhu cầu đầu vào. Câu hỏi của chúng tôi nằm ở chỗ nối các hướng đó: điều phối sẽ ra sao khi báo cáo bị tách nhầm, gộp nhầm hoặc tạo điểm đến giả? Chúng tôi kiểm tra mối nối này thay vì mặc định rằng cơ chế bảo vệ trên đồ thị hay điểm số có giới hạn đã đủ để điều phối hữu ích. Chúng tôi kiểm tra điều này theo ba bước: gom nhóm, xếp hạng và lập kế hoạch cứu hộ.",
+    "role": "main"
+  },
+  {
+    "slide": 6,
+    "title": "Dataset: How we create the reports",
+    "section": "DATASET",
+    "seconds": 90,
+    "purpose_vi": "Giải thích cách tổng hợp theo bốn bước, chỉ rõ thành phần thật và mô phỏng.",
+    "english": "We create the dataset in four steps, shown from left to right. First, we set the scenario. For the clustering tests, EMSR848, OpenStreetMap, and WorldPop give the geographic context: an area, places, and population. The ranking and rescue-planning tests use a synthetic region from the same generator. Second, we simulate the incidents, sixteen in each run. The data generator knows these incidents, but the algorithm never does. Third, we generate reports about the incidents, each with a location, a time, and evidence. Several reports can describe the same event, and we keep a separate record of which incident each report comes from. Fourth, we add controlled noise: exact copies, slightly changed copies, false reports, and groups of reports designed to support the same false claim. For rescue planning, the generator also gives each incident a benefit value, a deadline, a service time, and harm parameters. Real geographic context does not make the reports real observations. This process lets us control the test conditions and know the correct answers, so it helps us find failures. Tests with real reports labeled by independent reviewers are still needed.",
+    "vietnamese": "Chúng tôi xây dựng bộ dữ liệu theo bốn bước, đi từ trái sang phải. Bước một là đặt bối cảnh. Với phép thử phân cụm, EMSR848, OpenStreetMap và WorldPop cung cấp khu vực, các địa điểm và phân bố dân cư. Phép thử xếp hạng và điều phối dùng một vùng tổng hợp do cùng bộ sinh tạo ra. Bước hai mô phỏng các sự cố tiềm ẩn, mười sáu sự cố mỗi run. Bộ sinh biết những sự cố này, nhưng thuật toán không bao giờ được biết. Bước ba sinh báo cáo từ các sự cố, mỗi báo cáo có vị trí, thời gian và bằng chứng. Một sự kiện có thể sinh ra nhiều báo cáo, và chúng tôi giữ riêng bản ghi báo cáo nào đến từ sự cố nào. Bước bốn bổ sung nhiễu có kiểm soát: bản sao chính xác, bản sao gần, báo cáo giả và chiến dịch báo cáo phối hợp cho cùng một lời khai sai. Để đánh giá điều phối, bộ sinh còn gán cho mỗi sự cố lợi ích, hạn đáp ứng, thời gian phục vụ và tham số tổn hại. Bối cảnh địa lý thật không biến báo cáo thành quan sát thực. Quy trình này cho phép kiểm soát điều kiện thử và biết trước đáp án, nên phù hợp để tìm các trường hợp thất bại. Kiểm chứng trên báo cáo thực được gán nhãn độc lập vẫn là bước tiếp theo.",
+    "role": "main"
+  },
+  {
+    "slide": 7,
+    "title": "Dataset: Inputs and evaluation truth",
+    "section": "DATASET",
+    "seconds": 80,
+    "purpose_vi": "Dùng sơ đồ ranh giới thông tin: thuật toán chỉ thấy trường báo cáo rồi phân nhóm, xếp hạng, lập lịch; đáp án ẩn chỉ được nối vào sau khi dự đoán và lịch đã cố định; một bộ dữ liệu 80 run (20 phát triển, 20 hiệu chỉnh, 40 kiểm tra).",
+    "english": "This diagram shows the most important rule of our evaluation. Above the orange line is what the algorithm sees: the location, time, flood and urgency evidence, people count, and vulnerability in each report. From these fields only, it groups the reports, ranks the groups, and schedules boat trips. Below the line, the evaluator keeps the hidden truth: the true incident of each report, which reports are fake, and the benefit, deadline, and harm values. This truth is opened last, only after the groups, ranks, and trips are fixed. Then we compute the scores: ARI for grouping, NDCG at five for ranking, and harm and missed deadlines for planning. The dataset has eighty runs, with sixteen incidents in each run. We use twenty runs for development, twenty for choosing settings, and keep forty for the final test. Every result in this talk comes from these forty test runs. One detail: to test the score alone, ranking uses the true groups. Rescue planning uses the predicted groups, so grouping mistakes can reach the plans.",
+    "vietnamese": "Sơ đồ này thể hiện nguyên tắc quan trọng nhất của cách đánh giá. Phía trên đường cam là những gì thuật toán nhìn thấy: vị trí, thời gian, bằng chứng về mức ngập và mức khẩn cấp, số người và mức dễ tổn thương trong từng báo cáo. Chỉ từ các trường này, thuật toán gom nhóm báo cáo, xếp hạng các nhóm và lập lịch chuyến xuồng. Phía dưới đường cam, bộ đánh giá giữ riêng đáp án ẩn: sự cố thật của từng báo cáo, báo cáo nào là giả, cùng lợi ích, hạn đáp ứng và tổn hại. Đáp án chỉ được mở sau cùng, khi nhóm, thứ hạng và lịch đã cố định. Khi đó mới tính điểm: ARI cho gom nhóm, NDCG@5 cho xếp hạng, tổn hại và tỉ lệ trễ hạn cho điều phối. Bộ dữ liệu gồm tám mươi run, mỗi run mười sáu sự cố. Hai mươi run dùng để phát triển, hai mươi run để chọn cấu hình, và bốn mươi run được giữ riêng để kiểm tra. Mọi kết quả trong bài trình bày đều đến từ bốn mươi run kiểm tra này. Một chi tiết: để đánh giá riêng điểm số, bước xếp hạng dùng nhóm sự cố chuẩn; bước điều phối dùng nhóm dự đoán, nên lỗi gom nhóm có thể lan đến lịch.",
+    "role": "main"
+  },
+  {
+    "slide": 8,
+    "title": "Method: From reports to incident groups",
+    "section": "METHOD",
+    "seconds": 80,
+    "purpose_vi": "Giải thích công thức Product/Additive, bước làm thưa và Louvain bằng sơ đồ luồng và đường cong minh họa công thức.",
+    "english": "This diagram shows how reports become incident groups. For each pair of reports, we calculate three similarities between zero and one: distance, time, and evidence. Then we combine them into one link weight. Product multiplies the distance term by the sum of the other two. Additive adds all three. The curve on the right shows the difference for two reports with the same time and evidence. With Product, the weight falls to zero as distance grows. With Additive, half of the maximum weight remains at any distance. Next, we keep only the strong links, using a threshold and each report's top neighbours. Louvain then finds communities, and we treat them as predicted incident groups. The distance limit of Product applies to single links under stated conditions. It does not promise correct groups, so we need experiments.",
+    "vietnamese": "Sơ đồ cho thấy cách các báo cáo trở thành nhóm sự cố. Với mỗi cặp báo cáo, chúng tôi tính ba độ tương đồng trong khoảng từ không đến một: khoảng cách, thời gian và bằng chứng. Sau đó ba giá trị được kết hợp thành một trọng số cạnh. Product nhân thành phần khoảng cách với tổng hai thành phần còn lại. Additive cộng cả ba. Đường cong bên phải minh họa khác biệt cho hai báo cáo có cùng thời gian và bằng chứng. Với Product, trọng số giảm về không khi khoảng cách tăng. Với Additive, một nửa trọng số cực đại vẫn còn ở mọi khoảng cách. Tiếp theo, chỉ các cạnh mạnh được giữ lại, dựa trên một ngưỡng phân vị và các láng giềng gần nhất của từng báo cáo. Louvain tìm các cộng đồng, và chúng tôi xem đó là nhóm sự cố dự đoán. Giới hạn khoảng cách của Product chỉ áp dụng cho từng cạnh trong điều kiện đã nêu. Nó không bảo đảm nhóm đúng, vì vậy cần thực nghiệm.",
+    "role": "main"
+  },
+  {
+    "slide": 9,
+    "title": "Method: From evidence to rescue trips",
+    "section": "METHOD",
+    "seconds": 65,
+    "purpose_vi": "Giải thích nhóm bằng chứng, công thức điểm ưu tiên có chặn (0 ≤ P ≤ μ), điều kiện bất biến bản sao và liên hệ bộ lập lịch bằng sơ đồ luồng.",
+    "english": "Within each predicted group, we put exact and near copies into evidence families. Each family gives one value: its highest value, weighted by the confidence of the report. The priority combines urgency, flood level, and the number of people, each between zero and one. Vulnerability can raise the score, but at most to twice that sum. So the score always stays between zero and mu. An exact copy joins a family that already exists, so the revised score does not change. This holds only if families and score inputs stay fixed, and it does not prove that claims are true. Coordinated false reports can still move the score. Finally, the scheduler uses the priorities to plan trips within travel time, service time, and the available boats. A need score does not cover these limits, so we test plans separately.",
+    "vietnamese": "Trong mỗi nhóm dự đoán, bản sao chính xác và bản sao gần được gom thành các nhóm bằng chứng. Mỗi nhóm bằng chứng chỉ đóng góp một giá trị: giá trị cao nhất, có trọng số theo độ tin cậy của báo cáo. Điểm ưu tiên kết hợp mức khẩn cấp, mức ngập và số người, mỗi thành phần nằm trong khoảng từ không đến một. Mức dễ tổn thương có thể tăng điểm, nhưng tối đa gấp đôi tổng đó. Vì vậy điểm luôn nằm giữa không và mu. Một bản sao chính xác rơi vào nhóm bằng chứng đã có, nên điểm sửa đổi không thay đổi. Điều này chỉ đúng khi nhóm bằng chứng và đầu vào tính điểm được giữ cố định, và không chứng minh lời khai là thật. Báo cáo giả có phối hợp vẫn có thể làm lệch điểm. Cuối cùng, bộ lập lịch dùng các mức ưu tiên để xếp chuyến đi trong giới hạn thời gian di chuyển, thời gian phục vụ và số xuồng sẵn có. Điểm nhu cầu không bao quát các giới hạn này, nên lịch được đánh giá riêng.",
+    "role": "main"
+  },
+  {
+    "slide": 10,
+    "title": "Results: Clustering accuracy",
+    "section": "RESULTS / CLUSTERING",
+    "seconds": 40,
+    "purpose_vi": "Trình bày ARI của toàn bộ phương pháp kèm khoảng tin cậy; kết luận chưa xác lập ưu thế giữa Product và Additive.",
+    "english": "ARI measures how well predicted groups match true groups, taking chance agreement into account. Higher is better. The chart shows all tested methods on the forty test runs. The graph methods are at the top, between 0.90 and 0.92. With settings chosen separately for each method, Additive scores 0.9191 and Product scores 0.9072. The paired p-value is 0.2560 after Holm correction for multiple comparisons. So no advantage is shown for either way of combining the signals.",
+    "vietnamese": "ARI so sánh nhóm dự đoán với nhóm sự cố chuẩn và hiệu chỉnh mức trùng khớp do ngẫu nhiên; càng cao càng tốt. Biểu đồ trình bày tất cả phương pháp được thử trên bốn mươi run kiểm tra. Các phương pháp đồ thị đứng đầu, trong khoảng 0,90 đến 0,92. Với cấu hình được chọn riêng cho từng phương pháp, Additive đạt 0,9191 và Product đạt 0,9072. Giá trị p theo cặp sau hiệu chỉnh Holm là 0,2560, nên chưa xác lập ưu thế cho cách kết hợp nào.",
+    "role": "main"
+  },
+  {
+    "slide": 11,
+    "title": "Results: Clustering under stress",
+    "section": "RESULTS / CLUSTERING",
+    "seconds": 50,
+    "purpose_vi": "Trình bày bảng nhiệt ARI theo bảy điều kiện stress cố định, sụt giảm ở sao chép 5× và tỉ lệ điểm đến giả; nối lại với cảnh thứ ba ở phần mở đầu.",
+    "english": "Next, we repeat the test under seven fixed conditions, without changing any settings. Location noise and time noise lower the ARI of every method. Twofold exact copies raise it slightly. But fivefold exact copies lower all four graph methods to an ARI of about 0.30. For Product, the drop is about 0.61. Also, Product kept fake reports away from real incident groups, but the fake reports still formed their own groups. The false-destination rate was 16.49 percent. This is the third example from the introduction. A rule that limits single links does not promise correct groups.",
+    "vietnamese": "Tiếp theo, phép thử được lặp lại dưới bảy điều kiện cố định, không chỉnh lại cấu hình. Nhiễu vị trí và nhiễu thời gian làm giảm ARI của mọi phương pháp. Sao chép chính xác hai lần làm ARI tăng nhẹ. Nhưng sao chép chính xác năm lần kéo cả bốn biến thể đồ thị về ARI khoảng 0,30; riêng Product giảm khoảng 0,61. Ngoài ra, Product giữ báo cáo giả không lẫn vào nhóm sự cố thật, nhưng các báo cáo giả vẫn tự tạo thành nhóm riêng. Tỉ lệ điểm đến giả là 16,49 phần trăm. Đây chính là cảnh thứ ba ở phần mở đầu. Một quy tắc giới hạn từng cạnh không bảo đảm nhóm sự cố đúng.",
+    "role": "main"
+  },
+  {
+    "slide": 12,
+    "title": "Results: Ranking",
+    "section": "RESULTS / RANKING",
+    "seconds": 75,
+    "purpose_vi": "Đặt cạnh nhau tính ổn định, chất lượng xếp hạng và điểm yếu trước chiến dịch phối hợp; không gán ý nghĩa thống kê cho chênh lệch nhỏ.",
+    "english": "The left chart checks the top five positions against benefit values created separately in the simulation. The revised score gets 0.6669. The old score gets 0.6548, and this difference is not statistically significant. Ranking by reported people alone gets 0.6709, and random order gets 0.6763. These values do not show an advantage for the revised score. They also do not prove that random order is better. The right chart shows how much the score moves when we change the reports. With two, five, or ten exact copies, the revised score does not move, if families and score inputs stay fixed. But some changes move it more than the old score. Inflated people counts move it by about 0.07, compared with 0.01. A coordinated campaign of high-confidence false reports moves it by about 0.17, compared with 0.03. This test uses true incident groups, so grouping mistakes alone cannot explain the weak ranking.",
+    "vietnamese": "Biểu đồ bên trái so năm vị trí đầu với lợi ích mô phỏng được sinh độc lập. Điểm sửa đổi đạt 0,6669. Điểm cũ đạt 0,6548, và chênh lệch này không có ý nghĩa thống kê. Xếp theo số người được báo đạt 0,6709; thứ tự ngẫu nhiên đạt 0,6763. Các giá trị này chưa xác lập ưu thế của điểm sửa đổi, và cũng không chứng minh thứ tự ngẫu nhiên tốt hơn. Biểu đồ bên phải cho thấy điểm thay đổi bao nhiêu khi báo cáo bị thay đổi. Với hai, năm hoặc mười bản sao chính xác, điểm sửa đổi không đổi, với điều kiện nhóm bằng chứng và đầu vào giữ nguyên. Nhưng một số nhiễu loạn làm điểm sửa đổi lệch nhiều hơn điểm cũ. Số người bị thổi phồng làm lệch khoảng 0,07, so với 0,01. Chiến dịch báo cáo giả phối hợp có độ tin cậy cao làm lệch khoảng 0,17, so với 0,03. Do đánh giá dùng nhóm sự cố chuẩn, mức phù hợp yếu không thể chỉ được giải thích bằng lỗi phân cụm.",
+    "role": "main"
+  },
+  {
+    "slide": 13,
+    "title": "Results: Rescue planning",
+    "section": "RESULTS / DISPATCH",
+    "seconds": 75,
+    "purpose_vi": "Dùng so sánh theo cặp rõ hướng hiệu ứng trên cả tổn hại và trễ hạn; nêu phạm vi mô phỏng.",
+    "english": "These charts compare plans using the revised priority rule and Product groups. Values above zero are worse for the revised rule. Compared with the old rule, harm is about fourteen model units higher, while the share of missed deadlines is about two percentage points lower. Neither difference is statistically significant after Holm correction. Compared with nearest-first, harm is about seventy units higher, and missed deadlines are about eighteen percentage points higher. Both differences are statistically significant. We average three resource conditions within each random seed, then compare forty pairs of results. The third box links planning back to grouping. With the same revised rule, Product groups give about eighteen more units of harm than matched-density Additive groups, and this difference is significant. So grouping errors do reach the rescue plan. Harm is a cost in the simulation, not actual injuries or deaths. This result does not prove that nearest-first is suitable for real rescue work.",
+    "vietnamese": "Hai biểu đồ so sánh các lịch điều phối dùng điểm ưu tiên sửa đổi trên phân hoạch Product. Giá trị trên không nghĩa là điểm sửa đổi kém hơn. So với điểm cũ, tổn hại cao hơn khoảng mười bốn đơn vị mô hình, còn tỉ lệ trễ hạn thấp hơn khoảng hai điểm phần trăm. Cả hai chênh lệch đều không có ý nghĩa sau hiệu chỉnh Holm. So với ưu tiên điểm gần nhất, tổn hại cao hơn khoảng bảy mươi đơn vị và tỉ lệ trễ hạn cao hơn khoảng mười tám điểm phần trăm. Cả hai khác biệt này đều có ý nghĩa thống kê. Phân tích lấy trung bình ba điều kiện nguồn lực trong từng seed, rồi so sánh bốn mươi cặp kết quả. Ô thứ ba nối điều phối trở lại bước gom nhóm. Với cùng điểm ưu tiên sửa đổi, nhóm của Product gây tổn hại cao hơn khoảng mười tám đơn vị so với nhóm của Additive cùng mật độ, và khác biệt này có ý nghĩa thống kê. Như vậy lỗi gom nhóm thực sự lan đến lịch cứu hộ. Tổn hại ở đây là chi phí trong mô phỏng, không phải thương tích hoặc sinh mạng đo được. Kết quả chưa chứng minh ưu tiên điểm gần nhất phù hợp cho cứu hộ thực tế.",
+    "role": "main"
+  },
+  {
+    "slide": 14,
+    "title": "Conclusion & Future work: What comes next",
+    "section": "CONCLUSION & FUTURE WORK",
+    "seconds": 50,
+    "purpose_vi": "Chốt một bài học, nêu đóng góp và hai hướng kiểm chứng tiếp theo.",
+    "english": "Each step needs its own evidence. The geographic rule did not show better grouping. Stable scores under exact copies did not show better ranking by benefit. Neither feature ensured better rescue plans. Our contribution is a controlled test for each step, with the true answers kept away from the algorithm, and a public research artifact that others can check. Next, we need real reports with independent labels, checks with experts and sources, and tests of ranking together with travel and service limits. These are needed before claiming benefits for real rescue work.",
+    "vietnamese": "Bài học trung tâm là mỗi bước cần bằng chứng riêng. Cổng địa lý chưa xác lập phân cụm tốt hơn. Bất biến trước bản sao chưa xác lập xếp hạng hữu ích theo lợi ích. Cả hai tính chất chưa bảo đảm điều phối tốt hơn. Đóng góp của chúng tôi là phép kiểm tra có kiểm soát cho từng bước, trong đó đáp án được giữ tách khỏi thuật toán, cùng một artifact nghiên cứu công khai để người khác kiểm chứng. Các bước tiếp theo gồm báo cáo thực được gán nhãn độc lập, kiểm tra cùng chuyên gia và nguồn tin, và đánh giá xếp hạng đồng thời với di chuyển và phục vụ. Cần hoàn thành những bước này trước khi khẳng định lợi ích cứu hộ thực tế.",
+    "role": "main"
+  },
+  {
+    "slide": 15,
+    "title": "References (1 of 2)",
+    "section": "REFERENCES",
+    "seconds": 5,
+    "purpose_vi": "Giữ nội dung và hình thức theo yêu cầu; không đọc danh mục.",
+    "english": "This page lists the references for our methods and evaluation.",
+    "vietnamese": "Trang tài liệu tham khảo đầu tiên gồm phương pháp và đánh giá.",
+    "role": "main"
+  },
+  {
+    "slide": 16,
+    "title": "References (2 of 2)",
+    "section": "REFERENCES",
+    "seconds": 5,
+    "purpose_vi": "Giữ các nguồn dữ liệu và artifact theo yêu cầu.",
+    "english": "This page lists the sources for the data context, the code, and the research files.",
+    "vietnamese": "Trang thứ hai liệt kê nguồn bối cảnh dữ liệu và tài nguyên nghiên cứu.",
+    "role": "main"
+  },
+  {
+    "slide": 17,
+    "title": "Thank you",
+    "section": "CLOSING",
+    "seconds": 5,
+    "purpose_vi": "Giữ slide thank you hiện tại.",
+    "english": "Thank you for listening. I am happy to take your questions.",
+    "vietnamese": "Xin cảm ơn. Tôi xin tiếp nhận các câu hỏi và trao đổi.",
+    "role": "main"
+  },
+  {
+    "slide": 18,
+    "title": "Backup: Evaluation details",
+    "section": "BACKUP",
+    "seconds": 0,
+    "purpose_vi": "Đưa chi tiết cấu hình, điều kiện bảo đảm và đơn vị suy luận ra khỏi luồng chính.",
+    "english": "This extra slide gives more details about the tests. We create the grouping setup and the ranking and rescue-planning setup separately. Each has its own development data, data for choosing settings, and test data. RQ2 uses the true incident groups. RQ3 uses predicted groups. For rescue planning, we average the resource conditions within each random seed and compare forty pairs of results. Exact copies leave the score unchanged only when the evidence families and score inputs stay fixed. These tests use simulated data. They do not prove that the methods work in real rescue operations.",
+    "vietnamese": "Slide dự phòng ghi lại những giới hạn đứng sau kết quả chính. Cấu hình phân cụm và cấu hình xếp hạng, điều phối được sinh độc lập, với các tập phát triển, hiệu chỉnh và kiểm tra riêng. RQ2 dùng nhóm sự cố chuẩn, còn RQ3 dùng cụm dự đoán. Phân tích điều phối có bốn mươi cặp theo seed sau khi lấy trung bình điều kiện nguồn lực. Bất biến trước bản sao đòi hỏi nhóm bằng chứng và đầu vào cố định. Các phép kiểm tra nằm trong phạm vi bộ sinh tổng hợp, chưa xác lập tính hợp lệ thực địa.",
+    "role": "backup"
+  },
+  {
+    "slide": 19,
+    "title": "Backup: Anticipated questions",
+    "section": "BACKUP",
+    "seconds": 0,
+    "purpose_vi": "Chuẩn bị bốn câu hỏi dễ gặp: khoảng tin cậy và kiểm định, Leiden, độ nhạy hằng số, lý do dùng dữ liệu tổng hợp.",
+    "english": "This extra slide answers some likely questions. For grouping, the average difference between Product and Additive is small. Its confidence interval does not include zero, but the Wilcoxon test is not significant after Holm correction. The two use different procedures, so we do not claim an advantage. Product with Leiden scores 0.9165, and its difference from Product with Louvain is not significant. For the fixed constants in the score, we changed one constant at a time in twenty-one settings. The average NDCG at five changed by less than 0.01. Finally, we use simulated data because we need known true incidents and controlled problems. We do not claim that the results hold for real operations.",
+    "vietnamese": "Slide dự phòng này trả lời một số câu hỏi dễ gặp. Ở phân cụm, chênh lệch trung bình giữa Product và Additive nhỏ. Khoảng tin cậy bootstrap chưa hiệu chỉnh không chứa số không, nhưng kiểm định Wilcoxon sau hiệu chỉnh Holm không có ý nghĩa. Hai thủ tục khác nhau, nên chúng tôi không khẳng định ưu thế. Product với Leiden đạt 0,9165 và chênh lệch so với Product Louvain không có ý nghĩa. Với các hằng số cố định của điểm số, chúng tôi thay đổi từng hằng số một trong hai mươi mốt cấu hình; NDCG tại năm trung bình thay đổi dưới 0,01. Cuối cùng, dữ liệu mô phỏng được dùng vì cần biết sự cố thật và kiểm soát các tình huống khó. Chúng tôi không khẳng định kết quả đúng cho vận hành thực tế.",
+    "role": "backup"
+  }
+]
