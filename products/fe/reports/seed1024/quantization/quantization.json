@@ -1,0 +1,39 @@
+{
+  "fp32_onnx": {
+    "file": "flood_mobilenetv3_large.onnx",
+    "bytes": 16821822,
+    "sha256": "f74c99b479b6fc55bd5f7bb2dffcf080d376ff7bc25269ad80732f996d3d89a9"
+  },
+  "int8_onnx": {
+    "file": "flood_mobilenetv3_large.int8.onnx",
+    "bytes": 4726961,
+    "sha256": "ebc6a32452443dfe134cdcf4a3a9944e744fc5ac8f95eb0e0b2542cad1927c03"
+  },
+  "calibration_images": 200,
+  "calibration_split": "train",
+  "evaluation_split": "test",
+  "split_csv": "E:\\RHNA\\1Visual\\NCKH\\nckh2\\products\\fe\\model\\Edge Ai\\split_train_val_test_mobilenetv3_large.csv",
+  "split_csv_sha256": "f7b52cd25411d4d1df2f7f80745a2cf430819773854345798cf7e093e3bcba45",
+  "config_sha256": "1a14408bd2f42c9c06aba419ec3862fefec109c4e1030fa2a354ca8522a46779",
+  "seed": 1024,
+  "input_size": 256,
+  "class_order": [
+    "low",
+    "medium",
+    "high",
+    "non_flood"
+  ],
+  "onnxruntime": "1.30.0",
+  "n_images": 256,
+  "fp32": {
+    "accuracy": 0.7578125,
+    "macro_f1": 0.7426491791647138,
+    "latency_ms_median": 39.52650001156144
+  },
+  "int8": {
+    "accuracy": 0.66796875,
+    "macro_f1": 0.6436168387451474,
+    "latency_ms_median": 41.725150018464774
+  },
+  "top1_agreement": 0.7734375
+}

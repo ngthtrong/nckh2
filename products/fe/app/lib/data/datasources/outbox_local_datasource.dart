@@ -1,0 +1,263 @@
+import 'dart:math';
+
+import 'package:hive_ce_flutter/hive_flutter.dart';
+import 'package:uuid/uuid.dart';
+
+import '../../core/sync/payload_hash.dart';
+import '../models/sync_message_model.dart';
+
+/// Dead-letter không do nội dung báo cáo mà do message/vận chuyển (trùng số thứ tự
+/// khi hai tiến trình cùng ghi outbox, message hỏng): tạo message mới với ID và
+/// sequence mới. HTTP chỉ phục hồi với 408/429/5xx của dữ liệu cũ. Các mã khác
+/// (`INVALID_PAYLOAD`, `EXPIRED`, `REPORT_ID_CONFLICT`...) là từ chối vĩnh viễn.
+bool isRecoverableDeadLetter(String? code) {
+  if (code == 'SEQUENCE_REUSED' || code == 'ID_REUSED_WITH_DIFFERENT_PAYLOAD') {
+    return true;
+  }
+  final status = code != null && code.startsWith('HTTP_')
+      ? int.tryParse(code.substring(5))
+      : null;
+  return status == 408 ||
+      status == 429 ||
+      (status != null && status >= 500 && status < 600);
+}
+
+class OutboxLocalDataSource {
+  static const boxName = 'sync_outbox';
+  static const _clientIdKey = '_meta:client_id';
+  static const _sequenceKey = '_meta:sequence_number';
+  static const _serverIdKey = '_meta:server_id';
+  static const _serverUrlKey = '_meta:server_url';
+  static const _attachmentCursorKey = '_meta:attachment_cursor';
+
+  final Uuid _uuid;
+  final Random _random;
+  Box<dynamic>? _box;
+  final _messageIdsByRecord = <String, List<String>>{};
+
+  OutboxLocalDataSource({Uuid? uuid, Random? random})
+    : _uuid = uuid ?? const Uuid(),
+      _random = random ?? Random.secure();
+
+  /// [hivePath] chỉ dùng trong test (thư mục tạm, không cần plugin path_provider).
+  Future<void> init({String? hivePath}) async {
+    hivePath == null ? await Hive.initFlutter() : Hive.init(hivePath);
+    _box = await Hive.openBox<dynamic>(boxName);
+    if (_box!.get(_clientIdKey) == null) {
+      await _box!.put(_clientIdKey, _uuid.v4());
+    }
+    await _recoverInFlight();
+    _messageIdsByRecord.clear();
+    for (final message in _messages()) {
+      if (message.operationType == 'CREATE_RESCUE_RECORD') {
+        _messageIdsByRecord
+            .putIfAbsent(message.payload['id'] as String, () => [])
+            .add(message.messageId);
+      }
+    }
+  }
+
+  Future<SyncMessageModel> enqueueCreate(Map<String, dynamic> payload) async {
+    var existing = messageForRecord(payload['id'] as String);
+    if (existing != null) {
+      while (existing != null &&
+          existing.deliveryStatus == 'dead_letter' &&
+          isRecoverableDeadLetter(existing.lastError)) {
+        await acknowledge(existing.messageId);
+        existing = messageForRecord(payload['id'] as String);
+      }
+      if (existing != null) return existing;
+    }
+
+    final sequence = ((_box!.get(_sequenceKey) as num?)?.toInt() ?? 0) + 1;
+    final now = DateTime.now().toUtc();
+    final message = SyncMessageModel(
+      messageId: _uuid.v4(),
+      clientId: _box!.get(_clientIdKey) as String,
+      sequenceNumber: sequence,
+      operationType: 'CREATE_RESCUE_RECORD',
+      createdAt: now,
+      payloadHash: computePayloadHash(payload),
+      payload: payload,
+      nextAttemptAt: now,
+    );
+    await _box!.putAll({
+      _sequenceKey: sequence,
+      message.messageId: message.toStorageJson(),
+    });
+    _messageIdsByRecord
+        .putIfAbsent(payload['id'] as String, () => [])
+        .add(message.messageId);
+    return message;
+  }
+
+  /// ID thiết bị gửi kèm mọi message; server dùng làm chủ báo cáo.
+  String get clientId => _box!.get(_clientIdKey) as String;
+
+  /// A restored backup can lag behind the server; retain report ownership.
+  Future<void> reconcileSequence(int nextSequenceNumber) async {
+    final current = (_box!.get(_sequenceKey) as num?)?.toInt() ?? 0;
+    if (nextSequenceNumber > current + 1) {
+      await _box!.put(_sequenceKey, nextSequenceNumber - 1);
+    }
+  }
+
+  String? get serverId => _box!.get(_serverIdKey) as String?;
+  String? get serverUrl => _box!.get(_serverUrlKey) as String?;
+
+  String? get lastAttachmentRecordId =>
+      _box!.get(_attachmentCursorKey) as String?;
+
+  Future<void> rememberAttachmentAttempt(String recordId) =>
+      _box!.put(_attachmentCursorKey, recordId);
+
+  Future<void> saveServer(String id, String url) =>
+      _box!.putAll({_serverIdKey: id, _serverUrlKey: url});
+
+  List<SyncMessageModel> readyMessages({
+    int limit = 50,
+    String? priorityRecordId,
+  }) {
+    final now = DateTime.now().toUtc();
+    final messages =
+        _messages()
+            .where(
+              (m) =>
+                  m.deliveryStatus == 'pending' &&
+                  !m.nextAttemptAt.isAfter(now),
+            )
+            .toList()
+          ..sort((a, b) {
+            final aPriority = a.payload['id'] == priorityRecordId;
+            final bPriority = b.payload['id'] == priorityRecordId;
+            if (aPriority != bPriority) return aPriority ? -1 : 1;
+            return a.sequenceNumber.compareTo(b.sequenceNumber);
+          });
+    return messages.take(limit).toList();
+  }
+
+  SyncMessageModel? messageForRecord(String recordId) {
+    final messages = _messageIdsByRecord[recordId]
+        ?.map(_read)
+        .whereType<SyncMessageModel>()
+        .toList();
+    if (messages == null || messages.isEmpty) return null;
+    messages.sort((a, b) => a.sequenceNumber.compareTo(b.sequenceNumber));
+    return messages.first;
+  }
+
+  /// Có mạng trở lại: message đang chờ backoff được gửi ngay (giữ số lần thử).
+  Future<void> makePendingReady() async {
+    final now = DateTime.now().toUtc();
+    final updates = {
+      for (final m in _messages())
+        if (m.deliveryStatus == 'pending' && m.nextAttemptAt.isAfter(now))
+          m.messageId: m.copyWith(nextAttemptAt: now).toStorageJson(),
+    };
+    if (updates.isNotEmpty) await _box!.putAll(updates);
+  }
+
+  /// Thời điểm message `pending` sớm nhất đến hạn gửi; null nếu không có.
+  DateTime? get nextAttemptAt {
+    DateTime? earliest;
+    for (final m in _messages()) {
+      if (m.deliveryStatus != 'pending') continue;
+      if (earliest == null || m.nextAttemptAt.isBefore(earliest)) {
+        earliest = m.nextAttemptAt;
+      }
+    }
+    return earliest;
+  }
+
+  Future<void> markInFlight(Iterable<SyncMessageModel> messages) async {
+    await _box!.putAll({
+      for (final message in messages)
+        message.messageId: message
+            .copyWith(deliveryStatus: 'in_flight')
+            .toStorageJson(),
+    });
+  }
+
+  /// A rejected batch can be retried in smaller pieces with the same message IDs.
+  Future<void> releaseInFlight(Iterable<SyncMessageModel> messages) async {
+    final now = DateTime.now().toUtc();
+    await _box!.putAll({
+      for (final message in messages)
+        message.messageId: message
+            .copyWith(deliveryStatus: 'pending', nextAttemptAt: now)
+            .toStorageJson(),
+    });
+  }
+
+  Future<void> acknowledge(String messageId) async {
+    final message = _read(messageId);
+    await _box!.delete(messageId);
+    if (message != null) {
+      final recordId = message.payload['id'];
+      final ids = _messageIdsByRecord[recordId];
+      ids?.remove(messageId);
+      if (ids?.isEmpty == true) _messageIdsByRecord.remove(recordId);
+    }
+  }
+
+  Future<void> markDeadLetter(String messageId, String? error) async {
+    final message = _read(messageId);
+    if (message == null) return;
+    await _box!.put(
+      messageId,
+      message
+          .copyWith(deliveryStatus: 'dead_letter', lastError: error)
+          .toStorageJson(),
+    );
+  }
+
+  Future<void> scheduleRetry(String messageId, String? error) async {
+    final message = _read(messageId);
+    if (message == null) return;
+    final attempt = message.attemptCount + 1;
+    final ceilingSeconds = min(300, 1 << min(attempt, 9));
+    final delay = Duration(
+      milliseconds: _random.nextInt(ceilingSeconds * 1000 + 1),
+    );
+    await _box!.put(
+      messageId,
+      message
+          .copyWith(
+            deliveryStatus: 'pending',
+            attemptCount: attempt,
+            nextAttemptAt: DateTime.now().toUtc().add(delay),
+            lastError: error,
+          )
+          .toStorageJson(),
+    );
+  }
+
+  Future<void> _recoverInFlight() async {
+    final updates = <String, dynamic>{};
+    for (final message in _messages()) {
+      if (message.deliveryStatus == 'in_flight') {
+        updates[message.messageId] = message
+            .copyWith(
+              deliveryStatus: 'pending',
+              nextAttemptAt: DateTime.now().toUtc(),
+            )
+            .toStorageJson();
+      }
+    }
+    if (updates.isNotEmpty) await _box!.putAll(updates);
+  }
+
+  Iterable<SyncMessageModel> _messages() sync* {
+    for (final key in _box!.keys.whereType<String>()) {
+      if (key.startsWith('_meta:')) continue;
+      final message = _read(key);
+      if (message != null) yield message;
+    }
+  }
+
+  SyncMessageModel? _read(String id) {
+    final raw = _box!.get(id);
+    if (raw is! Map) return null;
+    return SyncMessageModel.fromStorageJson(Map<String, dynamic>.from(raw));
+  }
+}

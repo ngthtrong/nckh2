@@ -1,0 +1,48 @@
+\NeedsTeXFormat{LaTeX2e}
+\ProvidesClass{template/ctu-report}[2026/10/06 CTU student research report]
+\RequirePackage{iftex}
+\ifXeTeX\else
+  \ClassError{ctu-report}{XeLaTeX is required}{Run make content in report/}
+\fi
+\DeclareOption{twoside}{\def\TwoSidedReport{1}}
+\DeclareOption*{\PassOptionsToClass{\CurrentOption}{scrreprt}}
+\ProcessOptions\relax
+% geometry owns final margins; explicit DIV avoids the initial 13bp DIV warning.
+\PassOptionsToPackage{usegeometry,DIV=12}{typearea}
+\ifdefined\TwoSidedReport
+  \PassOptionsToClass{twoside}{scrreprt}
+\else
+  \PassOptionsToClass{oneside}{scrreprt}
+\fi
+\LoadClass[fontsize=13bp,a4paper,open=any,chapterprefix=true,
+  listof=totoc,bibliography=totoc,numbers=noenddot,captions=tableheading]{scrreprt}
+\RequirePackage[reset,a4paper,left=3cm,right=2cm,top=2cm,bottom=2cm,
+  headheight=22bp,footskip=10mm]{geometry}
+\ifdefined\TwoSidedReport
+  \geometry{reset,a4paper,left=3cm,right=2cm,top=2cm,bottom=2cm,
+    asymmetric,headheight=22bp,footskip=10mm}
+\fi
+\addtokomafont{disposition}{\rmfamily}
+\setkomafont{chapter}{\normalfont\bfseries\fontsize{16bp}{20bp}\selectfont}
+\setkomafont{section}{\normalfont\bfseries\fontsize{14bp}{18bp}\selectfont}
+\setkomafont{subsection}{\normalfont\bfseries\normalsize}
+\setkomafont{caption}{\normalfont\normalsize}
+\setkomafont{captionlabel}{\normalfont\bfseries}
+\RedeclareSectionCommand[beforeskip=0pt,afterskip=18bp]{chapter}
+\RedeclareSectionCommand[beforeskip=14bp,afterskip=7bp]{section}
+\RedeclareSectionCommand[beforeskip=10bp,afterskip=5bp]{subsection}
+\RedeclareSectionCommand[beforeskip=8bp,afterskip=4bp]{subsubsection}
+\RedeclareSectionCommand[beforeskip=7bp,afterskip=.75em,runin=true]{paragraph}
+\setcounter{secnumdepth}{2}
+\setcounter{tocdepth}{2}
+% Leave room for longer Roman page numbers after the lists of tables/figures grow.
+\makeatletter
+\renewcommand*{\@pnumwidth}{2.5em}
+\renewcommand*{\@tocrmarg}{3.5em}
+\makeatother
+\RequirePackage{scrlayer-scrpage}
+\clearpairofpagestyles
+\cfoot*{\pagemark}
+\setkomafont{pageheadfoot}{\normalfont\normalsize}
+\renewcommand*{\chapterpagestyle}{scrheadings}
+\setlength{\footheight}{22bp}

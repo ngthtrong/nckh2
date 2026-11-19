@@ -1,0 +1,48 @@
+\section{Phân lớp và lưu trữ}\label{sec:system-storage-details}
+\subsection{Ứng dụng và hàng đợi}
+Ứng dụng có ba tầng dữ liệu, nghiệp vụ và giao diện (Hình~\ref{fig:mobile-architecture-layers}). Hive lưu báo cáo và outbox; repository điều phối gửi metadata/ảnh. Android gọi ONNX Runtime hoặc ExecuTorch, SMS qua MethodChannel; web phục vụ giao diện và đồng bộ HTTP.
+
+\begin{reportlandscapefigure}
+\centering
+
+\includegraphics[width=\linewidth,height=\ReportLandscapeImageHeight,keepaspectratio]{mobile_architecture.pdf}
+\caption{Phân lớp Flutter, hợp đồng domain và tích hợp nền tảng}
+\label{fig:mobile-architecture-layers}
+\end{reportlandscapefigure}
+
+Outbox giữ định danh, hash, sequence và số lần thử. Khi kết nối trở lại, ứng dụng đánh giá lại chế độ gửi; Workmanager và sự kiện kết nối kích hoạt đồng bộ. Báo cáo chưa có vị trí được giữ trong hàng xem xét; vị trí bổ sung lưu nguồn nhập.
+
+\subsection{Trao đổi và lưu trữ backend}
+Metadata đi qua \texttt{/sync/messages}, ảnh qua \texttt{/api/reports}. Batch tối đa 50 message và 256 KiB; mỗi message có phản hồi riêng. SHA-256 trên JSON chuẩn tắc RFC 8785~\citep{rfc8785} cùng ID/sequence hỗ trợ chống gửi lặp. Quy tắc retry và xử lý mất ACK ở Mục~\ref{sec:synchronization-design}.
+
+SQLite đang triển khai bảy bảng: reports, messages\_dedup, report\_events, teams, operators, sessions và server\_meta. Ảnh lưu ngoài CSDL; mỗi message ghi trong transaction riêng, chế độ WAL hỗ trợ đọc đồng thời. Backend giữ ảnh đầu tiên và trường đã có khi gộp báo cáo; quyền bổ sung được kiểm theo chủ báo cáo. Hình~\ref{fig:data-relations} tóm tắt các quan hệ chính.
+
+\begin{figure}[htbp]
+\centering
+\begin{tikzpicture}[node distance=9mm,>=Stealth,
+ box/.style={draw=black!80,align=center,text width=46mm,minimum height=17mm,font=\small,rounded corners=1pt}]
+\node[box] (reports) {\textbf{reports}\\
+  \scriptsize id, vị trí (lat, lng), status\\
+  \scriptsize trapped, injured, payload};
+\node[box,left=22mm of reports] (events) {\textbf{report\_events}\\
+  \scriptsize id, report\_id, kind\\
+  \scriptsize actor, source, created\_at};
+\node[box,below=of reports] (teams) {\textbf{teams}\\
+  \scriptsize id, name, phone\\
+  \scriptsize members, note, active};
+\node[box,below=of events] (ops) {\textbf{operators / sessions}\\
+  \scriptsize operators (id, user, role)\\
+  \scriptsize sessions (token, op\_id)};
+\node[box,below=of teams] (dedup) {\textbf{messages\_dedup}\\
+  \scriptsize message\_id, payload\_hash\\
+  \scriptsize client\_id, sequence\_number};
+\draw[->] (reports)--node[above,font=\scriptsize]{ghi nhật ký}(events);
+\draw[->] (reports)--node[right,font=\scriptsize]{giao đội}(teams);
+\draw[dashed,->] (ops)--node[left,font=\scriptsize]{actor kiểm toán}(events);
+\draw[dashed,->] (dedup.east)--++(8mm,0)|-node[pos=0.25,right,font=\scriptsize]{đồng bộ / upsert}(reports.east);
+\end{tikzpicture}
+\caption{Quan hệ logic chính của lưu trữ; nét đứt biểu diễn liên hệ nghiệp vụ}
+\label{fig:data-relations}
+\end{figure}
+
+Thiết kế CDM, LDM và PDM được trình bày tại Mục~\ref{sec:system-data-models}.

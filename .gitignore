@@ -1,0 +1,101 @@
+# OS-specific files
+.DS_Store
+.DS_Store?
+._*
+.Spotlight-V100
+.Trashes
+ehthumbs.db
+Thumbs.db
+*:Zone.Identifier
+
+# IDEs and editors
+.idea/
+.vscode/
+*.suo
+*.ntvs*
+*.njsproj
+*.sln
+*.sw?
+*~
+
+# Temporary files and logs
+*.log
+!revision/clean-room-full.log
+*.pid
+tmp/
+temp/
+/demo/*/.venv
+/demo/artifacts/runs/
+.claude/settings.json
+
+# Python
+.venv/
+.pytest_cache/
+__pycache__/
+*.py[cod]
+
+# LaTeX auxiliary files
+*.aux
+*.bbl
+*.blg
+*.fls
+*.fdb_latexmk
+*.out
+*.synctex.gz
+paper/submission/
+.agents/ 
+CLAUDE.md
+.rtk/
+AGENTS.md
+# Môi trường kiểm thử E2E (scripts/demo/e2e)
+.venv-e2e/
+.gitnexus
+
+# Raw image dataset
+/dataset/image_data/
+
+# Android packages
+*.[aA][pP][kK]
+*.[aA][aA][bB]
+
+# Large local artifacts
+/thucnghiem/results/rq3_results/rq3_destination_assignments.csv
+/report/tectonic.exe
+/products/be/benchmark_package.rhb
+
+# ---------------------------------------------------------------------------
+# File nặng / sinh tự động: KHÔNG commit (lưu ở Google Drive / GitHub Release)
+# ---------------------------------------------------------------------------
+# Model weights & artefact xuất model
+*.pth
+*.pt
+*.pte
+*.onnx
+*.onnx.data
+*.ckpt
+*.safetensors
+*.h5
+*.tflite
+/products/fe/app/assets/models/
+
+# Dataset ảnh huấn luyện
+/products/fe/model/Dataset_Flood/
+**/Dataset_Flood/
+
+# Kết quả thực nghiệm nặng
+/thucnghiem/results/rq1_results/checkpoints/
+
+# Build LaTeX / báo cáo
+*.xdv
+/report/build/
+/reportTemplate/build/
+/report/diagram-revisions/*/before/
+**/export-profile/
+/docs/revision-plan/outputs/
+
+# Binary / archive rác
+*.exe
+*.rhb
+/products/fe/app/lib.zip
+/products/fe/app/android.zip
+/products/be/build/

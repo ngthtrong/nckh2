@@ -1,0 +1,32 @@
+\begin{landscape}
+\subsection{Mô hình dữ liệu đề xuất}\label{sec:system-data-models}
+Các bảng phân tích bổ sung thuộc thiết kế đề xuất; phiên bản hiện tại dùng bảy bảng nêu trên và cache kết quả cụm trong bộ nhớ.
+
+Ba mô hình CDM, LDM và PDM mô tả thiết kế tích hợp đầy đủ. CDM ở Hình~\ref{fig:database-cdm} xác định các thực thể nghiệp vụ.
+
+\begin{figure}[H]\centering
+\includegraphics[width=\linewidth,height=\dimexpr\textheight-48mm\relax,keepaspectratio]{diagram-revisions/2026-10-29-data-models-review/01-cdm.pdf}
+\caption{Mô hình dữ liệu khái niệm (CDM) của hệ thống cứu hộ}
+\label{fig:database-cdm}
+\end{figure}
+\end{landscape}
+
+\begin{landscape}
+LDM ở Hình~\ref{fig:database-ldm} bổ sung lần chạy, cụm và họ bằng chứng.
+
+\begin{figure}[H]\centering
+\includegraphics[width=\linewidth,height=\dimexpr\textheight-28mm\relax,keepaspectratio]{diagram-revisions/2026-10-29-data-models-review/02-ldm.pdf}
+\caption{Mô hình dữ liệu logic (LDM), định danh và cấu hình phân tích}
+\label{fig:database-ldm}
+\end{figure}
+\end{landscape}
+
+\begin{landscape}
+PDM ở Hình~\ref{fig:database-pdm} cụ thể hóa khóa, kiểu dữ liệu và ràng buộc SQLite.
+
+\begin{figure}[H]\centering
+\includegraphics[width=\linewidth,height=\dimexpr\textheight-28mm\relax,keepaspectratio]{diagram-revisions/2026-10-29-data-models-review/03-pdm.pdf}
+\caption{Mô hình dữ liệu vật lý (PDM) đề xuất trên SQLite}
+\label{fig:database-pdm}
+\end{figure}
+\end{landscape}

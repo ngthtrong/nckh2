@@ -1,0 +1,66 @@
+# [CHỈNH SỬA] Compose riêng cho E2E; build context trỏ về gốc repo.
+# Mỗi RUN_ID dùng project/volume riêng. Không đặt SEED_RESET=1 khi resume.
+name: ${E2E_PROJECT:-flood-rescue-e2e}
+
+services:
+  be:
+    build:
+      context: ../..
+      dockerfile: thuc_nghiem_nq/experiment_e2e/docker/be.Dockerfile
+    image: flood-rescue/e2e-be:${E2E_RUN_ID:-local}
+    environment:
+      SEED_RUN: ${SEED_RUN:-1}
+      SEED_RESET: "0"
+      # Tài khoản quản trị tạo lần đầu khi DB chưa có tài khoản (đổi mật khẩu khi triển khai thật);
+      # các điều phối viên khác do quản trị viên tạo trên dashboard.
+      RESCUE_ADMIN_USERNAME: ${RESCUE_ADMIN_USERNAME:-admin}
+      RESCUE_ADMIN_PASSWORD: ${RESCUE_ADMIN_PASSWORD:-${RESCUE_DASHBOARD_PASSWORD:-cuuho2026}}
+      # nginx của dashboard và web app: chỉ tin X-Forwarded-For từ hai container này.
+      RESCUE_TRUSTED_PROXIES: ${RESCUE_TRUSTED_PROXIES:-dashboard,fe}
+      # Nút "Xóa toàn bộ dữ liệu" chỉ dành cho demo; mặc định tắt.
+      RESCUE_ALLOW_WIPE: ${RESCUE_ALLOW_WIPE:-0}
+      # Sao lưu DB định kỳ vào volume be-data (/var/lib/rescue/backups); 0 = tắt.
+      RESCUE_BACKUP_INTERVAL_MIN: "0"
+      # SMS gateway chuyển tiếp tin SOS tới POST /api/sms/inbound; để trống thì tắt.
+      RESCUE_SMS_GATEWAY_TOKEN: ${RESCUE_SMS_GATEWAY_TOKEN:-}
+    volumes:
+      - be-data:/var/lib/rescue
+    ports:
+      - "${BE_PORT:-18000}:8000"
+    restart: unless-stopped
+
+  dashboard:
+    build:
+      context: ../..
+      dockerfile: thuc_nghiem_nq/experiment_e2e/docker/dashboard.Dockerfile
+    image: flood-rescue/e2e-dashboard:${E2E_RUN_ID:-local}
+    environment:
+      BACKEND_URL: http://be:8000
+    depends_on:
+      be:
+        condition: service_healthy
+    ports:
+      - "${DASHBOARD_PORT:-18080}:80"
+    restart: unless-stopped
+
+  fe:
+    build:
+      context: ../..
+      dockerfile: thuc_nghiem_nq/experiment_e2e/docker/fe.Dockerfile
+      # runtime: build Flutter trong Docker; prebuilt: dùng products/fe/app/build/web đã build sẵn.
+      target: ${FE_BUILD_TARGET:-runtime}
+      args:
+        FLUTTER_VERSION: ${FLUTTER_VERSION:-3.47.5}
+        SERVER_URL: ${FE_SERVER_URL:-}
+    image: flood-rescue/e2e-fe:${E2E_RUN_ID:-local}
+    environment:
+      BACKEND_URL: http://be:8000
+    depends_on:
+      be:
+        condition: service_healthy
+    ports:
+      - "${FE_PORT:-18081}:80"
+    restart: unless-stopped
+
+volumes:
+  be-data:

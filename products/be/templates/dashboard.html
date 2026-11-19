@@ -1,0 +1,280 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Điều phối cứu hộ</title>
+    <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'%3E%3Ccircle cx='16' cy='16' r='15' fill='%23b91c1c'/%3E%3Cpath d='M16 7v18M7 16h18' stroke='white' stroke-width='5'/%3E%3C/svg%3E">
+    <!-- Trang tĩnh, không dùng CDN: phục vụ bởi FastAPI (/static) hoặc nginx của container dashboard. -->
+    <link rel="stylesheet" href="static/vendor/leaflet/leaflet.css">
+    <link rel="stylesheet" href="static/css/dashboard.css">
+    <script src="static/vendor/leaflet/leaflet.js"></script>
+    <script src="static/vendor/leaflet-heat.js"></script>
+    <script type="module" src="static/js/main.js"></script>
+</head>
+<body>
+    <!-- Đăng nhập -->
+    <section id="login-view" class="login-view" hidden>
+        <form id="login-form" class="login-card" autocomplete="on">
+            <div class="login-brand">
+                <span class="brand-mark" aria-hidden="true"></span>
+                <div>
+                    <h1>Điều phối cứu hộ bão lũ</h1>
+                    <p class="muted">Dành cho điều phối viên</p>
+                </div>
+            </div>
+            <label class="field">
+                <span>Tên đăng nhập</span>
+                <input id="login-username" name="username" autocomplete="username" required maxlength="64" autocapitalize="none" spellcheck="false">
+            </label>
+            <label class="field">
+                <span>Mật khẩu</span>
+                <input id="login-password" name="password" type="password" autocomplete="current-password" required>
+            </label>
+            <p id="login-error" class="form-error" role="alert" hidden></p>
+            <button type="submit" class="btn btn-primary btn-block">Đăng nhập</button>
+            <p class="muted small">Mỗi điều phối viên dùng tài khoản riêng do quản trị viên cấp; tên hiển thị được ghi vào nhật ký thao tác.</p>
+        </form>
+    </section>
+
+    <!-- Ứng dụng -->
+    <div id="app-view" hidden>
+        <header class="topbar">
+            <div class="topbar-inner">
+                <div class="topbar-title">
+                    <span class="brand-mark" aria-hidden="true"></span>
+                    <div>
+                        <h1>Điều phối cứu hộ bão lũ</h1>
+                        <p id="live-status" class="live-status" aria-live="polite"><span class="dot"></span><span class="text">Đang kết nối…</span></p>
+                    </div>
+                </div>
+                <nav class="topbar-actions">
+                    <button id="new-reports" class="btn btn-alert" hidden></button>
+                    <button id="btn-new-report" class="btn btn-primary" title="Nhập báo cáo nhận qua điện thoại, tổng đài">+ Báo cáo mới</button>
+                    <button id="btn-teams" class="btn btn-ghost">Đội cứu hộ</button>
+                    <button id="btn-operators" class="btn btn-ghost" hidden>Tài khoản</button>
+                    <div class="menu">
+                        <button id="btn-export" class="btn btn-ghost" aria-haspopup="true" aria-expanded="false">Xuất dữ liệu</button>
+                        <div id="export-menu" class="menu-list" hidden>
+                            <button data-format="csv">CSV (Excel) theo bộ lọc</button>
+                            <button data-format="geojson">GeoJSON (bản đồ GIS) theo bộ lọc</button>
+                            <button data-action="backup" data-admin-only hidden>Tải bản sao lưu CSDL</button>
+                            <button data-action="backup-images" data-admin-only hidden>Tải sao lưu CSDL kèm ảnh (.zip)</button>
+                        </div>
+                    </div>
+                    <button id="btn-sound" class="btn btn-ghost" aria-pressed="false" title="Âm báo khi có báo cáo mới">Âm báo: tắt</button>
+                    <button id="operator-name" class="btn btn-ghost operator" title="Đổi mật khẩu"></button>
+                    <button id="btn-logout" class="btn btn-ghost">Đăng xuất</button>
+                </nav>
+            </div>
+        </header>
+
+        <div id="synthetic-banner" class="banner banner-warning" hidden>
+            <b>Dữ liệu mô phỏng:</b> <span id="synthetic-count"></span> báo cáo bán tổng hợp (neo theo bối cảnh EMSR848), không phải báo cáo thật.
+        </div>
+
+        <main class="page">
+            <section class="kpis" aria-label="Tổng quan">
+                <button class="kpi" data-status-filter="processing"><span class="kpi-label">Chờ xử lý</span><span class="kpi-value tone-critical" id="kpi-processing">–</span></button>
+                <button class="kpi" data-status-filter="dispatched"><span class="kpi-label">Đã điều phối</span><span class="kpi-value tone-warning" id="kpi-dispatched">–</span></button>
+                <button class="kpi" data-status-filter="resolved"><span class="kpi-label">Đã giải quyết</span><span class="kpi-value tone-good" id="kpi-resolved">–</span></button>
+                <button class="kpi" data-status-filter="cancelled"><span class="kpi-label">Đã đóng</span><span class="kpi-value" id="kpi-cancelled">–</span></button>
+                <button class="kpi" data-tab-target="review"><span class="kpi-label">Cần xem xét</span><span class="kpi-value" id="kpi-review">–</span><span class="kpi-hint">Thiếu vị trí / thời gian</span></button>
+                <button class="kpi" data-tab-target="clusters"><span class="kpi-label">Cụm sự kiện</span><span class="kpi-value tone-accent" id="kpi-clusters">–</span></button>
+                <button class="kpi" data-tab-target="stats"><span class="kpi-label">Tiếp nhận → điều phối</span><span class="kpi-value" id="kpi-response">–</span><span class="kpi-hint" id="kpi-response-hint">trung vị</span></button>
+            </section>
+
+            <section class="workspace">
+                <div class="card map-card">
+                    <div class="map-toolbar">
+                        <div class="segmented" role="group" aria-label="Tô màu điểm">
+                            <button data-color-mode="cluster" aria-pressed="true">Theo cụm</button>
+                            <button data-color-mode="status" aria-pressed="false">Theo trạng thái</button>
+                        </div>
+                        <label class="check"><input type="checkbox" id="toggle-closed"> Hiện báo cáo đã kết thúc</label>
+                        <label class="check"><input type="checkbox" id="toggle-heat"> Bản đồ nhiệt</label>
+                        <button id="btn-fit" class="btn btn-small">Vừa khung</button>
+                    </div>
+                    <div id="pick-banner" class="pick-banner" hidden></div>
+                    <div id="map"></div>
+                    <div id="map-legend" class="map-legend"></div>
+                </div>
+
+                <div class="card side-card">
+                    <div class="tabs" role="tablist">
+                        <button role="tab" data-tab="clusters" aria-selected="true">Cụm ưu tiên <span class="count" id="tab-count-clusters"></span></button>
+                        <button role="tab" data-tab="review" aria-selected="false">Cần xem xét <span class="count" id="tab-count-review"></span></button>
+                        <button role="tab" data-tab="stats" aria-selected="false">Thống kê</button>
+                    </div>
+                    <div class="tab-panel" data-panel="clusters">
+                        <p class="panel-note">P = (0.34·E + 0.33·F + 0.33·N) × (1 + tanh(V/10)), P ∈ [0; 2] (Eq. 4, ISDS 2026). Bấm một cụm để lọc bảng và xem trên bản đồ.</p>
+                        <div id="cluster-list" class="list"></div>
+                    </div>
+                    <div class="tab-panel" data-panel="review" hidden>
+                        <p class="panel-note">Báo cáo thiếu vị trí hoặc thời gian không được phân cụm. Xác minh (gọi lại, hỏi địa phương) rồi nhập vị trí để đưa vào điều phối.</p>
+                        <div id="review-list" class="list"></div>
+                    </div>
+                    <div class="tab-panel" data-panel="stats" hidden>
+                        <div id="stats-panel"></div>
+                    </div>
+                </div>
+            </section>
+
+            <section class="card table-card">
+                <div class="table-head">
+                    <div>
+                        <h2 id="table-title">Tất cả báo cáo</h2>
+                        <p id="table-subtitle" class="muted small"></p>
+                    </div>
+                    <div id="cluster-actions" class="row-actions" hidden>
+                        <button class="btn btn-warning" data-cluster-action="dispatched">Điều phối cả cụm</button>
+                        <button class="btn btn-good" data-cluster-action="resolved">Hoàn tất cả cụm</button>
+                        <button class="btn" id="btn-clear-cluster">Bỏ chọn cụm</button>
+                    </div>
+                </div>
+
+                <div class="filters">
+                    <input id="f-q" type="search" placeholder="Tìm theo ID hoặc mô tả…" aria-label="Tìm kiếm">
+                    <div class="chips" role="group" aria-label="Lọc trạng thái">
+                        <button class="chip" data-status="processing" aria-pressed="false">Chờ xử lý</button>
+                        <button class="chip" data-status="dispatched" aria-pressed="false">Đã điều phối</button>
+                        <button class="chip" data-status="resolved" aria-pressed="false">Đã giải quyết</button>
+                        <button class="chip" data-status="cancelled" aria-pressed="false">Đã đóng</button>
+                    </div>
+                    <select id="f-time" aria-label="Khoảng thời gian">
+                        <option value="">Mọi thời điểm</option>
+                        <option value="1">1 giờ qua</option>
+                        <option value="6">6 giờ qua</option>
+                        <option value="24">24 giờ qua</option>
+                        <option value="72">3 ngày qua</option>
+                        <option value="custom">Tùy chọn…</option>
+                    </select>
+                    <span id="f-custom-time" class="custom-time" hidden>
+                        <input id="f-since" type="datetime-local" aria-label="Từ"> – <input id="f-until" type="datetime-local" aria-label="Đến">
+                    </span>
+                    <select id="f-team" aria-label="Đội"><option value="">Mọi đội</option><option value="none">Chưa giao đội</option></select>
+                    <select id="f-location" aria-label="Vị trí">
+                        <option value="">Có hoặc không vị trí</option>
+                        <option value="true">Có vị trí</option>
+                        <option value="false">Thiếu vị trí</option>
+                    </select>
+                    <select id="f-vulnerable" aria-label="Nhóm yếu thế">
+                        <option value="">Mọi nhóm</option>
+                        <option value="any">Có nhóm yếu thế</option>
+                        <option value="elderly">Người già</option>
+                        <option value="children">Trẻ em</option>
+                        <option value="pregnant">Phụ nữ mang thai</option>
+                        <option value="disabled">Người khuyết tật</option>
+                    </select>
+                    <select id="f-label" aria-label="Nhãn AI">
+                        <option value="">Mọi nhãn AI</option>
+                        <option value="high">Ngập cao</option>
+                        <option value="medium">Ngập trung bình</option>
+                        <option value="low">Ngập thấp</option>
+                        <option value="non_flood">Không ngập</option>
+                    </select>
+                    <select id="f-sendmode" aria-label="Cách gửi">
+                        <option value="">Mọi cách gửi</option>
+                        <option value="fullImage">Ảnh gốc</option>
+                        <option value="compressedImage">Ảnh nén</option>
+                        <option value="textOnly">Chỉ thông tin</option>
+                        <option value="smsFallback">SMS, gửi muộn</option>
+                        <option value="queuedOffline">Gửi muộn (offline)</option>
+                        <option value="hotline">Tổng đài nhập</option>
+                    </select>
+                    <button id="f-reset" class="btn btn-small">Xóa lọc</button>
+                </div>
+
+                <div id="bulk-bar" class="bulk-bar" hidden>
+                    <span id="bulk-count"></span>
+                    <button class="btn btn-warning btn-small" data-bulk="dispatched">Điều phối</button>
+                    <button class="btn btn-good btn-small" data-bulk="resolved">Hoàn tất</button>
+                    <button class="btn btn-small" data-bulk="cancelled">Đóng báo cáo</button>
+                    <button class="btn btn-small" data-bulk="team">Giao đội</button>
+                    <button class="btn btn-ghost-dark btn-small" data-bulk="clear">Bỏ chọn</button>
+                </div>
+
+                <div class="table-wrap">
+                    <table class="reports">
+                        <thead>
+                            <tr>
+                                <th class="col-check"><input type="checkbox" id="check-all" aria-label="Chọn tất cả trên trang"></th>
+                                <th><button class="sort" data-sort="createdAt">Thời điểm</button></th>
+                                <th>ID</th>
+                                <th><button class="sort" data-sort="priority">Cụm</button></th>
+                                <th><button class="sort" data-sort="people">Người</button></th>
+                                <th>Mô tả / nhãn AI</th>
+                                <th>Ảnh</th>
+                                <th>Đội</th>
+                                <th><button class="sort" data-sort="status">Trạng thái</button></th>
+                                <th class="col-actions"></th>
+                            </tr>
+                        </thead>
+                        <tbody id="report-rows"></tbody>
+                    </table>
+                </div>
+                <div id="empty-state" class="empty" hidden></div>
+                <div class="pager">
+                    <span id="pager-info" class="muted small"></span>
+                    <div class="pager-buttons">
+                        <select id="page-size" aria-label="Số dòng mỗi trang">
+                            <option value="25">25 / trang</option>
+                            <option value="50" selected>50 / trang</option>
+                            <option value="100">100 / trang</option>
+                            <option value="200">200 / trang</option>
+                        </select>
+                        <button id="page-prev" class="btn btn-small">‹ Trước</button>
+                        <span id="page-label" class="small"></span>
+                        <button id="page-next" class="btn btn-small">Sau ›</button>
+                    </div>
+                </div>
+            </section>
+        </main>
+
+        <!-- Chi tiết báo cáo -->
+        <aside id="drawer" class="drawer" hidden aria-labelledby="drawer-title">
+            <div class="drawer-head">
+                <div>
+                    <h2 id="drawer-title"></h2>
+                    <div id="drawer-sub" class="muted small"></div>
+                </div>
+                <button class="icon-btn" id="drawer-close" aria-label="Đóng">×</button>
+            </div>
+            <div id="drawer-body" class="drawer-body"></div>
+        </aside>
+
+        <!-- Hộp thoại dùng chung -->
+        <dialog id="dialog" class="dialog">
+            <form id="dialog-form" method="dialog">
+                <h3 id="dialog-title"></h3>
+                <div id="dialog-body"></div>
+                <p id="dialog-error" class="form-error" role="alert" hidden></p>
+                <div class="dialog-actions">
+                    <button type="button" class="btn" id="dialog-cancel">Hủy</button>
+                    <button type="submit" class="btn btn-primary" id="dialog-ok">Xác nhận</button>
+                </div>
+            </form>
+        </dialog>
+
+        <!-- Quản lý đội -->
+        <dialog id="teams-dialog" class="dialog dialog-wide">
+            <div class="dialog-headline">
+                <h3>Đội cứu hộ</h3>
+                <button class="icon-btn" id="teams-close" aria-label="Đóng">×</button>
+            </div>
+            <div id="teams-body"></div>
+        </dialog>
+
+        <!-- Tài khoản (quản trị viên) -->
+        <dialog id="operators-dialog" class="dialog dialog-wide">
+            <div class="dialog-headline">
+                <h3>Tài khoản điều phối viên</h3>
+                <button class="icon-btn" id="operators-close" aria-label="Đóng">×</button>
+            </div>
+            <div id="operators-body"></div>
+        </dialog>
+
+        <div id="toasts" class="toasts" aria-live="polite"></div>
+    </div>
+</body>
+</html>

@@ -1,0 +1,1670 @@
+{
+  "flowchart": {
+    "title": "2.2 · Bốn phân hệ và phản hồi trạng thái",
+    "width_pt": 728.503937007874,
+    "height_pt": 440,
+    "minimum_font_pt": 9,
+    "text_count": 20,
+    "text_bounds": "PASS",
+    "artifacts": {
+      "pdf": "79ea72a8329851a7344dd1ceac2e6f94b1247a9922b10e787f93846831c61f88",
+      "svg": "f0a9a2955d9beb2b6dbdee12efa63a05f85dd0456d8e4f22e7c75e876ecc9d10",
+      "drawio": "dcd0a1997d38de0d4b9d7103c90716e0c69ddc81c652816cb67fdce1c176d17a"
+    },
+    "text_overlaps": "PASS",
+    "flow_links": [
+      {
+        "from": "create",
+        "to": "send",
+        "points": [
+          [
+            94.0,
+            95
+          ],
+          [
+            94.0,
+            145
+          ]
+        ]
+      },
+      {
+        "from": "attachment",
+        "to": "track",
+        "points": [
+          [
+            94.0,
+            275
+          ],
+          [
+            94.0,
+            335
+          ]
+        ]
+      },
+      {
+        "from": "receive",
+        "to": "save",
+        "points": [
+          [
+            274.0,
+            95
+          ],
+          [
+            274.0,
+            145
+          ]
+        ]
+      },
+      {
+        "from": "active",
+        "to": "graph",
+        "points": [
+          [
+            454.0,
+            95
+          ],
+          [
+            454.0,
+            145
+          ]
+        ]
+      },
+      {
+        "from": "graph",
+        "to": "score",
+        "points": [
+          [
+            454.0,
+            185
+          ],
+          [
+            454.0,
+            235
+          ]
+        ]
+      },
+      {
+        "from": "inspect",
+        "to": "assign",
+        "points": [
+          [
+            634.0,
+            185
+          ],
+          [
+            634.0,
+            235
+          ]
+        ]
+      },
+      {
+        "from": "assign",
+        "to": "close",
+        "points": [
+          [
+            634.0,
+            275
+          ],
+          [
+            634.0,
+            335
+          ]
+        ]
+      },
+      {
+        "from": "send",
+        "to": "receive",
+        "points": [
+          [
+            168,
+            165
+          ],
+          [
+            181,
+            165
+          ],
+          [
+            181,
+            75
+          ],
+          [
+            200,
+            75
+          ]
+        ]
+      },
+      {
+        "from": "save",
+        "to": "attachment",
+        "points": [
+          [
+            200,
+            165
+          ],
+          [
+            185,
+            165
+          ],
+          [
+            185,
+            255
+          ],
+          [
+            168,
+            255
+          ]
+        ]
+      },
+      {
+        "from": "save",
+        "to": "active",
+        "points": [
+          [
+            348,
+            165
+          ],
+          [
+            362,
+            165
+          ],
+          [
+            362,
+            75
+          ],
+          [
+            380,
+            75
+          ]
+        ]
+      },
+      {
+        "from": "score",
+        "to": "inspect",
+        "points": [
+          [
+            528,
+            255
+          ],
+          [
+            542,
+            255
+          ],
+          [
+            542,
+            165
+          ],
+          [
+            560,
+            165
+          ]
+        ]
+      },
+      {
+        "from": "assign",
+        "to": "update",
+        "points": [
+          [
+            605,
+            275
+          ],
+          [
+            605,
+            305
+          ],
+          [
+            360,
+            305
+          ],
+          [
+            360,
+            355
+          ],
+          [
+            348,
+            355
+          ]
+        ]
+      },
+      {
+        "from": "close",
+        "to": "update",
+        "points": [
+          [
+            634,
+            375
+          ],
+          [
+            634,
+            401
+          ],
+          [
+            274,
+            401
+          ],
+          [
+            274,
+            375
+          ]
+        ]
+      },
+      {
+        "from": "update",
+        "to": "track",
+        "points": [
+          [
+            200,
+            355
+          ],
+          [
+            168,
+            355
+          ]
+        ]
+      }
+    ],
+    "geometry": {
+      "crossing_links": 0,
+      "overlapping_links": 0,
+      "links_through_other_nodes": 0
+    }
+  },
+  "database_erd": {
+    "title": "2.5 · ERD thiết kế thông tin nghiệp vụ",
+    "width_pt": 728.503937007874,
+    "height_pt": 425,
+    "minimum_font_pt": 9,
+    "text_count": 31,
+    "text_bounds": "PASS",
+    "artifacts": {
+      "pdf": "cbbef0fcf754826e8ecbc377231447c66aedec7db56333ff5d11807a24e8aee9",
+      "svg": "897023e1b306020a7c98eb1c0fef299316d9f9c9521f3f189d218e674a15edd6",
+      "drawio": "a4bfcc5c923bc34cadb4aa519de8340b1c4db5d952f7a3186e9f84c4d81b1814"
+    },
+    "text_overlaps": "PASS",
+    "flow_links": [
+      {
+        "from": "sender",
+        "to": "report",
+        "points": [
+          [
+            200,
+            122
+          ],
+          [
+            265,
+            122
+          ]
+        ]
+      },
+      {
+        "from": "report",
+        "to": "team",
+        "points": [
+          [
+            475,
+            122
+          ],
+          [
+            540,
+            122
+          ]
+        ]
+      },
+      {
+        "from": "report",
+        "to": "event",
+        "points": [
+          [
+            370,
+            162
+          ],
+          [
+            370,
+            275
+          ]
+        ]
+      },
+      {
+        "from": "operator",
+        "to": "event",
+        "points": [
+          [
+            200,
+            322
+          ],
+          [
+            265,
+            322
+          ]
+        ]
+      }
+    ],
+    "geometry": {
+      "crossing_links": 0,
+      "overlapping_links": 0,
+      "links_through_other_nodes": 0
+    }
+  },
+  "research_pipeline_report": {
+    "title": "2.6 · Hai luồng dọc: suy luận và đánh giá",
+    "width_pt": 728.503937007874,
+    "height_pt": 450,
+    "minimum_font_pt": 9,
+    "text_count": 15,
+    "text_bounds": "PASS",
+    "artifacts": {
+      "pdf": "1853e5061d5e0c991f0fc10321853e4795eaa1d286427c8ac38942044a520f11",
+      "svg": "4d3d9793726e96a4412d2302d58f1df94efbdb3d143fda68a10f7a9e85edeaac",
+      "drawio": "ff9efaed26563fea915ed1843d0d8ceefddb8e8ac88c7620b9615dcd7fc34f5c"
+    },
+    "text_overlaps": "PASS",
+    "flow_links": [
+      {
+        "from": "input",
+        "to": "eligible",
+        "points": [
+          [
+            138.0,
+            90
+          ],
+          [
+            138.0,
+            110
+          ]
+        ]
+      },
+      {
+        "from": "eligible",
+        "to": "graph",
+        "points": [
+          [
+            138.0,
+            150
+          ],
+          [
+            138.0,
+            170
+          ]
+        ]
+      },
+      {
+        "from": "graph",
+        "to": "partition",
+        "points": [
+          [
+            138.0,
+            210
+          ],
+          [
+            138.0,
+            230
+          ]
+        ]
+      },
+      {
+        "from": "partition",
+        "to": "rank",
+        "points": [
+          [
+            138.0,
+            270
+          ],
+          [
+            138.0,
+            290
+          ]
+        ]
+      },
+      {
+        "from": "rank",
+        "to": "schedule",
+        "points": [
+          [
+            138.0,
+            330
+          ],
+          [
+            138.0,
+            350
+          ]
+        ]
+      },
+      {
+        "from": "eligible",
+        "to": "review",
+        "points": [
+          [
+            248,
+            130
+          ],
+          [
+            256,
+            130
+          ],
+          [
+            256,
+            137.5
+          ],
+          [
+            266,
+            137.5
+          ]
+        ]
+      },
+      {
+        "from": "partition",
+        "to": "rq1",
+        "points": [
+          [
+            248,
+            250
+          ],
+          [
+            365,
+            250
+          ],
+          [
+            365,
+            185
+          ],
+          [
+            423,
+            185
+          ]
+        ]
+      },
+      {
+        "from": "schedule",
+        "to": "rq3",
+        "points": [
+          [
+            248,
+            370
+          ],
+          [
+            378,
+            370
+          ],
+          [
+            378,
+            369
+          ],
+          [
+            423,
+            369
+          ]
+        ]
+      },
+      {
+        "from": "truth",
+        "to": "rq3",
+        "points": [
+          [
+            693,
+            77.5
+          ],
+          [
+            710,
+            77.5
+          ],
+          [
+            710,
+            369
+          ],
+          [
+            693,
+            369
+          ]
+        ]
+      },
+      {
+        "from": null,
+        "to": "rq1",
+        "points": [
+          [
+            710,
+            185
+          ],
+          [
+            693,
+            185
+          ]
+        ]
+      },
+      {
+        "from": null,
+        "to": "rq2",
+        "points": [
+          [
+            710,
+            277
+          ],
+          [
+            693,
+            277
+          ]
+        ]
+      }
+    ],
+    "geometry": {
+      "crossing_links": 0,
+      "overlapping_links": 0,
+      "links_through_other_nodes": 0
+    }
+  },
+  "flow_04_track_rescue_status": {
+    "title": "Theo dõi và đồng bộ trạng thái",
+    "width_pt": 728.503937007874,
+    "height_pt": 430,
+    "minimum_font_pt": 9,
+    "text_count": 18,
+    "text_bounds": "PASS",
+    "artifacts": {
+      "pdf": "c4644f2b2f700ad7b63229433d115ffa36f979dcd22bf0981588aa3621f0b470",
+      "svg": "93f212e32e238bd67c44389d2a35b2c474478b435ed3d93fcc522efa3b5f4415",
+      "drawio": "1feae1fb1ddb82f3c251e33916db7164a8949fc345ae5202e58bd96874db5d1f"
+    },
+    "text_overlaps": "PASS",
+    "flow_links": [
+      {
+        "from": "open",
+        "to": "net",
+        "points": [
+          [
+            120.0,
+            103
+          ],
+          [
+            120.0,
+            120
+          ]
+        ]
+      },
+      {
+        "from": "net",
+        "to": "local",
+        "points": [
+          [
+            120.0,
+            171
+          ],
+          [
+            120.0,
+            188
+          ]
+        ]
+      },
+      {
+        "from": "net",
+        "to": "api",
+        "points": [
+          [
+            35,
+            145.5
+          ],
+          [
+            14,
+            145.5
+          ],
+          [
+            14,
+            281.5
+          ],
+          [
+            20,
+            281.5
+          ]
+        ]
+      },
+      {
+        "from": "local",
+        "to": "merge",
+        "points": [
+          [
+            220,
+            213.5
+          ],
+          [
+            236,
+            213.5
+          ],
+          [
+            236,
+            66
+          ],
+          [
+            264,
+            66
+          ]
+        ]
+      },
+      {
+        "from": "api",
+        "to": "merge",
+        "points": [
+          [
+            220,
+            281.5
+          ],
+          [
+            248,
+            281.5
+          ],
+          [
+            248,
+            89
+          ],
+          [
+            264,
+            89
+          ]
+        ]
+      },
+      {
+        "from": "merge",
+        "to": "states",
+        "points": [
+          [
+            364.0,
+            103
+          ],
+          [
+            364.0,
+            120
+          ]
+        ]
+      },
+      {
+        "from": "states",
+        "to": "ui",
+        "points": [
+          [
+            364.0,
+            171
+          ],
+          [
+            364.0,
+            256
+          ]
+        ]
+      },
+      {
+        "from": "ui",
+        "to": "active",
+        "points": [
+          [
+            464,
+            281.5
+          ],
+          [
+            492,
+            281.5
+          ],
+          [
+            492,
+            77.5
+          ],
+          [
+            523,
+            77.5
+          ]
+        ]
+      },
+      {
+        "from": "active",
+        "to": "timer",
+        "points": [
+          [
+            608.0,
+            103
+          ],
+          [
+            608.0,
+            188
+          ]
+        ]
+      },
+      {
+        "from": "active",
+        "to": "stop",
+        "points": [
+          [
+            693,
+            77.5
+          ],
+          [
+            716,
+            77.5
+          ],
+          [
+            716,
+            349.5
+          ],
+          [
+            708,
+            349.5
+          ]
+        ]
+      }
+    ],
+    "geometry": {
+      "crossing_links": 0,
+      "overlapping_links": 0,
+      "links_through_other_nodes": 0
+    }
+  },
+  "flow_05_backend_ingest_dedup": {
+    "title": "2.12 · Ba đường tiếp nhận và cơ chế chống trùng",
+    "width_pt": 728.503937007874,
+    "height_pt": 426,
+    "minimum_font_pt": 9,
+    "text_count": 22,
+    "text_bounds": "PASS",
+    "artifacts": {
+      "pdf": "79e8f5c5f7b48b32236316e7ca868ace5c7315676ebb7e2f4e9d4996c33c02a5",
+      "svg": "6d0c887bb5d0efde903d899a8f8c2c18140536147e668d05f8b4a7ff9a33764f",
+      "drawio": "7b6230369a0c9433bf9c8e8fddee578b88dfefd79a9906615055876875f92b88"
+    },
+    "text_overlaps": "PASS",
+    "flow_links": [],
+    "geometry": {
+      "scope": "monochrome only; ACK trunk retained"
+    }
+  },
+  "flow_02_create_report_edge_ai": {
+    "title": "Tạo báo cáo chi tiết và suy luận ảnh",
+    "width_pt": 728.503937007874,
+    "height_pt": 430,
+    "minimum_font_pt": 9,
+    "text_count": 18,
+    "text_bounds": "PASS",
+    "artifacts": {
+      "pdf": "1f6e0d1b4efd01e24e1707d9d51a6ac0a0e92355fcf5aa4d9a0ce8bc2032de66",
+      "svg": "bebb7d4c609488692d1035f1eac37330082e3c43d20d7ed11f2cff64f591c1fa",
+      "drawio": "8a1068006de93e2cc655e8ca83cf3b1caa999cb640400dc6a49e59d041a96fec"
+    },
+    "text_overlaps": "PASS",
+    "flow_links": [
+      {
+        "from": "open",
+        "to": "photo",
+        "points": [
+          [
+            120.0,
+            103
+          ],
+          [
+            120.0,
+            120
+          ]
+        ]
+      },
+      {
+        "from": "photo",
+        "to": "infer",
+        "points": [
+          [
+            120.0,
+            171
+          ],
+          [
+            120.0,
+            188
+          ]
+        ]
+      },
+      {
+        "from": "photo",
+        "to": "fallback",
+        "points": [
+          [
+            35,
+            145.5
+          ],
+          [
+            14,
+            145.5
+          ],
+          [
+            14,
+            349.5
+          ],
+          [
+            20,
+            349.5
+          ]
+        ]
+      },
+      {
+        "from": "infer",
+        "to": "form",
+        "points": [
+          [
+            220,
+            213.5
+          ],
+          [
+            236,
+            213.5
+          ],
+          [
+            236,
+            66
+          ],
+          [
+            264,
+            66
+          ]
+        ]
+      },
+      {
+        "from": "fallback",
+        "to": "form",
+        "points": [
+          [
+            220,
+            349.5
+          ],
+          [
+            248,
+            349.5
+          ],
+          [
+            248,
+            89
+          ],
+          [
+            264,
+            89
+          ]
+        ]
+      },
+      {
+        "from": "form",
+        "to": "lr",
+        "points": [
+          [
+            364.0,
+            103
+          ],
+          [
+            364.0,
+            120
+          ]
+        ]
+      },
+      {
+        "from": "lr",
+        "to": "gps",
+        "points": [
+          [
+            364.0,
+            171
+          ],
+          [
+            364.0,
+            188
+          ]
+        ]
+      },
+      {
+        "from": "gps",
+        "to": "check",
+        "points": [
+          [
+            364.0,
+            239
+          ],
+          [
+            364.0,
+            324
+          ]
+        ]
+      },
+      {
+        "from": "check",
+        "to": "record",
+        "points": [
+          [
+            464,
+            349.5
+          ],
+          [
+            492,
+            349.5
+          ],
+          [
+            492,
+            77.5
+          ],
+          [
+            508,
+            77.5
+          ]
+        ]
+      },
+      {
+        "from": "record",
+        "to": "queue",
+        "points": [
+          [
+            608.0,
+            103
+          ],
+          [
+            608.0,
+            120
+          ]
+        ]
+      },
+      {
+        "from": "queue",
+        "to": "send",
+        "points": [
+          [
+            608.0,
+            171
+          ],
+          [
+            608.0,
+            256
+          ]
+        ]
+      },
+      {
+        "from": "send",
+        "to": "done",
+        "points": [
+          [
+            608.0,
+            307
+          ],
+          [
+            608.0,
+            324
+          ]
+        ]
+      }
+    ],
+    "geometry": {
+      "crossing_links": 0,
+      "overlapping_links": 0,
+      "links_through_other_nodes": 0
+    }
+  },
+  "deployment_infrastructure": {
+    "title": "2.16 · Triển khai Docker Compose và Edge AI",
+    "width_pt": 728.503937007874,
+    "height_pt": 450,
+    "minimum_font_pt": 9,
+    "text_count": 38,
+    "text_bounds": "PASS",
+    "artifacts": {
+      "pdf": "5837fdbd7ee505b4b9b605ad12e7ea6d74157771c026e5c16270bdcdb35e39ff",
+      "svg": "9b81ec3ff22ee63569894474f9520e3cddcb81494526f854640639de50f4cd49",
+      "drawio": "675e304713cf450deac6be361453a3a51ffdac81a526e18923b647a00b0b47c9"
+    },
+    "text_overlaps": "PASS",
+    "flow_links": [
+      {
+        "from": "phone",
+        "to": "be",
+        "points": [
+          [
+            202,
+            135
+          ],
+          [
+            488,
+            135
+          ],
+          [
+            488,
+            170
+          ],
+          [
+            522,
+            170
+          ]
+        ]
+      },
+      {
+        "from": "phone",
+        "to": "sms",
+        "points": [
+          [
+            202,
+            80
+          ],
+          [
+            522,
+            80
+          ]
+        ]
+      },
+      {
+        "from": "sms",
+        "to": "be",
+        "points": [
+          [
+            650,
+            106
+          ],
+          [
+            650,
+            150
+          ]
+        ]
+      },
+      {
+        "from": "operator",
+        "to": "dash",
+        "points": [
+          [
+            202,
+            232
+          ],
+          [
+            272,
+            232
+          ]
+        ]
+      },
+      {
+        "from": "web",
+        "to": "fe",
+        "points": [
+          [
+            202,
+            332
+          ],
+          [
+            272,
+            332
+          ]
+        ]
+      },
+      {
+        "from": "dash",
+        "to": "be",
+        "points": [
+          [
+            457,
+            232
+          ],
+          [
+            478,
+            232
+          ],
+          [
+            478,
+            205
+          ],
+          [
+            522,
+            205
+          ]
+        ]
+      },
+      {
+        "from": "fe",
+        "to": "be",
+        "points": [
+          [
+            457,
+            332
+          ],
+          [
+            500,
+            332
+          ],
+          [
+            500,
+            254
+          ],
+          [
+            522,
+            254
+          ]
+        ]
+      },
+      {
+        "from": "be",
+        "to": "volume",
+        "points": [
+          [
+            610,
+            285
+          ],
+          [
+            610,
+            326
+          ]
+        ]
+      }
+    ],
+    "geometry": {
+      "crossing_links": 0,
+      "overlapping_links": 0,
+      "links_through_other_nodes": 0
+    }
+  },
+  "flow_03_adaptive_network_send": {
+    "title": "Truyền tải thích ứng, ACK và hoàn tất ảnh",
+    "width_pt": 728.503937007874,
+    "height_pt": 464,
+    "minimum_font_pt": 9,
+    "text_count": 26,
+    "text_bounds": "PASS",
+    "artifacts": {
+      "pdf": "3363ca2ce0ab5449c13f24e9bd2afc275d26995547b5700018e116d9e26196de",
+      "svg": "9ea3dc4e7b79ead0cd604706ec789b755e16edf4389c6dd5458847902d8dc042",
+      "drawio": "96b085ea54cad39dd841e88651b473ba88c4e22f14f5764b664836b5197c4346"
+    },
+    "text_overlaps": "PASS",
+    "flow_links": [
+      {
+        "from": "save",
+        "to": "data",
+        "points": [
+          [
+            120.0,
+            103
+          ],
+          [
+            120.0,
+            120
+          ]
+        ]
+      },
+      {
+        "from": "data",
+        "to": "sms",
+        "points": [
+          [
+            120.0,
+            171
+          ],
+          [
+            120.0,
+            188
+          ]
+        ]
+      },
+      {
+        "from": "data",
+        "to": "meta",
+        "points": [
+          [
+            205,
+            145.5
+          ],
+          [
+            226,
+            145.5
+          ],
+          [
+            226,
+            281.5
+          ],
+          [
+            220,
+            281.5
+          ]
+        ]
+      },
+      {
+        "from": "sms",
+        "to": "meta",
+        "points": [
+          [
+            120.0,
+            239
+          ],
+          [
+            120.0,
+            256
+          ]
+        ]
+      },
+      {
+        "from": "meta",
+        "to": "ack",
+        "points": [
+          [
+            120.0,
+            307
+          ],
+          [
+            120.0,
+            324
+          ]
+        ]
+      },
+      {
+        "from": "ack",
+        "to": "image",
+        "points": [
+          [
+            220,
+            349.5
+          ],
+          [
+            242,
+            349.5
+          ],
+          [
+            242,
+            42
+          ],
+          [
+            364,
+            42
+          ],
+          [
+            364.0,
+            52
+          ]
+        ]
+      },
+      {
+        "from": "image",
+        "to": "probe",
+        "points": [
+          [
+            364.0,
+            103
+          ],
+          [
+            364.0,
+            120
+          ]
+        ]
+      },
+      {
+        "from": "image",
+        "to": "finish",
+        "points": [
+          [
+            279,
+            77.5
+          ],
+          [
+            250,
+            77.5
+          ],
+          [
+            250,
+            362
+          ],
+          [
+            264,
+            362
+          ]
+        ]
+      },
+      {
+        "from": "probe",
+        "to": "modes",
+        "points": [
+          [
+            364.0,
+            171
+          ],
+          [
+            364.0,
+            188
+          ]
+        ]
+      },
+      {
+        "from": "modes",
+        "to": "upload",
+        "points": [
+          [
+            364.0,
+            239
+          ],
+          [
+            364.0,
+            256
+          ]
+        ]
+      },
+      {
+        "from": "modes",
+        "to": "finish",
+        "points": [
+          [
+            264,
+            213.5
+          ],
+          [
+            258,
+            213.5
+          ],
+          [
+            258,
+            338
+          ],
+          [
+            264,
+            338
+          ]
+        ]
+      },
+      {
+        "from": "upload",
+        "to": "finish",
+        "points": [
+          [
+            364.0,
+            307
+          ],
+          [
+            364.0,
+            324
+          ]
+        ]
+      },
+      {
+        "from": "finish",
+        "to": "status",
+        "points": [
+          [
+            364.0,
+            375
+          ],
+          [
+            364,
+            400
+          ],
+          [
+            608,
+            400
+          ],
+          [
+            608.0,
+            375
+          ]
+        ]
+      },
+      {
+        "from": "upload",
+        "to": "retry",
+        "points": [
+          [
+            464,
+            281.5
+          ],
+          [
+            492,
+            281.5
+          ],
+          [
+            492,
+            77.5
+          ],
+          [
+            508,
+            77.5
+          ]
+        ]
+      },
+      {
+        "from": "meta",
+        "to": "reject",
+        "points": [
+          [
+            20,
+            281.5
+          ],
+          [
+            5,
+            281.5
+          ],
+          [
+            5,
+            425
+          ],
+          [
+            722,
+            425
+          ],
+          [
+            722,
+            213.5
+          ],
+          [
+            708,
+            213.5
+          ]
+        ]
+      }
+    ],
+    "geometry": {
+      "crossing_links": 0,
+      "overlapping_links": 0,
+      "links_through_other_nodes": 0
+    }
+  },
+  "flow_08_dispatch_lifecycle": {
+    "title": "2.19 · Vòng đời tác nghiệp, API và kiểm soát trạng thái",
+    "width_pt": 728.503937007874,
+    "height_pt": 405,
+    "minimum_font_pt": 9,
+    "text_count": 26,
+    "text_bounds": "PASS",
+    "artifacts": {
+      "pdf": "b31db54e1fcbc5eeed360d3a9a786610e85de63d03fe4de8c060340c1f4befc5",
+      "svg": "c3732296015e6f1e0ea8f12bb84cfc35b5bf16939c30943075e1879cb36710d1",
+      "drawio": "c6d2204d047130a921f66717d5c55eed18f10534ff328c3bbce549a5b6da10b3"
+    },
+    "text_overlaps": "PASS",
+    "flow_links": [],
+    "geometry": {
+      "crossing_links": 0,
+      "overlapping_links": 0,
+      "links_through_other_nodes": 0
+    }
+  },
+  "flow_09_ai_training_optimization": {
+    "title": "Huấn luyện, tối ưu và xuất runtime",
+    "width_pt": 728.503937007874,
+    "height_pt": 430,
+    "minimum_font_pt": 9,
+    "text_count": 17,
+    "text_bounds": "PASS",
+    "artifacts": {
+      "pdf": "658b782154f378664044e11d2780cb024786bba7c243f329335ff6bdee845e95",
+      "svg": "840922a6371427067adb6dec6a834f8006ba5519ca48c3c7ca3b77c21a013909",
+      "drawio": "707e1d69102c46deebc34fda353ade0a159d2f9045fb45331c462b68263494fc"
+    },
+    "text_overlaps": "PASS",
+    "flow_links": [
+      {
+        "from": "data",
+        "to": "prep",
+        "points": [
+          [
+            120.0,
+            103
+          ],
+          [
+            120.0,
+            120
+          ]
+        ]
+      },
+      {
+        "from": "prep",
+        "to": "model",
+        "points": [
+          [
+            120.0,
+            171
+          ],
+          [
+            120.0,
+            256
+          ]
+        ]
+      },
+      {
+        "from": "model",
+        "to": "freeze",
+        "points": [
+          [
+            220,
+            281.5
+          ],
+          [
+            242,
+            281.5
+          ],
+          [
+            242,
+            77.5
+          ],
+          [
+            264,
+            77.5
+          ]
+        ]
+      },
+      {
+        "from": "freeze",
+        "to": "tune",
+        "points": [
+          [
+            364.0,
+            103
+          ],
+          [
+            364.0,
+            120
+          ]
+        ]
+      },
+      {
+        "from": "tune",
+        "to": "val",
+        "points": [
+          [
+            364.0,
+            171
+          ],
+          [
+            364.0,
+            188
+          ]
+        ]
+      },
+      {
+        "from": "val",
+        "to": "tune",
+        "points": [
+          [
+            464,
+            213.5
+          ],
+          [
+            478,
+            213.5
+          ],
+          [
+            478,
+            145.5
+          ],
+          [
+            464,
+            145.5
+          ]
+        ]
+      },
+      {
+        "from": "val",
+        "to": "ckpt",
+        "points": [
+          [
+            364.0,
+            239
+          ],
+          [
+            364.0,
+            324
+          ]
+        ]
+      },
+      {
+        "from": "ckpt",
+        "to": "test",
+        "points": [
+          [
+            464,
+            349.5
+          ],
+          [
+            492,
+            349.5
+          ],
+          [
+            492,
+            77.5
+          ],
+          [
+            508,
+            77.5
+          ]
+        ]
+      },
+      {
+        "from": "test",
+        "to": "branches",
+        "points": [
+          [
+            608.0,
+            103
+          ],
+          [
+            608.0,
+            120
+          ]
+        ]
+      },
+      {
+        "from": "branches",
+        "to": "export",
+        "points": [
+          [
+            608.0,
+            171
+          ],
+          [
+            608.0,
+            256
+          ]
+        ]
+      },
+      {
+        "from": "export",
+        "to": "mobile",
+        "points": [
+          [
+            608.0,
+            307
+          ],
+          [
+            608.0,
+            324
+          ]
+        ]
+      }
+    ],
+    "geometry": {
+      "crossing_links": 0,
+      "overlapping_links": 0,
+      "links_through_other_nodes": 0
+    }
+  }
+}

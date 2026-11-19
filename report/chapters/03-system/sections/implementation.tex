@@ -1,0 +1,45 @@
+\section{Triển khai và vận hành}\label{sec:system-implementation-details}
+\subsection{Đóng gói và nạp mô hình}
+Mobile dùng PTE mặc định; quản trị viên có thể nạp ONNX để đối chiếu. Ứng dụng kiểm hash, thứ tự lớp và cấu hình tiền xử lý trước nạp. Lỗi AI không chặn việc lưu và gửi báo cáo.
+
+\begin{landscape}
+Docker Compose tách backend, dashboard và app web, dùng volume cho CSDL và ảnh (Hình~\ref{fig:deployment-infrastructure}).
+
+\begin{figure}[H]\centering
+\includegraphics[width=\linewidth,height=\dimexpr\textheight-28mm\relax,keepaspectratio]{deployment_infrastructure.pdf}
+\caption{Sơ đồ triển khai hạ tầng các dịch vụ trong môi trường Docker Compose}
+\label{fig:deployment-infrastructure}
+\end{figure}
+\end{landscape}
+
+\subsection{Trạng thái và phản hồi}
+Báo cáo mới bắt đầu ở processing; các trạng thái tiếp theo là dispatched, resolved hoặc cancelled. Backend kiểm quyền và version; app bỏ cập nhật đến muộn làm trạng thái lùi. Hình~\ref{fig:status-flow} mô tả chuyển trạng thái. Giao đội và đổi trạng thái là hai thao tác riêng; lỗi truyền không tự đóng ca.
+
+\begin{figure}[H]\centering
+\includegraphics[width=\textwidth]{status_machine.pdf}
+\caption{Biểu đồ chuyển trạng thái nghiệp vụ của ca cứu hộ do backend kiểm soát}
+\label{fig:status-flow}
+\end{figure}
+
+\begin{landscape}
+Hình~\ref{fig:flow-dispatch-lifecycle} mô tả thao tác điều phối.
+
+\begin{figure}[H]\centering
+\includegraphics[width=\linewidth,height=\dimexpr\textheight-28mm\relax,keepaspectratio]{flow_08_dispatch_lifecycle.pdf}
+\caption{Vòng đời tác nghiệp, thao tác API và kiểm soát trạng thái cứu hộ}
+\label{fig:flow-dispatch-lifecycle}
+\end{figure}
+\end{landscape}
+
+\subsection{SMS và tiếp nhận thủ công}
+Android có đường gửi SMS khi mất data và có số tiếp nhận; outbox tiếp tục chờ HTTP để bổ sung dữ liệu. Backend nhận SMS qua gateway có token, nhận báo cáo tổng đài qua giao diện nhập tay. Cùng report ID được dùng để gộp hai đường gửi. Hình~\ref{fig:flow-manual-intake} trình bày tiếp nhận và xác minh vị trí thủ công; tỷ lệ giao SMS thật cần được đo riêng.
+
+\begin{figure}[H]
+\centering
+\includegraphics[width=.95\textwidth,height=.78\textheight,keepaspectratio]{flow_07_manual_intake_location.pdf}
+\caption{Quy trình tiếp nhận thông tin cứu hộ qua tổng đài và định vị thủ công}
+\label{fig:flow-manual-intake}
+\end{figure}
+
+\subsection{Phân quyền và truy vết}
+Tài khoản admin/operator dùng mật khẩu PBKDF2 và phiên có token; thao tác quản trị cần quyền admin. Backend ghi người thao tác, nguồn và thời điểm trong nhật ký. Điều phối viên xác minh thông tin trước khi phân công; kết quả kiểm thử ở Mục~\ref{sec:system-testing}.

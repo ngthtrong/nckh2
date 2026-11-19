@@ -1,0 +1,101 @@
+\section{Kết quả chức năng và truyền tải}\label{sec:system-testing}
+Phần này trình bày kiểm thử Android, web, phần mềm hiệu chỉnh và mạng yếu giả lập. Mỗi nhóm giữ riêng môi trường, đầu vào và đơn vị đánh giá.
+
+\subsection{Kiểm thử trên Android}\label{sec:mobile-system-results}
+Hai lượt ngày 24/10/2026 trên Samsung S10e kiểm tra chín case ở Bảng~\ref{tab:mobile-system-cases}. Run\_001 có 8 PASS/1 FAIL; run\_002 đạt chín case. \OfflineFixVI{} Trạng thái FAIL được giữ để phản ánh lần thử trước sửa.
+
+\begin{table}[htbp]\centering
+\caption{Kết quả kiểm thử luồng xử lý và giao diện trên Samsung S10e}
+\label{tab:mobile-system-cases}
+\begin{tabular}{cP{.57\textwidth}cc}
+\toprule Case & Nội dung và điều kiện đạt & Run\_001 & Run\_002 \\
+\midrule
+1 & Online: backend nhận đúng metadata và ảnh theo chế độ gửi & PASS & PASS \\
+2 & HTTP 503: giữ hàng đợi, phục hồi đúng một bài, hết pending & PASS & PASS \\
+3 & 300 kbit/s: chế độ gửi đúng chính sách, backend nhận đúng dữ liệu & PASS & PASS \\
+4 & 20 kbit/s: chế độ gửi đúng chính sách, backend nhận đúng dữ liệu & PASS & PASS \\
+5 & Không GPS: tọa độ rỗng, bài thuộc hàng xem xét & PASS & PASS \\
+6 & Phản hồi: app nhận trạng thái dispatched từ backend & PASS & PASS \\
+\midrule
+7 & Thao tác giao diện Android: gửi bài và xem Lịch sử & PASS & PASS \\
+8 & Tắt/bật mạng thật: giữ bài và gửi lại khi có mạng & FAIL$^{*}$ & PASS \\
+\midrule
+9 & Dashboard: hiển thị đúng các ID bài của benchmark & PASS & PASS \\
+\bottomrule
+\end{tabular}
+\end{table}
+\noindent\textit{$^{*}$Case 8 run\_001 là lỗi lịch sử khi tắt mạng; nhóm xác nhận lỗi này đã được khắc phục.}
+
+Case 1--6 gọi các hàm xử lý trong app, Case 7--8 do người chạy thao tác giao diện, Case 9 kiểm dashboard bằng Playwright. Mỗi lượt có năm ID bài; các case có ảnh dùng lại một ảnh minh họa. Bảng~\ref{tab:mobile-system-network} ghi chế độ gửi.
+
+\begin{table}[htbp]\centering
+\caption{Chế độ gửi của ba case có ảnh trên điện thoại thật}
+\label{tab:mobile-system-network}
+\begin{tabular}{llrlr}
+\toprule Run & Cấu hình proxy & Probe (kbit/s) & Chế độ gửi & Byte ảnh \\
+\midrule
+run\_001 & Online & 7.944 & Ảnh gốc & 162.727 \\
+run\_001 & 300 kbit/s & 240 & Ảnh nén & 71.909 \\
+run\_001 & 20 kbit/s & 18 & Chỉ văn bản & --- \\
+run\_002 & Online & 15.420 & Ảnh gốc & 38.779 \\
+run\_002 & 300 kbit/s & 238 & Ảnh nén & 33.862 \\
+run\_002 & 20 kbit/s & 18 & Chỉ văn bản & --- \\
+\bottomrule
+\end{tabular}
+\end{table}
+Run\_001 dùng ảnh high nhưng dự đoán medium, confidence 0,7802, thời gian \texttt{classifyImage} là 64/37/33 ms; run\_002 dùng ảnh medium nhưng dự đoán high, confidence 0,6461, thời gian 30/40/37 ms. PASS ở đây xác nhận luồng gửi đúng; chất lượng phân loại được đánh giá bằng benchmark riêng. Run\_002 có một lần Case 5 chưa đáp ứng tiền điều kiện từ chối quyền Vị trí; sau khi thực hiện đúng, phép thử đạt.
+
+\input{chapters/04-evaluation/sections/software-revision-checks}
+
+\subsection{Kiểm thử lịch sử và web}\label{sec:web-e2e-results}
+Bảng~\ref{tab:historical-tests} giữ kết quả ngày 27/09/2026. Hai lượt web ngày 24/10/2026 ở Bảng~\ref{tab:web-e2e-results} kiểm năm kịch bản: dashboard, online/offline, mạng 300 kbit/s, mạng 20 kbit/s và từ chối GPS.
+
+\begin{table}[htbp]\centering\small
+\caption{Tổng hợp kết quả kiểm thử chức năng của hệ thống phần mềm}
+\label{tab:historical-tests}
+\begin{tabularx}{\textwidth}{P{.32\textwidth}P{.16\textwidth}X}
+\toprule Bộ kiểm thử & Kết quả ghi nhận & Phạm vi \\\midrule
+Backend unit test & 44/44 & Quy tắc trao đổi dữ liệu, migration, hash, cụm, dashboard \\
+Flutter unit test & 26/26 & Chính sách gửi, SMS, trạng thái, hash \\
+Trao đổi dữ liệu trên container & Đạt các ca & App/server message và multipart \\
+E2E Chromium headless & 46/46 & App web tới backend/dashboard, mạng giả lập \\
+APK debug & Hoàn thành & Tạo gói cài đặt Android APK phục vụ kiểm thử \\
+\bottomrule\end{tabularx}
+\end{table}
+
+\begin{table}[htbp]\centering\small
+\caption{Kết quả kiểm thử E2E trên web giả lập ngày 24/10/2026}\label{tab:web-e2e-results}
+\begin{tabular}{lrrrrr}
+\toprule Run & Báo cáo seed & Kịch bản & PASS & FAIL & CHƯA CÓ \\
+\midrule
+run\_001 & 316 & 5/5 & 45 & 0 & 1 \\
+run\_002 & 334 & 5/5 & 45 & 0 & 1 \\
+\bottomrule
+\end{tabular}
+\end{table}
+Mỗi lượt web đạt 45/46 tiêu chí; mục còn thiếu là thông báo AI on-device không khả dụng trên web. Kết quả kiểm hàng đợi, metadata/ảnh, hash và trạng thái; AI native và SMS thuộc phạm vi kiểm riêng.
+
+\subsection{Truyền tải trong mạng yếu giả lập}\label{sec:weak-network-results}
+Điện thoại chọn ảnh gốc khi online, ảnh nén ở 300 kbit/s và metadata ở 20 kbit/s như Bảng~\ref{tab:mobile-system-network}. Phép đo trên máy tính dùng 257 ảnh validation, ba cấu hình mạng và ba chế độ, tổng cộng 2.313 lượt. Bảng~\ref{tab:weak-network-new-results} tổng hợp tỷ lệ thành công và độ trễ.
+
+\begin{table}[htbp]\centering
+\caption{Tỷ lệ thành công và độ trễ theo cấu hình mạng giả lập}
+\label{tab:weak-network-new-results}
+\begin{tabular}{llrrrr}
+\toprule Mạng & Chế độ & Thành công & Tỷ lệ (\%) & Median (s) & P95 (s) \\
+\midrule
+2G & Metadata & \textbf{257/257} & \textbf{100,00} & \textbf{1,488} & \textbf{1,524} \\
+2G & Ảnh nén & \textbf{257/257} & \textbf{100,00} & 5,666 & 25,230 \\
+2G & Ảnh gốc & 230/257 & 89,49 & 5,526 & 38,973 \\
+3G & Metadata & \textbf{257/257} & \textbf{100,00} & \textbf{0,476} & \textbf{0,495} \\
+3G & Ảnh nén & \textbf{257/257} & \textbf{100,00} & 1,056 & 3,798 \\
+3G & Ảnh gốc & 255/257 & 99,22 & 1,350 & 14,117 \\
+4G & Metadata & \textbf{257/257} & \textbf{100,00} & \textbf{0,145} & \textbf{0,165} \\
+4G & Ảnh nén & \textbf{257/257} & \textbf{100,00} & 0,211 & 0,532 \\
+4G & Ảnh gốc & 256/257 & 99,61 & 0,259 & 1,762 \\
+\bottomrule
+\end{tabular}
+\end{table}
+Median/P95 chỉ tính lượt thành công. Ở 2G giả lập, metadata và ảnh nén đạt 257/257, ảnh gốc 230/257; 27 lần thất bại không góp vào phân bố latency ảnh gốc. Toàn bộ có 27 NETWORK\_ERROR và ba UNSUPPORTED\_IMAGE; ba lỗi định dạng là AVIF bị từ chối ở ba cấu hình. Byte proxy trung vị là 1.011 B cho metadata, 26.558 B cho ảnh nén và 41.202 B cho ảnh gốc.
+
+Kết quả cho thấy đánh đổi giữa dung lượng và khả năng truyền trong cấu hình đã đo. Mỗi ảnh/điều kiện được đo một lần, chế độ gửi được ép riêng; chưa đo chính sách tự chọn chế độ trên toàn bộ tập hoặc mạng viễn thông thật. Giới hạn chung ở Mục~\ref{sec:04-evaluation-limitations}.

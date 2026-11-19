@@ -1,0 +1,4 @@
+\section{Nguyên tắc xử lý dữ liệu không hoàn chỉnh}\label{sec:incomplete-data}
+Trong điều kiện thực tế, thông tin cứu hộ thường xuyên gặp tình trạng thiếu dữ liệu. Hệ thống phân biệt rõ giữa trường hợp dữ liệu có giá trị bằng không (như mức ngập bằng 0) và trường hợp thiếu dữ liệu (người dùng không gửi ảnh hoặc không bật GPS). Các báo cáo thiếu vị trí địa lý được tự động chuyển vào hàng đợi xem xét riêng để điều phối viên bổ sung thủ công qua phỏng vấn hoặc nghiệp vụ ngoại tuyến, tuyệt đối không gán tọa độ giả định nhằm tránh điều động sai hiện trường.
+
+Về mặt thời gian, hệ thống ưu tiên lưu giữ thời điểm ghi nhận ban đầu tại thiết bị biên (\texttt{createdAt}) song song với thời điểm tiếp nhận tại máy chủ (\texttt{receivedAt}). Cách tiếp cận này giúp phân biệt độ trễ truyền thông với thời gian phát sinh sự cố, đảm bảo tính khách quan khi thuật toán tái hiện trình tự diễn biến thiên tai.

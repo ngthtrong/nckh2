@@ -1,0 +1,44 @@
+\section{Tích hợp đa phương thức}\label{sec:multimodal-design}
+\subsection{Các mức tích hợp}
+Bảng~\ref{tab:fusion-levels} phân biệt tiếp nhận nhiều trường, kết hợp đầu ra và học từ đặc trưng ảnh--văn bản. \MobileIntegrationVI{} Kết quả định lượng trong hai pilot được đo ngoại tuyến.
+\begin{table}[htbp]\centering
+\caption{Các mức tích hợp ảnh và văn bản}\label{tab:fusion-levels}
+\begin{tabular}{P{.23\textwidth}P{.36\textwidth}P{.30\textwidth}}\toprule
+Mức & Cách kết hợp & Phần thực hiện \\\midrule
+Trường dữ liệu & Ảnh, mô tả, vị trí và cờ trong một báo cáo & Ánh xạ/heuristic của ứng dụng \\
+Đầu ra & Trung bình xác suất cùng nhiệm vụ & Đối chứng informative/request \\
+Đặc trưng & Nối biểu diễn ảnh--câu, học LR & Fusion trong hai pilot; mobile theo xác nhận nhóm \\
+\bottomrule\end{tabular}
+\end{table}
+
+\subsection{Kiến trúc fusion}
+Pilot informative dùng TF-IDF 5.345 chiều và MobileNetV3 Small ImageNet frozen 576 chiều. Mỗi block được chuẩn hóa \(z(v)=v/\max(\lVert v\rVert_2,\epsilon)\), rồi nối thành vector 5.921 chiều:
+\begin{equation}
+ u=\frac{1}{\sqrt{2}}[z(v_{\mathrm{text}});z(v_{\mathrm{image}})],\qquad
+ p_{\mathrm{inf}}=\operatorname{sigmoid}(w^\top u+b).
+ \label{eq:pilot-fusion}
+\end{equation}
+Classifier LR chọn regularization bằng validation. Phép chia \(\sqrt{2}\) cân bằng chuẩn hai block; đây là nối đặc trưng tuyến tính. Pilot request dùng DistilBERT 768 chiều và MobileNetV3-Large ImageNet 960 chiều; encoder frozen và các head LR được chọn qua 18 lần fit. Nhánh fine-tuning DistilBERT được đánh giá riêng tại Mục~\ref{sec:vi-silver-pilot}.
+
+Hình~\ref{fig:multimodal-levels} tóm tắt tuyến informative và hướng mở rộng. Pilot tiếng Việt dùng bản dịch/nhãn AI đã được nhóm kiểm tra; thiết kế xác nhận bằng tin thu nhận trực tiếp và nhãn ghép cặp độc lập là bước phát triển tiếp.
+
+\begin{figure}[H]\centering
+\begin{tikzpicture}[>=Stealth,node distance=5mm and 7mm,font=\small,
+ box/.style={draw,rounded corners=2pt,align=center,text width=62mm,minimum height=12mm},
+ proposed/.style={box,dashed}]
+\node[box] (cp) {CrisisMMD: cặp ảnh--tweet\\target informative, đã có};
+\node[box,below=of cp] (ce) {TF-IDF + MobileNetV3 Small\\encoder ảnh frozen, L2 từng block};
+\node[box,below=of ce] (cf) {Nối đặc trưng $/\sqrt{2}$ + LR\\đã huấn luyện ngoại tuyến};
+\node[box,below=of cf] (co) {Informative / not informative\\không đưa vào điểm khẩn cấp};
+\node[proposed,right=of cp] (vp) {Ảnh + tin tiếng Việt gốc + metadata\\cần dữ liệu ghép cặp và gold độc lập};
+\node[proposed,below=of vp] (ve) {Encoder ảnh + DistilBERT\\kiểm tra thiếu nguồn / chất lượng};
+\node[proposed,below=of ve] (vf) {Fusion đặc trưng, đầu phân loại\\yêu cầu hỗ trợ cứu hộ};
+\node[proposed,below=of vf] (vo) {Đầu ra + span + cờ mâu thuẫn\\người dùng / điều phối viên xác nhận};
+\foreach \a/\b in {cp/ce,ce/cf,cf/co,vp/ve,ve/vf,vf/vo}{\draw[->] (\a)--(\b);}
+\end{tikzpicture}
+\caption{Tuyến informative đã thực hiện và thiết kế xác nhận tiếng Việt gốc; pilot silver trình bày riêng}
+\label{fig:multimodal-levels}
+\end{figure}
+
+\subsection{Thiếu nguồn và mâu thuẫn}
+Đầu ra có yêu cầu hỗ trợ cần được giữ riêng với mức ngập, khẩn cấp và điểm ưu tiên. Khi thiếu ảnh hoặc văn bản, chính sách chuyển sang nhánh đơn phải được đánh giá riêng; che một block của fusion chỉ là phép ablation. Khi hai nguồn khác nhau, hệ thống giữ cờ bất đồng để xác minh thời điểm, vị trí và nội dung. Ảnh không thấy người không đủ bác bỏ tin có người mắc kẹt ngoài khung hình. Đánh giá trên cùng ID và nhiệm vụ ở Mục~\ref{sec:vi-ablation-plan}.

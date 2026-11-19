@@ -1,0 +1,51 @@
+class User {
+  static String? normalizePhone(String value) {
+    final phone = value.trim().replaceAll(' ', '');
+    return RegExp(r'^[0-9]{9,11}$').hasMatch(phone) ? phone : null;
+  }
+
+  final String username;
+  final String phone;
+  final String address;
+  final String password;
+  final String? passwordHash;
+
+  const User({
+    required this.username,
+    required this.phone,
+    required this.address,
+    this.password = '',
+    this.passwordHash,
+  });
+
+  Map<String, dynamic> toJson() => {
+    'username': username,
+    'phone': phone,
+    'address': address,
+    if (passwordHash != null) 'passwordHash': passwordHash,
+  };
+
+  factory User.fromJson(Map<String, dynamic> json) => User(
+    username: json['username'] as String? ?? '',
+    phone: json['phone'] as String? ?? '',
+    address: json['address'] as String? ?? '',
+    password: json['password'] as String? ?? '',
+    passwordHash: json['passwordHash'] as String?,
+  );
+
+  User copyWith({
+    String? username,
+    String? phone,
+    String? address,
+    String? password,
+    String? passwordHash,
+  }) => User(
+    username: username ?? this.username,
+    phone: phone ?? this.phone,
+    address: address ?? this.address,
+    password: password ?? this.password,
+    passwordHash: password != null && password.isNotEmpty
+        ? null
+        : passwordHash ?? this.passwordHash,
+  );
+}

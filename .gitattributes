@@ -1,0 +1,97 @@
+* text=auto
+
+# Canonical source and documentation formats.
+*.py text eol=lf
+*.json text eol=lf
+*.log text eol=lf
+revision/clean-room-full.log -whitespace
+*.md text eol=lf
+*.tex text eol=lf
+*.bib text eol=lf
+*.toml text eol=lf
+*.sh text eol=lf
+*.mmd text eol=lf
+
+# Additional repository text formats covered by the submission package.
+*.bst text eol=lf
+*.cjs text eol=lf
+*.cls text eol=lf
+*.csv text eol=lf
+*.html text eol=lf
+*.lock text eol=lf
+*.txt text eol=lf
+.gitattributes text eol=lf
+.gitignore text eol=lf
+
+# Byte-exact binary artifacts.
+*.eps -text
+*.gz -text
+*.jpeg -text
+*.jpg -text
+*.pdf -text
+*.png -text
+products/fe/model/models/Final/*.zip filter=lfs diff=lfs merge=lfs -text
+<<<<<<< HEAD
+=======
+
+# Preserve exact bytes covered by the image-quality result receipts.
+/docs/revision-plan/outputs/followup-20261108/phase-04/predictions.csv -text whitespace=cr-at-eol
+/docs/revision-plan/outputs/followup-20261108/phase-04/metrics.csv -text whitespace=cr-at-eol
+/docs/revision-plan/outputs/followup-20261108/phase-04/paired-effects.csv -text whitespace=cr-at-eol
+/docs/revision-plan/outputs/followup-20261108/phase-04/variant-manifest.csv -text whitespace=cr-at-eol
+/docs/revision-plan/outputs/followup-20261108/phase-04/clean-predictions.csv -text whitespace=cr-at-eol
+/docs/revision-plan/outputs/followup-20261108/phase-04/degraded-predictions.csv -text whitespace=cr-at-eol
+/docs/revision-plan/outputs/followup-20261108/phase-04/validation-smoke-predictions.csv -text whitespace=cr-at-eol
+/docs/revision-plan/outputs/local-report-update-20261110/evidence/bundle-results/image_export_compare/comparison/all_predictions.csv -text whitespace=cr-at-eol
+/docs/revision-plan/outputs/local-report-update-20261110/evidence/bundle-results/image_pruning/ratio-0.050/history.csv -text whitespace=cr-at-eol
+/docs/revision-plan/outputs/local-report-update-20261110/evidence/bundle-results/image_pruning/ratio-0.100/history.csv -text whitespace=cr-at-eol
+/docs/revision-plan/outputs/local-report-update-20261110/evidence/bundle-results/image_pruning/ratio-0.200/history.csv -text whitespace=cr-at-eol
+/docs/revision-plan/outputs/local-report-update-20261110/evidence/bundle-results/quantization_analysis/comparison/all_predictions.csv -text whitespace=cr-at-eol
+/docs/revision-plan/outputs/local-report-update-20261110/evidence/bundle-results/silver_evaluation/outputs/metrics.csv -text whitespace=cr-at-eol
+/docs/revision-plan/outputs/local-report-update-20261110/evidence/bundle-results/silver_evaluation/outputs/model-selection.csv -text whitespace=cr-at-eol
+/docs/revision-plan/outputs/local-report-update-20261110/evidence/bundle-results/silver_evaluation/outputs/paired-effects.csv -text whitespace=cr-at-eol
+/docs/revision-plan/outputs/local-report-update-20261110/evidence/bundle-results/silver_evaluation/outputs/predictions.csv -text whitespace=cr-at-eol
+/docs/revision-plan/outputs/local-report-update-20261110/evidence/bundle-results/silver_evaluation/outputs/t2-history.csv -text whitespace=cr-at-eol
+/docs/revision-plan/outputs/local-report-update-20261110/evidence/bundle-results/silver_evaluation/outputs/t2-metrics.csv -text whitespace=cr-at-eol
+/docs/revision-plan/outputs/local-report-update-20261110/evidence/bundle-results/silver_evaluation/outputs/t2-model-selection.csv -text whitespace=cr-at-eol
+/docs/revision-plan/outputs/local-report-update-20261110/evidence/bundle-results/silver_evaluation/outputs/t2-predictions.csv -text whitespace=cr-at-eol
+/docs/revision-plan/outputs/multimodal-20261108/metrics.csv -text whitespace=cr-at-eol
+/docs/revision-plan/outputs/multimodal-20261108/model-selection.csv -text whitespace=cr-at-eol
+/docs/revision-plan/outputs/multimodal-20261108/paired-effects.csv -text whitespace=cr-at-eol
+/docs/revision-plan/outputs/multimodal-20261108/split-manifest.csv -text whitespace=cr-at-eol
+/docs/revision-plan/outputs/multimodal-20261108/test-predictions.csv -text whitespace=cr-at-eol
+/docs/revision-plan/outputs/vi-nlp-fusion-silver-20261108/metrics.csv -text whitespace=cr-at-eol
+/docs/revision-plan/outputs/vi-nlp-fusion-silver-20261108/paired-effects.csv -text whitespace=cr-at-eol
+/docs/revision-plan/outputs/vi-nlp-fusion-silver-20261108/predictions.csv -text whitespace=cr-at-eol
+/docs/revision-plan/outputs/vi-nlp-fusion-silver-20261108/t2-metrics.csv -text whitespace=cr-at-eol
+/docs/revision-plan/outputs/vi-nlp-fusion-silver-20261108/t2-predictions.csv -text whitespace=cr-at-eol
+"/docs/revision-plan/outputs/local-report-update-20261110/evidence/local-control/state.json" -text whitespace=cr-at-eol
+"/docs/revision-plan/outputs/local-report-update-20261110/evidence/bundle-results/locked-config.json" -text whitespace=cr-at-eol
+"/docs/revision-plan/outputs/local-report-update-20261110/evidence/bundle-results/preflight/preflight.json" -text whitespace=cr-at-eol
+"/docs/revision-plan/outputs/local-report-update-20261110/evidence/bundle-results/historical_analysis/pruning-paired-statistics.json" -text whitespace=cr-at-eol
+"/docs/revision-plan/outputs/local-report-update-20261110/evidence/bundle-results/image_pruning/selection.json" -text whitespace=cr-at-eol
+"/docs/revision-plan/outputs/local-report-update-20261110/evidence/bundle-results/image_export_compare/selected-model.json" -text whitespace=cr-at-eol
+"/docs/revision-plan/outputs/local-report-update-20261110/evidence/bundle-results/image_ptq/report/quantization.json" -text whitespace=cr-at-eol
+"/docs/revision-plan/outputs/local-report-update-20261110/evidence/bundle-results/quantization_analysis/validation-debug/activation-errors.json" -text whitespace=cr-at-eol
+"/docs/revision-plan/outputs/local-report-update-20261110/evidence/bundle-results/image_pruning/ratio-0.050/metrics.json" -text whitespace=cr-at-eol
+"/docs/revision-plan/outputs/local-report-update-20261110/evidence/bundle-results/image_pruning/ratio-0.100/metrics.json" -text whitespace=cr-at-eol
+"/docs/revision-plan/outputs/local-report-update-20261110/evidence/bundle-results/image_pruning/ratio-0.200/metrics.json" -text whitespace=cr-at-eol
+"/docs/revision-plan/outputs/local-report-update-20261110/evidence/bundle-results/image_export_compare/paired-statistics.json" -text whitespace=cr-at-eol
+"/docs/revision-plan/outputs/local-report-update-20261110/evidence/bundle-results/image_export_compare/comparison/summary.json" -text whitespace=cr-at-eol
+"/docs/revision-plan/outputs/local-report-update-20261110/evidence/bundle-results/quantization_analysis/paired-statistics.json" -text whitespace=cr-at-eol
+"/docs/revision-plan/outputs/local-report-update-20261110/evidence/bundle-results/quantization_analysis/comparison/summary.json" -text whitespace=cr-at-eol
+"/docs/revision-plan/outputs/local-report-update-20261110/evidence/bundle-results/silver_evaluation/outputs/encoder-update-check.json" -text whitespace=cr-at-eol
+"/docs/revision-plan/outputs/local-report-update-20261110/evidence/bundle-results/silver_evaluation/outputs/evaluation.json" -text whitespace=cr-at-eol
+"/docs/revision-plan/outputs/local-report-update-20261110/evidence/bundle-results/silver_evaluation/outputs/features.json" -text whitespace=cr-at-eol
+"/docs/revision-plan/outputs/local-report-update-20261110/evidence/bundle-results/silver_evaluation/outputs/t2-evaluation.json" -text whitespace=cr-at-eol
+"/docs/revision-plan/outputs/local-report-update-20261110/evidence/bundle-results/silver_evaluation/outputs/t2-training.json" -text whitespace=cr-at-eol
+"/docs/revision-plan/outputs/local-report-update-20261110/evidence/bundle-results/silver_evaluation/outputs/training.json" -text whitespace=cr-at-eol
+"/docs/revision-plan/outputs/local-report-update-20261110/evidence/bundle-results/silver_evaluation/outputs/verification.json" -text whitespace=cr-at-eol
+"/docs/revision-plan/outputs/local-report-update-20261110/evidence/bundle-results/historical_analysis/stage.json" -text whitespace=cr-at-eol
+"/docs/revision-plan/outputs/local-report-update-20261110/evidence/bundle-results/image_pruning/stage.json" -text whitespace=cr-at-eol
+"/docs/revision-plan/outputs/local-report-update-20261110/evidence/bundle-results/image_export_compare/stage.json" -text whitespace=cr-at-eol
+"/docs/revision-plan/outputs/local-report-update-20261110/evidence/bundle-results/image_ptq/stage.json" -text whitespace=cr-at-eol
+"/docs/revision-plan/outputs/local-report-update-20261110/evidence/bundle-results/quantization_analysis/stage.json" -text whitespace=cr-at-eol
+"/docs/revision-plan/outputs/local-report-update-20261110/evidence/bundle-results/silver_t2/stage.json" -text whitespace=cr-at-eol
+"/docs/revision-plan/outputs/local-report-update-20261110/evidence/bundle-results/silver_evaluation/stage.json" -text whitespace=cr-at-eol
+>>>>>>> 4c2dd04fba73475c87ef0106ca13172d216f0e80

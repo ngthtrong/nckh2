@@ -1,0 +1,251 @@
+import 'package:flutter/material.dart';
+import 'package:intl/intl.dart';
+
+import '../../../domain/entities/rescue_record.dart';
+import '../../../domain/entities/send_mode.dart';
+import '../../../domain/entities/sms_delivery.dart';
+import '../../widgets/quick_call_panel.dart';
+import '../../widgets/status_tracker.dart';
+import '../../widgets/tag_chip.dart';
+
+class SubmittedScreen extends StatelessWidget {
+  final RescueRecord record;
+  final VoidCallback onHomePressed;
+
+  const SubmittedScreen({
+    super.key,
+    required this.record,
+    required this.onHomePressed,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    final timeStr = DateFormat('HH:mm · dd/MM/yyyy').format(record.createdAt);
+    final idShort = record.id.length > 8
+        ? record.id.substring(record.id.length - 8).toUpperCase()
+        : record.id.toUpperCase();
+
+    return Scaffold(
+      backgroundColor: Colors.white,
+      body: SafeArea(
+        child: Column(
+          children: [
+            Expanded(
+              child: SingleChildScrollView(
+                padding: const EdgeInsets.symmetric(
+                  horizontal: 20,
+                  vertical: 24,
+                ),
+                physics: const BouncingScrollPhysics(),
+                child: Column(
+                  children: [
+                    Container(
+                      width: 80,
+                      height: 80,
+                      decoration: BoxDecoration(
+                        color: record.syncError != null
+                            ? const Color(0xFFFEE2E2)
+                            : const Color(0xFFDCFCE7),
+                        shape: BoxShape.circle,
+                      ),
+                      child: Icon(
+                        record.syncError != null
+                            ? Icons.error_rounded
+                            : Icons.check_circle_rounded,
+                        color: record.syncError != null
+                            ? const Color(0xFFDC2626)
+                            : const Color(0xFF16A34A),
+                        size: 56,
+                      ),
+                    ),
+                    const SizedBox(height: 16),
+                    Text(
+                      record.synced
+                          ? 'Đã gửi thành công!'
+                          : record.syncError != null
+                          ? 'Máy chủ không nhận báo cáo'
+                          : 'Đã lưu, chờ gửi lên trung tâm',
+                      style: TextStyle(
+                        color: Color(0xFF1F2937),
+                        fontSize: 22,
+                        fontWeight: FontWeight.w900,
+                      ),
+                    ),
+                    const SizedBox(height: 6),
+                    Text(
+                      record.synced
+                          ? 'Máy chủ đã tiếp nhận báo cáo. Trạng thái bên dưới tự cập nhật khi trung tâm điều phối.'
+                          : record.syncError != null
+                          ? 'Báo cáo bị từ chối (${record.syncError}), app sẽ không gửi lại. Hãy gọi 112 hoặc tổng đài cứu hộ.'
+                          : record.metadataSynced
+                          ? 'Máy chủ đã nhận nội dung; ảnh còn chờ gửi. App sẽ thử lại khi có mạng.'
+                          : 'Chưa tới được máy chủ. Bài nằm trong hàng đợi và tự gửi khi có mạng.',
+                      textAlign: TextAlign.center,
+                      style: TextStyle(
+                        color: Color(0xFF6B7280),
+                        fontSize: 13,
+                        fontWeight: FontWeight.w500,
+                        height: 1.4,
+                      ),
+                    ),
+                    const SizedBox(height: 20),
+                    if (record.smsStatus != SmsStatus.notAttempted) ...[
+                      Text(
+                        smsStatusMessage(record.smsStatus),
+                        textAlign: TextAlign.center,
+                        style: const TextStyle(color: Color(0xFFB45309)),
+                      ),
+                      const SizedBox(height: 12),
+                    ],
+                    if (record.attachmentError != null)
+                      const Text(
+                        'Không đọc được ảnh đính kèm. Báo cáo chưa đồng bộ xong; hãy gửi lại ảnh cùng báo cáo.',
+                        textAlign: TextAlign.center,
+                        style: TextStyle(color: Color(0xFFB45309)),
+                      ),
+
+                    // Summary Card
+                    Container(
+                      width: double.infinity,
+                      padding: const EdgeInsets.all(16),
+                      decoration: BoxDecoration(
+                        color: const Color(0xFFF9FAFB),
+                        borderRadius: BorderRadius.circular(20),
+                        border: Border.all(color: const Color(0xFFF3F4F6)),
+                      ),
+                      child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          _summaryRow('Mã yêu cầu', '#$idShort', isMono: true),
+                          const Divider(height: 20),
+                          _summaryRow('Thời gian', timeStr),
+                          const Divider(height: 20),
+                          _summaryRow(
+                            'Cách gửi',
+                            sendModeFromName(record.sendMode)?.label ??
+                                record.sendMode,
+                          ),
+                          const Divider(height: 20),
+                          _summaryRow('Vị trí GPS', record.locationText),
+                          if (record.trappedCount > 0 ||
+                              record.injuredCount > 0 ||
+                              record.vulnerableGroups.isNotEmpty) ...[
+                            const Divider(height: 20),
+                            if (record.trappedCount > 0)
+                              _summaryRow(
+                                'Số người mắc kẹt',
+                                '${record.trappedCount} người',
+                              ),
+                            if (record.injuredCount > 0) ...[
+                              const SizedBox(height: 8),
+                              _summaryRow(
+                                'Số người bị thương',
+                                '${record.injuredCount} người',
+                              ),
+                            ],
+                            if (record.vulnerableGroups.isNotEmpty) ...[
+                              const SizedBox(height: 8),
+                              _summaryRow(
+                                'Đối tượng ưu tiên',
+                                record.vulnerableGroups.join(', '),
+                              ),
+                            ],
+                          ],
+                          if (record.aiTags.isNotEmpty) ...[
+                            const Divider(height: 20),
+                            const Text(
+                              'AI PHÂN TÍCH',
+                              style: TextStyle(
+                                color: Color(0xFF9CA3AF),
+                                fontSize: 11,
+                                fontWeight: FontWeight.w800,
+                              ),
+                            ),
+                            const SizedBox(height: 8),
+                            Wrap(
+                              spacing: 6,
+                              runSpacing: 6,
+                              children: record.aiTags
+                                  .map((t) => TagChip(tag: t, isSmall: true))
+                                  .toList(),
+                            ),
+                          ],
+                        ],
+                      ),
+                    ),
+                    const SizedBox(height: 24),
+
+                    if (record.metadataSynced || record.synced) ...[
+                      StatusTracker(currentStatus: record.status),
+                      const SizedBox(height: 24),
+                    ],
+
+                    // Quick Call Panel
+                    const QuickCallPanel(),
+                  ],
+                ),
+              ),
+            ),
+
+            // Bottom Home Button
+            Padding(
+              padding: const EdgeInsets.all(16),
+              child: SizedBox(
+                width: double.infinity,
+                child: ElevatedButton(
+                  onPressed: onHomePressed,
+                  style: ElevatedButton.styleFrom(
+                    backgroundColor: const Color(0xFFF3F4F6),
+                    foregroundColor: const Color(0xFF374151),
+                    elevation: 0,
+                    padding: const EdgeInsets.symmetric(vertical: 16),
+                    shape: RoundedRectangleBorder(
+                      borderRadius: BorderRadius.circular(16),
+                    ),
+                  ),
+                  child: const Text(
+                    'Về trang chủ',
+                    style: TextStyle(fontWeight: FontWeight.w800, fontSize: 15),
+                  ),
+                ),
+              ),
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+
+  Widget _summaryRow(String label, String value, {bool isMono = false}) {
+    return Row(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        Expanded(
+          flex: 2,
+          child: Text(
+            label,
+            style: const TextStyle(
+              color: Color(0xFF6B7280),
+              fontSize: 12,
+              fontWeight: FontWeight.w600,
+            ),
+          ),
+        ),
+        const SizedBox(width: 12),
+        Expanded(
+          flex: 3,
+          child: Text(
+            value,
+            textAlign: TextAlign.right,
+            style: TextStyle(
+              color: const Color(0xFF1F2937),
+              fontSize: 13,
+              fontWeight: FontWeight.w800,
+              fontFamily: isMono ? 'monospace' : null,
+            ),
+          ),
+        ),
+      ],
+    );
+  }
+}

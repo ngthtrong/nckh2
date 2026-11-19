@@ -1,0 +1,26 @@
+\addchap{KẾT LUẬN VÀ HƯỚNG PHÁT TRIỂN}\label{chap:conclusion}
+\addsec{Kết luận}
+Đề tài xây dựng nguyên mẫu gồm ứng dụng Flutter có suy luận ảnh tại biên, backend FastAPI và Web GIS. Baseline MobileNetV3-Large đạt Accuracy \NewImageAccuracy\%, macro-F1 \NewImageMacroFOne\% trên \ImageTest{} ảnh; benchmark điện thoại giữ 32 cấu hình trên bốn máy. McNemar chưa xác lập cải thiện của pruning lịch sử. Thử thêm 5/10/20\% chọn mức 5\% bằng validation nhưng macro-F1 test còn \LocalPrunedFOne\%; model nguyên mẫu được giữ riêng.
+
+Hai pilot ngoại tuyến đã đánh giá văn bản và fusion trên nhãn informative hoặc bản dịch tiếng Việt/nhãn AI đã được nhóm kiểm tra. Fusion silver đạt macro-F1 \VISilverFusionFOne\%, recall request \VISilverFusionRecall\%; T2 CUDA đạt trung bình \VISilverFineFOne\%, recall \VISilverFineRecall\%. CI chưa xác lập ưu thế fusion. \MobileIntegrationVI{} Tình trạng bàn giao APK và giới hạn sử dụng các metric được trình bày tại Mục~\ref{sec:mobile-integration-status}.
+
+RQ1 chưa xác lập Product hơn Additive độc lập (ARI 0,9072 so với 0,9191; Holm $p=0{,}2560$). RQ2 hỗ trợ bất biến bản sao exact khi grouping cố định, chưa xác lập alignment tốt hơn chung; ba raw $p$ Spearman và năm Holm vẫn chưa khớp replay. RQ3 revised kém nearest-first về harm và trễ hạn mô phỏng. Những kết quả âm này giới hạn việc suy từ điểm số thuật toán sang lợi ích điều phối thực tế.
+
+\OfflineFixVI{} Kiểm hồi quy và tích hợp Linux--backend được trình bày ở Mục~\ref{sec:software-revision-checks}. Backend khử bản sao exact trước quantile/top-$K$, giữ ánh xạ về mọi báo cáo gốc.
+
+Đóng góp chính là nguyên mẫu tích hợp tiếp nhận--lưu--gửi lại--hiển thị thông tin, cùng thiết kế và thực nghiệm có đối chứng cho phân cụm và ưu tiên. Đề tài cung cấp nền tảng nghiên cứu/đào tạo về Edge AI và hệ thống thông tin cứu hộ; hiệu quả cứu hộ thực địa chưa được đo.
+
+\addsec{Hạn chế và kiến nghị}
+Bộ ảnh cần hoàn thiện hồ sơ nguồn, đồng thuận nhãn và test sự kiện độc lập. Bản dịch/nhãn AI đã được nhóm kiểm tra; đánh giá trên tin thu nhận trực tiếp, nhãn độc lập, SMS và mạng di động thật là các bước tiếp theo. Giới hạn chung tại Mục~\ref{sec:04-evaluation-limitations}.
+
+Nên tiếp tục sử dụng nguyên mẫu trong nghiên cứu và đào tạo. Mọi quyết định nghiệp vụ cần người xác minh, kiểm soát quyền truy cập và bảo vệ thông tin liên hệ, vị trí, người yếu thế. Chẩn đoán thêm PTQ/QAT và đo lặp hiệu năng, pin/RAM nằm ngoài phạm vi đợt hiệu chỉnh này.
+
+\addsec{Hướng nghiên cứu tiếp theo}
+\begin{itemize}
+\item Xác nhận NLP/fusion trên tin tiếng Việt gốc, gold độc lập và test sự kiện mới; trích xuất thông tin cần nhãn span và đánh giá riêng;
+\item Nghiên cứu lịch điều phối xét chi phí di chuyển, năng lực đội và thời hạn, so với nearest-first và chính sách hiện có; đây là hướng phát triển, không được thực thi trong đợt này;
+\item Nghiên cứu định vị GPS, Wi-Fi, mạng di động và mốc địa chỉ có nguồn, thời điểm, độ bất định; khi mâu thuẫn cần người xác minh, không tạo tọa độ giả;
+\item Nghiên cứu tiếp nhận âm thanh qua ASR tiếng Việt và trích xuất thông tin, đánh giá riêng tiếng địa phương, nhiễu mưa/gió, lỗi chép và độ trễ;
+\item Nghiên cứu mất kết nối hoàn toàn: lưu cục bộ chưa đồng nghĩa giao tới trung tâm; SMS cần sóng/gateway, DTN cần relay và đường ra; báo hộ hoặc đội tại chỗ cần xác minh và phản hồi;
+\item Xây dựng phương án thí điểm với đơn vị cứu hộ, mạng viễn thông/SMS thật và quy trình bảo vệ dữ liệu. Đây chỉ là kiến nghị hướng phát triển; báo cáo không ghi nhận đã tổ chức thí điểm.
+\end{itemize}

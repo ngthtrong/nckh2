@@ -1,0 +1,32 @@
+\section{Các khái niệm và kỹ thuật liên quan}\label{sec:01-foundations-background}
+\subsection{Thông tin cứu hộ đa phương thức}
+Một báo cáo cứu hộ có thể chứa ảnh, mô tả, tọa độ, thời gian và các trường khai báo. Ảnh phản ánh vùng nhìn thấy; tọa độ có thể do thiết bị đo hoặc người dùng nhập; số người mắc kẹt là lời khai. Nguồn của từng trường cần được giữ để phân biệt quan sát, suy luận của mô hình và thông tin người dùng cung cấp.
+
+Trong bản mã được đối chiếu, nhãn ảnh, mô tả, số người và nhóm yếu thế được ánh xạ thành đầu vào phân cụm, xếp hạng. Logistic Regression (LR) tính điểm khẩn cấp từ biểu mẫu; điểm được gửi và lưu nhưng adapter chưa đọc trực tiếp. Luồng ánh xạ cụ thể ở Chương~\ref{chap:03-system}; NLP/fusion và tình trạng mobile được trình bày tại Mục~\ref{sec:mobile-integration-status}.
+
+Ảnh và thông tin khai báo là \emph{dữ liệu quan sát}; đầu ra mô hình là \emph{đặc trưng suy luận}. \emph{Nhãn đánh giá} chỉ được nối khi đo chất lượng, không đưa vào suy luận.
+
+\subsection{Edge AI và chi phí triển khai}
+Edge AI thực hiện suy luận tại thiết bị. Ứng dụng có thể nhận diện mức ngập và tạo metadata trước khi chọn gửi ảnh gốc, ảnh nén hoặc chỉ thông tin cơ bản, phù hợp với băng thông hiện có.
+
+MobileNetV3 hướng đến CPU di động \citep{howard2019mobilenetv3}. Đề tài xuất mô hình từ PyTorch sang ONNX và PTE, chạy bằng ONNX Runtime và ExecuTorch. Hai runtime hỗ trợ tối ưu đồ thị hoặc toán tử CPU qua XNNPACK \citep{onnxGraphOptimizations,executorchXnnpack}. Dung lượng, chất lượng và độ trễ được đo theo từng cấu hình, gồm cả lượng tử hóa sau huấn luyện (PTQ) và cắt tỉa.
+
+\subsection{Lưu trữ và truyền dữ liệu khi mất kết nối}
+Ứng dụng lưu bản tin vào hàng đợi cục bộ và gửi lại khi có mạng. Định danh thao tác, mã băm payload và xác nhận tiếp nhận (ACK) giúp theo dõi việc gửi và chống tạo bản ghi trùng. SMS là đường dự phòng qua gateway có xác thực; phạm vi kiểm chứng từng đường truyền được nêu ở Mục~\ref{sec:system-testing}.
+
+\subsection{Phân cụm đồ thị và ý nghĩa đối với sự kiện}
+Trong biểu diễn đồ thị, một nút là báo cáo và trọng số cạnh thể hiện độ tương đồng giữa hai báo cáo. Cộng đồng là nhóm nút có cấu trúc liên kết mạnh theo mục tiêu tối ưu của thuật toán. Cộng đồng dự đoán có thể tương ứng một hiện trường, nhưng sự tương ứng này phải được đánh giá bằng nhãn sự kiện độc lập.
+
+Louvain tối ưu modularity qua quá trình gom cộng đồng \citep{blondel2008louvain}; Leiden là một lựa chọn phát hiện cộng đồng với các bảo đảm về tính liên kết được nghiên cứu trong tài liệu gốc \citep{traag2019leiden}. Trong đề tài, Product Leiden giữ đồ thị Product và thay bước phát hiện cộng đồng để tạo đối chứng. Đây là cách tách ảnh hưởng của bộ phát hiện cộng đồng khỏi cách tính cạnh, dù các điều kiện khác vẫn phải được khóa.
+
+DBSCAN dựa trên lân cận mật độ và cho phép đánh dấu nhiễu \citep{ester1996dbscan}. Một phương pháp gán mọi báo cáo vào cụm và một phương pháp từ chối báo cáo có khác biệt về khối lượng cần xem xét. Do đó, chỉ số ARI cần đi cùng tỷ lệ loại bỏ, số điểm đến giả và tỷ lệ hấp thụ tin giả. Không có báo cáo giả trong cụm thật có thể cùng tồn tại với nhiều cụm hoàn toàn giả.
+
+\subsection{Trùng dữ liệu, trùng bằng chứng và trùng sự kiện}
+Ba mức trùng có cơ chế xử lý khác nhau. Trùng message là gửi lại cùng thao tác do mạng; trùng payload là các bản sao cùng bằng chứng; cùng sự kiện là các quan sát có thể khác nhau nhưng nói về một hiện trường. Backend kiểm tra trùng message bằng \texttt{message\_id} và hash. Lõi nghiên cứu gom payload và bản gần trùng thành họ bằng chứng. Thuật toán đồ thị cố gắng gom những báo cáo có liên quan thành cụm sự kiện.
+
+Một định danh message hợp lệ không chứng minh nguồn độc lập. Hai payload khác nhau có thể đến từ một chiến dịch phối hợp. Tương tự, hai báo cáo gần nhau không chắc là bản sao. Những giới hạn này giải thích vì sao điểm confidence dựa trên số báo cáo củng cố chỉ là heuristic, cần giữ nguyên các kết quả đối kháng trong đánh giá.
+
+\subsection{Điểm ưu tiên và quyết định điều phối}
+Xếp hạng là tạo thứ tự từ những tín hiệu như mức ngập, khẩn cấp, số người và yếu thế. Điều phối còn cần vị trí đội, thời gian di chuyển, năng lực phục vụ, deadline và điều kiện tiếp cận. Nghiên cứu về logistics nhân đạo cho thấy các mục tiêu này cần được cân nhắc đồng thời \citep{gralla2014review}. Một thứ tự ưu tiên chỉ theo nhu cầu có thể khác với thứ tự tối ưu thời gian tiếp cận.
+
+Điều phối viên xem ngữ cảnh, xác minh thông tin và quyết định phân công. Mô phỏng trong báo cáo đo ảnh hưởng của sai số phân cụm đến điều phối, chưa đo hiệu quả cứu hộ thực địa.

@@ -1,0 +1,124 @@
+{
+  "layer": "PDM",
+  "title": "PDM PostgreSQL mượn sách — ví dụ",
+  "source": "Ví dụ thư viện giả định để minh họa; không phải dữ liệu của đề tài.",
+  "entities": [
+    {
+      "name": "readers",
+      "attrs": [
+        [
+          true,
+          "reader_id",
+          "bigint",
+          false
+        ],
+        [
+          false,
+          "name",
+          "varchar(120)",
+          false
+        ]
+      ]
+    },
+    {
+      "name": "loans",
+      "attrs": [
+        [
+          true,
+          "loan_id",
+          "bigint",
+          false
+        ],
+        [
+          false,
+          "reader_id [FK]",
+          "bigint",
+          false
+        ],
+        [
+          false,
+          "loan_date",
+          "date",
+          false
+        ]
+      ]
+    },
+    {
+      "name": "loan_items",
+      "attrs": [
+        [
+          true,
+          "loan_id [FK]",
+          "bigint",
+          false
+        ],
+        [
+          true,
+          "copy_id [FK]",
+          "bigint",
+          false
+        ],
+        [
+          false,
+          "return_date",
+          "date",
+          true
+        ]
+      ]
+    },
+    {
+      "name": "book_copies",
+      "attrs": [
+        [
+          true,
+          "copy_id",
+          "bigint",
+          false
+        ],
+        [
+          false,
+          "barcode",
+          "varchar(40)",
+          false
+        ]
+      ]
+    }
+  ],
+  "relations": [
+    {
+      "a": "readers",
+      "b": "loans",
+      "label": "reader_id",
+      "ca": "1",
+      "cb": "0..N",
+      "ident": false
+    },
+    {
+      "a": "loans",
+      "b": "loan_items",
+      "label": "loan_id",
+      "ca": "1",
+      "cb": "0..N",
+      "ident": true
+    },
+    {
+      "a": "book_copies",
+      "b": "loan_items",
+      "label": "copy_id",
+      "ca": "1",
+      "cb": "0..N",
+      "ident": true
+    }
+  ],
+  "grid": [
+    [
+      "readers",
+      "loans"
+    ],
+    [
+      "book_copies",
+      "loan_items"
+    ]
+  ],
+  "note": "Schema giả định PostgreSQL: 4 bảng, 3 FK, không lược cột hay quan hệ. PK loan_items = (loan_id, copy_id); barcode có UNIQUE (ghi trong từ điển dữ liệu). Phiếu nháp có thể chưa có loan_items."
+}

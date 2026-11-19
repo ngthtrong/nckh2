@@ -1,0 +1,18 @@
+\section{Giới hạn của thực nghiệm}\label{sec:04-evaluation-limitations}
+\paragraph{Dữ liệu ảnh và nhãn.}
+Bộ ảnh gồm ảnh nhóm tự chụp và thu thập web; hồ sơ theo từng ID, quyền sử dụng ảnh web, đồng thuận nhãn và checksum split lúc train chưa đầy đủ. Nhóm gần trùng đã ghi nhận không bảo đảm độc lập nguồn/sự kiện. Các nhánh tối ưu dùng lại cùng test; cần tập camera độc lập để xác nhận lựa chọn cuối.
+
+\paragraph{Văn bản và fusion.}
+Bản dịch tiếng Việt và nhãn AI đã được nhóm kiểm tra, có cách diễn đạt gần tin cứu hộ tiếng Việt. Dữ liệu vẫn có nguồn gốc dẫn xuất từ CrisisMMD; rà soát này chưa cung cấp chỉ số đồng thuận gán nhãn độc lập hoặc kiểm chứng trên nhiều sự kiện thu nhận trực tiếp. Test request chỉ có sáu mẫu dương trong một sự kiện đã được xem trước. CI chưa xác lập ưu thế fusion; trích xuất span, hiệu chuẩn và chính sách thiếu/mâu thuẫn nguồn cần đánh giá riêng.
+
+\paragraph{Phạm vi mô phỏng.}
+RQ1--RQ3 dùng dữ liệu bán tổng hợp/tổng hợp. Bối cảnh địa lý, nhãn lợi ích và harm phục vụ so sánh có kiểm soát; hiệu quả cứu hộ thực địa chưa được đo. LR năm cờ học nhãn OR tổng hợp, chưa là mô hình nguy kịch được xác nhận chuyên môn. Các heuristic về số người, yếu thế và thời gian cần thống nhất với đơn vị sử dụng.
+
+\paragraph{Thiết bị và mạng.}
+Benchmark gồm 32 cấu hình trên bốn điện thoại, dùng cùng 256 ảnh; chưa có đo lặp kiểm soát nhiệt/tải hoặc pin/RAM. CPU đo predict, ứng dụng đo \texttt{classifyImage}, nên không so speedup trực tiếp giữa hai phạm vi. Phép đo truyền tải dùng proxy, còn SMS và mạng viễn thông thật cần kiểm riêng. Khắc phục lỗi gửi khi mất mạng và kiểm hồi quy/tích hợp Linux ở Mục~\ref{sec:software-revision-checks}.
+
+\paragraph{Ảnh suy giảm và tối ưu mô hình.}
+Biến đổi CPU áp riêng lên ảnh test, chưa bao quát tổ hợp mưa, mờ, tối và góc chụp tại hiện trường; nhãn sau biến đổi chưa được thẩm định lại. Kế hoạch camera/Android tại Mục~\ref{sec:camera-evaluation-plan} và Mục~\ref{sec:camera-session-plan} chưa có kết quả. PTQ/QAT giảm dung lượng nhưng suy giảm chất lượng; chẩn đoán tensor chưa cô lập nguyên nhân. Pruning 5\% mới cũng chưa bảo toàn macro-F1 baseline. Chẩn đoán thêm và đo lặp hiệu năng/pin/RAM nằm ngoài đợt hiệu chỉnh này.
+
+\paragraph{Tái lập và hướng phát triển.}
+RQ2 còn ba raw \(p\) Spearman và năm Holm chưa khớp tái tính; chưa xác lập lợi ích alignment chung. Backend đã khử bản sao exact; đánh giá gần trùng/dữ liệu thực, điều phối xét chi phí di chuyển và thí điểm cùng đơn vị cứu hộ là các hướng tiếp theo.
