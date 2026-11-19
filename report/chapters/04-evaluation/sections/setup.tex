@@ -47,7 +47,7 @@ Phiên mở rộng gồm phát lại cùng ảnh trên ONNX/PTE và chụp camer
 \subsection{Thiết lập đánh giá mô hình nhận diện trên điện thoại}\label{sec:phone-benchmark-setup}
 Phép đo trên ứng dụng Android chỉ đánh giá mô hình nhận diện mức ngập: chất lượng phân loại và thời gian xử lý ảnh của ONNX/ExecuTorch trên từng điện thoại. Đây không phải thực nghiệm E2E Android; không dùng benchmark này để đánh giá gửi SOS, GPS, đồng bộ nền hoặc SMS. Nguồn kết quả chính là các phiên benchmark đã lưu trên bốn mẫu điện thoại, có thông tin thiết bị và hash model để đối chiếu.
 
-\begin{table}[htbp]\centering
+\begin{table}[H]\centering
 \caption{Các mẫu điện thoại dùng đánh giá mô hình nhận diện}
 \label{tab:phone-benchmark-devices}
 \begin{tabular}{P{.27\textwidth}P{.24\textwidth}P{.18\textwidth}P{.18\textwidth}}
@@ -84,7 +84,7 @@ Phạm vi kiểm thử được chia thành ba nhóm:
 
 Chỉ tiêu chính là PASS/FAIL/NOT\_RUN theo từng case. Các case gửi bài đối chiếu ID và metadata với backend; ảnh gốc được kiểm tra hash, ảnh nén được kiểm tra nội dung ảnh giải mã, chế độ chỉ văn bản yêu cầu không có ảnh tải lên. Case phục hồi bằng HTTP 503 yêu cầu nhận đúng một bài và hết hàng đợi; case thiếu GPS yêu cầu tọa độ rỗng và bài thuộc hàng xem xét. PASS của luồng xử lý không yêu cầu nhãn model trùng nhãn chuẩn, nên không dùng số PASS để suy ra Accuracy/F1. Băng thông probe, chế độ gửi và số byte ảnh được ghi để giải thích hành vi; thời gian một case gồm cả xử lý/chờ/đối chiếu, không đồng nhất với độ trễ mạng. HTTP 503 ở Case 2 cũng không thay thế mất kết nối vật lý ở Case 8.
 
-Hồ sơ hai lượt thử ghi kết quả từng case, cấu hình thiết bị, mô hình và quan sát từ backend. Nhật ký thô chưa có trong bộ dữ liệu tái lập.
+Hồ sơ hai lượt thử ghi kết quả từng ca, cấu hình thiết bị, mô hình và kết quả quan sát trên máy chủ.
 
 \subsection{Thiết lập kiểm thử E2E bổ sung trên web giả lập}\label{sec:web-e2e-setup}
 Runner Playwright trong \RepoPath{thuc_nghiem_nq/experiment_e2e/e2e_system.py} thao tác ứng dụng Flutter web và dashboard, đối chiếu dữ liệu với backend. Docker Compose tách ba dịch vụ, mỗi lượt có cơ sở dữ liệu và volume riêng. Hai lượt dùng Flutter 3.47.5, Dart 3.13.4, Python 3.11.0 và Playwright 1.63.0; bản web được build mới rồi đóng gói bằng target prebuilt. Đây là kiểm thử web trên máy tính, không chạy AI on-device hoặc gửi SMS thật.
@@ -96,7 +96,7 @@ Năm kịch bản gồm dashboard, ứng dụng online/offline, gửi ở 300 kb
 \subsection{Thiết lập phép đo truyền tải dưới mạng yếu giả lập}\label{sec:weak-network-setup}
 Phép đo dùng proxy giới hạn băng thông/RTT và backend riêng trên máy tính, không dùng mạng viễn thông thực và không đo trên điện thoại. Công cụ đo truyền tải chạy trên máy tính; lượt được chọn có ID \texttt{20261005-102040}, với CSV, bản tổng hợp, checkpoint và manifest/log cùng ID trong thư mục thực nghiệm. Manifest ghi Python 3.11.0 trên Windows và backend \texttt{127.0.0.1:8001}.
 
-\begin{table}[htbp]\centering
+\begin{table}[H]\centering
 \caption{Ba cấu hình proxy của lượt đo mạng yếu}
 \label{tab:weak-network-profiles}
 \begin{tabular}{lrr}

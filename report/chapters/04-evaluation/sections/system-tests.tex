@@ -4,7 +4,7 @@ Phần này trình bày kiểm thử Android, web, phần mềm hiệu chỉnh v
 \subsection{Kiểm thử trên Android}\label{sec:mobile-system-results}
 Hai lượt trên Samsung S10e kiểm tra chín case ở Bảng~\ref{tab:mobile-system-cases}. Run\_001 có 8 PASS/1 FAIL; run\_002 đạt chín case.
 
-\begin{table}[htbp]\centering
+\begin{table}[H]\centering
 \caption{Kết quả kiểm thử luồng xử lý và giao diện trên Samsung S10e}
 \label{tab:mobile-system-cases}
 \begin{tabular}{cP{.57\textwidth}cc}
@@ -28,7 +28,7 @@ Hai lượt trên Samsung S10e kiểm tra chín case ở Bảng~\ref{tab:mobile-
 
 Case 1--6 gọi các hàm xử lý trong app, Case 7--8 do người chạy thao tác giao diện, Case 9 kiểm dashboard bằng Playwright. Mỗi lượt có năm ID bài; các case có ảnh dùng lại một ảnh minh họa. Bảng~\ref{tab:mobile-system-network} ghi chế độ gửi.
 
-\begin{table}[htbp]\centering
+\begin{table}[H]\centering
 \caption{Chế độ gửi của ba case có ảnh trên điện thoại thật}
 \label{tab:mobile-system-network}
 \begin{tabular}{llrlr}
@@ -50,7 +50,7 @@ Run\_001 dùng ảnh high nhưng dự đoán medium, confidence 0.7802, thời g
 \subsection{Kiểm thử lịch sử và web}\label{sec:web-e2e-results}
 Bảng~\ref{tab:historical-tests} giữ kết quả ngày 27/09/2026. Hai lượt web ngày 24/10/2026 ở Bảng~\ref{tab:web-e2e-results} kiểm năm kịch bản: dashboard, online/offline, mạng 300 kbit/s, mạng 20 kbit/s và từ chối GPS.
 
-\begin{table}[htbp]\centering\small
+\begin{table}[H]\centering\small
 \caption{Tổng hợp kết quả kiểm thử chức năng của hệ thống phần mềm}
 \label{tab:historical-tests}
 \begin{tabularx}{\textwidth}{P{.32\textwidth}P{.16\textwidth}X}
@@ -63,7 +63,7 @@ APK debug & Hoàn thành & Tạo gói cài đặt Android APK phục vụ kiểm
 \bottomrule\end{tabularx}
 \end{table}
 
-\begin{table}[htbp]\centering\small
+\begin{table}[H]\centering\small
 \caption{Kết quả kiểm thử E2E trên web giả lập ngày 24/10/2026}\label{tab:web-e2e-results}
 \begin{tabular}{lrrrrr}
 \toprule Run & Báo cáo seed & Kịch bản & PASS & FAIL & CHƯA CÓ \\
@@ -78,7 +78,7 @@ Mỗi lượt web đạt 45/46 tiêu chí; mục còn thiếu là thông báo AI
 \subsection{Truyền tải trong mạng yếu giả lập}\label{sec:weak-network-results}
 Điện thoại chọn ảnh gốc khi online, ảnh nén ở 300 kbit/s và metadata ở 20 kbit/s như Bảng~\ref{tab:mobile-system-network}. Phép đo trên máy tính dùng 257 ảnh validation, ba cấu hình mạng và ba chế độ, tổng cộng 2\,313 lượt. Bảng~\ref{tab:weak-network-new-results} tổng hợp tỷ lệ thành công và độ trễ.
 
-\begin{table}[htbp]\centering
+\begin{table}[H]\centering
 \caption{Tỷ lệ thành công và độ trễ theo cấu hình mạng giả lập}
 \label{tab:weak-network-new-results}
 \begin{tabular}{llrrrr}

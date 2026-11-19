@@ -4,20 +4,20 @@ Dữ liệu và phạm vi từng phép đánh giá được trình bày tại M�
 \input{appendices/phone-benchmarks}
 
 \section{Đối chiếu nội dung nghiên cứu với thuyết minh}\label{sec:proposal-comparison}
-Bảng~\ref{tab:proposal-map} tóm tắt nội dung thực hiện và phần cần phát triển tiếp.
+Bảng~\ref{tab:proposal-map} tóm tắt kết quả và phạm vi đánh giá của từng hạng mục.
 
 \begin{longtable}{P{.20\textwidth}P{.43\textwidth}P{.28\textwidth}}
 \caption{Đối chiếu nội dung nghiên cứu với thuyết minh}\label{tab:proposal-map}\\
-\toprule Nội dung & Kết quả thực hiện & Phạm vi tiếp theo \\\midrule\endfirsthead
-\toprule Nội dung & Kết quả thực hiện & Phạm vi tiếp theo \\\midrule\endhead
-Dữ liệu & Ảnh đô thị từ AlleyFloodNet, FloodNet, báo chí và ảnh tự chụp; CrisisMMD và bản dịch tiếng Việt; dữ liệu mô phỏng RQ & Hồ sơ nguồn, chỉ số đồng thuận nhãn và test độc lập \\
-Thiết kế hệ thống & Flutter, FastAPI, Web GIS; lưu cục bộ, gửi lại và đồng bộ trạng thái & Ngữ nghĩa đầu vào với đơn vị sử dụng \\
-Mô hình ảnh & MobileNetV3-Large; benchmark bốn máy; pruning 5/10/20\% và McNemar & Ảnh camera độc lập \\
-Văn bản tiếng Việt & TF-IDF, DistilBERT frozen và fine-tuning ba seed; bản dịch/nhãn AI được rà soát & Tin thu nhận trực tiếp và nhãn độc lập \\
-Đa phương thức & Thử nghiệm fusion và ablation ngoại tuyến & Dữ liệu ghép cặp mới và thiếu nguồn \\
-Phần mềm & Kiểm hồi quy gửi khi mất mạng, tích hợp Linux và khử bản sao trùng khớp & Mạng di động và SMS thật \\
-Phân cụm, xếp hạng & RQ1--RQ3 có đối chứng; giữ kết quả âm và giới hạn tái lập RQ2 & Dữ liệu thực hoặc kịch bản được xác nhận nghiệp vụ \\
-Điều phối và ứng dụng & Nguyên mẫu hỗ trợ xác minh, hiển thị và phân công & Chi phí di chuyển và thí điểm là hướng phát triển \\
+\toprule Nội dung & Kết quả thực hiện & Phạm vi đánh giá \\\midrule\endfirsthead
+\toprule Nội dung & Kết quả thực hiện & Phạm vi đánh giá \\\midrule\endhead
+Dữ liệu & Ảnh đô thị từ AlleyFloodNet, FloodNet, báo chí và ảnh tự chụp; CrisisMMD và bản dịch tiếng Việt & Phân loại mức ngập và thử nghiệm kết hợp ảnh--văn bản \\
+Thiết kế hệ thống & Flutter, FastAPI, Web GIS; lưu cục bộ, gửi lại và đồng bộ trạng thái & Luồng tiếp nhận và xử lý báo cáo \\
+Mô hình ảnh & MobileNetV3-Large; benchmark bốn máy; cắt tỉa 5/10/20\% và McNemar & Nhận diện bốn mức ngập trên tập kiểm thử \\
+Văn bản tiếng Việt & TF-IDF và DistilBERT; tinh chỉnh qua ba seed & Thử nghiệm ngoại tuyến trên bản dịch có nhãn AI \\
+Đa phương thức & So sánh mô hình chỉ ảnh, chỉ văn bản và kết hợp cả hai & Hai thử nghiệm ngoại tuyến với nhiệm vụ riêng \\
+Phần mềm & Kiểm hồi quy gửi khi mất mạng, tích hợp Linux và khử bản sao trùng khớp & Kiểm thử phần mềm và mạng giả lập \\
+Phân cụm, xếp hạng & RQ1 và RQ2 có phương pháp đối chứng & Báo cáo bán tổng hợp và tổng hợp \\
+Điều phối và ứng dụng & Nguyên mẫu hỗ trợ xác minh, hiển thị và phân công & So sánh chính sách điều phối trong mô phỏng RQ3 \\
 \bottomrule
 \end{longtable}
 

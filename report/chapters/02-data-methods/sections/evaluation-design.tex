@@ -1,6 +1,8 @@
 \section{Thiết kế đánh giá}\label{sec:02-evaluation-design}
-\begin{table}[htbp]\centering\small
-\caption{Chỉ tiêu đánh giá theo thành phần và phạm vi bằng chứng}\label{tab:objective-metrics}
+Các thước đo theo thành phần được trình bày trong Bảng~\ref{tab:objective-metrics}. Thước đo phân loại ảnh được định nghĩa ở Mục~\ref{sec:02-metrics-image}, còn phân cụm và xếp hạng được trình bày ở các mục tiếp theo. Kết quả truyền tải báo cáo nằm ở Mục~\ref{sec:weak-network-results}.
+
+\begin{table}[H]\centering\small
+\caption{Chỉ tiêu đánh giá theo thành phần và điều kiện đo}\label{tab:objective-metrics}
 \begin{tabular}{P{.19\textwidth}P{.40\textwidth}P{.30\textwidth}}\toprule
 Thành phần & Chỉ tiêu & Đơn vị và điều kiện \\\midrule
 Ảnh mức ngập & Accuracy, macro-F1, recall high, lỗi lệch từ hai mức; byte, median/P95 & Cùng ID ảnh và runtime; chọn bằng validation \\
@@ -10,8 +12,6 @@ Phân cụm/xếp hạng & ARI, F1 cặp, NDCG, overlap, drift; harm/trễ hạn
 \bottomrule\end{tabular}
 \end{table}
 
-Các thước đo ảnh được định nghĩa ở Mục~\ref{sec:02-metrics-image}, phân cụm và xếp hạng ở các mục tiếp theo; kết quả tương ứng ở Mục~\ref{sec:04-evaluation-results}. Độ trễ và giao nhận báo cáo được đo ở Mục~\ref{sec:weak-network-results}. Đây là các đại lượng đánh giá, chưa phải ngưỡng nghiệm thu.
-
 \subsection{Giao thức dữ liệu và đơn vị độc lập}
 Đơn vị đánh giá thay đổi theo bài toán (Bảng~\ref{tab:method-map}): một ảnh với bộ phân loại; một run với RQ1; một seed với RQ2 và RQ3. Tham số của RQ1 được chọn bằng grid trên 20 run calibration, còn 40 run test không dùng để chọn tham số; chi tiết đối chứng và điều kiện stress ở Mục~\ref{sec:04-evaluation-setup}. Với mô hình ảnh, test không tham gia scheduler, quy tắc chọn checkpoint hay calibration lượng tử hóa. Với mọi nhánh, nhãn thật chỉ được nối sau khi dự đoán và cấu hình đã được lưu.
 
@@ -20,7 +20,7 @@ Hai phép kiểm tra cần phân biệt. Trong score-invariance test, grouping �
 \subsection{Đánh giá mở rộng ảnh--văn bản}\label{sec:vi-ablation-plan}
 Ablation đã chạy trong từng pilot với cùng nhiệm vụ và ID test. Bước tiếp theo dùng tin thu nhận trực tiếp, nhãn độc lập và nhóm sự kiện trước chia tập. Các cấu hình trong Bảng~\ref{tab:vi-ablation-plan} cùng dự đoán request/no\_request; chọn model, ngưỡng và trọng số bằng validation, báo macro-F1, precision/recall request và CI ghép cặp theo nhóm. Trường hợp thiếu hoặc mâu thuẫn nguồn được đánh giá riêng.
 
-\begin{table}[htbp]\centering
+\begin{table}[H]\centering
 \caption{Các cấu hình cho phép xác nhận ảnh--văn bản tiếp theo}\label{tab:vi-ablation-plan}
 \begin{tabular}{P{.26\textwidth}P{.64\textwidth}}\toprule
 Cấu hình & Đầu vào và cách đánh giá \\\midrule
@@ -35,7 +35,7 @@ Lớp đa số & Nhãn cố định theo tần suất train \\
 \subsection{Đánh giá camera và Android dự kiến}\label{sec:camera-evaluation-plan}
 Tập camera phải độc lập với dữ liệu chọn model, nhóm theo cảnh/sự kiện và kiểm lại nhãn khi dấu hiệu bị che. Bảng~\ref{tab:camera-scenarios-plan} nêu các điều kiện; mức biến đổi và số lượt đo được khóa trước test.
 
-\begin{table}[htbp]\centering
+\begin{table}[H]\centering
 \caption{Điều kiện camera/Android cho lần đánh giá tiếp theo}\label{tab:camera-scenarios-plan}
 \begin{tabular}{P{.27\textwidth}P{.63\textwidth}}\toprule
 Điều kiện & Nội dung kiểm tra \\\midrule

@@ -62,7 +62,8 @@
   \renewcommand{\ReportTableFont}{\fontsize{12bp}{13.8bp}\selectfont}%
   \vspace*{\dimexpr\FormFirstSkip-\parskip-\baselineskip\relax}%
 }{\clearpage\restoregeometry\endgroup}
-\renewcommand{\FormSection}[1]{\par\noindent\textbf{#1}\par\nopagebreak[4]}
+\renewcommand{\FormSection}[1]{%
+  \par{\interlinepenalty=10000\noindent\textbf{#1}\par}\nopagebreak[4]}
 \renewcommand{\FormIndented}[1]{\par\begingroup\leftskip=28.10bp\noindent #1\par\endgroup}
 \renewcommand{\FormSignature}[2]{%
   \par\noindent\hfill\begin{minipage}{242bp}\centering

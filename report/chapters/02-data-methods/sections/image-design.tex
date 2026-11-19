@@ -52,7 +52,7 @@ Hệ số 0.1 có trong config đã lưu; CSV history cũng có cột CE, severi
 \subsection{Tối ưu, chọn checkpoint và khác biệt phiên bản}
 Siêu tham số huấn luyện được tổng hợp ở Bảng~\ref{tab:train-config}. Mã notebook dùng AdamW với hai nhóm learning rate cho backbone và classifier; ReduceLROnPlateau theo validation. Ba epoch đầu khóa backbone và giữ các lớp features ở chế độ eval để không cập nhật BatchNorm của phần bị khóa; sau đó mở backbone để tinh chỉnh. AMP chỉ được bật khi cấu hình cho phép và thiết bị là CUDA.
 
-\begin{table}[htbp]\centering\small
+\begin{table}[H]\centering\small
 \caption{Cấu hình huấn luyện mô hình ảnh theo config đã lưu}\label{tab:train-config}
 \begin{tabular}{P{.34\textwidth}P{.54\textwidth}}
 \toprule Thành phần & Giá trị \\\midrule

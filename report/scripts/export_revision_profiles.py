@@ -8,7 +8,7 @@ if not P.is_file():raise SystemExit('Missing P02 image-profile.csv; run the read
 rows=list(csv.DictReader(P.open()))
 chosen=[r for r in rows if r['split']=='all' and r['class']!='all']
 assert len(chosen)==4 and sum(int(r['n']) for r in chosen)==1702
-lines=[r'\begin{table}[htbp]\centering\small',r'\caption{Đặc điểm ảnh gốc theo lớp, tính từ header của 1\,702 tệp}\label{tab:image-profile}',r'\begin{tabular}{lrrrr}',r'\toprule Lớp & Số ảnh & Rộng trung vị & Cao trung vị & Dung lượng trung vị (KiB) \\',r'\midrule']
+lines=[r'\begin{table}[H]\centering\small',r'\caption{Đặc điểm ảnh gốc theo lớp, tính từ header của 1\,702 tệp}\label{tab:image-profile}',r'\begin{tabular}{lrrrr}',r'\toprule Lớp & Số ảnh & Rộng trung vị & Cao trung vị & Dung lượng trung vị (KiB) \\',r'\midrule']
 for r in chosen:
  lines.append(r['class'].replace('_',r'\_')+' & '+r['n']+' & '+format(float(r['width_q50']),'g')+' & '+format(float(r['height_q50']),'g')+' & '+f"{float(r['bytes_q50'])/1024:.2f}"+r' \\')
 lines.extend([r'\bottomrule\end{tabular}',r'\end{table}'])

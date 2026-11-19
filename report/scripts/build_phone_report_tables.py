@@ -53,7 +53,7 @@ def table(name, caption, label, headers, rows, long=False, two_columns=False):
                   r'\midrule\multicolumn{' + str(len(headers) * (2 if two_columns else 1)) + r'}{r}{Còn tiếp ở trang sau}\\\endfoot',
                   r'\bottomrule\endlastfoot']
     else:
-        lines += [r'\begin{table}[htbp]\centering' + ('' if two_columns else r'\small\setlength{\tabcolsep}{4pt}'),
+        lines += [r'\begin{table}[H]\centering' + ('' if two_columns else r'\small\setlength{\tabcolsep}{4pt}'),
                   r'\caption{' + caption + r'}\label{' + label + '}',
                   r'\begin{tabular}{' + spec + '}', r'\toprule ' + header + r' \midrule']
     for index, row in enumerate(rows):

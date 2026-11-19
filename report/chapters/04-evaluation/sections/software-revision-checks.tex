@@ -1,7 +1,7 @@
 \subsection{Khắc phục phần mềm và kiểm hồi quy}\label{sec:software-revision-checks}
 Ứng dụng kiểm tra vòng đời bộ điều khiển và dùng chế độ gửi dự phòng khi phép dò mạng lỗi. Sau khi sửa, sáu ca kiểm thử hồi quy lỗi gửi và đồng bộ đều đạt. Kết quả kiểm phần mềm ở Bảng~\ref{tab:software-revision-checks}.
 
-\begin{table}[htbp]\centering\small
+\begin{table}[H]\centering\small
 \caption{Kết quả kiểm thử hồi quy và tích hợp phần mềm}\label{tab:software-revision-checks}
 \begin{tabular}{P{.28\textwidth}P{.25\textwidth}P{.36\textwidth}}\toprule
 Phạm vi & Kết quả & Điều kiện \\\midrule
@@ -11,4 +11,4 @@ Backend API và đồ thị & \SoftwareBackendPass{} đạt & Có \SoftwareGraph
 App Linux--backend thật & \SoftwareLinuxPass{} kịch bản đạt & Mất mạng/phục hồi; gửi ảnh, nhận trạng thái và chặn sửa chéo; DB tạm riêng \\
 \bottomrule\end{tabular}
 \end{table}
-Backend gộp bản sao trùng khớp trước khi lọc cạnh theo phân vị và top-$K$, đồng thời giữ mọi ID gốc. Ba phép kiểm gồm nhân bản 2/5 lần, nội dung khác và hàng xem xét; fixture giữ số cặp, cạnh, ngưỡng, phân hoạch và ưu tiên. Hai kịch bản Linux--backend kiểm đường outbox, ảnh, phản hồi trạng thái và quyền sửa chéo; chúng không đo SMS hoặc mạng di động thật.
+Backend gộp bản sao trùng khớp trước khi lọc cạnh theo phân vị và top-$K$, đồng thời giữ mọi ID gốc. Các ca kiểm thử bao gồm thêm bản sao hai và năm lần, phân biệt báo cáo khác nội dung và xử lý hàng đợi xác minh. Với dữ liệu nhân bản, số cặp, số cạnh, ngưỡng, phân hoạch và thứ tự ưu tiên đều được giữ. Hai kịch bản tích hợp Linux--máy chủ kiểm tra hàng đợi gửi, ảnh, phản hồi trạng thái và quyền sửa báo cáo.

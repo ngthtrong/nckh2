@@ -2,7 +2,7 @@
 \subsection{Các nguồn dữ liệu và vai trò}
 Báo cáo dùng năm nhóm dữ liệu có mục đích khác nhau (Bảng~\ref{tab:data-sources}): bộ ảnh để huấn luyện và đánh giá phân loại; bảng trạng thái Boolean để xây dựng điểm khẩn cấp có cấu trúc; bộ báo cáo Generator 3.0 để đánh giá phân cụm; bộ Candidate 4.1 để khảo sát xếp hạng và điều phối; và các cặp ảnh--văn bản CrisisMMD cho pilot phân loại tính hữu ích thông tin (\emph{informative}). Riêng CrisisMMD có ghép cặp ảnh--văn bản trong cùng bài đăng. Không ghép nó với ảnh mức ngập, bảng cờ khẩn cấp hoặc báo cáo mô phỏng, và không cộng số mẫu của năm nhóm thành một bộ dữ liệu cứu hộ chung.
 
-\begin{table}[htbp]\centering\small
+\begin{table}[H]\centering\small
 \caption{Năm nhóm dữ liệu, bản chất và phạm vi sử dụng}\label{tab:data-sources}
 \begin{tabular}{P{.19\textwidth}P{.17\textwidth}P{.23\textwidth}P{.28\textwidth}}
 \toprule Nhóm & Quy mô & Bản chất & Dùng cho \\\midrule
@@ -18,13 +18,14 @@ Hai bộ báo cáo mô phỏng không đại diện cho báo cáo cứu hộ th�
 
 \subsection{Bộ ảnh mức ngập}
 Mô hình dùng \ImageTotal{} ảnh sạch phân bố vào bốn mức. Thứ tự lớp được giữ thống nhất từ huấn luyện, xuất mô hình đến xử lý trong ứng dụng: \texttt{low}, \texttt{medium}, \texttt{high}, \texttt{non\_flood}.
+
 \input{generated/tables/image-split}
 
-\paragraph{Thu thập ảnh.} Bộ dữ liệu sử dụng ảnh được chọn từ AlleyFloodNet~\citep{lee2025alleyfloodnet} và FloodNet~\citep{rahnemoonfar2021floodnet}. Sau khi lọc theo bối cảnh đô thị, số ảnh phù hợp từ hai nguồn này còn ít. Đề tài bổ sung ảnh từ các trang báo chính thống của Việt Nam và ảnh do nhóm tự chụp. Ảnh báo chí chỉ dùng trong nội bộ nghiên cứu và không được phát hành công khai kèm bộ dữ liệu. Hồ sơ theo từng ảnh còn thiếu thông tin về nguồn, sự kiện, thời điểm và quyền sử dụng.
+\paragraph{Thu thập ảnh.} Bộ dữ liệu sử dụng ảnh được chọn từ AlleyFloodNet~\citep{lee2025alleyfloodnet} và FloodNet~\citep{rahnemoonfar2021floodnet}. Sau khi lọc theo bối cảnh đô thị, số ảnh phù hợp từ hai nguồn này còn ít. Đề tài bổ sung ảnh từ các trang báo chính thống của Việt Nam và ảnh do nhóm tự chụp. Ảnh báo chí chỉ dùng trong nội bộ nghiên cứu và không được phát hành công khai kèm bộ dữ liệu.
 
-\paragraph{Tiêu chí gán nhãn.} Hai người gán nhãn từng ảnh theo bốn mức ngập rồi đối chiếu kết quả để thống nhất nhãn cuối cùng. Bảng~\ref{tab:label-criteria} trình bày cách dùng người và phương tiện trong ảnh làm mốc tham chiếu. Nhãn biểu thị mức ngập phục vụ xếp hạng. Chưa có chỉ số định lượng về độ đồng thuận trước khi đối chiếu. Ranh giới giữa \texttt{low} và \texttt{medium} hoặc giữa \texttt{medium} và \texttt{high} phụ thuộc vào mốc nhìn thấy trong ảnh, nên đây là hai cặp lớp dễ nhầm nhất.
+\paragraph{Tiêu chí gán nhãn.} Hai người gán nhãn từng ảnh theo bốn mức ngập rồi đối chiếu kết quả để thống nhất nhãn cuối cùng. Bảng~\ref{tab:label-criteria} trình bày cách dùng người và phương tiện trong ảnh làm mốc tham chiếu. Nhãn biểu thị mức ngập phục vụ xếp hạng. Ranh giới giữa \texttt{low} và \texttt{medium} hoặc giữa \texttt{medium} và \texttt{high} phụ thuộc vào mốc nhìn thấy trong ảnh, nên đây là hai cặp lớp dễ nhầm nhất.
 
-\begin{table}[htbp]\centering\small
+\begin{table}[H]\centering\small
 \caption{Tiêu chí gán nhãn bốn mức ngập}\label{tab:label-criteria}
 \begin{tabular}{P{.14\textwidth}P{.78\textwidth}}
 \toprule Lớp & Dấu hiệu thị giác \\\midrule
@@ -36,6 +37,7 @@ Mô hình dùng \ImageTotal{} ảnh sạch phân bố vào bốn mức. Thứ t�
 \end{table}
 
 \paragraph{Đặc điểm tệp gốc.} Audit header trên toàn bộ \ImageTotal{} ảnh cho thấy JPEG 1\,521, PNG 24, WEBP 152 và AVIF 5; mode RGB 1\,687, RGBA 14 và L 1. Đây là format giải mã từ header, không suy từ đuôi tên. Chiều rộng min/trung vị/max là 168/512/5\,472 pixel; chiều cao 100/384/3\,648 pixel; dung lượng 2\,481/41\,564/2\,900\,796 byte. Bảng~\ref{tab:image-profile} tách theo lớp; hồ sơ tái lập giữ thêm phân vị và bảng chéo theo split. Các số này mô tả ảnh gốc, không thay kích thước tensor $256\times256$ hoặc chứng minh độ bền với ảnh tối, mờ.
+
 \input{generated/tables/image-profile}
 
 JPEG chiếm phần lớn bộ ảnh, còn PNG, WEBP và AVIF đòi hỏi bộ giải mã hỗ trợ đúng định dạng thực. Đuôi tên giống nhau không bảo đảm định dạng hoặc cách giải mã giống nhau. Mode RGBA có kênh trong suốt, còn mode L chỉ có mức xám; bước chuyển RGB tạo đầu vào ba kênh thống nhất nhưng không bổ sung thông tin màu vốn không có. Hướng EXIF cần được áp trước khi resize để mốc người và phương tiện không bị xoay sai. Audit header không cho biết ảnh đã trải qua bao nhiêu lần nén, có bị sửa nội dung hay còn nhìn rõ mốc ngập hay không.
@@ -47,7 +49,7 @@ Trước khi huấn luyện, notebook loại ảnh không đọc được và c�
 
 Cách làm này giảm nguy cơ rò rỉ do ảnh trùng hoặc gần trùng, nhưng không chứng minh các tập độc lập hoàn toàn về nguồn hay sự kiện: hai ảnh cùng một trận ngập từ hai nguồn có thể rơi vào hai tập khác nhau. Bộ xuất kết quả đối chiếu đường dẫn và MD5 giữa bảng chia với các tệp ảnh hiện có (Mục~\ref{sec:04-evaluation-setup}).
 
-Đối chiếu bổ sung xác nhận 1\,702 bản ghi sau làm sạch của seed 1024 khớp tám trường định danh, nhãn, mã băm và nhóm với bảng chia hiện tại; toàn bộ trường nhóm nguồn còn trống. Metadata checkpoint ghi seed 1024 và đường dẫn bảng chia dùng chung trong kho huấn luyện, nhưng chưa khôi phục được checksum của bảng chia tại thời điểm train.
+Đối chiếu 1\,702 bản ghi sau làm sạch của seed 1024 với bảng chia hiện tại cho kết quả khớp ở tám trường định danh, nhãn, mã băm và nhóm. Thông tin kèm mô hình ghi seed 1024 và đường dẫn bảng chia dùng chung trong kho huấn luyện.
 
 \subsection{Quản lý và hoàn thiện dữ liệu}\label{sec:data-process}
 Quy trình gồm thu thập, sàng lọc, làm sạch, gán nhãn, chia tập và lưu phiên bản. Hồ sơ bổ sung cần gắn ID với nguồn/sự kiện và căn cứ sử dụng; giữ nhãn độc lập trước phân xử, báo độ đồng thuận và lưu checksum bảng chia. Khi đổi nhãn hoặc bổ sung ảnh, tạo phiên dữ liệu mới và giữ lịch sử. Các khoảng trống hiện có được tập hợp tại Mục~\ref{sec:04-evaluation-limitations}.

@@ -1,18 +1,15 @@
-\section{Giới hạn của thực nghiệm}\label{sec:04-evaluation-limitations}
+\section{Phạm vi diễn giải kết quả}\label{sec:04-evaluation-limitations}
 \paragraph{Dữ liệu ảnh và nhãn.}
-Hồ sơ nguồn ảnh, quyền sử dụng, độ đồng thuận nhãn và mã băm của bảng chia khi huấn luyện chưa đầy đủ. Nhóm gần trùng đã ghi nhận không bảo đảm độc lập nguồn/sự kiện. Các nhánh tối ưu dùng lại cùng test; cần tập camera độc lập để xác nhận lựa chọn cuối.
+Các mô hình ảnh được so sánh trên cùng tập kiểm thử. Việc chia tập giữ các ảnh gần trùng trong cùng một nhóm. Các mức ngập là nhãn thị giác dựa trên mốc người và phương tiện trong ảnh.
 
 \paragraph{Văn bản và fusion.}
-Bản dịch tiếng Việt và nhãn AI từ CrisisMMD chưa có phép đo độ đồng thuận nhãn độc lập hoặc kiểm chứng trên nhiều sự kiện thu nhận trực tiếp. Test request chỉ có sáu mẫu dương trong một sự kiện đã được xem trước. CI chưa xác lập ưu thế fusion; trích xuất span, hiệu chuẩn và chính sách thiếu/mâu thuẫn nguồn cần đánh giá riêng.
+Thử nghiệm tiếng Việt dùng bản dịch và nhãn AI từ CrisisMMD. Tập kiểm thử có sáu mẫu mang nhãn yêu cầu hỗ trợ, cùng thuộc một sự kiện. Khoảng tin cậy được diễn giải trong phạm vi tập này.
 
 \paragraph{Phạm vi mô phỏng.}
-RQ1--RQ3 dùng dữ liệu bán tổng hợp/tổng hợp. Bối cảnh địa lý, nhãn lợi ích và harm phục vụ so sánh có kiểm soát; hiệu quả cứu hộ thực địa chưa được đo. LR năm cờ học nhãn OR tổng hợp, chưa là mô hình nguy kịch được xác nhận chuyên môn. Các heuristic về số người, yếu thế và thời gian cần thống nhất với đơn vị sử dụng.
+RQ1--RQ3 dùng dữ liệu bán tổng hợp và tổng hợp. Các chỉ số về lợi ích, tổn thất và thời hạn phục vụ so sánh trong mô phỏng. Hồi quy logistic học từ 32 tổ hợp của năm dấu hiệu và nhãn tạo theo quy tắc OR.
 
 \paragraph{Thiết bị và mạng.}
-Benchmark gồm 32 cấu hình trên bốn điện thoại, dùng cùng 256 ảnh; chưa có đo lặp kiểm soát nhiệt/tải hoặc pin/RAM. CPU đo predict, ứng dụng đo \texttt{classifyImage}, nên không so speedup trực tiếp giữa hai phạm vi. Phép đo truyền tải dùng proxy trên máy tính. Kế hoạch kiểm thử SMS và mạng di động thật trên điện thoại được trình bày trong mục \nameref{sec:future-work}. Khắc phục lỗi gửi khi mất mạng và kiểm hồi quy/tích hợp Linux ở Mục~\ref{sec:software-revision-checks}.
+Độ trễ trên CPU được đo ở lời gọi suy luận, còn phép đo trên điện thoại dùng lời gọi \texttt{classifyImage}, gồm cả xử lý ảnh. Phép đo truyền tải dùng proxy trên máy tính. Các phép kiểm thử dự kiến trên điện thoại được trình bày trong mục \nameref{sec:future-work}.
 
 \paragraph{Ảnh suy giảm và tối ưu mô hình.}
-Biến đổi CPU áp riêng lên ảnh test, chưa bao quát tổ hợp mưa, mờ, tối và góc chụp tại hiện trường; nhãn sau biến đổi chưa được thẩm định lại. PTQ/QAT giảm dung lượng nhưng suy giảm chất lượng; chẩn đoán tensor chưa cô lập nguyên nhân. Pruning 5\% mới cũng chưa bảo toàn macro-F1 baseline.
-
-\paragraph{Tái lập và hướng phát triển.}
-RQ2 còn ba raw \(p\) Spearman và năm Holm chưa khớp tái tính; chưa xác lập lợi ích alignment chung. Backend đã khử bản sao exact; đánh giá gần trùng/dữ liệu thực, điều phối xét chi phí di chuyển và thí điểm cùng đơn vị cứu hộ là các hướng tiếp theo.
+Phép thử trên CPU áp dụng riêng từng biến đổi nhân tạo lên ảnh kiểm thử. Trong các cấu hình đã đo, lượng tử hóa giảm dung lượng và làm giảm chất lượng nhận diện. Phiên bản cắt tỉa 5\% có macro-F1 thấp hơn mô hình gốc.

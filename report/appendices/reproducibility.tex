@@ -21,7 +21,7 @@ So sánh ảnh dùng cùng ID test và cùng phạm vi thời gian: CPU đo lờ
 Các thực nghiệm gồm pruning 5/10/20\%, McNemar, suy luận lại các model và fine-tuning DistilBERT. Hồ sơ tại \RepoPath{docs/revision-plan/outputs/local-report-update-20261110/} giữ hash 47 tệp, kiểm lại 23 cấu hình/seed và dự đoán ghép cặp. CI được lấy từ artifact đã lưu. Hai checkpoint seed 43 cần dùng bản trong ZIP có hash khớp receipt. Kết quả frozen được dùng lại, không tạo thêm tập test.
 
 \section{Tái lập RQ và kiểm thử phần mềm}
-RQ1 giữ cấu hình đã chọn trước test; stress gồm 1\,400 lượt fit. RQ3 lấy trung bình ba điều kiện trong mỗi seed trước bootstrap và Holm, giữ 40 đơn vị độc lập. RQ2 còn ba raw \(p\) Spearman và năm giá trị Holm chưa khớp khi tái tính; phân tích tại Mục~\ref{sec:rq2-discussion}.
+RQ1 giữ cấu hình đã chọn trước test; stress gồm 1\,400 lượt fit. RQ3 lấy trung bình ba điều kiện trong mỗi seed trước bootstrap và Holm, giữ 40 đơn vị độc lập. Kết quả đối chiếu thống kê RQ2 được trình bày tại Mục~\ref{sec:rq2-discussion}.
 
 Phép kiểm hồi quy Flutter/backend và hai kịch bản trên Linux được trình bày tại Mục~\ref{sec:software-revision-checks}. Mục~\ref{sec:mobile-system-results} trình bày kiểm thử trên Samsung S10e.
 

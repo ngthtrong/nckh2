@@ -17,7 +17,7 @@
 
 - Chương mới và biểu mẫu độc lập được bắt đầu ở trang mới. Không thêm `\clearpage`, `\newpage`, dòng trống cưỡng bức hoặc `\vspace` âm trong thân chương để sửa một trang riêng lẻ.
 - Số trang của báo cáo kết thúc ở Phụ lục B. Các trang thuyết minh, minh chứng sản phẩm, bản tin và báo cáo tóm tắt ở phần sau để trống số trang.
-- Hình trong thân bài dùng `figure[H]` để xuất hiện tại vị trí chèn trong văn bản. Bảng thường và hình trong phụ lục có thể dùng `[htbp]`. Chỉ đặt `\FloatBarrier` khi cần giữ một nhóm nội dung.
+- Hình trong thân bài và bảng một trang dùng `[H]` giữa hai đoạn văn. Dùng `longtable` cho bảng cần sang trang, kèm tiêu đề cột lặp. Hình trong phụ lục có thể dùng `[htbp]`.
 - Với hình khổ ngang trong thân bài, đặt đoạn dẫn và `figure[H]` cùng trong môi trường `landscape`. Dùng `width=\linewidth` và `keepaspectratio`, đồng thời giới hạn chiều cao để đoạn dẫn, hình và chú thích vừa trên một trang. Khổ ngang trong phụ lục dùng `reportlandscapefigure`.
 - Giữ nguyên nhóm ảnh giao diện và các ký hiệu (a), (b), (c). Cho phép phần diễn giải nối tiếp giữa các trang; không bắt buộc mỗi nhóm ảnh mở một trang mới.
 - Rà soát trang trước, trang chứa hình/bảng và trang sau mỗi lần sửa. Khoảng dành cho ký tên và sơ đồ lớn cần đọc được là khoảng có chủ đích; trang chỉ còn một vài dòng do ngắt cưỡng bức cần xử lý.

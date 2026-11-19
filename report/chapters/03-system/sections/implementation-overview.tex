@@ -1,7 +1,7 @@
 \subsection{Chính sách gửi thích ứng}\label{sec:03-system-implementation}
 Ứng dụng đo throughput qua \texttt{/probe}, endpoint khoảng 64 KiB. Ngân sách probe ở chính sách gửi là 6 giây và có thể dùng số byte đọc một phần để ước lượng. Cấu hình hiện tại dùng ngưỡng mạng mạnh 1\,000 kbit/s, mức còn phù hợp ảnh nén 50 kbit/s và confidence cao 0.90.
 
-\begin{table}[htbp]\centering\small
+\begin{table}[H]\centering\small
 \caption{Chính sách chọn chế độ gửi trong mã hiện tại}\label{tab:send-policy}
 \begin{tabularx}{\textwidth}{P{.36\textwidth}X}
 \toprule Điều kiện & Chế độ được chọn \\\midrule

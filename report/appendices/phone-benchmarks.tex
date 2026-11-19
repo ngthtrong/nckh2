@@ -4,9 +4,12 @@ Các Bảng~\ref{tab:phone-full-quality}--\ref{tab:phone-full-classes} giữ đ�
 Accuracy, precision, recall và F1 được báo theo phần trăm; macro là trung bình đều bốn lớp. Lỗi nặng là chênh ít nhất hai mức theo thứ tự non\_flood, low, medium, high. Với sai lệch mức \(e_i\), \(\mathrm{MAE}=\sum_i|e_i|/n\), \(\mathrm{RMSE}=\sqrt{\sum_i e_i^2/n}\). Thời gian tính bằng ms trong \texttt{classifyImage}; P50/P95 dùng nearest-rank sau khi loại năm lượt làm nóng.
 
 \input{generated/tables/phone-full-quality}
+
 \input{generated/tables/phone-full-ordinal}
+
 \input{generated/tables/phone-full-latency}
 \FloatBarrier
+
 \input{generated/tables/phone-full-classes}
 
 Bảng theo lớp có 128 hàng, tương ứng bốn lớp trong mỗi cấu hình; số ảnh là số mẫu thật. Các phiên dùng lại cùng test, không tạo 8\,192 ảnh độc lập. Bảng tổng hợp ở Chương~\ref{chap:04-evaluation} lấy trung bình tám phiên máy--runtime cho mỗi phương án; các bảng tại đây giữ từng cấu hình.
