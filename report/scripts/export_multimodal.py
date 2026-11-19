@@ -20,7 +20,7 @@ def read_csv(name):
 
 
 def number(value):
-    return f'{float(value):.2f}'.replace('.', ',')
+    return f'{float(value):.2f}'
 
 
 def main():

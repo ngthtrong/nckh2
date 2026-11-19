@@ -29,7 +29,7 @@ Nghiên cứu có các nhánh được đánh giá riêng: ảnh mức ngập, k
 \label{fig:method-pipeline}
 \end{figure}
 
-Các nhánh dùng dữ liệu và đơn vị đánh giá riêng; Dataset\_Flood, bảng OR và báo cáo mô phỏng không ghép thành một corpus. Nhánh tiếng Việt ở Mục~\ref{sec:text-design}--\ref{sec:multimodal-design} đã có kết quả trên bản dịch/nhãn AI được nhóm kiểm tra; đánh giá tin thu nhận trực tiếp là bước tiếp theo.
+Các nhánh dùng dữ liệu và đơn vị đánh giá riêng; Dataset\_Flood, bảng OR và báo cáo mô phỏng không ghép thành một corpus. Nhánh tiếng Việt ở Mục~\ref{sec:text-design}--\ref{sec:multimodal-design} đã có kết quả trên bản dịch tiếng Việt và nhãn AI; đánh giá tin thu nhận trực tiếp là bước tiếp theo.
 
 Bảng~\ref{tab:method-map} ghi dữ liệu, phương pháp, thước đo và đơn vị thống kê của từng nhánh. Số lượng và nguồn kết quả chi tiết nằm ở Bảng~\ref{tab:experiment-map} của Chương~\ref{chap:04-evaluation}.
 
@@ -38,7 +38,7 @@ Bảng~\ref{tab:method-map} ghi dữ liệu, phương pháp, thước đo và đ
 \toprule Nhánh & Dữ liệu và đơn vị & Phương pháp & Thước đo \\\midrule\endfirsthead
 \toprule Nhánh & Dữ liệu và đơn vị & Phương pháp & Thước đo \\\midrule\endhead
 Phân loại ảnh & \ImageTest{} ảnh test trong \ImageTotal{} ảnh; đơn vị là ảnh & MobileNetV3-Large bốn lớp; PTQ, QAT, cắt tỉa & Accuracy, macro-F1, lỗi nặng, latency \\
-Khẩn cấp có cấu trúc & 32 trạng thái Boolean & Logistic Regression so với quy tắc OR & Độ khớp nhãn ở ngưỡng 0,5 \\
+Khẩn cấp có cấu trúc & 32 trạng thái Boolean & Logistic Regression so với quy tắc OR & Độ khớp nhãn ở ngưỡng 0.5 \\
 Pilot ảnh--văn bản & CrisisMMD: \MMTrainN/\MMDevN/\MMTestN{} cặp train/validation/test; đơn vị CI là nhóm bản trùng & TF-IDF, encoder ảnh frozen, fusion tuyến tính & Accuracy, macro-F1, recall informative, CI ghép cặp \\
 RQ1 & Generator 3.0, 80 run; chọn tham số trên 20 run calibration, báo cáo trên 40 run test; đơn vị là run & Đồ thị cổng tích so với dạng cộng; Louvain, Leiden & ARI, F1 theo cặp \\
 RQ2 & Candidate 4.1, 40 seed test; nhóm oracle; đơn vị là seed & Điểm $P_k$ theo họ bằng chứng so với năm đối chứng & NDCG@5, Spearman, overlap top-5, drift, churn \\

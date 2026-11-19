@@ -59,12 +59,11 @@ def main():
     entries = validated_entries()
     output = ROOT / 'build/evidence.tex'
     output.parent.mkdir(exist_ok=True)
-    proposal = entries[0]
+    commands = ['\\EvidencePDF', '\\FirstProductEvidencePDF']
+    commands.extend(['\\EvidencePDF[]'] * max(0, len(entries) - 2))
     output.write_text('% Generated from evidence/manifest.yaml; do not edit.\n'
-        + '\\EvidencePDF{' + tex_escape(proposal['title']) + '}{' + proposal['path'] + '}\n'
-        + '\\clearpage\\pdfbookmark[0]{Minh chứng sản phẩm}{product-evidence}\n'
-        + ''.join('\\EvidencePDF[]{' + tex_escape(e['title']) + '}{' + e['path'] + '}\n'
-                  for e in entries[1:]))
+        + ''.join(command + '{' + tex_escape(entry['title']) + '}{' + entry['path'] + '}\n'
+                  for command, entry in zip(commands, entries)), encoding='utf-8')
     print(f'Đã kiểm tra {len(entries)} PDF; tạo build/evidence.tex')
 
 if __name__ == '__main__':

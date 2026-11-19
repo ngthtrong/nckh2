@@ -107,6 +107,12 @@ def image_figures(predictions):
         ax.set_title(f"T: {row['true_label']} | P: {row['pred_label']}\nconf={float(row['confidence']):.2f}, true_prob={float(row['true_prob']):.2f}",fontsize=10)
         ax.axis('off')
     save(fig,'image-examples')
+    return {'new_model_plots': names, 'rendered_from_saved_values': True,
+            'validation_examples':[r['relative_path'] for r in errors],
+            'history_rows': len(history), **confidence_figure(predictions)}
+
+
+def confidence_figure(predictions):
     # Report coverage and error in bins, without interpreting confidence as medical risk.
     confidence = np.array([float(r['confidence_pth']) for r in predictions])
     correct = np.array([r['pred_pth'] == r['ground_truth'] for r in predictions])
@@ -122,13 +128,11 @@ def image_figures(predictions):
     axes[0].set(xlabel='Confidence trung bình theo bin', ylabel='Tỷ lệ đúng theo bin',
                 xlim=(0, 1), ylim=(0, 1)); axes[0].legend(fontsize=11)
     axes[1].bar([b['lower'] + .05 for b in bins], [b['n'] for b in bins], width=.085, color=BLUE)
-    axes[1].set(xlabel='Bin confidence (độ rộng 0,1)', ylabel='Số ảnh test', xlim=(0, 1))
+    axes[1].set(xlabel='Bin confidence (độ rộng 0.1)', ylabel='Số ảnh test', xlim=(0, 1))
     save(fig, 'confidence-calibration')
-    return {'new_model_plots': names, 'rendered_from_saved_values': True,
-            'validation_examples':[r['relative_path'] for r in errors], 'historical_confidence_bins': bins,
+    return {'historical_confidence_bins': bins,
             'confidence_ge_090': {'samples': int((confidence >= .9).sum()),
-                                 'correct': int(correct[confidence >= .9].sum())},
-            'history_rows': len(history)}
+                                 'correct': int(correct[confidence >= .9].sum())}}
 
 
 def compression_figures(benchmarks):

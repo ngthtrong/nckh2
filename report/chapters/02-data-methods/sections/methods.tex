@@ -6,15 +6,15 @@ Với vector cờ $\symbf{x}\in\{0,1\}^{5}$ của bảng 32 trạng thái (Mục
  \qquad \operatorname{sigmoid}(z)=\frac{1}{1+e^{-z}}.
  \label{eq:urgency-lr}
 \end{equation}
-JSON lưu $\xi_0=-1{,}0580446217$ và cả năm hệ số $\xi_j=1{,}1087792041$. Threshold kỹ thuật là 0,5 và \texttt{class\_weight=balanced}. Hệ số bằng nhau khiến đầu ra chỉ phụ thuộc số cờ được chọn trong không gian rút gọn. Đây không phải bằng chứng rằng năm dấu hiệu có trọng lượng y khoa như nhau; cấu trúc này phản ánh bảng huấn luyện đối xứng và nhãn OR của nhóm.
+JSON lưu $\xi_0=-1.0580446217$ và cả năm hệ số $\xi_j=1.1087792041$. Threshold kỹ thuật là 0.5 và \texttt{class\_weight=balanced}. Hệ số bằng nhau khiến đầu ra chỉ phụ thuộc số cờ được chọn trong không gian rút gọn. Đây không phải bằng chứng rằng năm dấu hiệu có trọng lượng y khoa như nhau; cấu trúc này phản ánh bảng huấn luyện đối xứng và nhãn OR của nhóm.
 
-Trên toàn bộ 32 trạng thái, nhãn ở threshold 0,5 khớp quy tắc OR. Khi không có cờ, điểm bằng khoảng 0,2577; với một cờ, điểm nhỏ nhất của trạng thái dương khoảng 0,5127. Quy tắc OR trực tiếp là baseline chính xác cho định nghĩa nhãn này. Độ khớp toàn bảng và sanity test không chứng minh Logistic Regression tốt hơn quy tắc hoặc có hiệu quả lâm sàng.
+Trên toàn bộ 32 trạng thái, nhãn ở threshold 0.5 khớp quy tắc OR. Khi không có cờ, điểm bằng khoảng 0.2577; với một cờ, điểm nhỏ nhất của trạng thái dương khoảng 0.5127. Quy tắc OR trực tiếp là baseline chính xác cho định nghĩa nhãn này. Độ khớp toàn bảng và sanity test không chứng minh Logistic Regression tốt hơn quy tắc hoặc có hiệu quả lâm sàng.
 
 \paragraph{Nhãn OR và vai trò của số cờ.} Nhãn được dựng bởi $y=\mathbf{1}\{\sum_{j=1}^{5}x_j\geq1\}$, nên bảng có một trạng thái âm và 31 trạng thái dương. Không có người bệnh, văn bản tự do hoặc kết quả cứu hộ trong bảng này. Mọi hoán vị năm cột đều giữ nguyên tập 32 tổ hợp và nhãn; với cùng cách xử lý các đặc trưng trong phép fit đã lưu, nghiệm có hệ số bằng nhau phù hợp với tính đối xứng đó. \texttt{class\_weight=balanced} điều chỉnh đóng góp của hai lớp khi fit, không làm xuất hiện nhãn chuyên gia hay dân số bệnh nhân đại diện.
 
-Đặt $k_i=\sum_jx_j$, Công thức~\ref{eq:urgency-lr} trở thành $E_i^{\mathrm{LR}}=\operatorname{sigmoid}(-1{,}0580446217+1{,}1087792041\,k_i)$. Vì hệ số chung dương và sigmoid tăng, chọn thêm cờ làm điểm tăng; hai báo cáo có cùng số cờ nhận cùng điểm dù loại dấu hiệu khác nhau. Với ngưỡng 0,5, quyết định dương tương đương logit không âm; do đó không chọn cờ cho kết quả âm, còn một cờ đã đủ cho kết quả dương. Đây là đặc tính của hàm đã lưu, không phải quy tắc xác nhận mức nguy cấp giữa các loại dấu hiệu hoặc giữa nhiều người trong một báo cáo.
+Đặt $k_i=\sum_jx_j$, Công thức~\ref{eq:urgency-lr} trở thành $E_i^{\mathrm{LR}}=\operatorname{sigmoid}(-1.0580446217+1.1087792041\,k_i)$. Vì hệ số chung dương và sigmoid tăng, chọn thêm cờ làm điểm tăng; hai báo cáo có cùng số cờ nhận cùng điểm dù loại dấu hiệu khác nhau. Với ngưỡng 0.5, quyết định dương tương đương logit không âm; do đó không chọn cờ cho kết quả âm, còn một cờ đã đủ cho kết quả dương. Đây là đặc tính của hàm đã lưu, không phải quy tắc xác nhận mức nguy cấp giữa các loại dấu hiệu hoặc giữa nhiều người trong một báo cáo.
 
-\paragraph{Ví dụ minh họa, không phải mẫu thực nghiệm.} Với vector tự soạn $(0,0,0,0,0)$, thay vào hàm cho $\operatorname{sigmoid}(-1{,}0580446217)\simeq0{,}2577$. Đổi riêng cờ đầu thành một cho logit $-1{,}0580446217+1{,}1087792041$ và điểm khoảng 0,5127; đổi sang bất kỳ cờ đơn nào khác vẫn cho cùng kết quả. Ví dụ chỉ giải thích đại số từ hệ số đã lưu. Điểm 0,5127 không có nghĩa xác suất người đó nguy kịch là 51,27\%; trạng thái toàn số không cũng có thể phản ánh người dùng thiếu thông tin. Khi thiết kế lại biểu mẫu hoặc adapter, cần giữ riêng ``không có dấu hiệu'' và ``chưa biết/chưa khai báo'', thay vì âm thầm coi mọi trường thiếu là âm.
+\paragraph{Ví dụ minh họa, không phải mẫu thực nghiệm.} Với vector tự soạn $(0,0,0,0,0)$, thay vào hàm cho $\operatorname{sigmoid}(-1.0580446217)\simeq0.2577$. Đổi riêng cờ đầu thành một cho logit $-1.0580446217+1.1087792041$ và điểm khoảng 0.5127; đổi sang bất kỳ cờ đơn nào khác vẫn cho cùng kết quả. Ví dụ chỉ giải thích đại số từ hệ số đã lưu. Điểm 0.5127 không có nghĩa xác suất người đó nguy kịch là 51.27\%; trạng thái toàn số không cũng có thể phản ánh người dùng thiếu thông tin. Khi thiết kế lại biểu mẫu hoặc adapter, cần giữ riêng ``không có dấu hiệu'' và ``chưa biết/chưa khai báo'', thay vì âm thầm coi mọi trường thiếu là âm.
 
 Trong ứng dụng, Logistic Regression tính điểm $E_i^{\mathrm{LR}}$ từ các dấu hiệu khẩn cấp được người dùng lựa chọn và gửi đến máy chủ trong trường \texttt{E\_i}. Backend lưu payload gốc trong SQLite, nhưng adapter hiện hành chỉ đọc \texttt{urgency}; nếu thiếu trường này, adapter dùng từ khóa trong mô tả để tạo \texttt{ReportV2.E}. Adapter chưa đọc \texttt{E\_i}. Vì vậy, nối điểm LR vào đầu vào khẩn cấp của lõi mới là thiết kế dự kiến, chưa phải đường tích hợp đã hoạt động. Mô hình LR không phân tích trực tiếp văn bản tự do.
 
@@ -27,20 +27,20 @@ Trong ứng dụng, Logistic Regression tính điểm $E_i^{\mathrm{LR}}$ từ c
 Hash byte của CSV LR hiện tại khác hash trong JSON mô hình; tái dựng CRLF trong bộ nhớ khớp hash lịch sử. Không thay CSV hoặc manifest để xóa sai lệch này. Kiểm tra đại số trên bảng hiện tại xác nhận OR/fidelity và tính tương đương theo số cờ; chưa xác nhận nguyên byte dữ liệu tại lần huấn luyện lịch sử.
 
 \subsection{Biểu diễn báo cáo và điều kiện tiếp nhận}
-Bản thảo nghiên cứu định nghĩa
+Điểm chất lượng được tính theo công thức
 \begin{equation}
  r_i=(L_i,T_i,F_i,E_i,N_i,V_i,Q_i),
  \label{eq:report-tuple}
 \end{equation}
 trong đó $L_i$ là vị trí GPS, $T_i$ là thời gian báo cáo quan sát, $F_i,E_i\in[0,1]$ là bằng chứng ngập và khẩn cấp, $N_i\geq0$ là số người được khai báo, $V_i\geq0$ là bằng chứng yếu thế và $Q_i$ là heuristic confidence/provenance. Ảnh hiện diện, loại nguồn và các cờ thiếu còn được dùng để xây fingerprint và confidence, nhưng không phải nhãn sự kiện.
 
-Điều kiện vào đồ thị là $a_i=\mathbf{1}\{L_i,T_i\text{ được quan sát}\}$. Nếu $a_i=0$, báo cáo chuyển tới hàng xem xét. Việc chuyển hàng này giữ khả năng xử lý của con người thay vì tạo cạnh bằng một khoảng cách không xác định. Artifact RQ1 hiện tại có đầy đủ vị trí, thời gian và hai trường ngữ cảnh; nhánh thiếu dữ liệu là thiết kế và kiểm tra đơn vị, chưa có thực nghiệm thiếu dữ liệu trên chính bộ benchmark đó.
+Điều kiện vào đồ thị là $a_i=\mathbf{1}\{L_i,T_i\text{ được quan sát}\}$. Nếu $a_i=0$, báo cáo chuyển tới hàng xem xét. Việc chuyển hàng này giữ khả năng xử lý của con người thay vì tạo cạnh bằng một khoảng cách không xác định. Dữ liệu RQ1 có đầy đủ vị trí, thời gian và hai trường ngữ cảnh. Nhánh xử lý thiếu dữ liệu được kiểm tra ở mức đơn vị.
 
 \subsection{Confidence từ dữ liệu quan sát}
 Confidence dùng cho xếp hạng được tính bởi
 \begin{equation}
- Q_i=\operatorname{sigmoid}\!\left(-0{,}2+1{,}4\,\mathbf{1}\{\text{có ảnh}_i\}
-               +0{,}9\log(1+n_i^{\mathrm{corrob}})\right).
+ Q_i=\operatorname{sigmoid}\!\left(-0.2+1.4\,\mathbf{1}\{\text{có ảnh}_i\}
+               +0.9\log(1+n_i^{\mathrm{corrob}})\right).
  \label{eq:confidence-report}
 \end{equation}
 $n_i^{\mathrm{corrob}}$ là số payload quan sát khác nhau củng cố lân cận, đếm theo định danh nội dung. Bản sao nguyên vẹn cùng payload không tự tạo thêm củng cố. Tuy nhiên, nhiều payload khác nhau được phối hợp có thể làm tăng confidence; cơ chế không chứng minh nguồn tin thật hoặc nguồn độc lập. Cách gom bản sao thành họ bằng chứng được định nghĩa ở Mục~\ref{sec:02-evidence-family}.
@@ -73,9 +73,9 @@ Dạng tích dùng không gian như cổng: dù thời gian và ngữ cảnh ph�
 \subsection{Làm thưa đồ thị và phát hiện cộng đồng}
 Pipeline tính ma trận cặp đủ điều kiện, xác định ngưỡng $\theta$ bằng quantile $q$ trên trọng số khác không, bỏ cạnh có $w\leq\theta$, chọn top-$K$ láng giềng còn lại theo từng đầu mút, rồi đối xứng bằng hợp các cạnh có hướng. Louvain hoặc Leiden được chạy trên đồ thị cuối với resolution đã khóa.
 
-Top-$K$ ở mỗi đầu mút không bảo đảm bậc vô hướng tối đa bằng $K$, vì một nút có thể được nhiều nút khác chọn. Thêm bản sao còn làm đổi phân bố trọng số dùng tính quantile và tập cạnh cạnh tranh, nên cần kiểm tra riêng tính ổn định của phân cụm.
+Chọn top-$K$ ở mỗi đầu mút không bảo đảm bậc vô hướng tối đa bằng $K$, vì một nút có thể được nhiều nút khác chọn. Thêm bản sao còn làm đổi phân bố trọng số dùng tính quantile và tập cạnh cạnh tranh, nên cần kiểm tra riêng tính ổn định của phân cụm.
 
-Bảng~\ref{tab:cluster-params} ghi các tham số của cấu hình Product được chọn ở RQ1 và các hằng số của điểm ưu tiên. Cấu hình Additive chọn $\alpha=1$ và $q=0{,}95$ cùng các tham số còn lại hiệu chỉnh riêng. Hai cấu hình được hiệu chỉnh độc lập nên phép so sánh chính là giữa hai pipeline được chọn, không phải tác động nhân quả của chỉ riêng phép tích hay phép cộng.
+Bảng~\ref{tab:cluster-params} ghi các tham số của cấu hình Product được chọn ở RQ1 và các hằng số của điểm ưu tiên. Cấu hình Additive chọn $\alpha=1$ và $q=0.95$ cùng các tham số còn lại hiệu chỉnh riêng. Hai cấu hình được hiệu chỉnh độc lập nên phép so sánh chính là giữa hai pipeline được chọn, không phải tác động nhân quả của chỉ riêng phép tích hay phép cộng.
 
 \begin{table}[htbp]\centering\small
 \caption{Tham số của cấu hình Product (RQ1) và điểm ưu tiên}\label{tab:cluster-params}
@@ -83,13 +83,13 @@ Bảng~\ref{tab:cluster-params} ghi các tham số của cấu hình Product đ�
 \toprule Tham số & Ký hiệu & Giá trị \\\midrule
 Thang khoảng cách của cổng & $\sigma$ & 700 m \\
 Thang thời gian & $\tau_t$ & 60 phút \\
-Thang chênh lệch ngập, khẩn cấp & $\tau_F,\tau_E$ & 0,25; 0,35 \\
-Trọng số thời gian, ngữ cảnh & $\beta,\gamma$ & 0,5; 0,5 \\
-Quantile ngưỡng cạnh & $q$ & 0,90 \\
+Thang chênh lệch ngập, khẩn cấp & $\tau_F,\tau_E$ & 0.25; 0.35 \\
+Trọng số thời gian, ngữ cảnh & $\beta,\gamma$ & 0.5; 0.5 \\
+Quantile ngưỡng cạnh & $q$ & 0.90 \\
 Số láng giềng giữ lại & $K$ & 8 \\
-Resolution của Louvain/Leiden & --- & 1,2 \\
-Hệ số của $Q_i$ & --- & $-0{,}2$; $1{,}4$; $0{,}9$ (Công thức~\ref{eq:confidence-report}) \\
-Trọng số điểm ưu tiên & $\omega_E,\omega_F,\omega_N$ & 0,34; 0,33; 0,33 \\
+Resolution của Louvain/Leiden & --- & 1.2 \\
+Hệ số của $Q_i$ & --- & $-0.2$; $1.4$; $0.9$ (Công thức~\ref{eq:confidence-report}) \\
+Trọng số điểm ưu tiên & $\omega_E,\omega_F,\omega_N$ & 0.34; 0.33; 0.33 \\
 Hệ số cực đại, thang yếu thế & $\mu,\ s$ & 2; 10 \\
 Mốc số người, trần yếu thế & $N_{\mathrm{ref}},\ V_{\mathrm{cap}}$ & 500; 50 \\
 \bottomrule\end{tabular}
@@ -151,7 +151,7 @@ Sao chép làm đầu vào tăng khoảng $m$ lần thì số cặp trước là
 Khử transport copy trước khi tạo đồ thị là một hướng giảm số nút lặp, nhưng cần giữ lineage để evaluator vẫn đánh giá trên đơn vị báo cáo gốc theo protocol. Nếu tự bỏ các hàng trùng rồi đổi mẫu số ARI, phép so sánh trước và sau sẽ đổi cả thuật toán lẫn bài toán đánh giá. Tương tự, chỉ giữ gần trùng bằng envelope có thể gộp quan sát độc lập; cần kiểm tra cả sai gộp và sai tách khi thử hướng này.
 
 \subsection{Họ bằng chứng và tổng hợp có chặn}\label{sec:02-evidence-family}
-Adapter hiệu chỉnh ngày 10/11/2026 gom bản sao cùng trường mô hình và nội dung trước quantile/top-$K$, giữ ánh xạ về toàn bộ ID gốc. Kiểm hồi quy ở Mục~\ref{sec:software-revision-checks}; số liệu RQ lịch sử giữ nguyên.
+Adapter gom bản sao theo nội dung và trường quan sát trước bước làm thưa đồ thị, đồng thời lưu ánh xạ đến các ID gốc. Mục~\ref{sec:software-revision-checks} trình bày các phép kiểm hồi quy.
 Trong cụm dự đoán thứ $k$, bản sao exact được nhận diện bằng fingerprint chuẩn tắc; bản gần trùng được liên kết bằng thành phần liên thông trong envelope quan sát. Mỗi nhóm bản sao như vậy là một \emph{họ bằng chứng}. Phương pháp gần trùng có tính bắc cầu, không phải complete linkage. Ký hiệu $\mathcal F_k$ là tập họ bằng chứng trong cụm $k$. Đặt $\widetilde N_i=\min(N_i,N_{\mathrm{ref}})$ và $\widetilde V_i=\min(V_i,V_{\mathrm{cap}})$.
 \begin{align}
  \bar E_k&=\frac{\sum_{g\in\mathcal F_k}\max_{i\in g}Q_iE_i}

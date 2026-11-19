@@ -33,7 +33,7 @@ Lớp đa số & Nhãn cố định theo tần suất train \\
 \end{table}
 
 \subsection{Đánh giá camera và Android dự kiến}\label{sec:camera-evaluation-plan}
-Kế hoạch này chưa thực hiện. Tập camera phải độc lập với dữ liệu chọn model, nhóm theo cảnh/sự kiện và kiểm lại nhãn khi dấu hiệu bị che. Bảng~\ref{tab:camera-scenarios-plan} nêu các điều kiện; mức biến đổi và số lượt đo được khóa trước test.
+Tập camera phải độc lập với dữ liệu chọn model, nhóm theo cảnh/sự kiện và kiểm lại nhãn khi dấu hiệu bị che. Bảng~\ref{tab:camera-scenarios-plan} nêu các điều kiện; mức biến đổi và số lượt đo được khóa trước test.
 
 \begin{table}[htbp]\centering
 \caption{Điều kiện camera/Android cho lần đánh giá tiếp theo}\label{tab:camera-scenarios-plan}
@@ -77,7 +77,7 @@ F1 theo cặp dùng cặp báo cáo làm đơn vị: TP là cặp cùng sự ki�
 \operatorname{Rec}_{\mathrm{pair}}=\frac{\mathrm{TP}}{\mathrm{TP}+\mathrm{FN}},\quad
 \operatorname{F1}_{\mathrm{pair}}=\frac{2\mathrm{TP}}{2\mathrm{TP}+\mathrm{FP}+\mathrm{FN}}.
 \end{equation}
-Đây là F1 của quan hệ cặp, khác macro-F1 bốn lớp ảnh. Một sự kiện có nhiều báo cáo tạo nhiều cặp hơn, nên phải giữ định nghĩa mẫu và cách đánh giá trên báo cáo gốc khi thay multiplicity.
+Đây là F1 của quan hệ cặp, khác macro-F1 bốn lớp ảnh. Một sự kiện có nhiều báo cáo tạo nhiều cặp hơn, nên phải giữ định nghĩa mẫu và đơn vị đánh giá khi thay đổi số bản sao.
 
 \subsection{Thước đo xếp hạng}
 RQ2 đánh giá thứ tự cụm theo ba nhóm thước đo. Về phù hợp với mục tiêu, NDCG@5, Spearman và overlap top-5 so sánh thứ tự dự đoán với lợi ích do evaluator sinh. Về độ bền, drift điểm là độ thay đổi tuyệt đối đã chuẩn hóa giữa điểm sau perturbation và điểm nền; drift thứ hạng là thay đổi vị trí trung bình trên danh sách chuẩn hóa; churn là thay đổi thành viên top-5. Drift và churn không đo sự đúng với lợi ích: một danh sách sai nhưng không đổi có drift thấp và churn bằng không. Vì vậy phải xem đồng thời phù hợp và độ bền.
@@ -95,15 +95,15 @@ RQ3 tạo lịch từ cụm dự đoán và điểm ưu tiên, sau đó evaluato
 ``Cải thiện'' trong bảng ghép cặp được tính theo hướng tốt của từng thước đo. Khi harm thấp hơn là tốt hơn, $\Delta$ bằng harm đối chứng trừ harm candidate; khi tỷ lệ phục vụ cao hơn là tốt hơn, hướng trừ đổi lại. CSV còn giữ cột candidate-minus-comparator, nên cần xem hướng của thước đo trước khi dùng dấu. Chênh lệch tỷ lệ được báo bằng điểm phần trăm để tránh nhầm với phần trăm thay đổi tương đối.
 
 \subsection{Suy luận thống kê}
-Đối với pruning ảnh, McNemar exact dùng số ảnh chuyển đúng$\to$sai và sai$\to$đúng sau khi ghép cùng ID test. Hiệu macro-F1 sau trừ trước có CI percentile từ 2.000 bootstrap draw theo nhóm split; CI chưa hiệu chỉnh, còn Holm giữ đúng họ tương phản của từng artifact. Các nhóm này chưa được xác nhận độc lập theo nguồn/sự kiện. Kiểm định thay đổi đúng/sai và CI macro-F1 xét hai đại lượng khác nhau; không suy tương đương từ $p>0{,}05$. Kết quả được trình bày tại Mục~\ref{sec:local-image-update}.
+Đối với pruning ảnh, McNemar exact dùng số ảnh chuyển đúng$\to$sai và sai$\to$đúng sau khi ghép cùng ID test. Hiệu macro-F1 sau trừ trước có CI percentile từ 2\,000 bootstrap draw theo nhóm split; CI chưa hiệu chỉnh, còn Holm giữ đúng họ tương phản của từng artifact. Kiểm định thay đổi đúng/sai và CI macro-F1 xét hai đại lượng khác nhau; không suy tương đương từ $p>0.05$. Kết quả được trình bày tại Mục~\ref{sec:local-image-update}.
 
-Với mỗi seed, hai phương pháp được đánh giá trên cùng dữ liệu để tạo hiệu ghép cặp. Bootstrap lấy mẫu lại theo run hoặc seed thay vì theo từng báo cáo có tương quan. RQ1 dùng 10.000 resample cho so sánh chính; RQ2 và RQ3 dùng 5.000. Kiểm định Wilcoxon và hiệu chỉnh Holm theo các họ giả thuyết đã xuất giúp kiểm soát việc xét nhiều chỉ số và đối chứng.
+Với mỗi seed, hai phương pháp được đánh giá trên cùng dữ liệu để tạo hiệu ghép cặp. Bootstrap lấy mẫu lại theo run hoặc seed thay vì theo từng báo cáo có tương quan. RQ1 dùng 10\,000 resample cho so sánh chính; RQ2 và RQ3 dùng 5\,000. Kiểm định Wilcoxon và hiệu chỉnh Holm theo các họ giả thuyết đã xuất giúp kiểm soát việc xét nhiều chỉ số và đối chứng.
 
 Trong RQ3, ba điều kiện nguồn lực thuộc cùng một seed được lấy trung bình trước, giữ 40 cặp seed. Bảng cũ có $40\times3=120$ hàng điều kiện chỉ phục vụ chẩn đoán; coi tất cả là mẫu độc lập sẽ sai đơn vị suy luận. Khoảng tin cậy bootstrap chưa hiệu chỉnh và kiểm định Wilcoxon có Holm là hai thủ tục khác nhau, nên một CI không chứa không không tự cho phép bỏ qua kết luận của kiểm định đã hiệu chỉnh.
 
 Các phép kiểm tra stress RQ1 báo cáo thay đổi trong từng phương pháp so với chính đối chứng của nó; chúng không phải kiểm định ưu thế giữa các phương pháp. Giữ các ranh giới này giúp trình bày đầy đủ kết quả âm và tránh diễn giải chọn lọc.
 
-\paragraph{Phạm vi kiểm chứng bổ sung.} Phần tái kiểm RQ chỉ tính lại thống kê từ bảng CSV và checkpoint đã lưu, không chạy lại phân cụm, generator hoặc huấn luyện. RQ1 stress primary và replication được kiểm riêng, gồm 300 hàng hiệu ứng mỗi bundle, với 288 khoảng tin cậy bootstrap được tính lại và 12 hàng thiếu chỉ số được kiểm tra giữ trống; không gộp thành 80 run độc lập. Các bootstrap stress dùng 5.000 mẫu với seed suy từ protocol theo method/scenario/metric. Một CSV cơ sở RQ1 hiện thiếu newline cuối so với commit gốc, nhưng 400 bản ghi và mọi trường giống nhau; sai lệch byte được giữ, không gọi toàn bộ verifier lịch sử đã đạt. RQ3 replay dùng NumPy 2.5.1, pandas 3.0.3 và SciPy 1.18.0; RQ2 có kiểm bổ sung bằng đúng phiên bản gốc. Sai lệch $p$ RQ2 còn lại được nêu tại phần kết quả, không sửa số gốc để làm kiểm tra đạt.
+\paragraph{Phạm vi kiểm chứng bổ sung.} Phần tái kiểm RQ chỉ tính lại thống kê từ bảng CSV và checkpoint đã lưu, không chạy lại phân cụm, generator hoặc huấn luyện. RQ1 stress primary và replication được kiểm riêng, gồm 300 hàng hiệu ứng mỗi bundle, với 288 khoảng tin cậy bootstrap được tính lại và 12 hàng thiếu chỉ số được kiểm tra giữ trống; không gộp thành 80 run độc lập. Các bootstrap stress dùng 5\,000 mẫu với seed suy từ protocol theo method/scenario/metric. Một CSV cơ sở RQ1 hiện thiếu newline cuối so với commit gốc, nhưng 400 bản ghi và mọi trường giống nhau; sai lệch byte được giữ, không gọi toàn bộ verifier lịch sử đã đạt. RQ3 replay dùng NumPy 2.5.1, pandas 3.0.3 và SciPy 1.18.0; RQ2 có kiểm bổ sung bằng đúng phiên bản gốc. Sai lệch $p$ RQ2 còn lại được nêu tại phần kết quả.
 
 \subsection{Quy trình xử lý và kiểm chứng kết quả}\label{sec:02-reproducibility}
 Quy trình chỉ nạp trường quan sát, kiểm miền số, thời gian và tọa độ; báo cáo thiếu vị trí hoặc thời gian vào hàng xem xét. Với báo cáo đủ trường, tính định danh payload, số củng cố, $Q_i$, trọng số cạnh, ngưỡng quantile và top-$K$, rồi phát hiện cộng đồng. Từng cụm được gom họ bằng chứng để tính các tổng hợp ở Công thức~\ref{eq:aggregate-e}--\ref{eq:aggregate-v} và điểm $P_k$. Sau khi lưu đầu ra/cấu hình, bộ đánh giá mới nối nhãn để tính chỉ số. Hàng xem xét được giữ trong đầu ra để phản ánh khối lượng cần con người xử lý.

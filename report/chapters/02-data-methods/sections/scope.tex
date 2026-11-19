@@ -1,9 +1,9 @@
 \section{Phạm vi của phương pháp}\label{sec:02-scope}
-RQ1--RQ3 đánh giá hành vi trên dữ liệu bán tổng hợp hoặc tổng hợp, chưa đo hiệu quả cứu hộ thực địa. Bộ ảnh gồm ảnh nhóm tự chụp và ảnh nhóm thu thập từ web theo xác nhận bổ sung ngày 10/11/2026; hiện chưa có ánh xạ đầy đủ nguồn/sự kiện theo từng ID hoặc chỉ số đồng thuận nhãn. Các hằng số của $Q_i$ và điểm ưu tiên vẫn là heuristic cần xác nhận nghiệp vụ. Các giới hạn chung được tập hợp tại Mục~\ref{sec:04-evaluation-limitations}.
+RQ1--RQ3 đánh giá thuật toán trên dữ liệu bán tổng hợp và tổng hợp. Các hệ số của $Q_i$ và điểm ưu tiên là tham số nghiên cứu dùng trong các kịch bản mô phỏng.
 
 Logistic Regression năm cờ trong bản mã được đối chiếu học nhãn OR tự sinh, không phải mô hình xử lý văn bản tự do hoặc xác suất nguy kịch đã hiệu chuẩn. Hai pilot riêng đã học classifier văn bản, ảnh và fusion cho informative tiếng Anh hoặc request trên bản dịch/nhãn AI. DistilBERT frozen và fine-tuning được đánh giá riêng; xác suất request không được đồng nhất với khẩn cấp hoặc ưu tiên điều phối.
 
-\subsection{Tình trạng tích hợp di động}\label{sec:mobile-integration-status}
-\MobileIntegrationVI{} Việc cập nhật mobile thuộc nhóm phát triển riêng; báo cáo ghi nhận thông tin này theo xác nhận của nhóm, phân biệt thông tin triển khai với kết quả đo offline. Các metric pilot ở Mục~\ref{sec:vi-silver-pilot} và Mục~\ref{sec:multimodal-pilot} được giữ là kết quả offline, không gán thành chất lượng của bản APK.
+\subsection{Phạm vi thực hiện so với thuyết minh}\label{sec:mobile-integration-status}
+Ứng dụng Android tích hợp nhận diện bốn mức ngập từ ảnh và tính điểm từ các trường có cấu trúc. Hệ thống tiếp nhận, đồng bộ báo cáo và hiển thị sự kiện trên bản đồ điều phối. Nhánh văn bản tiếng Việt và kết hợp ảnh--văn bản được đánh giá ngoại tuyến trong hai thử nghiệm ở Mục~\ref{sec:vi-silver-pilot} và Mục~\ref{sec:multimodal-pilot}.
 
-Ablation ảnh/văn bản/cả hai đã thực hiện trong từng pilot với target và ID test chung. Nhãn silver xuất phát từ câu nguồn; bản dịch và nhãn đã được nhóm kiểm tra. Xác nhận trên corpus tiếng Việt gốc, nhãn span, mức khẩn cấp và các tình huống thiếu/mâu thuẫn nguồn vẫn cần bằng chứng riêng. Tình trạng thực hiện từng nội dung được đối chiếu tại Mục~\ref{sec:proposal-comparison}.
+Trong mỗi thử nghiệm, mô hình chỉ dùng ảnh, chỉ dùng văn bản và kết hợp hai nguồn được đánh giá trên cùng tập kiểm thử. Các phép đo truyền tải dùng mạng giả lập, còn phân cụm, xếp hạng và điều phối được đánh giá bằng kịch bản mô phỏng. Bảng~\ref{tab:proposal-map} đối chiếu các hạng mục thực hiện theo thuyết minh.

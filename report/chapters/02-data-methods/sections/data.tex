@@ -6,11 +6,11 @@ Báo cáo dùng năm nhóm dữ liệu có mục đích khác nhau (Bảng~\ref{
 \caption{Năm nhóm dữ liệu, bản chất và phạm vi sử dụng}\label{tab:data-sources}
 \begin{tabular}{P{.19\textwidth}P{.17\textwidth}P{.23\textwidth}P{.28\textwidth}}
 \toprule Nhóm & Quy mô & Bản chất & Dùng cho \\\midrule
-Bộ ảnh mức ngập & \ImageTotal{} ảnh & Ảnh do nhóm thu thập, gán nhãn thủ công & Huấn luyện và đánh giá phân loại ảnh \\
+Bộ ảnh mức ngập & \ImageTotal{} ảnh & Ảnh đô thị từ bộ dữ liệu công khai, báo chí và ảnh tự chụp & Huấn luyện và đánh giá phân loại ảnh \\
 Bảng trạng thái khẩn cấp & 32 trạng thái & Bảng tham chiếu tổng hợp, liệt kê đầy đủ & Mô hình Logistic Regression \\
-Generator 3.0 & 80 run, 26.288 báo cáo & Bán tổng hợp, neo vào bối cảnh Copernicus EMSR848 & RQ1 \\
-Candidate 4.1 & 80 tập, 30.229 báo cáo & Tổng hợp & RQ2 và RQ3 \\
-CrisisMMD pilot & 4.261 cặp sau lọc & Bài đăng ảnh--văn bản công khai; nhãn informative & Text, ảnh và fusion trên nhiệm vụ riêng \\
+Generator 3.0 & 80 run, 26\,288 báo cáo & Bán tổng hợp, neo vào bối cảnh Copernicus EMSR848 & RQ1 \\
+Candidate 4.1 & 80 tập, 30\,229 báo cáo & Tổng hợp & RQ2 và RQ3 \\
+CrisisMMD pilot & 4\,261 cặp sau lọc & Bài đăng ảnh--văn bản công khai; nhãn informative & Text, ảnh và fusion trên nhiệm vụ riêng \\
 \bottomrule\end{tabular}
 \end{table}
 
@@ -20,9 +20,9 @@ Hai bộ báo cáo mô phỏng không đại diện cho báo cáo cứu hộ th�
 Mô hình dùng \ImageTotal{} ảnh sạch phân bố vào bốn mức. Thứ tự lớp được giữ thống nhất từ huấn luyện, xuất mô hình đến xử lý trong ứng dụng: \texttt{low}, \texttt{medium}, \texttt{high}, \texttt{non\_flood}.
 \input{generated/tables/image-split}
 
-\paragraph{Nguồn gốc.} Theo xác nhận bổ sung của nhóm ngày 10/11/2026, bộ ảnh gồm cả ảnh nhóm tự chụp và ảnh nhóm tự thu thập từ web. Đây là thông tin ở mức bộ dữ liệu; chưa có ánh xạ đầy đủ từ từng ID tới loại nguồn, sự kiện, thời điểm và căn cứ sử dụng. Vì vậy không gọi toàn bộ tập là ảnh web, cũng không coi các ảnh tự chụp trong tập hiện có là một test camera thực địa độc lập. Không suy giấy phép của ảnh web từ việc nhóm đã tải hoặc lưu ảnh.
+\paragraph{Thu thập ảnh.} Bộ dữ liệu sử dụng ảnh được chọn từ AlleyFloodNet~\citep{lee2025alleyfloodnet} và FloodNet~\citep{rahnemoonfar2021floodnet}. Sau khi lọc theo bối cảnh đô thị, số ảnh phù hợp từ hai nguồn này còn ít. Đề tài bổ sung ảnh từ các trang báo chính thống của Việt Nam và ảnh do nhóm tự chụp. Ảnh báo chí chỉ dùng trong nội bộ nghiên cứu và không được phát hành công khai kèm bộ dữ liệu. Hồ sơ theo từng ảnh còn thiếu thông tin về nguồn, sự kiện, thời điểm và quyền sử dụng.
 
-\paragraph{Tiêu chí gán nhãn.} Nhãn theo hướng dẫn gán nhãn trong notebook huấn luyện (Bảng~\ref{tab:label-criteria}), dùng người và phương tiện trong ảnh làm mốc tham chiếu. Nhãn là chỉ dấu mức ngập hỗ trợ xếp hạng, không phải số đo độ sâu. Tài liệu của bộ ảnh không ghi số người gán nhãn hay độ đồng thuận giữa người gán, nên nhãn được xem là nhãn của nhóm theo hướng dẫn này. Ranh giới \texttt{low}/\texttt{medium} và \texttt{medium}/\texttt{high} phụ thuộc mốc tham chiếu nhìn thấy trong ảnh; đây là hai cặp lớp dễ nhầm nhất.
+\paragraph{Tiêu chí gán nhãn.} Hai người gán nhãn từng ảnh theo bốn mức ngập rồi đối chiếu kết quả để thống nhất nhãn cuối cùng. Bảng~\ref{tab:label-criteria} trình bày cách dùng người và phương tiện trong ảnh làm mốc tham chiếu. Nhãn biểu thị mức ngập phục vụ xếp hạng. Chưa có chỉ số định lượng về độ đồng thuận trước khi đối chiếu. Ranh giới giữa \texttt{low} và \texttt{medium} hoặc giữa \texttt{medium} và \texttt{high} phụ thuộc vào mốc nhìn thấy trong ảnh, nên đây là hai cặp lớp dễ nhầm nhất.
 
 \begin{table}[htbp]\centering\small
 \caption{Tiêu chí gán nhãn bốn mức ngập}\label{tab:label-criteria}
@@ -35,7 +35,7 @@ Mô hình dùng \ImageTotal{} ảnh sạch phân bố vào bốn mức. Thứ t�
 \bottomrule\end{tabular}
 \end{table}
 
-\paragraph{Đặc điểm tệp gốc.} Audit header trên toàn bộ \ImageTotal{} ảnh cho thấy JPEG 1.521, PNG 24, WEBP 152 và AVIF 5; mode RGB 1.687, RGBA 14 và L 1. Đây là format giải mã từ header, không suy từ đuôi tên. Chiều rộng min/trung vị/max là 168/512/5.472 pixel; chiều cao 100/384/3.648 pixel; dung lượng 2.481/41.564/2.900.796 byte. Bảng~\ref{tab:image-profile} tách theo lớp; hồ sơ tái lập giữ thêm phân vị và bảng chéo theo split. Các số này mô tả ảnh gốc, không thay kích thước tensor $256\times256$ hoặc chứng minh độ bền với ảnh tối, mờ.
+\paragraph{Đặc điểm tệp gốc.} Audit header trên toàn bộ \ImageTotal{} ảnh cho thấy JPEG 1\,521, PNG 24, WEBP 152 và AVIF 5; mode RGB 1\,687, RGBA 14 và L 1. Đây là format giải mã từ header, không suy từ đuôi tên. Chiều rộng min/trung vị/max là 168/512/5\,472 pixel; chiều cao 100/384/3\,648 pixel; dung lượng 2\,481/41\,564/2\,900\,796 byte. Bảng~\ref{tab:image-profile} tách theo lớp; hồ sơ tái lập giữ thêm phân vị và bảng chéo theo split. Các số này mô tả ảnh gốc, không thay kích thước tensor $256\times256$ hoặc chứng minh độ bền với ảnh tối, mờ.
 \input{generated/tables/image-profile}
 
 JPEG chiếm phần lớn bộ ảnh, còn PNG, WEBP và AVIF đòi hỏi bộ giải mã hỗ trợ đúng định dạng thực. Đuôi tên giống nhau không bảo đảm định dạng hoặc cách giải mã giống nhau. Mode RGBA có kênh trong suốt, còn mode L chỉ có mức xám; bước chuyển RGB tạo đầu vào ba kênh thống nhất nhưng không bổ sung thông tin màu vốn không có. Hướng EXIF cần được áp trước khi resize để mốc người và phương tiện không bị xoay sai. Audit header không cho biết ảnh đã trải qua bao nhiêu lần nén, có bị sửa nội dung hay còn nhìn rõ mốc ngập hay không.
@@ -47,28 +47,28 @@ Trước khi huấn luyện, notebook loại ảnh không đọc được và c�
 
 Cách làm này giảm nguy cơ rò rỉ do ảnh trùng hoặc gần trùng, nhưng không chứng minh các tập độc lập hoàn toàn về nguồn hay sự kiện: hai ảnh cùng một trận ngập từ hai nguồn có thể rơi vào hai tập khác nhau. Bộ xuất kết quả đối chiếu đường dẫn và MD5 giữa bảng chia với các tệp ảnh hiện có (Mục~\ref{sec:04-evaluation-setup}).
 
-Đối chiếu bổ sung xác nhận 1.702 bản ghi sau làm sạch của seed 1024 khớp tám trường định danh, nhãn, mã băm và nhóm với bảng chia hiện tại; toàn bộ trường nhóm nguồn còn trống. Metadata checkpoint ghi seed 1024 và đường dẫn bảng chia dùng chung trong kho huấn luyện, nhưng chưa khôi phục được checksum của bảng chia tại thời điểm train. Sự khớp của bản ghi hiện có và đường dẫn lịch sử chưa chứng minh bytes của split đã dùng khi huấn luyện; nguồn ảnh, giấy phép, độ đồng thuận gán nhãn và xác nhận chuyên gia vẫn chưa có hồ sơ bổ sung.
+Đối chiếu bổ sung xác nhận 1\,702 bản ghi sau làm sạch của seed 1024 khớp tám trường định danh, nhãn, mã băm và nhóm với bảng chia hiện tại; toàn bộ trường nhóm nguồn còn trống. Metadata checkpoint ghi seed 1024 và đường dẫn bảng chia dùng chung trong kho huấn luyện, nhưng chưa khôi phục được checksum của bảng chia tại thời điểm train.
 
 \subsection{Quản lý và hoàn thiện dữ liệu}\label{sec:data-process}
 Quy trình gồm thu thập, sàng lọc, làm sạch, gán nhãn, chia tập và lưu phiên bản. Hồ sơ bổ sung cần gắn ID với nguồn/sự kiện và căn cứ sử dụng; giữ nhãn độc lập trước phân xử, báo độ đồng thuận và lưu checksum bảng chia. Khi đổi nhãn hoặc bổ sung ảnh, tạo phiên dữ liệu mới và giữ lịch sử. Các khoảng trống hiện có được tập hợp tại Mục~\ref{sec:04-evaluation-limitations}.
 
 \subsection{Dữ liệu khẩn cấp có cấu trúc}
-Bảng tham chiếu liệt kê toàn bộ $2^5=32$ tổ hợp của năm cờ Boolean do nhóm chọn: không phản ứng (\texttt{unresponsive}), khó thở hoặc tím tái (\texttt{respiratory\_\allowbreak{}distress\_\allowbreak{}or\_\allowbreak{}cyanosis}), chảy máu nhiều (\texttt{heavy\_bleeding}), co giật (\texttt{active\_convulsions}) và chấn thương nguy cơ cao (\texttt{high\_risk\_trauma}). Nhãn dương theo quy tắc OR của nhóm: có ít nhất một cờ thì dương. Do duyệt đủ không gian tổ hợp, bảng có tính tất định và có thể kiểm tra từng dòng.
+Bảng tham chiếu liệt kê toàn bộ $2^5=32$ tổ hợp của năm cờ Boolean: không phản ứng (\texttt{unresponsive}), khó thở hoặc tím tái (\texttt{respiratory\_\allowbreak{}distress\_\allowbreak{}or\_\allowbreak{}cyanosis}), chảy máu nhiều (\texttt{heavy\_bleeding}), co giật (\texttt{active\_convulsions}) và chấn thương nguy cơ cao (\texttt{high\_risk\_trauma}). Nhãn dương theo quy tắc OR: có ít nhất một cờ thì dương. Do duyệt đủ không gian tổ hợp, bảng có tính tất định và có thể kiểm tra từng dòng.
 
 Bảng này phục vụ khảo sát phương pháp ước lượng điểm khẩn cấp $E_i^{\mathrm{LR}}\in[0,1]$; nó không phải dữ liệu lâm sàng và không được dùng để kết luận về hiệu quả y khoa. Cách mô hình dùng bảng được trình bày ở Mục~\ref{sec:02-urgency-lr}.
 
 \subsection{Generator 3.0 cho RQ1}
-Bộ dữ liệu RQ1 gồm 80 run với seed từ 1 đến 80, mỗi run mô phỏng 16 sự kiện thiên tai tiềm ẩn. Tổng cộng 26.288 báo cáo, gồm 17.901 báo cáo thật trong mô phỏng, 3.587 báo cáo trùng lặp và 4.800 báo cáo tin giả có phối hợp. Bối cảnh không gian và mật độ dân cư được neo vào kích hoạt vệ tinh Copernicus EMSR848 kết hợp OpenStreetMap và WorldPop tại Việt Nam \citep{copernicusEMSR848,worldpop2025vietnam}. Đây là dữ liệu bán tổng hợp, không phải báo cáo cứu hộ thực tế.
+Bộ dữ liệu RQ1 gồm 80 run với seed từ 1 đến 80, mỗi run mô phỏng 16 sự kiện thiên tai tiềm ẩn. Tổng cộng 26\,288 báo cáo, gồm 17\,901 báo cáo thật trong mô phỏng, 3\,587 báo cáo trùng lặp và 4\,800 báo cáo tin giả có phối hợp. Bối cảnh không gian và mật độ dân cư được neo vào kích hoạt vệ tinh Copernicus EMSR848 kết hợp OpenStreetMap và WorldPop tại Việt Nam \citep{copernicusEMSR848,worldpop2025vietnam}. Đây là dữ liệu bán tổng hợp, không phải báo cáo cứu hộ thực tế.
 
 Mỗi run gồm năm thành phần tách riêng: dữ liệu đầu vào thuật toán, danh sách báo cáo quan sát được, nhãn thật (ground truth), các sự cố tiềm ẩn và siêu dữ liệu cấu hình. Chỉ tệp đầu vào thuật toán được đưa vào suy luận; nhãn thật được nối sau khi đã lưu dự đoán để đối soát độc lập.
 
 \subsection{Candidate 4.1 cho RQ2 và RQ3}
-Candidate 4.1 là bộ dữ liệu tổng hợp riêng cho độ bền vững của điểm ưu tiên và hệ quả điều phối. Bộ gồm 80 tập với 30.229 báo cáo, mô phỏng các dạng tấn công phối hợp, tin giả và dữ liệu trùng lặp. Mô hình sinh dữ liệu cung cấp thời hạn phục vụ, điều kiện tiếp cận hiện trường và mức tổn thất mô phỏng, đủ để tính lợi ích và harm khi đánh giá điều phối. Vì các đại lượng này do generator quy định, kết quả chỉ nói về sự phù hợp với mục tiêu mô phỏng.
+Candidate 4.1 là bộ dữ liệu tổng hợp riêng cho độ bền vững của điểm ưu tiên và hệ quả điều phối. Bộ gồm 80 tập với 30\,229 báo cáo, mô phỏng các dạng tấn công phối hợp, tin giả và dữ liệu trùng lặp. Mô hình sinh dữ liệu cung cấp thời hạn phục vụ, điều kiện tiếp cận hiện trường và mức tổn thất mô phỏng, đủ để tính lợi ích và harm khi đánh giá điều phối. Vì các đại lượng này do generator quy định, kết quả chỉ nói về sự phù hợp với mục tiêu mô phỏng.
 
 \subsection{CrisisMMD cho pilot ảnh--văn bản}
-Pilot đã sử dụng dữ liệu CrisisMMD \citep{alam2018crisismmd} có nhãn informative thống nhất giữa hai nguồn để huấn luyện các classifier văn bản, ảnh và fusion. Sau lọc trùng xuyên split, giữ 2.971 cặp train, 589 validation và 701 test; test là sự kiện lũ Sri Lanka, validation là Maria, còn train thuộc năm sự kiện khác. Cách chia và ngưỡng được khóa riêng cho pilot. Nguồn mô tả corpus bằng tiếng Anh, nhưng chưa có đánh giá ngôn ngữ từng hàng. Nhãn mô tả tính hữu ích thông tin của bài đăng, không mô tả độ sâu ngập, mức nguy cấp hoặc thứ tự điều phối. Quy trình chọn mẫu và kết quả ở Mục~\ref{sec:multimodal-pilot}; không nhập các cặp này vào Dataset\_Flood hoặc các RQ mô phỏng.
+Pilot đã sử dụng dữ liệu CrisisMMD \citep{alam2018crisismmd} có nhãn informative thống nhất giữa hai nguồn để huấn luyện các classifier văn bản, ảnh và fusion. Sau lọc trùng xuyên split, giữ 2\,971 cặp train, 589 validation và 701 test; test là sự kiện lũ Sri Lanka, validation là Maria, còn train thuộc năm sự kiện khác. Cách chia và ngưỡng được khóa riêng cho pilot. Nhãn mô tả tính hữu ích thông tin của bài đăng, không mô tả độ sâu ngập, mức nguy cấp hoặc thứ tự điều phối. Kết quả pilot ở Mục~\ref{sec:multimodal-pilot}.
 
-\paragraph{Tập con dịch tiếng Việt và nhãn AI.} Đợt pilot ở Mục~\ref{sec:vi-silver-pilot} dùng 300 cặp chọn từ cohort CrisisMMD trên đây, dịch văn bản và gán lại task request bằng AI theo chỉ đạo bổ sung. Giữ riêng bốn ca chưa rõ nghĩa, còn \VISilverTrainN/\VISilverDevN/\VISilverTestN{} cặp theo split sự kiện cũ. Đây là dữ liệu dẫn xuất từ cùng nguồn, không phải nguồn độc lập thứ sáu hoặc corpus người Việt gửi tin; nhãn AI dựa trên câu nguồn. \VietnameseDataReviewVI{}
+\paragraph{Tập con dịch tiếng Việt và nhãn AI.} Đợt pilot ở Mục~\ref{sec:vi-silver-pilot} dùng 300 cặp chọn từ cohort CrisisMMD trên đây, dịch văn bản và gán nhãn request bằng AI. Giữ riêng bốn ca chưa rõ nghĩa, còn \VISilverTrainN/\VISilverDevN/\VISilverTestN{} cặp theo split sự kiện cũ. Đây là dữ liệu dẫn xuất từ cùng nguồn, không phải nguồn độc lập thứ sáu hoặc corpus người Việt gửi tin; nhãn AI dựa trên câu nguồn.
 
 \subsection{Lưu trữ và truy vết}
-Các bảng số liệu và hình định lượng được sinh từ artifact đã lưu bằng script, kèm bản ghi nguồn và mã băm trong hồ sơ provenance. Bảng thiết kế và sơ đồ giải thích được biên soạn trong nguồn LaTeX, phân biệt với kết quả thực nghiệm. Dữ liệu, seed, cấu hình và kết quả của từng lần chạy được giữ cùng nhau để tái lập; quy trình cụ thể ở Mục~\ref{sec:02-reproducibility}.
+Các bảng số liệu và hình định lượng được sinh từ artifact đã lưu bằng script, kèm bản ghi nguồn và mã băm trong hồ sơ provenance. Dữ liệu, seed, cấu hình và kết quả của từng lần chạy được giữ cùng nhau để tái lập; quy trình cụ thể ở Mục~\ref{sec:02-reproducibility}.

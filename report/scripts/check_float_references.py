@@ -41,6 +41,7 @@ def arguments(text, start, count):
 
 
 def normalize(text):
+    text = re.sub(r'\\xpg@aux\s*\{[^{}]*\}\{[^{}]*\}', '', text)
     text = text.replace('\\ignorespaces', '').replace('\\relax', '')
     return re.sub(r'\s+', ' ', text).strip()
 

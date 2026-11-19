@@ -32,12 +32,12 @@ Luồng phối hợp giữa các phân hệ và phản hồi trạng thái đư�
 \input{chapters/03-system/sections/data-models}
 
 \subsection{Dịch vụ phân cụm và hàng xem xét}
-Trong bản mã được đối chiếu, bộ chuyển đổi (adapter) đưa báo cáo lưu trữ về các trường đầu vào thuật toán. Nhãn ngập ánh xạ \texttt{non\_flood}$\mapsto0$, \texttt{low}$\mapsto0{,}33$, \texttt{medium}$\mapsto0{,}66$, \texttt{high}$\mapsto1$; trường \texttt{flood} được dùng nếu có. Điểm LR được lưu trong \texttt{E\_i}, nhưng adapter lấy $E$ từ \texttt{urgency} hoặc từ khóa mô tả. $N$ là số mắc kẹt cộng số bị thương; nếu thiếu trường trực tiếp, $V$ là số nhóm yếu thế được chọn.
+Trong bản mã được đối chiếu, bộ chuyển đổi (adapter) đưa báo cáo lưu trữ về các trường đầu vào thuật toán. Nhãn ngập ánh xạ \texttt{non\_flood}$\mapsto0$, \texttt{low}$\mapsto0.33$, \texttt{medium}$\mapsto0.66$, \texttt{high}$\mapsto1$; trường \texttt{flood} được dùng nếu có. Điểm LR được lưu trong \texttt{E\_i}, nhưng adapter lấy $E$ từ \texttt{urgency} hoặc từ khóa mô tả. $N$ là số mắc kẹt cộng số bị thương; nếu thiếu trường trực tiếp, $V$ là số nhóm yếu thế được chọn.
 
-Các ánh xạ trên dùng công thức và quy tắc kinh nghiệm; trọng số được cấu hình tại backend. Lược đồ đầy đủ ở phần trước là thiết kế đề xuất. Phương pháp fusion ở Mục~\ref{sec:multimodal-design}; tình trạng tích hợp mobile do nhóm khác phụ trách ở Mục~\ref{sec:mobile-integration-status}.
+Các ánh xạ trên dùng công thức và quy tắc kinh nghiệm; trọng số được cấu hình tại backend. Lược đồ đầy đủ ở phần trước là thiết kế đề xuất. Phương pháp fusion ở Mục~\ref{sec:multimodal-design}; phạm vi đánh giá trên di động ở Mục~\ref{sec:mobile-integration-status}.
 
 \subsubsection{Luồng điểm khẩn cấp hiện tại và phương án nối điểm}
-Hình~\ref{fig:urgency-current-proposed} phân biệt đường hiện có và phương án nối điểm bằng nét đứt. Nếu có khóa \texttt{urgency}, adapter chặn số hữu hạn về $[0,1]$; giá trị lỗi hoặc không hữu hạn được trả thành thiếu. Chỉ khi vắng khóa này mới dò từ khóa: mô tả không rỗng, không khớp nhận mặc định 0,4; mô tả rỗng trả thành thiếu. Lỗi giá trị không tự chuyển sang dò từ khóa.
+Hình~\ref{fig:urgency-current-proposed} phân biệt đường hiện có và phương án nối điểm bằng nét đứt. Nếu có khóa \texttt{urgency}, adapter chặn số hữu hạn về $[0,1]$; giá trị lỗi hoặc không hữu hạn được trả thành thiếu. Chỉ khi vắng khóa này mới dò từ khóa: mô tả không rỗng, không khớp nhận mặc định 0.4; mô tả rỗng trả thành thiếu. Lỗi giá trị không tự chuyển sang dò từ khóa.
 
 \begin{figure}[H]\centering
 \begin{tikzpicture}[>=Stealth,node distance=5mm and 7mm,font=\small,
@@ -62,7 +62,7 @@ Hình~\ref{fig:urgency-current-proposed} phân biệt đường hiện có và p
 \label{fig:urgency-current-proposed}
 \end{figure}
 
-Phương án nối điểm giữ riêng LR, urgency và nguồn của từng giá trị. LR đi cùng phiên bản hệ số và trạng thái cờ; cờ chưa chọn có thể là chưa khai báo. Khi các nguồn bất đồng, chính sách xác minh phải được thống nhất trước khi chọn giá trị cho \texttt{ReportV2.E}. Xác suất informative/request có ngữ nghĩa khác điểm khẩn cấp. Sơ đồ chỉ mô tả adapter được đối chiếu; sửa backend ngày 10/11/2026 là khử bản sao trước dựng đồ thị.
+Phương án nối điểm giữ riêng LR, urgency và nguồn của từng giá trị. LR đi cùng phiên bản hệ số và trạng thái cờ; cờ chưa chọn có thể là chưa khai báo. Khi các nguồn bất đồng, chính sách xác minh phải được thống nhất trước khi chọn giá trị cho \texttt{ReportV2.E}. Xác suất informative/request có ngữ nghĩa khác điểm khẩn cấp.
 
 Báo cáo resolved/cancelled được loại khỏi cụm đang hoạt động. Cụm được tính lại khi version dữ liệu liên quan thay đổi; nếu một lần tính kéo dài, dịch vụ có cơ chế cập nhật nền. \texttt{clusterId} có thể đổi giữa lần chạy, còn \texttt{clusterKey} dùng ID nhỏ nhất trong cụm để hỗ trợ giữ lựa chọn trên giao diện. Khóa này cũng có thể đổi khi thành viên thay đổi; các thao tác điều phối cần xác nhận danh sách hiện tại.
 
@@ -73,13 +73,11 @@ Dashboard được phục vụ từ backend hoặc nginx, nạp Leaflet cục b�
 
 Điều phối viên có thể lọc theo trạng thái/cụm, xem chi tiết, gán đội, ghi chú, cập nhật vị trí và chuyển trạng thái. API quản trị hỗ trợ quản lý tài khoản và sao lưu. Nhật ký \texttt{report\_events} ghi actor, nguồn và thời gian thao tác để theo dõi quá trình xử lý. Ứng dụng di động định kỳ đồng bộ trạng thái báo cáo từ máy chủ để hiển thị phản hồi kịp thời cho người dân.
 
-\begin{landscape}
 \subsection{Luồng xử lý dữ liệu và hỗ trợ điều phối}
 Hình~\ref{fig:research-pipeline} tách ba đường: trường quan sát đi vào phân cụm/xếp hạng; báo cáo thiếu vị trí vào hàng xem xét; nhãn đánh giá chỉ nối sau khi lưu dự đoán. Danh sách ưu tiên hỗ trợ điều phối viên xác minh và phân công.
 
 \begin{figure}[H]\centering
-\includegraphics[width=\linewidth,height=\dimexpr\textheight-44mm\relax,keepaspectratio]{research_pipeline_report.pdf}
+\includegraphics[width=\linewidth]{research_pipeline_report.pdf}
 \caption{Ranh giới dữ liệu quan sát, hàng xem xét và luồng đánh giá}
 \label{fig:research-pipeline}
 \end{figure}
-\end{landscape}

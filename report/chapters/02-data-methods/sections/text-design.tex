@@ -1,10 +1,10 @@
 \section{Phân tích văn bản tiếng Việt}\label{sec:text-design}
 \subsection{Nhiệm vụ và dữ liệu}
-Nhánh văn bản nhận diện tin có yêu cầu hỗ trợ thiên tai bằng TF-IDF, DistilBERT frozen và fine-tuning. Dữ liệu gồm các cặp CrisisMMD được dịch sang tiếng Việt và gán nhãn AI. \VietnameseDataReviewVI{} Nguồn gốc bản dịch được giữ trong hồ sơ; kết quả đo trên tập này được trình bày tại Mục~\ref{sec:vi-silver-pilot}.
+Nhánh văn bản nhận diện tin có yêu cầu hỗ trợ thiên tai bằng TF-IDF, DistilBERT frozen và fine-tuning. Thực nghiệm dùng bản dịch tiếng Việt và nhãn AI từ CrisisMMD, trình bày tại Mục~\ref{sec:vi-silver-pilot}.
 
 Nhãn request bao gồm cứu, sơ tán, tiếp tế hoặc hỗ trợ chưa được đáp ứng. Nhãn mô tả nội dung, tách với mức ngập và điểm khẩn cấp. LR năm cờ ở Mục~\ref{sec:02-urgency-lr} xử lý thông tin biểu mẫu; DistilBERT đọc văn bản tự do.
 
-Bảng~\ref{tab:text-contract} tóm tắt đầu vào và đầu ra. Văn bản gốc được giữ để đối chiếu; câu rỗng, phủ định hoặc chưa rõ thời điểm cần được xử lý riêng.
+Bảng~\ref{tab:text-contract} tóm tắt đầu vào và đầu ra. Văn bản gốc được giữ để đối chiếu; câu rỗng hoặc có phủ định cần được xử lý riêng.
 \begin{table}[htbp]\centering
 \caption{Đầu vào và đầu ra nhánh văn bản}\label{tab:text-contract}
 \begin{tabular}{P{.24\textwidth}P{.66\textwidth}}\toprule
@@ -22,7 +22,7 @@ Tiền xử lý chuẩn hóa Unicode và khoảng trắng, giữ dấu, chữ s�
  p_{\mathrm{text}}=\operatorname{softmax}\!\left(W\,\operatorname{Dropout}(h_{\mathrm{text}})+b\right).
  \label{eq:text-proposed}
 \end{equation}
-Nhánh frozen giữ encoder và học LR; nhánh fine-tuning cập nhật encoder cùng đầu hai lớp. Pilot dùng tối đa 128 token, dropout 0,2, batch hiệu dụng 16, AdamW, hai learning rate \(10^{-5}\) và \(2\times10^{-5}\), tối đa năm epoch, patience 2. Learning rate chọn theo macro-F1 validation trung bình ba seed; TF-IDF + LR là đối chứng trên cùng dữ liệu. Chi tiết và kết quả ở Mục~\ref{sec:vi-silver-pilot}.
+Nhánh frozen giữ encoder và học LR; nhánh fine-tuning cập nhật encoder cùng đầu hai lớp. Pilot dùng tối đa 128 token, dropout 0.2, batch hiệu dụng 16, AdamW, hai learning rate \(10^{-5}\) và \(2\times10^{-5}\), tối đa năm epoch, patience 2. Learning rate chọn theo macro-F1 validation trung bình ba seed; TF-IDF + LR là đối chứng trên cùng dữ liệu. Chi tiết và kết quả ở Mục~\ref{sec:vi-silver-pilot}.
 
 \subsection{Sử dụng đầu ra}
 Văn bản bổ sung nhu cầu và tình trạng người bị ảnh hưởng mà ảnh có thể không thể hiện. Đầu ra phân loại hỗ trợ xác minh; điểm request không thay trực tiếp \(E_i\). Trích xuất địa điểm, số người và dấu hiệu là hướng bổ sung, cần nhãn span và đánh giá precision/recall/F1 riêng. Chẳng hạn, “ba người gồm một trẻ nhỏ” có tổng số ba; “chưa ai bị thương” cần giữ thông tin phủ định.

@@ -1,18 +1,18 @@
 \section{Tích hợp đa phương thức}\label{sec:multimodal-design}
 \subsection{Các mức tích hợp}
-Bảng~\ref{tab:fusion-levels} phân biệt tiếp nhận nhiều trường, kết hợp đầu ra và học từ đặc trưng ảnh--văn bản. \MobileIntegrationVI{} Kết quả định lượng trong hai pilot được đo ngoại tuyến.
+Bảng~\ref{tab:fusion-levels} phân biệt tiếp nhận nhiều trường, kết hợp đầu ra và học từ đặc trưng ảnh--văn bản. Kết quả định lượng trong hai pilot được đo ngoại tuyến.
 \begin{table}[htbp]\centering
 \caption{Các mức tích hợp ảnh và văn bản}\label{tab:fusion-levels}
 \begin{tabular}{P{.23\textwidth}P{.36\textwidth}P{.30\textwidth}}\toprule
 Mức & Cách kết hợp & Phần thực hiện \\\midrule
 Trường dữ liệu & Ảnh, mô tả, vị trí và cờ trong một báo cáo & Ánh xạ/heuristic của ứng dụng \\
 Đầu ra & Trung bình xác suất cùng nhiệm vụ & Đối chứng informative/request \\
-Đặc trưng & Nối biểu diễn ảnh--câu, học LR & Fusion trong hai pilot; mobile theo xác nhận nhóm \\
+Đặc trưng & Nối biểu diễn ảnh--câu, học LR & Fusion ngoại tuyến trong hai pilot \\
 \bottomrule\end{tabular}
 \end{table}
 
 \subsection{Kiến trúc fusion}
-Pilot informative dùng TF-IDF 5.345 chiều và MobileNetV3 Small ImageNet frozen 576 chiều. Mỗi block được chuẩn hóa \(z(v)=v/\max(\lVert v\rVert_2,\epsilon)\), rồi nối thành vector 5.921 chiều:
+Pilot informative dùng TF-IDF 5\,345 chiều và MobileNetV3 Small ImageNet frozen 576 chiều. Mỗi block được chuẩn hóa \(z(v)=v/\max(\lVert v\rVert_2,\epsilon)\), rồi nối thành vector 5\,921 chiều:
 \begin{equation}
  u=\frac{1}{\sqrt{2}}[z(v_{\mathrm{text}});z(v_{\mathrm{image}})],\qquad
  p_{\mathrm{inf}}=\operatorname{sigmoid}(w^\top u+b).
@@ -20,7 +20,7 @@ Pilot informative dùng TF-IDF 5.345 chiều và MobileNetV3 Small ImageNet froz
 \end{equation}
 Classifier LR chọn regularization bằng validation. Phép chia \(\sqrt{2}\) cân bằng chuẩn hai block; đây là nối đặc trưng tuyến tính. Pilot request dùng DistilBERT 768 chiều và MobileNetV3-Large ImageNet 960 chiều; encoder frozen và các head LR được chọn qua 18 lần fit. Nhánh fine-tuning DistilBERT được đánh giá riêng tại Mục~\ref{sec:vi-silver-pilot}.
 
-Hình~\ref{fig:multimodal-levels} tóm tắt tuyến informative và hướng mở rộng. Pilot tiếng Việt dùng bản dịch/nhãn AI đã được nhóm kiểm tra; thiết kế xác nhận bằng tin thu nhận trực tiếp và nhãn ghép cặp độc lập là bước phát triển tiếp.
+Hình~\ref{fig:multimodal-levels} tóm tắt tuyến informative và hướng mở rộng. Pilot tiếng Việt dùng bản dịch tiếng Việt và nhãn AI; thiết kế xác nhận bằng tin thu nhận trực tiếp và nhãn ghép cặp độc lập là bước phát triển tiếp.
 
 \begin{figure}[H]\centering
 \begin{tikzpicture}[>=Stealth,node distance=5mm and 7mm,font=\small,

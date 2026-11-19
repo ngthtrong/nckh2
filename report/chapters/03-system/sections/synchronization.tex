@@ -1,12 +1,8 @@
 \section{Thiết kế đồng bộ và truy vết báo cáo}\label{sec:synchronization-design}
 \subsection{Mã nhận diện báo cáo và trạng thái xử lý}
-\texttt{payload.id} định danh báo cáo; \texttt{message\_id} định danh thao tác. Cặp \texttt{client\_id} và \texttt{sequence\_number} kiểm soát việc dùng lại số thứ tự của một client. Gửi lại cùng thao tác phải giữ message và hash; thao tác bổ sung dùng message mới nhưng vẫn tham chiếu báo cáo cũ.
+\texttt{payload.id} định danh báo cáo; \texttt{message\_id} định danh thao tác. Cặp \texttt{client\_id} và \texttt{sequence\_number} kiểm soát việc dùng lại số thứ tự của một client. Gửi lại cùng thao tác phải giữ message và hash; thao tác bổ sung dùng message mới nhưng giữ nguyên ID báo cáo.
 
 Outbox theo dõi truyền tin qua \texttt{pending}, \texttt{in\_flight}, ACK và dead-letter. Các trạng thái nghiệp vụ \texttt{processing}, \texttt{dispatched}, \texttt{resolved}, \texttt{cancelled} được cập nhật riêng bằng thao tác có quyền. ACK xác nhận tiếp nhận dữ liệu, chưa xác nhận đội đã xuất phát hoặc hoàn tất ca.
-
-Hình~\ref{fig:flow-track-status} mô tả việc tra cứu và đồng bộ trạng thái nghiệp vụ giữa ứng dụng và máy chủ.
-
-
 
 \subsection{Mất ACK sau commit và xử lý idempotency}
 Nếu server đã ghi dữ liệu nhưng ACK bị mất (Hình~\ref{fig:sync-sequence}), ứng dụng gửi lại cùng message/hash. Ghi nghiệp vụ và ghi chống trùng nằm trong một giao dịch; lần gửi lại trả kết quả duplicate.
@@ -82,13 +78,5 @@ Hình~\ref{fig:user-workflow} liên kết các bước khai báo, tiếp nhận,
 \end{figure}
 
 Thao tác nghiệp vụ gắn với report ID và danh sách thành viên hiện tại vì khóa cụm có thể đổi. Dữ liệu từng báo cáo và nhật ký được giữ để xác minh quyết định.
-
-Quy trình tạo SOS và lưu yêu cầu tại thiết bị được trình bày ở Hình~\ref{fig:flow-sos-one-touch}.
-
-
-
-Hình~\ref{fig:flow-create-report} mô tả quy trình tạo báo cáo có ảnh và suy luận AI tại thiết bị.
-
-
 
 Các sơ đồ thao tác chi tiết theo từng chức năng được tập hợp tại Mục~\ref{sec:system-flow-details}; đường mất ACK, retry và đồng bộ ở trên là luồng chính.

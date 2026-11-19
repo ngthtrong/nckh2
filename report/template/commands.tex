@@ -29,23 +29,20 @@
   \fi
   \includepdf[pages=-,fitpaper=true,pagecommand={\thispagestyle{empty}}]{#3}}
 \newwrite\ReportMetricsFile
-\ExplSyntaxOn
-\NewDocumentCommand{\EnglishNumber}{m}{%
-  \group_begin:
-  \tl_set:Nx \l_tmpa_tl {#1}
-  \tl_replace_all:Nnn \l_tmpa_tl {,} {.}
-  \tl_use:N \l_tmpa_tl
-  \group_end:}
-\ExplSyntaxOff
-% Cover the source PDF's footer number while retaining the product heading.
+\newcommand{\ProductEvidenceHeading}{%
+  \pdfbookmark[0]{Minh chứng sản phẩm}{product-evidence}%
+  \noindent{\usekomafont{disposition}\usekomafont{chapter} MINH CHỨNG SẢN PHẨM\par}}
+% Reserve room above the first attachment while keeping later pages at their original size.
+\newcommand{\FirstProductEvidencePDF}[3][fitpaper=true,scale=.9]{%
+  \includepdf[pages=1,#1,offset=0 -12mm,pagecommand={%
+    \thispagestyle{empty}\ProductEvidenceHeading
+    \pdfbookmark[1]{#2}{numbered.evidence.#3}}]{#3}%
+  \ifnum\the\XeTeXpdfpagecount "#3" >1\relax
+    \includepdf[pages=2-,fitpaper=true,pagecommand={\thispagestyle{empty}}]{#3}%
+  \fi}
 \newcommand{\ProductEvidencePDF}[3][-]{%
   \clearpage\pdfbookmark[1]{#2}{numbered.evidence.#3}%
-  \includepdf[pages=#1,fitpaper=false,pagecommand={%
-    \thispagestyle{empty}%
-    \begin{tikzpicture}[remember picture,overlay]
-      \fill[white] (current page.south west) rectangle ([yshift=16mm]current page.south east);
-      \node[anchor=north,font=\normalfont\footnotesize] at ([yshift=-6mm]current page.north) {#2};
-    \end{tikzpicture}}]{#3}}
+  \includepdf[pages=#1,fitpaper=false,pagecommand={\thispagestyle{empty}}]{#3}}
 \AtBeginDocument{\immediate\openout\ReportMetricsFile=\jobname.metrics}
 \newcommand{\ReportMetric}[2]{\immediate\write\ReportMetricsFile{#1=#2}}
 \AtEndDocument{\immediate\closeout\ReportMetricsFile}
@@ -95,7 +92,7 @@
   \end{minipage}\par}
 \newcommand{\FormJointSignature}[2]{%
   \par\noindent\begin{minipage}[t]{.48\textwidth}\centering\vspace{0pt}
-  \mbox{}\\\textbf{Xác nhận của Đại học Cần Thơ}\par\vspace{20mm}
+  \strut\\\textbf{Xác nhận của Đại học Cần Thơ}\par\vspace{20mm}
   \end{minipage}\hfill\begin{minipage}[t]{.48\textwidth}\centering\vspace{0pt}
   Ngày \ldots\ tháng \ldots\ năm \ldots\\\textbf{#1}\par\vspace{20mm}\textbf{#2}\par
   \end{minipage}\par}

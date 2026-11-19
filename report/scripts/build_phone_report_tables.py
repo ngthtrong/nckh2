@@ -21,7 +21,7 @@ def read(name):
 
 
 def fmt(value, digits=2):
-    return f'{float(value):.{digits}f}'.replace('.', ',')
+    return f'{float(value):.{digits}f}'
 
 
 def code(r):

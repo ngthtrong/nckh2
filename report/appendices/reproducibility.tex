@@ -1,6 +1,6 @@
 \chapter{Tái lập thực nghiệm}\label{chap:reproducibility}
 \section{Dữ liệu và môi trường}
-Bộ bàn giao giữ dữ liệu, bảng chia, cấu hình, dự đoán và mã băm theo từng phiên~\citep{nguyen2026floodartifact}. Nhánh ảnh dùng \ImageTotal{} ảnh, chia 1.189/257/256; benchmark điện thoại gồm 32 cấu hình trên bốn máy. RQ1 giữ split run 1--20/21--40/41--80; RQ2/RQ3 suy luận trên 40 seed test. Các pilot ảnh--văn bản dùng split theo sự kiện như mô tả tại Mục~\ref{sec:02-data-methods-data}.
+Bộ bàn giao giữ dữ liệu, bảng chia, cấu hình, dự đoán và mã băm theo từng phiên~\citep{nguyen2026floodartifact}. Nhánh ảnh dùng \ImageTotal{} ảnh, chia 1\,189/257/256; benchmark điện thoại gồm 32 cấu hình trên bốn máy. RQ1 giữ split run 1--20/21--40/41--80; RQ2/RQ3 suy luận trên 40 seed test. Các pilot ảnh--văn bản dùng split theo sự kiện như mô tả tại Mục~\ref{sec:02-data-methods-data}.
 
 Để tái lập, dùng đúng phiên bản thư viện ghi trong metadata, kiểm mã băm đầu vào và lưu kết quả mới riêng với nguồn đã bàn giao. Nhãn thật chỉ được nối sau khi lưu dự đoán; các biến thể từ cùng ảnh và các cấu hình dùng lại test không được tính thành mẫu độc lập.
 
@@ -18,11 +18,11 @@ Các script trong \RepoPath{report/scripts/} xuất bảng từ JSON/CSV, đối
 \section{Kết quả ảnh và các lần chạy bổ sung}\label{sec:local-evidence}\label{sec:phone-benchmark-evidence}
 So sánh ảnh dùng cùng ID test và cùng phạm vi thời gian: CPU đo lời gọi dự đoán, điện thoại đo \texttt{classifyImage}. Benchmark điện thoại loại năm lượt làm nóng khỏi latency; chỉ số chất lượng vẫn dùng đủ 256 ảnh. Các bảng chi tiết ở Mục~\ref{sec:phone-full-results} giữ đủ 32 cấu hình.
 
-Lần bổ sung ngày 10/11/2026 gồm pruning 5/10/20\%, McNemar, suy luận lại các model và fine-tuning DistilBERT. Hồ sơ tại \RepoPath{docs/revision-plan/outputs/local-report-update-20261110/} giữ hash 47 tệp, kiểm lại 23 cấu hình/seed và dự đoán ghép cặp. CI được lấy từ artifact đã lưu. Hai checkpoint seed 43 cần dùng bản trong ZIP có hash khớp receipt. Kết quả frozen được dùng lại, không tạo thêm tập test.
+Các thực nghiệm gồm pruning 5/10/20\%, McNemar, suy luận lại các model và fine-tuning DistilBERT. Hồ sơ tại \RepoPath{docs/revision-plan/outputs/local-report-update-20261110/} giữ hash 47 tệp, kiểm lại 23 cấu hình/seed và dự đoán ghép cặp. CI được lấy từ artifact đã lưu. Hai checkpoint seed 43 cần dùng bản trong ZIP có hash khớp receipt. Kết quả frozen được dùng lại, không tạo thêm tập test.
 
 \section{Tái lập RQ và kiểm thử phần mềm}
-RQ1 giữ cấu hình đã chọn trước test; stress gồm 1.400 lượt fit. RQ3 lấy trung bình ba điều kiện trong mỗi seed trước bootstrap và Holm, giữ 40 đơn vị độc lập. RQ2 còn ba raw \(p\) Spearman và năm giá trị Holm chưa khớp khi tái tính; phân tích tại Mục~\ref{sec:rq2-discussion}.
+RQ1 giữ cấu hình đã chọn trước test; stress gồm 1\,400 lượt fit. RQ3 lấy trung bình ba điều kiện trong mỗi seed trước bootstrap và Holm, giữ 40 đơn vị độc lập. RQ2 còn ba raw \(p\) Spearman và năm giá trị Holm chưa khớp khi tái tính; phân tích tại Mục~\ref{sec:rq2-discussion}.
 
-Kiểm thử phần mềm ngày 10/11/2026 gồm hồi quy Flutter/backend và hai kịch bản app Linux--backend, được tóm tắt tại Mục~\ref{sec:software-revision-checks}. \OfflineFixVI{} Hai lượt Samsung S10e ngày 24/10/2026 được giữ như kết quả lịch sử tại Mục~\ref{sec:mobile-system-results}.
+Phép kiểm hồi quy Flutter/backend và hai kịch bản trên Linux được trình bày tại Mục~\ref{sec:software-revision-checks}. Mục~\ref{sec:mobile-system-results} trình bày kiểm thử trên Samsung S10e.
 
 Hướng dẫn chạy ứng dụng và backend nằm trong tài liệu sản phẩm. Thử nghiệm dùng database và thư mục ảnh riêng; phép thử SMS cần điện thoại, SIM và gateway. Chi tiết nguồn, môi trường và log được giữ trong bộ bàn giao.

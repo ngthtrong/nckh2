@@ -36,7 +36,7 @@ def obj(relative):
 
 
 def fmt(value, digits=4):
-    return f'{float(value):.{digits}f}'.replace('.', ',')
+    return f'{float(value):.{digits}f}'
 
 
 def verify_predictions(artifact, relative, split):
@@ -324,8 +324,8 @@ def main():
             'HighConfidenceCount':len(confident), 'HighConfidenceCoverage':fmt(100*len(confident)/len(predictions),2),
             'HighConfidenceCorrect':sum(row['pred_pth'] == row['ground_truth'] for row in confident),
             'MobileAgreementCount':mobile_audit['top1_agreement_count'],
-            'PruningParametersBefore':f"{pruning_parameters['parameter_count_before']:,}".replace(',', '.'),
-            'PruningParametersAfter':f"{pruning_parameters['parameter_count_after']:,}".replace(',', '.'),
+            'PruningParametersBefore':f"{pruning_parameters['parameter_count_before']:,}".replace(',', r'\,'),
+            'PruningParametersAfter':f"{pruning_parameters['parameter_count_after']:,}".replace(',', r'\,'),
             'PruningParameterReduction':fmt(100*(1-pruning_parameters['parameter_count_after']/pruning_parameters['parameter_count_before']),2),
             'PruningAgreement':fmt(100*pruning['pairwise_comparison']['baseline_pth_vs_structured_pth']['top1_agreement'],2),
             'PTQAgreement':fmt(100*quant['pairwise_comparison']['onnx_fp32_vs_ptq_int8']['top1_agreement'],2),

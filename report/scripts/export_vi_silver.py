@@ -28,7 +28,7 @@ def csv_rows(name):
 
 
 def fmt(value):
-    return f'{float(value):.2f}'.replace('.', ',')
+    return f'{float(value):.2f}'
 
 
 def main():

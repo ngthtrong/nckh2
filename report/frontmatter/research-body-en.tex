@@ -6,26 +6,26 @@
 \FormIndented{Duration: \ProjectPeriodEnglish{} (six months).}
 
 \FormSection{2. Objective(s):}
-Develop an AI-based mobile system to receive and analyze flood rescue information and support decision-making under unstable network conditions, with the aim of reducing loss of life and property damage.
+Develop a mobile AI system that receives and analyzes flood rescue reports to support decisions under unstable network conditions.
 
 \FormSection{3. Creativeness and innovativeness:}
-The project integrates edge image inference, adaptive transmission and event clustering in a mobile--server--map prototype. Location, time and report content support grouping and human verification.
+The prototype combines edge image inference, adaptive transmission and event clustering. Location, time and report content support grouping and verification on a map.
 
 \FormSection{4. Research results:}
-On 256 test images, the seed-1024 baseline achieved \EnglishNumber{\NewImageAccuracy}\% accuracy and \EnglishNumber{\NewImageMacroFOne}\% macro-F1 with three critical errors. Historical pruning reached \EnglishNumber{\PruningAccuracy}\% accuracy; exact McNemar \(p=0.1173\) did not establish improvement. A 5/10/20\% grid selected 5\% using validation, but test macro-F1 fell to \EnglishNumber{\LocalPrunedFOne}\%. Benchmarking covers 32 configurations on four phones. CPU corruption screening does not establish field-camera robustness.
+On 256 test images, the seed-1024 baseline reached \NewImageAccuracy{}\% accuracy and \NewImageMacroFOne{}\% macro-F1, with three critical errors. Historical pruning reached \PruningAccuracy{}\% accuracy (McNemar \(p=0.1173\)). A 5/10/20\% validation grid selected 5\%; test macro-F1 fell to \LocalPrunedFOne{}\%. Benchmarks covered 32 configurations on four phones. Field-camera robustness remains unverified.
 
-The English CrisisMMD pilot reaches text/fusion macro-F1 of \EnglishNumber{\MMTextFOne}\%/\EnglishNumber{\MMFusionFOne}\%. The Vietnamese translation/AI-label pilot uses \VISilverTrainN/\VISilverDevN/\VISilverTestN{} train/dev/test pairs; fusion reaches \EnglishNumber{\VISilverFusionFOne}\% macro-F1 and \EnglishNumber{\VISilverFusionRecall}\% request recall. DistilBERT fine-tuning averages \EnglishNumber{\VISilverFineFOne}\% macro-F1 across three seeds. \VietnameseDataReviewEN{} Fusion superiority is not established. \MobileIntegrationEN{} These metrics were measured offline.
+Offline, English CrisisMMD text/fusion macro-F1 was \MMTextFOne{}\%/\MMFusionFOne{}\%. The Vietnamese translation and AI-label pilot used \VISilverTrainN/\VISilverDevN/\VISilverTestN{} train/dev/test pairs. Fusion reached \VISilverFusionFOne{}\% macro-F1 and \VISilverFusionRecall{}\% request recall. DistilBERT fine-tuning averaged \VISilverFineFOne{}\% macro-F1 over three seeds. Neither pilot established a fusion advantage.
 
-At 50 kbit/s and 600 ms round-trip time, metadata and compressed images succeeded in 257/257 attempts, versus 230/257 (89.49\%) for originals. These were computer-based proxy measurements. \OfflineFixEN{}
+\begin{samepage}
+In a computer-based proxy test at 50 kbit/s and 600 ms round-trip time, metadata and compressed images succeeded in 257/257 attempts, versus 230/257 (89.49\%) for originals.\par
+\end{samepage}
 
 RQ1 does not establish Product superiority over independently selected Additive (ARI 0.9072 versus 0.9191; Holm \(p=0.2560\)). RQ2 supports exact-copy invariance under fixed grouping without general alignment gains (NDCG@5 0.6669 versus random 0.6763); three raw Spearman and five Holm values remain unreconciled. RQ3 favors nearest-first on simulated harm and deadline misses. Field rescue benefits remain unmeasured.
 
 \FormSection{5. Products:}
-The project registers three main scientific and technological products:
-\FormIndented{-- A mobile application supporting disaster rescue, integrating AI models and rescue request submission functions.}
-\FormIndented{-- A web-based rescue information management system featuring a digital map for visualizing rescue locations and clustering related events.}
-\FormIndented{-- A trained and optimized multimodal AI model package for analyzing rescue information and supporting deployment on mobile devices.}
-\par\noindent In addition, the project registers a research bulletin, a research summary and a demonstration video of no more than two minutes, in accordance with Can Tho University's requirements. The paper ``Stress-Testing Product-Gated Clustering and Bounded Priority Ranking for Flood-Rescue Reports: A Synthetic Study'' has been published in the ISDS 2026 proceedings, Part II, in Communications in Computer and Information Science (CCIS), volume 3253, Springer Nature, 2026.
+The registered products are an AI-assisted rescue app, a web dashboard for mapping reports and clustering events, and a mobile-optimized multimodal AI model package. Other outputs are a research bulletin, a summary and a demonstration video of up to two minutes.
+
+``Stress-Testing Product-Gated Clustering and Bounded Priority Ranking for Flood-Rescue Reports: A Synthetic Study'' was published in ISDS 2026, Part II, Communications in Computer and Information Science (CCIS), volume 3253, Springer Nature, 2026.
 
 \FormSection{6. Effects, technology transfer means and applicability:}
-Planned transfer supports education and research at Can Tho University. Field applicability requires professional validation; rescue effectiveness remains unmeasured.
+Transfer to Can Tho University is planned for education and research. Field use requires professional validation.

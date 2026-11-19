@@ -38,12 +38,12 @@
 \include{appendices/supplementary-results}
 \clearpage
 \pagestyle{empty}
-\includepdf[pages=-, pagecommand={}, fitpaper=false]{THS2026-68_Le Thi Ngoc Anh_Thuyet minh.pdf}
 \ifReportFull
   \input{build/evidence.tex}
 \else
-  \clearpage\pdfbookmark[0]{Minh chứng sản phẩm}{product-evidence}
-  \ProductEvidencePDF{Ứng dụng di động hỗ trợ cứu hộ thiên tai}{evidence/products/mobile-app.pdf}
+  \pdfbookmark[0]{Thuyết minh đề tài}{project-proposal}
+  \includepdf[pages=-,pagecommand={\thispagestyle{empty}},fitpaper=false]{THS2026-68_Le Thi Ngoc Anh_Thuyet minh.pdf}
+  \FirstProductEvidencePDF[fitpaper=false]{Ứng dụng di động hỗ trợ cứu hộ thiên tai}{evidence/products/mobile-app.pdf}
   \ProductEvidencePDF{Website quản lý thông tin cứu hộ}{evidence/products/dashboard.pdf}
   \ProductEvidencePDF{Bộ mô hình AI đã huấn luyện}{evidence/products/ai-models.pdf}
 \fi
