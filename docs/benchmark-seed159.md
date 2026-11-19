@@ -4,16 +4,15 @@ Hướng dẫn đối chiếu ngày 20/10/2026. Mục tiêu là lấy **cùng m�
 
 ## 1. Những gì hiện có và cần tạo
 
-Thư mục train thực sự nằm thêm một cấp bên trong thư mục bạn tải về:
+Thư mục train (đã rút gọn từ `mobilenetv3_large_dataset_v4_seed159-20260929T075441Z-1-001/mobilenetv3_large_dataset_v4_seed159/` để tránh lỗi đường dẫn quá dài trên Windows). File `.pth` không có trong git, cần chép vào từ Drive:
 
 ```text
 products/fe/model/models/Final/
-  mobilenetv3_large_dataset_v4_seed159-20260929T075441Z-1-001/
-    mobilenetv3_large_dataset_v4_seed159/
-      flood_mobilenetv3_large_best.pth
-      config_mobilenetv3_large.json
-      test_metrics_mobilenetv3_large.json
-      ...
+  seed159/
+    flood_mobilenetv3_large_best.pth
+    config_mobilenetv3_large.json
+    test_metrics_mobilenetv3_large.json
+    ...
 ```
 
 Dùng `best.pth` cho phép so sánh chính. File `last.pth` là checkpoint cuối, có thể khác mô hình được chọn tốt nhất trên validation.
@@ -32,7 +31,7 @@ Chạy các bước trong cùng cửa sổ PowerShell. Chạy lần lượt; n�
 $project = 'D:\nckh-flood-rescue\nckh2'
 $fe = Join-Path $project 'products\fe'
 $tools = Join-Path $fe 'tools'
-$model159 = Join-Path $fe 'model\models\Final\mobilenetv3_large_dataset_v4_seed159-20260929T075441Z-1-001\mobilenetv3_large_dataset_v4_seed159'
+$model159 = Join-Path $fe 'model\models\Final\seed159'
 $checkpoint = Join-Path $model159 'flood_mobilenetv3_large_best.pth'
 $config = Join-Path $model159 'config_mobilenetv3_large.json'
 $split = Join-Path $fe 'model\Edge Ai\split_train_val_test_mobilenetv3_large.csv'
@@ -170,7 +169,7 @@ Trong `$reports159\pth_onnx_pte` (hoặc `pth_onnx_only`) sẽ có:
 
 Kiểm tra metadata có `seed=159`, `evaluation_scope=full_test`, `n_images=256`. Đọc Accuracy/macro-F1/recall high/lỗi nặng; ECE/Brier; top-1 agreement giữa PTH–ONNX/PTE; latency và dung lượng. Trùng nhãn 100% là điều cần kiểm tra, không phải giả định trước.
 
-File train cũ [test_metrics_mobilenetv3_large.json](D:/nckh-flood-rescue/nckh2/products/fe/model/models/Final/mobilenetv3_large_dataset_v4_seed159-20260929T075441Z-1-001/mobilenetv3_large_dataset_v4_seed159/test_metrics_mobilenetv3_large.json) ghi Accuracy 75,78%, macro-F1 khoảng 74,09%, 4 lỗi nặng/256 ảnh. Đây là mốc lịch sử để đối chiếu, không phải kết quả của lệnh vừa hướng dẫn. Nếu đánh giá lại khác số, kiểm tra split/tiền xử lý/model trước, không sửa CSV cho khớp mốc cũ.
+File train cũ [test_metrics_mobilenetv3_large.json](../products/fe/model/models/Final/seed159/test_metrics_mobilenetv3_large.json) ghi Accuracy 75,78%, macro-F1 khoảng 74,09%, 4 lỗi nặng/256 ảnh. Đây là mốc lịch sử để đối chiếu, không phải kết quả của lệnh vừa hướng dẫn. Nếu đánh giá lại khác số, kiểm tra split/tiền xử lý/model trước, không sửa CSV cho khớp mốc cũ.
 
 ## 9. Nếu sau này muốn so INT8 hoặc mô hình đã bớt kênh tính toán
 
