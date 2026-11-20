@@ -2,23 +2,21 @@
 \section{Dữ liệu và môi trường}
 Bộ bàn giao giữ dữ liệu, bảng chia, cấu hình, dự đoán và mã băm theo từng phiên~\citep{nguyen2026floodartifact}. Nhánh ảnh dùng \ImageTotal{} ảnh, chia 1\,189/257/256; benchmark điện thoại gồm 32 cấu hình trên bốn máy. RQ1 giữ split run 1--20/21--40/41--80; RQ2/RQ3 suy luận trên 40 seed test. Các pilot ảnh--văn bản dùng split theo sự kiện như mô tả tại Mục~\ref{sec:02-data-methods-data}.
 
-Để tái lập, dùng đúng phiên bản thư viện ghi trong metadata, kiểm mã băm đầu vào và lưu kết quả mới riêng với nguồn đã bàn giao. Nhãn thật chỉ được nối sau khi lưu dự đoán; các biến thể từ cùng ảnh và các cấu hình dùng lại test không được tính thành mẫu độc lập.
+Để tái lập, dùng phiên bản thư viện theo siêu dữ liệu, kiểm mã băm đầu vào và lưu riêng kết quả mới. Chỉ nối nhãn thật sau khi lưu dự đoán. Ảnh biến đổi và cấu hình dùng lại tập kiểm thử không tạo thêm mẫu độc lập.
 
 \section{Sinh bảng và kiểm tra báo cáo}
 Các lệnh sau chạy từ thư mục gốc repo:
 \begin{verbatim}
-make -C report content
-make -C report content-twoside
-make -C report check
+make -j1 -C report content content-twoside check
 python3 report/scripts/check_report.py \
   --build-dir build/content-twoside
 \end{verbatim}
-Các script trong \RepoPath{report/scripts/} xuất bảng từ JSON/CSV, đối chiếu số mẫu, nhãn, dự đoán và cấu hình trước khi biên dịch. Hai bản in dùng chung nội dung; bản một mặt được đồng bộ tới \RepoPath{report/main.pdf}.
+Các chương trình trong \RepoPath{report/scripts/} đối chiếu số mẫu, nhãn, dự đoán và cấu hình khi xuất bảng từ JSON/CSV. Hai bản in dùng chung nội dung. Bản một mặt được lưu tại \RepoPath{report/main.pdf}.
 
 \section{Kết quả ảnh và các lần chạy bổ sung}\label{sec:local-evidence}\label{sec:phone-benchmark-evidence}
 So sánh ảnh dùng cùng ID test và cùng phạm vi thời gian: CPU đo lời gọi dự đoán, điện thoại đo \texttt{classifyImage}. Benchmark điện thoại loại năm lượt làm nóng khỏi latency; chỉ số chất lượng vẫn dùng đủ 256 ảnh. Các bảng chi tiết ở Mục~\ref{sec:phone-full-results} giữ đủ 32 cấu hình.
 
-Các thực nghiệm gồm pruning 5/10/20\%, McNemar, suy luận lại các model và fine-tuning DistilBERT. Hồ sơ tại \RepoPath{docs/revision-plan/outputs/local-report-update-20261110/} giữ hash 47 tệp, kiểm lại 23 cấu hình/seed và dự đoán ghép cặp. CI được lấy từ artifact đã lưu. Hai checkpoint seed 43 cần dùng bản trong ZIP có hash khớp receipt. Kết quả frozen được dùng lại, không tạo thêm tập test.
+Hồ sơ tại \RepoPath{docs/revision-plan/outputs/local-report-update-20261110/} gồm kết quả cắt tỉa 5/10/20\%, McNemar, suy luận lại và tinh chỉnh DistilBERT. Hồ sơ lưu mã băm của 47 tệp, kết quả kiểm tra 23 cấu hình/seed, dự đoán ghép cặp và khoảng tin cậy. Hai checkpoint seed 43 lấy từ tệp ZIP theo mã băm đã ghi. Kết quả của bộ mã hóa cố định được dùng lại trên cùng tập kiểm thử.
 
 \section{Tái lập RQ và kiểm thử phần mềm}
 RQ1 giữ cấu hình đã chọn trước test; stress gồm 1\,400 lượt fit. RQ3 lấy trung bình ba điều kiện trong mỗi seed trước bootstrap và Holm, giữ 40 đơn vị độc lập. Kết quả đối chiếu thống kê RQ2 được trình bày tại Mục~\ref{sec:rq2-discussion}.

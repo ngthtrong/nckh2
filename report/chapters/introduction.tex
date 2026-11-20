@@ -24,7 +24,7 @@ Mạng quá tải hoặc gián đoạn còn hạn chế truyền ảnh. Ứng d�
 
 \addsec{Mục tiêu đề tài}
 
-Mục tiêu chung là xây dựng hệ thống ứng dụng trí tuệ nhân tạo trên thiết bị di động để tiếp nhận, phân tích thông tin và hỗ trợ ra quyết định cứu hộ bão lũ trong điều kiện mạng không ổn định.
+Theo thuyết minh, mục tiêu chung là xây dựng hệ thống trí tuệ nhân tạo trên thiết bị di động để hỗ trợ tiếp nhận, phân tích thông tin và ra quyết định cứu hộ bão lũ khi mạng không ổn định. Hệ thống hướng tới giảm thiệt hại về người và tài sản.
 
 Các mục tiêu cụ thể theo đăng ký bao gồm:
 
@@ -75,7 +75,7 @@ Các thước đo về chất lượng mô hình, độ trễ và đồng bộ �
 \begin{itemize}
     \item \textbf{Thời gian:} 06 tháng, từ tháng 05/2026 đến tháng 10/2026.
     \item \textbf{Nội dung và nền tảng:} Phân tích thông tin cứu hộ bằng AI tại thiết bị; tạo, lưu và gửi báo cáo qua HTTP hoặc SMS gateway; đồng bộ khi có mạng; phân cụm, xếp hạng và hiển thị trên ứng dụng di động, web. Phân cụm xử lý các tập báo cáo hiện có, dashboard cập nhật theo chu kỳ; quyết định điều phối vẫn do con người thực hiện.
-    \item \textbf{Dữ liệu:} Bộ \texttt{Dataset\_Flood} gồm ảnh đô thị chọn từ AlleyFloodNet và FloodNet, ảnh báo chí Việt Nam và ảnh tự chụp. CrisisMMD cung cấp \MMTrainN/\MMDevN/\MMTestN{} cặp train/validation/test cho nhãn informative và tập con dịch tiếng Việt/nhãn AI cho request. RQ1 dùng dữ liệu bán tổng hợp; RQ2/RQ3 dùng dữ liệu tổng hợp. Các nguồn và cách sử dụng được trình bày ở Mục~\ref{sec:02-data-methods-data}.
+    \item \textbf{Dữ liệu:} Bộ \texttt{Dataset\_Flood} gồm ảnh ngập đô thị từ các bộ dữ liệu công khai, báo chí Việt Nam và ảnh tự chụp. Hồ sơ thu thập có nêu AlleyFloodNet và FloodNet. CrisisMMD cung cấp \MMTrainN/\MMDevN/\MMTestN{} cặp train/validation/test cho nhãn informative và tập con dịch tiếng Việt/nhãn AI cho request. RQ1 dùng dữ liệu bán tổng hợp; RQ2/RQ3 dùng dữ liệu tổng hợp. Các nguồn và cách sử dụng được trình bày ở Mục~\ref{sec:02-data-methods-data}.
     \item \textbf{Phân tích ảnh và thông tin khẩn cấp:} Đo mô hình ảnh trên CPU và điện thoại. Hồi quy logistic xử lý các dấu hiệu chọn trên biểu mẫu. Nhánh văn bản tự do và kết hợp ảnh--văn bản được đánh giá ngoại tuyến (Mục~\ref{sec:mobile-integration-status}).
     \item \textbf{Mạng và giới hạn ứng dụng:} Lưu cục bộ và gửi lại khi kết nối phục hồi; không nghiên cứu dự báo khí tượng--thủy văn hoặc điều hành cứu hộ tự động.
 \end{itemize}
