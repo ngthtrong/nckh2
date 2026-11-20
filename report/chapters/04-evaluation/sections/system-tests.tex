@@ -45,6 +45,15 @@ run\_002 & 20 kbit/s & 18 & Chỉ văn bản & --- \\
 \end{table}
 Run\_001 dùng ảnh high nhưng dự đoán medium, confidence 0.7802, thời gian \texttt{classifyImage} là 64/37/33 ms; run\_002 dùng ảnh medium nhưng dự đoán high, confidence 0.6461, thời gian 30/40/37 ms. PASS ở đây xác nhận luồng gửi đúng; chất lượng phân loại được đánh giá bằng benchmark riêng. Run\_002 có một lần Case 5 chưa đáp ứng tiền điều kiện từ chối quyền Vị trí; sau khi thực hiện đúng, phép thử đạt.
 
+\paragraph{Gửi SOS qua SMS.} Trong ca thử gửi đến số điện thoại thực tế, ảnh chụp ứng dụng Tin nhắn ghi lại hai mã SOS khác nhau. Với mỗi mã, hội thoại hiển thị một tin gửi và một tin nhận có nội dung tương ứng (Hình~\ref{fig:android-sos-sms-test}). Ảnh xác nhận tin được hiển thị trên điện thoại. Việc chuyển tiếp qua cổng SMS đến máy chủ cần được kiểm tra bằng nhật ký của máy chủ.
+
+\begin{figure}[H]
+\centering
+\includegraphics[height=.38\textheight,keepaspectratio,trim={0 32bp 0 160bp},clip]{assets/figures/sms.png}
+\caption{Tin nhắn SOS gửi và nhận trong ca kiểm thử trên điện thoại}
+\label{fig:android-sos-sms-test}
+\end{figure}
+
 \input{chapters/04-evaluation/sections/software-revision-checks}
 
 \subsection{Kiểm thử lịch sử và web}\label{sec:web-e2e-results}

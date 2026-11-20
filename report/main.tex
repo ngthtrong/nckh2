@@ -6,6 +6,9 @@
 \input{template/commands}
 \input{template/bibliography}
 \input{generated/values}
+% Give each list heading its own destination in the PDF table of contents.
+\deftocheading{lot}{\addchap{#1}}
+\deftocheading{lof}{\addchap{#1}}
 \hypersetup{pdftitle={\ProjectTitle},pdfauthor={\PrincipalName}}
 \begin{document}
 \pagestyle{empty}\hypersetup{pageanchor=false}

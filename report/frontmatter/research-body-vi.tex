@@ -7,10 +7,10 @@
 \FormLine{Người hướng dẫn: \SupervisorName}
 
 \FormSection{2. Mục tiêu đề tài:}
-Xây dựng hệ thống trí tuệ nhân tạo (AI) trên điện thoại để tiếp nhận, phân tích thông tin và hỗ trợ quyết định cứu hộ bão lũ khi mạng không ổn định, hướng tới giảm thiệt hại về người và tài sản.
+Xây dựng hệ thống trí tuệ nhân tạo trên điện thoại để tiếp nhận, phân tích thông tin và hỗ trợ quyết định cứu hộ bão lũ khi mạng không ổn định, hướng tới giảm thiệt hại về người và tài sản.
 
 \FormSection{3. Tính mới và sáng tạo:}
-Đề tài kết hợp suy luận ảnh tại biên, truyền dữ liệu theo kết nối và gom nhóm báo cáo từ vị trí, thời gian, nội dung để hỗ trợ xác minh trên bản đồ. Thiết kế mở rộng xử lý ngôn ngữ tự nhiên (NLP) và fusion tiếng Việt được trình bày riêng với phần đã thực hiện.
+Đề tài kết hợp nhận diện mức ngập trên điện thoại, truyền dữ liệu theo điều kiện kết nối và gom nhóm báo cáo theo vị trí, thời gian và nội dung. Ứng dụng tính điểm khẩn cấp từ biểu mẫu. Các mô hình phân tích văn bản tiếng Việt và kết hợp ảnh với văn bản được thử nghiệm ngoại tuyến.
 
 \FormSection{4. Kết quả nghiên cứu:}
 Trên 256 ảnh test, baseline seed 1024 đạt Accuracy \NewImageAccuracy\%, macro-F1 \NewImageMacroFOne\% và 3 lỗi nặng. Pruning lịch sử đạt Accuracy \PruningAccuracy\%, có \PruningCriticalCount{} lỗi nặng; McNemar exact $p=0.1173$, chưa xác lập cải thiện. Thử thêm 5/10/20\% chọn mức 5\% bằng validation nhưng macro-F1 test còn \LocalPrunedFOne\%; chẩn đoán tensor PTQ/QAT chưa cô lập nguyên nhân suy giảm. Trên ONNX CPU của model pruning lịch sử, macro-F1 clean \QualityCleanMacroFOne\% giảm còn \QualityDarkMacroFOne\% khi nhân độ sáng 0.4; chưa xác nhận Android/camera hoặc nhãn sau biến đổi.

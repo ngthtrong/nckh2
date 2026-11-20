@@ -1,5 +1,3 @@
-Đã thu hẹp cột **Từ viết tắt** từ 18% xuống 14% chiều rộng vùng chữ và dành phần đó cho cột **Diễn giải**. Danh mục nằm gọn ở **trang PDF 12**, đủ 38 mục, bỏ được trang chỉ có dòng `WAL`. Cả hai bản in đã biên dịch lại, còn **148 trang**.
-
 :codex-file-citation{path="D:/thanhtrong/nckh2/report/main.pdf" purpose="output"}
 
 ## Kết quả đối chiếu nhận xét
@@ -43,11 +41,6 @@ Hai góp ý đã được đưa vào **trang PDF 103** dưới dạng kế hoạ
 
 - Đánh giá phân cụm, xếp hạng và điều phối trên **báo cáo cứu hộ thực tế**.
 - **Kiểm thử SMS đầu cuối** và đo gửi, nhận, đồng bộ lại trên **mạng di động thật**.
-
-
-
-
-
 
 **Có. Bản hiện tại đã sửa nhiều góp ý về trình bày và bổ sung thực nghiệm, nhưng vẫn còn thiếu hồ sơ nghiệm thu, phần giải trình chênh lệch so với thuyết minh và một số phép kiểm chứng mà hội đồng yêu cầu.** Hai điểm nên xử lý trước khi nộp là **hoàn tất nhận xét của người hướng dẫn** và **ghi rõ hạng mục nào đã triển khai, hạng mục nào mới thử ngoại tuyến hoặc còn thiếu kiểm chứng**.
 

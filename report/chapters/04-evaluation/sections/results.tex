@@ -115,7 +115,7 @@ Theo summary đã chọn, QAT INT8 đạt Accuracy \QATAccuracy\%, macro-F1 \QAT
 
 \input{generated/tables/pruning_st}
 
-Benchmark seed \PruningSeed{} đối chiếu mô hình gốc và cắt tỉa trên cùng test split ở ba định dạng. Artifact ghi số tham số từ \PruningParametersBefore{} xuống \PruningParametersAfter{}, giảm \PruningParameterReduction\%. Bảng~\ref{tab:pruning_st} giữ riêng Accuracy, macro-F1, lỗi nặng, dung lượng và trung vị độ trễ của từng phương án, tránh thay đổi một chỉ số tổng hợp che khuất các đánh đổi còn lại.
+Benchmark seed \PruningSeed{} đối chiếu mô hình gốc và cắt tỉa trên cùng test split ở ba định dạng. Artifact ghi số tham số từ \PruningParametersBefore{} xuống \PruningParametersAfter{}, giảm \PruningParameterReduction\%. Mức cắt tỉa này chỉ loại bỏ một phần nhỏ số tham số. Bảng~\ref{tab:pruning_st} giữ riêng Accuracy, macro-F1, lỗi nặng, dung lượng và trung vị độ trễ của từng phương án, tránh thay đổi một chỉ số tổng hợp che khuất các đánh đổi còn lại.
 
 Model cắt tỉa đạt Accuracy \PruningAccuracy\% và macro-F1 \PruningMacroFOne\%, nhưng có \PruningCriticalCount{} lỗi nặng so với 3 lỗi của model gốc. Đồng thuận top-1 giữa PTH gốc và cắt tỉa là \PruningAgreement\%. Mức tăng chỉ số tổng hợp đi kèm các ảnh chuyển từ đúng sang sai và ngược lại; cần xem từng lớp và disagreement để đánh giá đánh đổi.
 

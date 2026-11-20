@@ -1,6 +1,6 @@
 \section{Phạm vi diễn giải kết quả}\label{sec:04-evaluation-limitations}
 \paragraph{Dữ liệu ảnh và nhãn.}
-Các mô hình ảnh được so sánh trên cùng tập kiểm thử. Việc chia tập giữ các ảnh gần trùng trong cùng một nhóm. Các mức ngập là nhãn thị giác dựa trên mốc người và phương tiện trong ảnh.
+Các mô hình ảnh được so sánh trên cùng tập kiểm thử. Việc chia tập giữ các ảnh gần trùng trong cùng một nhóm. Các mức ngập là nhãn thị giác dựa trên mốc người và phương tiện trong ảnh. Nhóm chưa đo mức đồng thuận giữa hai người gán nhãn trước khi thống nhất kết quả.
 
 \paragraph{Văn bản và fusion.}
 Thử nghiệm tiếng Việt dùng bản dịch và nhãn AI từ CrisisMMD. Tập kiểm thử có sáu mẫu mang nhãn yêu cầu hỗ trợ, cùng thuộc một sự kiện. Khoảng tin cậy được diễn giải trong phạm vi tập này.
@@ -9,7 +9,7 @@ Thử nghiệm tiếng Việt dùng bản dịch và nhãn AI từ CrisisMMD. T�
 RQ1--RQ3 dùng dữ liệu bán tổng hợp và tổng hợp. Các chỉ số về lợi ích, tổn thất và thời hạn phục vụ so sánh trong mô phỏng. Hồi quy logistic học từ 32 tổ hợp của năm dấu hiệu và nhãn tạo theo quy tắc OR.
 
 \paragraph{Thiết bị và mạng.}
-Độ trễ trên CPU được đo ở lời gọi suy luận, còn phép đo trên điện thoại dùng lời gọi \texttt{classifyImage}, gồm cả xử lý ảnh. Phép đo truyền tải dùng proxy trên máy tính. Các phép kiểm thử dự kiến trên điện thoại được trình bày trong mục \nameref{sec:future-work}.
+Độ trễ trên CPU được đo ở lời gọi suy luận, còn phép đo trên điện thoại dùng lời gọi \texttt{classifyImage}, gồm cả xử lý ảnh. Các phép đo truyền tải dưới mạng yếu sử dụng proxy. Ảnh kiểm thử SMS ghi nhận tin SOS trên điện thoại. Tỷ lệ giao, độ trễ và việc chuyển tiếp qua cổng SMS đến máy chủ cần được đo riêng. Các phép kiểm thử dự kiến trên điện thoại được trình bày trong mục \nameref{sec:future-work}.
 
 \paragraph{Ảnh suy giảm và tối ưu mô hình.}
 Phép thử trên CPU áp dụng riêng từng biến đổi nhân tạo lên ảnh kiểm thử. Trong các cấu hình đã đo, lượng tử hóa giảm dung lượng và làm giảm chất lượng nhận diện. Phiên bản cắt tỉa 5\% có macro-F1 thấp hơn mô hình gốc.

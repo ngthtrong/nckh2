@@ -4,6 +4,23 @@ RQ1--RQ3 đánh giá thuật toán trên dữ liệu bán tổng hợp và tổn
 Logistic Regression năm cờ trong bản mã được đối chiếu học nhãn OR tự sinh, không phải mô hình xử lý văn bản tự do hoặc xác suất nguy kịch đã hiệu chuẩn. Hai pilot riêng đã học classifier văn bản, ảnh và fusion cho informative tiếng Anh hoặc request trên bản dịch/nhãn AI. DistilBERT frozen và fine-tuning được đánh giá riêng; xác suất request không được đồng nhất với khẩn cấp hoặc ưu tiên điều phối.
 
 \subsection{Phạm vi thực hiện so với thuyết minh}\label{sec:mobile-integration-status}
-Ứng dụng Android tích hợp nhận diện bốn mức ngập từ ảnh và tính điểm từ các trường có cấu trúc. Hệ thống tiếp nhận, đồng bộ báo cáo và hiển thị sự kiện trên bản đồ điều phối. Nhánh văn bản tiếng Việt và kết hợp ảnh--văn bản được đánh giá ngoại tuyến trong hai thử nghiệm ở Mục~\ref{sec:vi-silver-pilot} và Mục~\ref{sec:multimodal-pilot}.
+Ứng dụng Android nhận diện bốn mức ngập từ ảnh và tính điểm khẩn cấp từ biểu mẫu. Hệ thống tiếp nhận, đồng bộ báo cáo và hiển thị sự kiện trên bản đồ điều phối. Các mô hình chỉ dùng ảnh, chỉ dùng văn bản và kết hợp cả hai được so sánh trên cùng tập kiểm thử của từng thử nghiệm ngoại tuyến (Mục~\ref{sec:vi-silver-pilot} và Mục~\ref{sec:multimodal-pilot}).
 
-Trong mỗi thử nghiệm, mô hình chỉ dùng ảnh, chỉ dùng văn bản và kết hợp hai nguồn được đánh giá trên cùng tập kiểm thử. Các phép đo truyền tải dùng mạng giả lập, còn phân cụm, xếp hạng và điều phối được đánh giá bằng kịch bản mô phỏng. Bảng~\ref{tab:proposal-map} đối chiếu các hạng mục thực hiện theo thuyết minh.
+Bảng~\ref{tab:proposal-map} đối chiếu phần đã thực hiện với phạm vi và phương pháp trong thuyết minh. Các phép đo truyền tải dùng mạng giả lập. Phân cụm, xếp hạng và điều phối được đánh giá trong mô phỏng.
+
+\begin{table}[H]
+\centering
+\caption{Đối chiếu nội dung nghiên cứu với thuyết minh}
+\label{tab:proposal-map}
+\begin{tabular}{P{.18\textwidth}P{.39\textwidth}P{.34\textwidth}}
+\toprule Hạng mục & Kết quả thực hiện & Phạm vi và chênh lệch so với thuyết minh \\\midrule
+Dữ liệu & Bộ ảnh mức ngập và các cặp ảnh--văn bản CrisisMMD. & Thử nghiệm tiếng Việt dùng bản dịch CrisisMMD có nhãn AI. Chưa dùng UIT-VSMEC hoặc tin nhắn cứu hộ thu nhận trực tiếp từ Zalo hay Facebook. \\
+Thiết kế hệ thống & Ứng dụng Flutter, máy chủ FastAPI và bản đồ Web GIS. & Hỗ trợ tiếp nhận, lưu cục bộ, gửi lại và đồng bộ báo cáo. \\
+Mô hình ảnh & MobileNetV3-Large chạy trên Android. Đã đo trên bốn mẫu điện thoại và thử cắt tỉa ở các mức mục tiêu 5/10/20\%. & Ứng dụng nhận diện bốn mức ngập. Chưa triển khai nhận diện thiệt hại nhà cửa. \\
+Văn bản và đa phương thức & Đã thử mô hình văn bản TF-IDF, DistilBERT và mô hình kết hợp ảnh với văn bản. & Hai thử nghiệm ngoại tuyến. Các mô hình văn bản và ảnh--văn bản chưa tích hợp vào Android. \\
+Phần mềm & Kiểm thử Android, hồi quy và tích hợp Linux. Đã ghi nhận ca SMS trên điện thoại. & Mạng yếu được tạo bằng proxy. Chưa có thử nghiệm với nhóm sinh viên hoặc phép đo trên mạng 2G/3G thực như dự kiến. \\
+Phân cụm và xếp hạng & RQ1 và RQ2 có phương pháp đối chứng. & Đánh giá trên báo cáo bán tổng hợp và tổng hợp. \\
+Điều phối & Nguyên mẫu hỗ trợ xác minh, hiển thị và phân công. & So sánh chính sách điều phối trong mô phỏng RQ3. \\
+\bottomrule
+\end{tabular}
+\end{table}

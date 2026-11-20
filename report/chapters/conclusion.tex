@@ -6,14 +6,14 @@ Hai thử nghiệm ngoại tuyến so sánh mô hình văn bản, ảnh và kế
 
 Trong mô phỏng, RQ1 chưa xác lập ưu thế của Product so với Additive (ARI 0.9072 so với 0.9191; $p$ sau hiệu chỉnh Holm là 0.2560). RQ2 cho thấy điểm ưu tiên bất biến với bản sao trùng khớp khi cố định cách gom nhóm. NDCG@5 đạt 0.6669 so với 0.6763 của đối chứng ngẫu nhiên. RQ3 cho thấy chính sách ưu tiên đề xuất kém chiến lược gần nhất trước về tổn thất và số ca trễ hạn.
 
-Kiểm thử hồi quy và tích hợp Linux--máy chủ kiểm tra việc lưu, gửi lại và đồng bộ báo cáo. Máy chủ gộp bản sao trùng khớp trước khi lọc cạnh theo phân vị và top-$K$, đồng thời giữ mã của các báo cáo gốc (Mục~\ref{sec:software-revision-checks}).
+Kiểm thử hồi quy và tích hợp Linux--máy chủ kiểm tra việc lưu, gửi lại và đồng bộ báo cáo. Máy chủ gộp bản sao trùng khớp trước khi lọc cạnh theo phân vị và top-$K$, đồng thời giữ mã của các báo cáo gốc (Mục~\ref{sec:software-revision-checks}). Ca thử gửi SOS qua SMS ghi nhận tin gửi và tin nhận trên điện thoại (Mục~\ref{sec:mobile-system-results}).
 
 Nguyên mẫu phục vụ nghiên cứu và đào tạo về Edge AI và quản lý thông tin cứu hộ. Điều phối viên xác minh thông tin trước khi ra quyết định. Hệ thống giới hạn quyền truy cập dữ liệu cá nhân.
 
 \addsec{Hướng nghiên cứu tiếp theo}\label{sec:future-work}
 \begin{itemize}
 \item \textbf{Đánh giá trên báo cáo cứu hộ thực tế.} Phối hợp với đơn vị cứu hộ để đối chiếu kết quả phân cụm, xếp hạng và điều phối với hồ sơ sự kiện đã xác minh.
-\item \textbf{Mở rộng kiểm thử trên điện thoại.} Kiểm thử SMS đầu cuối từ điện thoại qua gateway đến máy chủ. Đo tỷ lệ nhận, độ trễ và khả năng đồng bộ lại trên mạng di động thật khi tín hiệu yếu hoặc kết nối gián đoạn.
+\item \textbf{Mở rộng kiểm thử trên điện thoại.} Kiểm tra việc chuyển tiếp SOS từ điện thoại qua cổng SMS đến máy chủ. Đo tỷ lệ nhận, độ trễ và khả năng đồng bộ lại khi mạng di động thật có tín hiệu yếu hoặc gián đoạn. Đo RAM đỉnh và mức tiêu thụ pin khi chạy mô hình trên Android.
 \item Đánh giá mô hình văn bản và ảnh--văn bản trên tin tiếng Việt thu nhận trực tiếp. Khảo sát nhận dạng tiếng nói trong mưa gió và trích xuất thông tin cầu cứu.
 \item So sánh các phương án điều phối theo chi phí di chuyển, năng lực đội, thời hạn và khoảng cách tới hiện trường.
 \item Kiểm tra định vị đa nguồn từ GPS, Wi-Fi, mạng di động và địa chỉ. Khảo sát lưu báo cáo chờ kết nối và báo hộ khi người dân thiếu thiết bị.
